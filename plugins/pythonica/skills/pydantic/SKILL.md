@@ -1016,84 +1016,9 @@ class UserModel(BaseModel):
 user_model = UserModel.model_validate(user)
 ```
 
-## Testing Strategies
+## Testing
 
-### Unit Testing Models
-
-```python
-import pytest
-from pydantic import ValidationError
-
-def test_user_validation():
-    # Valid data
-    user = User(id=1, name='Alice', email='alice@example.com')
-    assert user.name == 'Alice'
-
-    # Invalid data
-    with pytest.raises(ValidationError) as exc_info:
-        User(id='invalid', name='Bob', email='bob@example.com')
-
-    errors = exc_info.value.errors()
-    assert errors[0]['type'] == 'int_parsing'
-
-def test_user_serialization():
-    user = User(id=1, name='Alice', email='alice@example.com')
-    data = user.model_dump()
-
-    assert data == {
-        'id': 1,
-        'name': 'Alice',
-        'email': 'alice@example.com'
-    }
-
-def test_nested_validation():
-    company = Company(
-        name='ACME',
-        address={'street': '123 Main', 'city': 'NYC', 'country': 'USA'}
-    )
-    assert company.address.city == 'NYC'
-```
-
-### Testing with Fixtures
-
-```python
-@pytest.fixture
-def sample_user_data():
-    return {
-        'id': 1,
-        'name': 'Alice',
-        'email': 'alice@example.com'
-    }
-
-@pytest.fixture
-def sample_user(sample_user_data):
-    return User(**sample_user_data)
-
-def test_with_fixtures(sample_user):
-    assert sample_user.name == 'Alice'
-
-def test_invalid_email(sample_user_data):
-    sample_user_data['email'] = 'invalid'
-    with pytest.raises(ValidationError):
-        User(**sample_user_data)
-```
-
-### Property-Based Testing
-
-```python
-from hypothesis import given, strategies as st
-
-@given(
-    id=st.integers(min_value=1),
-    name=st.text(min_size=1, max_size=100),
-    email=st.emails()
-)
-def test_user_always_valid(id, name, email):
-    user = User(id=id, name=name, email=email)
-    assert user.id == id
-    assert user.name == name
-    assert user.email == email
-```
+For testing Pydantic models with pytest, see the `python-testing` skill.
 
 ## Migration Guide (v1 → v2)
 
@@ -1335,94 +1260,15 @@ class Document(AuditMixin):
 
 ## Related Skills
 
-When using Pydantic, consider these complementary skills:
+When using Pydantic, consider these complementary pythonica skills:
 
-- **fastapi-local-dev**: FastAPI development server patterns with Pydantic integration
-- **sqlalchemy**: SQLAlchemy ORM patterns for database models with Pydantic validation
-- **django**: Django framework integration with Pydantic schemas
-- **pytest**: Testing strategies for Pydantic models and validation
-
-### Quick FastAPI Integration Reference (Inlined for Standalone Use)
-
-```python
-# FastAPI with Pydantic (basic pattern)
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, EmailStr
-
-app = FastAPI()
-
-class UserCreate(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
-
-class UserResponse(BaseModel):
-    id: int
-    username: str
-    email: EmailStr
-
-    model_config = ConfigDict(from_attributes=True)
-
-@app.post('/users', response_model=UserResponse)
-def create_user(user: UserCreate):
-    # FastAPI auto-validates using Pydantic
-    # response_model filters out password
-    return UserResponse(id=1, username=user.username, email=user.email)
-```
-
-### Quick SQLAlchemy Integration Reference (Inlined for Standalone Use)
-
-```python
-# SQLAlchemy 2.0 with Pydantic validation
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import DeclarativeBase
-from pydantic import BaseModel, ConfigDict
-
-class Base(DeclarativeBase):
-    pass
-
-class UserDB(Base):
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    username = Column(String(50))
-    email = Column(String(100))
-
-class UserSchema(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    id: int
-    username: str
-    email: str
-
-# Convert ORM to Pydantic
-user_orm = db.query(UserDB).first()
-user_validated = UserSchema.model_validate(user_orm)
-```
-
-### Quick Pytest Testing Reference (Inlined for Standalone Use)
-
-```python
-# Testing Pydantic models with pytest
-import pytest
-from pydantic import ValidationError
-
-def test_user_validation():
-    user = User(id=1, name='Alice', email='alice@example.com')
-    assert user.name == 'Alice'
-
-def test_validation_error():
-    with pytest.raises(ValidationError) as exc_info:
-        User(id='invalid', name='Bob', email='bob@example.com')
-    errors = exc_info.value.errors()
-    assert errors[0]['type'] == 'int_parsing'
-
-@pytest.fixture
-def sample_user():
-    return User(id=1, name='Alice', email='alice@example.com')
-```
-
-[Full integration patterns available in respective skills if deployed together]
+- **python-testing**: Testing strategies for Pydantic models and validation
+- **python-error-handling**: Exception hierarchies and validation patterns
+- **python-configuration**: pydantic-settings for environment and config management
+- **python-type-safety**: Protocols, generics, and type narrowing
 
 ## Additional Resources
+
 - [Pydantic Documentation](https://docs.pydantic.dev/)
 - [Migration Guide v1→v2](https://docs.pydantic.dev/latest/migration/)
 - [Performance Benchmarks](https://docs.pydantic.dev/latest/concepts/performance/)
