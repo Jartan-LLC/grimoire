@@ -18,22 +18,13 @@ Then browse and install plugins:
 
 | Plugin | Description |
 |--------|-------------|
-| [recursion](plugins/recursion/) | Recursive multi-agent development with TDD — waves of parallel nested subagents |
+| [github-conventions](plugins/github-conventions/) | Branch naming, commit format, issue/PR templates |
+| [praxis](plugins/praxis/) | Development workflow — issue planning, implementation, PR creation, code review |
+| [recursio](plugins/recursio/) | Recursive multi-agent development with TDD — waves of parallel nested subagents |
 
 ## Contributing
 
-Create a new directory at the repo root with your plugin name. Include:
-
-```
-your-plugin/
-  .claude-plugin/plugin.json
-  skills/
-  agents/
-  commands/
-  README.md
-```
-
-Add an entry to `.claude-plugin/marketplace.json` and submit a PR.
+New plugins go in `plugins/<name>/` with a `.claude-plugin/plugin.json` manifest. Add an entry to `.claude-plugin/marketplace.json` and submit a PR.
 
 ## License
 

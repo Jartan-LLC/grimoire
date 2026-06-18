@@ -1,0 +1,8 @@
+{
+  "name": "github-conventions",
+  "description": "GitHub conventions — branch naming, commit format, issue/PR templates, and safe issue/PR referencing",
+  "author": {
+    "name": "Jartan LLC",
+    "url": "https://github.com/Jartan-LLC"
+  }
+}

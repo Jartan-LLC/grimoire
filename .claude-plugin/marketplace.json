@@ -9,8 +9,32 @@
   "pluginRoot": "./",
   "plugins": [
     {
-      "name": "recursion",
-      "source": "./plugins/recursion",
+      "name": "github-conventions",
+      "source": "./plugins/github-conventions",
+      "description": "GitHub conventions — branch naming, commit format, issue/PR templates, and safe issue/PR referencing",
+      "author": {
+        "name": "Jartan LLC",
+        "url": "https://github.com/Jartan-LLC"
+      },
+      "license": "MIT",
+      "category": "development",
+      "keywords": ["github", "conventions", "commits", "branches"]
+    },
+    {
+      "name": "praxis",
+      "source": "./plugins/praxis",
+      "description": "Development workflow — issue planning, implementation, PR creation, code review with specialized reviewers, and project conventions",
+      "author": {
+        "name": "Jartan LLC",
+        "url": "https://github.com/Jartan-LLC"
+      },
+      "license": "MIT",
+      "category": "development",
+      "keywords": ["workflow", "review", "conventions", "planning"]
+    },
+    {
+      "name": "recursio",
+      "source": "./plugins/recursio",
       "description": "Recursive multi-agent development system with TDD — decomposes projects into waves of parallel nested subagents",
       "author": {
         "name": "Jartan LLC",
@@ -18,22 +42,7 @@
       },
       "license": "MIT",
       "category": "development",
-      "keywords": ["recursive", "multi-agent", "tdd", "wave-plan", "orchestration"],
-      "skills": [
-        "./skills/recursive-development/SKILL.md",
-        "./skills/recursive-planning/SKILL.md",
-        "./skills/recursive-quality/SKILL.md",
-        "./skills/recursive-execution/SKILL.md"
-      ],
-      "agents": [
-        "./agents/recursive-orchestrator.md",
-        "./agents/recursive-implementer.md",
-        "./agents/recursive-planner.md",
-        "./agents/recursive-reviewer.md"
-      ],
-      "commands": [
-        "./commands/recursive-implement.md"
-      ]
+      "keywords": ["recursive", "multi-agent", "tdd", "wave-plan", "orchestration"]
     }
   ]
 }
