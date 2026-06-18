@@ -1,12 +1,12 @@
-# GitHub Conventions
+# Gitwise
 
-Branch naming, commit format, issue/PR templates, and safe issue/PR referencing in comments.
+GitHub conventions — branch naming, commit format, issue/PR templates, and safe issue/PR referencing in comments.
 
 ## Installation
 
 ```
 /plugin marketplace add Jartan-LLC/grimoire
-/plugin install github-conventions
+/plugin install gitwise
 ```
 
 ## What's Included
