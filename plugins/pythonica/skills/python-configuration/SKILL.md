@@ -1,7 +1,8 @@
 <!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 ---
 name: python-configuration
-description: Python configuration management via environment variables and typed settings. Use when externalizing config, setting up pydantic-settings, managing secrets, or implementing environment-specific behavior.
+description: Python configuration management via environment variables and typed settings.
+when_to_use: Externalizing config, setting up pydantic-settings, managing secrets, or implementing environment-specific behavior.
 ---
 
 # Python Configuration Management

@@ -1,18 +1,8 @@
 <!-- Adapted from claude-mpm-skills by bobmatnyc (https://github.com/bobmatnyc/claude-mpm-skills) -->
 ---
 name: pydantic
-description: Python data validation using type hints and runtime type checking with Pydantic v2's Rust-powered core for high-performance validation in FastAPI, Django, and configuration management.
-user-invocable: false
-disable-model-invocation: true
-progressive_disclosure:
-  entry_point:
-    - summary
-    - when_to_use
-    - quick_start
-  full_content: all
-token_estimates:
-  entry_point: 70
-  full: 5500
+description: Python data validation using type hints and runtime type checking with Pydantic v2's Rust-powered core.
+when_to_use: Validating API request/response data, managing settings with pydantic-settings, integrating Pydantic with FastAPI or Django, or building type-safe data models.
 ---
 
 # Pydantic Validation Skill

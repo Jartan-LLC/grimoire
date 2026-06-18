@@ -1,7 +1,8 @@
 <!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 ---
 name: python-anti-patterns
-description: Use this skill when reviewing Python code for common anti-patterns to avoid. Use as a checklist when reviewing code, before finalizing implementations, or when debugging issues that might stem from known bad practices.
+description: Common Python anti-patterns and a pre-merge review checklist.
+when_to_use: Reviewing Python code, finalizing implementations, or debugging issues that might stem from known bad practices.
 ---
 
 # Python Anti-Patterns Checklist
@@ -314,6 +315,77 @@ def test_user_service():
 
 **Fix:** Use integration tests for critical paths. Mock only external services.
 
+## Language-Level Anti-Patterns
+
+### Mutable Default Arguments
+
+```python
+# BAD: Default list is shared across all calls
+def append_to(item, items=[]):
+    items.append(item)
+    return items
+
+append_to(1)  # [1]
+append_to(2)  # [1, 2] — not [2]!
+```
+
+**Fix:** Use `None` and create a new object inside the function.
+
+```python
+# GOOD
+def append_to(item, items=None):
+    if items is None:
+        items = []
+    items.append(item)
+    return items
+```
+
+### `type()` vs `isinstance()`
+
+```python
+# BAD: Fails for subclasses
+if type(obj) == list:
+    process(obj)
+```
+
+**Fix:** Use `isinstance`, which respects inheritance.
+
+```python
+# GOOD
+if isinstance(obj, list):
+    process(obj)
+```
+
+### `== None` vs `is None`
+
+```python
+# BAD: == can be overridden by __eq__
+if value == None:
+    process()
+```
+
+**Fix:** Use the identity check `is None`.
+
+```python
+# GOOD
+if value is None:
+    process()
+```
+
+### Wildcard Imports
+
+```python
+# BAD: Pollutes namespace, hides where names come from
+from os.path import *
+```
+
+**Fix:** Import only what you need.
+
+```python
+# GOOD
+from os.path import join, exists
+```
+
 ## Quick Review Checklist
 
 Before finalizing code, verify:
@@ -332,6 +404,10 @@ Before finalizing code, verify:
 - [ ] Collections have type parameters
 - [ ] Error paths are tested
 - [ ] Edge cases are covered
+- [ ] No mutable default arguments (`def f(x=[])`)
+- [ ] Using `isinstance()` not `type()` for type checks
+- [ ] Using `is None` not `== None`
+- [ ] No wildcard imports (`from module import *`)
 
 ## Common Fixes Summary
 
@@ -348,3 +424,7 @@ Before finalizing code, verify:
 | Blocking in async | Async-native libraries |
 | Missing types | Type annotations on all public APIs |
 | Only happy path tests | Test errors and edge cases |
+| Mutable default args | Use `None` + create inside function |
+| `type()` comparison | `isinstance()` |
+| `== None` | `is None` |
+| Wildcard imports | Explicit named imports |

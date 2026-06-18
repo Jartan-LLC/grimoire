@@ -2,7 +2,7 @@
 ---
 name: python-patterns
 description: Pythonic idioms, PEP 8 standards, type hints, and best practices for building robust, efficient, and maintainable Python applications.
-origin: ECC
+when_to_use: Writing, reviewing, or refactoring Python code, or designing Python packages and modules.
 ---
 
 # Python Development Patterns
@@ -698,54 +698,8 @@ addopts = "--cov=mypackage --cov-report=term-missing"
 | `pathlib.Path` | For path operations (Python 3.4+) |
 | `enumerate` | For index-element pairs in loops |
 
-## Anti-Patterns to Avoid
+## Anti-Patterns
 
-```python
-# Bad: Mutable default arguments
-def append_to(item, items=[]):
-    items.append(item)
-    return items
-
-# Good: Use None and create new list
-def append_to(item, items=None):
-    if items is None:
-        items = []
-    items.append(item)
-    return items
-
-# Bad: Checking type with type()
-if type(obj) == list:
-    process(obj)
-
-# Good: Use isinstance
-if isinstance(obj, list):
-    process(obj)
-
-# Bad: Comparing to None with ==
-if value == None:
-    process()
-
-# Good: Use is
-if value is None:
-    process()
-
-# Bad: from module import *
-from os.path import *
-
-# Good: Explicit imports
-from os.path import join, exists
-
-# Bad: Bare except
-try:
-    risky_operation()
-except:
-    pass
-
-# Good: Specific exception
-try:
-    risky_operation()
-except SpecificError as e:
-    logger.error(f"Operation failed: {e}")
-```
+For common Python mistakes and a pre-merge review checklist, see the `python-anti-patterns` skill.
 
 __Remember__: Python code should be readable, explicit, and follow the principle of least surprise. When in doubt, prioritize clarity over cleverness.

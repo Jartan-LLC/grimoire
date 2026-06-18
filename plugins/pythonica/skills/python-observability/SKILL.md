@@ -1,7 +1,8 @@
 <!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 ---
 name: python-observability
-description: Python observability patterns including structured logging, metrics, and distributed tracing. Use when adding logging, implementing metrics collection, setting up tracing, or debugging production systems.
+description: Python observability patterns including structured logging, metrics, and distributed tracing.
+when_to_use: Adding logging, implementing metrics collection, setting up tracing, or debugging production systems.
 ---
 
 # Python Observability

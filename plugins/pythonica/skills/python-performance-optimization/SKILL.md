@@ -1,7 +1,8 @@
 <!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 ---
 name: python-performance-optimization
-description: Profile and optimize Python code using cProfile, memory profilers, and performance best practices. Use when debugging slow Python code, optimizing bottlenecks, or improving application performance.
+description: Profile and optimize Python code using cProfile, memory profilers, and performance best practices.
+when_to_use: Debugging slow Python code, optimizing bottlenecks, or improving application performance.
 ---
 
 # Python Performance Optimization
