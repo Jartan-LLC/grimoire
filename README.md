@@ -18,11 +18,11 @@ Then browse and install plugins:
 
 | Plugin | Description |
 |--------|-------------|
-| [github-conventions](plugins/github-conventions/) | Branch naming, commit format, issue/PR templates |
-| [memoria](plugins/memoria/) | Session memory and continuous learning — cross-session context, instinct-based pattern extraction |
-| [pythonica](plugins/pythonica/) | Comprehensive Python development — patterns, testing, async, resilience, Pydantic |
-| [praxis](plugins/praxis/) | Development workflow — issue planning, implementation, PR creation, code review |
-| [recursio](plugins/recursio/) | Recursive multi-agent development with TDD — waves of parallel nested subagents |
+| [github-conventions](plugins/github-conventions/) | GitHub conventions — branch naming, commit format, issue/PR templates, and safe issue/PR referencing |
+| [memoria](plugins/memoria/) | Session memory and continuous learning — cross-session context, pattern extraction, instinct-based learning |
+| [praxis](plugins/praxis/) | Development workflow — issue planning, implementation, PR creation, code review with specialized reviewers, and project conventions |
+| [pythonica](plugins/pythonica/) | Comprehensive Python development — patterns, testing, async, error handling, packaging, configuration, type safety, resilience, observability, Pydantic, and more |
+| [recursio](plugins/recursio/) | Recursive multi-agent development system with TDD — decomposes projects into waves of parallel nested subagents |
 
 ## Contributing
 

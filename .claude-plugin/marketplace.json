@@ -21,16 +21,16 @@
       "keywords": ["github", "conventions", "commits", "branches"]
     },
     {
-      "name": "pythonica",
-      "source": "./plugins/pythonica",
-      "description": "Comprehensive Python development — patterns, testing, async, error handling, packaging, configuration, type safety, resilience, observability, Pydantic",
+      "name": "memoria",
+      "source": "./plugins/memoria",
+      "description": "Session memory and continuous learning — cross-session context, pattern extraction, instinct-based learning",
       "author": {
         "name": "Jartan LLC",
         "url": "https://github.com/Jartan-LLC"
       },
       "license": "MIT",
-      "category": "development",
-      "keywords": ["python", "patterns", "testing", "pydantic", "async", "packaging"]
+      "category": "productivity",
+      "keywords": ["session", "memory", "learning", "instincts", "patterns"]
     },
     {
       "name": "praxis",
@@ -45,16 +45,16 @@
       "keywords": ["workflow", "review", "conventions", "planning"]
     },
     {
-      "name": "memoria",
-      "source": "./plugins/memoria",
-      "description": "Session memory and continuous learning — cross-session context, pattern extraction, instinct-based learning",
+      "name": "pythonica",
+      "source": "./plugins/pythonica",
+      "description": "Comprehensive Python development — patterns, testing, async, error handling, packaging, configuration, type safety, resilience, observability, Pydantic, and more",
       "author": {
         "name": "Jartan LLC",
         "url": "https://github.com/Jartan-LLC"
       },
       "license": "MIT",
-      "category": "productivity",
-      "keywords": ["session", "memory", "learning", "instincts", "patterns"]
+      "category": "development",
+      "keywords": ["python", "patterns", "testing", "pydantic", "async", "packaging"]
     },
     {
       "name": "recursio",
