@@ -9,18 +9,6 @@ when_to_use: Debugging slow Python code, optimizing bottlenecks, or improving ap
 
 Comprehensive guide to profiling, analyzing, and optimizing Python code for better performance, including CPU profiling, memory optimization, and implementation best practices.
 
-## When to Use This Skill
-
-- Identifying performance bottlenecks in Python applications
-- Reducing application latency and response times
-- Optimizing CPU-intensive operations
-- Reducing memory consumption and memory leaks
-- Improving database query performance
-- Optimizing I/O operations
-- Speeding up data processing pipelines
-- Implementing high-performance algorithms
-- Profiling production applications
-
 ## Core Concepts
 
 ### 1. Profiling Types

@@ -9,15 +9,6 @@ when_to_use: Writing new code, reviewing style, configuring linters, writing doc
 
 Consistent code style and clear documentation make codebases maintainable and collaborative. This skill covers modern Python tooling, naming conventions, and documentation standards.
 
-## When to Use This Skill
-
-- Setting up linting and formatting for a new project
-- Writing or reviewing docstrings
-- Establishing team coding standards
-- Configuring ruff, mypy, or pyright
-- Reviewing code for style consistency
-- Creating project documentation
-
 ## Core Concepts
 
 ### 1. Automated Formatting

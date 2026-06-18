@@ -9,15 +9,6 @@ when_to_use: Adding retry logic, implementing timeouts, building fault-tolerant 
 
 Build fault-tolerant Python applications that gracefully handle transient failures, network issues, and service outages. Resilience patterns keep systems running when dependencies are unreliable.
 
-## When to Use This Skill
-
-- Adding retry logic to external service calls
-- Implementing timeouts for network operations
-- Building fault-tolerant microservices
-- Handling rate limiting and backpressure
-- Creating infrastructure decorators
-- Designing circuit breakers
-
 ## Core Concepts
 
 ### 1. Transient vs Permanent Failures

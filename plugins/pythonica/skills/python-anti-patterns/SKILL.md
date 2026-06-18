@@ -9,16 +9,6 @@ when_to_use: Reviewing Python code, finalizing implementations, or debugging iss
 
 A reference checklist of common mistakes and anti-patterns in Python code. Review this before finalizing implementations to catch issues early.
 
-## When to Use This Skill
-
-- Reviewing code before merge
-- Debugging mysterious issues
-- Teaching or learning Python best practices
-- Establishing team coding standards
-- Refactoring legacy code
-
-**Note:** This skill focuses on what to avoid. For guidance on positive patterns and architecture, see the `python-patterns` skill.
-
 ## Infrastructure Anti-Patterns
 
 ### Scattered Timeout/Retry Logic

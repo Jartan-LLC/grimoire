@@ -9,15 +9,6 @@ when_to_use: Adding logging, implementing metrics collection, setting up tracing
 
 Instrument Python applications with structured logs, metrics, and traces. When something breaks in production, you need to answer "what, where, and why" without deploying new code.
 
-## When to Use This Skill
-
-- Adding structured logging to applications
-- Implementing metrics collection with Prometheus
-- Setting up distributed tracing across services
-- Propagating correlation IDs through request chains
-- Debugging production issues
-- Building observability dashboards
-
 ## Core Concepts
 
 ### 1. Structured Logging

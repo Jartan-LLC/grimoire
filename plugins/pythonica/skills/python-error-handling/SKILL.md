@@ -9,15 +9,6 @@ when_to_use: Implementing validation logic, designing exception strategies, hand
 
 Build robust Python applications with proper input validation, meaningful exceptions, and graceful failure handling. Good error handling makes debugging easier and systems more reliable.
 
-## When to Use This Skill
-
-- Validating user input and API parameters
-- Designing exception hierarchies for applications
-- Handling partial failures in batch operations
-- Converting external data to domain types
-- Building user-friendly error messages
-- Implementing fail-fast validation patterns
-
 ## Core Concepts
 
 ### 1. Fail Fast

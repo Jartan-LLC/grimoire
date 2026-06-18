@@ -10,14 +10,6 @@ when_to_use: Validating API request/response data, managing settings with pydant
 ## Summary
 Python data validation using type hints and runtime type checking with Pydantic v2's Rust-powered core for high-performance validation.
 
-## When to Use
-- API request/response validation (FastAPI, Django)
-- Settings and configuration management (env variables, config files)
-- ORM model validation (SQLAlchemy integration)
-- Data parsing and serialization (JSON, dict, custom formats)
-- Type-safe data classes with automatic validation
-- CLI argument parsing with type safety
-
 ## Quick Start
 
 ```python

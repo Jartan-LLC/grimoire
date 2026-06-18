@@ -9,18 +9,6 @@ when_to_use: Packaging Python libraries, creating CLI tools, or distributing Pyt
 
 Comprehensive guide to creating, structuring, and distributing Python packages using modern packaging tools, pyproject.toml, and publishing to PyPI.
 
-## When to Use This Skill
-
-- Creating Python libraries for distribution
-- Building command-line tools with entry points
-- Publishing packages to PyPI or private repositories
-- Setting up Python project structure
-- Creating installable packages with dependencies
-- Building wheels and source distributions
-- Versioning and releasing Python packages
-- Creating namespace packages
-- Implementing package metadata and classifiers
-
 ## Core Concepts
 
 ### 1. Package Structure

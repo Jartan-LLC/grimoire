@@ -9,15 +9,6 @@ when_to_use: Adding type annotations, implementing generic classes, defining str
 
 Leverage Python's type system to catch errors at static analysis time. Type annotations serve as enforced documentation that tooling validates automatically.
 
-## When to Use This Skill
-
-- Adding type hints to existing code
-- Creating generic, reusable classes
-- Defining structural interfaces with protocols
-- Configuring mypy or pyright for strict checking
-- Understanding type narrowing and guards
-- Building type-safe APIs and libraries
-
 ## Core Concepts
 
 ### 1. Type Annotations

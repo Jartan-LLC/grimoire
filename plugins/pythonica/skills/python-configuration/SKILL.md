@@ -9,15 +9,6 @@ when_to_use: Externalizing config, setting up pydantic-settings, managing secret
 
 Externalize configuration from code using environment variables and typed settings. Well-managed configuration enables the same code to run in any environment without modification.
 
-## When to Use This Skill
-
-- Setting up a new project's configuration system
-- Migrating from hardcoded values to environment variables
-- Implementing pydantic-settings for typed configuration
-- Managing secrets and sensitive values
-- Creating environment-specific settings (dev/staging/prod)
-- Validating configuration at application startup
-
 ## Core Concepts
 
 ### 1. Externalized Configuration

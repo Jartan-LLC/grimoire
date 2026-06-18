@@ -9,15 +9,6 @@ when_to_use: Setting up new projects, organizing modules, defining public interf
 
 Design well-organized Python projects with clear module boundaries, explicit public interfaces, and maintainable directory structures. Good organization makes code discoverable and changes predictable.
 
-## When to Use This Skill
-
-- Starting a new Python project from scratch
-- Reorganizing an existing codebase for clarity
-- Defining module public APIs with `__all__`
-- Deciding between flat and nested directory structures
-- Determining test file placement strategies
-- Creating reusable library packages
-
 ## Core Concepts
 
 ### 1. Module Cohesion

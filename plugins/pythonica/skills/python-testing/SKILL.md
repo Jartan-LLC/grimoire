@@ -9,13 +9,6 @@ when_to_use: Writing new Python tests, designing test suites, reviewing test cov
 
 Comprehensive testing strategies for Python applications using pytest, TDD methodology, and best practices.
 
-## When to Activate
-
-- Writing new Python code (follow TDD: red, green, refactor)
-- Designing test suites for Python projects
-- Reviewing Python test coverage
-- Setting up testing infrastructure
-
 ## Core Testing Philosophy
 
 ### Test-Driven Development (TDD)

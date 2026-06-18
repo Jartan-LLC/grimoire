@@ -9,15 +9,6 @@ when_to_use: Managing connections, file handles, implementing cleanup logic, or 
 
 Manage resources deterministically using context managers. Resources like database connections, file handles, and network sockets should be released reliably, even when exceptions occur.
 
-## When to Use This Skill
-
-- Managing database connections and connection pools
-- Working with file handles and I/O
-- Implementing custom context managers
-- Building streaming responses with state
-- Handling nested resource cleanup
-- Creating async context managers
-
 ## Core Concepts
 
 ### 1. Context Managers

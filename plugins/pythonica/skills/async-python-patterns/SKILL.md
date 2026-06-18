@@ -9,17 +9,6 @@ when_to_use: Building async APIs, concurrent systems, or I/O-bound applications 
 
 Comprehensive guidance for implementing asynchronous Python applications using asyncio, concurrent programming patterns, and async/await for building high-performance, non-blocking systems.
 
-## When to Use This Skill
-
-- Building async web APIs (FastAPI, aiohttp, Sanic)
-- Implementing concurrent I/O operations (database, file, network)
-- Creating web scrapers with concurrent requests
-- Developing real-time applications (WebSocket servers, chat systems)
-- Processing multiple independent tasks simultaneously
-- Building microservices with async communication
-- Optimizing I/O-bound workloads
-- Implementing async background tasks and queues
-
 ## Sync vs Async Decision Guide
 
 Before adopting async, consider whether it's the right choice for your use case.
