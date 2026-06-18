@@ -8,7 +8,7 @@ when_to_use: Writing, reviewing, or refactoring Python code, or designing Python
 
 Idiomatic Python patterns and best practices for building robust, efficient, and maintainable applications.
 
-## Core Principles
+## Core Concepts
 
 ### 1. Readability Counts
 
