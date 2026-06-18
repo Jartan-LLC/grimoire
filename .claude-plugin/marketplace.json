@@ -33,6 +33,18 @@
       "keywords": ["workflow", "review", "conventions", "planning"]
     },
     {
+      "name": "memoria",
+      "source": "./plugins/memoria",
+      "description": "Session memory and continuous learning — cross-session context, pattern extraction, instinct-based learning",
+      "author": {
+        "name": "Jartan LLC",
+        "url": "https://github.com/Jartan-LLC"
+      },
+      "license": "MIT",
+      "category": "productivity",
+      "keywords": ["session", "memory", "learning", "instincts", "patterns"]
+    },
+    {
       "name": "recursio",
       "source": "./plugins/recursio",
       "description": "Recursive multi-agent development system with TDD — decomposes projects into waves of parallel nested subagents",
