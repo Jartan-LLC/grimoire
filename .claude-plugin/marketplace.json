@@ -21,6 +21,18 @@
       "keywords": ["github", "conventions", "commits", "branches"]
     },
     {
+      "name": "pythonica",
+      "source": "./plugins/pythonica",
+      "description": "Comprehensive Python development — patterns, testing, async, error handling, packaging, configuration, type safety, resilience, observability, Pydantic",
+      "author": {
+        "name": "Jartan LLC",
+        "url": "https://github.com/Jartan-LLC"
+      },
+      "license": "MIT",
+      "category": "development",
+      "keywords": ["python", "patterns", "testing", "pydantic", "async", "packaging"]
+    },
+    {
       "name": "praxis",
       "source": "./plugins/praxis",
       "description": "Development workflow — issue planning, implementation, PR creation, code review with specialized reviewers, and project conventions",
