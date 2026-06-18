@@ -1,6 +1,6 @@
 # Pythonica
 
-Comprehensive Python development skills for Claude Code. Covers patterns, testing, async, error handling, packaging, configuration, type safety, resilience, observability, and framework integrations.
+Comprehensive Python development — patterns, testing, async, error handling, packaging, configuration, type safety, resilience, observability, Pydantic, and more.
 
 ## Installation
 
