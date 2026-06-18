@@ -1,5 +1,5 @@
 {
-  "name": "recursion",
+  "name": "recursio",
   "description": "Recursive multi-agent development system with TDD — decomposes projects into waves of parallel nested subagents",
   "author": {
     "name": "Jartan LLC",

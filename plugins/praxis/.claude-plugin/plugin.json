@@ -1,0 +1,8 @@
+{
+  "name": "praxis",
+  "description": "Development workflow — issue planning, implementation, PR creation, code review with specialized reviewers, and project conventions",
+  "author": {
+    "name": "Jartan LLC",
+    "url": "https://github.com/Jartan-LLC"
+  }
+}
