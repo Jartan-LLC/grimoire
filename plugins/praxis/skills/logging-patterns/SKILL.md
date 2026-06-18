@@ -2,7 +2,6 @@
 name: logging-patterns
 description: Logging conventions — level usage, formatting style, structured output.
 when_to_use: Writing code that logs events, configuring log output, or choosing log levels.
-user-invocable: false
 ---
 
 # Logging Conventions

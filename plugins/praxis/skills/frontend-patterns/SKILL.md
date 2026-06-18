@@ -2,7 +2,6 @@
 name: frontend-patterns
 description: CSS design system principles — token usage, semantic layering, mobile-first, component isolation.
 when_to_use: Working on CSS, styling, design tokens, or frontend component structure.
-user-invocable: false
 ---
 
 # Frontend Design Principles

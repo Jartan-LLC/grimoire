@@ -1,6 +1,7 @@
 ---
 name: recursive-execution
 description: Wave execution rules — agent constraints, wave barriers, review-fix evaluation, language awareness.
+when_to_use: Orchestrating or implementing within recursive development waves.
 ---
 
 # Recursive Execution
