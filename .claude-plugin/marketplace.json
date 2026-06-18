@@ -1,0 +1,39 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "grimoire",
+  "description": "Curated Claude Code plugins for development workflows",
+  "owner": {
+    "name": "Jartan LLC",
+    "url": "https://github.com/Jartan-LLC"
+  },
+  "pluginRoot": "./",
+  "plugins": [
+    {
+      "name": "recursion",
+      "source": "./plugins/recursion",
+      "description": "Recursive multi-agent development system with TDD — decomposes projects into waves of parallel nested subagents",
+      "author": {
+        "name": "Jartan LLC",
+        "url": "https://github.com/Jartan-LLC"
+      },
+      "license": "MIT",
+      "category": "development",
+      "keywords": ["recursive", "multi-agent", "tdd", "wave-plan", "orchestration"],
+      "skills": [
+        "./skills/recursive-development/SKILL.md",
+        "./skills/recursive-planning/SKILL.md",
+        "./skills/recursive-quality/SKILL.md",
+        "./skills/recursive-execution/SKILL.md"
+      ],
+      "agents": [
+        "./agents/recursive-orchestrator.md",
+        "./agents/recursive-implementer.md",
+        "./agents/recursive-planner.md",
+        "./agents/recursive-reviewer.md"
+      ],
+      "commands": [
+        "./commands/recursive-implement.md"
+      ]
+    }
+  ]
+}
