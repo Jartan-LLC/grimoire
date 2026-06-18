@@ -19,7 +19,7 @@ Then browse and install plugins:
 | Plugin | Description |
 |--------|-------------|
 | [claudivis](plugins/claudivis/) | The key to Claude Code configuration — how agents, skills, and commands work together |
-| [github-conventions](plugins/github-conventions/) | GitHub conventions — branch naming, commit format, issue/PR templates, and safe issue/PR referencing |
+| [gitwise](plugins/gitwise/) | GitHub conventions — branch naming, commit format, issue/PR templates, and safe issue/PR referencing |
 | [memoria](plugins/memoria/) | Session memory and continuous learning — cross-session context, pattern extraction, instinct-based learning |
 | [praxis](plugins/praxis/) | Development workflow — issue planning, implementation, PR creation, code review with specialized reviewers, and project conventions |
 | [pythonica](plugins/pythonica/) | Comprehensive Python development — patterns, testing, async, error handling, packaging, configuration, type safety, resilience, observability, Pydantic, and more |

@@ -21,8 +21,8 @@
       "keywords": ["claude-code", "configuration", "agents", "skills", "commands"]
     },
     {
-      "name": "github-conventions",
-      "source": "./plugins/github-conventions",
+      "name": "gitwise",
+      "source": "./plugins/gitwise",
       "description": "GitHub conventions — branch naming, commit format, issue/PR templates, and safe issue/PR referencing",
       "author": {
         "name": "Jartan LLC",
