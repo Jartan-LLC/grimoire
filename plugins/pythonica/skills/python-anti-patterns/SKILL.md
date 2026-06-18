@@ -16,7 +16,7 @@ A reference checklist of common mistakes and anti-patterns in Python code. Revie
 - Establishing team coding standards
 - Refactoring legacy code
 
-**Note:** This skill focuses on what to avoid. For guidance on positive patterns and architecture, see the `python-design-patterns` skill.
+**Note:** This skill focuses on what to avoid. For guidance on positive patterns and architecture, see the `python-patterns` skill.
 
 ## Infrastructure Anti-Patterns
 

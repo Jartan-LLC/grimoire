@@ -19,8 +19,7 @@ Comprehensive Python development skills for Claude Code. Covers patterns, testin
 - **python-anti-patterns** — BAD→GOOD checklist for code review
 
 ### Testing
-- **python-testing** — pytest ecosystem: fixtures, parametrize, mocking, async testing, coverage
-- **python-testing-patterns** — TDD workflow, test organization, isolation strategies
+- **python-testing** — pytest ecosystem: fixtures, parametrize, mocking, async testing, TDD workflow, coverage
 
 ### Error Handling & Resilience
 - **python-error-handling** — exception hierarchies, batch processing, validation patterns, Pydantic integration
