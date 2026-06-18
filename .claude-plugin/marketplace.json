@@ -9,6 +9,18 @@
   "pluginRoot": "./",
   "plugins": [
     {
+      "name": "claudivis",
+      "source": "./plugins/claudivis",
+      "description": "The key to Claude Code configuration — how agents, skills, and commands work together",
+      "author": {
+        "name": "Jartan LLC",
+        "url": "https://github.com/Jartan-LLC"
+      },
+      "license": "MIT",
+      "category": "development",
+      "keywords": ["claude-code", "configuration", "agents", "skills", "commands"]
+    },
+    {
       "name": "github-conventions",
       "source": "./plugins/github-conventions",
       "description": "GitHub conventions — branch naming, commit format, issue/PR templates, and safe issue/PR referencing",
