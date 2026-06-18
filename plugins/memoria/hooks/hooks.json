@@ -2,16 +2,6 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/suggest-compact.js\""
-          }
-        ],
-        "description": "Suggest manual compaction at logical intervals"
-      },
-      {
         "matcher": "Bash|Edit|Write",
         "hooks": [
           {
@@ -32,18 +22,6 @@
           }
         ],
         "description": "Observe tool usage for continuous learning (post)"
-      }
-    ],
-    "PreCompact": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/pre-compact.js\""
-          }
-        ],
-        "description": "Save state before context compaction"
       }
     ],
     "SessionStart": [
