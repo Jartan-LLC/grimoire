@@ -12,7 +12,7 @@ Comprehensive Python development — patterns, testing, async, error handling, p
 ## Skills
 
 ### Core Language
-- **python-patterns** — protocols, context managers, concurrency, decorators, performance
+- **python-patterns** — protocols, context managers, concurrency, decorators, memory efficiency
 - **python-type-safety** — protocols, generics, type narrowing, mypy strict mode
 - **async-python-patterns** — asyncio fundamentals, when to use async vs sync, core patterns
 - **python-resource-management** — context managers (class + decorator), async resources, cleanup guarantees

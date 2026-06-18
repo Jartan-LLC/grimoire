@@ -193,7 +193,7 @@ class Example(BaseModel):
 ### Custom Types
 
 ```python
-from pydantic import GetCoreSchemaHandler, GetJsonSchemaHandler
+from pydantic import GetCoreSchemaHandler
 from pydantic_core import core_schema
 from typing import Any
 

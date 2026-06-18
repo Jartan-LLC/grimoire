@@ -808,7 +808,6 @@ pytest --pdb
 
 **Remember**: Tests are code too. Keep them clean, readable, and maintainable. Good tests catch bugs; great tests prevent them.
 
-## Additional Resources
+## Detailed patterns and worked examples
 
-- [Advanced Patterns](references/advanced-patterns.md)
-- [Details](references/details.md)
+Detailed pattern documentation lives in `references/details.md`. Read that file when the navigation tier above is insufficient. For advanced patterns, see `references/advanced-patterns.md`.
