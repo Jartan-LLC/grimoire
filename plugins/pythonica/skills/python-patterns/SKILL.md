@@ -556,8 +556,6 @@ For ruff, mypy, black, and pyproject.toml configuration, see the `python-code-st
 
 ## Quick Reference: Python Idioms
 
-## Quick Reference: Python Idioms
-
 | Idiom | Description |
 |-------|-------------|
 | EAFP | Easier to Ask Forgiveness than Permission |

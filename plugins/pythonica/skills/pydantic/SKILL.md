@@ -6,9 +6,6 @@ when_to_use: Validating API request/response data, managing settings with pydant
 
 # Pydantic Validation Skill
 
-## Summary
-Python data validation using type hints and runtime type checking with Pydantic v2's Rust-powered core for high-performance validation.
-
 ## Quick Start
 
 ```python
