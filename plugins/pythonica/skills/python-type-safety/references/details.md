@@ -1,4 +1,3 @@
-<!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 # python-type-safety — detailed worked examples
 
 ## Advanced Patterns

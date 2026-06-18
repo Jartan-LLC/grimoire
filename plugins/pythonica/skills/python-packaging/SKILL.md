@@ -1,4 +1,3 @@
-<!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 ---
 name: python-packaging
 description: Create distributable Python packages with proper project structure, pyproject.toml, and publishing to PyPI.

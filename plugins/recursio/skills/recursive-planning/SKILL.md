@@ -1,6 +1,7 @@
 ---
 name: recursive-planning
 description: How to decompose projects into wave plans — module identification, dependency mapping, wave assignment, contract guidance, deliverables.
+when_to_use: Designing wave plans for recursive development.
 ---
 
 # Recursive Planning

@@ -1,4 +1,3 @@
-<!-- Adapted from everything-claude-code by Affaan Mustafa (https://github.com/affaan-m/everything-claude-code) -->
 ---
 name: python-patterns
 description: Pythonic idioms, PEP 8 standards, type hints, and best practices for building robust, efficient, and maintainable Python applications.

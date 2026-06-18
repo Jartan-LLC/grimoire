@@ -2,7 +2,6 @@
 name: github-conventions
 description: GitHub conventions — branch naming, commit format, issue/PR templates, and safe issue/PR referencing in comments.
 when_to_use: Using gh CLI, creating commits, posting PR/issue comments, or referencing issues by number.
-user-invocable: false
 ---
 
 # GitHub Conventions

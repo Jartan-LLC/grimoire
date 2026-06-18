@@ -1,4 +1,3 @@
-<!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 ---
 name: python-type-safety
 description: Python type safety with type hints, generics, protocols, and strict type checking.

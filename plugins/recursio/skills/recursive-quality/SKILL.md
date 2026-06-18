@@ -1,6 +1,7 @@
 ---
 name: recursive-quality
 description: Quality patterns, anti-patterns, and contract richness guidelines for recursive development.
+when_to_use: Implementing or reviewing code produced by recursive development.
 ---
 
 # Recursive Quality

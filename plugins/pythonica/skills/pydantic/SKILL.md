@@ -1,4 +1,3 @@
-<!-- Adapted from claude-mpm-skills by bobmatnyc (https://github.com/bobmatnyc/claude-mpm-skills) -->
 ---
 name: pydantic
 description: Python data validation using type hints and runtime type checking with Pydantic v2's Rust-powered core.

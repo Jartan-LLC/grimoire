@@ -1,4 +1,3 @@
-<!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 ---
 name: python-resilience
 description: Python resilience patterns including automatic retries, exponential backoff, timeouts, and fault-tolerant decorators.

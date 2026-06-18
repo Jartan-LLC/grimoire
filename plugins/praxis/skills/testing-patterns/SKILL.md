@@ -2,7 +2,6 @@
 name: testing-patterns
 description: Integration test philosophy — test observable behavior, fixture composition, canary markers for library internals.
 when_to_use: Writing tests, reviewing test code, or deciding between unit and integration tests.
-user-invocable: false
 ---
 
 # Testing Philosophy

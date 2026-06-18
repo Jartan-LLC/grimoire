@@ -2,7 +2,6 @@
 name: api-error-patterns
 description: API error response format — machine-readable codes, human-readable reasons, status code rules.
 when_to_use: Writing API error handling, choosing HTTP status codes, designing error response shapes.
-user-invocable: false
 ---
 
 # API Error Conventions

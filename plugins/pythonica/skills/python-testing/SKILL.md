@@ -1,4 +1,3 @@
-<!-- Adapted from everything-claude-code by Affaan Mustafa (https://github.com/affaan-m/everything-claude-code) -->
 ---
 name: python-testing
 description: Python testing strategies using pytest, TDD methodology, fixtures, mocking, parametrization, and coverage requirements.

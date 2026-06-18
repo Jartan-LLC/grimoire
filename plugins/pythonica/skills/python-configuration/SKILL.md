@@ -1,4 +1,3 @@
-<!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 ---
 name: python-configuration
 description: Python configuration management via environment variables and typed settings.

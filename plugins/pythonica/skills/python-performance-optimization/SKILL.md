@@ -1,4 +1,3 @@
-<!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 ---
 name: python-performance-optimization
 description: Profile and optimize Python code using cProfile, memory profilers, and performance best practices.

@@ -1,4 +1,3 @@
-<!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 # python-error-handling — detailed worked examples
 
 ## Advanced Patterns

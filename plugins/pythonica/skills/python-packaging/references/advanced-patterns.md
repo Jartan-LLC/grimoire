@@ -1,4 +1,3 @@
-<!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 # Python Packaging — Advanced Reference
 
 Advanced packaging patterns including data files, namespace packages, C extensions, version management, testing installation, documentation templates, and distribution workflows.

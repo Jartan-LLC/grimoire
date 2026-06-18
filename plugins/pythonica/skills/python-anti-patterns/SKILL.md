@@ -1,4 +1,3 @@
-<!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 ---
 name: python-anti-patterns
 description: Common Python anti-patterns and a pre-merge review checklist.

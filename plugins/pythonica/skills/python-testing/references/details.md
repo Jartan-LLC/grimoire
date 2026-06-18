@@ -1,4 +1,3 @@
-<!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 # python-testing-patterns — detailed patterns and worked examples
 
 ## Fundamental Patterns

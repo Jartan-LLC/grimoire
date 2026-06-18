@@ -1,4 +1,3 @@
-<!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 ---
 name: python-code-style
 description: Python code style, linting, formatting, naming conventions, and documentation standards.

@@ -1,4 +1,3 @@
-<!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 ---
 name: python-resource-management
 description: Python resource management with context managers, cleanup patterns, and streaming.

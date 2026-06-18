@@ -1,4 +1,3 @@
-<!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 # python-performance-optimization — detailed patterns and worked examples
 
 ## Profiling Tools

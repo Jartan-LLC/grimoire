@@ -1,4 +1,3 @@
-<!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 ---
 name: async-python-patterns
 description: Python asyncio, concurrent programming, and async/await patterns for high-performance applications.

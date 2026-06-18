@@ -1,4 +1,3 @@
-<!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 ---
 name: python-observability
 description: Python observability patterns including structured logging, metrics, and distributed tracing.

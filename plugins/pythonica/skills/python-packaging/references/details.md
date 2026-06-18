@@ -1,4 +1,3 @@
-<!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 # python-packaging — detailed patterns and worked examples
 
 ## Complete pyproject.toml Examples

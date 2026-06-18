@@ -1,4 +1,3 @@
-<!-- Adapted from wshobson/agents (https://github.com/wshobson/agents) -->
 ---
 name: python-error-handling
 description: Python error handling patterns including input validation, exception hierarchies, and partial failure handling.
