@@ -19,6 +19,7 @@ Then browse and install plugins:
 | Plugin | Description |
 |--------|-------------|
 | [github-conventions](plugins/github-conventions/) | Branch naming, commit format, issue/PR templates |
+| [memoria](plugins/memoria/) | Session memory and continuous learning — cross-session context, instinct-based pattern extraction |
 | [praxis](plugins/praxis/) | Development workflow — issue planning, implementation, PR creation, code review |
 | [recursio](plugins/recursio/) | Recursive multi-agent development with TDD — waves of parallel nested subagents |
 
