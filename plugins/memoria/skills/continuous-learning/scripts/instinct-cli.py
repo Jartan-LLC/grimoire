@@ -446,15 +446,27 @@ def load_registry() -> dict:
 
 
 def _write_registry(registry: dict) -> None:
-    """Write the project registry atomically."""
+    """Write the project registry atomically with file locking."""
     REGISTRY_FILE.parent.mkdir(parents=True, exist_ok=True)
-    tmp_file = REGISTRY_FILE.parent / f".{REGISTRY_FILE.name}.tmp.{os.getpid()}"
-    with open(tmp_file, "w", encoding="utf-8") as f:
-        json.dump(registry, f, indent=2)
-        f.write("\n")
-        f.flush()
-        os.fsync(f.fileno())
-    os.replace(tmp_file, REGISTRY_FILE)
+    lock_path = REGISTRY_FILE.parent / f".{REGISTRY_FILE.name}.lock"
+    lock_fd = None
+
+    try:
+        if _HAS_FCNTL:
+            lock_fd = open(lock_path, "w")
+            fcntl.flock(lock_fd, fcntl.LOCK_EX)
+
+        tmp_file = REGISTRY_FILE.parent / f".{REGISTRY_FILE.name}.tmp.{os.getpid()}"
+        with open(tmp_file, "w", encoding="utf-8") as f:
+            json.dump(registry, f, indent=2)
+            f.write("\n")
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp_file, REGISTRY_FILE)
+    finally:
+        if lock_fd is not None:
+            fcntl.flock(lock_fd, fcntl.LOCK_UN)
+            lock_fd.close()
 
 
 def _validate_project_id(project_id: str) -> bool:

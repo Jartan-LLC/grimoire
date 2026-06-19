@@ -4,8 +4,7 @@ description: Instinct-based learning system that observes sessions via hooks, cr
 when_to_use: Understanding how instinct-based learning works, configuring the observer, or managing learned patterns.
 ---
 
-# Continuous Learning - Instinct
--Based Architecture
+# Continuous Learning - Instinct-Based Architecture
 
 An advanced learning system that turns your Claude Code sessions into reusable knowledge through atomic "instincts" - small learned behaviors with confidence scoring.
 
@@ -144,7 +143,7 @@ Continuous-learning stores observer data outside `~/.claude` so Claude Code's se
 Existing users with data at `~/.claude/homunculus` can migrate once:
 
 ```bash
-bash skills/continuous-learning/scripts/migrate-homunculus.sh
+bash "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning/scripts/migrate-homunculus.sh"
 ```
 
 ## Quick Start
@@ -221,7 +220,7 @@ Edit `config.json` to control the background observer:
 {
   "version": "2.1",
   "observer": {
-    "enabled": false,
+    "enabled": true,
     "run_interval_minutes": 5,
     "min_observations_to_analyze": 20
   }
@@ -230,7 +229,7 @@ Edit `config.json` to control the background observer:
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `observer.enabled` | `false` | Enable the background observer agent |
+| `observer.enabled` | `true` | Enable the background observer agent |
 | `observer.run_interval_minutes` | `5` | How often the observer analyzes observations |
 | `observer.min_observations_to_analyze` | `20` | Minimum observations before analysis runs |
 
