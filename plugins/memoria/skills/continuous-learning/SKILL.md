@@ -4,11 +4,35 @@ description: Instinct-based learning system that observes sessions via hooks, cr
 when_to_use: Understanding how instinct-based learning works, configuring the observer, or managing learned patterns.
 ---
 
-# Continuous Learning v2 - Instinct-Based Architecture
+# Continuous Learning - Instinct
+-Based Architecture
 
 An advanced learning system that turns your Claude Code sessions into reusable knowledge through atomic "instincts" - small learned behaviors with confidence scoring.
 
-## What's New in v2
+**v2.1** adds **project-scoped instincts** — React patterns stay in your React project, Python conventions stay in your Python project, and universal patterns (like "always validate input") are shared globally.
+
+## When to Activate
+
+- Setting up automatic learning from Claude Code sessions
+- Configuring instinct-based behavior extraction via hooks
+- Tuning confidence thresholds for learned behaviors
+- Reviewing, exporting, or importing instinct libraries
+- Evolving instincts into full skills, commands, or agents
+- Managing project-scoped vs global instincts
+- Promoting instincts from project to global scope
+
+## What's New in v2.1
+
+| Feature | v2.0 | v2.1 |
+|---------|------|------|
+| Storage | Global (`~/.claude/homunculus/`) | Project-scoped (`${XDG_DATA_HOME:-~/.local/share}/ecc-homunculus/projects/<hash>/`) |
+| Scope | All instincts apply everywhere | Project-scoped + global |
+| Detection | None | git remote URL / repo path |
+| Promotion | N/A | Project → global when seen in 2+ projects |
+| Commands | 4 (status/evolve/export/import) | 6 (+promote/projects) |
+| Cross-project | Contamination risk | Isolated by default |
+
+## What's New in v2 (vs v1)
 
 | Feature | v1 | v2 |
 |---------|----|----|
@@ -16,7 +40,7 @@ An advanced learning system that turns your Claude Code sessions into reusable k
 | Analysis | Main context | Background agent (Haiku) |
 | Granularity | Full skills | Atomic "instincts" |
 | Confidence | None | 0.3-0.9 weighted |
-| Evolution | Direct to skill | Instincts → cluster → skill/command/agent |
+| Evolution | Direct to skill | Instincts -> cluster -> skill/command/agent |
 | Sharing | None | Export/import instincts |
 
 ## The Instinct Model
@@ -30,6 +54,9 @@ trigger: "when writing new functions"
 confidence: 0.7
 domain: "code-style"
 source: "session-observation"
+scope: project
+project_id: "a1b2c3d4e5f6"
+project_name: "my-react-app"
 ---
 
 # Prefer Functional Style
@@ -43,81 +70,94 @@ Use functional patterns over classes when appropriate.
 ```
 
 **Properties:**
-- **Atomic** — one trigger, one action
-- **Confidence-weighted** — 0.3 = tentative, 0.9 = near certain
-- **Domain-tagged** — code-style, testing, git, debugging, workflow, etc.
-- **Evidence-backed** — tracks what observations created it
+- **Atomic** -- one trigger, one action
+- **Confidence-weighted** -- 0.3 = tentative, 0.9 = near certain
+- **Domain-tagged** -- code-style, testing, git, debugging, workflow, etc.
+- **Evidence-backed** -- tracks what observations created it
+- **Scope-aware** -- `project` (default) or `global`
 
 ## How It Works
 
 ```
-Session Activity
-      │
-      │ Hooks capture prompts + tool use (100% reliable)
-      ▼
-┌─────────────────────────────────────────┐
-│         observations.jsonl              │
-│   (prompts, tool calls, outcomes)       │
-└─────────────────────────────────────────┘
-      │
-      │ Observer agent reads (background, Haiku)
-      ▼
-┌─────────────────────────────────────────┐
-│          PATTERN DETECTION              │
-│   • User corrections → instinct         │
-│   • Error resolutions → instinct        │
-│   • Repeated workflows → instinct       │
-└─────────────────────────────────────────┘
-      │
-      │ Creates/updates
-      ▼
-┌─────────────────────────────────────────┐
-│         instincts/personal/             │
-│   • prefer-functional.md (0.7)          │
-│   • always-test-first.md (0.9)          │
-│   • use-zod-validation.md (0.6)         │
-└─────────────────────────────────────────┘
-      │
-      │ /evolve clusters
-      ▼
-┌─────────────────────────────────────────┐
-│              evolved/                   │
-│   • commands/new-feature.md             │
-│   • skills/testing-workflow.md          │
-│   • agents/refactor-specialist.md       │
-└─────────────────────────────────────────┘
+Session Activity (in a git repo)
+      |
+      | Hooks capture prompts + tool use (100% reliable)
+      | + detect project context (git remote / repo path)
+      v
++---------------------------------------------+
+|  projects/<project-hash>/observations.jsonl  |
+|   (prompts, tool calls, outcomes, project)   |
++---------------------------------------------+
+      |
+      | Observer agent reads (background, Haiku)
+      v
++---------------------------------------------+
+|          PATTERN DETECTION                   |
+|   * User corrections -> instinct             |
+|   * Error resolutions -> instinct            |
+|   * Repeated workflows -> instinct           |
+|   * Scope decision: project or global?       |
++---------------------------------------------+
+      |
+      | Creates/updates
+      v
++---------------------------------------------+
+|  projects/<project-hash>/instincts/personal/ |
+|   * prefer-functional.yaml (0.7) [project]   |
+|   * use-react-hooks.yaml (0.9) [project]     |
++---------------------------------------------+
+|  instincts/personal/  (GLOBAL)               |
+|   * always-validate-input.yaml (0.85) [global]|
+|   * grep-before-edit.yaml (0.6) [global]     |
++---------------------------------------------+
+      |
+      | /evolve clusters + /promote
+      v
++---------------------------------------------+
+|  projects/<hash>/evolved/ (project-scoped)   |
+|  evolved/ (global)                           |
+|   * commands/new-feature.md                  |
+|   * skills/testing-workflow.md               |
+|   * agents/refactor-specialist.md            |
++---------------------------------------------+
+```
+
+## Project Detection
+
+The system automatically detects your current project:
+
+1. **`CLAUDE_PROJECT_DIR` env var** (highest priority)
+2. **`git remote get-url origin`** -- hashed to create a portable project ID (same repo on different machines gets the same ID)
+3. **`git rev-parse --show-toplevel`** -- fallback using repo path (machine-specific)
+4. **Global fallback** -- if no project is detected, instincts go to global scope
+
+Each project gets a 12-character hash ID (e.g., `a1b2c3d4e5f6`). A registry file at `${XDG_DATA_HOME:-~/.local/share}/ecc-homunculus/projects.json` maps IDs to human-readable names.
+
+### Data Directory
+
+Continuous-learning stores observer data outside `~/.claude` so Claude Code's sensitive-path guard does not block background instinct writes:
+
+1. `CLV2_HOMUNCULUS_DIR` when set to an absolute path
+2. `$XDG_DATA_HOME/ecc-homunculus`
+3. `$HOME/.local/share/ecc-homunculus`
+
+Existing users with data at `~/.claude/homunculus` can migrate once:
+
+```bash
+bash skills/continuous-learning/scripts/migrate-homunculus.sh
 ```
 
 ## Quick Start
 
 ### 1. Enable Observation Hooks
 
-Add to your `~/.claude/settings.json`.
-
 **If installed as a plugin** (recommended):
 
-```json
-{
-  "hooks": {
-    "PreToolUse": [{
-      "matcher": "*",
-      "hooks": [{
-        "type": "command",
-        "command": "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/hooks/observe.sh pre"
-      }]
-    }],
-    "PostToolUse": [{
-      "matcher": "*",
-      "hooks": [{
-        "type": "command",
-        "command": "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/hooks/observe.sh post"
-      }]
-    }]
-  }
-}
-```
+No extra `settings.json` hook block is required. Claude Code v2.1+ auto-loads the plugin `hooks/hooks.json`, and `observe.sh` is already registered there.
 
-**If installed manually** to `~/.claude/skills`:
+If you previously copied `observe.sh` into `~/.claude/settings.json`, remove that duplicate `PreToolUse` / `PostToolUse` block. Duplicating the plugin hook causes double execution and `${CLAUDE_PLUGIN_ROOT}` resolution errors because that variable is only available inside plugin-managed `hooks/hooks.json` entries.
+
+**If installed manually** to `~/.claude/skills`, add this to your `~/.claude/settings.json`:
 
 ```json
 {
@@ -126,14 +166,14 @@ Add to your `~/.claude/settings.json`.
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "~/.claude/skills/continuous-learning-v2/hooks/observe.sh pre"
+        "command": "~/.claude/skills/continuous-learning/hooks/observe.sh"
       }]
     }],
     "PostToolUse": [{
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "~/.claude/skills/continuous-learning-v2/hooks/observe.sh post"
+        "command": "~/.claude/skills/continuous-learning/hooks/observe.sh"
       }]
     }]
   }
@@ -142,92 +182,125 @@ Add to your `~/.claude/settings.json`.
 
 ### 2. Initialize Directory Structure
 
-The Python CLI will create these automatically, but you can also create them manually:
+The system creates directories automatically on first use, but you can also create them manually:
 
 ```bash
-mkdir -p ~/.claude/homunculus/{instincts/{personal,inherited},evolved/{agents,skills,commands}}
-touch ~/.claude/homunculus/observations.jsonl
+# Global directories
+mkdir -p "${XDG_DATA_HOME:-$HOME/.local/share}/ecc-homunculus"/{instincts/{personal,inherited},evolved/{agents,skills,commands},projects}
+
+# Project directories are auto-created when the hook first runs in a git repo
 ```
 
 ### 3. Use the Instinct Commands
 
 ```bash
-/instinct-status     # Show learned instincts with confidence scores
+/instinct-status     # Show learned instincts (project + global)
 /evolve              # Cluster related instincts into skills/commands
-/instinct-export     # Export instincts for sharing
+/instinct-export     # Export instincts to file
 /instinct-import     # Import instincts from others
+/promote             # Promote project instincts to global scope
+/projects            # List all known projects and their instinct counts
 ```
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `/instinct-status` | Show all learned instincts with confidence |
-| `/evolve` | Cluster related instincts into skills/commands |
-| `/instinct-export` | Export instincts for sharing |
-| `/instinct-import <file>` | Import instincts from others |
+| `/instinct-status` | Show all instincts (project-scoped + global) with confidence |
+| `/evolve` | Cluster related instincts into skills/commands, suggest promotions |
+| `/instinct-export` | Export instincts (filterable by scope/domain) |
+| `/instinct-import <file>` | Import instincts with scope control |
+| `/promote [id]` | Promote project instincts to global scope |
+| `/projects` | List all known projects and their instinct counts |
 
 ## Configuration
 
-Edit `config.json`:
+Edit `config.json` to control the background observer:
 
 ```json
 {
-  "version": "2.0",
-  "observation": {
-    "enabled": true,
-    "store_path": "~/.claude/homunculus/observations.jsonl",
-    "max_file_size_mb": 10,
-    "archive_after_days": 7
-  },
-  "instincts": {
-    "personal_path": "~/.claude/homunculus/instincts/personal/",
-    "inherited_path": "~/.claude/homunculus/instincts/inherited/",
-    "min_confidence": 0.3,
-    "auto_approve_threshold": 0.7,
-    "confidence_decay_rate": 0.05
-  },
+  "version": "2.1",
   "observer": {
-    "enabled": true,
-    "model": "haiku",
+    "enabled": false,
     "run_interval_minutes": 5,
-    "patterns_to_detect": [
-      "user_corrections",
-      "error_resolutions",
-      "repeated_workflows",
-      "tool_preferences"
-    ]
-  },
-  "evolution": {
-    "cluster_threshold": 3,
-    "evolved_path": "~/.claude/homunculus/evolved/"
+    "min_observations_to_analyze": 20
   }
 }
 ```
 
+| Key | Default | Description |
+|-----|---------|-------------|
+| `observer.enabled` | `false` | Enable the background observer agent |
+| `observer.run_interval_minutes` | `5` | How often the observer analyzes observations |
+| `observer.min_observations_to_analyze` | `20` | Minimum observations before analysis runs |
+
+Other behavior (observation capture, instinct thresholds, project scoping, promotion criteria) is configured via code defaults in `instinct-cli.py` and `observe.sh`.
+
 ## File Structure
 
 ```
-~/.claude/homunculus/
-├── identity.json           # Your profile, technical level
-├── observations.jsonl      # Current session observations
-├── observations.archive/   # Processed observations
-├── instincts/
-│   ├── personal/           # Auto-learned instincts
-│   └── inherited/          # Imported from others
-└── evolved/
-    ├── agents/             # Generated specialist agents
-    ├── skills/             # Generated skills
-    └── commands/           # Generated commands
+${XDG_DATA_HOME:-~/.local/share}/ecc-homunculus/
++-- identity.json           # Your profile, technical level
++-- projects.json           # Registry: project hash -> name/path/remote
++-- observations.jsonl      # Global observations (fallback)
++-- instincts/
+|   +-- personal/           # Global auto-learned instincts
+|   +-- inherited/          # Global imported instincts
++-- evolved/
+|   +-- agents/             # Global generated agents
+|   +-- skills/             # Global generated skills
+|   +-- commands/           # Global generated commands
++-- projects/
+    +-- a1b2c3d4e5f6/       # Project hash (from git remote URL)
+    |   +-- project.json    # Per-project metadata mirror (id/name/root/remote)
+    |   +-- observations.jsonl
+    |   +-- observations.archive/
+    |   +-- instincts/
+    |   |   +-- personal/   # Project-specific auto-learned
+    |   |   +-- inherited/  # Project-specific imported
+    |   +-- evolved/
+    |       +-- skills/
+    |       +-- commands/
+    |       +-- agents/
+    +-- f6e5d4c3b2a1/       # Another project
+        +-- ...
 ```
 
-## Integration with Skill Creator
+## Scope Decision Guide
 
-When you use the [Skill Creator GitHub App](https://skill-creator.app), it now generates **both**:
-- Traditional SKILL.md files (for backward compatibility)
-- Instinct collections (for v2 learning system)
+| Pattern Type | Scope | Examples |
+|-------------|-------|---------|
+| Language/framework conventions | **project** | "Use React hooks", "Follow Django REST patterns" |
+| File structure preferences | **project** | "Tests in `__tests__`/", "Components in src/components/" |
+| Code style | **project** | "Use functional style", "Prefer dataclasses" |
+| Error handling strategies | **project** | "Use Result type for errors" |
+| Security practices | **global** | "Validate user input", "Sanitize SQL" |
+| General best practices | **global** | "Write tests first", "Always handle errors" |
+| Tool workflow preferences | **global** | "Grep before Edit", "Read before Write" |
+| Git practices | **global** | "Conventional commits", "Small focused commits" |
 
-Instincts from repo analysis have `source: "repo-analysis"` and include the source repository URL.
+## Instinct Promotion (Project -> Global)
+
+When the same instinct appears in multiple projects with high confidence, it's a candidate for promotion to global scope.
+
+**Auto-promotion criteria:**
+- Same instinct ID in 2+ projects
+- Average confidence >= 0.8
+
+**How to promote:**
+
+```bash
+# Promote a specific instinct
+python3 instinct-cli.py promote prefer-explicit-errors
+
+# Auto-promote all qualifying instincts
+python3 instinct-cli.py promote
+
+# Preview without changes
+python3 instinct-cli.py promote --dry-run
+```
+
+The `/evolve` command also suggests promotion candidates.
 
 ## Confidence Scoring
 
@@ -252,7 +325,7 @@ Confidence evolves over time:
 
 ## Why Hooks vs Skills for Observation?
 
-> "v1 relied on skills to observe. Skills are probabilistic—they fire ~50-80% of the time based on Claude's judgment."
+> "v1 relied on skills to observe. Skills are probabilistic -- they fire ~50-80% of the time based on Claude's judgment."
 
 Hooks fire **100% of the time**, deterministically. This means:
 - Every tool call is observed
@@ -261,24 +334,26 @@ Hooks fire **100% of the time**, deterministically. This means:
 
 ## Backward Compatibility
 
-v2 is fully compatible with v1:
-- Existing `~/.claude/skills/learned/` skills still work
+v2.1 is fully compatible with v2.0 and v1:
+- Existing global instincts can be migrated from `~/.claude/homunculus/instincts/` with `scripts/migrate-homunculus.sh`
+- Existing `~/.claude/skills/learned/` skills from v1 still work
 - Stop hook still runs (but now also feeds into v2)
-- Gradual migration path: run both in parallel
+- Gradual migration: run both in parallel
 
 ## Privacy
 
 - Observations stay **local** on your machine
-- Only **instincts** (patterns) can be exported
+- Project-scoped instincts are isolated per project
+- Only **instincts** (patterns) can be exported — not raw observations
 - No actual code or conversation content is shared
-- You control what gets exported
+- You control what gets exported and promoted
 
 ## Related
 
-- [Skill Creator](https://skill-creator.app) - Generate instincts from repo history
+- [ECC-Tools GitHub App](https://github.com/apps/ecc-tools) - Generate instincts from repo history
 - Homunculus - Community project that inspired the v2 instinct-based architecture (atomic observations, confidence scoring, instinct evolution pipeline)
 - [The Longform Guide](https://x.com/affaanmustafa/status/2014040193557471352) - Continuous learning section
 
 ---
 
-*Instinct-based learning: teaching Claude your patterns, one observation at a time.*
+*Instinct-based learning: teaching Claude your patterns, one project at a time.*
