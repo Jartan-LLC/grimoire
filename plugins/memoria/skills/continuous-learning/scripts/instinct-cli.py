@@ -418,6 +418,7 @@ def _update_registry(pid: str, pname: str, proot: str, premote: str) -> None:
             registry = {}
 
         registry[pid] = {
+            "id": pid,
             "name": pname,
             "root": proot,
             "remote": premote,
@@ -588,6 +589,8 @@ def _project_counts(project_id: str) -> dict:
 def _remove_project_storage(project_id: str) -> None:
     project_dir = PROJECTS_DIR / project_id
     if project_dir.exists():
+        if not project_dir.resolve().is_relative_to(PROJECTS_DIR.resolve()):
+            raise ValueError(f"Refusing to remove path outside projects dir: {project_dir}")
         shutil.rmtree(project_dir)
 
 

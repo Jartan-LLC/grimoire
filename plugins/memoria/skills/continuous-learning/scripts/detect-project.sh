@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Originally from everything-claude-code by Affaan Mustafa (https://github.com/affaan-m/everything-claude-code)
 # Continuous Learning v2 - Project Detection Helper
 #
