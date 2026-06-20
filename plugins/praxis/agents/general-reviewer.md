@@ -6,7 +6,7 @@ model: sonnet
 color: blue
 permissionMode: plan
 skills:
-  - github-conventions
+  - gitwise:github-conventions
 ---
 
 You are a senior code reviewer focusing on general quality and adherence to project standards.

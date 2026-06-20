@@ -7,10 +7,10 @@ Complete development workflow — from issue to shipped PR. Includes issue plann
 ```
 /plugin marketplace add Jartan-LLC/grimoire
 /plugin install praxis
-/plugin install github-conventions
+/plugin install gitwise
 ```
 
-Praxis requires the `github-conventions` plugin for commit format, branch naming, and PR conventions.
+Praxis requires the `gitwise` plugin for commit format, branch naming, and PR conventions.
 
 ## What's Included
 

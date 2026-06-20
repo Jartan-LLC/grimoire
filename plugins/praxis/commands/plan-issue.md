@@ -36,7 +36,7 @@ Before creating the plan, think through:
 - **Simplicity** — Don't over-engineer, but don't paint yourself into a corner either.
 
 ### 6. Create Plan
-Write a plan in `.claude/workspace/` following the format in the `github-conventions` skill (see `plan-format.md`).
+Write a plan in `.claude/workspace/` following the format in the `gitwise:github-conventions` skill (see `plan-format.md`).
 
 ### 7. Post Plan
 ```bash

@@ -5,7 +5,7 @@ tools: Glob, Grep, Read, Bash
 model: opus
 color: green
 skills:
-  - github-conventions
+  - gitwise:github-conventions
 ---
 
 You are an expert software architect specializing in planning implementations.
@@ -43,4 +43,4 @@ Analyze issue requirements, understand existing patterns, and design decisive im
 
 ## Output Format
 
-Follow the plan format from the `github-conventions` skill (see `plan-format.md`). Be specific and actionable — file paths, function names, concrete steps.
+Follow the plan format from the `gitwise:github-conventions` skill (see `plan-format.md`). Be specific and actionable — file paths, function names, concrete steps.
