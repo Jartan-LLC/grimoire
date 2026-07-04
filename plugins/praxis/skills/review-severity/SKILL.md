@@ -101,6 +101,15 @@ findings (block if >= Critical) and routes suspected-severe to a non-blocking fl
 channel. Folding confidence into severity -- or emitting severity with no status field --
 collapses the gate and is forbidden.
 
+### Knowledge-cutoff blind spot
+
+A finding that hinges on a post-cutoff fact -- a version you think doesn't exist or is newer
+than you know (Sphinx `9.1.0` when you last knew `9.0.0`), a missing API, a deprecation, any
+"latest is X" claim -- is a blind spot, never *confirmed* from memory. Presume a
+newer-than-known version is real until a live source says otherwise: verify against a registry
+(`pip index versions <pkg>`), changelog, or docs before asserting; if you can't, mark it
+`suspected`.
+
 ## No "Optimization" tier
 
 "Optimize" maps to no directive a generator can act on (block / fix-or-log / polish). Every

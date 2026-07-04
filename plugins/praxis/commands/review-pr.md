@@ -28,7 +28,7 @@ Launch relevant reviewer agents based on changed files:
 If code changed public behavior, `doc-reviewer` must run -- it owns doc-code mismatch.
 
 ### 4. Post Review
-Post the review as a PR comment following `review-format.md` in the `gitwise:github-conventions` skill:
+Reviewers have no web access, so verify each `suspected` post-cutoff finding against a live source and confirm or drop it. Then post the review as a PR comment following `review-format.md` in the `gitwise:github-conventions` skill:
 
 ```bash
 gh pr comment <pr-number> --body "<review comment>"
