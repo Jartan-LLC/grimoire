@@ -51,14 +51,13 @@ A Claude Code plugin marketplace. Each plugin lives in `plugins/<name>/` with a
 There is no build system. Before declaring work done, confirm:
 
 ```bash
-# 1. Pure ASCII -- must print nothing
-git grep -lP '[^\x00-\x7F]' -- '*.md' '*.json' '*.js' '*.sh'
+# Pure ASCII -- must print nothing
+git grep -lP '[^\x00-\x7F]'
 
-# 2. JSON parses and versions are in lockstep
+# JSON parses
 python3 -c "import json,glob; [json.load(open(f)) for f in glob.glob('**/*.json', recursive=True)]"
-
-# 3. Each skill/agent frontmatter `name` matches its directory
 ```
 
-Then confirm any plugin with changed content under `plugins/<name>/` has a bumped
-`version` in both `plugin.json` and its `marketplace.json` entry.
+Then confirm by inspection: each skill/agent frontmatter `name` matches its directory, and
+any plugin with changed content under `plugins/<name>/` has a bumped `version` in both
+`plugin.json` and its `marketplace.json` entry (kept in lockstep).
