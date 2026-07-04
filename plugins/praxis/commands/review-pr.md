@@ -20,12 +20,12 @@ gh pr diff <pr-number>
 Launch relevant reviewer agents based on changed files:
 - Backend changes -> `backend-reviewer`
 - Frontend changes -> `frontend-reviewer`
-- Documentation changes -> `doc-reviewer`
+- Documentation changes, or code that changes public behavior -> `doc-reviewer`
 - CI/test changes -> `test-reviewer`
 - All changes -> `general-reviewer`
 
 ### 3. Verify Documentation
-If feature code changed, check that relevant docs were updated.
+If code changed public behavior, `doc-reviewer` must run -- it owns doc-code mismatch.
 
 ### 4. Post Review
 Post the review as a PR comment following `review-format.md` in the `gitwise:github-conventions` skill:
