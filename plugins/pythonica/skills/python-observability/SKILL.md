@@ -203,6 +203,54 @@ async def call_downstream_service(endpoint: str, data: dict) -> dict:
         return response.json()
 ```
 
+### Pattern 5: Deferred Log Message Formatting
+
+Never render an f-string inside a log call. Pass the message template and its values as separate arguments so formatting is *deferred* — it happens only if the record's level is actually enabled. This is one principle with two mechanisms, depending on the logger.
+
+**Stdlib `logging`** — pass `%s` args positionally and let the logger interpolate:
+
+```python
+import logging
+
+stdlib_logger = logging.getLogger(__name__)
+
+# GOOD: interpolated by the logger, and only if the level is enabled
+stdlib_logger.info("user=%s processed orders=%s", user_id, order_count)
+
+# BAD: the f-string renders eagerly at the call site, every time
+stdlib_logger.info(f"user={user_id} processed orders={order_count}")
+
+# BAD: the % operator pre-formats before the logger sees it — still eager
+stdlib_logger.info("user=%s processed orders=%s" % (user_id, order_count))
+```
+
+When the level is disabled, the deferred form costs nothing: `Logger.isEnabledFor` short-circuits before `LogRecord.getMessage` ever interpolates the message. An f-string (or `%` / `str.format` / `+` pre-formatting) pays that cost unconditionally, even for records that are filtered out.
+
+**Structlog** — the kwargs form used throughout this skill *is* the deferred equivalent; the event string is a constant and the values stay structured, so nothing renders eagerly:
+
+```python
+logger = structlog.get_logger()
+
+# GOOD: constant event, structured values — nothing rendered at the call site
+logger.info("orders processed", user_id=user_id, order_count=order_count)
+```
+
+Note: `%s` args are *not* the structlog form here. This skill's processor chain (Pattern 1) omits `PositionalArgumentsFormatter`, so `logger.info("user=%s", user_id)` on the structlog logger would emit the literal `user=%s` with the value stashed under `positional_args`, not an interpolated message. Use kwargs with structlog; use `%s` args with stdlib `logging`.
+
+Ruff enforces this mandate via the `flake8-logging-format` (`G`) rules: `G004` flags f-strings in log calls, and `G001`/`G002`/`G003` flag `str.format`, `%`, and `+` pre-formatting. Only the deferred-args (stdlib) or kwargs (structlog) form passes.
+
+For exceptions, keep the deferred style and let logging attach the traceback instead of f-stringing it into the message:
+
+```python
+try:
+    save(record)
+except OSError:
+    # logger.exception is logger.error(..., exc_info=True): both attach the
+    # traceback; the message still uses deferred %s args, never an f-string
+    stdlib_logger.exception("save failed, record_id=%s", record.id)
+    raise
+```
+
 ## Detailed worked examples and patterns
 
 Detailed sections (starting with `## Advanced Patterns`) live in `references/details.md`. Read that file when the navigation summary above is insufficient.
@@ -219,3 +267,4 @@ Detailed sections (starting with `## Advanced Patterns`) live in `references/det
 8. **Separate concerns** - Observability code shouldn't pollute business logic
 9. **Test your observability** - Verify logs and metrics in integration tests
 10. **Set up alerts** - Metrics are useless without alerting
+11. **Defer log formatting** - Pass `%s` args (stdlib) or kwargs (structlog); never f-string a log message (ruff `G004`)

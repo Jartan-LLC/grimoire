@@ -61,6 +61,7 @@ select = [
     "I",    # isort
     "B",    # flake8-bugbear
     "C4",   # flake8-comprehensions
+    "G",    # flake8-logging-format
     "UP",   # pyupgrade
     "SIM",  # flake8-simplify
 ]
