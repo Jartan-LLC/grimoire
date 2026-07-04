@@ -83,10 +83,16 @@ tags above:
 }
 ```
 
-The grimoire plugins have no hard runtime dependencies on one another today, so
-none are declared. Add a `dependencies` entry only for a real requirement — it
-makes Claude Code auto-install the dependency — and keep its constraint pinned to
-a tested range. See the upstream
+`praxis` declares `gitwise` (`^1.0.0`): its reviewer and planner agents load the
+`gitwise:github-conventions` skill, so `gitwise` must be present for them to
+resolve. Declaring it makes Claude Code auto-install `gitwise` alongside
+`praxis`. Add a `dependencies` entry only for a real requirement like this, and
+keep its constraint pinned to a tested range.
+
+Because constraints resolve against the `{plugin-name}--v{version}` tags above, a
+dependency must be tagged **before or with** the plugin that requires it — tag
+`gitwise` before shipping a `praxis` release that depends on it, or the resolver
+has no version to match. See the upstream
 [dependency guide](https://code.claude.com/docs/en/plugin-dependencies) for
 cross-marketplace rules and conflict resolution.
 

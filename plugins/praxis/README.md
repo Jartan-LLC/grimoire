@@ -7,10 +7,11 @@ Complete development workflow — from issue to shipped PR. Includes issue plann
 ```
 /plugin marketplace add Jartan-LLC/grimoire
 /plugin install praxis
-/plugin install gitwise
 ```
 
-Praxis requires the `gitwise` plugin for commit format, branch naming, and PR conventions.
+Praxis requires the `gitwise` plugin for commit format, branch naming, and PR
+conventions, and declares it as a dependency — Claude Code installs `gitwise`
+automatically. To install it explicitly, run `/plugin install gitwise`.
 
 ## What's Included
 
