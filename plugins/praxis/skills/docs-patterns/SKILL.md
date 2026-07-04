@@ -65,7 +65,7 @@ Both trace to one source: **docstrings + type annotations**. The "use it" doc na
 | Nav / table-of-contents completeness | Orphan and unlisted pages nothing links to |
 | Cross-reference check | Broken reference-style pointers to renamed or removed targets |
 
-Language toolchain that implements these bars (strict build, link and snippet checks, API docs generated from docstrings): see the pythonica API-docs guidance — issue #23.
+Language toolchain that implements these bars (strict build, link and snippet checks, API docs generated from docstrings): see `pythonica:python-api-docs`.
 
 ## Conventions
 

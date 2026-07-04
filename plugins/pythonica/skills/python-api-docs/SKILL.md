@@ -203,7 +203,7 @@ def slugify(text: str) -> str:
 sphinx-build -b doctest docs docs/_build/doctest   # 'hello-world' must match, or the build fails
 ```
 
-Default doctest flags include `ELLIPSIS`, so `>>> obj  # doctest: +ELLIPSIS` with `<... object at 0x...>` works for unstable output.
+Sphinx's doctest defaults include `ELLIPSIS`, so `...` already matches unstable output like `<object at 0x...>` — no per-example `# doctest: +ELLIPSIS` directive needed (add a directive only to override a flag for one block).
 
 ### Pattern 6: Gate the docs build in CI
 

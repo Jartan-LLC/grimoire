@@ -5,11 +5,14 @@
 # Enforces two rules for every plugin under plugins/<name>/ in the range being
 # pushed:
 #
-#   1. Bump rule. If any tracked content under a plugin changed, its
-#      plugin.json "version" must differ from the pushed base. Content changes
-#      without a version bump leave users on a stale, version-stamped cache.
+#   1. Bump rule. If a plugin's tracked content differs from main, its
+#      plugin.json "version" must also differ from main — so one bump per branch
+#      covers all its iterative pushes. Content changes without a version bump
+#      leave users on a stale, version-stamped cache.
 #   2. Lockstep rule. A plugin's plugin.json "version" must equal the "version"
-#      in its .claude-plugin/marketplace.json entry.
+#      in its .claude-plugin/marketplace.json entry. Checked repo-wide for every
+#      versioned plugin at the tip (not only changed ones), so any pre-existing
+#      drift blocks the push until it is fixed.
 #
 # A plugin with no "version" field (commit-SHA versioning, e.g. a plugin that
 # opts out) is tolerated: both rules are skipped for it with a warning.
@@ -112,19 +115,19 @@ check_range() {
 }
 
 # git feeds one line per ref on stdin: <local ref> <local sha> <remote ref> <remote sha>
-while read -r _local_ref local_sha _remote_ref remote_sha; do
+while read -r _local_ref local_sha _remote_ref _remote_sha; do
   # Skip branch/tag deletions (nothing to validate).
   [ "$local_sha" = "$ZERO_SHA" ] && continue
 
-  if [ "$remote_sha" != "$ZERO_SHA" ]; then
-    # Updating an existing remote ref: diff against what the remote has.
-    base="$remote_sha"
-  elif base="$(git rev-parse -q --verify origin/main 2>/dev/null)"; then
-    # New remote ref: fall back to origin/main as the baseline.
-    :
+  # Baseline the bump rule against main (the release line), not the last push,
+  # so a single version bump per branch covers all of its iterative pushes. Use
+  # the merge-base so an advancing main never spuriously flags a plugin this
+  # branch did not touch.
+  if main_sha="$(git rev-parse -q --verify origin/main 2>/dev/null)"; then
+    base="$(git merge-base "$main_sha" "$local_sha" 2>/dev/null || printf '%s' "$main_sha")"
   else
-    # No baseline available (e.g. first push): compare against the empty tree,
-    # so newly added plugin.json files register as a version change and pass.
+    # No main to compare against (e.g. the very first push): use the empty tree,
+    # so newly added versioned plugins register as a change and pass.
     base="$(git hash-object -t tree /dev/null)"
   fi
 

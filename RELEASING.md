@@ -26,6 +26,11 @@ hooks, README), bump both:
 - **MINOR** (`1.0.0` → `1.1.0`) — new skills/agents/commands, backward-compatible additions
 - **MAJOR** (`1.0.0` → `2.0.0`) — breaking changes to existing behaviour or invocation
 
+Editing only a plugin's `marketplace.json` metadata — its `description` or
+`keywords` — is **not** a bump trigger: those fields sit outside `plugins/<name>/`,
+the only path the bump rule watches. (The entry's `version` still must match
+`plugin.json` — see lockstep below.)
+
 The [pre-push hook](#pre-push-hook) enforces both the bump and the two files
 staying in lockstep.
 
@@ -56,11 +61,15 @@ dependency version constraints resolve against (see [Dependencies](#dependencies
 
 ## Pre-push hook
 
-`.githooks/pre-push` blocks a push that changes a plugin's content without a
-version bump and rejects any `plugin.json` ↔ `marketplace.json` version
-mismatch. A plugin with no `version` field is tolerated (its checks are skipped
-with a warning), so opting a plugin out of explicit versioning does not break
-the hook.
+`.githooks/pre-push` blocks a push that changes a plugin's content (relative to
+`main`) without a version bump, and rejects any `plugin.json` ↔
+`marketplace.json` version mismatch. The bump rule baselines against `main`, so
+**one** bump per branch covers all of its iterative pushes — no need to re-bump on
+every push. The lockstep check runs across **every** versioned plugin on each push
+(not only the ones you changed), so pre-existing version drift anywhere must be
+fixed before any push succeeds. A plugin with no `version` field is tolerated (its
+checks are skipped with a warning), so opting a plugin out of explicit versioning
+does not break the hook.
 
 Enable it once per clone:
 
