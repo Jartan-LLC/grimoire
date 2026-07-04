@@ -10,6 +10,7 @@
   "plugins": [
     {
       "name": "claudivis",
+      "version": "1.0.0",
       "source": "./plugins/claudivis",
       "description": "The key to Claude Code configuration — how agents, skills, and commands work together",
       "author": {
@@ -22,6 +23,7 @@
     },
     {
       "name": "gitwise",
+      "version": "1.0.0",
       "source": "./plugins/gitwise",
       "description": "GitHub conventions — branch naming, commit format, issue/PR templates, and safe issue/PR referencing",
       "author": {
@@ -33,19 +35,8 @@
       "keywords": ["github", "conventions", "commits", "branches"]
     },
     {
-      "name": "memoria",
-      "source": "./plugins/memoria",
-      "description": "Session memory and continuous learning — cross-session context, pattern extraction, instinct-based learning",
-      "author": {
-        "name": "Jartan LLC",
-        "url": "https://github.com/Jartan-LLC"
-      },
-      "license": "MIT",
-      "category": "productivity",
-      "keywords": ["session", "memory", "learning", "instincts", "patterns"]
-    },
-    {
       "name": "praxis",
+      "version": "1.0.0",
       "source": "./plugins/praxis",
       "description": "Development workflow — issue planning, implementation, PR creation, code review with specialized reviewers, and project conventions",
       "author": {
@@ -58,6 +49,7 @@
     },
     {
       "name": "pythonica",
+      "version": "1.0.0",
       "source": "./plugins/pythonica",
       "description": "Comprehensive Python development — patterns, testing, async, error handling, packaging, configuration, type safety, resilience, observability, Pydantic, and more",
       "author": {
@@ -70,6 +62,7 @@
     },
     {
       "name": "recursio",
+      "version": "1.0.0",
       "source": "./plugins/recursio",
       "description": "Recursive multi-agent development system with TDD — decomposes projects into waves of parallel nested subagents",
       "author": {

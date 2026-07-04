@@ -20,10 +20,23 @@ Then browse and install plugins:
 |--------|-------------|
 | [claudivis](plugins/claudivis/) | The key to Claude Code configuration — how agents, skills, and commands work together |
 | [gitwise](plugins/gitwise/) | GitHub conventions — branch naming, commit format, issue/PR templates, and safe issue/PR referencing |
-| [memoria](plugins/memoria/) | Session memory and continuous learning — cross-session context, pattern extraction, instinct-based learning |
 | [praxis](plugins/praxis/) | Development workflow — issue planning, implementation, PR creation, code review with specialized reviewers, and project conventions |
 | [pythonica](plugins/pythonica/) | Comprehensive Python development — patterns, testing, async, error handling, packaging, configuration, type safety, resilience, observability, Pydantic, and more |
 | [recursio](plugins/recursio/) | Recursive multi-agent development system with TDD — decomposes projects into waves of parallel nested subagents |
+
+## Versioning & Releases
+
+Each plugin is versioned with [semantic versioning](https://semver.org) in both
+its `.claude-plugin/plugin.json` and its `.claude-plugin/marketplace.json` entry,
+and released with a `{plugin-name}--v{version}` git tag. Any change to a plugin's
+content needs a version bump in both files. A pre-push hook enforces this — enable
+it once per clone:
+
+```
+git config core.hooksPath .githooks
+```
+
+See [RELEASING.md](RELEASING.md) for the full workflow and tag convention.
 
 ## Contributing
 
