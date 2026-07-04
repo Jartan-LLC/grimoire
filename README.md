@@ -29,11 +29,7 @@ Then browse and install plugins:
 Each plugin uses [semantic versioning](https://semver.org), with its version in
 both `.claude-plugin/plugin.json` and its `.claude-plugin/marketplace.json` entry,
 and is released with a `{plugin-name}--v{version}` git tag. Any content change needs
-a version bump in both files, enforced by a pre-push hook — enable it once per clone:
-
-```
-git config core.hooksPath .githooks
-```
+a version bump in both files, kept in lockstep.
 
 See [RELEASING.md](RELEASING.md) for the full workflow and tag convention.
 

@@ -31,8 +31,8 @@ is **not** a bump trigger — those fields sit outside `plugins/<name>/`, the on
 path the bump rule watches. (The entry's `version` still must match `plugin.json`
 — see lockstep below.)
 
-The [pre-push hook](#pre-push-hook) enforces both the bump and the two files
-staying in lockstep.
+Keep the bump and the two files in lockstep; both are enforced by review (see
+[Enforcement](#enforcement)).
 
 ## Tag a release
 
@@ -59,28 +59,12 @@ git push origin <name>--v<version>
 These tags give each plugin an independent version line and are what dependency
 constraints resolve against (see [Dependencies](#dependencies)).
 
-## Pre-push hook
+## Enforcement
 
-`.githooks/pre-push` blocks a push that changes a plugin's content (relative to
-`main`) without a version bump, and rejects any `plugin.json` ↔
-`marketplace.json` version mismatch. The bump rule baselines against `main`, so
-**one** bump per branch covers all its iterative pushes. The lockstep check runs
-across **every** versioned plugin on each push (not only the ones you changed),
-so pre-existing version drift anywhere must be fixed before any push succeeds. A
-plugin with no `version` field is tolerated (checks skipped with a warning), so
-opting out of explicit versioning does not break the hook.
-
-Enable it once per clone:
-
-```bash
-git config core.hooksPath .githooks
-chmod +x .githooks/pre-push   # git tracks the +x bit; set it if your clone lost it
-```
-
-The hook reads JSON with `python3`. Without `python3` it fails **open** — warns
-and lets the push through rather than blocking — so treat it as a guard, not a
-guarantee; CI or review is the backstop. Bypass in an emergency with `git push
---no-verify`.
+There's no automated gate today — version discipline is enforced by **PR review**.
+Before merging, confirm any plugin with changed content under `plugins/<name>/`
+has a bumped `version`, and that its `plugin.json` and `marketplace.json` entry
+agree. (A CI check could automate this later.)
 
 ## Dependencies
 
