@@ -29,7 +29,7 @@ Use these as guidance — not an exhaustive checklist.
 
 ### CRITICAL — Must fix
 - Factually incorrect information (doesn't match what the code actually does)
-- Broken cross-references (links to docs that don't exist)
+- Broken cross-references and dead external links — internal links, reference-style pointers, or URLs to targets that don't exist. Confirm a link check runs in CI and flag obviously-dead targets on read (you read and grep — you don't fetch URLs or run a build)
 - Code examples that won't work
 
 ### HIGH — Should fix
@@ -37,11 +37,16 @@ Use these as guidance — not an exhaustive checklist.
 - Redundancy — repeating information already documented elsewhere instead of linking
 - Missing critical information that comparable docs include
 - Structure inconsistent with similar docs in the same category
+- Doc-type fit — the doc's shape matches its Diátaxis type (a how-to written as reference, a tutorial that's really explanation)
+- Two-audience fit — right register for its audience (use-it vs navigate/change-it), with claims tracing to docstrings/types rather than restating them
+- Heading hierarchy — no skipped levels (e.g. H1 jumping to H3); headings stable and predictable
+- Nav / table-of-contents completeness — no orphan or unlisted pages (compare doc files against the index/nav file)
 
 ### MEDIUM — Consider fixing
 - Verbose prose where a table or code example would be clearer
 - Missing code examples where they would clarify usage
 - Overly detailed explanations of obvious concepts
+- Strict-build gate — confirm CI runs a strict docs build (warnings → errors) plus snippet and link checks. Gate-existence check: verify the gate exists; you don't run the build
 
 ### Optimization Opportunities
 - Sections that could be consolidated or merged
