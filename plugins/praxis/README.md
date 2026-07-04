@@ -40,6 +40,7 @@ automatically. To install it explicitly, run `/plugin install gitwise`.
 - **docs-patterns** — writing style, structure, brevity
 - **frontend-patterns** — design tokens, mobile-first, component isolation
 - **logging-patterns** — log levels, formatting, structured output
+- **review-severity** — Critical/Important/Minor by consequence-if-shipped
 - **testing-patterns** — integration tests, fixture composition, canary markers
 
 ## Workflow
