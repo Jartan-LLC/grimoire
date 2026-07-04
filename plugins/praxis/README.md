@@ -16,12 +16,12 @@ Praxis requires the `gitwise` plugin for commit format, branch naming, and PR co
 
 ### Commands
 
-- `/plan-issue` — analyze a GitHub issue and create an implementation plan
-- `/implement-issue` — implement a GitHub issue, optionally from an existing plan
-- `/create-issue` — create a GitHub issue using the appropriate template
-- `/create-pr` — create a pull request for implemented changes
-- `/review-pr` — review a pull request using specialized reviewer agents
-- `/address-review` — work through review findings on a PR one at a time
+- `/praxis:plan-issue` — analyze a GitHub issue and create an implementation plan
+- `/praxis:implement-issue` — implement a GitHub issue, optionally from an existing plan
+- `/praxis:create-issue` — create a GitHub issue using the appropriate template
+- `/praxis:create-pr` — create a pull request for implemented changes
+- `/praxis:review-pr` — review a pull request using specialized reviewer agents
+- `/praxis:address-review` — work through review findings on a PR one at a time
 
 ### Agents
 
@@ -35,6 +35,7 @@ Praxis requires the `gitwise` plugin for commit format, branch naming, and PR co
 ### Skills
 
 - **api-error-patterns** — error response format, status codes
+- **code-hygiene** — zombie code (dead/reinvented/orphaned), tombstone comments
 - **docs-patterns** — writing style, structure, brevity
 - **frontend-patterns** — design tokens, mobile-first, component isolation
 - **logging-patterns** — log levels, formatting, structured output
@@ -43,11 +44,11 @@ Praxis requires the `gitwise` plugin for commit format, branch naming, and PR co
 ## Workflow
 
 ```
-/plan-issue 42          → analyze and plan
-/implement-issue 42     → implement the plan
-/create-pr 42           → open a pull request
-/review-pr 43           → multi-agent code review
-/address-review 43      → work through findings
+/praxis:plan-issue 42          → analyze and plan
+/praxis:implement-issue 42     → implement the plan
+/praxis:create-pr 42           → open a pull request
+/praxis:review-pr 43           → multi-agent code review
+/praxis:address-review 43      → work through findings
 ```
 
 ## License
