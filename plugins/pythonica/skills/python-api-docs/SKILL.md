@@ -12,9 +12,9 @@ when_to_use: Setting up an API reference site, wiring Sphinx + autodoc + napoleo
 
 ### 1. Docstrings are the single source
 
-Autodoc imports your package and extracts docstrings at build time. The reference is generated, never hand-copied — so it can't drift from the code.
+Autodoc imports your package and extracts docstrings at build time. The reference is generated, never hand-copied -- so it can't drift from the code.
 
-### 2. Annotations render themselves — don't duplicate types
+### 2. Annotations render themselves -- don't duplicate types
 
 With type hints present, autodoc renders them into the signature (`autodoc_typehints` defaults to `"signature"`). Restating `(str)` in an `Args` line duplicates the annotation and drifts when the type changes. Keep `Args` descriptions prose-only.
 
@@ -36,7 +36,7 @@ Declare the toolchain as an optional-dependency extra, then build:
 docs = [
     "sphinx>=9,<10",     # site generator (reads google docstrings via napoleon)
     "myst-parser>=5,<6", # author pages in Markdown, not reStructuredText
-    "furo>=2025.12",     # theme (CalVer — date floor, no semver major to cap)
+    "furo>=2025.12",     # theme (CalVer -- date floor, no semver major to cap)
 ]
 ```
 
@@ -99,7 +99,7 @@ exclude_patterns = ["_build"]
 html_theme = "furo"
 ```
 
-**MkDocs alternative — flagged.** `mkdocstrings` (with Material for MkDocs) is the MkDocs-native equivalent, but the MkDocs ecosystem is mid-transition. MkDocs 2.0 (announced Jan 2026) drops plugin support entirely, which breaks `mkdocstrings` and Material; Material has entered maintenance mode, and its successor **Zensical** is still `v0.0.x` with API-reference feature-parity in progress. **Prefer Sphinx today**; revisit Zensical once it reaches parity and stabilizes.
+**MkDocs alternative -- flagged.** `mkdocstrings` (with Material for MkDocs) is the MkDocs-native equivalent, but the MkDocs ecosystem is mid-transition. MkDocs 2.0 (announced Jan 2026) drops plugin support entirely, which breaks `mkdocstrings` and Material; Material has entered maintenance mode, and its successor **Zensical** is still `v0.0.x` with API-reference feature-parity in progress. **Prefer Sphinx today**; revisit Zensical once it reaches parity and stabilizes.
 
 ### Pattern 2: Don't duplicate types
 
@@ -110,7 +110,7 @@ def get_user(user_id: str, *, include_deleted: bool = False) -> User:
     """Fetch a user by primary key.
 
     Args:
-        user_id: Primary key of the user.          # prose only — NOT "(str) Primary key…"
+        user_id: Primary key of the user.          # prose only -- NOT "(str) Primary key..."
         include_deleted: Also return soft-deleted rows.
 
     Returns:
@@ -123,9 +123,9 @@ def get_user(user_id: str, *, include_deleted: bool = False) -> User:
 
 Autodoc renders `user_id (str)` from the annotation itself. See `pythonica:python-code-style` Pattern 5 for the docstring shape this builds on.
 
-### Pattern 3: Build the reference page — avoid the thin-`__init__` trap
+### Pattern 3: Build the reference page -- avoid the thin-`__init__` trap
 
-A bare `.. automodule:: mypkg` on a re-export-only `__init__.py` renders **only the package docstring** — none of the submodules it re-exports. Two ways out.
+A bare `.. automodule:: mypkg` on a re-export-only `__init__.py` renders **only the package docstring** -- none of the submodules it re-exports. Two ways out.
 
 **Per-module `automodule`** (explicit; MyST `eval-rst` fence). Stale module names break the strict build, forcing the page to track the code:
 
@@ -178,7 +178,7 @@ def connect(dsn: str) -> Connection:
 See {py:func}`mypkg.client.connect` and the stdlib {py:class}`pathlib.Path`.
 ```
 
-With `intersphinx_mapping` set (Pattern 1), unresolved references like `socket.socket` or `pathlib.Path` fall back to the mapped projects' inventories (`objects.inv`) and become live links — no hardcoded URLs.
+With `intersphinx_mapping` set (Pattern 1), unresolved references like `socket.socket` or `pathlib.Path` fall back to the mapped projects' inventories (`objects.inv`) and become live links -- no hardcoded URLs.
 
 ### Pattern 5: Run examples under doctest
 
@@ -203,7 +203,7 @@ def slugify(text: str) -> str:
 sphinx-build -b doctest docs docs/_build/doctest   # 'hello-world' must match, or the build fails
 ```
 
-Sphinx's doctest defaults include `ELLIPSIS`, so `...` already matches unstable output like `<object at 0x...>` — no per-example `# doctest: +ELLIPSIS` directive needed (add a directive only to override a flag for one block).
+Sphinx's doctest defaults include `ELLIPSIS`, so `...` already matches unstable output like `<object at 0x...>` -- no per-example `# doctest: +ELLIPSIS` directive needed (add a directive only to override a flag for one block).
 
 ### Pattern 6: Gate the docs build in CI
 
@@ -219,7 +219,7 @@ docs:
       with:
         python-version: "3.12"
     - run: pip install -e '.[docs]'          # runtime deps must import for autodoc
-    - run: sphinx-build -W -b html    docs docs/_build/html      # warnings → errors
+    - run: sphinx-build -W -b html    docs docs/_build/html      # warnings -> errors
     - run: sphinx-build -W -b doctest docs docs/_build/doctest    # examples must pass
 ```
 
@@ -227,16 +227,16 @@ Add `docs` to the aggregate check job's `needs`, and audit `.[docs]` for CVEs al
 
 ## Best Practices Summary
 
-1. **Docstrings are the source** — generate the reference with autodoc; never hand-copy signatures.
-2. **Napoleon + google** — set `napoleon_google_docstring = True`; author pages in MyST Markdown.
-3. **Never restate types** — annotations render into the signature; keep `Args` prose-only.
-4. **Executable examples** — run `>>>` blocks under `sphinx.ext.doctest` (`-b doctest`) so they can't rot.
-5. **Cross-reference, don't hardcode** — use `:func:`/`:class:` roles and `intersphinx_mapping` for external links.
-6. **Escape the thin-`__init__` trap** — per-module `automodule` or autosummary `:recursive:`, never a bare package `automodule`.
-7. **Strict build in CI** — `sphinx-build -W` for HTML and doctest; wire it into the check gate.
-8. **Prefer Sphinx today** — the MkDocs/mkdocstrings/Zensical stack is mid-transition; revisit when it stabilizes.
+1. **Docstrings are the source** -- generate the reference with autodoc; never hand-copy signatures.
+2. **Napoleon + google** -- set `napoleon_google_docstring = True`; author pages in MyST Markdown.
+3. **Never restate types** -- annotations render into the signature; keep `Args` prose-only.
+4. **Executable examples** -- run `>>>` blocks under `sphinx.ext.doctest` (`-b doctest`) so they can't rot.
+5. **Cross-reference, don't hardcode** -- use `:func:`/`:class:` roles and `intersphinx_mapping` for external links.
+6. **Escape the thin-`__init__` trap** -- per-module `automodule` or autosummary `:recursive:`, never a bare package `automodule`.
+7. **Strict build in CI** -- `sphinx-build -W` for HTML and doctest; wire it into the check gate.
+8. **Prefer Sphinx today** -- the MkDocs/mkdocstrings/Zensical stack is mid-transition; revisit when it stabilizes.
 
 ## See Also
 
-- `pythonica:python-code-style` — writing the google-style docstrings and type hints this renders.
-- `praxis:docs-patterns` — the general documentation style, structure, and strictness rules this toolchain serves.
+- `pythonica:python-code-style` -- writing the google-style docstrings and type hints this renders.
+- `praxis:docs-patterns` -- the general documentation style, structure, and strictness rules this toolchain serves.

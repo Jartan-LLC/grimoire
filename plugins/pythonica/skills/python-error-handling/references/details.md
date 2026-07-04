@@ -1,4 +1,4 @@
-# python-error-handling — detailed worked examples
+# python-error-handling -- detailed worked examples
 
 ## Advanced Patterns
 

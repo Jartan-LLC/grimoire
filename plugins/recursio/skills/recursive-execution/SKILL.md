@@ -1,6 +1,6 @@
 ---
 name: recursive-execution
-description: Wave execution rules — agent constraints, wave barriers, review-fix evaluation, language awareness.
+description: Wave execution rules -- agent constraints, wave barriers, review-fix evaluation, language awareness.
 when_to_use: Orchestrating or implementing within recursive development waves.
 ---
 
@@ -10,8 +10,8 @@ when_to_use: Orchestrating or implementing within recursive development waves.
 
 These apply to ALL agents in the recursive tree:
 
-- **No worktree isolation.** Never use `isolation: "worktree"`. Worktree agents work in a copy — files get discarded on cleanup.
-- **No background agents.** Never use `run_in_background: true`. Background dispatch triggers worktree isolation. Use foreground Agent calls — send parallel agents in a single message for concurrency.
+- **No worktree isolation.** Never use `isolation: "worktree"`. Worktree agents work in a copy -- files get discarded on cleanup.
+- **No background agents.** Never use `run_in_background: true`. Background dispatch triggers worktree isolation. Use foreground Agent calls -- send parallel agents in a single message for concurrency.
 - **Fix delegation.** Simple fixes (unused import, missing return) directly. Logic fixes (bugs, structural merges) via a `recursive-implementer` scoped to affected files with findings in the prompt.
 - **Failure escalation.** When a child agent fails: parent retries (max 2), restructures (split differently), or escalates to its own parent. Handle failures at the lowest level that has enough context to fix them.
 
@@ -32,11 +32,11 @@ Waves execute sequentially. Within each wave, agents run in parallel.
 
 After each wave, spawn a `recursive-reviewer` scoped to the wave's output:
 
-**Post-Wave 0:** review contracts for richness — are interfaces complete enough for downstream modules? Fix gaps directly.
+**Post-Wave 0:** review contracts for richness -- are interfaces complete enough for downstream modules? Fix gaps directly.
 
 **Post-implementation waves:** review for bugs, structural artifacts, cross-module consistency. Fix Critical findings via implementer agents (max 2 rounds). Note Important findings.
 
-**Post-final wave:** full codebase review. Fix Critical. Verify README.md and CHANGELOG.md exist — create via implementer if missing.
+**Post-final wave:** full codebase review. Fix Critical. Verify README.md and CHANGELOG.md exist -- create via implementer if missing.
 
 **Report:** total tests, files, max nesting depth, findings summary (found/fixed).
 

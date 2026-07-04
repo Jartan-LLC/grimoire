@@ -18,11 +18,11 @@ Then browse and install plugins:
 
 | Plugin | Description |
 |--------|-------------|
-| [claudivis](plugins/claudivis/) | The key to Claude Code configuration — how agents, skills, and commands work together |
-| [gitwise](plugins/gitwise/) | GitHub conventions — branch naming, commit format, issue/PR templates, and safe issue/PR referencing |
-| [praxis](plugins/praxis/) | Development workflow — issue planning, implementation, PR creation, code review with specialized reviewers, and project conventions |
-| [pythonica](plugins/pythonica/) | Comprehensive Python development — patterns, testing, async, error handling, packaging, configuration, type safety, resilience, observability, Pydantic, and more |
-| [recursio](plugins/recursio/) | Recursive multi-agent development system with TDD — decomposes projects into waves of parallel nested subagents |
+| [claudivis](plugins/claudivis/) | The key to Claude Code configuration -- how agents, skills, and commands work together |
+| [gitwise](plugins/gitwise/) | GitHub conventions -- branch naming, commit format, issue/PR templates, and safe issue/PR referencing |
+| [praxis](plugins/praxis/) | Development workflow -- issue planning, implementation, PR creation, code review with specialized reviewers, and project conventions |
+| [pythonica](plugins/pythonica/) | Comprehensive Python development -- patterns, testing, async, error handling, packaging, configuration, type safety, resilience, observability, Pydantic, and more |
+| [recursio](plugins/recursio/) | Recursive multi-agent development system with TDD -- decomposes projects into waves of parallel nested subagents |
 
 ## Versioning & Releases
 

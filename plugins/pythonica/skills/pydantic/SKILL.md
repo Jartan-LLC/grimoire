@@ -119,12 +119,12 @@ class NewModel(BaseModel):
         return {...}
 
 # Key changes:
-# - .dict() → .model_dump()
-# - .json() → .model_dump_json()
-# - .parse_obj() → .model_validate()
-# - .parse_raw() → .model_validate_json()
-# - @validator → @field_validator
-# - @root_validator → @model_validator
+# - .dict() -> .model_dump()
+# - .json() -> .model_dump_json()
+# - .parse_obj() -> .model_validate()
+# - .parse_raw() -> .model_validate_json()
+# - @validator -> @field_validator
+# - @root_validator -> @model_validator
 ```
 
 ### Performance Improvements
@@ -174,7 +174,7 @@ class Example(BaseModel):
     config_file: FilePath
     data_dir: DirectoryPath
 
-    # JSON string → parsed object
+    # JSON string -> parsed object
     metadata: Json[dict[str, str]]
 
     # Secret (won't print in logs)
@@ -327,8 +327,8 @@ class CoerciveModel(BaseModel):
     price: float
 
 data = CoerciveModel(count="42", price="19.99")
-assert data.count == 42  # String → int
-assert data.price == 19.99  # String → float
+assert data.count == 42  # String -> int
+assert data.price == 19.99  # String -> float
 
 # Strict mode
 class StrictModel(BaseModel):
@@ -713,7 +713,7 @@ from sqlalchemy.orm import Session
 
 def get_user(db: Session, user_id: int) -> UserSchema:
     user = db.query(UserDB).filter(UserDB.id == user_id).first()
-    return UserSchema.model_validate(user)  # ORM → Pydantic
+    return UserSchema.model_validate(user)  # ORM -> Pydantic
 ```
 
 ### Hybrid Approach
@@ -1008,7 +1008,7 @@ user_model = UserModel.model_validate(user)
 
 For testing Pydantic models with pytest, see the `python-testing` skill.
 
-## Migration Guide (v1 → v2)
+## Migration Guide (v1 -> v2)
 
 ### Key Changes
 
@@ -1070,13 +1070,13 @@ class NewModel(BaseModel):
 ### Migration Checklist
 
 - [ ] Replace `class Config` with `model_config = ConfigDict()`
-- [ ] Update `.dict()` → `.model_dump()`
-- [ ] Update `.json()` → `.model_dump_json()`
-- [ ] Update `.parse_obj()` → `.model_validate()`
-- [ ] Update `.parse_raw()` → `.model_validate_json()`
-- [ ] Update `@validator` → `@field_validator` with `@classmethod`
-- [ ] Update `@root_validator` → `@model_validator(mode='after')`
-- [ ] Review `json_encoders` → use `@field_serializer`
+- [ ] Update `.dict()` -> `.model_dump()`
+- [ ] Update `.json()` -> `.model_dump_json()`
+- [ ] Update `.parse_obj()` -> `.model_validate()`
+- [ ] Update `.parse_raw()` -> `.model_validate_json()`
+- [ ] Update `@validator` -> `@field_validator` with `@classmethod`
+- [ ] Update `@root_validator` -> `@model_validator(mode='after')`
+- [ ] Review `json_encoders` -> use `@field_serializer`
 - [ ] Test strict mode behavior changes
 - [ ] Update custom types to use `__get_pydantic_core_schema__`
 
@@ -1258,6 +1258,6 @@ When using Pydantic, consider these complementary pythonica skills:
 ## Additional Resources
 
 - [Pydantic Documentation](https://docs.pydantic.dev/)
-- [Migration Guide v1→v2](https://docs.pydantic.dev/latest/migration/)
+- [Migration Guide v1->v2](https://docs.pydantic.dev/latest/migration/)
 - [Performance Benchmarks](https://docs.pydantic.dev/latest/concepts/performance/)
 - [JSON Schema Integration](https://docs.pydantic.dev/latest/concepts/json_schema/)

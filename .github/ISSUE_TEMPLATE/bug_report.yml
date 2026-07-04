@@ -30,7 +30,7 @@ body:
 
   - type: markdown
     attributes:
-      value: "### Optional — helps us reproduce faster"
+      value: "### Optional -- helps us reproduce faster"
 
   - type: dropdown
     id: reproducibility

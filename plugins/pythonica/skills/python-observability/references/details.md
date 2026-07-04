@@ -1,4 +1,4 @@
-# python-observability — detailed worked examples
+# python-observability -- detailed worked examples
 
 ## Advanced Patterns
 

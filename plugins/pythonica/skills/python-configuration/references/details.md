@@ -1,4 +1,4 @@
-# python-configuration — detailed worked examples
+# python-configuration -- detailed worked examples
 
 ## Advanced Patterns
 

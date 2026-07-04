@@ -11,7 +11,7 @@ Recommended structure for implementation plans posted to GitHub issues and saved
 Brief restatement of what needs to be done.
 
 ### Patterns & Conventions Found
-- Pattern: `file:line` — How the project does similar things
+- Pattern: `file:line` -- How the project does similar things
 
 ### Chosen Approach
 - **What**: Specific approach
@@ -19,10 +19,10 @@ Brief restatement of what needs to be done.
 - **How**: High-level steps
 
 ### Alternatives Considered
-1. Alternative — why not chosen
+1. Alternative -- why not chosen
 
 ### Files to Create/Modify
-- `path/file` — Specific changes
+- `path/file` -- Specific changes
 
 ### Documentation Plan
 - Which docs need creating or updating
@@ -38,7 +38,7 @@ Simple | Moderate | Complex
 
 ## Guidelines
 
-- Be specific and actionable — file paths, function names, concrete steps
+- Be specific and actionable -- file paths, function names, concrete steps
 - Always include alternatives considered, even if briefly
 - The documentation plan ensures docs stay current with code
 - Phases should be independently verifiable where possible

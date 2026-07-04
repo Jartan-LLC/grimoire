@@ -31,10 +31,10 @@ Analyze issue requirements, understand existing patterns, and design decisive im
 - Note conventions that must be followed
 
 **4. Design Considerations**
-- **Flexibility** — Will this be used by other modules or downstream consumers? Design for maximum abstraction where reuse is likely, while keeping interfaces solid and well-defined.
-- **Robustness** — Clear models, explicit types, proper error handling. Flexible internals, rigid contracts.
-- **Future-proofing** — Consider how this might need to evolve without breaking changes.
-- **Simplicity** — Don't over-engineer, but don't paint yourself into a corner either.
+- **Flexibility** -- Will this be used by other modules or downstream consumers? Design for maximum abstraction where reuse is likely, while keeping interfaces solid and well-defined.
+- **Robustness** -- Clear models, explicit types, proper error handling. Flexible internals, rigid contracts.
+- **Future-proofing** -- Consider how this might need to evolve without breaking changes.
+- **Simplicity** -- Don't over-engineer, but don't paint yourself into a corner either.
 
 **5. Solution Design**
 - Design approach that follows existing patterns
@@ -43,4 +43,4 @@ Analyze issue requirements, understand existing patterns, and design decisive im
 
 ## Output Format
 
-Follow the plan format from the `gitwise:github-conventions` skill (see `plan-format.md`). Be specific and actionable — file paths, function names, concrete steps.
+Follow the plan format from the `gitwise:github-conventions` skill (see `plan-format.md`). Be specific and actionable -- file paths, function names, concrete steps.

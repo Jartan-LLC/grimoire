@@ -10,7 +10,7 @@ Create a GitHub issue from a description.
 ## Process
 
 ### 1. Gather Context
-Use the conversation context and `$ARGUMENTS` to understand what needs to be filed. If this is being called from within an existing issue or PR, gather relevant context from it — the new issue may be a spin-off for something discovered during that work.
+Use the conversation context and `$ARGUMENTS` to understand what needs to be filed. If this is being called from within an existing issue or PR, gather relevant context from it -- the new issue may be a spin-off for something discovered during that work.
 
 ### 2. Determine Type
 From the gathered context, determine whether this is a bug report or feature request.

@@ -1,12 +1,12 @@
 ---
 name: github-conventions
-description: GitHub conventions — branch naming, commit format, issue/PR templates, and safe issue/PR referencing in comments.
+description: GitHub conventions -- branch naming, commit format, issue/PR templates, and safe issue/PR referencing in comments.
 when_to_use: Using gh CLI, creating commits, posting PR/issue comments, or referencing issues by number.
 ---
 
 # GitHub Conventions
 
-CRITICAL: `#<number>` auto-links to issues/PRs on GitHub. Use `1.`/`2.`/`3.` for numbered lists and "Finding 1:"/"Item 1:" for labeled items — never `#1`, `#2`, `#3` as markers.
+CRITICAL: `#<number>` auto-links to issues/PRs on GitHub. Use `1.`/`2.`/`3.` for numbered lists and "Finding 1:"/"Item 1:" for labeled items -- never `#1`, `#2`, `#3` as markers.
 
 ## Branches
 
@@ -24,19 +24,19 @@ Optional scope: `feat(frontend): description`
 
 ## Issues
 
-Templates in `.github/ISSUE_TEMPLATE/` — read them for section structure.
+Templates in `.github/ISSUE_TEMPLATE/` -- read them for section structure.
 - **Bug reports**: must have label `bug`
 - **Feature requests**: must have label `enhancement`
 
 ## Pull Requests
 
-PR template at `.github/PULL_REQUEST_TEMPLATE.md` — read it for section structure.
+PR template at `.github/PULL_REQUEST_TEMPLATE.md` -- read it for section structure.
 Use `Closes #<number>` to link PRs to issues.
 
 ## Code Reviews
 
 Reviews are posted as PR comments. See [review-format.md](review-format.md) for the
-recommended structure — severity buckets and the `#N` footgun to avoid in the summary.
+recommended structure -- severity buckets and the `#N` footgun to avoid in the summary.
 
 ## Implementation Plans
 

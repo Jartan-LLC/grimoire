@@ -533,7 +533,7 @@ def read_lines(path: str) -> Iterator[str]:
 ### Avoid String Concatenation in Loops
 
 ```python
-# Bad: O(n²) due to string immutability
+# Bad: O(n^2) due to string immutability
 result = ""
 for item in items:
     result += str(item)

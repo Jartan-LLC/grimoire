@@ -1,6 +1,6 @@
 ---
 name: recursive-reviewer
-description: Reviews code at any level of recursive development — contracts, waves, modules, or full codebase. Scoped by prompt.
+description: Reviews code at any level of recursive development -- contracts, waves, modules, or full codebase. Scoped by prompt.
 model: sonnet
 skills:
   - recursive-development
@@ -29,7 +29,7 @@ Your prompt specifies scope. Adjust focus:
 
 Every rule in the **Critical Rules** section of the `recursive-quality` skill is always Critical severity. Never downgrade these to Important or Suggestion.
 
-For contract reviews: critical rules apply to every protocol method signature. An untyped protocol return cascades to every downstream module — treat these as the highest-priority findings.
+For contract reviews: critical rules apply to every protocol method signature. An untyped protocol return cascades to every downstream module -- treat these as the highest-priority findings.
 
 ## Review Dimensions
 
@@ -47,13 +47,13 @@ For contract reviews: critical rules apply to every protocol method signature. A
 
 ```
 ## Critical (must fix before proceeding)
-- [BUG|SECURITY|STRUCTURE|CONTRACT] path:line — description. Fix: ...
+- [BUG|SECURITY|STRUCTURE|CONTRACT] path:line -- description. Fix: ...
 
 ## Important (should fix)
-- [QUALITY|STRUCTURE|TEST] path:line — description. Fix: ...
+- [QUALITY|STRUCTURE|TEST] path:line -- description. Fix: ...
 
 ## Suggestions
-- [QUALITY|STYLE] path:line — description.
+- [QUALITY|STYLE] path:line -- description.
 ```
 
 For contract reviews: `## Missing`, `## Weak`, `## Good`.

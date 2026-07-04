@@ -8,7 +8,7 @@ and is released with its own git tag.
 
 Claude Code uses a plugin's `version` as the cache key for updates: users only
 receive changes when you bump it. Push new commits without a bump and everyone
-stays on the cached copy — `/plugin update` reports "already at the latest
+stays on the cached copy -- `/plugin update` reports "already at the latest
 version." Every plugin here declares a `version`, so **every user-visible change
 needs a version bump**.
 
@@ -16,20 +16,20 @@ needs a version bump**.
 
 A plugin's version lives in **two** files that must always agree:
 
-- `plugins/<name>/.claude-plugin/plugin.json` — the `"version"` field
-- `.claude-plugin/marketplace.json` — the `"version"` field on that plugin's entry
+- `plugins/<name>/.claude-plugin/plugin.json` -- the `"version"` field
+- `.claude-plugin/marketplace.json` -- the `"version"` field on that plugin's entry
 
 When you change any content under `plugins/<name>/` (skills, agents, commands,
 hooks, README), bump both:
 
-- **PATCH** (`1.0.0` → `1.0.1`) — bug fixes, wording, non-behavioural tweaks
-- **MINOR** (`1.0.0` → `1.1.0`) — new skills/agents/commands, backward-compatible additions
-- **MAJOR** (`1.0.0` → `2.0.0`) — breaking changes to existing behaviour or invocation
+- **PATCH** (`1.0.0` -> `1.0.1`) -- bug fixes, wording, non-behavioural tweaks
+- **MINOR** (`1.0.0` -> `1.1.0`) -- new skills/agents/commands, backward-compatible additions
+- **MAJOR** (`1.0.0` -> `2.0.0`) -- breaking changes to existing behaviour or invocation
 
 Editing only a plugin's `marketplace.json` metadata (`description`, `keywords`)
-is **not** a bump trigger — those fields sit outside `plugins/<name>/`, the only
+is **not** a bump trigger -- those fields sit outside `plugins/<name>/`, the only
 path the bump rule watches. (The entry's `version` still must match `plugin.json`
-— see lockstep below.)
+-- see lockstep below.)
 
 Keep the bump and the two files in lockstep; both are enforced by review (see
 [Enforcement](#enforcement)).
@@ -48,7 +48,7 @@ claude plugin tag --push
 `claude plugin tag` derives the tag from the manifest, verifies `plugin.json`
 and the marketplace entry agree on the version, requires a clean working tree
 under the plugin directory, and refuses if the tag already exists; add
-`--dry-run` to preview. If the `claude` CLI is unavailable, tag by hand —
+`--dry-run` to preview. If the `claude` CLI is unavailable, tag by hand --
 equivalent as long as the two files are already in lockstep:
 
 ```bash
@@ -61,7 +61,7 @@ constraints resolve against (see [Dependencies](#dependencies)).
 
 ## Enforcement
 
-There's no automated gate today — version discipline is enforced by **PR review**.
+There's no automated gate today -- version discipline is enforced by **PR review**.
 Before merging, confirm any plugin with changed content under `plugins/<name>/`
 has a bumped `version`, and that its `plugin.json` and `marketplace.json` entry
 agree. (A CI check could automate this later.)
@@ -90,7 +90,7 @@ resolve. Declaring it makes Claude Code auto-install `gitwise` alongside
 keep its constraint pinned to a tested range.
 
 Because constraints resolve against the `{plugin-name}--v{version}` tags above, a
-dependency must be tagged **before or with** the plugin that requires it — tag
+dependency must be tagged **before or with** the plugin that requires it -- tag
 `gitwise` before shipping a `praxis` release that depends on it, or the resolver
 has no version to match. See the upstream
 [dependency guide](https://code.claude.com/docs/en/plugin-dependencies) for
@@ -100,4 +100,4 @@ cross-marketplace rules and conflict resolution.
 
 Per-plugin release channels (say, a stable line and a bleeding-edge line) are not
 set up. If needed later, express them with a `ref` on the marketplace `source` or
-with separate marketplace entries — future work.
+with separate marketplace entries -- future work.

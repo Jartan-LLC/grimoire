@@ -30,15 +30,15 @@ Apply naming and organization patterns uniformly across the project.
 
 ```
 myproject/
-├── src/
-│   └── myproject/
-│       ├── __init__.py
-│       ├── services/
-│       ├── models/
-│       └── api/
-├── tests/
-├── pyproject.toml
-└── README.md
+|-- src/
+|   `-- myproject/
+|       |-- __init__.py
+|       |-- services/
+|       |-- models/
+|       `-- api/
+|-- tests/
+|-- pyproject.toml
+`-- README.md
 ```
 
 ## Fundamental Patterns
@@ -89,17 +89,17 @@ Prefer minimal nesting. Deep hierarchies make imports verbose and navigation dif
 ```
 # Preferred: Flat structure
 project/
-├── api/
-│   ├── routes.py
-│   └── middleware.py
-├── services/
-│   ├── user_service.py
-│   └── order_service.py
-├── models/
-│   ├── user.py
-│   └── order.py
-└── utils/
-    └── validation.py
+|-- api/
+|   |-- routes.py
+|   `-- middleware.py
+|-- services/
+|   |-- user_service.py
+|   `-- order_service.py
+|-- models/
+|   |-- user.py
+|   `-- order.py
+`-- utils/
+    `-- validation.py
 
 # Avoid: Deep nesting
 project/core/internal/services/impl/user/
@@ -115,10 +115,10 @@ Choose one approach and apply it consistently throughout the project.
 
 ```
 src/
-├── user_service.py
-├── test_user_service.py
-├── order_service.py
-└── test_order_service.py
+|-- user_service.py
+|-- test_user_service.py
+|-- order_service.py
+`-- test_order_service.py
 ```
 
 Benefits: Tests live next to the code they verify. Easy to see coverage gaps.
@@ -127,13 +127,13 @@ Benefits: Tests live next to the code they verify. Easy to see coverage gaps.
 
 ```
 src/
-├── services/
-│   ├── user_service.py
-│   └── order_service.py
+|-- services/
+|   |-- user_service.py
+|   `-- order_service.py
 tests/
-├── services/
-│   ├── test_user_service.py
-│   └── test_order_service.py
+|-- services/
+|   |-- test_user_service.py
+|   `-- test_order_service.py
 ```
 
 Benefits: Clean separation between production and test code. Standard for larger projects.
@@ -175,14 +175,14 @@ Organize code by architectural layer for clear separation of concerns.
 
 ```
 myapp/
-├── api/           # HTTP handlers, request/response
-│   ├── routes/
-│   └── middleware/
-├── services/      # Business logic
-├── repositories/  # Data access
-├── models/        # Domain entities
-├── schemas/       # API schemas (Pydantic)
-└── config/        # Configuration
+|-- api/           # HTTP handlers, request/response
+|   |-- routes/
+|   `-- middleware/
+|-- services/      # Business logic
+|-- repositories/  # Data access
+|-- models/        # Domain entities
+|-- schemas/       # API schemas (Pydantic)
+`-- config/        # Configuration
 ```
 
 Each layer should only depend on layers below it, never above.
@@ -193,19 +193,19 @@ For complex applications, organize by business domain rather than technical laye
 
 ```
 ecommerce/
-├── users/
-│   ├── models.py
-│   ├── services.py
-│   ├── repository.py
-│   └── api.py
-├── orders/
-│   ├── models.py
-│   ├── services.py
-│   ├── repository.py
-│   └── api.py
-└── shared/
-    ├── database.py
-    └── exceptions.py
+|-- users/
+|   |-- models.py
+|   |-- services.py
+|   |-- repository.py
+|   `-- api.py
+|-- orders/
+|   |-- models.py
+|   |-- services.py
+|   |-- repository.py
+|   `-- api.py
+`-- shared/
+    |-- database.py
+    `-- exceptions.py
 ```
 
 ## File and Module Naming

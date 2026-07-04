@@ -12,7 +12,7 @@
       "name": "claudivis",
       "version": "1.0.0",
       "source": "./plugins/claudivis",
-      "description": "The key to Claude Code configuration — how agents, skills, and commands work together",
+      "description": "The key to Claude Code configuration -- how agents, skills, and commands work together",
       "author": {
         "name": "Jartan LLC",
         "url": "https://github.com/Jartan-LLC"
@@ -25,7 +25,7 @@
       "name": "gitwise",
       "version": "1.0.0",
       "source": "./plugins/gitwise",
-      "description": "GitHub conventions — branch naming, commit format, issue/PR templates, and safe issue/PR referencing",
+      "description": "GitHub conventions -- branch naming, commit format, issue/PR templates, and safe issue/PR referencing",
       "author": {
         "name": "Jartan LLC",
         "url": "https://github.com/Jartan-LLC"
@@ -38,7 +38,7 @@
       "name": "praxis",
       "version": "1.0.0",
       "source": "./plugins/praxis",
-      "description": "Development workflow — issue planning, implementation, PR creation, code review with specialized reviewers, and project conventions",
+      "description": "Development workflow -- issue planning, implementation, PR creation, code review with specialized reviewers, and project conventions",
       "author": {
         "name": "Jartan LLC",
         "url": "https://github.com/Jartan-LLC"
@@ -51,7 +51,7 @@
       "name": "pythonica",
       "version": "1.0.0",
       "source": "./plugins/pythonica",
-      "description": "Comprehensive Python development — patterns, testing, async, error handling, packaging, configuration, type safety, resilience, observability, Pydantic, and more",
+      "description": "Comprehensive Python development -- patterns, testing, async, error handling, packaging, configuration, type safety, resilience, observability, Pydantic, and more",
       "author": {
         "name": "Jartan LLC",
         "url": "https://github.com/Jartan-LLC"
@@ -64,7 +64,7 @@
       "name": "recursio",
       "version": "1.0.0",
       "source": "./plugins/recursio",
-      "description": "Recursive multi-agent development system with TDD — decomposes projects into waves of parallel nested subagents",
+      "description": "Recursive multi-agent development system with TDD -- decomposes projects into waves of parallel nested subagents",
       "author": {
         "name": "Jartan LLC",
         "url": "https://github.com/Jartan-LLC"

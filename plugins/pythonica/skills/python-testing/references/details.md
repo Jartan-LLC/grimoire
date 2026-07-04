@@ -1,4 +1,4 @@
-# python-testing-patterns — detailed patterns and worked examples
+# python-testing-patterns -- detailed patterns and worked examples
 
 ## Fundamental Patterns
 

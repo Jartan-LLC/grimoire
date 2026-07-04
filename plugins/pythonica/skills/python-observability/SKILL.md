@@ -205,7 +205,7 @@ async def call_downstream_service(endpoint: str, data: dict) -> dict:
 
 ### Pattern 5: Deferred Log Message Formatting
 
-Never f-string a log message. Pass the template and its values as separate args so formatting is *deferred* — it runs only when the record's level is enabled (`Logger.isEnabledFor` short-circuits before interpolation; an f-string, or `%`/`str.format`/`+` pre-formatting, pays that cost even for filtered-out records). Two mechanisms:
+Never f-string a log message. Pass the template and its values as separate args so formatting is *deferred* -- it runs only when the record's level is enabled (`Logger.isEnabledFor` short-circuits before interpolation; an f-string, or `%`/`str.format`/`+` pre-formatting, pays that cost even for filtered-out records). Two mechanisms:
 
 ```python
 stdlib_logger.info("user=%s orders=%s", user_id, order_count)              # stdlib: logger interpolates %s args
@@ -217,7 +217,7 @@ stdlib_logger.info(f"user={user_id} orders={order_count}")                 # BAD
 
 Ruff `flake8-logging-format` (`G`) enforces this: `G004` flags f-strings, `G001`/`G002`/`G003` flag `str.format`/`%`/`+` pre-formatting.
 
-For exceptions use `logger.exception` (= `error(..., exc_info=True)`) — it attaches the traceback; keep deferred `%s` args:
+For exceptions use `logger.exception` (= `error(..., exc_info=True)`) -- it attaches the traceback; keep deferred `%s` args:
 
 ```python
 except OSError:

@@ -1,7 +1,7 @@
 {
   "name": "gitwise",
   "version": "1.0.0",
-  "description": "GitHub conventions — branch naming, commit format, issue/PR templates, and safe issue/PR referencing",
+  "description": "GitHub conventions -- branch naming, commit format, issue/PR templates, and safe issue/PR referencing",
   "author": {
     "name": "Jartan LLC",
     "url": "https://github.com/Jartan-LLC"
