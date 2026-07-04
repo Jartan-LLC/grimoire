@@ -33,6 +33,11 @@ Templates in `.github/ISSUE_TEMPLATE/` — read them for section structure.
 PR template at `.github/PULL_REQUEST_TEMPLATE.md` — read it for section structure.
 Use `Closes #<number>` to link PRs to issues.
 
+## Code Reviews
+
+Reviews are posted as PR comments. See [review-format.md](review-format.md) for the
+recommended structure — severity buckets and the `#N` footgun to avoid in the summary.
+
 ## Implementation Plans
 
 Plans are posted as issue comments and saved to `.claude/workspace/`. See [plan-format.md](plan-format.md) for the recommended structure.

@@ -28,17 +28,17 @@ You are a senior QA engineer focused on test coverage, test quality, and CI/CD c
 
 Use these as guidance — not an exhaustive checklist.
 
-### CRITICAL — Must fix
+### Critical — Must fix
 - New functionality with no test coverage at all
 - Tests that trivially pass without exercising the code
 - Integration tests that test implementation details instead of behavior
 
-### HIGH — Should fix
+### Important — Should fix
 - Tests missing required services (database, mail, etc.)
 - Only happy-path tested — no error/failure path coverage
 - Tests that depend on external state or execution order
 
-### MEDIUM — Consider fixing
+### Minor — Consider fixing
 - Missing edge case coverage
 - Redundant tests duplicating existing coverage
 
@@ -62,8 +62,8 @@ Fix: How to fix it
 
 | Severity | Count |
 |----------|-------|
-| CRITICAL | X |
-| HIGH | X |
-| MEDIUM | X |
+| Critical | X |
+| Important | X |
+| Minor | X |
 
 **Verdict**: APPROVE / WARNING / BLOCK

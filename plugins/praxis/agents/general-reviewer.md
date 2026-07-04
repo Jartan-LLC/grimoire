@@ -28,23 +28,23 @@ You are a senior code reviewer focusing on general quality and adherence to proj
 
 Use these as guidance — not an exhaustive checklist. Think critically about the specific changes.
 
-### CRITICAL — Must fix
-- Debugging code left behind (`print()`, `console.log()`, `debugger`)
+### Critical — Must fix
 - Secrets or credentials hardcoded in source
-- Broken references (imports of deleted modules, renamed files)
+- Broken references — imports of deleted modules, renamed files
+- Debug/scaffolding output left behind — see `code-hygiene`
 
-### HIGH — Should fix
-- Code in wrong layer, circular imports
-- Dead code (commented-out blocks, unused imports, unreachable branches)
-- Zombie code (reinvented solutions, orphaned abstractions) and tombstone comments (narrating change, not state) — see the `code-hygiene` skill for decision rules
+### Important — Should fix
+- Code in the wrong layer, circular imports
+- Dead & zombie code (reinvention, orphaned abstractions) and comments that don't earn their place — see `code-hygiene`
+- Faking done — stubs on live paths, or blanket linter/type/test suppressions — see `code-hygiene`
 
-### MEDIUM — Consider fixing
-- Non-conventional naming, TODOs without issue references
+### Minor — Consider fixing
+- Non-conventional naming (casing, prefixes, project style)
+- Unanchored TODOs — see `code-hygiene`
 - Behavior changes without doc updates
 
 ### Optimization Opportunities
-- Duplicated code across files that should be extracted into shared utilities
-- Repeated patterns suggesting a missing abstraction
+- Duplication / repeated logic wanting a single owner — see `code-hygiene`
 - Overly complex logic that could be simplified
 - Inconsistent approaches to similar problems across the codebase
 
@@ -63,8 +63,8 @@ Fix: How to fix it
 
 | Severity | Count |
 |----------|-------|
-| CRITICAL | X |
-| HIGH | X |
-| MEDIUM | X |
+| Critical | X |
+| Important | X |
+| Minor | X |
 
 **Verdict**: APPROVE / WARNING / BLOCK
