@@ -27,6 +27,7 @@ Comprehensive Python development — patterns, testing, async, error handling, p
 
 ### Project Setup
 - **python-code-style** — ruff/mypy config, docstrings, naming conventions
+- **python-api-docs** — Sphinx/autodoc/napoleon/MyST, doctest, intersphinx, strict docs CI gate
 - **python-project-structure** — directory layout, `__all__`, flat vs nested
 - **python-packaging** — pyproject.toml, src layout, build backends, entry points
 - **python-configuration** — pydantic-settings, env vars, 12-factor methodology
