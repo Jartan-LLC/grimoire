@@ -26,11 +26,10 @@ Then browse and install plugins:
 
 ## Versioning & Releases
 
-Each plugin is versioned with [semantic versioning](https://semver.org) in both
-its `.claude-plugin/plugin.json` and its `.claude-plugin/marketplace.json` entry,
-and released with a `{plugin-name}--v{version}` git tag. Any change to a plugin's
-content needs a version bump in both files. A pre-push hook enforces this — enable
-it once per clone:
+Each plugin uses [semantic versioning](https://semver.org), with its version in
+both `.claude-plugin/plugin.json` and its `.claude-plugin/marketplace.json` entry,
+and is released with a `{plugin-name}--v{version}` git tag. Any content change needs
+a version bump in both files, enforced by a pre-push hook — enable it once per clone:
 
 ```
 git config core.hooksPath .githooks

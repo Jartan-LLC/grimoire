@@ -29,7 +29,7 @@ Use these as guidance — not an exhaustive checklist.
 
 ### CRITICAL — Must fix
 - Factually incorrect information (doesn't match what the code actually does)
-- Broken cross-references and dead external links — internal links, reference-style pointers, or URLs to targets that don't exist. Confirm a link check runs in CI and flag obviously-dead targets on read (you read and grep — you don't fetch URLs or run a build)
+- Broken cross-references and dead external links — internal links, reference-style pointers, or URLs to nonexistent targets. Confirm CI runs a link check; flag obviously-dead targets on read (you read and grep, not fetch URLs or run builds)
 - Code examples that won't work
 
 ### HIGH — Should fix
@@ -46,7 +46,7 @@ Use these as guidance — not an exhaustive checklist.
 - Verbose prose where a table or code example would be clearer
 - Missing code examples where they would clarify usage
 - Overly detailed explanations of obvious concepts
-- Strict-build gate — confirm CI runs a strict docs build (warnings → errors) plus snippet and link checks. Gate-existence check: verify the gate exists; you don't run the build
+- Strict-build gate — confirm CI runs a strict docs build (warnings → errors) plus snippet and link checks; you verify the gate exists, not run the build
 
 ### Optimization Opportunities
 - Sections that could be consolidated or merged

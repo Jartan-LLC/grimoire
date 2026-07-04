@@ -12,7 +12,7 @@ when_to_use: Setting up an API reference site, wiring Sphinx + autodoc + napoleo
 
 ### 1. Docstrings are the single source
 
-Autodoc imports your package and extracts docstrings at build time. The reference is generated, never hand-copied — so it can't drift from the code. Write the docstring once; the site follows.
+Autodoc imports your package and extracts docstrings at build time. The reference is generated, never hand-copied — so it can't drift from the code.
 
 ### 2. Annotations render themselves — don't duplicate types
 
@@ -99,7 +99,7 @@ exclude_patterns = ["_build"]
 html_theme = "furo"
 ```
 
-**MkDocs alternative — flagged.** `mkdocstrings` (with Material for MkDocs) is the MkDocs-native equivalent, but the MkDocs ecosystem is mid-transition. MkDocs 2.0 (announced Jan 2026) drops plugin support entirely, which breaks `mkdocstrings` and Material; Material has entered maintenance mode, and its successor **Zensical** is still `v0.0.x` with API-reference feature-parity in progress. **Prefer Sphinx today** for a stable reference toolchain; revisit Zensical once it reaches parity and stabilizes.
+**MkDocs alternative — flagged.** `mkdocstrings` (with Material for MkDocs) is the MkDocs-native equivalent, but the MkDocs ecosystem is mid-transition. MkDocs 2.0 (announced Jan 2026) drops plugin support entirely, which breaks `mkdocstrings` and Material; Material has entered maintenance mode, and its successor **Zensical** is still `v0.0.x` with API-reference feature-parity in progress. **Prefer Sphinx today**; revisit Zensical once it reaches parity and stabilizes.
 
 ### Pattern 2: Don't duplicate types
 
@@ -127,7 +127,7 @@ Autodoc renders `user_id (str)` from the annotation itself. See `pythonica:pytho
 
 A bare `.. automodule:: mypkg` on a re-export-only `__init__.py` renders **only the package docstring** — none of the submodules it re-exports. Two ways out.
 
-**Per-module `automodule`** (explicit; MyST `eval-rst` fence). Stale module names break the strict build, which is the point — it forces the page to track the code:
+**Per-module `automodule`** (explicit; MyST `eval-rst` fence). Stale module names break the strict build, forcing the page to track the code:
 
 ````markdown
 # API reference
@@ -223,7 +223,7 @@ docs:
     - run: sphinx-build -W -b doctest docs docs/_build/doctest    # examples must pass
 ```
 
-Add `docs` to the aggregate check job's `needs`, and audit `.[docs]` for CVEs alongside `.[dev]` so the docs toolchain is covered too.
+Add `docs` to the aggregate check job's `needs`, and audit `.[docs]` for CVEs alongside `.[dev]`.
 
 ## Best Practices Summary
 

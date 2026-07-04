@@ -6,7 +6,7 @@ when_to_use: Writing or reviewing code, adding a solution that may already exist
 
 # Code Hygiene
 
-Don't leave — or write — code that git or an existing solution already owns. Two failure modes: **zombie code** (dead, reinvented, orphaned, or bloated code) and **tombstone comments** (comments that narrate a change instead of describing current state). Both are cheap to introduce and easy to miss — especially in fast or AI-assisted work that produces code faster than comprehension.
+Don't leave — or write — code that git or an existing solution already owns. Two failure modes: **zombie code** (dead, reinvented, orphaned, or bloated code) and **tombstone comments** (comments that narrate a change instead of describing current state). Both are cheap to introduce and easy to miss, especially in fast or AI-assisted work that outpaces comprehension.
 
 ## Tombstone Comments
 
@@ -14,17 +14,17 @@ A comment describes the code's current **state**. If it narrates the **change** 
 
 Antecedent: Robert C. Martin, *Clean Code* (Ch. 4, "Comments") names the file-top changelog a **journal comment**, made redundant by source control. "Tombstone comment" (this project's coinage) generalizes that to any change-narrating comment.
 
-**Core rule (one line):** State, not transition. Current behavior or a non-obvious *why* → keep. The delta from the old version → delete.
+**Core rule:** State, not transition. Current behavior or a non-obvious *why* → keep. The delta from the old version → delete.
 
 **Decision logic (in order):**
 
-1. **Cold-reader test** — would it make sense, and be worth writing, to someone opening the file for the first time who never saw the prior version or the PR? No → tombstone → delete.
+1. **Cold-reader test** — would it make sense, and be worth writing, to a first-time reader who never saw the prior version or the PR? No → tombstone → delete.
 2. **Git-ownership test** — does the fact it conveys amount to "what changed / moved / was removed"? That's version control's job → delete.
 3. **State vs. transition** — present behavior or non-obvious rationale (keep) vs. relocation / removal / delta-from-old (delete).
 
 **Cheap first-pass filter (flag, don't auto-verdict):** tokens `moved`, `now handled`, `no longer`, `used to`, `previously`, `was`, `replaced`, `instead of`, `per review`, `as requested`, `see <otherfile>` (when explaining an *absence* here). A hit only triggers the cold-reader test — `now` / `instead` also appear in legitimate rationale.
 
-**Sharpest single discriminator:** does the comment reference a thing that isn't in this file's current content (a removed block, a moved responsibility, a PR)? Yes → tombstone.
+**Sharpest discriminator:** does the comment reference a thing that isn't in this file's current content (a removed block, a moved responsibility, a PR)? Yes → tombstone.
 
 | Comment | Verdict | Why |
 |---|---|---|
@@ -39,7 +39,7 @@ Code that is dead but still in the tree, or that re-solves an already-solved pro
 
 **Rule:** Before writing, check whether a well-maintained solution already exists — stdlib, an established library, or an in-repo utility. Reuse it unless a *stated* reason rules it out.
 
-**Discriminator:** Is this a generic, already-solved problem (date math, retries, arg parsing, HTTP, serialization, path handling)? Yes → search first; a hand-rolled version is a maintenance liability someone else already carries, better.
+**Discriminator:** Is this a generic, already-solved problem (date math, retries, arg parsing, HTTP, serialization, path handling)? Yes → search first; a hand-rolled version re-shoulders a maintenance burden someone else already carries for you.
 
 Reuse isn't free, so weigh it honestly:
 

@@ -16,7 +16,7 @@ Before writing, **read 2-3 existing docs in the same category** to match their t
 
 ## Doc Types
 
-Pick the type before the shape — the four Diátaxis types answer different questions and want different shapes. Two questions place any doc: **action** (doing) or **cognition** (understanding)? **Study** (learning) or **work** (the task at hand)?
+Pick the type before the shape — the four Diátaxis types each want a different shape. Two questions place any doc: **action** (doing) or **cognition** (understanding)? **Study** (learning) or **work** (the task at hand)?
 
 | Type | Purpose | Shape | Which am I writing? |
 |------|---------|-------|---------------------|
@@ -54,7 +54,7 @@ Both trace to one source: **docstrings + type annotations**. The "use it" doc na
 
 ## Strictness Bars
 
-"Examples work" and "links resolve" only hold if a check enforces them. Each bar is a CI gate, stated tool-free — what catches which failure:
+"Examples work" and "links resolve" only hold if a check enforces them. Each bar is a CI gate, stated tool-free:
 
 | Bar | What it catches |
 |-----|-----------------|
@@ -65,7 +65,7 @@ Both trace to one source: **docstrings + type annotations**. The "use it" doc na
 | Nav / table-of-contents completeness | Orphan and unlisted pages nothing links to |
 | Cross-reference check | Broken reference-style pointers to renamed or removed targets |
 
-Language toolchain that implements these bars (strict build, link and snippet checks, API docs generated from docstrings): see `pythonica:python-api-docs`.
+Language toolchain implementing these bars (plus API docs generated from docstrings): see `pythonica:python-api-docs`.
 
 ## Conventions
 
