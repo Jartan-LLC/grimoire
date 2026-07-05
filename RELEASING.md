@@ -16,9 +16,9 @@ needs a version bump**.
 
 A plugin's version lives in one place: the `"version"` field in
 `plugins/<name>/.claude-plugin/plugin.json`. Claude Code resolves the version from
-`plugin.json` first and the marketplace entry second, warning on neither, so a
-`version` in the marketplace entry would only mask the manifest -- the marketplace
-entries deliberately carry none.
+`plugin.json` first and the marketplace entry only as a fallback, so a marketplace
+`version` is redundant when it matches and silently overridden by the manifest when
+it drifts -- the marketplace entries deliberately carry none.
 
 When you change any content under `plugins/<name>/` (skills, agents, commands,
 hooks, README), bump it:
@@ -46,7 +46,8 @@ claude plugin tag --push
 
 `claude plugin tag` derives the tag from `plugin.json`, requires a clean working
 tree under the plugin directory, and refuses if the tag already exists; add
-`--dry-run` to preview. If the `claude` CLI is unavailable, tag by hand:
+`--dry-run` to preview. (Its check that `plugin.json` and the marketplace entry
+agree on the version is moot here -- the marketplace entries carry none.) If the `claude` CLI is unavailable, tag by hand:
 
 ```bash
 git tag <name>--v<version>
