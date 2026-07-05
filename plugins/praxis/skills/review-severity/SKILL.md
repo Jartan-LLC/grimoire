@@ -96,8 +96,8 @@ gate only decides whether to surface it: report if >80% sure; for security, lowe
 discard a genuine-but-uncertain severe issue.
 
 The machine-readable record is **two orthogonal fields**: `severity` (an ordered enum) and
-`status` (`confirmed` | `suspected-severe`). A CI consumer thresholds *severity* on confirmed
-findings (block if >= Critical) and routes suspected-severe to a non-blocking flagged-question
+`status` (`confirmed` | `suspected`). A CI consumer thresholds *severity* on confirmed
+findings (block if >= Critical) and routes suspected to a non-blocking flagged-question
 channel. Folding confidence into severity -- or emitting severity with no status field --
 collapses the gate and is forbidden.
 

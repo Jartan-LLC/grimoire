@@ -1153,8 +1153,7 @@ def safe_validate(data: dict) -> User | None:
     try:
         return User.model_validate(data)
     except ValidationError as e:
-        # Log validation errors
-        logger.error(f"Validation failed: {e.errors()}")
+        logger.exception("Validation failed: %s", e.errors())
         return None
 
 def validate_with_details(data: dict):
