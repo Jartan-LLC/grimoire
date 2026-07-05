@@ -22,6 +22,7 @@ Launch relevant reviewer agents based on changed files:
 - Frontend changes -> `frontend-reviewer`
 - Documentation changes, or code that changes public behavior -> `doc-reviewer`
 - CI/test changes -> `test-reviewer`
+- Non-trivial code changes -> `structure-reviewer`
 - All changes -> `general-reviewer`
 
 ### 3. Verify Documentation

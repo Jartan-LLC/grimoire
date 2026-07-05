@@ -30,6 +30,7 @@ automatically. To install it explicitly, run `/plugin install gitwise`.
 - **backend-reviewer** -- reviews backend code for patterns, async correctness, security
 - **frontend-reviewer** -- reviews frontend code for design system compliance, accessibility
 - **general-reviewer** -- reviews code for general quality, naming, organization
+- **structure-reviewer** -- reviews structure and readability: decomposition, coupling, interfaces, data modeling, control flow, naming
 - **test-reviewer** -- reviews test coverage and CI/CD correctness
 - **doc-reviewer** -- reviews documentation for conciseness, accuracy, consistency
 
@@ -37,9 +38,11 @@ automatically. To install it explicitly, run `/plugin install gitwise`.
 
 - **api-error-patterns** -- error response format, status codes
 - **code-hygiene** -- zombie code (dead/reinvented/orphaned), tombstone comments
+- **code-structure** -- structural craft: decompose on responsibility not size, deep modules, cohesion/coupling/interface/error-contract/data shape
 - **docs-patterns** -- writing style, structure, brevity
 - **frontend-patterns** -- design tokens, mobile-first, component isolation
 - **logging-patterns** -- log levels, formatting, structured output
+- **readable-code** -- local clarity: control-flow shape, naming for the reader, reading order and working set
 - **review-severity** -- Critical/Important/Minor by consequence-if-shipped
 - **testing-patterns** -- integration tests, fixture composition, canary markers
 

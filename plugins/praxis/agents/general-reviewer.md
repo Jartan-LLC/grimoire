@@ -48,6 +48,7 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 
 ## Deferred
 
+- Structural or readability shaping (decomposition, coupling, interfaces, data, control flow, naming) -> `structure-reviewer` owns it
 - Behavior changed but docs stale -> flag the location; `doc-reviewer` owns doc-code mismatch
 
 ## Output Format
