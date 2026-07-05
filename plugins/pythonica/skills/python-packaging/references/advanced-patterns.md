@@ -1,4 +1,4 @@
-# Python Packaging — Advanced Reference
+# Python Packaging -- Advanced Reference
 
 Advanced packaging patterns including data files, namespace packages, C extensions, version management, testing installation, documentation templates, and distribution workflows.
 
@@ -40,15 +40,15 @@ data = files("my_package").joinpath("data/file.txt").read_text()
 ```
 # Package 1: company-core
 company/
-└── core/
-    ├── __init__.py
-    └── models.py
+`-- core/
+    |-- __init__.py
+    `-- models.py
 
 # Package 2: company-api
 company/
-└── api/
-    ├── __init__.py
-    └── routes.py
+`-- api/
+    |-- __init__.py
+    `-- routes.py
 ```
 
 **Do NOT include __init__.py in the namespace directory (company/):**

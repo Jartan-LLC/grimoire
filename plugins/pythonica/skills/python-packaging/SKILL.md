@@ -43,15 +43,15 @@ Comprehensive guide to creating, structuring, and distributing Python packages u
 
 ```
 my-package/
-├── pyproject.toml
-├── README.md
-├── LICENSE
-├── src/
-│   └── my_package/
-│       ├── __init__.py
-│       └── module.py
-└── tests/
-    └── test_module.py
+|-- pyproject.toml
+|-- README.md
+|-- LICENSE
+|-- src/
+|   `-- my_package/
+|       |-- __init__.py
+|       `-- module.py
+`-- tests/
+    `-- test_module.py
 ```
 
 ### Minimal pyproject.toml
@@ -85,22 +85,22 @@ dev = [
 
 ```
 my-package/
-├── pyproject.toml
-├── README.md
-├── LICENSE
-├── .gitignore
-├── src/
-│   └── my_package/
-│       ├── __init__.py
-│       ├── core.py
-│       ├── utils.py
-│       └── py.typed          # For type hints
-├── tests/
-│   ├── __init__.py
-│   ├── test_core.py
-│   └── test_utils.py
-└── docs/
-    └── index.md
+|-- pyproject.toml
+|-- README.md
+|-- LICENSE
+|-- .gitignore
+|-- src/
+|   `-- my_package/
+|       |-- __init__.py
+|       |-- core.py
+|       |-- utils.py
+|       `-- py.typed          # For type hints
+|-- tests/
+|   |-- __init__.py
+|   |-- test_core.py
+|   `-- test_utils.py
+`-- docs/
+    `-- index.md
 ```
 
 **Advantages:**
@@ -120,13 +120,13 @@ where = ["src"]
 
 ```
 my-package/
-├── pyproject.toml
-├── README.md
-├── my_package/
-│   ├── __init__.py
-│   └── module.py
-└── tests/
-    └── test_module.py
+|-- pyproject.toml
+|-- README.md
+|-- my_package/
+|   |-- __init__.py
+|   `-- module.py
+`-- tests/
+    `-- test_module.py
 ```
 
 **Simpler but:**
@@ -138,15 +138,15 @@ my-package/
 
 ```
 project/
-├── pyproject.toml
-├── packages/
-│   ├── package-a/
-│   │   └── src/
-│   │       └── package_a/
-│   └── package-b/
-│       └── src/
-│           └── package_b/
-└── tests/
+|-- pyproject.toml
+|-- packages/
+|   |-- package-a/
+|   |   `-- src/
+|   |       `-- package_a/
+|   `-- package-b/
+|       `-- src/
+|           `-- package_b/
+`-- tests/
 ```
 
 ## Detailed patterns and worked examples

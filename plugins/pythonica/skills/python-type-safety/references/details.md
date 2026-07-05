@@ -1,4 +1,4 @@
-# python-type-safety — detailed worked examples
+# python-type-safety -- detailed worked examples
 
 ## Advanced Patterns
 

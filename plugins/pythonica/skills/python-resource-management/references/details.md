@@ -1,4 +1,4 @@
-# python-resource-management — detailed worked examples
+# python-resource-management -- detailed worked examples
 
 ## Advanced Patterns
 
@@ -86,12 +86,12 @@ def stream_with_accumulation(
 
 ### Pattern 7: Efficient String Accumulation
 
-Avoid O(n²) string concatenation when accumulating.
+Avoid O(n^2) string concatenation when accumulating.
 
 ```python
 def accumulate_stream(stream) -> str:
     """Efficiently accumulate stream content."""
-    # BAD: O(n²) due to string immutability
+    # BAD: O(n^2) due to string immutability
     # content = ""
     # for chunk in stream:
     #     content += chunk  # Creates new string each time

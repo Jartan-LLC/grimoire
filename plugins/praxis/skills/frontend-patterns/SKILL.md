@@ -1,12 +1,12 @@
 ---
 name: frontend-patterns
-description: CSS design system principles — token usage, semantic layering, mobile-first, component isolation.
+description: CSS design system principles -- token usage, semantic layering, mobile-first, component isolation.
 when_to_use: Working on CSS, styling, design tokens, or frontend component structure.
 ---
 
 # Frontend Design Principles
 
-Core principles for maintaining consistent, maintainable frontend code. Framework-agnostic — adapt examples to your stack.
+Core principles for maintaining consistent, maintainable frontend code. Framework-agnostic -- adapt examples to your stack.
 
 ## 1. Single Source of Truth
 
@@ -31,7 +31,7 @@ SDK.configure({ buttonColor: '#5b5956' }); /* no */
 
 ## 2. Variable-First Development
 
-If it's a design value, it's a variable. Colors, spacing, fonts, shadows, radii, and breakpoints are always variables — even if used once.
+If it's a design value, it's a variable. Colors, spacing, fonts, shadows, radii, and breakpoints are always variables -- even if used once.
 
 ```css
 .card { padding: var(--space-xl); border-radius: var(--radius-lg); }     /* yes */
@@ -54,8 +54,8 @@ Base tokens -> Semantic tokens -> Component usage. Define primitives, map to pur
 :root { --color-primary: var(--color-charcoal); }
 
 /* Layer 3: Component usage */
-.button { background: var(--color-primary); }     /* yes — semantic */
-.button { background: var(--color-charcoal); }    /* no — base primitive */
+.button { background: var(--color-primary); }     /* yes -- semantic */
+.button { background: var(--color-charcoal); }    /* no -- base primitive */
 ```
 
 ## 4. Separation of Concerns
@@ -63,10 +63,10 @@ Base tokens -> Semantic tokens -> Component usage. Define primitives, map to pur
 CSS owns presentation. Never use inline styles. State changes toggle CSS classes, not inline styles.
 
 ```css
-/* yes — class-driven state */
+/* yes -- class-driven state */
 .card.selected { border-color: var(--color-accent); }
 
-/* no — inline style state */
+/* no -- inline style state */
 /* style={selected ? 'border: 2px solid blue;' : ''} */
 ```
 
@@ -92,18 +92,18 @@ Base styles target mobile. Enhance upward with `min-width` media queries. Never 
 }
 ```
 
-Desktop-first (`max-width`) leads to undoing styles at smaller sizes — harder to maintain and reason about.
+Desktop-first (`max-width`) leads to undoing styles at smaller sizes -- harder to maintain and reason about.
 
 ## 8. Explicit Over Implicit
 
 Be clear about sizing, positioning, and state.
 
 ```css
-.container { max-width: var(--max-width); margin: 0 auto; }    /* yes — explicit */
-.container { width: 90%; }                                      /* no — 90% of what? */
+.container { max-width: var(--max-width); margin: 0 auto; }    /* yes -- explicit */
+.container { width: 90%; }                                      /* no -- 90% of what? */
 
-.modal { position: fixed; top: 50%; left: 50%; }               /* yes — explicit */
-.modal { position: absolute; }                                  /* no — relative to what? */
+.modal { position: fixed; top: 50%; left: 50%; }               /* yes -- explicit */
+.modal { position: absolute; }                                  /* no -- relative to what? */
 ```
 
 ## 9. Consistency Over Cleverness
@@ -111,10 +111,10 @@ Be clear about sizing, positioning, and state.
 Prefer boring, predictable patterns over novel solutions. When solving similar problems, use the same approach. Before creating a new pattern, check if an existing one can be adapted.
 
 ```html
-<!-- yes — consistent pattern for all cards -->
+<!-- yes -- consistent pattern for all cards -->
 <div class="card"><h3 class="card-title">...</h3></div>
 
-<!-- no — different naming for each similar component -->
+<!-- no -- different naming for each similar component -->
 <div class="service-box"><h3 class="service-heading">...</h3></div>
 <div class="product-container"><h3 class="product-name">...</h3></div>
 ```

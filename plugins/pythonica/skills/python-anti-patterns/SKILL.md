@@ -331,7 +331,7 @@ def append_to(item, items=[]):
     return items
 
 append_to(1)  # [1]
-append_to(2)  # [1, 2] — not [2]!
+append_to(2)  # [1, 2] -- not [2]!
 ```
 
 **Fix:** Use `None` and create a new object inside the function.

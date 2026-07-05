@@ -1,4 +1,4 @@
-# python-resilience — detailed worked examples
+# python-resilience -- detailed worked examples
 
 ## Advanced Patterns
 

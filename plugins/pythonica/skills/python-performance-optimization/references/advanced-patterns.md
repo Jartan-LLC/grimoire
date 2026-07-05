@@ -1,4 +1,4 @@
-# Python Performance Optimization — Advanced Reference
+# Python Performance Optimization -- Advanced Reference
 
 Advanced optimization techniques including NumPy vectorization, caching, memory management, parallelization, async I/O, database optimization, and benchmarking tools.
 

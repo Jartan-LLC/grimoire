@@ -1,6 +1,7 @@
 {
   "name": "pythonica",
-  "description": "Comprehensive Python development — patterns, testing, async, error handling, packaging, configuration, type safety, resilience, observability, Pydantic, and more",
+  "version": "1.0.0",
+  "description": "Comprehensive Python development -- patterns, testing, async, error handling, packaging, configuration, type safety, resilience, observability, Pydantic, and more",
   "author": {
     "name": "Jartan LLC",
     "url": "https://github.com/Jartan-LLC"

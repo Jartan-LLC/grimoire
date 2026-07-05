@@ -1,4 +1,4 @@
-# python-packaging — detailed patterns and worked examples
+# python-packaging -- detailed patterns and worked examples
 
 ## Complete pyproject.toml Examples
 

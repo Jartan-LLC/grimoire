@@ -1,6 +1,6 @@
 # Claudivis
 
-The key to Claude Code configuration — how agents, skills, and commands work together.
+The key to Claude Code configuration -- how agents, skills, and commands work together.
 
 ## Installation
 
@@ -13,7 +13,7 @@ The key to Claude Code configuration — how agents, skills, and commands work t
 
 ### Skills
 
-- **claude-config** — the three configuration primitives (agents = roles, skills = knowledge, commands = workflows), how they interact, naming conventions, and how to test the distinction
+- **claude-config** -- the three configuration primitives (agents = roles, skills = knowledge, commands = workflows), how they interact, naming conventions, and how to test the distinction
 
 ## License
 

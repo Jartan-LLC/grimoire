@@ -1,4 +1,4 @@
-# async-python-patterns — detailed worked examples
+# async-python-patterns -- detailed worked examples
 
 ## Advanced Patterns
 

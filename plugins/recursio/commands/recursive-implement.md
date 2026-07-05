@@ -25,9 +25,9 @@ Spawn a `recursive-orchestrator`. The prompt should contain:
 ```
 [Project description or plan file path]
 
-[Conversation context if any — requirements, constraints, decisions made]
+[Conversation context if any -- requirements, constraints, decisions made]
 
-[Existing project context if any — language, conventions, key files]
+[Existing project context if any -- language, conventions, key files]
 
 Working directory: [cwd]
 ```
@@ -39,5 +39,5 @@ Relay the orchestrator's final report to the user.
 ## Failure Recovery
 
 If the orchestrator reports a failure, present the context to the user. On re-run:
-- The wave plan persists in `.claude/workspace/` — pass the file path to skip re-planning
-- Completed source files and tests remain on disk — the orchestrator can build on them
+- The wave plan persists in `.claude/workspace/` -- pass the file path to skip re-planning
+- Completed source files and tests remain on disk -- the orchestrator can build on them

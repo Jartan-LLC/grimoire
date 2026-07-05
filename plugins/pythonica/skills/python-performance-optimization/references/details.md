@@ -1,4 +1,4 @@
-# python-performance-optimization — detailed patterns and worked examples
+# python-performance-optimization -- detailed patterns and worked examples
 
 ## Profiling Tools
 

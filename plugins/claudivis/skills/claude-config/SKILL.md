@@ -1,12 +1,12 @@
 ---
 name: claude-config
 description: How agents, skills, and commands work in Claude Code projects.
-when_to_use: Creating or modifying files in .claude/ — agents, skills, commands, or settings.
+when_to_use: Creating or modifying files in .claude/ -- agents, skills, commands, or settings.
 ---
 
 # Claude Configuration Primitives
 
-Three distinct configuration types in `.claude/`. Each has a clear purpose — never conflate them.
+Three distinct configuration types in `.claude/`. Each has a clear purpose -- never conflate them.
 
 ## Agents = Roles
 
@@ -17,7 +17,7 @@ An agent defines **who you are**. It shapes focus, identity, and constraints for
 - What the agent cares about (evaluation criteria, output format, confidence thresholds)
 - Runs in an isolated subagent context
 
-**Agents are not workflows.** They define a lens for approaching work, not steps to follow. A backend-reviewer says "you care about async correctness and session handling" — not "Step 1: read the diff."
+**Agents are not workflows.** They define a lens for approaching work, not steps to follow. A backend-reviewer says "you care about async correctness and session handling" -- not "Step 1: read the diff."
 
 **Good:** Role identity, focus areas, evaluation criteria, output format, what to read for context.
 **Bad:** Step-by-step procedures, bash scripts, workflow orchestration.
@@ -33,7 +33,7 @@ A skill defines **what you know**. It provides conventions, recommendations, how
 
 **Skills are not workflows.** They provide knowledge for good decision-making.
 
-A skill MAY include a sequence when it's critical reference — but as illustrative guidance, not a script to execute.
+A skill MAY include a sequence when it's critical reference -- but as illustrative guidance, not a script to execute.
 
 **Good:** Conventions, patterns, templates, recommendations, how-tos, reference material.
 **Bad:** Rigid step-by-step procedures, orchestration logic, state management.
@@ -60,9 +60,9 @@ A command defines **what to do**. An explicit, purposeful sequence triggered by 
 
 ## Naming
 
-- **Agents** answer "who is this?" — `backend-reviewer`, `issue-planner`
-- **Skills** answer "what does this teach?" — `logging-patterns`, `github-conventions`
-- **Commands** answer "what does this do?" — `plan-issue`, `review-pr`
+- **Agents** answer "who is this?" -- `backend-reviewer`, `issue-planner`
+- **Skills** answer "what does this teach?" -- `logging-patterns`, `github-conventions`
+- **Commands** answer "what does this do?" -- `plan-issue`, `review-pr`
 
 Naming should be predictable within a category but not forced into a single suffix.
 
@@ -76,4 +76,4 @@ If a file does two of these, split it.
 
 ## Workspace
 
-`.claude/workspace/` is the conventional path for working documents — plans, research, scratch files. Skills and commands that need to write intermediate files should use this directory.
+`.claude/workspace/` is the conventional path for working documents -- plans, research, scratch files. Skills and commands that need to write intermediate files should use this directory.

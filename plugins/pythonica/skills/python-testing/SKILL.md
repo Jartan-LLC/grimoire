@@ -588,20 +588,20 @@ def test_with_tmpdir(tmpdir):
 
 ```
 tests/
-├── conftest.py                 # Shared fixtures
-├── __init__.py
-├── unit/                       # Unit tests
-│   ├── __init__.py
-│   ├── test_models.py
-│   ├── test_utils.py
-│   └── test_services.py
-├── integration/                # Integration tests
-│   ├── __init__.py
-│   ├── test_api.py
-│   └── test_database.py
-└── e2e/                        # End-to-end tests
-    ├── __init__.py
-    └── test_user_flow.py
+|-- conftest.py                 # Shared fixtures
+|-- __init__.py
+|-- unit/                       # Unit tests
+|   |-- __init__.py
+|   |-- test_models.py
+|   |-- test_utils.py
+|   `-- test_services.py
+|-- integration/                # Integration tests
+|   |-- __init__.py
+|   |-- test_api.py
+|   `-- test_database.py
+`-- e2e/                        # End-to-end tests
+    |-- __init__.py
+    `-- test_user_flow.py
 ```
 
 ### Test Classes

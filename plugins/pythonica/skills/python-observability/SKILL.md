@@ -203,6 +203,28 @@ async def call_downstream_service(endpoint: str, data: dict) -> dict:
         return response.json()
 ```
 
+### Pattern 5: Deferred Log Message Formatting
+
+Never f-string a log message. Pass the template and its values as separate args so formatting is *deferred* -- it runs only when the record's level is enabled (`Logger.isEnabledFor` short-circuits before interpolation; an f-string, or `%`/`str.format`/`+` pre-formatting, pays that cost even for filtered-out records). Two mechanisms:
+
+```python
+stdlib_logger.info("user=%s orders=%s", user_id, order_count)              # stdlib: logger interpolates %s args
+logger.info("orders processed", user_id=user_id, order_count=order_count)  # structlog: constant event + structured kwargs
+stdlib_logger.info(f"user={user_id} orders={order_count}")                 # BAD: f-string renders eagerly, every call
+```
+
+`%s` args are *not* the structlog form: this skill's processor chain (Pattern 1) omits `PositionalArgumentsFormatter`, so `logger.info("user=%s", user_id)` stores the literal `user=%s` under `positional_args` instead of interpolating. Use kwargs with structlog, `%s` args with stdlib.
+
+Ruff `flake8-logging-format` (`G`) enforces this: `G004` flags f-strings, `G001`/`G002`/`G003` flag `str.format`/`%`/`+` pre-formatting.
+
+For exceptions use `logger.exception` (= `error(..., exc_info=True)`) -- it attaches the traceback; keep deferred `%s` args:
+
+```python
+except OSError:
+    stdlib_logger.exception("save failed, record_id=%s", record.id)
+    raise
+```
+
 ## Detailed worked examples and patterns
 
 Detailed sections (starting with `## Advanced Patterns`) live in `references/details.md`. Read that file when the navigation summary above is insufficient.
@@ -219,3 +241,4 @@ Detailed sections (starting with `## Advanced Patterns`) live in `references/det
 8. **Separate concerns** - Observability code shouldn't pollute business logic
 9. **Test your observability** - Verify logs and metrics in integration tests
 10. **Set up alerts** - Metrics are useless without alerting
+11. **Defer log formatting** - Pass `%s` args (stdlib) or kwargs (structlog); never f-string a log message (ruff `G004`)
