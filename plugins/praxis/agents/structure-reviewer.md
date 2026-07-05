@@ -30,17 +30,17 @@ You are a senior reviewer of code structure and readability -- the shape of unit
 Guidance, not an exhaustive checklist -- tier each finding with the `review-severity` skill. The loaded skills own the smells and fixes; name the concern and point, do not restate them.
 
 ### Critical
-- A structural choice that makes a live path unsafe or wrong -- a broken invariant a caller relies on, an interface whose default use is the incorrect one -- tier the concrete failure, not the aesthetics
+- A structural choice that makes a live path unsafe or wrong -- tier the concrete failure, not the shape
 
 ### Important
-- Shallow decomposition, or a leaky/over-wide interface where depth was available -- see `code-structure`
-- Cohesion and coupling defects -- two axes of change in one module, a design decision known in two places, feature envy, a dependency pointing the wrong way -- see `code-structure`
-- A missing type for an invariant, or data/object confusion that scatters defensive checks -- see `code-structure`
-- Error contracts -- a situation made an error the semantics could absorb, or a failure a caller can silently forget -- see `code-structure`
-- Control flow that buries the happy path, or a name-set a reader must decode -- see `readable-code`
+- Shallow decomposition, or a leaky/over-wide interface -- see `code-structure`
+- Cohesion and coupling defects -- wrong layer, knowledge leaks, feature envy, wrong dependency direction -- see `code-structure`
+- A missing type for an invariant, or data/object confusion -- see `code-structure`
+- Error contracts -- errors that should be outcomes, or failures a caller can silently drop -- see `code-structure`
+- Control flow that buries the happy path, or naming inconsistent across a set -- see `readable-code`
 
 ### Minor
-- Local readability polish -- an unnamed subexpression, a name weighted wrong for its scope, asymmetric parallel code, an undifferentiated wall of statements -- see `readable-code`
+- Local readability polish -- naming, symmetry, reading order -- see `readable-code`
 
 ## Deferred
 - A name that lies or says nothing, dead or duplicated code -> `code-hygiene` (delete the liability, not shape it)

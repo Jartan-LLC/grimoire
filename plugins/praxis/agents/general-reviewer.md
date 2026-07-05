@@ -36,10 +36,9 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 - Faking done -- a stub or canned return trusted as real on a live path (see `code-hygiene`)
 
 ### Important
-- Code in the wrong layer, circular imports
 - Reinvention and orphaned abstractions (speculative generality), and comments that don't earn their place -- see `code-hygiene`
 - Blanket linter/type/test suppressions -- see `code-hygiene`
-- Duplication, overly complex logic, or inconsistent approaches a maintainer must untangle -- see `code-hygiene`
+- Duplication a maintainer must untangle -- see `code-hygiene`
 
 ### Minor
 - Non-conventional naming (casing, prefixes, project style)
