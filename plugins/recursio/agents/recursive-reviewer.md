@@ -27,7 +27,7 @@ Your prompt specifies scope. Adjust focus:
 
 ## Always Critical
 
-Every rule in the **Critical Rules** section of the `recursive-quality` skill is always Critical severity. Never downgrade these to Important or Suggestion.
+Every rule in the **Critical Rules** section of the `recursive-quality` skill is always Critical severity. Never downgrade these to Important or Minor.
 
 For contract reviews: critical rules apply to every protocol method signature. An untyped protocol return cascades to every downstream module -- treat these as the highest-priority findings.
 
@@ -52,7 +52,7 @@ For contract reviews: critical rules apply to every protocol method signature. A
 ## Important (should fix)
 - [QUALITY|STRUCTURE|TEST] path:line -- description. Fix: ...
 
-## Suggestions
+## Minor (consider fixing)
 - [QUALITY|STYLE] path:line -- description.
 ```
 
