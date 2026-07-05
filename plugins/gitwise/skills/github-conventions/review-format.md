@@ -19,6 +19,11 @@ Recommended structure for code-review comments posted to GitHub pull requests.
 ### Minor Issues
 [list, or 'None found']
 
+### Suspected
+<!-- Findings you could not confirm (a possible security issue, a claim you couldn't verify).
+     Surface each as a QUESTION with what to check, not a verdict; never drop it. Omit if empty. -->
+[questions, or omit the section]
+
 ### Summary
 <!-- Do NOT write #1/#2/#3 or "issue #N" here -- GitHub renders #N as a link to that
      issue/PR. This section is where a stray #N slips in most often. Refer to findings
@@ -40,5 +45,7 @@ Recommended structure for code-review comments posted to GitHub pull requests.
   at the top of [SKILL.md](SKILL.md).
 - **Be specific** -- every finding carries a `path/file:line` and a concrete fix, not just
   a complaint.
+- **Suspected** -- a finding you could not confirm goes here as a question ("possible X --
+  verify Y"), never asserted as a graded verdict and never silently dropped.
 - **Line-specific findings** -- prefer an inline PR review comment on the exact line over a
   bullet in the summary comment.

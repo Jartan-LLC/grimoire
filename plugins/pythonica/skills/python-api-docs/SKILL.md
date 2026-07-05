@@ -99,7 +99,7 @@ exclude_patterns = ["_build"]
 html_theme = "furo"
 ```
 
-**MkDocs alternative -- flagged.** `mkdocstrings` (with Material for MkDocs) is the MkDocs-native equivalent, but the MkDocs ecosystem is mid-transition. MkDocs 2.0 (announced Jan 2026) drops plugin support entirely, which breaks `mkdocstrings` and Material; Material has entered maintenance mode, and its successor **Zensical** is still `v0.0.x` with API-reference feature-parity in progress. **Prefer Sphinx today**; revisit Zensical once it reaches parity and stabilizes.
+**MkDocs alternative -- flagged.** `mkdocstrings` (with Material for MkDocs) is the MkDocs-native equivalent, but its theming/plugin ecosystem is in flux (an early successor, Zensical, is still `v0.0.x`), so API-reference feature-parity is a moving target. **Prefer Sphinx today**; revisit MkDocs once its stack settles.
 
 ### Pattern 2: Don't duplicate types
 
