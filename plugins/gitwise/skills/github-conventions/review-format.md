@@ -40,5 +40,8 @@ Recommended structure for code-review comments posted to GitHub pull requests.
   at the top of [SKILL.md](SKILL.md).
 - **Be specific** -- every finding carries a `path/file:line` and a concrete fix, not just
   a complaint.
+- **Suspected findings** -- the poster verifies each `suspected` finding before posting; one
+  that can't be verified is posted as a flagged question tagged `(suspected -- verify X)`,
+  not asserted (see `review-severity`).
 - **Line-specific findings** -- prefer an inline PR review comment on the exact line over a
   bullet in the summary comment.

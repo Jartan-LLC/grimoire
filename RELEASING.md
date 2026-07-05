@@ -14,13 +14,14 @@ needs a version bump**.
 
 ## Version-bump rules
 
-A plugin's version lives in **two** files that must always agree:
-
-- `plugins/<name>/.claude-plugin/plugin.json` -- the `"version"` field
-- `.claude-plugin/marketplace.json` -- the `"version"` field on that plugin's entry
+A plugin's version lives in one place: the `"version"` field in
+`plugins/<name>/.claude-plugin/plugin.json`. Claude Code resolves the version from
+`plugin.json` first and the marketplace entry second, warning on neither, so a
+`version` in the marketplace entry would only mask the manifest -- the marketplace
+entries deliberately carry none.
 
 When you change any content under `plugins/<name>/` (skills, agents, commands,
-hooks, README), bump both:
+hooks, README), bump it:
 
 - **PATCH** (`1.0.0` -> `1.0.1`) -- bug fixes, wording, non-behavioural tweaks
 - **MINOR** (`1.0.0` -> `1.1.0`) -- new skills/agents/commands, backward-compatible additions
@@ -28,11 +29,9 @@ hooks, README), bump both:
 
 Editing only a plugin's `marketplace.json` metadata (`description`, `keywords`)
 is **not** a bump trigger -- those fields sit outside `plugins/<name>/`, the only
-path the bump rule watches. (The entry's `version` still must match `plugin.json`
--- see lockstep below.)
+path the bump rule watches.
 
-Keep the bump and the two files in lockstep; both are enforced by review (see
-[Enforcement](#enforcement)).
+The bump is enforced by review (see [Enforcement](#enforcement)).
 
 ## Tag a release
 
@@ -45,11 +44,9 @@ cd plugins/<name>
 claude plugin tag --push
 ```
 
-`claude plugin tag` derives the tag from the manifest, verifies `plugin.json`
-and the marketplace entry agree on the version, requires a clean working tree
-under the plugin directory, and refuses if the tag already exists; add
-`--dry-run` to preview. If the `claude` CLI is unavailable, tag by hand --
-equivalent as long as the two files are already in lockstep:
+`claude plugin tag` derives the tag from `plugin.json`, requires a clean working
+tree under the plugin directory, and refuses if the tag already exists; add
+`--dry-run` to preview. If the `claude` CLI is unavailable, tag by hand:
 
 ```bash
 git tag <name>--v<version>
@@ -63,8 +60,7 @@ constraints resolve against (see [Dependencies](#dependencies)).
 
 There's no automated gate today -- version discipline is enforced by **PR review**.
 Before merging, confirm any plugin with changed content under `plugins/<name>/`
-has a bumped `version`, and that its `plugin.json` and `marketplace.json` entry
-agree. (A CI check could automate this later.)
+has a bumped `version` in its `plugin.json`. (A CI check could automate this later.)
 
 ## Dependencies
 

@@ -30,11 +30,11 @@ You are a senior QA engineer focused on test coverage, test quality, and CI/CD c
 Guidance, not an exhaustive checklist -- tier each finding with the `review-severity` skill.
 
 ### Critical
-- New functionality with no test coverage at all
-- Tests that trivially pass without exercising the code
-- Integration tests that assert implementation details instead of behavior
+- A test or CI change that breaks the build or blocks the pipeline (won't-run)
 
 ### Important
+- New functionality with no test coverage at all
+- Tests that trivially pass without exercising the code, or integration tests that assert implementation details instead of behavior
 - Tests missing required services (database, mail, etc.)
 - Only happy-path tested -- no error/failure path coverage on load-bearing logic
 - Tests that depend on external state or execution order
@@ -54,6 +54,7 @@ For each finding:
 File: path/file:line
 Issue: What's wrong
 Fix: How to fix it
+Status: confirmed, or `suspected -- verify X` if you could not confirm it
 ```
 
 ## Summary

@@ -182,11 +182,11 @@ With `intersphinx_mapping` set (Pattern 1), unresolved references like `socket.s
 
 ### Pattern 5: Run examples under doctest
 
-`sphinx.ext.doctest` tests the `>>>` blocks in autodoc-included docstrings *and* narrative pages, with no special markup. Share common imports via `doctest_global_setup`:
+`sphinx.ext.doctest` tests the `>>>` blocks in autodoc-included docstrings *and* narrative pages, with no special markup. Every example in a document shares one namespace seeded *only* by `doctest_global_setup` -- unlike stdlib `doctest`, it does not inject the defining module's globals, so an example must import the names it calls:
 
 ```python
-# docs/conf.py
-doctest_global_setup = "import mypkg"
+# docs/conf.py -- import the names your examples use, not just the package
+doctest_global_setup = "from mypkg import slugify"
 ```
 
 ```python
@@ -207,7 +207,7 @@ Sphinx's doctest defaults include `ELLIPSIS`, so `...` already matches unstable 
 
 ### Pattern 6: Gate the docs build in CI
 
-Run both builders under `-W` so warnings and failed examples block the merge:
+Run the HTML and doctest builders under `-W` (warnings and failed examples block the merge), plus `linkcheck` (dead external links block it):
 
 ```yaml
 # .github/workflows/ci.yml
@@ -218,9 +218,10 @@ docs:
     - uses: actions/setup-python@v6
       with:
         python-version: "3.12"
-    - run: pip install -e '.[docs]'          # runtime deps must import for autodoc
-    - run: sphinx-build -W -b html    docs docs/_build/html      # warnings -> errors
-    - run: sphinx-build -W -b doctest docs docs/_build/doctest    # examples must pass
+    - run: pip install -e '.[docs]'             # runtime deps must import for autodoc
+    - run: sphinx-build -W -b html      docs docs/_build/html       # warnings -> errors
+    - run: sphinx-build -W -b doctest   docs docs/_build/doctest     # examples must pass
+    - run: sphinx-build    -b linkcheck docs docs/_build/linkcheck   # external links resolve
 ```
 
 Add `docs` to the aggregate check job's `needs`, and audit `.[docs]` for CVEs alongside `.[dev]`.
@@ -233,7 +234,7 @@ Add `docs` to the aggregate check job's `needs`, and audit `.[docs]` for CVEs al
 4. **Executable examples** -- run `>>>` blocks under `sphinx.ext.doctest` (`-b doctest`) so they can't rot.
 5. **Cross-reference, don't hardcode** -- use `:func:`/`:class:` roles and `intersphinx_mapping` for external links.
 6. **Escape the thin-`__init__` trap** -- per-module `automodule` or autosummary `:recursive:`, never a bare package `automodule`.
-7. **Strict build in CI** -- `sphinx-build -W` for HTML and doctest; wire it into the check gate.
+7. **Strict build in CI** -- `sphinx-build -W` for HTML and doctest, plus `-b linkcheck` for external links; wire it into the check gate.
 8. **Prefer Sphinx today** -- the MkDocs/mkdocstrings/Zensical stack is mid-transition; revisit when it stabilizes.
 
 ## See Also

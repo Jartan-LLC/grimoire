@@ -21,9 +21,9 @@ logger = logging.getLogger(__name__)
 Use `%s`-style formatting arguments, not f-strings -- the message template is preserved for structured aggregator queries:
 
 ```python
-logger.info("Cleaned up %d expired sessions", count)                # yes
-logger.error("SMTP send failed for %s", email, exc_info=True)       # yes
-logger.info(f"Cleaned up {count} expired sessions")                 # no
+logger.info("Cleaned up %d expired sessions", count)  # yes
+logger.exception("SMTP send failed for %s", email)    # yes (in an except handler)
+logger.info(f"Cleaned up {count} expired sessions")   # no
 ```
 
 `%s` deferral is stdlib-specific -- `structlog` uses kwargs, not `%s`. See `pythonica:python-observability`.
@@ -35,7 +35,7 @@ logger.info(f"Cleaned up {count} expired sessions")                 # no
 | `DEBUG` | Cache hit/miss, slow-path internals (opt-in only) |
 | `INFO` | Startup/shutdown, admin bootstrap, cleanup counts, rate limit hits |
 | `WARNING` | Recoverable anomalies, swallowed exceptions, degraded operation |
-| `ERROR` | Unexpected exceptions on operational paths -- always with `exc_info=True` |
+| `ERROR` | Unexpected exceptions on operational paths -- use `logger.exception(...)` |
 | `CRITICAL` | Reserved for unusable state |
 
 ## Output

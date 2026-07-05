@@ -15,8 +15,11 @@ A Claude Code plugin marketplace. Each plugin lives in `plugins/<name>/` with a
   and `|` `` ` `` `-` for directory trees. Applies to prose, code fences, JSON
   descriptions, and hook scripts alike.
 - Read `README.md` and `RELEASING.md` before changing plugin structure or versioning
-- Keep `plugin.json` and `marketplace.json` versions in lockstep; bump on any content
-  change under `plugins/<name>/` (see `RELEASING.md` for PATCH/MINOR/MAJOR)
+- Version lives only in `plugin.json`; bump it on any content change under
+  `plugins/<name>/` (marketplace entries carry no `version` -- see `RELEASING.md`)
+- Declare a plugin `dependency` for every cross-plugin skill an agent loads in its
+  frontmatter `skills:` (a hard, resolve-or-fail load like `gitwise:github-conventions`);
+  a prose `see plugin:skill` pointer is soft and needs none
 - Update the affected READMEs and skills alongside any change
 - Reviewer agents tier findings with the `review-severity` skill; agents name their
   lens and reference skills -- they do not restate a skill's rules (agents = role,
@@ -54,10 +57,10 @@ There is no build system. Before declaring work done, confirm:
 # Pure ASCII -- must print nothing
 git grep -lP '[^\x00-\x7F]'
 
-# JSON parses
-python3 -c "import json,glob; [json.load(open(f)) for f in glob.glob('**/*.json', recursive=True)]"
+# JSON parses (git ls-files covers dotdir manifests; glob '**' skips them)
+python3 -c "import json,subprocess; [json.load(open(f)) for f in subprocess.run(['git','ls-files','*.json'],capture_output=True,text=True).stdout.split()]"
 ```
 
 Then confirm by inspection: each skill/agent frontmatter `name` matches its directory, and
-any plugin with changed content under `plugins/<name>/` has a bumped `version` in both
-`plugin.json` and its `marketplace.json` entry (kept in lockstep).
+any plugin with changed content under `plugins/<name>/` has a bumped `version` in
+`plugin.json`.

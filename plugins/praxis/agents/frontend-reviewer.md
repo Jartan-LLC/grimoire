@@ -57,6 +57,7 @@ For each finding:
 File: path/file:line
 Issue: What's wrong
 Fix: How to fix it
+Status: confirmed, or `suspected -- verify X` if you could not confirm it
 ```
 
 ## Summary
