@@ -11,16 +11,11 @@ CRITICAL: `#<number>` auto-links to issues/PRs on GitHub. Use `1.`/`2.`/`3.` for
 
 ## Authentication
 
-**Never reconfigure a repository's auth transport to get a command working.** If
-the remote is SSH and the key is missing, or the token lacks a scope, stop and
-ask for it to be fixed. Do not switch the remote to HTTPS, add a credential
-helper, or route around it with an explicit URL.
-
-A blocked push is a missing credential, not a transport problem. Working around
-it hides the real cause, silently changes config the user did not ask you to
-touch -- often globally, affecting every other repository -- and leaves the
-project on a transport nobody chose. The user is the only one who can add a key
-or grant a scope, so surface it and wait.
+**Never reconfigure auth transport to unblock a command.** Don't switch the remote
+between SSH and HTTPS, add a credential helper, or push to an explicit URL. A
+missing key or token scope is a missing credential, not a transport problem --
+only the user can supply it, and working around it changes config they never asked
+you to touch, often globally. Stop and ask.
 
 ## Branches
 
