@@ -4,9 +4,18 @@ Comprehensive Python development -- patterns, testing, async, error handling, pa
 
 ## Installation
 
+Claude Code:
+
 ```
 /plugin marketplace add Jartan-LLC/grimoire
 /plugin install pythonica
+```
+
+Codex:
+
+```
+codex plugin marketplace add Jartan-LLC/grimoire
+codex plugin add pythonica@grimoire
 ```
 
 ## Skills

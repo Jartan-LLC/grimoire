@@ -1,0 +1,7 @@
+# Codex reads AGENTS.md, not CLAUDE.md. Rather than keep a second instructions
+# file in sync, or a symlink that needs Developer Mode on Windows, point Codex at
+# the one we already maintain. Codex tries AGENTS.override.md and AGENTS.md
+# first, so adding either later takes precedence without touching this.
+#
+# Project-local config is ignored until the directory is trusted.
+project_doc_fallback_filenames = ["CLAUDE.md"]

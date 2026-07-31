@@ -2,6 +2,7 @@
 name: python-api-docs
 description: Render Python docstrings into a browsable, published API reference with Sphinx, autodoc, napoleon, and MyST.
 when_to_use: Setting up an API reference site, wiring Sphinx + autodoc + napoleon, running docstring examples under doctest, or adding a strict docs build as a CI gate.
+user-invocable: false
 ---
 
 # Python API Documentation

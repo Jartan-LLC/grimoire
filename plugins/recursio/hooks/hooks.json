@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const r = process.env.PLUGIN_ROOT; if (r) require(r + '/hooks/scripts/sync-codex-agents.js')\""
+          }
+        ],
+        "description": "Install this plugin's Codex agent roles (no-op outside Codex)"
+      }
+    ]
+  }
+}

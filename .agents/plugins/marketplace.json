@@ -1,0 +1,48 @@
+{
+  "name": "grimoire",
+  "interface": {
+    "displayName": "Grimoire"
+  },
+  "plugins": [
+    {
+      "name": "claudivis",
+      "source": {
+        "source": "local",
+        "path": "./plugins/claudivis"
+      },
+      "category": "Development"
+    },
+    {
+      "name": "gitwise",
+      "source": {
+        "source": "local",
+        "path": "./plugins/gitwise"
+      },
+      "category": "Development"
+    },
+    {
+      "name": "praxis",
+      "source": {
+        "source": "local",
+        "path": "./plugins/praxis"
+      },
+      "category": "Development"
+    },
+    {
+      "name": "pythonica",
+      "source": {
+        "source": "local",
+        "path": "./plugins/pythonica"
+      },
+      "category": "Development"
+    },
+    {
+      "name": "recursio",
+      "source": {
+        "source": "local",
+        "path": "./plugins/recursio"
+      },
+      "category": "Development"
+    }
+  ]
+}

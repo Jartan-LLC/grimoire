@@ -59,9 +59,11 @@ constraints resolve against (see [Dependencies](#dependencies)).
 
 ## Enforcement
 
-There's no automated gate today -- version discipline is enforced by **PR review**.
-Before merging, confirm any plugin with changed content under `plugins/<name>/`
-has a bumped `version` in its `plugin.json`. (A CI check could automate this later.)
+Version discipline is enforced by **PR review**. Before merging, confirm any
+plugin with changed content under `plugins/<name>/` has a bumped `version` in its
+`plugin.json`. CI runs the `CLAUDE.md` Verify block on every pull request, but
+that covers ASCII, JSON and generated-file drift -- not the bump rule, which
+still needs a human. (A CI check could automate it later.)
 
 ## Dependencies
 
@@ -92,6 +94,25 @@ dependency must be tagged **before or with** the plugin that requires it -- tag
 has no version to match. See the upstream
 [dependency guide](https://code.claude.com/docs/en/plugin-dependencies) for
 cross-marketplace rules and conflict resolution.
+
+## Codex
+
+Codex consumes this repo as a marketplace too, so releasing has a second axis.
+Verified against codex-cli 0.146.0:
+
+- **Version bumps do reach Codex users.** The plugin cache is keyed by version
+  (`~/.codex/plugins/cache/<marketplace>/<plugin>/<version>`), and an installed
+  plugin follows whatever version the marketplace snapshot carries. The bump rule
+  above therefore applies unchanged.
+- **The `{plugin-name}--v{version}` tags do not.** Codex tracks a git ref for the
+  marketplace, not our tags, and refreshes on `codex plugin marketplace upgrade`.
+  The tags stay a Claude Code concern, as do `dependencies` -- Codex ignores
+  those, which is why `praxis` documents installing `gitwise` explicitly.
+- **The Codex files are generated -- never hand-edit them.** That means
+  `plugins/<name>/.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`,
+  and `plugins/<name>/codex/agents/*.toml`. Run `scripts/generate-codex.py` after
+  any change to a plugin's name, version, description, keywords, category, or
+  agents, and commit the result. `--check` fails when they are stale or orphaned.
 
 ## Release channels
 

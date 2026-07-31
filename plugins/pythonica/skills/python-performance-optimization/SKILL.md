@@ -2,6 +2,7 @@
 name: python-performance-optimization
 description: Profile and optimize Python code using cProfile, memory profilers, and performance best practices.
 when_to_use: Debugging slow Python code, optimizing bottlenecks, or improving application performance.
+user-invocable: false
 ---
 
 # Python Performance Optimization

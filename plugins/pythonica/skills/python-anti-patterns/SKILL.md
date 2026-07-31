@@ -2,6 +2,7 @@
 name: python-anti-patterns
 description: Common Python anti-patterns and a pre-merge review checklist.
 when_to_use: Reviewing Python code, finalizing implementations, or debugging issues that might stem from known bad practices.
+user-invocable: false
 ---
 
 # Python Anti-Patterns Checklist

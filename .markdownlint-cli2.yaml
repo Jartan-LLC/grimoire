@@ -1,0 +1,15 @@
+# markdownlint config -- lints Markdown structure/consistency (Prettier is off
+# for Markdown; this does NOT reformat). Tune rules to taste.
+config:
+  default: true
+  MD013: false # line length -- tables and prose legitimately run long
+  MD024:
+    siblings_only: true # repeated headings under sibling sections are fine
+  MD046: false # code-block style -- skills mix fenced and indented blocks
+  MD060: false # table-column-style -- we deliberately don't auto-format tables
+globs:
+  - "**/*.md"
+ignores:
+  - "node_modules"
+  - ".claude/workspace"
+  - ".github/PULL_REQUEST_TEMPLATE.md" # a fragment; starts with ## by design (MD041)

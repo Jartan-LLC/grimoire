@@ -2,6 +2,7 @@
 name: code-hygiene
 description: Language-agnostic code hygiene -- honest comments, no dead/reinvented/duplicated code, truthful names, real implementations, and scoped (never blanket) diagnostic suppressions.
 when_to_use: Writing or reviewing code -- auditing comments, dead or duplicated code, naming, stubbed/placeholder implementations, or linter/type-checker/test suppressions.
+user-invocable: false
 ---
 
 # Code Hygiene

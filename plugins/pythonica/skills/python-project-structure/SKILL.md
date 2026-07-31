@@ -2,6 +2,7 @@
 name: python-project-structure
 description: Python project organization, module architecture, and public API design.
 when_to_use: Setting up new projects, organizing modules, defining public interfaces with __all__, or planning directory layouts.
+user-invocable: false
 ---
 
 # Python Project Structure & Module Architecture

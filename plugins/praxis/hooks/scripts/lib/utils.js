@@ -1,4 +1,4 @@
-// Originally from everything-claude-code by Affaan Mustafa (https://github.com/affaan-m/everything-claude-code)
+// Originally from everything-claude-code by Affaan Mustafa (https://github.com/affaan-m/ECC)
 /**
  * Cross-platform utility functions for Claude Code hooks and scripts
  * Works on Windows, macOS, and Linux
@@ -360,7 +360,32 @@ function isGitRepo() {
 }
 
 /**
+ * Filter paths by regex pattern strings. Invalid patterns are silently skipped;
+ * an empty or all-invalid list leaves the paths untouched.
+ */
+function filterByPatterns(files, patterns) {
+  if (patterns.length === 0) return files;
+
+  const compiled = [];
+  for (const pattern of patterns) {
+    if (typeof pattern !== 'string' || pattern.length === 0) continue;
+    try {
+      compiled.push(new RegExp(pattern));
+    } catch {
+      // Skip invalid regex patterns
+    }
+  }
+  if (compiled.length === 0) return files;
+
+  return files.filter(file => compiled.some(regex => regex.test(file)));
+}
+
+/**
  * Get git modified files, optionally filtered by regex patterns
+ *
+ * Tracked files only -- `git diff` cannot see a file that was never added.
+ * Pair with getGitUntrackedFiles to cover everything the working tree changed.
+ *
  * @param {string[]} patterns - Array of regex pattern strings to filter files.
  *   Invalid patterns are silently skipped.
  * @returns {string[]} Array of modified file paths
@@ -371,25 +396,23 @@ function getGitModifiedFiles(patterns = []) {
   const result = runCommand('git diff --name-only HEAD');
   if (!result.success) return [];
 
-  let files = result.output.split('\n').filter(Boolean);
+  return filterByPatterns(result.output.split('\n').filter(Boolean), patterns);
+}
 
-  if (patterns.length > 0) {
-    // Pre-compile patterns, skipping invalid ones
-    const compiled = [];
-    for (const pattern of patterns) {
-      if (typeof pattern !== 'string' || pattern.length === 0) continue;
-      try {
-        compiled.push(new RegExp(pattern));
-      } catch {
-        // Skip invalid regex patterns
-      }
-    }
-    if (compiled.length > 0) {
-      files = files.filter(file => compiled.some(regex => regex.test(file)));
-    }
-  }
+/**
+ * Get untracked, non-ignored files, optionally filtered by regex patterns
+ *
+ * @param {string[]} patterns - Array of regex pattern strings to filter files.
+ *   Invalid patterns are silently skipped.
+ * @returns {string[]} Array of untracked file paths
+ */
+function getGitUntrackedFiles(patterns = []) {
+  if (!isGitRepo()) return [];
 
-  return files;
+  const result = runCommand('git ls-files --others --exclude-standard');
+  if (!result.success) return [];
+
+  return filterByPatterns(result.output.split('\n').filter(Boolean), patterns);
 }
 
 /**
@@ -526,5 +549,6 @@ module.exports = {
   commandExists,
   runCommand,
   isGitRepo,
-  getGitModifiedFiles
+  getGitModifiedFiles,
+  getGitUntrackedFiles
 };

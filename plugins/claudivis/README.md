@@ -4,16 +4,25 @@ The key to Claude Code configuration -- how agents, skills, and commands work to
 
 ## Installation
 
+Claude Code:
+
 ```
 /plugin marketplace add Jartan-LLC/grimoire
 /plugin install claudivis
+```
+
+Codex:
+
+```
+codex plugin marketplace add Jartan-LLC/grimoire
+codex plugin add claudivis@grimoire
 ```
 
 ## What's Included
 
 ### Skills
 
-- **claude-config** -- the three configuration primitives (agents = roles, skills = knowledge, commands = workflows), how they interact, naming conventions, and how to test the distinction
+- **claude-config** -- the three configuration primitives (agents = roles, skills = knowledge, commands = workflows), invocation control, how they interact, naming conventions, and how to test the distinction
 
 ## License
 

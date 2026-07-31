@@ -1,6 +1,8 @@
 ---
+name: address-review
 description: Work through review findings on a PR one at a time
 argument-hint: PR number
+disable-model-invocation: true
 ---
 
 # Address Review
@@ -12,7 +14,7 @@ Work through code review findings on a pull request, investigating each one and 
 ## Process
 
 ### 1. Load Review
-Extract the PR number from `$ARGUMENTS`. Fetch the review comments:
+Determine the PR number from the user's request. Fetch the review comments:
 ```bash
 gh pr view <pr-number> --comments
 ```

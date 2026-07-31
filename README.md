@@ -1,8 +1,10 @@
 # Grimoire
 
-Curated Claude Code plugins for development workflows.
+Curated plugins for development workflows, for Claude Code and Codex.
 
 ## Setup
+
+Claude Code:
 
 ```
 /plugin marketplace add Jartan-LLC/grimoire
@@ -13,6 +15,18 @@ Then browse and install plugins:
 ```
 /plugin
 ```
+
+Codex:
+
+```
+codex plugin marketplace add Jartan-LLC/grimoire
+codex plugin add <plugin>@grimoire
+```
+
+Skills and hooks behave the same under both. Two things differ: Codex ignores
+plugin dependencies, so `praxis` needs `gitwise` installed explicitly, and it has
+no plugin-level agent surface, so plugins shipping agents install them into your
+Codex config on session start instead.
 
 ## Available Plugins
 

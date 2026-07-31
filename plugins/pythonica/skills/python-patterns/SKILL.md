@@ -2,6 +2,7 @@
 name: python-patterns
 description: Pythonic idioms, PEP 8 standards, type hints, and best practices for building robust, efficient, and maintainable Python applications.
 when_to_use: Writing, reviewing, or refactoring Python code, or designing Python packages and modules.
+user-invocable: false
 ---
 
 # Python Development Patterns

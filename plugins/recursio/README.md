@@ -1,12 +1,28 @@
-# Recursion
+# Recursio
 
 Recursive multi-agent development system that decomposes projects into waves of parallel nested subagents with TDD at every level. Works for greenfield and existing codebases.
 
 ## Installation
 
+Claude Code:
+
 ```
-claude plugin add --source github Jartan-LLC/grimoire
+/plugin marketplace add Jartan-LLC/grimoire
+/plugin install recursio
 ```
+
+Codex:
+
+```
+codex plugin marketplace add Jartan-LLC/grimoire
+codex plugin add recursio@grimoire
+```
+
+Recursio leans harder on Claude Code than the other plugins. Its skills and
+agent roles install under Codex, but nested wave orchestration depends on
+spawning subagents that themselves spawn subagents, under per-agent tool
+constraints Codex has no equivalent for. Expect `recursive-implement` to behave
+differently there.
 
 ## What's Included
 
@@ -26,12 +42,12 @@ claude plugin add --source github Jartan-LLC/grimoire
 
 ### Commands
 
-- `/recursive-implement` -- build a project using the full recursive development pipeline
+- `/recursio:recursive-implement` -- build a project using the full recursive development pipeline
 
 ## Quick Start
 
 ```
-/recursive-implement Build a CLI tool that parses JSON logs and outputs summary reports
+/recursio:recursive-implement Build a CLI tool that parses JSON logs and outputs summary reports
 ```
 
 ## License

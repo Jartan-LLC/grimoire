@@ -2,11 +2,20 @@
 name: github-conventions
 description: GitHub conventions -- branch naming, commit format, issue/PR templates, and safe issue/PR referencing in comments.
 when_to_use: Using gh CLI, creating commits, posting PR/issue comments, or referencing issues by number.
+user-invocable: false
 ---
 
 # GitHub Conventions
 
 CRITICAL: `#<number>` auto-links to issues/PRs on GitHub. Use `1.`/`2.`/`3.` for numbered lists and "Finding 1:"/"Item 1:" for labeled items -- never `#1`, `#2`, `#3` as markers.
+
+## Authentication
+
+**Never reconfigure auth transport to unblock a command.** Don't switch the remote
+between SSH and HTTPS, add a credential helper, or push to an explicit URL. A
+missing key or token scope is a missing credential, not a transport problem --
+only the user can supply it, and working around it changes config they never asked
+you to touch, often globally. Stop and ask.
 
 ## Branches
 

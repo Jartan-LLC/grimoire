@@ -2,6 +2,7 @@
 name: review-severity
 description: One severity model for code review -- Critical/Important/Minor by consequence-if-shipped (impact x reachability), with confidence as a separate report gate.
 when_to_use: Reviewing code, or wiring a reviewer agent -- assigning a tier to a finding, or deciding whether to surface a suspected issue.
+user-invocable: false
 ---
 
 # Review Severity

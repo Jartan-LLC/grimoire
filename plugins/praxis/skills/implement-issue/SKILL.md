@@ -1,6 +1,8 @@
 ---
+name: implement-issue
 description: Implement a GitHub issue, optionally from an existing plan
 argument-hint: Issue number (may include additional context)
+disable-model-invocation: true
 ---
 
 # Implement Issue
@@ -10,7 +12,7 @@ Implement changes for a GitHub issue.
 ## Process
 
 ### 1. Load Context
-Extract the issue number from `$ARGUMENTS` (the user may include additional context beyond just the number). Fetch the issue and any plan comments:
+Determine the issue number from the user's request, which may carry context beyond the number. Fetch the issue and any plan comments:
 ```bash
 gh issue view <issue-number> --comments
 ```

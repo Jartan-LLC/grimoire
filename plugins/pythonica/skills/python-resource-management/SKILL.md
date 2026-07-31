@@ -2,6 +2,7 @@
 name: python-resource-management
 description: Python resource management with context managers, cleanup patterns, and streaming.
 when_to_use: Managing connections, file handles, implementing cleanup logic, or building streaming responses with accumulated state.
+user-invocable: false
 ---
 
 # Python Resource Management

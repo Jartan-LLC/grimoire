@@ -59,6 +59,9 @@ git grep -lP '[^\x00-\x7F]'
 
 # JSON parses (git ls-files covers dotdir manifests; glob '**' skips them)
 python3 -c "import json,subprocess; [json.load(open(f)) for f in subprocess.run(['git','ls-files','*.json'],capture_output=True,text=True).stdout.split()]"
+
+# Generated Codex files match their Claude Code sources
+python3 scripts/generate-codex.py --check
 ```
 
 Then confirm by inspection: each skill/agent frontmatter `name` matches its directory, and

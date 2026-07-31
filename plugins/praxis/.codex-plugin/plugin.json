@@ -1,0 +1,16 @@
+{
+  "name": "praxis",
+  "version": "1.1.0",
+  "description": "Development workflow -- issue planning, implementation, PR creation, code review with specialized reviewers, and project conventions",
+  "interface": {
+    "displayName": "Praxis",
+    "shortDescription": "Development workflow",
+    "category": "Development"
+  },
+  "keywords": [
+    "workflow",
+    "review",
+    "conventions",
+    "planning"
+  ]
+}
