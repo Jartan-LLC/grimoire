@@ -2,6 +2,7 @@
 name: readable-code
 description: Language-agnostic local-clarity craft -- shape control flow, the naming of a whole set, and reading order so a body reads straight down with the smallest working set. Sibling to code-hygiene and code-structure.
 when_to_use: Writing or reviewing how a function or file READS line by line -- guard-clause control flow, naming for the reader across a set, and the order and locality that shrink what a reader must hold in mind.
+user-invocable: false
 ---
 
 # Readable Code

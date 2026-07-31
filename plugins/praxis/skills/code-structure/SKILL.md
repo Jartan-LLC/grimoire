@@ -2,6 +2,7 @@
 name: code-structure
 description: Language-agnostic structural craft -- decompose on responsibility not size, prefer deep modules over shallow piles, and shape cohesion, coupling, interfaces, error contracts, and data invariants. Sibling to code-hygiene and readable-code.
 when_to_use: Writing or reviewing code -- shaping function and module boundaries, interfaces, error contracts, and data types once code-hygiene has removed the outright liabilities. Local reading (control flow, naming, reading order) is readable-code.
+user-invocable: false
 ---
 
 # Code Structure

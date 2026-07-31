@@ -2,6 +2,7 @@
 name: docs-patterns
 description: Documentation writing conventions -- style, structure, tone, and quality standards.
 when_to_use: Writing, editing, or reviewing documentation files.
+user-invocable: false
 ---
 
 # Documentation Writing Patterns

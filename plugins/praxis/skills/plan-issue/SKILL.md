@@ -1,6 +1,8 @@
 ---
+name: plan-issue
 description: Analyze a GitHub issue and create an implementation plan
 argument-hint: Issue number (may include additional context)
+disable-model-invocation: true
 ---
 
 # Plan Issue
@@ -10,7 +12,7 @@ Create an implementation plan for a GitHub issue.
 ## Process
 
 ### 1. Load Issue
-Extract the issue number from `$ARGUMENTS` (the user may include additional context beyond just the number). Fetch the issue details:
+Determine the issue number from the user's request, which may carry context beyond the number. Fetch the issue details:
 ```bash
 gh issue view <issue-number>
 ```

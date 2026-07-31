@@ -1,6 +1,8 @@
 ---
+name: create-pr
 description: Create a pull request for implemented changes from a GitHub issue
 argument-hint: Issue number (may include additional context)
+disable-model-invocation: true
 ---
 
 # Create Pull Request
@@ -13,7 +15,7 @@ Create a pull request from the current implementation branch for a GitHub issue.
 Check existing local and remote branches for one related to this issue -- it may be named by issue number (`feature/issue-123`) or by description (`feature/audit-improvements`). Check it out and ensure it has committed changes ready for a PR.
 
 ### 2. Get Issue Context
-Extract the issue number from `$ARGUMENTS` and fetch details:
+Determine the issue number from the user's request and fetch details:
 ```bash
 gh issue view <issue-number>
 ```

@@ -2,6 +2,7 @@
 name: recursive-development
 description: Core principles for recursive multi-agent development -- nesting, scope ownership, TDD, context flow, token economics.
 when_to_use: Any work involving recursive subagent orchestration.
+user-invocable: false
 ---
 
 # Recursive Development

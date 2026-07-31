@@ -1,6 +1,8 @@
 ---
+name: recursive-implement
 description: Build a project using recursive multi-agent development with TDD
 argument-hint: Project description, issue number, or plan file path
+disable-model-invocation: true
 ---
 
 # Recursive Implement
@@ -13,7 +15,7 @@ Build a project (or feature) using waves of parallel nested subagents with TDD a
 
 Collect everything the orchestrator needs into a single prompt:
 
-- **From `$ARGUMENTS`:** the project description, issue number, or plan file path
+- **From the user's request:** the project description, issue number, or plan file path
 - **If issue number:** fetch the issue body with `gh issue view <number>` and include it
 - **From conversation:** if the user discussed requirements, architecture decisions, constraints, or preferences in this session, summarize the relevant parts
 - **From existing project:** if working in an existing codebase, note the language, test framework, key conventions, and any relevant file paths

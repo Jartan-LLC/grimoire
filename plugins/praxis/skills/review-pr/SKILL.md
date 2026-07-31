@@ -1,6 +1,8 @@
 ---
+name: review-pr
 description: Review a pull request using specialized reviewer agents
 argument-hint: PR number (may include additional context)
+disable-model-invocation: true
 ---
 
 # Review PR
@@ -10,7 +12,7 @@ Review a pull request with category-based reviewer agents.
 ## Process
 
 ### 1. Get PR Context
-Extract the PR number from `$ARGUMENTS` (the user may include additional context beyond just the number). Fetch the PR details and diff:
+Determine the PR number from the user's request, which may carry context beyond the number. Fetch the PR details and diff:
 ```bash
 gh pr view <pr-number>
 gh pr diff <pr-number>

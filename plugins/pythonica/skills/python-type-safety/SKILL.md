@@ -2,6 +2,7 @@
 name: python-type-safety
 description: Python type safety with type hints, generics, protocols, and strict type checking.
 when_to_use: Adding type annotations, implementing generic classes, defining structural interfaces, or configuring mypy/pyright.
+user-invocable: false
 ---
 
 # Python Type Safety

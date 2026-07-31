@@ -2,6 +2,7 @@
 name: python-packaging
 description: Create distributable Python packages with proper project structure, pyproject.toml, and publishing to PyPI.
 when_to_use: Packaging Python libraries, creating CLI tools, or distributing Python code.
+user-invocable: false
 ---
 
 # Python Packaging

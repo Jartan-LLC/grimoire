@@ -2,6 +2,7 @@
 name: pydantic
 description: Python data validation using type hints and runtime type checking with Pydantic v2's Rust-powered core.
 when_to_use: Validating API request/response data, managing settings with pydantic-settings, integrating Pydantic with FastAPI or Django, or building type-safe data models.
+user-invocable: false
 ---
 
 # Pydantic Validation Skill

@@ -13,7 +13,7 @@ The key to Claude Code configuration -- how agents, skills, and commands work to
 
 ### Skills
 
-- **claude-config** -- the three configuration primitives (agents = roles, skills = knowledge, commands = workflows), how they interact, naming conventions, and how to test the distinction
+- **claude-config** -- the three configuration primitives (agents = roles, skills = knowledge, commands = workflows), invocation control, how they interact, naming conventions, and how to test the distinction
 
 ## License
 
