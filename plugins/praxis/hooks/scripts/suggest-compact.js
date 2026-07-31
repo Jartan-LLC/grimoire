@@ -25,14 +25,17 @@
  */
 
 const fs = require('fs');
-const path = require('path');
 const {
-  getTempDir,
   writeFile,
   readStdinJson,
   log,
   output
 } = require('./lib/utils');
+const {
+  sessionId: toSessionId,
+  stateFilePath,
+  sweepStaleState
+} = require('./lib/session-state');
 const {
   readLatestContextTokens,
   resolveContextWindowTokens,
@@ -45,61 +48,6 @@ const {
 const COUNTER_FILE_PREFIX = 'claude-tool-count-';
 const CONTEXT_BUCKET_FILE_PREFIX = 'claude-context-bucket-';
 const STATE_FILE_PREFIXES = [COUNTER_FILE_PREFIX, CONTEXT_BUCKET_FILE_PREFIX];
-const DEFAULT_COMPACT_STATE_TTL_DAYS = 14;
-
-function getCounterRetentionDays() {
-  const parsed = Number.parseInt(process.env.COMPACT_STATE_TTL_DAYS, 10);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : DEFAULT_COMPACT_STATE_TTL_DAYS;
-}
-
-/**
- * Sweep stale per-session state files from the temp dir.
- *
- * Each session writes `claude-tool-count-<sessionId>` and
- * `claude-context-bucket-<sessionId>` into the OS temp dir; nothing else removes
- * them, so without a sweep they accumulate one-per-session forever. Files whose
- * mtime is older than `retentionDays` are removed; the active session's files
- * are preserved unconditionally.
- *
- * Never throws -- the hook must always exit 0, so failures are logged and
- * swallowed.
- */
-function cleanupOldCounters(tempDir, retentionDays, currentStateFiles) {
-  let entries;
-  try {
-    entries = fs.readdirSync(tempDir, { withFileTypes: true });
-  } catch (err) {
-    log(`[StrategicCompact] Skipping counter sweep; readdir failed: ${err.message}`);
-    return;
-  }
-
-  const cutoffMs = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
-  const currentBasenames = new Set(currentStateFiles.map(f => path.basename(f)));
-
-  for (const entry of entries) {
-    if (!entry.isFile()) continue;
-    if (!STATE_FILE_PREFIXES.some(prefix => entry.name.startsWith(prefix))) continue;
-    if (currentBasenames.has(entry.name)) continue;
-
-    const fullPath = path.join(tempDir, entry.name);
-    let stats;
-    try {
-      stats = fs.statSync(fullPath);
-    } catch {
-      continue;
-    }
-
-    // Strict "older than": a file sitting exactly on the cutoff has age ==
-    // retentionDays, which is not older than it, so preserve it.
-    if (stats.mtimeMs >= cutoffMs) continue;
-
-    try {
-      fs.rmSync(fullPath, { force: true });
-    } catch (err) {
-      log(`[StrategicCompact] Warning: failed to prune stale counter ${fullPath}: ${err.message}`);
-    }
-  }
-}
 
 /**
  * Increment and persist the per-session tool-call counter.
@@ -190,18 +138,14 @@ async function main() {
     input = {};
   }
 
-  const rawSessionId = (input && typeof input.session_id === 'string' && input.session_id)
-    ? input.session_id
-    : (process.env.CLAUDE_SESSION_ID || 'default');
-  // Strip path separators and anything else that could escape the temp dir.
-  const sessionId = rawSessionId.replace(/[^a-zA-Z0-9_-]/g, '') || 'default';
+  const sessionId = toSessionId(input && input.session_id);
   const transcriptPath = (input && typeof input.transcript_path === 'string') ? input.transcript_path : '';
 
-  const tempDir = getTempDir();
-  const counterFile = path.join(tempDir, `${COUNTER_FILE_PREFIX}${sessionId}`);
-  const bucketFile = path.join(tempDir, `${CONTEXT_BUCKET_FILE_PREFIX}${sessionId}`);
+  const counterFile = stateFilePath(COUNTER_FILE_PREFIX, sessionId);
+  const bucketFile = stateFilePath(CONTEXT_BUCKET_FILE_PREFIX, sessionId);
 
-  cleanupOldCounters(tempDir, getCounterRetentionDays(), [counterFile, bucketFile]);
+  // Only this hook's own prefixes -- every hook sweeps after itself.
+  sweepStaleState(STATE_FILE_PREFIXES, [counterFile, bucketFile]);
 
   const rawThreshold = parseInt(process.env.COMPACT_THRESHOLD || '50', 10);
   const threshold = Number.isFinite(rawThreshold) && rawThreshold > 0 && rawThreshold <= 10000
