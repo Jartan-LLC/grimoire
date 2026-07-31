@@ -4,9 +4,18 @@ The key to Claude Code configuration -- how agents, skills, and commands work to
 
 ## Installation
 
+Claude Code:
+
 ```
 /plugin marketplace add Jartan-LLC/grimoire
 /plugin install claudivis
+```
+
+Codex:
+
+```
+codex plugin marketplace add Jartan-LLC/grimoire
+codex plugin add claudivis@grimoire
 ```
 
 ## What's Included

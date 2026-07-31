@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/sync-codex-agents.js\""
+          }
+        ],
+        "description": "Install this plugin's Codex agent roles (no-op outside Codex)"
+      }
+    ]
+  }
+}

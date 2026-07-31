@@ -93,6 +93,23 @@ has no version to match. See the upstream
 [dependency guide](https://code.claude.com/docs/en/plugin-dependencies) for
 cross-marketplace rules and conflict resolution.
 
+## Codex
+
+Codex consumes this repo as a marketplace too, so releasing has a second axis.
+Verified against codex-cli 0.146.0:
+
+- **Version bumps do reach Codex users.** The plugin cache is keyed by version
+  (`~/.codex/plugins/cache/<marketplace>/<plugin>/<version>`), and an installed
+  plugin follows whatever version the marketplace snapshot carries. The bump rule
+  above therefore applies unchanged.
+- **The `{plugin-name}--v{version}` tags do not.** Codex tracks a git ref for the
+  marketplace, not our tags, and refreshes on `codex plugin marketplace upgrade`.
+  The tags stay a Claude Code concern, as do `dependencies` -- Codex ignores
+  those, which is why `praxis` documents installing `gitwise` explicitly.
+- **The Codex files are generated.** Run `scripts/generate-codex.py` after any
+  change to a plugin's name, version, description, keywords, category, or agents,
+  and commit the result. `--check` fails when they are stale.
+
 ## Release channels
 
 Per-plugin release channels (say, a stable line and a bleeding-edge line) are not
