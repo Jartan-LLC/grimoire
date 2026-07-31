@@ -15,6 +15,13 @@
  * and reading paths from it means a version bump moves the source directory
  * without stranding a stale copy.
  *
+ * hooks.json guards on the same variable before requiring this file, rather than
+ * naming the path directly, because CLAUDE_PLUGIN_ROOT has a history of being
+ * unpopulated for SessionStart specifically (anthropics/claude-code issue 27145).
+ * An unset value there would resolve to `/hooks/scripts/...` and fail to load
+ * before any check in this file could run. The guard below still stands on its
+ * own so the script is safe to invoke directly.
+ *
  * Roles land in a `grimoire/<plugin>/` subdirectory rather than loose in
  * agents/: Codex discovers agent roles recursively, so nesting them keeps the
  * namespace ours and cannot clobber a role the user wrote themselves.
@@ -28,7 +35,11 @@ const NAMESPACE = 'grimoire';
 
 function codexAgentsDir() {
   const home = process.env.CODEX_HOME || path.join(os.homedir(), '.codex');
-  return path.join(home, 'agents', NAMESPACE, path.basename(process.env.PLUGIN_ROOT));
+  // Resolve before taking the basename: a PLUGIN_ROOT ending in `..` would
+  // otherwise yield ".." and point the target at the agents directory itself,
+  // putting roles this plugin does not own within reach of the sweep below.
+  const plugin = path.basename(path.resolve(process.env.PLUGIN_ROOT));
+  return path.join(home, 'agents', NAMESPACE, plugin);
 }
 
 /**

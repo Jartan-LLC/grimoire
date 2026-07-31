@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # No pip cache: the Verify block is stdlib-only, so there is nothing to
+      # install and nothing to key a cache on.
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+
+      # The Verify block from CLAUDE.md (the single source, shared with the
+      # pre-merge checklist). There is no build system here -- the repo is
+      # Markdown, JSON manifests and a generator -- so this is the whole gate.
+      #
+      # `git grep -l` exits 1 when nothing matches, which is the passing case, so
+      # the ASCII result is inverted rather than taken at face value.
+      - name: Pure ASCII
+        run: |
+          if git grep -lP '[^\x00-\x7F]'; then
+            echo "::error::Non-ASCII characters found in the files listed above"
+            exit 1
+          fi
+
+      # git ls-files covers dotdir manifests, which a '**' glob would skip.
+      - name: JSON parses
+        run: python3 -c "import json,subprocess; [json.load(open(f)) for f in subprocess.run(['git','ls-files','*.json'],capture_output=True,text=True).stdout.split()]"
+
+      # Catches drift (a generated file out of date with its Claude Code source)
+      # and orphans (a generated file with no source, which sync-codex-agents.js
+      # would otherwise install into every Codex user's config).
+      - name: Codex files match their sources
+        run: python3 scripts/generate-codex.py --check
+
+  check:
+    if: always()
+    # When you add jobs above, add them to BOTH the needs list and the results
+    # array below.
+    needs: [verify]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - run: |
+          results=("${{ needs.verify.result }}")
+          for r in "${results[@]}"; do
+            if [[ "$r" != "success" && "$r" != "skipped" ]]; then
+              echo "Check failed: $r"
+              exit 1
+            fi
+          done

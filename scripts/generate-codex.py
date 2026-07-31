@@ -43,6 +43,9 @@ CODEX_MARKETPLACE = ROOT / ".agents" / "plugins" / "marketplace.json"
 # `acceptEdits` and `readOnly`, returning None for `plan`. Emitting nothing
 # there would let a plan-mode reviewer inherit a writable sandbox, so `plan` is
 # mapped to the mode that actually matches its intent.
+# Shipped once per plugin because plugins install independently; kept identical.
+DUPLICATED_HOOK_SCRIPTS = ["hooks/scripts/sync-codex-agents.js"]
+
 PERMISSION_MODE_TO_SANDBOX = {
     "plan": "read-only",
     "readOnly": "read-only",
@@ -88,6 +91,19 @@ def qualify(skill, plugin):
     return skill if ":" in skill else f"{plugin}:{skill}"
 
 
+def basic_string(value):
+    """Quote a value as a TOML basic string.
+
+    Basic strings process escapes, so an unescaped backslash silently corrupts
+    the value (`\\b` becomes a backspace) and an unescaped quote ends the string
+    early. Either one is worse than it sounds: Codex parses role files with
+    `deny_unknown_fields`, so a malformed line takes down the whole role rather
+    than the one field.
+    """
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'
+
+
 def render_agent_toml(fields, body, plugin):
     """Render one Claude Code agent as a Codex agent role.
 
@@ -106,7 +122,10 @@ def render_agent_toml(fields, body, plugin):
     if "'''" in instructions:
         raise ValueError(f"{fields['name']}: body contains ''' and cannot be a TOML literal")
 
-    lines = [f'name = "{fields["name"]}"', f'description = "{fields["description"]}"']
+    lines = [
+        f"name = {basic_string(fields['name'])}",
+        f"description = {basic_string(fields['description'])}",
+    ]
     sandbox = PERMISSION_MODE_TO_SANDBOX.get(fields.get("permissionMode"))
     if sandbox:
         lines.append(f'sandbox_mode = "{sandbox}"')
@@ -144,8 +163,9 @@ def plugin_manifest(entry):
     }
     if entry.get("keywords"):
         manifest["keywords"] = entry["keywords"]
-    if entry.get("category"):
-        manifest["interface"]["category"] = display_name(entry["category"])
+    # Required, matching marketplace_manifest -- a category-less entry should
+    # fail here rather than half-work in one manifest and raise in the other.
+    manifest["interface"]["category"] = display_name(entry["category"])
     return source / ".codex-plugin" / "plugin.json", manifest
 
 
@@ -188,6 +208,41 @@ def collect_targets(marketplace):
     return targets
 
 
+def find_divergent_copies():
+    """Hook scripts that several plugins each ship a copy of.
+
+    Plugins install independently, so they cannot share a module at hook runtime
+    and the file has to be duplicated. Nothing else stops the copies drifting
+    after a one-sided edit, so assert they are byte-identical here.
+    """
+    divergent = []
+    for relative in DUPLICATED_HOOK_SCRIPTS:
+        copies = sorted(ROOT.glob(f"plugins/*/{relative}"))
+        if len({copy.read_bytes() for copy in copies}) > 1:
+            divergent.extend(copy.relative_to(ROOT) for copy in copies)
+    return divergent
+
+
+def find_orphans(targets):
+    """Generated files no longer produced by the generator.
+
+    The forward pass only checks that each expected file is current, so a role
+    left behind by a deleted agent stays invisible to it. That matters more than
+    ordinary drift here: sync-codex-agents.js ships every `.toml` it finds, so an
+    orphan would install into every Codex user's config with the check green.
+
+    Every directory written to is owned wholly by this script, so anything in one
+    that is not a target is an orphan.
+    """
+    expected = {path for path, _ in targets}
+    return sorted(
+        found.relative_to(ROOT)
+        for directory in {path.parent for path in expected}
+        for found in directory.glob("*")
+        if found.is_file() and found not in expected
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -210,10 +265,22 @@ def main():
         path.write_text(contents)
         print(f"wrote {path.relative_to(ROOT)}")
 
-    if stale:
-        print("stale Codex files -- run scripts/generate-codex.py:")
-        for path in stale:
-            print(f"  {path}")
+    orphans = find_orphans(targets) if args.check else []
+    divergent = find_divergent_copies() if args.check else []
+
+    if stale or orphans or divergent:
+        if stale:
+            print("stale Codex files -- run scripts/generate-codex.py:")
+            for path in stale:
+                print(f"  {path}")
+        if orphans:
+            print("orphaned Codex files -- delete them:")
+            for path in orphans:
+                print(f"  {path}")
+        if divergent:
+            print("duplicated hook scripts have diverged -- make them identical:")
+            for path in divergent:
+                print(f"  {path}")
         return 1
     if args.check:
         print(f"{len(targets)} Codex files current")

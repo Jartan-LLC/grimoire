@@ -59,9 +59,11 @@ constraints resolve against (see [Dependencies](#dependencies)).
 
 ## Enforcement
 
-There's no automated gate today -- version discipline is enforced by **PR review**.
-Before merging, confirm any plugin with changed content under `plugins/<name>/`
-has a bumped `version` in its `plugin.json`. (A CI check could automate this later.)
+Version discipline is enforced by **PR review**. Before merging, confirm any
+plugin with changed content under `plugins/<name>/` has a bumped `version` in its
+`plugin.json`. CI runs the `CLAUDE.md` Verify block on every pull request, but
+that covers ASCII, JSON and generated-file drift -- not the bump rule, which
+still needs a human. (A CI check could automate it later.)
 
 ## Dependencies
 

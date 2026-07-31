@@ -25,6 +25,7 @@ const {
   getGitUntrackedFiles,
   grepFile,
   log,
+  output,
 } = require('./lib/utils');
 
 // Files where console.log is expected and should not trigger warnings
@@ -58,7 +59,10 @@ function run() {
     if (!isGitRepo()) return warnings;
 
     for (const file of changedSourceFiles()) {
-      const matches = grepFile(file, /console\.log/);
+      // Require the call parenthesis: the bare substring also matches
+      // `console.logger.info(...)` and `console.log.bind(...)`, neither of which
+      // is a debug statement.
+      const matches = grepFile(file, /console\.log\s*\(/);
       if (matches.length === 0) continue;
 
       warnings.push(`[Hook] WARNING: console.log found in ${file}`);
@@ -71,49 +75,39 @@ function run() {
       warnings.push('[Hook] Remove console.log statements before committing');
     }
   } catch (err) {
-    warnings.push(`[Hook] check-console-log error: ${err.message}`);
+    // An internal failure is a debugging detail, not something to put in front
+    // of the model -- log it and report no findings.
+    log(`[Hook] check-console-log error: ${err.message}`);
+    return [];
   }
 
   return warnings;
 }
 
-const MAX_STDIN = 1024 * 1024; // 1MB limit
-let data = '';
-let truncated = false;
-
-process.stdin.setEncoding('utf8');
-
-process.stdin.on('data', chunk => {
-  if (data.length < MAX_STDIN) {
-    const remaining = MAX_STDIN - data.length;
-    data += chunk.substring(0, remaining);
-    if (chunk.length > remaining) truncated = true;
-  } else {
-    truncated = true;
-  }
-});
-
-/**
- * Echo stdin back, then exit once the pipe has flushed. Truncated stdin is
- * never echoed: a JSON document cut mid-stream is reported by the harness as a
- * Stop hook JSON validation failure, so fail open and stay silent instead.
- */
-function passThroughAndExit() {
-  if (truncated) {
-    log('[Hook] check-console-log: stdin exceeded 1MB; suppressing pass-through (fail-open)');
-    process.exit(0);
-  }
-  if (!data) {
-    process.exit(0);
-  }
-  process.stdout.write(data, () => process.exit(0));
-}
+// Nothing here reads the hook payload -- the check consults git, not the event
+// -- but stdin still has to be drained so the harness is never left writing
+// into a full pipe.
+process.stdin.resume();
+process.stdin.on('data', () => {});
 
 process.stdin.on('end', () => {
-  for (const warning of run()) {
-    log(warning);
+  const warnings = run();
+
+  // stderr on a zero-exit Stop hook reaches the debug log and nothing else, so
+  // findings travel as structured stdout instead. Stop supports
+  // hookSpecificOutput.additionalContext, which Claude Code injects at the end
+  // of the turn so it can act on the feedback. Only one JSON payload is allowed
+  // per run, which is why the input is not echoed back alongside it.
+  if (warnings.length > 0) {
+    output({
+      hookSpecificOutput: {
+        hookEventName: 'Stop',
+        additionalContext: warnings.join('\n')
+      }
+    });
   }
-  passThroughAndExit();
+
+  process.exit(0);
 });
 
 module.exports = { run };

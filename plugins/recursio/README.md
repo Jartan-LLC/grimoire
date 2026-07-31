@@ -47,7 +47,7 @@ differently there.
 ## Quick Start
 
 ```
-/recursive-implement Build a CLI tool that parses JSON logs and outputs summary reports
+/recursio:recursive-implement Build a CLI tool that parses JSON logs and outputs summary reports
 ```
 
 ## License
