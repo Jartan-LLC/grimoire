@@ -5,12 +5,31 @@
  *
  * Cross-platform (Windows, macOS, Linux)
  *
- * Runs after Edit tool use. If the edited JS/TS file contains console.log
+ * Runs after Edit tool use. If an edited JS/TS file contains console.log
  * statements, warns with line numbers to help remove debug statements
  * before committing.
  */
 
 const { readFile } = require('./lib/utils');
+
+// Claude Code names the edited file in `tool_input.file_path`. Codex matches
+// this hook through its `Edit` alias for `apply_patch`, which instead puts the
+// whole patch in `tool_input.command`, so the paths have to be read out of it.
+// Markers are verbatim from codex-rs/apply-patch/src/parser.rs. `Delete File`
+// is omitted -- there is nothing left to scan.
+const PATCH_FILE_MARKERS = ['*** Add File: ', '*** Update File: ', '*** Move to: '];
+
+function editedPaths(toolInput) {
+  if (!toolInput) return [];
+  if (typeof toolInput.file_path === 'string') return [toolInput.file_path];
+  if (typeof toolInput.command !== 'string') return [];
+
+  return toolInput.command.split('\n').reduce((paths, line) => {
+    const marker = PATCH_FILE_MARKERS.find(m => line.startsWith(m));
+    if (marker) paths.push(line.slice(marker.length).trim());
+    return paths;
+  }, []);
+}
 
 const MAX_STDIN = 1024 * 1024; // 1MB limit
 let data = '';
@@ -26,15 +45,15 @@ process.stdin.on('data', chunk => {
 process.stdin.on('end', () => {
   try {
     const input = JSON.parse(data);
-    const filePath = input.tool_input?.file_path;
 
-    if (filePath && /\.(ts|tsx|js|jsx)$/.test(filePath)) {
+    for (const filePath of editedPaths(input.tool_input)) {
+      if (!/\.(ts|tsx|js|jsx)$/.test(filePath)) continue;
+
       const content = readFile(filePath);
-      if (!content) { process.stdout.write(data); process.exit(0); }
-      const lines = content.split('\n');
-      const matches = [];
+      if (!content) continue;
 
-      lines.forEach((line, idx) => {
+      const matches = [];
+      content.split('\n').forEach((line, idx) => {
         if (/console\.log/.test(line)) {
           matches.push((idx + 1) + ': ' + line.trim());
         }

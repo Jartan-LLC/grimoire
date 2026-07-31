@@ -1,0 +1,16 @@
+{
+  "name": "gitwise",
+  "version": "1.1.0",
+  "description": "GitHub conventions -- branch naming, commit format, issue/PR templates, and safe issue/PR referencing",
+  "interface": {
+    "displayName": "Gitwise",
+    "shortDescription": "GitHub conventions",
+    "category": "Development"
+  },
+  "keywords": [
+    "github",
+    "conventions",
+    "commits",
+    "branches"
+  ]
+}
