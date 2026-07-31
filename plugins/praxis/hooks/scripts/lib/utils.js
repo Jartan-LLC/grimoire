@@ -1,4 +1,4 @@
-// Originally from everything-claude-code by Affaan Mustafa (https://github.com/affaan-m/everything-claude-code)
+// Originally from everything-claude-code by Affaan Mustafa (https://github.com/affaan-m/ECC)
 /**
  * Cross-platform utility functions for Claude Code hooks and scripts
  * Works on Windows, macOS, and Linux

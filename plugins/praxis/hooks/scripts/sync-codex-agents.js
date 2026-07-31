@@ -87,9 +87,10 @@ try {
   if (process.env.PLUGIN_ROOT) {
     const sourceDir = path.join(process.env.PLUGIN_ROOT, 'codex', 'agents');
     if (fs.existsSync(sourceDir)) {
-      const changed = syncRoles(sourceDir, codexAgentsDir());
+      const targetDir = codexAgentsDir();
+      const changed = syncRoles(sourceDir, targetDir);
       if (changed > 0) {
-        console.error(`[Hook] Synced ${changed} Codex agent role(s) to ${codexAgentsDir()}`);
+        console.error(`[Hook] Synced ${changed} Codex agent role(s) to ${targetDir}`);
       }
     }
   }

@@ -63,14 +63,21 @@ def short_description(description):
     return description.split(" -- ")[0].strip()
 
 
-def parse_frontmatter(text):
+def parse_frontmatter(text, path):
     """Split a Markdown document into its YAML frontmatter and body.
 
     Deliberately minimal: our agent frontmatter is single-line scalars plus a
-    `skills:` list, so a YAML dependency would buy nothing.
+    `skills:` list, so a YAML dependency would buy nothing. `path` is carried
+    only so a malformed file names itself -- otherwise a bare ValueError from
+    here points a reader at the generator rather than the file to fix.
     """
     lines = text.split("\n")
-    end = lines.index("---", 1)
+    if lines[0].strip() != "---":
+        raise ValueError(f"{path}: expected frontmatter to open with ---")
+    try:
+        end = lines.index("---", 1)
+    except ValueError:
+        raise ValueError(f"{path}: frontmatter has no closing ---") from None
     fields, key = {}, None
 
     for line in lines[1:end]:
@@ -96,11 +103,15 @@ def basic_string(value):
 
     Basic strings process escapes, so an unescaped backslash silently corrupts
     the value (`\\b` becomes a backspace) and an unescaped quote ends the string
-    early. Either one is worse than it sounds: Codex parses role files with
-    `deny_unknown_fields`, so a malformed line takes down the whole role rather
-    than the one field.
+    early. Control characters are rejected outright by the format. Any of them is
+    worse than it sounds: Codex parses role files with `deny_unknown_fields`, so
+    a malformed line takes down the whole role rather than the one field.
     """
     escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+    for char, shorthand in (("\n", "\\n"), ("\r", "\\r"), ("\t", "\\t"), ("\x7f", "\\u007F")):
+        escaped = escaped.replace(char, shorthand)
+    # Whatever C0 remains has no shorthand and has to go out as \uXXXX.
+    escaped = "".join(c if c >= " " else f"\\u{ord(c):04X}" for c in escaped)
     return f'"{escaped}"'
 
 
@@ -137,7 +148,7 @@ def agent_targets(source, plugin):
     """Every agent role file for one plugin, as (path, contents) pairs."""
     return [
         (source / "codex" / "agents" / f"{agent.stem}.toml",
-         render_agent_toml(*parse_frontmatter(agent.read_text()), plugin))
+         render_agent_toml(*parse_frontmatter(agent.read_text(), agent), plugin))
         for agent in sorted((source / "agents").glob("*.md"))
     ]
 
@@ -151,6 +162,14 @@ def plugin_manifest(entry):
     """
     source = ROOT / entry["source"].lstrip("./")
     claude = json.loads((source / ".claude-plugin" / "plugin.json").read_text())
+
+    # The catalog and the manifest name the plugin independently; a one-sided
+    # rename would leave the generated pair quietly disagreeing.
+    if claude["name"] != entry["name"]:
+        raise ValueError(
+            f"{source}: plugin.json name {claude['name']!r} does not match "
+            f"marketplace entry {entry['name']!r}"
+        )
 
     manifest = {
         "name": claude["name"],
@@ -232,12 +251,22 @@ def find_orphans(targets):
     orphan would install into every Codex user's config with the check green.
 
     Every directory written to is owned wholly by this script, so anything in one
-    that is not a target is an orphan.
+    that is not a target is an orphan. The directories to scan come from disk
+    rather than from the targets: a plugin that drops to zero agents, or leaves
+    the marketplace entirely, contributes no targets and would otherwise take its
+    whole directory out of the scan along with the files left in it.
     """
     expected = {path for path, _ in targets}
+    directories = (
+        {path.parent for path in expected}
+        | set(ROOT.glob("plugins/*/codex/agents"))
+        | set(ROOT.glob("plugins/*/.codex-plugin"))
+        | {CODEX_MARKETPLACE.parent}
+    )
     return sorted(
         found.relative_to(ROOT)
-        for directory in {path.parent for path in expected}
+        for directory in directories
+        if directory.is_dir()
         for found in directory.glob("*")
         if found.is_file() and found not in expected
     )

@@ -108,9 +108,11 @@ Verified against codex-cli 0.146.0:
   marketplace, not our tags, and refreshes on `codex plugin marketplace upgrade`.
   The tags stay a Claude Code concern, as do `dependencies` -- Codex ignores
   those, which is why `praxis` documents installing `gitwise` explicitly.
-- **The Codex files are generated.** Run `scripts/generate-codex.py` after any
-  change to a plugin's name, version, description, keywords, category, or agents,
-  and commit the result. `--check` fails when they are stale.
+- **The Codex files are generated -- never hand-edit them.** That means
+  `plugins/<name>/.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`,
+  and `plugins/<name>/codex/agents/*.toml`. Run `scripts/generate-codex.py` after
+  any change to a plugin's name, version, description, keywords, category, or
+  agents, and commit the result. `--check` fails when they are stale or orphaned.
 
 ## Release channels
 
