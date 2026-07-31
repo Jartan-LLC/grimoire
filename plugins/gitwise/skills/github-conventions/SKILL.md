@@ -9,6 +9,19 @@ user-invocable: false
 
 CRITICAL: `#<number>` auto-links to issues/PRs on GitHub. Use `1.`/`2.`/`3.` for numbered lists and "Finding 1:"/"Item 1:" for labeled items -- never `#1`, `#2`, `#3` as markers.
 
+## Authentication
+
+**Never reconfigure a repository's auth transport to get a command working.** If
+the remote is SSH and the key is missing, or the token lacks a scope, stop and
+ask for it to be fixed. Do not switch the remote to HTTPS, add a credential
+helper, or route around it with an explicit URL.
+
+A blocked push is a missing credential, not a transport problem. Working around
+it hides the real cause, silently changes config the user did not ask you to
+touch -- often globally, affecting every other repository -- and leaves the
+project on a transport nobody chose. The user is the only one who can add a key
+or grant a scope, so surface it and wait.
+
 ## Branches
 
 Feature branches: `feature/<description>` or `feature/issue-<number>`
