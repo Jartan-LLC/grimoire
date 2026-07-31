@@ -44,18 +44,6 @@
         "description": "Save state before context compaction"
       }
     ],
-    "PostToolUse": [
-      {
-        "matcher": "Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/post-edit-console-warn.js\""
-          }
-        ],
-        "description": "Warn about console.log statements after edits"
-      }
-    ],
     "Stop": [
       {
         "matcher": "*",
@@ -65,7 +53,7 @@
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/check-console-log.js\""
           }
         ],
-        "description": "Check for console.log in modified files after each response"
+        "description": "Check for console.log in changed files after each response"
       }
     ]
   }
