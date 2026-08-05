@@ -63,8 +63,9 @@ jobs:
     timeout-minutes: 2
     steps:
       # Derived from `needs` so adding a job above cannot leave this green while
-      # that job is red. toJSON goes through env, not inline `${{ }}`, which
-      # zizmor flags as template injection.
+      # that job is red. toJSON goes through env because it emits multi-line
+      # JSON: interpolated into `run:` its quotes and newlines would be spliced
+      # into the script text rather than reaching jq as one value.
       - name: Aggregate results
         env:
           NEEDS: ${{ toJSON(needs) }}
