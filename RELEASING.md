@@ -27,11 +27,21 @@ hooks, README), bump it:
 - **MINOR** (`1.0.0` -> `1.1.0`) -- new skills/agents/commands, backward-compatible additions
 - **MAJOR** (`1.0.0` -> `2.0.0`) -- breaking changes to existing behaviour or invocation
 
+Bump **once per release, not once per change**. The version is a cache key
+against the last released version, so what matters is the delta from `main`, not
+how many commits touched the plugin. A branch that fixes some wording and adds a
+skill lands a single MINOR bump, not a PATCH followed by a MINOR.
+
 Editing only a plugin's `marketplace.json` metadata (`description`, `keywords`)
 is **not** a bump trigger -- those fields sit outside `plugins/<name>/`, the only
 path the bump rule watches.
 
-The bump is enforced by review (see [Enforcement](#enforcement)).
+## Enforcement
+
+Version discipline is enforced by **PR review**. Before merging, confirm any
+plugin with changed content under `plugins/<name>/` has a bumped `version` in its
+`plugin.json`. CI gates pure ASCII, JSON parsing, generated-file drift and the
+full lint set, but nothing there checks the bump rule.
 
 ## Tag a release
 
@@ -44,10 +54,15 @@ cd plugins/<name>
 claude plugin tag --push
 ```
 
-`claude plugin tag` derives the tag from `plugin.json`, requires a clean working
-tree under the plugin directory, and refuses if the tag already exists; add
-`--dry-run` to preview. (Its check that `plugin.json` and the marketplace entry
-agree on the version is moot here -- the marketplace entries carry none.) If the `claude` CLI is unavailable, tag by hand:
+`claude plugin tag` derives the tag from `plugin.json`, validates the plugin
+contents, requires a clean working tree under the plugin directory, and refuses
+if the tag already exists; add `--dry-run` to preview. Its check that
+`plugin.json` and the marketplace entry agree on the version is moot here, since
+the marketplace entries carry none.
+
+`--push` pushes to `origin`. If that push fails the tag still exists locally and
+the command exits non-zero, so `git tag -d` it before retrying. Without the
+`claude` CLI, tag by hand:
 
 ```bash
 git tag <name>--v<version>
@@ -63,13 +78,9 @@ not generated notes -- GitHub's generated notes diff repo-wide and would
 attribute other plugins' commits to this release. The changelog lives in the
 commit history and the per-plugin tags.
 
-## Enforcement
-
-Version discipline is enforced by **PR review**. Before merging, confirm any
-plugin with changed content under `plugins/<name>/` has a bumped `version` in its
-`plugin.json`. CI runs the `CLAUDE.md` Verify block on every pull request, but
-that covers ASCII, JSON and generated-file drift -- not the bump rule, which
-still needs a human. (A CI check could automate it later.)
+A version carrying a prerelease suffix (`praxis--v2.0.0-rc1`) tags and releases
+the same way. `release.yml` marks it a GitHub prerelease, so it stays off the
+repo's "Latest" badge.
 
 ## Dependencies
 
@@ -118,7 +129,17 @@ Verified against codex-cli 0.146.0:
   `plugins/<name>/.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`,
   and `plugins/<name>/codex/agents/*.toml`. Run `scripts/generate-codex.py` after
   any change to a plugin's name, version, description, keywords, category, or
-  agents, and commit the result. `--check` fails when they are stale or orphaned.
+  agents, and commit the result.
+- **`--check` fails on three things**, not just staleness: a generated file out of
+  date with its source, an orphan whose source is gone, and a duplicated hook
+  script whose copies have diverged.
+
+## Duplicated hook scripts
+
+Some hook scripts ship from more than one plugin and must stay byte-identical;
+`generate-codex.py` names them in `DUPLICATED_HOOK_SCRIPTS`. Edit every copy in
+the same commit, or `--check` fails. Each plugin shipping one has changed content
+under `plugins/<name>/`, so each takes its own version bump.
 
 ## Release channels
 
