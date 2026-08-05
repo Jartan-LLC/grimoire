@@ -57,6 +57,12 @@ git push origin <name>--v<version>
 These tags give each plugin an independent version line and are what dependency
 constraints resolve against (see [Dependencies](#dependencies)).
 
+Pushing a `{plugin}--v{version}` tag auto-creates the GitHub Release, so
+`claude plugin tag --push` is the only manual step. The body is a fixed pointer,
+not generated notes -- GitHub's generated notes diff repo-wide and would
+attribute other plugins' commits to this release. The changelog lives in the
+commit history and the per-plugin tags.
+
 ## Enforcement
 
 Version discipline is enforced by **PR review**. Before merging, confirm any

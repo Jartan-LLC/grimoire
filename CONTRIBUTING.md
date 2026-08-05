@@ -36,12 +36,19 @@ Both must pass. CI runs the same two commands and nothing else.
   the tag convention.
 - Never hand-edit the generated Codex files. Run `python3 scripts/generate-codex.py`
   and commit its output.
+- Report security issues privately via [SECURITY.md](.github/SECURITY.md), not a
+  public issue.
 
 ## Updating the lint hooks
 
-Hook revisions are pinned to commit SHAs with a `# frozen: vX.Y.Z` comment.
-Bump them all with:
+Dependabot's `pre-commit` ecosystem proposes hook bumps weekly. It cannot see
+the lychee hook: lychee tags are prefixed (`lychee-v0.24.2`), so Dependabot
+cannot parse a version out of the `# frozen:` comment and reports the hook as
+permanently up to date. Bump that one by hand:
 
 ```bash
-pre-commit autoupdate --freeze
+pre-commit autoupdate --freeze --repo https://github.com/lycheeverse/lychee
 ```
+
+Everything else is covered by the weekly group, or by a bare
+`pre-commit autoupdate --freeze` to bump them all.

@@ -1,0 +1,46 @@
+name: Create GitHub Release
+
+on:
+  push:
+    tags:
+      # Per-plugin tags: {plugin}--v{version} (RELEASING.md). The quotes are
+      # required -- the pattern starts with '*' and holds '['. [0-9] keeps a
+      # stray tag like docs--verify out. Do NOT tighten to a full semver
+      # pattern: tag filters are whole-ref matches, so a future
+      # praxis--v2.0.0-rc1 would silently stop firing.
+      - "*--v[0-9]*"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      # No checkout needed: gh talks to the API and resolves the repo from
+      # GH_REPO. The view-or-create guard keeps re-runs on the same tag
+      # idempotent instead of failing with "release already exists"; keep the
+      # `||` form, since `gh release view ... && exit 0` would abort the step
+      # under `bash -e` on the create path.
+      #
+      # No --generate-notes: GitHub's generated notes diff against the previous
+      # release repo-wide, so a praxis tag would be captioned with recursio's
+      # and pythonica's commits.
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          plugin="${GITHUB_REF_NAME%%--v*}"
+          version="${GITHUB_REF_NAME#*--v}"
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 \
+            || gh release create "$GITHUB_REF_NAME" \
+                 --title "$GITHUB_REF_NAME" \
+                 --verify-tag \
+                 --notes "Release of the $plugin plugin, version $version. Install with '/plugin install $plugin@grimoire'. See RELEASING.md for the per-plugin versioning rules."
