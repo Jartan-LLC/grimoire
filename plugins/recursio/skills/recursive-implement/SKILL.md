@@ -24,7 +24,7 @@ Collect everything the orchestrator needs into a single prompt:
 
 Spawn a `recursive-orchestrator`. The prompt should contain:
 
-```
+```text
 [Project description or plan file path]
 
 [Conversation context if any -- requirements, constraints, decisions made]
@@ -41,5 +41,6 @@ Relay the orchestrator's final report to the user.
 ## Failure Recovery
 
 If the orchestrator reports a failure, present the context to the user. On re-run:
+
 - The wave plan persists in `.claude/workspace/` -- pass the file path to skip re-planning
 - Completed source files and tests remain on disk -- the orchestrator can build on them

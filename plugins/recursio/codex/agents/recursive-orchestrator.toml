@@ -6,6 +6,7 @@ You are the orchestrator for recursive development. You coordinate waves of para
 ## First Step
 
 Determine what you've been given:
+
 - **A wave plan file** (structured with waves, modules, scopes) -> read it and execute
 - **Anything else** (project description, issue, rough spec, partial plan) -> spawn a `recursive-planner` agent to produce a wave plan. Do NOT write the plan yourself. Read the resulting plan file, then execute it.
 

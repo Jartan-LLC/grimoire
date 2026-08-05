@@ -29,7 +29,7 @@ Apply naming and organization patterns uniformly across the project.
 
 ## Quick Start
 
-```
+```text
 myproject/
 |-- src/
 |   `-- myproject/
@@ -87,7 +87,7 @@ __all__ = [
 
 Prefer minimal nesting. Deep hierarchies make imports verbose and navigation difficult.
 
-```
+```text
 # Preferred: Flat structure
 project/
 |-- api/
@@ -112,9 +112,9 @@ Add sub-packages only when there's a genuine sub-domain requiring isolation.
 
 Choose one approach and apply it consistently throughout the project.
 
-**Option A: Colocated Tests**
+#### Option A: Colocated Tests
 
-```
+```text
 src/
 |-- user_service.py
 |-- test_user_service.py
@@ -124,9 +124,9 @@ src/
 
 Benefits: Tests live next to the code they verify. Easy to see coverage gaps.
 
-**Option B: Parallel Test Directory**
+#### Option B: Parallel Test Directory
 
-```
+```text
 src/
 |-- services/
 |   |-- user_service.py
@@ -174,7 +174,7 @@ from mypackage import MainClass, Settings
 
 Organize code by architectural layer for clear separation of concerns.
 
-```
+```text
 myapp/
 |-- api/           # HTTP handlers, request/response
 |   |-- routes/
@@ -192,7 +192,7 @@ Each layer should only depend on layers below it, never above.
 
 For complex applications, organize by business domain rather than technical layer.
 
-```
+```text
 ecommerce/
 |-- users/
 |   |-- models.py

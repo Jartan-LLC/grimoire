@@ -39,7 +39,7 @@ For existing projects: extend existing contracts, match established patterns.
 
 Save to `.claude/workspace/wave-plan-<project-name>.md`.
 
-```
+```text
 ## Implementation Plan -- `<name>` <description>
 ### Issue Summary
 ### Language & Conventions

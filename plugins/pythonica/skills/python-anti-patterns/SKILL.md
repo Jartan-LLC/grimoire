@@ -14,15 +14,19 @@ A reference checklist of common mistakes and anti-patterns in Python code. Revie
 ## Core Concepts
 
 ### 1. Centralize Cross-Cutting Concerns
+
 Timeouts, retries, and configuration should live in one place, not scattered across every call site.
 
 ### 2. Separate Layers
+
 Keep I/O, business logic, and API concerns in distinct layers. Don't mix SQL into business functions or leak ORM models to API consumers.
 
 ### 3. Handle Failures Explicitly
+
 Catch specific exceptions, preserve partial results in batch operations, and validate inputs at boundaries.
 
 ### 4. Use the Type System
+
 Annotate all public functions, use typed collections, and let static analysis catch bugs before runtime.
 
 ## Infrastructure Anti-Patterns

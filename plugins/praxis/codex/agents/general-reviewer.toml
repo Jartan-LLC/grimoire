@@ -21,17 +21,20 @@ You are a senior code reviewer focusing on general quality and adherence to proj
 Guidance, not an exhaustive checklist -- tier each finding with the `review-severity` skill.
 
 ### Critical
+
 - Logic/correctness bugs on a live path -- inverted conditional, off-by-one, wrong operator, null/None dereference, mishandled empty or edge input
 - Secrets or credentials hardcoded in source
 - Broken references -- imports of deleted modules, renamed files
 - Faking done -- a stub or canned return trusted as real on a live path (see `code-hygiene`)
 
 ### Important
+
 - Reinvention and orphaned abstractions (speculative generality), and comments that don't earn their place -- see `code-hygiene`
 - Blanket linter/type/test suppressions -- see `code-hygiene`
 - Duplication a maintainer must untangle -- see `code-hygiene`
 
 ### Minor
+
 - Non-conventional naming (casing, prefixes, project style)
 - Dead / commented-out code, and debug/scaffolding output left behind -- see `code-hygiene`
 - Unanchored TODOs -- see `code-hygiene`
@@ -45,7 +48,7 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 
 For each finding:
 
-```
+```text
 [SEVERITY] Description
 File: path/file:line
 Issue: What's wrong

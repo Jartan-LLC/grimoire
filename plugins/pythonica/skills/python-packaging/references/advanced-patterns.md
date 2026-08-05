@@ -37,7 +37,7 @@ data = files("my_package").joinpath("data/file.txt").read_text()
 
 **For large projects split across multiple repositories:**
 
-```
+```text
 # Package 1: company-core
 company/
 `-- core/
@@ -51,7 +51,7 @@ company/
     `-- routes.py
 ```
 
-**Do NOT include __init__.py in the namespace directory (company/):**
+**Do NOT include `__init__.py` in the namespace directory (company/):**
 
 ```toml
 # company-core/pyproject.toml
@@ -328,7 +328,7 @@ htmlcov/
 
 ### MANIFEST.in
 
-```
+```text
 # MANIFEST.in
 include README.md
 include LICENSE

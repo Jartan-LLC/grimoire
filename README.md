@@ -6,19 +6,19 @@ Curated plugins for development workflows, for Claude Code and Codex.
 
 Claude Code:
 
-```
+```text
 /plugin marketplace add Jartan-LLC/grimoire
 ```
 
 Then browse and install plugins:
 
-```
+```text
 /plugin
 ```
 
 Codex:
 
-```
+```bash
 codex plugin marketplace add Jartan-LLC/grimoire
 codex plugin add <plugin>@grimoire
 ```

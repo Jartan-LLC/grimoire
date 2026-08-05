@@ -22,12 +22,14 @@ Nest when a module contains distinct algorithms or domains. Stop when atomic (si
 The same principle applies at every level of recursion:
 
 **Split** (distinct algorithms or domains):
+
 - Parsers + filters + aggregation + formatters -- different domains
 - Cycle detection + topological sort -- different graph algorithms
 - JSONL parser + CLF parser + CSV parser -- different parsing algorithms
 - Expression parser + predicate evaluator -- syntax parsing vs logic evaluation
 
 **Don't split** (steps in one operation, or trivial wrappers):
+
 - File discovery + file reading + format detection -- one operation ("load config")
 - A parser that just delegates to a validator -- no distinct logic
 - Output capture separate from execution -- capturing is part of executing

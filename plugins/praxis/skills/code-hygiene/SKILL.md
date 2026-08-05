@@ -48,6 +48,7 @@ Cover the comment, read only the code; if a competent reader learns nothing new,
 #### Tombstone -- narrates the change, not the state
 
 Narrates the **change** that produced the code (what was removed, moved, renamed, or done "per review") rather than its current state. Git owns change history; such comments duplicate the diff, drift, and mean nothing to a reader who never saw the prior version. Two tests, in order:
+
 1. **Cold-reader** -- worth writing to a first-time reader who never saw the prior version or the PR? No -> delete.
 2. **Git-ownership** -- amounts to "what changed/moved/was removed", or points to a thing not in this file now (a removed block, a moved responsibility, a PR)? Version control's job -> delete.
 
@@ -69,7 +70,7 @@ Narrates the **change** that produced the code (what was removed, moved, renamed
 | `# retries 3 times` beside a loop of 5 | delete | Stale/derived -- updating the count just re-creates the echo; elevate to a WHY instead. |
 | `# timeout is 30s`, value lives in another service's config | delete | Nonlocal -- drifts when that config changes; state it at the source. |
 | "...Release is created by `release.yml`, so this only handles upload" | delete | Tombstone -- narrates the split; references a removed job. |
-| `# Author: Jane` * `# ==== HELPERS ====` * `} // end for` | delete | Byline / banner -- `git blame` and structure own these. |
+| `# Author: Jane` \* `# ==== HELPERS ====` \* `} // end for` | delete | Byline / banner -- `git blame` and structure own these. |
 | `x = f()  # TODO: fix later` | flag | Orphan TODO -- no owner, no anchor; anchor it or resolve it. |
 
 ### Meta-rule

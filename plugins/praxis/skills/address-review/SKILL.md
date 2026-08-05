@@ -14,16 +14,21 @@ Work through code review findings on a pull request, investigating each one and 
 ## Process
 
 ### 1. Load Review
+
 Determine the PR number from the user's request. Fetch the review comments:
+
 ```bash
 gh pr view <pr-number> --comments
 ```
+
 There may be multiple review comments in the history -- use only the most recent one. Parse its findings into a numbered list grouped by severity (Critical > Important > Minor).
 
 ### 2. Check Out Branch
+
 Ensure the PR's branch is checked out locally so fixes can be applied.
 
 ### 3. Walk Through Findings
+
 Work through each finding sequentially. For each one:
 
 1. **Investigate** -- Read the relevant code. Understand whether the finding is a real problem, a theoretical concern, or a false positive. Check how the rest of the codebase handles the same pattern.
@@ -33,13 +38,17 @@ Work through each finding sequentially. For each one:
 Do NOT blindly apply every suggestion. Investigate first -- the reviewer may have missed context, flagged a pattern that's intentional, or suggested a fix that creates inconsistency with the rest of the codebase.
 
 When the user agrees to skip a finding, post a brief PR comment explaining why it was declined:
+
 ```bash
 gh pr comment <pr-number> --body "**Re: <finding title>** -- <concise reason for skipping>"
 ```
 
 ### 4. Commit
+
 The user may ask to commit at any point during the review -- commit what's been done so far and continue with the remaining findings. Use the format:
-```
+
+```text
 fix(<scope>): address code review findings
 ```
+
 Include a bulleted list of what was changed in the commit body. Never push unless the user explicitly asks.
