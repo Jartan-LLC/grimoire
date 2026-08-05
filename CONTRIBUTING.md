@@ -24,7 +24,7 @@ make lint     # every file-level linter, via pre-commit
 make verify   # ASCII, JSON parses, Codex generated-file drift
 ```
 
-Both must pass. CI runs the same two commands and nothing else.
+Both must pass -- CI runs the same checks.
 
 ## Conventions
 

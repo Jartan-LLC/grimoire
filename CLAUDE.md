@@ -59,8 +59,8 @@ make verify   # pure ASCII, every tracked JSON parses, Codex files match sources
 make lint     # every file-level linter, via pre-commit
 ```
 
-CI runs the same two commands and nothing else. `AGENTS.md` is a symlink to this
-file, not a second source of truth -- edit `CLAUDE.md`.
+CI runs the same checks. `AGENTS.md` is a symlink to this file, not a second
+source of truth -- edit `CLAUDE.md`.
 
 Then confirm by inspection: each skill/agent frontmatter `name` matches its directory, and
 any plugin with changed content under `plugins/<name>/` has a bumped `version` in
