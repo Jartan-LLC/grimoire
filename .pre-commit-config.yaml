@@ -1,25 +1,14 @@
-# The single source of truth for file-level linting -- run by `make lint`, by CI
-# (`pre-commit run --all-files`), and on commit once `pre-commit install` has
-# wired the git hook.
+# Bump every rev: pre-commit autoupdate --freeze
 #
-# Revs are pinned to commit SHAs (# frozen: vX.Y.Z). Bump all with:
-#   pre-commit autoupdate --freeze
-# Dependabot's `pre-commit` ecosystem does this automatically -- see
-# .github/dependabot.yml.
+# The docker hooks resolve the workspace mount by inspecting this container, so
+# they only see files under the bind-mounted project directory. Run them from a
+# worktree or a copy and they report missing files, not a mount error.
 #
-# The two docker hooks need the daemon up, and they resolve the workspace mount
-# by inspecting this container, so they only see files under the bind-mounted
-# project directory. Running them from a worktree or a copy elsewhere (/tmp, a
-# home directory) reports missing files rather than a mount error.
-#
-# Deliberately absent:
-#   ruff     -- would govern one file (scripts/generate-codex.py) and drag in a
-#               pyproject.toml purely to hold its config.
-#   prettier -- deadlocks against scripts/generate-codex.py, which owns
-#               plugins/*/.codex-plugin/plugin.json. No tree state satisfies both.
-#   check-json -- .devcontainer/devcontainer.json is JSONC by convention; the
-#               first `//` comment would break it. The Verify block's
-#               `git ls-files '*.json'` loop covers strict JSON already.
+# Deliberately absent, all three of which look like obvious additions:
+#   ruff       governs one file and would drag in a pyproject.toml to hold its config
+#   prettier   fights generate-codex.py over plugins/*/.codex-plugin/plugin.json;
+#              no tree state satisfies both
+#   check-json .devcontainer/devcontainer.json is JSONC by convention
 repos:
   - repo: https://github.com/codespell-project/codespell
     rev: 2ccb47ff45ad361a21071a7eedda4c37e6ae8c5a # frozen: v2.4.2
@@ -32,25 +21,24 @@ repos:
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: 534166213006ec869b773b7ed8c6ebeaad1165d0 # frozen: v0.23.0
     hooks:
-      # --no-globs: without it the hook appends the config `globs` to the
-      # filenames pre-commit passes, so every run lints the whole tree
-      # (including untracked files) and is never incremental. `ignores` are
-      # honoured either way, which is what makes the AGENTS.md entry work.
+      # Without --no-globs the hook appends the config globs to the filenames
+      # pre-commit passes, so every run lints the whole tree and is never
+      # incremental. `ignores` still apply either way.
       - id: markdownlint-cli2
         args: [--no-globs]
   - repo: https://github.com/lycheeverse/lychee
     rev: 2bba271688c1abb1503097a064e6c3bc1d1b6a9b # frozen: lychee-v0.24.2
     hooks:
-      # Offline: relative links only. External-link rot is non-deterministic, so
-      # it is caught by external-link-check.yml, not this blocking gate.
-      - id: lychee-docker # docker: no Rust toolchain needed locally
-        args: [--offline, --no-progress] # args replace the default, so restate --no-progress
+      # Relative links only. External rot is non-deterministic and belongs in a
+      # weekly report, not a blocking gate.
+      - id: lychee-docker
+        args: [--offline, --no-progress] # args replace the defaults, so restate --no-progress
         types: [markdown]
-        exclude: '^\.github/SECURITY\.md$' # ../../security/advisories/new: GitHub-web link, no local file
+        exclude: '^\.github/SECURITY\.md$' # ../../security/advisories/new resolves on github.com only
   - repo: https://github.com/rhysd/actionlint
     rev: 914e7df21a07ef503a81201c76d2b11c789d3fca # frozen: v1.7.12
     hooks:
-      - id: actionlint-docker # docker: no Go toolchain needed locally
+      - id: actionlint-docker
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
     rev: e3eebf65325ccc992422292cb7a4baee967cf815 # frozen: v1.26.1
     hooks:
@@ -58,15 +46,10 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # frozen: v6.0.0
     hooks:
-      # --markdown-linebreak-ext=md preserves an exactly-two-space line break,
-      # which .editorconfig ([*.md] trim_trailing_whitespace = false) and
-      # markdownlint's MD009 (br_spaces: 2) both allow. The exclude is
-      # load-bearing: scripts/generate-codex.py embeds agent Markdown bodies
-      # verbatim into the generated TOMLs, so stripping whitespace there would
-      # fight the generator forever -- the hook strips it, the next generator
-      # run puts it back.
+      # generate-codex.py embeds agent Markdown bodies verbatim into the TOMLs,
+      # so stripping whitespace there would fight the generator forever.
       - id: trailing-whitespace
-        args: [--markdown-linebreak-ext=md]
+        args: [--markdown-linebreak-ext=md] # preserve MD009's two-space break
         exclude: '^plugins/[^/]+/codex/agents/.*\.toml$'
       - id: end-of-file-fixer
       - id: check-yaml

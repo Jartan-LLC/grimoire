@@ -27,9 +27,6 @@ jobs:
         with:
           python-version: "3.12"
 
-      # The Makefile owns the check definitions so they live in exactly one
-      # place -- `make verify` here, in CLAUDE.md, and in the pre-merge
-      # checklist all run the same recipe.
       - name: Verify
         run: make verify
 
@@ -45,9 +42,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      # Keyed on the config: a rev bump is the only thing that invalidates the
-      # hook environments. Does not cover the two docker hooks, whose images
-      # the runner pulls fresh.
+      # Caches the hook environments only; the docker hooks pull fresh images.
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/pre-commit
@@ -59,33 +54,25 @@ jobs:
       - name: Lint
         run: pre-commit run --all-files --show-diff-on-failure
 
-  # Single required status check. Do NOT give this job a `name:` -- the branch
-  # ruleset matches the context by job id, and adding one silently renames it so
-  # the required check stops matching.
+  # The required status check. Do NOT add a `name:` -- the ruleset matches the
+  # context by job id, so naming it silently stops the check from matching.
   check:
     if: always()
     needs: [verify, lint]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
-      # Derived from `needs` rather than a hand-maintained list, so adding a job
-      # above cannot leave this reporting green while that job is red. Passing
-      # toJSON through env instead of interpolating into `run` avoids the
-      # template-injection pattern zizmor flags.
-      #
-      # The `length > 0` assertion is load-bearing: an empty $NEEDS would give
-      # jq nothing to select, print nothing, and exit 0 -- a required check
-      # certifying nothing, which is the exact failure this derivation exists
-      # to prevent.
+      # Derived from `needs` so adding a job above cannot leave this green while
+      # that job is red. toJSON goes through env, not inline `${{ }}`, which
+      # zizmor flags as template injection.
       - name: Aggregate results
         env:
           NEEDS: ${{ toJSON(needs) }}
         run: |
           set -euo pipefail
-          # Both guards are needed. jq reads zero values from empty input and
-          # exits 0 without ever evaluating the filter, so the -n test is what
-          # actually catches an empty payload; the jq -e catches malformed
-          # input and `{}`.
+          # jq reads zero values from empty input and exits 0 without evaluating
+          # the filter, so this test -- not the jq -e below -- catches an empty
+          # payload. Without it the check passes while certifying nothing.
           [ -n "$NEEDS" ] || { echo "::error::empty needs payload"; exit 1; }
           jq -e 'type == "object" and length > 0' >/dev/null <<<"$NEEDS" \
             || { echo "::error::empty or malformed needs payload"; exit 1; }

@@ -3,11 +3,9 @@ name: Create GitHub Release
 on:
   push:
     tags:
-      # Per-plugin tags: {plugin}--v{version} (RELEASING.md). The quotes are
-      # required -- the pattern starts with '*' and holds '['. [0-9] keeps a
-      # stray tag like docs--verify out. Do NOT tighten to a full semver
-      # pattern: tag filters are whole-ref matches, so a future
-      # praxis--v2.0.0-rc1 would silently stop firing.
+      # Per-plugin tags, {plugin}--v{version} (RELEASING.md). Quotes are required
+      # for a pattern starting with '*'. Do NOT tighten to full semver: tag
+      # filters are whole-ref matches, so praxis--v2.0.0-rc1 would stop firing.
       - "*--v[0-9]*"
 
 concurrency:
@@ -23,20 +21,9 @@ jobs:
     permissions:
       contents: write
     steps:
-      # No checkout needed: gh talks to the API and resolves the repo from
-      # GH_REPO. The view-or-create guard keeps re-runs on the same tag
-      # idempotent: `gh release view` succeeds and the create is skipped, so a
-      # re-run is a no-op rather than "release already exists".
-      #
-      # No --generate-notes: GitHub's generated notes diff against the previous
-      # release repo-wide, so a praxis tag would be captioned with recursio's
-      # and pythonica's commits.
-      #
-      # A tag like praxis--v2.0.0-rc1 matches the trigger by design (a tighter
-      # semver pattern would silently stop firing on it), so mark any version
-      # carrying a semver prerelease suffix as a prerelease. GitHub picks the
-      # "Latest" release as the most recent non-prerelease, non-draft one by
-      # created_at, so without this an rc would be presented as current.
+      # gh resolves the repo from GH_REPO, so no checkout; the view guard keeps
+      # re-runs idempotent. No --generate-notes: GitHub diffs them repo-wide, so
+      # a praxis tag would be captioned with recursio's commits.
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -44,6 +31,8 @@ jobs:
         run: |
           plugin="${GITHUB_REF_NAME%%--v*}"
           version="${GITHUB_REF_NAME#*--v}"
+          # GitHub picks "Latest" as the newest non-prerelease by created_at, so
+          # an unmarked rc would present as current.
           flags=()
           case "$version" in
             *-*) flags+=(--prerelease) ;;

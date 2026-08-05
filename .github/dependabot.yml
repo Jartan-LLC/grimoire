@@ -17,17 +17,13 @@ updates:
     cooldown:
       default-days: 7
 
-  # No update-types filter here, unlike github-actions above. A pre-commit
-  # dependency's version is the frozen SHA, so update-types filtering empties
-  # the group and Dependabot falls back to one ungrouped PR per hook
-  # (dependabot-core#15266). Consequence: major hook bumps land in this group
-  # too, and the automerge action's `target: minor` declines them, so they wait
-  # for a manual merge.
+  # No update-types filter here: a pre-commit dependency's version is the frozen
+  # SHA, so filtering empties the group and Dependabot falls back to one PR per
+  # hook (dependabot-core#15266). Majors therefore land in this group too, where
+  # the automerge action's `target: minor` leaves them for a human.
   #
-  # The lychee hook is invisible to this ecosystem: its tags are prefixed
-  # (lychee-vX.Y.Z), so Dependabot cannot parse a version out of the `# frozen:`
-  # comment and reports it as permanently current. Bump it by hand -- see
-  # CONTRIBUTING.md.
+  # This ecosystem never proposes the lychee hook -- its lychee-vX.Y.Z tags do
+  # not parse as a version, so it reads as permanently current.
   - package-ecosystem: "pre-commit"
     directory: "/"
     schedule:

@@ -1,9 +1,7 @@
 name: External Link Check
 
-# Weekly check for dead external links in Markdown. Internal/relative links are
-# gated at commit time by the lychee pre-commit hook; external rot is
-# non-deterministic, so a failure opens (or updates) one tracking issue instead
-# of blocking.
+# External rot is non-deterministic, so a failure files a tracking issue rather
+# than blocking. Relative links are gated at commit time by the lychee hook.
 
 on:
   schedule:
@@ -12,11 +10,11 @@ on:
 
 permissions: {}
 
-# Serialize runs so a manual dispatch overlapping the weekly run cannot both
-# clear the find-issue step and each open a duplicate tracking issue.
+# Serialized: two concurrent runs would both find no existing issue and each
+# open one.
 concurrency:
   group: external-link-check
-  cancel-in-progress: false # queue an overlapping run, do not drop it
+  cancel-in-progress: false
 
 jobs:
   link-check:
@@ -36,16 +34,15 @@ jobs:
         id: lychee
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
-          # Markdown only; --exclude-path mirrors the pre-commit hook's exclude.
           args: "--no-progress --exclude-path .github/SECURITY.md './**/*.md'"
-          fail: false # the next step files an issue instead of going red
-          failIfEmpty: false # a 0-link tree should not red the run
-          output: ./lychee/out.md # pin the report path the create-issue step reads
+          fail: false # the next step files an issue instead of reddening the run
+          failIfEmpty: false
+          output: ./lychee/out.md
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # lifts GitHub's API rate limit
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # lifts the API rate limit
 
-      # Reuse one issue instead of filing a new one every week: find the open
-      # link-check issue (if any) so the next step updates it in place.
+      # Find the existing issue so the next step updates it in place rather than
+      # filing a fresh one every week.
       - name: Find the open link-check issue
         id: existing
         if: steps.lychee.outputs.exit_code != 0
@@ -60,9 +57,8 @@ jobs:
             --jq 'map(select(.title == env.ISSUE_TITLE) | .number) | .[0] // ""')"
           echo "number=$number" >> "$GITHUB_OUTPUT"
 
-      # The `dependency` label must already exist: labels are applied in a
-      # separate API call after the issue is created, and this action's single
-      # catch calls core.setFailed, so an unknown label reds the run weekly.
+      # The `dependency` label must already exist: it is applied in a separate
+      # call after the issue is filed, so an unknown one reds the run weekly.
       - name: Open or update the link-check issue
         if: steps.lychee.outputs.exit_code != 0
         uses: peter-evans/create-issue-from-file@fca9117c27cdc29c6c4db3b86c48e4115a786710 # v6.0.0

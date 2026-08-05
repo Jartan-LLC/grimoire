@@ -1,10 +1,5 @@
-# Task runner for the local dev loop. Run `make` or `make help` to list targets.
-# Grimoire has no build system -- these targets are the checks, nothing else.
-# CI calls `make verify` directly, so this file is the single source for the
-# Verify block rather than a copy of it.
-#
-# Recipes run under /bin/sh (dash on Debian and on the CI runners), so no
-# bashisms. `$$` escapes a shell variable from Make's own expansion.
+# CI calls these targets directly, so this file is the single definition of the
+# checks. Recipes run under dash both here and on the runners -- no bashisms.
 
 .PHONY: help install lint verify
 
@@ -19,11 +14,9 @@ install:  ## Install pre-commit and wire the git hook
 lint:  ## Lint all files via pre-commit (codespell, shellcheck, markdownlint, lychee, actionlint, zizmor, hygiene)
 	pre-commit run --all-files
 
-# `git grep -l` exits 0 on a match, 1 on none, and something else when the
-# invocation itself failed -- a PCRE build without -P, a bad repo state.
-# Treating every non-zero as "clean" would turn the ASCII gate into a silent
-# no-op, so each case is handled on its own. The whole block is one logical
-# line because Make runs each recipe line in a separate shell.
+# `git grep -l` exits 1 on no match, so `|| true` would turn the ASCII gate into
+# a permanent no-op and any other non-zero means the invocation itself failed.
+# One logical line because Make gives each recipe line its own shell.
 verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift)
 	@echo "Checking for non-ASCII characters..."
 	@set +e; git grep -lP '[^\x00-\x7F]'; rc=$$?; set -e; \
