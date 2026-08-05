@@ -46,37 +46,25 @@ full lint set, but nothing there checks the bump rule.
 ## Tag a release
 
 Releases are resolved from git tags named `{plugin-name}--v{version}` (double
-dash, leading `v`), where `{version}` matches that commit's `plugin.json`. Cut
-the tag from inside the plugin directory:
-
-```bash
-cd plugins/<name>
-claude plugin tag --push
-```
-
-`claude plugin tag` derives the tag from `plugin.json`, validates the plugin
-contents, requires a clean working tree under the plugin directory, and refuses
-if the tag already exists; add `--dry-run` to preview. Its check that
-`plugin.json` and the marketplace entry agree on the version is moot here, since
-the marketplace entries carry none.
-
-`--push` pushes to `origin`. If that push fails the tag still exists locally and
-the command exits non-zero, so `git tag -d` it before retrying. Without the
-`claude` CLI, tag by hand:
+dash, leading `v`), where `{version}` matches that commit's `plugin.json`. Tag
+the merge commit and push:
 
 ```bash
 git tag <name>--v<version>
 git push origin <name>--v<version>
 ```
 
+The version in the tag must match `plugin.json` at that commit, and the tag must
+not already exist -- nothing checks either for you, and a tag pointing at the
+wrong commit is what the resolver will hand users.
+
 These tags give each plugin an independent version line and are what dependency
 constraints resolve against (see [Dependencies](#dependencies)).
 
-Pushing a `{plugin}--v{version}` tag auto-creates the GitHub Release, so
-`claude plugin tag --push` is the only manual step. The body is a fixed pointer,
-not generated notes -- GitHub's generated notes diff repo-wide and would
-attribute other plugins' commits to this release. The changelog lives in the
-commit history and the per-plugin tags.
+Pushing the tag is the only manual step: `release.yml` creates the GitHub
+Release from it. The body is a fixed pointer, not generated notes -- GitHub's
+generated notes diff repo-wide and would attribute other plugins' commits to
+this release. The changelog lives in the commit history and the per-plugin tags.
 
 A version carrying a prerelease suffix (`praxis--v2.0.0-rc1`) tags and releases
 the same way. `release.yml` marks it a GitHub prerelease, so it stays off the
