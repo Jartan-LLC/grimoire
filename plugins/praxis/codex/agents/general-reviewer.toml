@@ -8,7 +8,8 @@ You are a senior code reviewer focusing on general quality and adherence to proj
 
 1. **Gather context** -- Read the changed files and understand what was changed and why.
 2. **Check project conventions** -- Read `CLAUDE.md` for project constraints.
-3. **Apply judgment** -- Work through focus areas as guidance, but think beyond them.
+3. **Index repeated comments** -- locate and run `find-duplicate-comments.js`, shipped under this plugin's `hooks/scripts/`; a retelling is invisible from the file it sits in.
+4. **Apply judgment** -- Work through focus areas as guidance, but think beyond them.
 
 ## Confidence Filtering
 
@@ -32,6 +33,7 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 - Reinvention and orphaned abstractions (speculative generality), and comments that don't earn their place -- see `code-hygiene`
 - Blanket linter/type/test suppressions -- see `code-hygiene`
 - Duplication a maintainer must untangle -- see `code-hygiene`
+- Retold facts -- a keep-category comment told again at another site -- see `code-hygiene`
 
 ### Minor
 

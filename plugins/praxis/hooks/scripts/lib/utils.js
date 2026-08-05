@@ -306,8 +306,8 @@ function appendFile(filePath, content) {
 }
 
 /**
- * Check if a command exists in PATH
- * Uses execFileSync to prevent command injection
+ * Check if a command exists in PATH.
+ * Argument-array spawn plus a name allowlist: no shell, nothing to inject into.
  */
 function commandExists(cmd) {
   // Validate command name - only allow alphanumeric, dash, underscore, dot

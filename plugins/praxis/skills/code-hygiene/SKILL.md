@@ -17,7 +17,7 @@ This truthfulness standard applies wherever the annotation lives -- inline comme
 
 ### KEEP -- the code can't say it
 
-Phrase each against the **invariant** that motivates it, not the current mechanics, so a refactor leaves it true.
+Phrase each against the **invariant** that motivates it, not the current mechanics -- **evergreen**, so a refactor leaves it true.
 
 - **WHY / rationale** -- the constraint that forced a non-obvious choice, the tradeoff, or the obvious alternative rejected and why (a performance hack that replaces the clean form belongs here -- say so and cite the evidence: hot path, measured Nx).
   `# gh resolves the repo from GH_REPO, so no checkout; the guard keeps re-runs idempotent`
@@ -40,24 +40,36 @@ Cover the comment, read only the code; if a competent reader learns nothing new,
 - **What / how restatement** -- paraphrases the mechanics the line states (`i += 1  # increment i`). Highest-coupling, fastest-rotting comment: a lie the instant the mechanics change and no one updates it.
 - **Derived-value echo** -- restates a value, count, threshold, or range the code already declares. No compiler catches the drift -> delete *even when currently correct*, on rot risk alone.
 - **Stale / misleading** -- the current code contradicts it. Worse than none: correct it into a keep-category fact, or delete.
-- **Nonlocal** -- asserts a fact another file/service/config owns; it drifts silently when *that* source changes. State it at the source. (Cross-ownership drift, distinct from mere in-repo duplication.)
+- **Nonlocal** -- asserts a fact another file/service/config owns; it drifts silently when *that* source changes. State it at the source. (Cross-ownership drift: told here, never at its owner -- move it there. If the repo already states it at the owner, that copy is *Retold fact* under CONDITIONAL -- point, don't restate.)
 - **Noise / banner / attribution** -- section dividers (`# ==== HELPERS ====`), closing-brace labels (`} // end for`), author/date bylines. Structure and `git blame` carry these; if a file needs dividers to navigate, split it. (A `# region` fold or codegen sentinel is a tooling directive, not a banner.)
 - **Commented-out code** -- delete unconditionally; git owns it (`git log -G` recovers it). "Disabled with a why" is no loophole -- the code still goes, only the codeless knowledge survives as a tracked note. See *Dead code*. Carve-out: an illustrative snippet inside a docstring/example config is documentation-by-example, not disabled program code -> keep.
 - **Mandated boilerplate** -- a comment satisfying only a "comment everything" rule, or a header restating the signature's name/params/return. If a header is required, make it say what the signature cannot.
 
 #### Tombstone -- narrates the change, not the state
 
-Narrates the **change** that produced the code (what was removed, moved, renamed, or done "per review") rather than its current state. Git owns change history; such comments duplicate the diff, drift, and mean nothing to a reader who never saw the prior version. Two tests, in order:
+Narrates the **change** that produced the code (what was removed, moved, renamed, or done "per review") rather than its current state. A state description is evergreen; a change narration is dated the moment it is written. Git owns change history; such comments duplicate the diff, drift, and mean nothing to a reader who never saw the prior version. Two tests, in order:
 
 1. **Cold-reader** -- worth writing to a first-time reader who never saw the prior version or the PR? No -> delete.
 2. **Git-ownership** -- amounts to "what changed/moved/was removed", or points to a thing not in this file now (a removed block, a moved responsibility, a PR)? Version control's job -> delete.
 
-**First-pass token filter (flag, don't auto-verdict):** `moved`, `now handled`, `no longer`, `used to`, `previously`, `was`, `replaced`, `instead of`, `per review`, `as requested`, `see <otherfile>` (explaining an *absence* here). A hit only triggers the cold-reader test -- `now`/`instead` also appear in legitimate rationale.
+**First-pass token filter (flag, don't auto-verdict):** `moved`, `now handled`, `no longer`, `used to`, `previously`, `was`, `replaced`, `instead of`, `per review`, `as requested`, `see <otherfile>` (explaining an *absence* here). A hit only triggers the cold-reader test -- `now`/`instead` also appear in legitimate rationale, and a **Dated advisory** legitimately uses `no longer`/`was` about the world outside this repo.
 
 ### CONDITIONAL
 
 - **TODO / FIXME / HACK** -- KEEP only if actionable *and* anchored to a tracker: `TODO(#123): drop once upstream ships stubs` states what the code can't (known-incomplete, and what's owed) -> treat as an external anchor. Flag the bare orphan (`TODO: fix later`) -- no owner, rots. Never delete a *live, real-gap* marker for cleanliness; that hides debt, which is worse.
 - **Magic value** -- SPLIT. The value's **meaning** -> self-document with a named constant (meta-rule) and drop the comment. Its **provenance** (spec section, RFC, empirically-tuned figure, bit-hack origin) -> KEEP as external-anchor WHY. A bare number with neither name nor anchor is a naming defect, not a comment to keep.
+- **Dated advisory** -- the one deliberate exception to evergreen. A fact about the world
+  *outside this repo* that you cannot fix from here: an unpatched CVE, an upstream bug you
+  compensate for. Undated it turns false the day the world moves, so it needs an **anchor**
+  (advisory or tracker id, never a person), an **as-of date**, and the **impact here**.
+  Phrase it to name its own end -- "no fixed release as of `<date>`" stops being true once one
+  ships, which is when the comment goes. Unlike a TODO, the fix is not ours to make.
+  `# CVE-2025-1234 in libfoo <= 2.3, no fixed release as of 2026-08-05; affected parser unreachable here`
+- **Retold fact** -- SPLIT. A keep-category fact told again at a second site: every copy is
+  true and locally unrecoverable, so per-file review keeps them all and one edit later the
+  rest read as lies. The site whose own change would falsify it KEEPs the telling; the others
+  name the topic and point (`# config ownership: entrypoint.sh`), though a warning at its own
+  point of danger stays. Grep the phrase before ruling.
 
 ### Keep vs. delete
 
@@ -72,6 +84,8 @@ Narrates the **change** that produced the code (what was removed, moved, renamed
 | "...Release is created by `release.yml`, so this only handles upload" | delete | Tombstone -- narrates the split; references a removed job. |
 | `# Author: Jane` \* `# ==== HELPERS ====` \* `} // end for` | delete | Byline / banner -- `git blame` and structure own these. |
 | `x = f()  # TODO: fix later` | flag | Orphan TODO -- no owner, no anchor; anchor it or resolve it. |
+| `# CVE-2025-1234 in libfoo <= 2.3, no fixed release as of 2026-08-05; parser unreachable here` | keep | Dated advisory -- anchored, dated, scoped; a fix retires it. |
+| The same "Geyser owns the config after first boot" in six files | split | Retold fact -- keep it where a change would falsify it; the rest point. |
 
 ### Meta-rule
 

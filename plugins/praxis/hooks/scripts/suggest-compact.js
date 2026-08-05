@@ -14,14 +14,15 @@
  *
  * Two signals:
  * - Context size (primary): the latest assistant `usage` record from the session
- *   transcript, compared against COMPACT_CONTEXT_THRESHOLD (default 160k),
- *   re-reminding after every COMPACT_CONTEXT_INTERVAL tokens of growth
- *   (default 60k). Absolute tokens only -- see lib/transcript-context.js for why
- *   there is no percentage.
- * - Tool-call count (secondary): first at COMPACT_THRESHOLD (default 50), then
- *   every 25. A weak proxy for window pressure on its own -- a few large reads
- *   can fill the window in very few calls, and many tiny calls can cross 50
- *   while the window is barely used.
+ *   transcript, gated by COMPACT_CONTEXT_THRESHOLD and COMPACT_CONTEXT_INTERVAL.
+ *   Absolute tokens only -- see lib/transcript-context.js for why there is no
+ *   percentage.
+ * - Tool-call count (secondary), gated by COMPACT_THRESHOLD. A weak proxy for
+ *   window pressure on its own -- a few large reads can fill the window in very
+ *   few calls, and many tiny calls can cross the threshold while the window is
+ *   barely used.
+ *
+ * Defaults are declared with the settings themselves, not echoed here.
  */
 
 const fs = require('fs');
