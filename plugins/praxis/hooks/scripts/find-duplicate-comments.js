@@ -1,18 +1,13 @@
 #!/usr/bin/env node
 /**
- * Duplicate-comment finder -- a reviewer tool, NOT a hook.
- *
- * It lives under hooks/scripts/ only to reuse lib/, which the directory name
- * would otherwise make misleading. Nothing in hooks.json invokes it; a reviewer
- * runs it by hand.
+ * Duplicate-comment finder -- a reviewer tool, NOT a hook. It sits under
+ * hooks/scripts/ only to reuse lib/; nothing in hooks.json invokes it.
  *
  * The Retold fact rule cannot be applied from one file: judging a comment as a
  * retelling means knowing whether the same fact is told elsewhere, which
- * per-file review structurally cannot see. This supplies that whole-repo view.
- *
- * Scoped to the diff, not the repo -- it reports comment lines ADDED by the
- * change whose prose already appears somewhere tracked, and names both sites so
- * the reviewer can pick which one keeps the telling.
+ * per-file review structurally cannot see. This supplies that whole-repo view,
+ * scoped to the diff -- comment lines ADDED by the change whose prose already
+ * appears somewhere tracked, naming both sites so the reviewer picks a keeper.
  *
  * Usage:
  *   node find-duplicate-comments.js [base-ref]     (default: origin/main)

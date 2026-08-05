@@ -4,30 +4,19 @@
 /**
  * PostToolUse Hook: Check for console.log statements in changed files
  *
- * Cross-platform (Windows, macOS, Linux)
+ * PostToolUse rather than Stop: on Stop, additionalContext continues the
+ * conversation so Claude can act on it, keeping the turn alive until the
+ * warning stops firing -- which an intentional console.log never would.
  *
- * Runs after an edit and checks whether any changed JavaScript/TypeScript file
- * contains console.log statements, reporting the offending line numbers to help
- * developers remove debug statements before committing.
+ * Findings are rate-limited because this fires per edit rather than per turn.
+ * One new to the session surfaces immediately; one already reported repeats
+ * only every CONSOLE_LOG_COOLDOWN edits, so a log the user has decided to keep
+ * stops nagging without delaying a genuinely new one.
  *
- * PostToolUse rather than Stop: on Stop, additionalContext is documented to
- * continue the conversation so Claude can act on the feedback, which keeps the
- * turn alive until the warning stops firing. An intentional console.log outside
- * the exclusions below would never stop firing. PostToolUse injects the same
- * warning next to the tool result and ends there.
+ * Untracked files are covered as well as tracked ones -- `git diff` cannot see
+ * a file that was never added, which is exactly where fresh debug logging lives.
  *
- * Firing per edit is noisier than per turn, so findings are rate-limited: a
- * finding not yet reported this session is always surfaced immediately, while
- * one already reported repeats only every CONSOLE_LOG_COOLDOWN edits. A log the
- * user has decided to keep therefore stops nagging without ever delaying a
- * genuinely new one.
- *
- * Covers modified tracked files and new untracked ones -- `git diff` alone
- * cannot see a file that was never added, which is exactly where fresh debug
- * logging tends to live.
- *
- * Exclusions: test files, config files, and scripts/ directory (where
- * console.log is often intentional).
+ * The exclusions below are the places console.log is usually intentional.
  */
 
 const fs = require('fs');

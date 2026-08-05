@@ -2,29 +2,23 @@
 /**
  * SessionStart Hook: install this plugin's Codex agent roles
  *
- * Cross-platform (Windows, macOS, Linux)
+ * Codex has no plugin-level agent surface -- a manifest can point at skills,
+ * MCP servers, apps and hooks, and nothing else -- so roles have to reach the
+ * user's Codex config some other way.
  *
- * Codex has no plugin-level agent surface -- a plugin manifest can point at
- * skills, MCP servers, apps and hooks, and nothing else -- so agent roles have
- * to reach the user's Codex config some other way. This copies the generated
- * roles out of the plugin into that config on session start.
+ * Codex-only, keyed on the bare PLUGIN_ROOT: Codex sets it alongside
+ * CLAUDE_PLUGIN_ROOT, Claude Code sets only the prefixed name, so it is a
+ * reliable discriminator. Reading paths from it also means a version bump
+ * moves the source directory without stranding a stale copy.
  *
- * Codex-only. Codex sets a bare PLUGIN_ROOT for plugin hook processes (as well
- * as CLAUDE_PLUGIN_ROOT, for compatibility); Claude Code sets only the
- * CLAUDE_-prefixed names. The bare one is therefore a reliable discriminator,
- * and reading paths from it means a version bump moves the source directory
- * without stranding a stale copy.
+ * hooks.json guards on the same variable before requiring this file, because
+ * CLAUDE_PLUGIN_ROOT has a history of being unset for SessionStart specifically
+ * (anthropics/claude-code issue 27145) and would resolve to `/hooks/scripts/...`
+ * before any check here could run. The guard below still stands alone, so the
+ * script is safe to invoke directly.
  *
- * hooks.json guards on the same variable before requiring this file, rather than
- * naming the path directly, because CLAUDE_PLUGIN_ROOT has a history of being
- * unpopulated for SessionStart specifically (anthropics/claude-code issue 27145).
- * An unset value there would resolve to `/hooks/scripts/...` and fail to load
- * before any check in this file could run. The guard below still stands on its
- * own so the script is safe to invoke directly.
- *
- * Roles land in a `grimoire/<plugin>/` subdirectory rather than loose in
- * agents/: Codex discovers agent roles recursively, so nesting them keeps the
- * namespace ours and cannot clobber a role the user wrote themselves.
+ * Roles nest under `grimoire/<plugin>/` because Codex discovers them
+ * recursively; that keeps the namespace ours and cannot clobber a user's own.
  */
 
 const fs = require('fs');

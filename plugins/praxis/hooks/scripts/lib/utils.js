@@ -1,50 +1,31 @@
 // Originally from everything-claude-code by Affaan Mustafa (https://github.com/affaan-m/ECC)
-/**
- * Cross-platform utility functions for Claude Code hooks and scripts
- * Works on Windows, macOS, and Linux
- */
+// Cross-platform helpers shared by the hook scripts.
 
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { execSync, spawnSync } = require('child_process');
 
-// Platform detection
 const isWindows = process.platform === 'win32';
 const isMacOS = process.platform === 'darwin';
 const isLinux = process.platform === 'linux';
 
-/**
- * Get the user's home directory (cross-platform)
- */
 function getHomeDir() {
   return os.homedir();
 }
 
-/**
- * Get the Claude config directory
- */
 function getClaudeDir() {
   return path.join(getHomeDir(), '.claude');
 }
 
-/**
- * Get the sessions directory
- */
 function getSessionsDir() {
   return path.join(getClaudeDir(), 'sessions');
 }
 
-/**
- * Get the learned skills directory
- */
 function getLearnedSkillsDir() {
   return path.join(getClaudeDir(), 'skills', 'learned');
 }
 
-/**
- * Get the temp directory (cross-platform)
- */
 function getTempDir() {
   return os.tmpdir();
 }
@@ -69,9 +50,6 @@ function ensureDir(dirPath) {
   return dirPath;
 }
 
-/**
- * Get current date in YYYY-MM-DD format
- */
 function getDateString() {
   const now = new Date();
   const year = now.getFullYear();
@@ -80,9 +58,6 @@ function getDateString() {
   return `${year}-${month}-${day}`;
 }
 
-/**
- * Get current time in HH:MM format
- */
 function getTimeString() {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, '0');
@@ -90,18 +65,12 @@ function getTimeString() {
   return `${hours}:${minutes}`;
 }
 
-/**
- * Get the git repository name
- */
 function getGitRepoName() {
   const result = runCommand('git rev-parse --show-toplevel');
   if (!result.success) return null;
   return path.basename(result.output);
 }
 
-/**
- * Get project name from git repo or current directory
- */
 function getProjectName() {
   const repoName = getGitRepoName();
   if (repoName) return repoName;
@@ -120,9 +89,6 @@ function getSessionIdShort(fallback = 'default') {
   return getProjectName() || fallback;
 }
 
-/**
- * Get current datetime in YYYY-MM-DD HH:MM:SS format
- */
 function getDateTimeString() {
   const now = new Date();
   const year = now.getFullYear();
@@ -260,16 +226,10 @@ async function readStdinJson(options = {}) {
   });
 }
 
-/**
- * Log to stderr (visible to user in Claude Code)
- */
 function log(message) {
   console.error(message);
 }
 
-/**
- * Output to stdout (returned to Claude)
- */
 function output(data) {
   if (typeof data === 'object') {
     console.log(JSON.stringify(data));
@@ -278,9 +238,6 @@ function output(data) {
   }
 }
 
-/**
- * Read a text file safely
- */
 function readFile(filePath) {
   try {
     return fs.readFileSync(filePath, 'utf8');
@@ -289,17 +246,11 @@ function readFile(filePath) {
   }
 }
 
-/**
- * Write a text file
- */
 function writeFile(filePath, content) {
   ensureDir(path.dirname(filePath));
   fs.writeFileSync(filePath, content, 'utf8');
 }
 
-/**
- * Append to a text file
- */
 function appendFile(filePath, content) {
   ensureDir(path.dirname(filePath));
   fs.appendFileSync(filePath, content, 'utf8');
@@ -352,9 +303,6 @@ function runCommand(cmd, options = {}) {
   }
 }
 
-/**
- * Check if current directory is a git repository
- */
 function isGitRepo() {
   return runCommand('git rev-parse --git-dir').success;
 }

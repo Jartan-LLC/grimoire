@@ -3,14 +3,8 @@
 /**
  * Strategic Compact Suggester
  *
- * Cross-platform (Windows, macOS, Linux)
- *
  * Suggests /compact at logical boundaries rather than waiting for auto-compact,
  * which fires mid-task and summarizes away context you still need.
- *
- * - Strategic compacting preserves context through logical phases
- * - Compact after exploration, before execution
- * - Compact after completing a milestone, before starting next
  *
  * Two signals:
  * - Context size (primary): the latest assistant `usage` record from the session
