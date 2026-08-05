@@ -58,31 +58,17 @@ jobs:
   # context by job id, so naming it silently stops the check from matching.
   check:
     if: always()
+    # When you add jobs above, add them to BOTH the needs list and the results
+    # array below.
     needs: [verify, lint]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
-      # Derived from `needs` so adding a job above cannot leave this green while
-      # that job is red. toJSON goes through env because it emits multi-line
-      # JSON: interpolated into `run:` its quotes and newlines would be spliced
-      # into the script text rather than reaching jq as one value.
-      - name: Aggregate results
-        env:
-          NEEDS: ${{ toJSON(needs) }}
-        run: |
-          set -euo pipefail
-          # jq reads zero values from empty input and exits 0 without evaluating
-          # the filter, so this test -- not the jq -e below -- catches an empty
-          # payload. Without it the check passes while certifying nothing.
-          [ -n "$NEEDS" ] || { echo "::error::empty needs payload"; exit 1; }
-          jq -e 'type == "object" and length > 0' >/dev/null <<<"$NEEDS" \
-            || { echo "::error::empty or malformed needs payload"; exit 1; }
-          failed=$(jq -r 'to_entries[]
-            | select(.value.result != "success" and .value.result != "skipped")
-            | "\(.key) -> \(.value.result)"' <<<"$NEEDS")
-          if [ -n "$failed" ]; then
-            echo "::error::Check failed:"
-            echo "$failed"
-            exit 1
-          fi
-          echo "All jobs passed."
+      - run: |
+          results=("${{ needs.verify.result }}" "${{ needs.lint.result }}")
+          for r in "${results[@]}"; do
+            if [[ "$r" != "success" && "$r" != "skipped" ]]; then
+              echo "Check failed: $r"
+              exit 1
+            fi
+          done
