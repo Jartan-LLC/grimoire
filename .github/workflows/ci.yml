@@ -27,49 +27,74 @@ jobs:
         with:
           python-version: "3.12"
 
-      # The Verify block from CLAUDE.md (the single source, shared with the
-      # pre-merge checklist). There is no build system here -- the repo is
-      # Markdown, JSON manifests and a generator -- so this is the whole gate.
-      #
-      # `git grep -l` exits 0 on a match, 1 on none, and something else when the
-      # invocation itself failed -- a PCRE build without -P, a bad repo state.
-      # Treating every non-zero as "clean" would let a broken check pass silently,
-      # so each case is handled on its own.
-      - name: Pure ASCII
-        run: |
-          set +e
-          git grep -lP '[^\x00-\x7F]'
-          rc=$?
-          set -e
-          case "$rc" in
-            0) echo "::error::Non-ASCII characters found in the files listed above"; exit 1 ;;
-            1) ;;
-            *) echo "::error::git grep failed with exit $rc"; exit 1 ;;
-          esac
+      # The Makefile owns the check definitions so they live in exactly one
+      # place -- `make verify` here, in CLAUDE.md, and in the pre-merge
+      # checklist all run the same recipe.
+      - name: Verify
+        run: make verify
 
-      # git ls-files covers dotdir manifests, which a '**' glob would skip.
-      - name: JSON parses
-        run: python3 -c "import json,subprocess; [json.load(open(f)) for f in subprocess.run(['git','ls-files','*.json'],capture_output=True,text=True).stdout.split()]"
+  lint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      # Catches drift (a generated file out of date with its Claude Code source)
-      # and orphans (a generated file with no source, which sync-codex-agents.js
-      # would otherwise install into every Codex user's config).
-      - name: Codex files match their sources
-        run: python3 scripts/generate-codex.py --check
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
 
+      # Keyed on the config: a rev bump is the only thing that invalidates the
+      # hook environments. Does not cover the two docker hooks, whose images
+      # the runner pulls fresh.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: pre-commit-${{ runner.os }}-
+
+      - run: pip install pre-commit
+
+      - name: Lint
+        run: pre-commit run --all-files --show-diff-on-failure
+
+  # Single required status check. Do NOT give this job a `name:` -- the branch
+  # ruleset matches the context by job id, and adding one silently renames it so
+  # the required check stops matching.
   check:
     if: always()
-    # When you add jobs above, add them to BOTH the needs list and the results
-    # array below.
-    needs: [verify]
+    needs: [verify, lint]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
-      - run: |
-          results=("${{ needs.verify.result }}")
-          for r in "${results[@]}"; do
-            if [[ "$r" != "success" && "$r" != "skipped" ]]; then
-              echo "Check failed: $r"
-              exit 1
-            fi
-          done
+      # Derived from `needs` rather than a hand-maintained list, so adding a job
+      # above cannot leave this reporting green while that job is red. Passing
+      # toJSON through env instead of interpolating into `run` avoids the
+      # template-injection pattern zizmor flags.
+      #
+      # The `length > 0` assertion is load-bearing: an empty $NEEDS would give
+      # jq nothing to select, print nothing, and exit 0 -- a required check
+      # certifying nothing, which is the exact failure this derivation exists
+      # to prevent.
+      - name: Aggregate results
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          set -euo pipefail
+          # Both guards are needed. jq reads zero values from empty input and
+          # exits 0 without ever evaluating the filter, so the -n test is what
+          # actually catches an empty payload; the jq -e catches malformed
+          # input and `{}`.
+          [ -n "$NEEDS" ] || { echo "::error::empty needs payload"; exit 1; }
+          jq -e 'type == "object" and length > 0' >/dev/null <<<"$NEEDS" \
+            || { echo "::error::empty or malformed needs payload"; exit 1; }
+          failed=$(jq -r 'to_entries[]
+            | select(.value.result != "success" and .value.result != "skipped")
+            | "\(.key) -> \(.value.result)"' <<<"$NEEDS")
+          if [ -n "$failed" ]; then
+            echo "::error::Check failed:"
+            echo "$failed"
+            exit 1
+          fi
+          echo "All jobs passed."

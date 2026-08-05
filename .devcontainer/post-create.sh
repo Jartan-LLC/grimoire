@@ -38,10 +38,14 @@ while IFS= read -r -d '' pyproject_file; do
     pip install -e "${dir}[dev]" || echo "Warning: pip install failed for $dir" >&2
 done < <(find . -name "pyproject.toml" -not -path "*/.venv/*" -not -path "*/venv/*" -not -path "*/.tox/*" -type f -print0)
 
-# pre-commit binary comes from the .[dev] install above.
-if command -v pre-commit &>/dev/null && [ -f .pre-commit-config.yaml ]; then
-    echo "Wiring pre-commit git hook..."
-    pre-commit install || echo "Warning: pre-commit install failed" >&2
+# Delegated to `make install` so the install+wire steps live in one place.
+# Grimoire has no pyproject.toml, so nothing above brings pre-commit in -- the
+# loops over requirements.txt/pyproject.toml find no files here. The hooks it
+# wires include two docker hooks, which need the daemon up; post-start.sh fixes
+# the socket permissions.
+if [ -f .pre-commit-config.yaml ]; then
+    echo "Installing pre-commit and wiring the git hook..."
+    make install || echo "Warning: 'make install' failed; run it by hand to enable the pre-commit hook" >&2
 fi
 
 # vscode-user-specific setup (volume mounts, ownership fixes)

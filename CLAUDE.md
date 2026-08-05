@@ -51,18 +51,16 @@ A Claude Code plugin marketplace. Each plugin lives in `plugins/<name>/` with a
 
 ## Verify
 
-There is no build system. Before declaring work done, confirm:
+The Makefile owns every check, so they live in one place. Before declaring work
+done, confirm:
 
 ```bash
-# Pure ASCII -- must print nothing
-git grep -lP '[^\x00-\x7F]'
-
-# JSON parses (git ls-files covers dotdir manifests; glob '**' skips them)
-python3 -c "import json,subprocess; [json.load(open(f)) for f in subprocess.run(['git','ls-files','*.json'],capture_output=True,text=True).stdout.split()]"
-
-# Generated Codex files match their Claude Code sources
-python3 scripts/generate-codex.py --check
+make verify   # pure ASCII, every tracked JSON parses, Codex files match sources
+make lint     # every file-level linter, via pre-commit
 ```
+
+CI runs the same two commands and nothing else. `AGENTS.md` is a symlink to this
+file, not a second source of truth -- edit `CLAUDE.md`.
 
 Then confirm by inspection: each skill/agent frontmatter `name` matches its directory, and
 any plugin with changed content under `plugins/<name>/` has a bumped `version` in

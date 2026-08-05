@@ -49,7 +49,17 @@ See [RELEASING.md](RELEASING.md) for the full workflow and tag convention.
 
 ## Contributing
 
-New plugins go in `plugins/<name>/` with a `.claude-plugin/plugin.json` manifest. Add an entry to `.claude-plugin/marketplace.json` and submit a PR.
+New plugins go in `plugins/<name>/` with a `.claude-plugin/plugin.json` manifest.
+Add an entry to `.claude-plugin/marketplace.json` and submit a PR.
+
+Local checks, run by CI and by the pre-commit hook:
+
+```bash
+make lint     # every file-level linter, via pre-commit
+make verify   # ASCII, JSON parses, Codex generated-file drift
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and conventions.
 
 ## License
 
