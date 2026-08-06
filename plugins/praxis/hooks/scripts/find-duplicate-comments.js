@@ -17,8 +17,9 @@
  *   node find-duplicate-comments.js [base-ref] [--skip <segment>]...
  *
  *   base-ref  defaults to origin/main
- *   --skip    extra path segments to ignore, repeatable. node_modules is always
- *             skipped; add generated trees here, e.g. --skip dist --skip build
+ *   --skip    extra path segments to ignore, repeatable and matched literally.
+ *             node_modules is always skipped; add generated trees here, e.g.
+ *             --skip dist --skip build
  */
 
 const { spawnSync } = require('child_process');
@@ -44,16 +45,20 @@ const EXEMPT = /SPDX-License-Identifier|Copyright|Licensed under|eslint-|prettie
 const ALWAYS_SKIP = ['node_modules'];
 
 /**
- * Path-segment matcher for the skip list. Patterns match whole segments, so
- * `dist` skips `dist/` and `a/dist/b` but never `redistribute.js`.
+ * Path-segment matcher for the skip list. Segments are matched literally and
+ * whole, so `dist` skips `dist/` and `a/dist/b` but never `redistribute.js`.
+ *
+ * Escaping is not cosmetic. Taken as patterns, a caller's `--skip .*` would
+ * compile happily, match every path, and report a clean tree -- the silent
+ * false-clean this tool exists to avoid producing.
  */
+function escapeRegExp(segment) {
+  return segment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function buildSkipMatcher(extra) {
-  const parts = [...ALWAYS_SKIP, ...extra];
-  try {
-    return new RegExp(`(^|/)(${parts.join('|')})(/|$)`);
-  } catch (err) {
-    die(`invalid --skip pattern: ${err.message}`);
-  }
+  const parts = [...ALWAYS_SKIP, ...extra].map(escapeRegExp);
+  return new RegExp(`(^|/)(${parts.join('|')})(/|$)`);
 }
 
 function parseArgs(argv) {
