@@ -129,8 +129,8 @@ Some hook scripts ship from more than one plugin and must stay byte-identical;
 the same commit, or `--check` fails. Each plugin shipping one has changed content
 under `plugins/<name>/`, so each takes its own version bump.
 
-Expect `find-duplicate-comments.js` to report every comment in these copies as
-retold, and dismiss it.
+Expect `find-duplicate-comments.js` to report comments in these copies as retold,
+and dismiss it.
 
 ## Release channels
 

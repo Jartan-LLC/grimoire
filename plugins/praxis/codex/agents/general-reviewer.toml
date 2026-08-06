@@ -66,6 +66,9 @@ Status: confirmed, or `suspected -- verify X` if you could not confirm it
 | Important | X |
 | Minor | X |
 
+Say so here if `find-duplicate-comments.js` could not be run -- a check that never
+ran must not read as one that found nothing.
+
 **Verdict**: APPROVE / WARNING / BLOCK
 
 ## Skills

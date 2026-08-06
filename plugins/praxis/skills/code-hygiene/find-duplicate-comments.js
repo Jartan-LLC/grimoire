@@ -290,11 +290,11 @@ function main() {
   const skipMatcher = buildSkipMatcher(skips);
 
   if (git(['rev-parse', '--verify', `${base}^{commit}`]) === null) {
-    die(`base ref '${base}' does not resolve. Pass one explicitly, or fetch it first.`);
+    return die(`base ref '${base}' does not resolve. Pass one explicitly, or fetch it first.`);
   }
 
   const diffNames = git(['diff', '--name-only', '-z', `${base}...HEAD`]);
-  if (diffNames === null) die(`git diff against '${base}' failed.`);
+  if (diffNames === null) return die(`git diff against '${base}' failed.`);
 
   const changed = diffNames.split('\0').filter(f => f && !skipMatcher.test(f));
   if (changed.length === 0) {
@@ -303,15 +303,15 @@ function main() {
   }
 
   const tracked = trackedPaths(skipMatcher);
-  if (tracked === null) die('git ls-files failed.');
+  if (tracked === null) return die('git ls-files failed.');
 
   const index = buildCommentIndex(tracked);
-  if (index === null) die('git cat-file --batch failed.');
+  if (index === null) return die('git cat-file --batch failed.');
 
   const findings = [];
   for (const file of changed) {
     const diff = git(['diff', `${base}...HEAD`, '--', file]);
-    if (diff === null) die(`git diff of '${file}' failed.`);
+    if (diff === null) return die(`git diff of '${file}' failed.`);
     findings.push(...findRetoldInDiff(diff, file, index));
   }
 
