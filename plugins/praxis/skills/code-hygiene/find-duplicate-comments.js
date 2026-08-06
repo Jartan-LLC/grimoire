@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 /**
- * Duplicate-comment finder -- a reviewer tool, NOT a hook. It sits under
- * hooks/scripts/ only to reuse lib/; nothing in hooks.json invokes it.
+ * Duplicate-comment finder.
  *
  * It runs against whatever repo is being reviewed, which is not this one. Keep
  * it free of assumptions about this repo's layout: a rule that suppresses a

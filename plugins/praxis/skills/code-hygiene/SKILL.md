@@ -69,7 +69,9 @@ Narrates the **change** that produced the code (what was removed, moved, renamed
   true and locally unrecoverable, so per-file review keeps them all and one edit later the
   rest read as lies. The site whose own change would falsify it KEEPs the telling; the others
   name the topic and point (`# config ownership: entrypoint.sh`), though a warning at its own
-  point of danger stays. Grep the phrase before ruling.
+  point of danger stays. Grep the phrase before ruling, or run
+  [find-duplicate-comments.js](find-duplicate-comments.js), which indexes every tracked
+  comment and reports the ones a diff adds that are already told elsewhere.
 
 ### Keep vs. delete
 
