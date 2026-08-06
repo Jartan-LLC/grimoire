@@ -55,8 +55,8 @@ The Makefile owns every check, so they live in one place. Before declaring work
 done, confirm:
 
 ```bash
-make verify   # pure ASCII, every tracked JSON parses, Codex files match sources
-make lint     # every file-level linter, via pre-commit
+make verify
+make lint
 ```
 
 CI runs the same checks. `AGENTS.md` is a symlink to this file, not a second

@@ -3,6 +3,10 @@
  * Duplicate-comment finder -- a reviewer tool, NOT a hook. It sits under
  * hooks/scripts/ only to reuse lib/; nothing in hooks.json invokes it.
  *
+ * It runs against whatever repo is being reviewed, which is not this one. Keep
+ * it free of assumptions about this repo's layout: a rule that suppresses a
+ * finding here silently suppresses real ones in every repo praxis reviews.
+ *
  * The Retold fact rule cannot be applied from one file: judging a comment as a
  * retelling means knowing whether the same fact is told elsewhere, which
  * per-file review structurally cannot see. This supplies that whole-repo view,
@@ -10,7 +14,11 @@
  * appears somewhere tracked, naming both sites so the reviewer picks a keeper.
  *
  * Usage:
- *   node find-duplicate-comments.js [base-ref]     (default: origin/main)
+ *   node find-duplicate-comments.js [base-ref] [--skip <segment>]...
+ *
+ *   base-ref  defaults to origin/main
+ *   --skip    extra path segments to ignore, repeatable. node_modules is always
+ *             skipped; add generated trees here, e.g. --skip dist --skip build
  */
 
 const { spawnSync } = require('child_process');
@@ -30,12 +38,66 @@ const COMMENT_PATTERNS = [
 // never a retelling.
 const EXEMPT = /SPDX-License-Identifier|Copyright|Licensed under|eslint-|prettier-|type:\s*ignore|noqa|@ts-|shellcheck\s+disable/i;
 
-// Generated trees are written by a tool; duplication there is the generator's.
-const SKIP_PATHS = /(^|\/)(node_modules|\.codex-plugin|codex\/agents|\.agents)(\/|$)/;
+// Only what is universal. Generated trees are worth skipping too -- duplication
+// there is the generator's, not an author's -- but their paths differ per repo,
+// so they come from --skip rather than being guessed here.
+const ALWAYS_SKIP = ['node_modules'];
 
+/**
+ * Path-segment matcher for the skip list. Patterns match whole segments, so
+ * `dist` skips `dist/` and `a/dist/b` but never `redistribute.js`.
+ */
+function buildSkipMatcher(extra) {
+  const parts = [...ALWAYS_SKIP, ...extra];
+  try {
+    return new RegExp(`(^|/)(${parts.join('|')})(/|$)`);
+  } catch (err) {
+    die(`invalid --skip pattern: ${err.message}`);
+  }
+}
+
+function parseArgs(argv) {
+  const skips = [];
+  let base = null;
+
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === '--skip') {
+      const value = argv[++i];
+      if (!value) die('--skip needs a pattern');
+      skips.push(value);
+    } else if (arg.startsWith('--skip=')) {
+      skips.push(arg.slice('--skip='.length));
+    } else if (arg.startsWith('-')) {
+      die(`unknown option '${arg}'`);
+    } else if (base === null) {
+      base = arg;
+    } else {
+      die(`unexpected argument '${arg}'`);
+    }
+  }
+
+  return { base: base || 'origin/main', skips };
+}
+
+
+/**
+ * Run git, returning stdout, or null when the command failed. The distinction is
+ * load-bearing: a tool that reports "nothing found" because git errored is worse
+ * than one that reports nothing at all, since a clean result is what a reviewer
+ * acts on. Callers must treat null as fatal, not as empty.
+ */
 function git(args) {
-  const r = spawnSync('git', args, { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
-  return r.status === 0 ? r.stdout : '';
+  const r = spawnSync('git', args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  // A maxBuffer overflow sets .error while leaving truncated stdout in place,
+  // which would silently drop a file from the index.
+  if (r.error || r.status !== 0) return null;
+  return r.stdout;
+}
+
+function die(message) {
+  console.error(`find-duplicate-comments: ${message}`);
+  process.exit(2);
 }
 
 /** Reduce a comment line to comparable prose, or '' when it carries none. */
@@ -54,11 +116,17 @@ function prose(line) {
 }
 
 function main() {
-  const base = process.argv[2] || 'origin/main';
+  const { base, skips } = parseArgs(process.argv.slice(2));
+  const skipPaths = buildSkipMatcher(skips);
 
-  const changed = git(['diff', '--name-only', `${base}...HEAD`])
-    .split('\n')
-    .filter(f => f && !SKIP_PATHS.test(f));
+  if (git(['rev-parse', '--verify', `${base}^{commit}`]) === null) {
+    die(`base ref '${base}' does not resolve. Pass one explicitly, or fetch it first.`);
+  }
+
+  const diffNames = git(['diff', '--name-only', `${base}...HEAD`]);
+  if (diffNames === null) die(`git diff against '${base}' failed.`);
+
+  const changed = diffNames.split('\n').filter(f => f && !skipPaths.test(f));
   if (changed.length === 0) {
     console.log('No changed files to check.');
     return;
@@ -67,10 +135,15 @@ function main() {
   // Index every comment in the tracked tree, so a retelling is found whether or
   // not the other site was touched by this change.
   const index = new Map();
-  for (const file of git(['ls-files']).split('\n')) {
-    if (!file || SKIP_PATHS.test(file)) continue;
+  const tracked = git(['ls-files']);
+  if (tracked === null) die('git ls-files failed.');
+
+  for (const file of tracked.split('\n')) {
+    if (!file || skipPaths.test(file)) continue;
     const content = git(['show', `HEAD:${file}`]);
-    if (!content) continue;
+    // Absent from HEAD (newly added) is normal; a read failure is not, but
+    // cannot be told apart here -- either way there is nothing to index.
+    if (content === null || content === '') continue;
     content.split('\n').forEach((line, i) => {
       const text = prose(line);
       if (!text) return;
@@ -80,8 +153,13 @@ function main() {
   }
 
   const findings = [];
+  // When both sides of a retelling are added in the same diff, each side finds
+  // the other; without this the reviewer reads every such pair twice.
+  const reported = new Set();
+
   for (const file of changed) {
     const diff = git(['diff', `${base}...HEAD`, '--', file]);
+    if (diff === null) die(`git diff of '${file}' failed.`);
     let lineNo = 0;
     for (const line of diff.split('\n')) {
       const hunk = line.match(/^@@ -\d+(?:,\d+)? \+(\d+)/);
@@ -95,9 +173,13 @@ function main() {
       if (!text) continue;
 
       const elsewhere = (index.get(text) || []).filter(site => site !== here);
-      if (elsewhere.length > 0) {
-        findings.push({ here, text, elsewhere });
-      }
+      if (elsewhere.length === 0) continue;
+
+      const pairKey = [here, ...elsewhere].sort().join('|');
+      if (reported.has(pairKey)) continue;
+      reported.add(pairKey);
+
+      findings.push({ here, text, elsewhere });
     }
   }
 

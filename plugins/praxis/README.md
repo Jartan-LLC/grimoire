@@ -82,7 +82,8 @@ session you may want a higher `COMPACT_CONTEXT_THRESHOLD`.
 
 | Setting | Default | Description |
 |---|---|---|
-| `COMPACT_THRESHOLD` | 50 | tool calls before the first suggestion, then every 25 |
+| `COMPACT_THRESHOLD` | 50 | tool calls before the first suggestion |
+| `COMPACT_INTERVAL` | 25 | tool calls before it repeats |
 | `COMPACT_CONTEXT_THRESHOLD` | 160000 | context size that triggers a suggestion; `0` disables |
 | `COMPACT_CONTEXT_INTERVAL` | 60000 | token growth before the suggestion repeats |
 

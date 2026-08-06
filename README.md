@@ -55,8 +55,8 @@ Add an entry to `.claude-plugin/marketplace.json` and submit a PR.
 Local checks, run by CI and by the pre-commit hook:
 
 ```bash
-make lint     # every file-level linter, via pre-commit
-make verify   # ASCII, JSON parses, Codex generated-file drift
+make lint
+make verify
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and conventions.

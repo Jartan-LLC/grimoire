@@ -144,7 +144,7 @@ version = {attr = "my_package.__version__"}
 write_to = "src/my_package/_version.py"
 ```
 
-**In **init**.py:**
+**In `__init__.py`:**
 
 ```python
 # src/my_package/__init__.py

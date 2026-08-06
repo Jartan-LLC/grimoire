@@ -20,11 +20,12 @@ error.
 ## Before opening a PR
 
 ```bash
-make lint     # every file-level linter, via pre-commit
-make verify   # ASCII, JSON parses, Codex generated-file drift
+make lint
+make verify
 ```
 
-Both must pass -- CI runs the same checks.
+Both must pass -- CI runs the same checks. `make help` lists what each target
+covers.
 
 ## Conventions
 

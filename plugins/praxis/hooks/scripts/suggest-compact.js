@@ -38,6 +38,10 @@ const {
   resolveContextInterval
 } = require('./lib/transcript-context');
 
+const DEFAULT_TOOL_CALL_THRESHOLD = 50;
+const DEFAULT_TOOL_CALL_INTERVAL = 25;
+const MAX_TOOL_CALL_SETTING = 10000;
+
 const COUNTER_FILE_PREFIX = 'claude-tool-count-';
 const CONTEXT_TOKENS_FILE_PREFIX = 'claude-context-tokens-';
 // The file now holds a token count, not a bucket index. Reusing the old prefix
@@ -49,6 +53,16 @@ const STATE_FILE_PREFIXES = [
   CONTEXT_TOKENS_FILE_PREFIX,
   LEGACY_CONTEXT_BUCKET_FILE_PREFIX
 ];
+
+/**
+ * Resolve a tool-call count setting. Invalid, out-of-range and absent values all
+ * fall back to the default; unlike the context threshold, 0 is not a disable
+ * switch here, since the count signal has no separate off state.
+ */
+function resolveToolCallSetting(raw, fallback) {
+  const parsed = parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 && parsed <= MAX_TOOL_CALL_SETTING ? parsed : fallback;
+}
 
 /**
  * Increment and persist the per-session tool-call counter.
@@ -120,8 +134,18 @@ function buildContextSuggestion(transcriptPath, tokensFile, env) {
     let lastFired = readLastFiredTokens(tokensFile);
     // Context shrank, so a compact happened. Without this reset the gate only
     // ever ratchets upward and goes silent for the rest of the session --
-    // straight after the action this hook exists to prompt.
-    if (lastFired !== null && usage.tokens < lastFired) lastFired = null;
+    // straight after the action this hook exists to prompt. Clearing the file
+    // rather than just the variable matters when the run returns below: growth
+    // back past the stale mark would otherwise be gated off the pre-compact
+    // peak, which is the same silence in a narrower window.
+    if (lastFired !== null && usage.tokens < lastFired) {
+      lastFired = null;
+      try {
+        fs.rmSync(tokensFile, { force: true });
+      } catch {
+        // Best-effort: the in-memory reset still covers this invocation.
+      }
+    }
 
     if (usage.tokens < threshold) return null;
     if (lastFired !== null && usage.tokens < lastFired + resolveContextInterval(env)) return null;
@@ -156,10 +180,8 @@ async function main() {
   // Only this hook's own prefixes -- every hook sweeps after itself.
   sweepStaleState(STATE_FILE_PREFIXES, [counterFile, contextTokensFile]);
 
-  const rawThreshold = parseInt(process.env.COMPACT_THRESHOLD || '50', 10);
-  const threshold = Number.isFinite(rawThreshold) && rawThreshold > 0 && rawThreshold <= 10000
-    ? rawThreshold
-    : 50;
+  const threshold = resolveToolCallSetting(process.env.COMPACT_THRESHOLD, DEFAULT_TOOL_CALL_THRESHOLD);
+  const interval = resolveToolCallSetting(process.env.COMPACT_INTERVAL, DEFAULT_TOOL_CALL_INTERVAL);
 
   const count = incrementToolCallCount(counterFile);
   const messages = [];
@@ -171,7 +193,7 @@ async function main() {
 
   if (count === threshold) {
     messages.push(`[StrategicCompact] ${threshold} tool calls reached - consider /compact if transitioning phases`);
-  } else if (count > threshold && (count - threshold) % 25 === 0) {
+  } else if (count > threshold && (count - threshold) % interval === 0) {
     messages.push(`[StrategicCompact] ${count} tool calls - good checkpoint for /compact if context is stale`);
   }
 
