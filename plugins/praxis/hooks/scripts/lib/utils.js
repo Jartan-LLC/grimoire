@@ -226,6 +226,25 @@ async function readStdinJson(options = {}) {
   });
 }
 
+/**
+ * Read a hook's stdin payload, always resolving to an object.
+ *
+ * Hook input is the one thing a hook cannot fetch again, so the wait it will
+ * tolerate and the promise never to throw over a bad payload are one policy,
+ * owned here: a hook that hangs holds up the user's turn, and one that crashes
+ * on malformed input is worse than one that quietly says nothing.
+ *
+ * @returns {Promise<object>} Parsed payload, or {} if it did not arrive
+ */
+async function readHookInput() {
+  try {
+    const input = await readStdinJson({ timeoutMs: 1000 });
+    return (input && typeof input === 'object') ? input : {};
+  } catch {
+    return {};
+  }
+}
+
 function log(message) {
   console.error(message);
 }
@@ -490,6 +509,7 @@ module.exports = {
 
   // Hook I/O
   readStdinJson,
+  readHookInput,
   log,
   output,
 

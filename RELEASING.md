@@ -129,6 +129,11 @@ Some hook scripts ship from more than one plugin and must stay byte-identical;
 the same commit, or `--check` fails. Each plugin shipping one has changed content
 under `plugins/<name>/`, so each takes its own version bump.
 
+Expect `find-duplicate-comments.js` to report every comment in these copies as
+retold, and dismiss it. The exemption is ours alone, and that tool reviews other
+repos, so it carries no carve-out for it -- one that silenced this pair here
+would silence real retellings everywhere praxis runs.
+
 ## Release channels
 
 Per-plugin release channels (say, a stable line and a bleeding-edge line) are not

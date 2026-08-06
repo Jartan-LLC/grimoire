@@ -12,27 +12,23 @@
  * model at the moment it holds the task, the only place that information
  * exists. Praxis owns it alone: one instance, no cross-plugin coordination.
  *
- * hooks.json reads CLAUDE_PLUGIN_ROOT inside node rather than shell-interpolating
- * it, so an unset value is a clean no-op instead of a `node /hooks/scripts/...`
- * ENOENT -- defensive across Claude Code versions. The SessionStart entry re-arms
- * after a compact evicts loaded skills; every other SessionStart is followed by a
- * user prompt, which the UserPromptSubmit registration covers.
+ * The SessionStart entry in hooks.json reads CLAUDE_PLUGIN_ROOT inside node
+ * rather than shell-interpolating it, so an unset value is a clean no-op instead
+ * of a `node /hooks/scripts/...` ENOENT -- defensive across Claude Code versions.
+ * That entry re-arms after a compact evicts loaded skills; every other
+ * SessionStart is followed by a user prompt, which the UserPromptSubmit
+ * registration covers.
  */
 
-const { readStdinJson, output } = require('./lib/utils');
+const { readHookInput, output } = require('./lib/utils');
 
 const IMPERATIVE =
   'Before responding, identify which of your available skills are relevant to this task and load them first.';
 
 async function main() {
-  let input = {};
-  try {
-    input = await readStdinJson({ timeoutMs: 1000 });
-  } catch {
-    input = {};
-  }
+  const input = await readHookInput();
 
-  const event = (input && input.hook_event_name) || '';
+  const event = input.hook_event_name || '';
   // An unread or unparsed payload leaves the event unknown. Saying nothing is
   // right: guessing would both skip the compact-only gate below and label the
   // output with an event that did not happen.

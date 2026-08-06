@@ -120,7 +120,9 @@ function gitBatch(specs) {
   const r = spawnSync('git', ['cat-file', '--batch', '-z'], {
     input: specs.join('\0') + '\0',
     // One response aggregates every tracked blob at once, unlike git()'s
-    // per-command output, so this cap sits far above it.
+    // per-command output, so this cap sits far above it. Batching trades
+    // granularity for spawns: an overflow ends the run, where a per-file read
+    // would have cost one file. Accepted: it fails loud.
     maxBuffer: 512 * 1024 * 1024
   });
   if (r.error || r.status !== 0) return null;
@@ -167,7 +169,8 @@ function prose(line) {
 }
 
 /**
- * Tracked paths at HEAD, minus submodule gitlinks and skipped trees.
+ * Tracked paths at HEAD, minus submodule gitlinks and skipped trees, or null
+ * when git failed.
  *
  * `-z` turns off the quoting `ls-files` otherwise applies to non-ASCII or
  * special-character paths; re-feeding a quoted display string as a spec would
@@ -176,9 +179,9 @@ function prose(line) {
  * no blob to index and, fed to `cat-file --batch`, answers `<sha> submodule`,
  * which would abort the whole batch.
  */
-function trackedPaths(skipPaths) {
+function trackedPaths(skipMatcher) {
   const raw = git(['ls-files', '-s', '-z']);
-  if (raw === null) die('git ls-files failed.');
+  if (raw === null) return null;
 
   const paths = [];
   for (const record of raw.split('\0')) {
@@ -187,7 +190,7 @@ function trackedPaths(skipPaths) {
     // take it whole after the first tab and read the mode before the first space.
     const path = record.slice(record.indexOf('\t') + 1);
     const mode = record.slice(0, record.indexOf(' '));
-    if (mode === '160000' || skipPaths.test(path)) continue;
+    if (mode === '160000' || skipMatcher.test(path)) continue;
     paths.push(path);
   }
   return paths;
@@ -196,16 +199,16 @@ function trackedPaths(skipPaths) {
 /**
  * Map every comment's prose to the sites that carry it, across the whole tree at
  * HEAD -- a retelling counts whether or not the other site was touched here.
+ * Null when git failed.
  *
  * One `git cat-file --batch` rather than a `git show` per file: this runs
  * against arbitrary repos, where per-file spawns scale with the checkout.
  */
-function buildCommentIndex(skipPaths) {
-  const files = trackedPaths(skipPaths);
+function buildCommentIndex(files) {
   if (files.length === 0) return new Map();
 
   const batch = gitBatch(files.map(f => `HEAD:${f}`));
-  if (batch === null) die('git cat-file --batch failed.');
+  if (batch === null) return null;
 
   const index = new Map();
   files.forEach((file, i) => {
@@ -223,45 +226,48 @@ function buildCommentIndex(skipPaths) {
 }
 
 /**
- * Walk the diff of each changed file, reporting added comment lines whose prose
- * already appears elsewhere in the index.
+ * Walk one file's diff text, reporting added comment lines whose prose already
+ * appears elsewhere in the index. Takes the diff rather than fetching it, so the
+ * line-number bookkeeping below can be exercised without a checkout.
  */
-function findRetoldComments(base, changed, index) {
+function findRetoldInDiff(diffText, file, index) {
   const findings = [];
-  // When both sides of a retelling are added in the same diff, each side finds
-  // the other; without this the reviewer reads every such pair twice.
-  const reported = new Set();
+  let lineNo = 0;
 
-  for (const file of changed) {
-    const diff = git(['diff', `${base}...HEAD`, '--', file]);
-    if (diff === null) die(`git diff of '${file}' failed.`);
-    let lineNo = 0;
+  for (const line of diffText.split('\n')) {
+    const hunk = line.match(/^@@ -\d+(?:,\d+)? \+(\d+)/);
+    if (hunk) { lineNo = parseInt(hunk[1], 10); continue; }
+    // "\ No newline at end of file" annotates the previous line rather than
+    // being one, so counting it shifts every later line number by one.
+    if (line.startsWith('\\')) continue;
+    if (line.startsWith('-')) continue;
+    if (!line.startsWith('+')) { lineNo++; continue; }
 
-    for (const line of diff.split('\n')) {
-      const hunk = line.match(/^@@ -\d+(?:,\d+)? \+(\d+)/);
-      if (hunk) { lineNo = parseInt(hunk[1], 10); continue; }
-      // "\ No newline at end of file" annotates the previous line rather than
-      // being one, so counting it shifts every later line number by one.
-      if (line.startsWith('\\')) continue;
-      if (line.startsWith('-')) continue;
-      if (!line.startsWith('+')) { lineNo++; continue; }
+    const text = prose(line.slice(1));
+    const here = `${file}:${lineNo}`;
+    lineNo++;
+    if (!text) continue;
 
-      const text = prose(line.slice(1));
-      const here = `${file}:${lineNo}`;
-      lineNo++;
-      if (!text) continue;
+    const elsewhere = (index.get(text) || []).filter(site => site !== here);
+    if (elsewhere.length === 0) continue;
 
-      const elsewhere = (index.get(text) || []).filter(site => site !== here);
-      if (elsewhere.length === 0) continue;
-
-      const pairKey = [here, ...elsewhere].sort().join('|');
-      if (reported.has(pairKey)) continue;
-      reported.add(pairKey);
-
-      findings.push({ here, text, elsewhere });
-    }
+    findings.push({ here, text, elsewhere });
   }
   return findings;
+}
+
+/**
+ * Drop the mirror image of a retelling whose sides were both added here: each
+ * side finds the other, and without this the reviewer reads every pair twice.
+ */
+function dedupePairs(findings) {
+  const reported = new Set();
+  return findings.filter(f => {
+    const pairKey = [f.here, ...f.elsewhere].sort().join('|');
+    if (reported.has(pairKey)) return false;
+    reported.add(pairKey);
+    return true;
+  });
 }
 
 function report(findings) {
@@ -282,7 +288,7 @@ function report(findings) {
 
 function main() {
   const { base, skips } = parseArgs(process.argv.slice(2));
-  const skipPaths = buildSkipMatcher(skips);
+  const skipMatcher = buildSkipMatcher(skips);
 
   if (git(['rev-parse', '--verify', `${base}^{commit}`]) === null) {
     die(`base ref '${base}' does not resolve. Pass one explicitly, or fetch it first.`);
@@ -291,13 +297,28 @@ function main() {
   const diffNames = git(['diff', '--name-only', '-z', `${base}...HEAD`]);
   if (diffNames === null) die(`git diff against '${base}' failed.`);
 
-  const changed = diffNames.split('\0').filter(f => f && !skipPaths.test(f));
+  const changed = diffNames.split('\0').filter(f => f && !skipMatcher.test(f));
   if (changed.length === 0) {
     console.log('No changed files to check.');
     return;
   }
 
-  report(findRetoldComments(base, changed, buildCommentIndex(skipPaths)));
+  const tracked = trackedPaths(skipMatcher);
+  if (tracked === null) die('git ls-files failed.');
+
+  const index = buildCommentIndex(tracked);
+  if (index === null) die('git cat-file --batch failed.');
+
+  const findings = [];
+  for (const file of changed) {
+    const diff = git(['diff', `${base}...HEAD`, '--', file]);
+    if (diff === null) die(`git diff of '${file}' failed.`);
+    findings.push(...findRetoldInDiff(diff, file, index));
+  }
+
+  report(dedupePairs(findings));
 }
 
-main();
+module.exports = { buildSkipMatcher, prose, buildCommentIndex, findRetoldInDiff, dedupePairs };
+
+if (require.main === module) main();

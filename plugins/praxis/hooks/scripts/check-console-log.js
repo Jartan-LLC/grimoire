@@ -25,7 +25,7 @@ const {
   getGitModifiedFiles,
   getGitUntrackedFiles,
   grepFile,
-  readStdinJson,
+  readHookInput,
   writeFile,
   log,
   output,
@@ -182,14 +182,9 @@ function run(sessionId) {
 }
 
 async function main() {
-  let input = {};
-  try {
-    input = await readStdinJson({ timeoutMs: 1000 });
-  } catch {
-    input = {};
-  }
+  const input = await readHookInput();
 
-  const warnings = run(toSessionId(input && input.session_id));
+  const warnings = run(toSessionId(input.session_id));
 
   // stderr on a zero-exit hook reaches the debug log and nothing else, so
   // findings travel as structured stdout instead: additionalContext is injected

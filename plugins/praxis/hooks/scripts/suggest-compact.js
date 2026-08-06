@@ -22,7 +22,7 @@
 const fs = require('fs');
 const {
   writeFile,
-  readStdinJson,
+  readHookInput,
   log,
   output
 } = require('./lib/utils');
@@ -55,13 +55,23 @@ const STATE_FILE_PREFIXES = [
 ];
 
 /**
- * Resolve a tool-call count setting. Invalid, out-of-range and absent values all
- * fall back to the default; unlike the context threshold, 0 is not a disable
- * switch here, since the count signal has no separate off state.
+ * Invalid, out-of-range and absent values all fall back to the default; unlike
+ * the context threshold, 0 is not a disable switch here, since the count signal
+ * has no separate off state.
  */
-function resolveToolCallSetting(raw, fallback) {
-  const parsed = parseInt(raw, 10);
-  return Number.isFinite(parsed) && parsed > 0 && parsed <= MAX_TOOL_CALL_SETTING ? parsed : fallback;
+function toolCallSetting(raw, fallback) {
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isInteger(parsed) && parsed > 0 && parsed <= MAX_TOOL_CALL_SETTING ? parsed : fallback;
+}
+
+/** Resolve the tool-call count at which the suggestion first fires. */
+function resolveToolCallThreshold(env) {
+  return toolCallSetting(env && env.COMPACT_THRESHOLD, DEFAULT_TOOL_CALL_THRESHOLD);
+}
+
+/** Resolve the further tool calls between repeats of the suggestion. */
+function resolveToolCallInterval(env) {
+  return toolCallSetting(env && env.COMPACT_INTERVAL, DEFAULT_TOOL_CALL_INTERVAL);
 }
 
 /**
@@ -164,15 +174,10 @@ async function main() {
   // Claude Code passes hook input via stdin JSON. `session_id` is canonical
   // (the legacy env var, then 'default', are fallbacks); `transcript_path`
   // feeds the context-size signal.
-  let input = {};
-  try {
-    input = await readStdinJson({ timeoutMs: 1000 });
-  } catch {
-    input = {};
-  }
+  const input = await readHookInput();
 
-  const sessionId = toSessionId(input && input.session_id);
-  const transcriptPath = (input && typeof input.transcript_path === 'string') ? input.transcript_path : '';
+  const sessionId = toSessionId(input.session_id);
+  const transcriptPath = typeof input.transcript_path === 'string' ? input.transcript_path : '';
 
   const counterFile = stateFilePath(COUNTER_FILE_PREFIX, sessionId);
   const contextTokensFile = stateFilePath(CONTEXT_TOKENS_FILE_PREFIX, sessionId);
@@ -180,8 +185,8 @@ async function main() {
   // Only this hook's own prefixes -- every hook sweeps after itself.
   sweepStaleState(STATE_FILE_PREFIXES, [counterFile, contextTokensFile]);
 
-  const threshold = resolveToolCallSetting(process.env.COMPACT_THRESHOLD, DEFAULT_TOOL_CALL_THRESHOLD);
-  const interval = resolveToolCallSetting(process.env.COMPACT_INTERVAL, DEFAULT_TOOL_CALL_INTERVAL);
+  const threshold = resolveToolCallThreshold(process.env);
+  const interval = resolveToolCallInterval(process.env);
 
   const count = incrementToolCallCount(counterFile);
   const messages = [];
