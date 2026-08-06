@@ -11,11 +11,10 @@
  * reliable discriminator. Reading paths from it also means a version bump
  * moves the source directory without stranding a stale copy.
  *
- * hooks.json guards on the same variable before requiring this file, because
- * CLAUDE_PLUGIN_ROOT has a history of being unset for SessionStart specifically
- * (anthropics/claude-code issue 27145) and would resolve to `/hooks/scripts/...`
- * before any check here could run. The guard below still stands alone, so the
- * script is safe to invoke directly.
+ * hooks.json reads PLUGIN_ROOT inside node rather than shell-interpolating it,
+ * so every non-Codex session -- where the variable is unset -- is a clean no-op
+ * instead of a `node /hooks/scripts/...` ENOENT. The guard below still stands
+ * alone, so the script is safe to invoke directly.
  *
  * Roles nest under `grimoire/<plugin>/` because Codex discovers them
  * recursively; that keeps the namespace ours and cannot clobber a user's own.

@@ -19,7 +19,7 @@
             "command": "node -e \"const r = process.env.CLAUDE_PLUGIN_ROOT; if (r) require(r + '/hooks/scripts/suggest-skills.js')\""
           }
         ],
-        "description": "Re-arm skill activation after a compact (best-effort; see the script header)"
+        "description": "Re-arm skill activation after a compact (see the script header)"
       }
     ],
     "UserPromptSubmit": [

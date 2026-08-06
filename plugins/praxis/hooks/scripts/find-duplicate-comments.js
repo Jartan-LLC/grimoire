@@ -109,14 +109,18 @@ function die(message) {
  * Read many blobs in one process. Returns their contents positionally, with
  * null where a spec did not resolve, or null overall if the batch itself failed.
  *
- * cat-file --batch frames each blob as `<sha> <type> <size>\n<size bytes>\n`,
- * and a missing spec as `<spec> missing\n`. Sizes are in bytes, so the payload
- * is sliced from a Buffer -- decoding first would misplace every boundary after
+ * Input specs are NUL-delimited (`-z`) so a spec built from an awkward path
+ * survives verbatim instead of being re-quoted. Output is unaffected by `-z`:
+ * cat-file frames each blob as `<sha> <type> <size>\n<size bytes>\n`, and a
+ * missing spec as `<spec> missing\n`. Sizes are in bytes, so the payload is
+ * sliced from a Buffer -- decoding first would misplace every boundary after
  * the first multi-byte character.
  */
 function gitBatch(specs) {
-  const r = spawnSync('git', ['cat-file', '--batch'], {
-    input: specs.join('\n') + '\n',
+  const r = spawnSync('git', ['cat-file', '--batch', '-z'], {
+    input: specs.join('\0') + '\0',
+    // One response aggregates every tracked blob at once, unlike git()'s
+    // per-command output, so this cap sits far above it.
     maxBuffer: 512 * 1024 * 1024
   });
   if (r.error || r.status !== 0) return null;
@@ -146,6 +150,9 @@ function gitBatch(specs) {
 
 /** Reduce a comment line to comparable prose, or '' when it carries none. */
 function prose(line) {
+  // A CRLF-committed blob leaves a trailing \r that the `(.*)$` patterns reject,
+  // silently hiding // # * comments; drop it before matching.
+  line = line.replace(/\r$/, '');
   for (const pattern of COMMENT_PATTERNS) {
     const m = line.match(pattern);
     if (m) {
@@ -160,6 +167,33 @@ function prose(line) {
 }
 
 /**
+ * Tracked paths at HEAD, minus submodule gitlinks and skipped trees.
+ *
+ * `-z` turns off the quoting `ls-files` otherwise applies to non-ASCII or
+ * special-character paths; re-feeding a quoted display string as a spec would
+ * silently miss the file -- the false-clean this tool exists to avoid. `-s`
+ * carries the mode, the only way to spot a submodule gitlink (160000): it has
+ * no blob to index and, fed to `cat-file --batch`, answers `<sha> submodule`,
+ * which would abort the whole batch.
+ */
+function trackedPaths(skipPaths) {
+  const raw = git(['ls-files', '-s', '-z']);
+  if (raw === null) die('git ls-files failed.');
+
+  const paths = [];
+  for (const record of raw.split('\0')) {
+    if (!record) continue;
+    // `<mode> <sha> <stage>\t<path>`; a path may itself hold spaces or tabs, so
+    // take it whole after the first tab and read the mode before the first space.
+    const path = record.slice(record.indexOf('\t') + 1);
+    const mode = record.slice(0, record.indexOf(' '));
+    if (mode === '160000' || skipPaths.test(path)) continue;
+    paths.push(path);
+  }
+  return paths;
+}
+
+/**
  * Map every comment's prose to the sites that carry it, across the whole tree at
  * HEAD -- a retelling counts whether or not the other site was touched here.
  *
@@ -167,10 +201,7 @@ function prose(line) {
  * against arbitrary repos, where per-file spawns scale with the checkout.
  */
 function buildCommentIndex(skipPaths) {
-  const tracked = git(['ls-files']);
-  if (tracked === null) die('git ls-files failed.');
-
-  const files = tracked.split('\n').filter(f => f && !skipPaths.test(f));
+  const files = trackedPaths(skipPaths);
   if (files.length === 0) return new Map();
 
   const batch = gitBatch(files.map(f => `HEAD:${f}`));
@@ -257,10 +288,10 @@ function main() {
     die(`base ref '${base}' does not resolve. Pass one explicitly, or fetch it first.`);
   }
 
-  const diffNames = git(['diff', '--name-only', `${base}...HEAD`]);
+  const diffNames = git(['diff', '--name-only', '-z', `${base}...HEAD`]);
   if (diffNames === null) die(`git diff against '${base}' failed.`);
 
-  const changed = diffNames.split('\n').filter(f => f && !skipPaths.test(f));
+  const changed = diffNames.split('\0').filter(f => f && !skipPaths.test(f));
   if (changed.length === 0) {
     console.log('No changed files to check.');
     return;

@@ -12,12 +12,11 @@
  * model at the moment it holds the task, the only place that information
  * exists. Praxis owns it alone: one instance, no cross-plugin coordination.
  *
- * The SessionStart registration is best-effort: CLAUDE_PLUGIN_ROOT is not
- * populated for that event (anthropics/claude-code issue 27145), so hooks.json
- * reads it inside node and does nothing when unset, rather than resolving to
- * `/hooks/scripts/...` and dying. The compact re-arm may therefore not fire;
- * the next UserPromptSubmit covers everything except a model that keeps working
- * post-compact without a new user turn.
+ * hooks.json reads CLAUDE_PLUGIN_ROOT inside node rather than shell-interpolating
+ * it, so an unset value is a clean no-op instead of a `node /hooks/scripts/...`
+ * ENOENT -- defensive across Claude Code versions. The SessionStart entry re-arms
+ * after a compact evicts loaded skills; every other SessionStart is followed by a
+ * user prompt, which the UserPromptSubmit registration covers.
  */
 
 const { readStdinJson, output } = require('./lib/utils');
