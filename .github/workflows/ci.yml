@@ -49,10 +49,12 @@ jobs:
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
           restore-keys: pre-commit-${{ runner.os }}-
 
-      - run: pip install pre-commit
+      # Pinned: every hook below is frozen to a SHA, but Dependabot's pre-commit
+      # ecosystem watches the hook repos, not the runner itself.
+      - run: pip install pre-commit==4.6.1
 
       - name: Lint
-        run: pre-commit run --all-files --show-diff-on-failure
+        run: make lint
 
   # The required status check. Do NOT add a `name:` -- the ruleset matches the
   # context by job id, so naming it silently stops the check from matching.

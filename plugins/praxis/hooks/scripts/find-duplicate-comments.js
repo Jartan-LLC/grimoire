@@ -105,6 +105,45 @@ function die(message) {
   process.exit(2);
 }
 
+/**
+ * Read many blobs in one process. Returns their contents positionally, with
+ * null where a spec did not resolve, or null overall if the batch itself failed.
+ *
+ * cat-file --batch frames each blob as `<sha> <type> <size>\n<size bytes>\n`,
+ * and a missing spec as `<spec> missing\n`. Sizes are in bytes, so the payload
+ * is sliced from a Buffer -- decoding first would misplace every boundary after
+ * the first multi-byte character.
+ */
+function gitBatch(specs) {
+  const r = spawnSync('git', ['cat-file', '--batch'], {
+    input: specs.join('\n') + '\n',
+    maxBuffer: 512 * 1024 * 1024
+  });
+  if (r.error || r.status !== 0) return null;
+
+  const out = r.stdout;
+  const results = [];
+  let pos = 0;
+
+  for (let i = 0; i < specs.length; i++) {
+    const nl = out.indexOf('\n', pos);
+    if (nl === -1) return null;
+    const header = out.toString('utf8', pos, nl);
+    pos = nl + 1;
+
+    if (header.endsWith(' missing')) {
+      results.push(null);
+      continue;
+    }
+
+    const size = Number.parseInt(header.split(' ')[2], 10);
+    if (!Number.isFinite(size)) return null;
+    results.push(out.toString('utf8', pos, pos + size));
+    pos += size + 1; // trailing newline git adds after each blob
+  }
+  return results;
+}
+
 /** Reduce a comment line to comparable prose, or '' when it carries none. */
 function prose(line) {
   for (const pattern of COMMENT_PATTERNS) {
@@ -118,6 +157,96 @@ function prose(line) {
     }
   }
   return '';
+}
+
+/**
+ * Map every comment's prose to the sites that carry it, across the whole tree at
+ * HEAD -- a retelling counts whether or not the other site was touched here.
+ *
+ * One `git cat-file --batch` rather than a `git show` per file: this runs
+ * against arbitrary repos, where per-file spawns scale with the checkout.
+ */
+function buildCommentIndex(skipPaths) {
+  const tracked = git(['ls-files']);
+  if (tracked === null) die('git ls-files failed.');
+
+  const files = tracked.split('\n').filter(f => f && !skipPaths.test(f));
+  if (files.length === 0) return new Map();
+
+  const batch = gitBatch(files.map(f => `HEAD:${f}`));
+  if (batch === null) die('git cat-file --batch failed.');
+
+  const index = new Map();
+  files.forEach((file, i) => {
+    const content = batch[i];
+    // Missing at HEAD (newly added) is normal -- nothing to index either way.
+    if (!content) return;
+    content.split('\n').forEach((line, n) => {
+      const text = prose(line);
+      if (!text) return;
+      if (!index.has(text)) index.set(text, []);
+      index.get(text).push(`${file}:${n + 1}`);
+    });
+  });
+  return index;
+}
+
+/**
+ * Walk the diff of each changed file, reporting added comment lines whose prose
+ * already appears elsewhere in the index.
+ */
+function findRetoldComments(base, changed, index) {
+  const findings = [];
+  // When both sides of a retelling are added in the same diff, each side finds
+  // the other; without this the reviewer reads every such pair twice.
+  const reported = new Set();
+
+  for (const file of changed) {
+    const diff = git(['diff', `${base}...HEAD`, '--', file]);
+    if (diff === null) die(`git diff of '${file}' failed.`);
+    let lineNo = 0;
+
+    for (const line of diff.split('\n')) {
+      const hunk = line.match(/^@@ -\d+(?:,\d+)? \+(\d+)/);
+      if (hunk) { lineNo = parseInt(hunk[1], 10); continue; }
+      // "\ No newline at end of file" annotates the previous line rather than
+      // being one, so counting it shifts every later line number by one.
+      if (line.startsWith('\\')) continue;
+      if (line.startsWith('-')) continue;
+      if (!line.startsWith('+')) { lineNo++; continue; }
+
+      const text = prose(line.slice(1));
+      const here = `${file}:${lineNo}`;
+      lineNo++;
+      if (!text) continue;
+
+      const elsewhere = (index.get(text) || []).filter(site => site !== here);
+      if (elsewhere.length === 0) continue;
+
+      const pairKey = [here, ...elsewhere].sort().join('|');
+      if (reported.has(pairKey)) continue;
+      reported.add(pairKey);
+
+      findings.push({ here, text, elsewhere });
+    }
+  }
+  return findings;
+}
+
+function report(findings) {
+  if (findings.length === 0) {
+    console.log('No retold comments found in the diff.');
+    return;
+  }
+
+  console.log(`${findings.length} added comment line(s) already told elsewhere:\n`);
+  for (const f of findings) {
+    console.log(`  ${f.here}`);
+    console.log(`    "${f.text}"`);
+    console.log(`    also at: ${f.elsewhere.slice(0, 5).join(', ')}${f.elsewhere.length > 5 ? ` (+${f.elsewhere.length - 5} more)` : ''}`);
+    console.log('');
+  }
+  console.log('Retold fact: keep the telling where a change would falsify it; the rest point.');
 }
 
 function main() {
@@ -137,70 +266,7 @@ function main() {
     return;
   }
 
-  // Index every comment in the tracked tree, so a retelling is found whether or
-  // not the other site was touched by this change.
-  const index = new Map();
-  const tracked = git(['ls-files']);
-  if (tracked === null) die('git ls-files failed.');
-
-  for (const file of tracked.split('\n')) {
-    if (!file || skipPaths.test(file)) continue;
-    const content = git(['show', `HEAD:${file}`]);
-    // Absent from HEAD (newly added) is normal; a read failure is not, but
-    // cannot be told apart here -- either way there is nothing to index.
-    if (content === null || content === '') continue;
-    content.split('\n').forEach((line, i) => {
-      const text = prose(line);
-      if (!text) return;
-      if (!index.has(text)) index.set(text, []);
-      index.get(text).push(`${file}:${i + 1}`);
-    });
-  }
-
-  const findings = [];
-  // When both sides of a retelling are added in the same diff, each side finds
-  // the other; without this the reviewer reads every such pair twice.
-  const reported = new Set();
-
-  for (const file of changed) {
-    const diff = git(['diff', `${base}...HEAD`, '--', file]);
-    if (diff === null) die(`git diff of '${file}' failed.`);
-    let lineNo = 0;
-    for (const line of diff.split('\n')) {
-      const hunk = line.match(/^@@ -\d+(?:,\d+)? \+(\d+)/);
-      if (hunk) { lineNo = parseInt(hunk[1], 10); continue; }
-      if (line.startsWith('-')) continue;
-      if (!line.startsWith('+')) { lineNo++; continue; }
-
-      const text = prose(line.slice(1));
-      const here = `${file}:${lineNo}`;
-      lineNo++;
-      if (!text) continue;
-
-      const elsewhere = (index.get(text) || []).filter(site => site !== here);
-      if (elsewhere.length === 0) continue;
-
-      const pairKey = [here, ...elsewhere].sort().join('|');
-      if (reported.has(pairKey)) continue;
-      reported.add(pairKey);
-
-      findings.push({ here, text, elsewhere });
-    }
-  }
-
-  if (findings.length === 0) {
-    console.log('No retold comments found in the diff.');
-    return;
-  }
-
-  console.log(`${findings.length} added comment line(s) already told elsewhere:\n`);
-  for (const f of findings) {
-    console.log(`  ${f.here}`);
-    console.log(`    "${f.text}"`);
-    console.log(`    also at: ${f.elsewhere.slice(0, 5).join(', ')}${f.elsewhere.length > 5 ? ` (+${f.elsewhere.length - 5} more)` : ''}`);
-    console.log('');
-  }
-  console.log('Retold fact: keep the telling where a change would falsify it; the rest point.');
+  report(findRetoldComments(base, changed, buildCommentIndex(skipPaths)));
 }
 
 main();

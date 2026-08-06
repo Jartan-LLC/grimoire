@@ -16,10 +16,10 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/suggest-skills.js\""
+            "command": "node -e \"const r = process.env.CLAUDE_PLUGIN_ROOT; if (r) require(r + '/hooks/scripts/suggest-skills.js')\""
           }
         ],
-        "description": "Re-arm skill activation after a compact (no-op on other starts)"
+        "description": "Re-arm skill activation after a compact (best-effort; see the script header)"
       }
     ],
     "UserPromptSubmit": [

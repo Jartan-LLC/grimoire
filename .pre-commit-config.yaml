@@ -4,7 +4,7 @@
 # they only see files under the bind-mounted project directory. Run them from a
 # worktree or a copy and they report missing files, not a mount error.
 #
-# Deliberately absent, all three of which look like obvious additions:
+# Deliberately absent, each of which looks like an obvious addition:
 #   ruff       governs one file and would drag in a pyproject.toml to hold its config
 #   prettier   fights generate-codex.py over plugins/*/.codex-plugin/plugin.json;
 #              no tree state satisfies both
@@ -27,6 +27,9 @@ repos:
       - id: markdownlint-cli2
         args: [--no-globs]
   - repo: https://github.com/lycheeverse/lychee
+    # The rev is the lychee-v0.24.2 tag, but lychee-docker is a docker_image
+    # hook and the entry: at this rev still pins lycheeverse/lychee:0.23.0, so
+    # that is the binary that runs. external-link-check.yml is on 0.24.2.
     rev: 2bba271688c1abb1503097a064e6c3bc1d1b6a9b # frozen: lychee-v0.24.2
     hooks:
       # Relative links only. External rot is non-deterministic and belongs in a
@@ -34,7 +37,6 @@ repos:
       - id: lychee-docker
         args: [--offline, --no-progress] # args replace the defaults, so restate --no-progress
         types: [markdown]
-        exclude: '^\.github/SECURITY\.md$' # ../../security/advisories/new resolves on github.com only
   - repo: https://github.com/rhysd/actionlint
     rev: 914e7df21a07ef503a81201c76d2b11c789d3fca # frozen: v1.7.12
     hooks:

@@ -12,7 +12,7 @@ install:  ## Install pre-commit and wire the git hook
 	if git rev-parse --git-dir >/dev/null 2>&1; then pre-commit install; fi
 
 lint:  ## Lint all files via pre-commit (codespell, shellcheck, markdownlint, lychee, actionlint, zizmor, hygiene)
-	pre-commit run --all-files
+	pre-commit run --all-files --show-diff-on-failure
 
 # `git grep -l` exits 1 on no match, so `|| true` would turn the ASCII gate into
 # a permanent no-op and any other non-zero means the invocation itself failed.

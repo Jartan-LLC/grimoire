@@ -118,9 +118,9 @@ Verified against codex-cli 0.146.0:
   and `plugins/<name>/codex/agents/*.toml`. Run `scripts/generate-codex.py` after
   any change to a plugin's name, version, description, keywords, category, or
   agents, and commit the result.
-- **`--check` fails on three things**, not just staleness: a generated file out of
-  date with its source, an orphan whose source is gone, and a duplicated hook
-  script whose copies have diverged.
+- **`--check` fails on more than staleness**: a generated file out of date with
+  its source, an orphan whose source is gone, and a duplicated hook script whose
+  copies have diverged.
 
 ## Duplicated hook scripts
 

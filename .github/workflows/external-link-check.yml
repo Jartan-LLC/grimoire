@@ -34,7 +34,7 @@ jobs:
         id: lychee
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
-          args: "--no-progress --exclude-path .github/SECURITY.md './**/*.md'"
+          args: "--no-progress './**/*.md'"
           fail: false # the next step files an issue instead of reddening the run
           failIfEmpty: false
           output: ./lychee/out.md

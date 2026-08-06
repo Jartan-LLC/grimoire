@@ -84,7 +84,7 @@ Narrates the **change** that produced the code (what was removed, moved, renamed
 | "...Release is created by `release.yml`, so this only handles upload" | delete | Tombstone -- narrates the split; references a removed job. |
 | `# Author: Jane` \* `# ==== HELPERS ====` \* `} // end for` | delete | Byline / banner -- `git blame` and structure own these. |
 | `x = f()  # TODO: fix later` | flag | Orphan TODO -- no owner, no anchor; anchor it or resolve it. |
-| `# CVE-2025-1234 in libfoo <= 2.3, no fixed release as of 2026-08-05; parser unreachable here` | keep | Dated advisory -- anchored, dated, scoped; a fix retires it. |
+| `# CVE-2025-1234 in libfoo <= 2.3, no fixed release as of 2026-08-05; affected parser unreachable here` | keep | Dated advisory -- anchored, dated, scoped; a fix retires it. |
 | The same "Geyser owns the config after first boot" in six files | split | Retold fact -- keep it where a change would falsify it; the rest point. |
 
 ### Meta-rule

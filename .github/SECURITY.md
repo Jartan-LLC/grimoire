@@ -4,7 +4,7 @@
 
 **Do not open a public issue for security vulnerabilities.**
 
-Please report security issues privately using [GitHub's security advisory feature](../../security/advisories/new).
+Please report security issues privately using [GitHub's security advisory feature](https://github.com/Jartan-LLC/grimoire/security/advisories/new).
 
 Include:
 

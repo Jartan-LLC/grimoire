@@ -64,12 +64,8 @@ codex plugin add gitwise@grimoire
 ### Hooks
 
 - **UserPromptSubmit** -- prompts the model to load the skills relevant to the
-  task. Left alone the model loads a relevant skill only rarely and
-  unpredictably, and a skill's own frontmatter does not reliably change that; an
-  agent's `skills:` array does, but only inside that agent. The hook names no
-  skill and ships no mapping -- the model judges relevance when it holds the
-  task. This is what makes every plugin's skills dependably reachable from
-  top-level chat, praxis's included.
+  task, which is what makes any plugin's skills dependably reachable from
+  top-level chat
 - **SessionStart** -- installs this plugin's Codex agent roles (no-op outside
   Codex); re-arms skill activation after a compact, which evicts loaded skills
 - **PreToolUse** -- reminds you to review changes before `git push`; warns about
