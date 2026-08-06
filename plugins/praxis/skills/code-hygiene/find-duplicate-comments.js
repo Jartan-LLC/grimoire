@@ -68,16 +68,16 @@ function parseArgs(argv) {
     const arg = argv[i];
     if (arg === '--skip') {
       const value = argv[++i];
-      if (!value) die('--skip needs a pattern');
+      if (!value) return die('--skip needs a pattern');
       skips.push(value);
     } else if (arg.startsWith('--skip=')) {
       skips.push(arg.slice('--skip='.length));
     } else if (arg.startsWith('-')) {
-      die(`unknown option '${arg}'`);
+      return die(`unknown option '${arg}'`);
     } else if (base === null) {
       base = arg;
     } else {
-      die(`unexpected argument '${arg}'`);
+      return die(`unexpected argument '${arg}'`);
     }
   }
 
