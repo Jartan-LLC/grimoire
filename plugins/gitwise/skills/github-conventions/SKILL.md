@@ -34,6 +34,7 @@ Optional scope: `feat(frontend): description`
 ## Issues
 
 Templates in `.github/ISSUE_TEMPLATE/` -- read them for section structure.
+
 - **Bug reports**: must have label `bug`
 - **Feature requests**: must have label `enhancement`
 

@@ -22,9 +22,11 @@ You are a senior QA engineer focused on test coverage, test quality, and CI/CD c
 Guidance, not an exhaustive checklist -- tier each finding with the `review-severity` skill.
 
 ### Critical
+
 - A test or CI change that breaks the build or blocks the pipeline (won't-run)
 
 ### Important
+
 - New functionality with no test coverage at all
 - Tests that trivially pass without exercising the code, or integration tests that assert implementation details instead of behavior
 - Tests missing required services (database, mail, etc.)
@@ -33,6 +35,7 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 - A test that demonstrably flakes CI (e.g. `sleep()` instead of awaiting a condition)
 
 ### Minor
+
 - Missing edge-case coverage
 - Redundant tests duplicating existing coverage
 - Overly complex tests, or duplicated setup that could be shared (a non-flaky `sleep()` sits here, not Important)
@@ -41,7 +44,7 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 
 For each finding:
 
-```
+```text
 [SEVERITY] Description
 File: path/file:line
 Issue: What's wrong

@@ -1,50 +1,31 @@
 // Originally from everything-claude-code by Affaan Mustafa (https://github.com/affaan-m/ECC)
-/**
- * Cross-platform utility functions for Claude Code hooks and scripts
- * Works on Windows, macOS, and Linux
- */
+// Cross-platform helpers shared by the hook scripts.
 
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { execSync, spawnSync } = require('child_process');
 
-// Platform detection
 const isWindows = process.platform === 'win32';
 const isMacOS = process.platform === 'darwin';
 const isLinux = process.platform === 'linux';
 
-/**
- * Get the user's home directory (cross-platform)
- */
 function getHomeDir() {
   return os.homedir();
 }
 
-/**
- * Get the Claude config directory
- */
 function getClaudeDir() {
   return path.join(getHomeDir(), '.claude');
 }
 
-/**
- * Get the sessions directory
- */
 function getSessionsDir() {
   return path.join(getClaudeDir(), 'sessions');
 }
 
-/**
- * Get the learned skills directory
- */
 function getLearnedSkillsDir() {
   return path.join(getClaudeDir(), 'skills', 'learned');
 }
 
-/**
- * Get the temp directory (cross-platform)
- */
 function getTempDir() {
   return os.tmpdir();
 }
@@ -69,9 +50,6 @@ function ensureDir(dirPath) {
   return dirPath;
 }
 
-/**
- * Get current date in YYYY-MM-DD format
- */
 function getDateString() {
   const now = new Date();
   const year = now.getFullYear();
@@ -80,9 +58,6 @@ function getDateString() {
   return `${year}-${month}-${day}`;
 }
 
-/**
- * Get current time in HH:MM format
- */
 function getTimeString() {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, '0');
@@ -90,18 +65,12 @@ function getTimeString() {
   return `${hours}:${minutes}`;
 }
 
-/**
- * Get the git repository name
- */
 function getGitRepoName() {
   const result = runCommand('git rev-parse --show-toplevel');
   if (!result.success) return null;
   return path.basename(result.output);
 }
 
-/**
- * Get project name from git repo or current directory
- */
 function getProjectName() {
   const repoName = getGitRepoName();
   if (repoName) return repoName;
@@ -120,9 +89,6 @@ function getSessionIdShort(fallback = 'default') {
   return getProjectName() || fallback;
 }
 
-/**
- * Get current datetime in YYYY-MM-DD HH:MM:SS format
- */
 function getDateTimeString() {
   const now = new Date();
   const year = now.getFullYear();
@@ -261,15 +227,28 @@ async function readStdinJson(options = {}) {
 }
 
 /**
- * Log to stderr (visible to user in Claude Code)
+ * Read a hook's stdin payload, always resolving to an object.
+ *
+ * Hook input is the one thing a hook cannot fetch again, so the wait it will
+ * tolerate and the promise never to throw over a bad payload are one policy,
+ * owned here: a hook that hangs holds up the user's turn, and one that crashes
+ * on malformed input is worse than one that quietly says nothing.
+ *
+ * @returns {Promise<object>} Parsed payload, or {} if it did not arrive
  */
+async function readHookInput() {
+  try {
+    const input = await readStdinJson({ timeoutMs: 1000 });
+    return (input && typeof input === 'object') ? input : {};
+  } catch {
+    return {};
+  }
+}
+
 function log(message) {
   console.error(message);
 }
 
-/**
- * Output to stdout (returned to Claude)
- */
 function output(data) {
   if (typeof data === 'object') {
     console.log(JSON.stringify(data));
@@ -278,9 +257,6 @@ function output(data) {
   }
 }
 
-/**
- * Read a text file safely
- */
 function readFile(filePath) {
   try {
     return fs.readFileSync(filePath, 'utf8');
@@ -289,25 +265,19 @@ function readFile(filePath) {
   }
 }
 
-/**
- * Write a text file
- */
 function writeFile(filePath, content) {
   ensureDir(path.dirname(filePath));
   fs.writeFileSync(filePath, content, 'utf8');
 }
 
-/**
- * Append to a text file
- */
 function appendFile(filePath, content) {
   ensureDir(path.dirname(filePath));
   fs.appendFileSync(filePath, content, 'utf8');
 }
 
 /**
- * Check if a command exists in PATH
- * Uses execFileSync to prevent command injection
+ * Check if a command exists in PATH.
+ * Argument-array spawn plus a name allowlist: no shell, nothing to inject into.
  */
 function commandExists(cmd) {
   // Validate command name - only allow alphanumeric, dash, underscore, dot
@@ -352,9 +322,6 @@ function runCommand(cmd, options = {}) {
   }
 }
 
-/**
- * Check if current directory is a git repository
- */
 function isGitRepo() {
   return runCommand('git rev-parse --git-dir').success;
 }
@@ -542,6 +509,7 @@ module.exports = {
 
   // Hook I/O
   readStdinJson,
+  readHookInput,
   log,
   output,
 

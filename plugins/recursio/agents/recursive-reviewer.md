@@ -45,7 +45,7 @@ For contract reviews: critical rules apply to every protocol method signature. A
 
 ## Output Format
 
-```
+```text
 ## Critical (must fix before proceeding)
 - [BUG|SECURITY|STRUCTURE|CONTRACT] path:line -- description. Fix: ...
 

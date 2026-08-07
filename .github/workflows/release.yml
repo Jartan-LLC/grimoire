@@ -1,0 +1,45 @@
+name: Create GitHub Release
+
+on:
+  push:
+    tags:
+      # Per-plugin tags, {plugin}--v{version} (RELEASING.md). Quotes are required
+      # for a pattern starting with '*'. Do NOT tighten to full semver: tag
+      # filters are whole-ref matches, so praxis--v2.0.0-rc1 would stop firing.
+      - "*--v[0-9]*"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      # gh resolves the repo from GH_REPO, so no checkout; the view guard keeps
+      # re-runs idempotent. No --generate-notes: GitHub diffs them repo-wide, so
+      # a praxis tag would be captioned with recursio's commits.
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          plugin="${GITHUB_REF_NAME%%--v*}"
+          version="${GITHUB_REF_NAME#*--v}"
+          # GitHub picks "Latest" as the newest non-prerelease by created_at, so
+          # an unmarked rc would present as current.
+          flags=()
+          case "$version" in
+            *-*) flags+=(--prerelease) ;;
+          esac
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 \
+            || gh release create "$GITHUB_REF_NAME" \
+                 --title "$GITHUB_REF_NAME" \
+                 --verify-tag \
+                 "${flags[@]}" \
+                 --notes "Release of the $plugin plugin, version $version. Install with '/plugin install $plugin'. See RELEASING.md for the per-plugin versioning rules."

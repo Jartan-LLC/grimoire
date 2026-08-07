@@ -6,14 +6,14 @@ GitHub conventions -- branch naming, commit format, issue/PR templates, and safe
 
 Claude Code:
 
-```
+```text
 /plugin marketplace add Jartan-LLC/grimoire
 /plugin install gitwise
 ```
 
 Codex:
 
-```
+```bash
 codex plugin marketplace add Jartan-LLC/grimoire
 codex plugin add gitwise@grimoire
 ```

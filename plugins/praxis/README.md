@@ -6,14 +6,14 @@ Complete development workflow -- from issue to shipped PR. Includes issue planni
 
 Claude Code:
 
-```
+```text
 /plugin marketplace add Jartan-LLC/grimoire
 /plugin install praxis
 ```
 
 Codex:
 
-```
+```bash
 codex plugin marketplace add Jartan-LLC/grimoire
 codex plugin add praxis@grimoire
 ```
@@ -24,7 +24,7 @@ automatically. To install it explicitly, run `/plugin install gitwise`.
 
 Codex does not read plugin dependencies, so install it there yourself:
 
-```
+```bash
 codex plugin add gitwise@grimoire
 ```
 
@@ -61,9 +61,31 @@ codex plugin add gitwise@grimoire
 - **review-severity** -- Critical/Important/Minor by consequence-if-shipped
 - **testing-patterns** -- integration tests, fixture composition, canary markers
 
+### Hooks
+
+- **UserPromptSubmit** -- prompts the model to load the skills relevant to the
+  task, which is what makes any plugin's skills dependably reachable from
+  top-level chat
+- **SessionStart** -- installs this plugin's Codex agent roles (no-op outside
+  Codex); re-arms skill activation after a compact, which evicts loaded skills
+- **PreToolUse** -- reminds you to review changes before `git push`; warns about
+  non-standard documentation files; suggests `/compact` at logical intervals
+- **PostToolUse** -- checks changed files for stray `console.log`
+
+The compact suggester reports absolute context size and does not know the
+model's context window -- a hook cannot determine it -- so on a large-window
+session you may want a higher `COMPACT_CONTEXT_THRESHOLD`.
+
+| Setting | Default | Description |
+|---|---|---|
+| `COMPACT_THRESHOLD` | 50 | tool calls before the first suggestion |
+| `COMPACT_INTERVAL` | 25 | tool calls before it repeats |
+| `COMPACT_CONTEXT_THRESHOLD` | 160000 | context size that triggers a suggestion; `0` disables |
+| `COMPACT_CONTEXT_INTERVAL` | 60000 | token growth before the suggestion repeats |
+
 ## Workflow
 
-```
+```text
 /praxis:plan-issue 42          -> analyze and plan
 /praxis:implement-issue 42     -> implement the plan
 /praxis:create-pr 42           -> open a pull request

@@ -3,6 +3,15 @@
 # Fix Docker socket permissions (docker-outside-of-docker feature)
 sudo chmod 666 /var/run/docker-host.sock 2>/dev/null || true
 
+# Claude Code is installed by post-create, which does not re-run on start or
+# attach -- so a registry blip during create would otherwise cost a rebuild.
+# Best-effort like everything else here: a failure must not fail postStart.
+if command -v npm &>/dev/null && ! command -v claude &>/dev/null; then
+    echo "Claude Code CLI missing; retrying install..."
+    npm install -g @anthropic-ai/claude-code \
+        || echo "Warning: Claude Code CLI install failed" >&2
+fi
+
 # In GitHub Codespaces, HOST_PROJECT_PATH (set via containerEnv) resolves to the
 # host-side path, which is meaningless inside the container. Override it with the
 # container workspace path so downstream Docker bind-mounts work correctly.

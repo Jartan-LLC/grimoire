@@ -6,14 +6,14 @@ Recursive multi-agent development system that decomposes projects into waves of 
 
 Claude Code:
 
-```
+```text
 /plugin marketplace add Jartan-LLC/grimoire
 /plugin install recursio
 ```
 
 Codex:
 
-```
+```bash
 codex plugin marketplace add Jartan-LLC/grimoire
 codex plugin add recursio@grimoire
 ```
@@ -46,7 +46,7 @@ differently there.
 
 ## Quick Start
 
-```
+```text
 /recursio:recursive-implement Build a CLI tool that parses JSON logs and outputs summary reports
 ```
 

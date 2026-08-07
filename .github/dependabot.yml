@@ -1,0 +1,41 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependency"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    cooldown:
+      default-days: 7
+
+  # No update-types filter here: a pre-commit dependency's version is the frozen
+  # SHA, so filtering empties the group and Dependabot falls back to one PR per
+  # hook (dependabot-core#15266). Majors therefore land in this group too, where
+  # the automerge action's `target: minor` leaves them for a human.
+  #
+  # This ecosystem never proposes the lychee hook -- its lychee-vX.Y.Z tags do
+  # not parse as a version, so it reads as permanently current.
+  - package-ecosystem: "pre-commit"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependency"
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+    cooldown:
+      default-days: 7

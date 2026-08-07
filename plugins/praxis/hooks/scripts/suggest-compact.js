@@ -3,31 +3,26 @@
 /**
  * Strategic Compact Suggester
  *
- * Cross-platform (Windows, macOS, Linux)
- *
  * Suggests /compact at logical boundaries rather than waiting for auto-compact,
  * which fires mid-task and summarizes away context you still need.
  *
- * - Strategic compacting preserves context through logical phases
- * - Compact after exploration, before execution
- * - Compact after completing a milestone, before starting next
- *
  * Two signals:
  * - Context size (primary): the latest assistant `usage` record from the session
- *   transcript, compared against a window-scaled token threshold
- *   (COMPACT_CONTEXT_THRESHOLD; default 160k on a 200k window, 250k on 1M),
- *   re-reminding after every COMPACT_CONTEXT_INTERVAL tokens of growth
- *   (default 60k).
- * - Tool-call count (secondary): first at COMPACT_THRESHOLD (default 50), then
- *   every 25. A weak proxy for window pressure on its own -- a few large reads
- *   can fill the window in very few calls, and many tiny calls can cross 50
- *   while the window is barely used.
+ *   transcript, gated by COMPACT_CONTEXT_THRESHOLD and COMPACT_CONTEXT_INTERVAL.
+ *   Absolute tokens only -- see lib/transcript-context.js for why there is no
+ *   percentage.
+ * - Tool-call count (secondary), gated by COMPACT_THRESHOLD. A weak proxy for
+ *   window pressure on its own -- a few large reads can fill the window in very
+ *   few calls, and many tiny calls can cross the threshold while the window is
+ *   barely used.
+ *
+ * Defaults are declared with the settings themselves, not echoed here.
  */
 
 const fs = require('fs');
 const {
   writeFile,
-  readStdinJson,
+  readHookInput,
   log,
   output
 } = require('./lib/utils');
@@ -37,17 +32,47 @@ const {
   sweepStaleState
 } = require('./lib/session-state');
 const {
+  MAX_TOKEN_SETTING,
   readLatestContextTokens,
-  resolveContextWindowTokens,
   resolveContextThreshold,
-  resolveContextInterval,
-  computeContextBucket,
-  formatWindowLabel
+  resolveContextInterval
 } = require('./lib/transcript-context');
 
+const DEFAULT_TOOL_CALL_THRESHOLD = 50;
+const DEFAULT_TOOL_CALL_INTERVAL = 25;
+const MAX_TOOL_CALL_SETTING = 10000;
+
 const COUNTER_FILE_PREFIX = 'claude-tool-count-';
-const CONTEXT_BUCKET_FILE_PREFIX = 'claude-context-bucket-';
-const STATE_FILE_PREFIXES = [COUNTER_FILE_PREFIX, CONTEXT_BUCKET_FILE_PREFIX];
+const CONTEXT_TOKENS_FILE_PREFIX = 'claude-context-tokens-';
+// The file now holds a token count, not a bucket index. Reusing the old prefix
+// would let a downgraded hook read ~400000 as a bucket index and go silent for
+// the rest of the session; the legacy prefix stays only so stale files sweep.
+const LEGACY_CONTEXT_BUCKET_FILE_PREFIX = 'claude-context-bucket-';
+const STATE_FILE_PREFIXES = [
+  COUNTER_FILE_PREFIX,
+  CONTEXT_TOKENS_FILE_PREFIX,
+  LEGACY_CONTEXT_BUCKET_FILE_PREFIX
+];
+
+/**
+ * Invalid, out-of-range and absent values all fall back to the default; unlike
+ * the context threshold, 0 is not a disable switch here, since the count signal
+ * has no separate off state.
+ */
+function toolCallSetting(raw, fallback) {
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isInteger(parsed) && parsed > 0 && parsed <= MAX_TOOL_CALL_SETTING ? parsed : fallback;
+}
+
+/** Resolve the tool-call count at which the suggestion first fires. */
+function resolveToolCallThreshold(env) {
+  return toolCallSetting(env && env.COMPACT_THRESHOLD, DEFAULT_TOOL_CALL_THRESHOLD);
+}
+
+/** Resolve the further tool calls between repeats of the suggestion. */
+function resolveToolCallInterval(env) {
+  return toolCallSetting(env && env.COMPACT_INTERVAL, DEFAULT_TOOL_CALL_INTERVAL);
+}
 
 /**
  * Increment and persist the per-session tool-call counter.
@@ -84,43 +109,61 @@ function incrementToolCallCount(counterFile) {
 }
 
 /**
- * Read the last context bucket this session already fired for (-1 when the
- * suggestion has not fired yet or the state file is unreadable/corrupted).
+ * Read the context size this session last fired at. Returns null when the
+ * suggestion has not fired yet or the state file is unreadable/corrupted.
+ *
+ * null rather than -1: with a numeric sentinel, `tokens >= lastFired + interval`
+ * silently turns the interval into a floor on the first fire, overriding a
+ * configured threshold.
  */
-function readLastContextBucket(bucketFile) {
+function readLastFiredTokens(tokensFile) {
   try {
-    const parsed = parseInt(fs.readFileSync(bucketFile, 'utf8').trim(), 10);
-    return Number.isInteger(parsed) && parsed >= 0 && parsed <= 1000000 ? parsed : -1;
+    const parsed = parseInt(fs.readFileSync(tokensFile, 'utf8').trim(), 10);
+    return Number.isInteger(parsed) && parsed >= 0 && parsed <= MAX_TOKEN_SETTING ? parsed : null;
   } catch {
-    return -1;
+    return null;
   }
 }
 
 /**
- * Build the context-size suggestion when the transcript shows the session has
- * crossed into a new context bucket. Returns null when the signal is silent
- * (no transcript, below threshold, disabled, or already fired for the bucket).
+ * Build the context-size suggestion when the session has grown enough since the
+ * last one. Returns null when the signal is silent (no transcript, below
+ * threshold, disabled, or too little growth since the last fire).
  *
  * Never throws -- any transcript or state-file failure silently disables the
  * signal so the hook keeps its always-exit-0 contract.
  */
-function buildContextSuggestion(transcriptPath, bucketFile, env) {
+function buildContextSuggestion(transcriptPath, tokensFile, env) {
   try {
     const usage = readLatestContextTokens(transcriptPath);
     if (!usage) return null;
 
-    const windowTokens = resolveContextWindowTokens(usage.tokens, usage.model);
-    const threshold = resolveContextThreshold(env, windowTokens);
+    const threshold = resolveContextThreshold(env);
     if (threshold <= 0) return null; // COMPACT_CONTEXT_THRESHOLD=0 disables
 
-    const bucket = computeContextBucket(usage.tokens, threshold, resolveContextInterval(env));
-    if (bucket < 0 || bucket <= readLastContextBucket(bucketFile)) return null;
+    let lastFired = readLastFiredTokens(tokensFile);
+    // Context shrank, so a compact happened. Without this reset the gate only
+    // ever ratchets upward and goes silent for the rest of the session --
+    // straight after the action this hook exists to prompt. Clearing the file
+    // rather than just the variable matters when the run returns below: growth
+    // back past the stale mark would otherwise be gated off the pre-compact
+    // peak, which is the same silence in a narrower window.
+    if (lastFired !== null && usage.tokens < lastFired) {
+      lastFired = null;
+      try {
+        fs.rmSync(tokensFile, { force: true });
+      } catch {
+        // Best-effort: the in-memory reset still covers this invocation.
+      }
+    }
 
-    writeFile(bucketFile, String(bucket));
+    if (usage.tokens < threshold) return null;
+    if (lastFired !== null && usage.tokens < lastFired + resolveContextInterval(env)) return null;
+
+    writeFile(tokensFile, String(usage.tokens));
 
     const approxTokens = `${Math.round(usage.tokens / 1000)}k`;
-    const percent = Math.round((usage.tokens / windowTokens) * 100);
-    return `[StrategicCompact] Context ~${approxTokens} tokens (${percent}% of ${formatWindowLabel(windowTokens)} window) - consider /compact at the next logical boundary`;
+    return `[StrategicCompact] Context ~${approxTokens} tokens - consider /compact at the next logical boundary`;
   } catch (err) {
     log(`[StrategicCompact] Context signal skipped: ${err.message}`);
     return null;
@@ -131,38 +174,31 @@ async function main() {
   // Claude Code passes hook input via stdin JSON. `session_id` is canonical
   // (the legacy env var, then 'default', are fallbacks); `transcript_path`
   // feeds the context-size signal.
-  let input = {};
-  try {
-    input = await readStdinJson({ timeoutMs: 1000 });
-  } catch {
-    input = {};
-  }
+  const input = await readHookInput();
 
-  const sessionId = toSessionId(input && input.session_id);
-  const transcriptPath = (input && typeof input.transcript_path === 'string') ? input.transcript_path : '';
+  const sessionId = toSessionId(input.session_id);
+  const transcriptPath = typeof input.transcript_path === 'string' ? input.transcript_path : '';
 
   const counterFile = stateFilePath(COUNTER_FILE_PREFIX, sessionId);
-  const bucketFile = stateFilePath(CONTEXT_BUCKET_FILE_PREFIX, sessionId);
+  const contextTokensFile = stateFilePath(CONTEXT_TOKENS_FILE_PREFIX, sessionId);
 
   // Only this hook's own prefixes -- every hook sweeps after itself.
-  sweepStaleState(STATE_FILE_PREFIXES, [counterFile, bucketFile]);
+  sweepStaleState(STATE_FILE_PREFIXES, [counterFile, contextTokensFile]);
 
-  const rawThreshold = parseInt(process.env.COMPACT_THRESHOLD || '50', 10);
-  const threshold = Number.isFinite(rawThreshold) && rawThreshold > 0 && rawThreshold <= 10000
-    ? rawThreshold
-    : 50;
+  const threshold = resolveToolCallThreshold(process.env);
+  const interval = resolveToolCallInterval(process.env);
 
   const count = incrementToolCallCount(counterFile);
   const messages = [];
 
-  const contextSuggestion = buildContextSuggestion(transcriptPath, bucketFile, process.env);
+  const contextSuggestion = buildContextSuggestion(transcriptPath, contextTokensFile, process.env);
   if (contextSuggestion) {
     messages.push(contextSuggestion);
   }
 
   if (count === threshold) {
     messages.push(`[StrategicCompact] ${threshold} tool calls reached - consider /compact if transitioning phases`);
-  } else if (count > threshold && (count - threshold) % 25 === 0) {
+  } else if (count > threshold && (count - threshold) % interval === 0) {
     messages.push(`[StrategicCompact] ${count} tool calls - good checkpoint for /compact if context is stale`);
   }
 

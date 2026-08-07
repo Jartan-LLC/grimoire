@@ -5,6 +5,16 @@ echo "Setting up development environment..."
 # Enable pnpm via corepack (ships with Node.js)
 sudo corepack enable || echo "Warning: corepack enable failed; pnpm may not be available" >&2
 
+# Installed here, not via the devcontainer feature: the feature installs as root,
+# leaving @anthropic-ai unwritable so auto-update fails forever. Must precede
+# codebase-memory-mcp, which registers its MCP server only if claude is present.
+echo "Installing Claude Code CLI..."
+claude_install_failed=0
+# Retry once: a registry blip during create otherwise costs a rebuild.
+npm install -g @anthropic-ai/claude-code \
+    || npm install -g @anthropic-ai/claude-code \
+    || claude_install_failed=1
+
 # Install Node.js dependencies from all package.json files
 echo "Installing Node.js dependencies..."
 while IFS= read -r -d '' pkg_file; do
@@ -28,10 +38,14 @@ while IFS= read -r -d '' pyproject_file; do
     pip install -e "${dir}[dev]" || echo "Warning: pip install failed for $dir" >&2
 done < <(find . -name "pyproject.toml" -not -path "*/.venv/*" -not -path "*/venv/*" -not -path "*/.tox/*" -type f -print0)
 
-# pre-commit binary comes from the .[dev] install above.
-if command -v pre-commit &>/dev/null && [ -f .pre-commit-config.yaml ]; then
-    echo "Wiring pre-commit git hook..."
-    pre-commit install || echo "Warning: pre-commit install failed" >&2
+# Delegated to `make install` so the install+wire steps live in one place.
+# Grimoire has no pyproject.toml, so nothing above brings pre-commit in -- the
+# loops over requirements.txt/pyproject.toml find no files here. The hooks it
+# wires include two docker hooks, which need the daemon up; post-start.sh fixes
+# the socket permissions.
+if [ -f .pre-commit-config.yaml ]; then
+    echo "Installing pre-commit and wiring the git hook..."
+    make install || echo "Warning: 'make install' failed; run it by hand to enable the pre-commit hook" >&2
 fi
 
 # vscode-user-specific setup (volume mounts, ownership fixes)
@@ -56,17 +70,6 @@ if [ "$(whoami)" = "vscode" ]; then
     else
         echo "Warning: $HOME/.claude not found; config will not persist across rebuilds" >&2
     fi
-
-    # Fix npm prefix ownership so Claude Code auto-update works
-    npm_prefix="$(npm prefix -g 2>/dev/null)"
-    if [ -z "$npm_prefix" ]; then
-        echo "Warning: could not determine npm global prefix" >&2
-    else
-        npm_owner="$(stat -c '%U' "$npm_prefix" 2>/dev/null)"
-        if [ -n "$npm_owner" ] && [ "$npm_owner" = "root" ]; then
-            sudo chown -R vscode:vscode "$npm_prefix" || echo "Warning: could not fix ownership on $npm_prefix" >&2
-        fi
-    fi
 fi
 
 # Optional: Headroom token compression proxy (https://github.com/chopratejas/headroom)
@@ -89,5 +92,13 @@ if command -v codebase-memory-mcp &>/dev/null; then
 fi
 
 gh auth status 2>/dev/null || echo "Warning: gh not authenticated. Run 'gh auth login' to enable GitHub CLI." >&2
+
+# Reported here, at the end, so it survives the dependency-install output above
+# rather than scrolling away. Not fatal: a non-zero postCreateCommand makes the
+# spec skip postStart and postAttach, losing the Docker socket fix and the
+# Codespaces path override.
+if [ "$claude_install_failed" = 1 ]; then
+    echo "ERROR: Claude Code CLI install failed. Run 'npm install -g @anthropic-ai/claude-code' to retry." >&2
+fi
 
 echo "Development environment setup complete!"

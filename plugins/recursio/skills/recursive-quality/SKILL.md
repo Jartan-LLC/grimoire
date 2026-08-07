@@ -12,22 +12,26 @@ user-invocable: false
 Wave 0 contracts set the ceiling. Thin contracts -> thin implementations.
 
 ### Completeness
+
 - Enumerate all operations, not just common ones
 - Enums for closed sets (prevents string-typing drift)
 - Error types alongside success types (`Record | ParseError`)
 - Custom exception hierarchy -- base + subtypes per failure domain
 
 ### Flexibility
+
 - Batch interfaces (`list[Spec]`) over single-item
 - Injectable I/O (write callables, output streams) for testability
 - Union return types for expected failures; exceptions for unexpected
 
 ### Modularity
+
 - Protocols/interfaces for DI -- not concrete dependencies
 - Factories/registries for runtime selection
 - Structured return types (`RunResult`) over bare values
 
 ### Typing boundaries
+
 - Untyped/dynamic values (`Any`, `object`) are acceptable at **input boundaries** -- parsed records, CLI args, external data where the shape is genuinely unknown
 - All **internal result types** (aggregation results, pipeline outputs, structured returns) must be fully typed -- the shape is known at design time
 - Contracts file contains: protocols, dataclasses, enums, type aliases, constants. No callable stubs.

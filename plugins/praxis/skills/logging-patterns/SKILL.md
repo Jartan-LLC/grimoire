@@ -44,6 +44,7 @@ logger.info(f"Cleaned up {count} expired sessions")   # no
 Log to **stderr** when stdout carries the program's own output -- the common case: CLIs, filters, pipeline stages (also Python's `logging.StreamHandler` default). Use **stdout** only for pure log-shipping services that emit nothing else. One record per line either way. Container runtimes (Docker, k8s) capture both streams, so the choice isolates logs from program output, not runtime visibility -- no file sinks or log rotation in-app.
 
 Support two formats via config:
+
 - **`plain`** -- Readable for local dev
 - **`json`** -- Stable single-line object per record for log aggregators (Loki, Datadog, ELK, CloudWatch)
 

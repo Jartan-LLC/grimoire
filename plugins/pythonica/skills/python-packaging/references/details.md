@@ -144,7 +144,7 @@ version = {attr = "my_package.__version__"}
 write_to = "src/my_package/_version.py"
 ```
 
-**In **init**.py:**
+**In `__init__.py`:**
 
 ```python
 # src/my_package/__init__.py
@@ -347,4 +347,4 @@ jobs:
         run: twine upload dist/*
 ```
 
-For advanced patterns including data files, namespace packages, C extensions, version management, testing installation, documentation templates, and distribution workflows, see [references/advanced-patterns.md](references/advanced-patterns.md)
+For advanced patterns including data files, namespace packages, C extensions, version management, testing installation, documentation templates, and distribution workflows, see [advanced-patterns.md](advanced-patterns.md)

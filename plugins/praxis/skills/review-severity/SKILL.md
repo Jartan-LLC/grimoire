@@ -51,6 +51,7 @@ of it (separate gate, below).
   re-tiers the instant a path is wired.
 
 ### Magnitude floor (on Critical)
+
 Below the floor, no live path makes a finding Critical. It clears only if a user, caller, or
 downstream would make a **materially different decision**, or money/records/persisted-state/
 credentials change. A mis-rounded non-critical stat, a wrong tooltip, a non-exploitable info

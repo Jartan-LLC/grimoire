@@ -6,14 +6,14 @@ Comprehensive Python development -- patterns, testing, async, error handling, pa
 
 Claude Code:
 
-```
+```text
 /plugin marketplace add Jartan-LLC/grimoire
 /plugin install pythonica
 ```
 
 Codex:
 
-```
+```bash
 codex plugin marketplace add Jartan-LLC/grimoire
 codex plugin add pythonica@grimoire
 ```
@@ -21,6 +21,7 @@ codex plugin add pythonica@grimoire
 ## Skills
 
 ### Core Language
+
 - **python-patterns** -- protocols, context managers, concurrency, decorators, memory efficiency
 - **python-type-safety** -- protocols, generics, type narrowing, mypy strict mode
 - **async-python-patterns** -- asyncio fundamentals, when to use async vs sync, core patterns
@@ -28,13 +29,16 @@ codex plugin add pythonica@grimoire
 - **python-anti-patterns** -- BAD->GOOD checklist for code review
 
 ### Testing
+
 - **python-testing** -- pytest ecosystem: fixtures, parametrize, mocking, async testing, TDD workflow, coverage
 
 ### Error Handling & Resilience
+
 - **python-error-handling** -- exception hierarchies, batch processing, validation patterns, Pydantic integration
 - **python-resilience** -- retry with tenacity, exponential backoff, jitter, circuit breakers
 
 ### Project Setup
+
 - **python-code-style** -- ruff/mypy config, docstrings, naming conventions
 - **python-api-docs** -- Sphinx/autodoc/napoleon/MyST, doctest, intersphinx, strict docs CI gate
 - **python-project-structure** -- directory layout, `__all__`, flat vs nested
@@ -43,15 +47,18 @@ codex plugin add pythonica@grimoire
 - **uv-package-manager** -- uv workflows, migration from pip/poetry, Docker/CI patterns
 
 ### Operations
+
 - **python-observability** -- structlog, correlation IDs, semantic log levels
 - **python-performance-optimization** -- profiling, optimization checklist
 
 ### Frameworks
+
 - **pydantic** -- v2 API, validators, serialization, settings, FastAPI/SQLAlchemy/Django integration
 
 ## Credits
 
 Skills adapted from:
+
 - [everything-claude-code](https://github.com/affaan-m/everything-claude-code) by Affaan Mustafa
 - [wshobson/agents](https://github.com/wshobson/agents) by wshobson
 - [claude-mpm-skills](https://github.com/bobmatnyc/claude-mpm-skills) by bobmatnyc

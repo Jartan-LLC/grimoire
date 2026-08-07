@@ -27,43 +27,48 @@ hooks, README), bump it:
 - **MINOR** (`1.0.0` -> `1.1.0`) -- new skills/agents/commands, backward-compatible additions
 - **MAJOR** (`1.0.0` -> `2.0.0`) -- breaking changes to existing behaviour or invocation
 
+Bump **once per release, not once per change**. The version is a cache key
+against the last released version, so what matters is the delta from `main`, not
+how many commits touched the plugin. A branch that fixes some wording and adds a
+skill lands a single MINOR bump, not a PATCH followed by a MINOR.
+
 Editing only a plugin's `marketplace.json` metadata (`description`, `keywords`)
 is **not** a bump trigger -- those fields sit outside `plugins/<name>/`, the only
 path the bump rule watches.
 
-The bump is enforced by review (see [Enforcement](#enforcement)).
+## Enforcement
+
+Version discipline is enforced by **PR review**. Before merging, confirm any
+plugin with changed content under `plugins/<name>/` has a bumped `version` in its
+`plugin.json`. CI gates pure ASCII, JSON parsing, generated-file drift and the
+full lint set, but nothing there checks the bump rule.
 
 ## Tag a release
 
 Releases are resolved from git tags named `{plugin-name}--v{version}` (double
-dash, leading `v`), where `{version}` matches that commit's `plugin.json`. Cut
-the tag from inside the plugin directory:
-
-```bash
-cd plugins/<name>
-claude plugin tag --push
-```
-
-`claude plugin tag` derives the tag from `plugin.json`, requires a clean working
-tree under the plugin directory, and refuses if the tag already exists; add
-`--dry-run` to preview. (Its check that `plugin.json` and the marketplace entry
-agree on the version is moot here -- the marketplace entries carry none.) If the `claude` CLI is unavailable, tag by hand:
+dash, leading `v`), where `{version}` matches that commit's `plugin.json`. Tag
+the merge commit and push:
 
 ```bash
 git tag <name>--v<version>
 git push origin <name>--v<version>
 ```
 
+The version in the tag must match `plugin.json` at that commit, and the tag must
+not already exist -- nothing checks either for you, and a tag pointing at the
+wrong commit is what the resolver will hand users.
+
 These tags give each plugin an independent version line and are what dependency
 constraints resolve against (see [Dependencies](#dependencies)).
 
-## Enforcement
+Pushing the tag is the only manual step: `release.yml` creates the GitHub
+Release from it. The body is a fixed pointer, not generated notes -- GitHub's
+generated notes diff repo-wide and would attribute other plugins' commits to
+this release. The changelog lives in the commit history and the per-plugin tags.
 
-Version discipline is enforced by **PR review**. Before merging, confirm any
-plugin with changed content under `plugins/<name>/` has a bumped `version` in its
-`plugin.json`. CI runs the `CLAUDE.md` Verify block on every pull request, but
-that covers ASCII, JSON and generated-file drift -- not the bump rule, which
-still needs a human. (A CI check could automate it later.)
+A version carrying a prerelease suffix (`praxis--v2.0.0-rc1`) tags and releases
+the same way. `release.yml` marks it a GitHub prerelease, so it stays off the
+repo's "Latest" badge.
 
 ## Dependencies
 
@@ -112,7 +117,20 @@ Verified against codex-cli 0.146.0:
   `plugins/<name>/.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`,
   and `plugins/<name>/codex/agents/*.toml`. Run `scripts/generate-codex.py` after
   any change to a plugin's name, version, description, keywords, category, or
-  agents, and commit the result. `--check` fails when they are stale or orphaned.
+  agents, and commit the result.
+- **`--check` fails on more than staleness**: a generated file out of date with
+  its source, an orphan whose source is gone, and a duplicated hook script whose
+  copies have diverged.
+
+## Duplicated hook scripts
+
+Some hook scripts ship from more than one plugin and must stay byte-identical;
+`generate-codex.py` names them in `DUPLICATED_HOOK_SCRIPTS`. Edit every copy in
+the same commit, or `--check` fails. Each plugin shipping one has changed content
+under `plugins/<name>/`, so each takes its own version bump.
+
+Expect `find-duplicate-comments.js` to report comments in these copies as retold,
+and dismiss it.
 
 ## Release channels
 

@@ -23,6 +23,7 @@ Waves execute sequentially. Within each wave, agents run in parallel.
 **Wave barrier:** all agents must complete before running tests or starting the next wave. Send all wave agents as foreground calls in a single message when possible. Sequential dispatch is acceptable when needed.
 
 **Typical structure:**
+
 - Wave 0: Contracts + setup (uses `recursive-implementer`)
 - Wave 1+: Implementation modules (parallel `recursive-implementer` agents)
 - Final wave: Integration tests + documentation
@@ -44,6 +45,7 @@ After each wave, spawn a `recursive-reviewer` scoped to the wave's output:
 ## Language Awareness
 
 The wave plan's **Language & Conventions** section determines:
+
 - Test command (`pytest`, `npx vitest run`, `cargo test`)
 - Types/contracts file path
 - Setup command (`npm install`, `uv sync`)

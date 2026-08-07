@@ -6,19 +6,19 @@ Curated plugins for development workflows, for Claude Code and Codex.
 
 Claude Code:
 
-```
+```text
 /plugin marketplace add Jartan-LLC/grimoire
 ```
 
 Then browse and install plugins:
 
-```
+```text
 /plugin
 ```
 
 Codex:
 
-```
+```bash
 codex plugin marketplace add Jartan-LLC/grimoire
 codex plugin add <plugin>@grimoire
 ```
@@ -49,7 +49,17 @@ See [RELEASING.md](RELEASING.md) for the full workflow and tag convention.
 
 ## Contributing
 
-New plugins go in `plugins/<name>/` with a `.claude-plugin/plugin.json` manifest. Add an entry to `.claude-plugin/marketplace.json` and submit a PR.
+New plugins go in `plugins/<name>/` with a `.claude-plugin/plugin.json` manifest.
+Add an entry to `.claude-plugin/marketplace.json` and submit a PR.
+
+Local checks, run by CI and by the pre-commit hook:
+
+```bash
+make lint
+make verify
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and conventions.
 
 ## License
 

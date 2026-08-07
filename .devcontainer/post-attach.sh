@@ -13,8 +13,10 @@ if command -v claude &>/dev/null; then
     # `claude plugins update` acts on one plugin at a time and has no bulk form,
     # so enumerate installed plugins (id + scope) and update each within its own
     # scope. node ships with the claude CLI, so use it to parse the JSON listing.
-    # Project-scoped updates are best-effort -- they only resolve when the attach
-    # directory matches the plugin's project, and are swallowed otherwise.
+    # Each update acts on a single record per (id, scope) -- this project's if it
+    # has one, otherwise the first found -- so ids listed for several projects
+    # resolve to the same record more than once. Harmless, and cheaper than
+    # de-duplicating.
     if command -v node &>/dev/null; then
         claude plugins list --json 2>/dev/null | node -e '
 let input = "";

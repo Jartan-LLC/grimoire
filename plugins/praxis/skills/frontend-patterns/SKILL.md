@@ -23,6 +23,7 @@ Every design decision is defined exactly once. Design tokens live in the styles 
 ```
 
 For JavaScript/SDK integrations, read tokens at runtime:
+
 ```javascript
 const primary = getComputedStyle(document.documentElement)
   .getPropertyValue('--color-primary').trim();

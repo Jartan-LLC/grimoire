@@ -1,0 +1,69 @@
+name: External Link Check
+
+# External rot is non-deterministic, so a failure files a tracking issue rather
+# than blocking. Relative links are gated at commit time by the lychee hook.
+
+on:
+  schedule:
+    - cron: "30 6 * * 1" # weekly, Monday 06:30 UTC
+  workflow_dispatch:
+
+permissions: {}
+
+# Serialized: two concurrent runs would both find no existing issue and each
+# open one.
+concurrency:
+  group: external-link-check
+  cancel-in-progress: false
+
+jobs:
+  link-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      ISSUE_TITLE: Broken links found by lychee # one source for the dedup key
+    permissions:
+      contents: read # checkout
+      issues: write # find + open/update the tracking issue
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check links
+        id: lychee
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: "--no-progress './**/*.md'"
+          fail: false # the next step files an issue instead of reddening the run
+          failIfEmpty: false
+          output: ./lychee/out.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # lifts the API rate limit
+
+      # Find the existing issue so the next step updates it in place rather than
+      # filing a fresh one every week.
+      - name: Find the open link-check issue
+        id: existing
+        if: steps.lychee.outputs.exit_code != 0
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          : "${ISSUE_TITLE:?}" # loud-fail if unset
+          number="$(gh issue list --repo "$REPO" --state open \
+            --search "$ISSUE_TITLE in:title" \
+            --json number,title \
+            --jq 'map(select(.title == env.ISSUE_TITLE) | .number) | .[0] // ""')"
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+
+      # The `dependency` label must already exist: it is applied in a separate
+      # call after the issue is filed, so an unknown one reds the run weekly.
+      - name: Open or update the link-check issue
+        if: steps.lychee.outputs.exit_code != 0
+        uses: peter-evans/create-issue-from-file@fca9117c27cdc29c6c4db3b86c48e4115a786710 # v6.0.0
+        with:
+          title: ${{ env.ISSUE_TITLE }}
+          content-filepath: ./lychee/out.md
+          labels: dependency
+          issue-number: ${{ steps.existing.outputs.number }} # empty = new issue; set = update in place

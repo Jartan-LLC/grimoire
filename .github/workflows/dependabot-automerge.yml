@@ -1,0 +1,26 @@
+name: Dependabot Automerge
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  automerge:
+    runs-on: ubuntu-24.04
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      # use-github-auto-merge queues behind the required `check` context, and
+      # requires the main ruleset to carry a required_status_checks rule -- the
+      # mutation is rejected without one, leaving every Dependabot PR approved
+      # and permanently red. Do not "fix" that by setting it false: that path
+      # merges immediately with nothing gating it.
+      - uses: fastify/github-action-merge-dependabot@73ec4cbb5e56df5591eae286972d5b2201ffe90f # v3
+        with:
+          target: minor
+          merge-method: squash
+          use-github-auto-merge: true
