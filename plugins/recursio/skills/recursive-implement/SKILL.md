@@ -2,7 +2,6 @@
 name: recursive-implement
 description: Build a project using recursive multi-agent development with TDD
 argument-hint: Project description, issue number, or plan file path
-disable-model-invocation: true
 ---
 
 # Recursive Implement

@@ -2,7 +2,6 @@
 name: create-pr
 description: Create a pull request for implemented changes from a GitHub issue
 argument-hint: Issue number (may include additional context)
-disable-model-invocation: true
 ---
 
 # Create Pull Request

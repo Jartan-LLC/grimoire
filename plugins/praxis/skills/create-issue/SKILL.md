@@ -2,7 +2,6 @@
 name: create-issue
 description: Create a GitHub issue using the appropriate template
 argument-hint: Description of the bug or feature request
-disable-model-invocation: true
 ---
 
 # Create Issue

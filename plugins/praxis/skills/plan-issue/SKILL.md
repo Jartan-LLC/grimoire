@@ -2,7 +2,6 @@
 name: plan-issue
 description: Analyze a GitHub issue and create an implementation plan
 argument-hint: Issue number (may include additional context)
-disable-model-invocation: true
 ---
 
 # Plan Issue

@@ -2,7 +2,6 @@
 name: review-pr
 description: Review a pull request using specialized reviewer agents
 argument-hint: PR number (may include additional context)
-disable-model-invocation: true
 ---
 
 # Review PR

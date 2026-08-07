@@ -45,7 +45,7 @@ Declare `user-invocable: false`. Claude loads a skill when it's relevant; the us
 
 ## Commands = Workflows
 
-A command defines **what to do**. An explicit, purposeful sequence triggered by the user.
+A command defines **what to do**. An explicit, purposeful sequence with a clear trigger.
 
 - Specific workflow with clear start and end
 - Defines what happens in what order
@@ -54,7 +54,7 @@ A command defines **what to do**. An explicit, purposeful sequence triggered by 
 
 **Commands are workflows.** They define *what* to do; skills inform *how* to do each step well.
 
-Declare `disable-model-invocation: true`. The user decides when a workflow runs, so Claude must not start one on its own.
+Set neither invocation field. `disable-model-invocation: true` makes an unprefixed `/name` a dead end: it autocompletes, then falls through to the model, and that same flag blocks the model from running it.
 
 Write a command as `skills/<name>/SKILL.md`. Claude Code has folded commands into skills: the older `commands/<name>.md` still resolves to the same `/<name>`, but it cannot carry supporting files.
 
@@ -63,15 +63,15 @@ Write a command as `skills/<name>/SKILL.md`. Claude Code has folded commands int
 
 ## Who Can Invoke
 
-Two frontmatter fields decide this, and every `SKILL.md` sets one of them:
+Two frontmatter fields decide this:
 
 | Frontmatter | Invoked by | Use for |
 |-------------|------------|---------|
 | `user-invocable: false` | Claude, when relevant | Knowledge -- conventions, patterns, reference |
-| `disable-model-invocation: true` | The user, via `/name` | Workflows -- ordered steps with a clear outcome |
-| Neither | Claude and the user | Rare -- justify it in the file |
+| `disable-model-invocation: true` | The user, via `/plugin:name` | Rare -- a workflow that must never start unbidden |
+| Neither | Claude and the user | Workflows -- ordered steps with a clear outcome |
 
-Setting neither field allows both. A few workflows genuinely need that; defaulting to it is how a `/` menu fills with reference material nobody meant to invoke.
+Knowledge sets `user-invocable: false`, which keeps a `/` menu from filling with reference material nobody meant to invoke. Workflows set neither.
 
 `disable-model-invocation: true` also blocks preloading into subagents via an agent's `skills:` frontmatter -- never put it on knowledge an agent depends on.
 

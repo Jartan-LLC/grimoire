@@ -2,7 +2,6 @@
 name: implement-issue
 description: Implement a GitHub issue, optionally from an existing plan
 argument-hint: Issue number (may include additional context)
-disable-model-invocation: true
 ---
 
 # Implement Issue
