@@ -23,7 +23,7 @@
 const { readHookInput, output } = require('./lib/utils');
 
 const IMPERATIVE =
-  'Before responding, identify which of your available skills are relevant to this task and load them first.';
+  'BEFORE your first tool call: name the applicable skills and load them with Skill. If none, say so. When unsure, load.';
 
 async function main() {
   const input = await readHookInput();
