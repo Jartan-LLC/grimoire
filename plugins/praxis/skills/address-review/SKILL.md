@@ -2,7 +2,6 @@
 name: address-review
 description: Work through review findings on a PR one at a time
 argument-hint: PR number
-disable-model-invocation: true
 ---
 
 # Address Review

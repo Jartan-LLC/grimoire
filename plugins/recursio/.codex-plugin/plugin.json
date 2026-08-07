@@ -1,6 +1,6 @@
 {
   "name": "recursio",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Recursive multi-agent development system with TDD -- decomposes projects into waves of parallel nested subagents",
   "interface": {
     "displayName": "Recursio",
