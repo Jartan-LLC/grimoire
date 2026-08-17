@@ -76,6 +76,16 @@ Language toolchain implementing these bars (plus API docs generated from docstri
 - **No redundancy** -- don't repeat information documented elsewhere. Link instead.
 - **Code examples must work** -- enforce with the tested-snippets bar (see Strictness Bars), not manual review alone.
 
+## Change narration
+
+Prose that narrates the change which produced the page, or inventories where else its fact applies, is addressed to whoever reviews the diff rather than whoever is following the page. It arrives looking like context and costs the reader a sentence answering a question they did not ask.
+
+**Test:** would a reader who never saw the change, wanting only what this section is for, do anything differently for having read it? No -> cut.
+
+`Or from source. This project installs with uv rather than pip -- in CI, in the devcontainer and in the Docker image:` -- the reader is installing locally. Which installer the project stopped using, and the three other places the new one is also used, change nothing they type. `Or from source, with uv:` is the whole of it.
+
+This is the prose form of the habit `code-hygiene` names as PR narration in its *Density* section, and one migration commonly produces both at once -- so a diff carrying it in comments is worth reading for it in the docs too. Rationale that genuinely needs a home goes in the pull request body, which is read once, by the reader it was written for.
+
 ## What to Avoid
 
 - Verbose explanations where a table or code block would be clearer
