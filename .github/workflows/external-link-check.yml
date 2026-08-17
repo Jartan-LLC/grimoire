@@ -34,7 +34,11 @@ jobs:
         id: lychee
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
-          args: "--no-progress './**/*.md'"
+          # --hidden is load-bearing: the glob alone skips dot-directories, so
+          # .github/ goes unchecked, and the security policy's private-advisory
+          # route with it. Link-scoped exemptions would live in a .lycheeignore,
+          # which this action reads; this repo needs none.
+          args: "--no-progress --hidden './**/*.md'"
           fail: false # the next step files an issue instead of reddening the run
           failIfEmpty: false
           output: ./lychee/out.md
