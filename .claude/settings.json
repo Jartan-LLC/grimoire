@@ -10,7 +10,8 @@
     "grimoire": {
       "source": {
         "source": "github",
-        "repo": "Jartan-LLC/grimoire"
+        "repo": "Jartan-LLC/grimoire",
+        "ref": "marketplace-v1.0.0"
       }
     }
   }
