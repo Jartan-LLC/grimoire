@@ -52,8 +52,9 @@ codex plugin add gitwise@grimoire
 ### Skills
 
 - **api-error-patterns** -- error response format, status codes
-- **code-hygiene** -- zombie code (dead/reinvented/orphaned), tombstone comments
+- **code-hygiene** -- zombie code (dead/reinvented/orphaned), truthful names, real implementations
 - **code-structure** -- structural craft: decompose on responsibility not size, deep modules, cohesion/coupling/interface/error-contract/data shape
+- **comment-hygiene** -- comment truthfulness: KEEP/DELETE/EXEMPT/CONDITIONAL, tombstone and retold-fact detection, comment density
 - **docs-patterns** -- writing style, structure, brevity
 - **frontend-patterns** -- design tokens, mobile-first, component isolation
 - **logging-patterns** -- log levels, formatting, structured output

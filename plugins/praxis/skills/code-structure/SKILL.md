@@ -1,6 +1,6 @@
 ---
 name: code-structure
-description: Language-agnostic structural craft -- decompose on responsibility not size, prefer deep modules over shallow piles, and shape cohesion, coupling, interfaces, error contracts, and data invariants. Sibling to code-hygiene and readable-code.
+description: Language-agnostic structural craft -- decompose on responsibility not size, prefer deep modules over shallow piles, and shape cohesion, coupling, interfaces, error contracts, and data invariants. Sibling to code-hygiene, comment-hygiene and readable-code.
 when_to_use: Writing or reviewing code -- shaping function and module boundaries, interfaces, error contracts, and data types once code-hygiene has removed the outright liabilities. Local reading (control flow, naming, reading order) is readable-code.
 user-invocable: false
 ---
@@ -9,12 +9,12 @@ user-invocable: false
 
 `code-hygiene` deletes the liability; this skill shapes the units that remain. Four owners, one test:
 
-- **hygiene = DELETE** what git or a library already owns -- a restating comment, dead code, a name that lies or says nothing. A rule that says *delete X* is hygiene's.
+- **hygiene = DELETE** what git or a library already owns -- dead code, a name that lies or says nothing (`code-hygiene`), a restating comment (`comment-hygiene`). A rule that says *delete X* is one of the two hygienes'.
 - **code-structure = SHAPE THE UNITS** -- how the code is decomposed, how units couple, how an interface reads, how a failure reaches a caller, how data carries its own invariants. Everything here assumes the code should exist; the question is what shape its units and boundaries take.
 - **readable-code = READ** -- how a single body reads line by line: control-flow shape, naming across a set, reading order and working set. Anything about how one body *reads* rather than how the units are *carved* is readable-code's.
 - **pythonica = Python mechanics** -- a rule that names a Python construct (`dataclass`, `NewType`, a context manager, `match`) is pythonica's; keep this skill language-agnostic.
 
-Read `code-hygiene` first: shaping code that should have been deleted is wasted work. When a fix here would be *self-documenting code* (a revealing name, an extracted step, an explaining variable), that is exactly what hygiene's "prefer self-documenting code over a comment" meta-rule points **to** -- hygiene removes the comment, this skill supplies the structure. Where a smell reads as "there is redundant knowledge here", check the boundary: identical *text* in two places is hygiene's duplication rule; the same *decision* in two unlike forms is this skill's (DRY-as-knowledge, below).
+Read `code-hygiene` and `comment-hygiene` first: shaping code that should have been deleted is wasted work. When a fix here would be *self-documenting code* (a revealing name, an extracted step, an explaining variable), that is exactly what `comment-hygiene`'s "prefer self-documenting code over a comment" meta-rule points **to** -- that skill removes the comment, this skill supplies the structure. Where a smell reads as "there is redundant knowledge here", check the boundary: identical *text* in two places is `code-hygiene`'s duplication rule; the same *decision* in two unlike forms is this skill's (DRY-as-knowledge, below).
 
 Every rule below is a recognizable **smell** (something a reader or author can actually spot) -> the **principle** it violates -> a **fix** direction. No line, parameter, or nesting-depth count gates any rule here: that false precision is the size-fallacy this skill exists to replace. (Illustrative counts like "a two-line loop index" still appear -- they describe an example, they do not set a threshold.)
 
@@ -98,7 +98,7 @@ Keep the code cheap to reshape, and keep reshaping honest.
 
 What this skill deliberately leaves to others, one reason each:
 
-- **Comments -- OUT.** Wholly owned by `code-hygiene` (KEEP/DELETE/EXEMPT and the self-documenting-code meta-rule). The explaining variables and phase seams that meta-rule points to live in `readable-code`; cross-link, never re-adjudicate a comment.
+- **Comments -- OUT.** Wholly owned by `comment-hygiene` (KEEP/DELETE/EXEMPT and the self-documenting-code meta-rule). The explaining variables and phase seams that meta-rule points to live in `readable-code`; cross-link, never re-adjudicate a comment.
 - **Control flow, naming, reading order -- OUT (to `readable-code`).** How a single body reads line by line -- guard clauses, whole-set naming, locality and working set -- is the local-clarity sibling. This skill carves the units; `readable-code` reads them.
 - **Formatting, whitespace, line length, alignment -- OUT.** Auto-formatter territory; legislating layout would smuggle in the numeric thresholds this skill's register forbids. The one shaping-relevant piece, phase seams, is a `readable-code` rule.
 - **Error handling -- IN, but only as interface semantics** (define errors out of existence, un-ignorability, detect-low/handle-high, do-not-extract-a-shallow-happy-path). Which exception type, `Result` versus `Option`, and syntax defer to `pythonica:python-error-handling`.
