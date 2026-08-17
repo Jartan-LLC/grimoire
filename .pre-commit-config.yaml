@@ -56,4 +56,17 @@ repos:
       - id: check-yaml
       - id: check-toml
       - id: check-added-large-files
+      # Without --assume-in-merge the hook returns 0 before reading a single
+      # byte unless .git/ holds MERGE_MSG plus MERGE_HEAD/rebase-apply/
+      # rebase-merge. A fresh `actions/checkout` never carries that state, so
+      # every CI path -- and every local commit outside a live merge -- was a
+      # no-op. The flag makes the scan unconditional, which is the only mode in
+      # which this gate catches anything.
+      #
+      # Scanning unconditionally means a lone `=======` line now reads as a
+      # marker, so a setext H1 underlined with exactly seven `=` would trip it.
+      # The tree has no such line (`git grep -nE '^={3,}'` is empty); if one
+      # ever lands legitimately, `exclude:` that path rather than dropping the
+      # flag and losing the gate again.
       - id: check-merge-conflict
+        args: [--assume-in-merge]
