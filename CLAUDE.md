@@ -60,10 +60,11 @@ done, confirm:
 ```bash
 make verify
 make lint
+make test
 ```
 
-`make test` joins these two once the suite lands -- it is specified in
-`CONTRIBUTING.md` and arrives with its first tests, not ahead of them.
+`CONTRIBUTING.md` has what `make test` covers, what it deliberately does not,
+and where a new test goes.
 
 CI runs the same checks. `AGENTS.md` is a symlink to this file, not a second
 source of truth -- edit `CLAUDE.md`.

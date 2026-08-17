@@ -318,6 +318,6 @@ function main() {
   report(dedupePairs(findings));
 }
 
-module.exports = { buildSkipMatcher, prose, buildCommentIndex, findRetoldInDiff, dedupePairs };
+module.exports = { parseArgs, buildSkipMatcher, prose, trackedPaths, buildCommentIndex, findRetoldInDiff, dedupePairs };
 
 if (require.main === module) main();

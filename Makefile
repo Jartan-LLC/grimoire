@@ -1,7 +1,7 @@
 # CI calls these targets directly, so this file is the single definition of the
 # checks. Recipes run under dash both here and on the runners -- no bashisms.
 
-.PHONY: help install lint verify
+.PHONY: help install lint verify test
 
 help:  ## Show available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  %-12s %s\n", $$1, $$2}'
@@ -29,3 +29,21 @@ verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift)
 	@python3 -c "import json,subprocess; files=subprocess.run(['git','ls-files','*.json'],capture_output=True,text=True,check=True).stdout.split(); assert files, 'git ls-files matched no JSON -- gate would pass having checked nothing'; [json.load(open(f)) for f in files]"
 	@echo "Checking generated Codex files against their sources..."
 	@python3 scripts/generate-codex.py --check
+
+# Each half hands its runner an explicit file list from `git ls-files`, and
+# asserts the list is non-empty for the same reason the JSON check above does:
+# `git ls-files` exits 0 on no match and `node --test` with no arguments walks
+# the whole tree instead of failing, so an unguarded list is a silent pass.
+# Why a list rather than a directory or a glob: see CONTRIBUTING.md.
+#
+# Node runs first, and Make stops at the first failing line, so a Node failure
+# hides the Python result -- the same trade `verify` makes above.
+test:  ## Run the unit tests and hook process contracts (Node, then Python)
+	@echo "Running the Node tests..."
+	@files=$$(git ls-files 'tests/*.test.js'); \
+	if [ -z "$$files" ]; then echo "ERROR: git ls-files matched no Node tests -- gate would pass having checked nothing"; exit 1; fi; \
+	node --test $$files
+	@echo "Running the Python tests..."
+	@files=$$(git ls-files 'tests/test_*.py' 'tests/*/test_*.py'); \
+	if [ -z "$$files" ]; then echo "ERROR: git ls-files matched no Python tests -- gate would pass having checked nothing"; exit 1; fi; \
+	python3 -m unittest $$files

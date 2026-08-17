@@ -64,18 +64,42 @@ jobs:
       - name: Lint
         run: make lint
 
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Node 20 rather than the runner's default: the hook scripts run under
+      # whatever Node the user's harness carries, so the floor is the version
+      # worth testing on. No matrix -- CONTRIBUTING.md has why.
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "20"
+
+      # No pip cache, for the same reason the Verify job gives: the test suite is
+      # stdlib-only, so there is nothing to install and nothing to key a cache on.
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Test
+        run: make test
+
   # The required status check. Do NOT add a `name:` -- the ruleset matches the
   # context by job id, so naming it silently stops the check from matching.
   check:
     if: always()
     # When you add jobs above, add them to BOTH the needs list and the results
     # array below.
-    needs: [verify, lint]
+    needs: [verify, lint, test]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
       - run: |
-          results=("${{ needs.verify.result }}" "${{ needs.lint.result }}")
+          results=("${{ needs.verify.result }}" "${{ needs.lint.result }}" "${{ needs.test.result }}")
           for r in "${results[@]}"; do
             if [[ "$r" != "success" && "$r" != "skipped" ]]; then
               echo "Check failed: $r"
