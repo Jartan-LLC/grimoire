@@ -132,6 +132,46 @@ under `plugins/<name>/`, so each takes its own version bump.
 Expect `find-duplicate-comments.js` to report comments in these copies as retold,
 and dismiss it.
 
+## Marketplace tags: what consumers pin to
+
+The per-plugin tags above version a plugin. They do not version the marketplace,
+and a consumer's `extraKnownMarketplaces` entry names the repository, not a
+plugin. So consumers pin to a second, repo-level tag line:
+
+```text
+marketplace-v{MAJOR}.{MINOR}.{PATCH}
+```
+
+One dash, not two. `release.yml` triggers on `*--v[0-9]*`, so a double dash would
+publish a GitHub Release captioned "Release of the marketplace plugin" -- the
+single dash keeps this line out of that trigger deliberately.
+
+Cut a new `marketplace-v*` tag when consumers should pick up plugin changes, and
+bump the `ref` in each consuming repository's `.claude/settings.json` in the same
+change. Until that bump lands, consumers keep loading the older tag: that is the
+point, not a bug. Merging to `main` alone reaches nobody.
+
+### Why a tag and not a SHA
+
+A marketplace `source` has no `sha` field -- only `ref`, and Claude Code clones a
+marketplace with `git clone --branch <ref>`, which rejects a commit SHA. Plugin
+sources accept a `sha`; marketplace sources do not. Verified against Claude Code
+2.1.233.
+
+A tag is therefore the strongest pin available here, and it is weaker than a SHA
+in one way worth stating: anyone who can push to this repository can move the
+tag. Protecting the `marketplace-v*` tags with a ruleset closes that gap.
+
+### CI
+
+`anthropics/claude-code-action` cannot pin either. Its `plugin_marketplaces`
+input runs `claude plugin marketplace add <url>`, which takes no ref, and the
+input validator rejects anything after the `.git` suffix. Consuming workflows
+therefore check this repository out at a `marketplace-v*` tag with
+`actions/checkout` and pass the resulting **local path** to
+`plugin_marketplaces`, which pins exactly. See `.github/workflows/claude.yml` in
+`scaffold`, `merlin` or `sonde` for the shape.
+
 ## Release channels
 
 Per-plugin release channels (say, a stable line and a bleeding-edge line) are not
