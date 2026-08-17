@@ -56,11 +56,25 @@ done, confirm:
 
 ```bash
 make verify
+make test
 make lint
 ```
 
 CI runs the same checks. `AGENTS.md` is a symlink to this file, not a second
 source of truth -- edit `CLAUDE.md`.
+
+## Test
+
+`make test` runs `node --test` (Node hook scripts and reviewer tooling) and
+`python3 -m unittest discover` (`scripts/generate-codex.py`). Both runners ship
+with the interpreter already running that code, so neither adds a dependency.
+Write logic that carries real parsing or bookkeeping as a pure, exported
+function -- a thin hook wrapper that only calls the Claude Code hook API back
+is not worth a fixture. Node tests live beside their source as `*.test.js`
+(node:test's own zero-config discovery pattern); Python tests live in
+`scripts/` as `test_*.py` (unittest's discovery pattern) and load
+`generate-codex.py` via `importlib`, since its hyphenated filename cannot be
+`import`ed directly.
 
 Then confirm by inspection: each skill/agent frontmatter `name` matches its directory, and
 any plugin with changed content under `plugins/<name>/` has a bumped `version` in

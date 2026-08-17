@@ -1,7 +1,7 @@
 # CI calls these targets directly, so this file is the single definition of the
 # checks. Recipes run under dash both here and on the runners -- no bashisms.
 
-.PHONY: help install lint verify
+.PHONY: help install lint verify test
 
 help:  ## Show available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  %-12s %s\n", $$1, $$2}'
@@ -13,6 +13,15 @@ install:  ## Install pre-commit and wire the git hook
 
 lint:  ## Lint all files via pre-commit (codespell, shellcheck, markdownlint, lychee, actionlint, zizmor, hygiene)
 	pre-commit run --all-files --show-diff-on-failure
+
+# Both runners ship with the interpreter already running every hook and
+# generate-codex.py, so neither line adds a dependency. `node --test` with no
+# path args recursively discovers *.test.js; unittest's discover needs an
+# explicit pattern since its default (test*.py) would also match a stray
+# fixture module.
+test:  ## Run the test suite (node:test, Python unittest)
+	node --test
+	python3 -m unittest discover -s scripts -p 'test_*.py'
 
 # `git grep -l` exits 1 on no match, so `|| true` would turn the ASCII gate into
 # a permanent no-op and any other non-zero means the invocation itself failed.
