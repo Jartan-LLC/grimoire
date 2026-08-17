@@ -36,6 +36,7 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 - Structure inconsistent with similar docs in the same category
 - Diataxis doc-type fit -- the doc's shape matches its type
 - Two-audience register -- use-it vs navigate/change-it, with claims tracing to docstrings/types
+- Change narration -- prose written for whoever reviews the diff rather than whoever reads the page -- see `docs-patterns`
 - Heading hierarchy -- no skipped levels
 - Nav / ToC completeness -- no orphan or unlisted pages
 
