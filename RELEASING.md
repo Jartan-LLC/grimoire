@@ -151,16 +151,11 @@ bump the `ref` in each consuming repository's `.claude/settings.json` in the sam
 change. Until that bump lands, consumers keep loading the older tag: that is the
 point, not a bug. Merging to `main` alone reaches nobody.
 
-### Why a tag and not a SHA
-
-A marketplace `source` has no `sha` field -- only `ref`, and Claude Code clones a
-marketplace with `git clone --branch <ref>`, which rejects a commit SHA. Plugin
-sources accept a `sha`; marketplace sources do not. Verified against Claude Code
-2.1.233.
-
-A tag is therefore the strongest pin available here, and it is weaker than a SHA
-in one way worth stating: anyone who can push to this repository can move the
-tag. Protecting the `marketplace-v*` tags with a ruleset closes that gap.
+Don't reach for a SHA instead: a marketplace `source` takes no `sha`, only a
+`ref` that is cloned with `git clone --branch`, which rejects one (commit
+`2325fd9` carries the derivation). A tag is the strongest pin available here and
+it is mutable, so protect `marketplace-v*` with a tag ruleset -- otherwise a push
+can move a pin consumers already trust.
 
 ### CI
 
