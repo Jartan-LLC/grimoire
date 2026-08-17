@@ -84,7 +84,7 @@ Prose that narrates the change which produced the page, or inventories where els
 
 `Or from source. This project installs with uv rather than pip -- in CI, in the devcontainer and in the Docker image:` -- the reader is installing locally. Which installer the project stopped using, and the three other places the new one is also used, change nothing they type. `Or from source, with uv:` is the whole of it.
 
-This is the prose form of the habit `code-hygiene` names as PR narration in its *Density* section, and one migration commonly produces both at once -- so a diff carrying it in comments is worth reading for it in the docs too. Rationale that genuinely needs a home goes in the pull request body, which is read once, by the reader it was written for.
+This is the prose form of the habit `comment-hygiene` names as PR narration in its *Density* section, and one migration commonly produces both at once -- so a diff carrying it in comments is worth reading for it in the docs too. Rationale that genuinely needs a home goes in the pull request body, which is read once, by the reader it was written for.
 
 ## What to Avoid
 

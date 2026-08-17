@@ -1,6 +1,6 @@
 ---
 name: readable-code
-description: Language-agnostic local-clarity craft -- shape control flow, the naming of a whole set, and reading order so a body reads straight down with the smallest working set. Sibling to code-hygiene and code-structure.
+description: Language-agnostic local-clarity craft -- shape control flow, the naming of a whole set, and reading order so a body reads straight down with the smallest working set. Sibling to code-hygiene, comment-hygiene and code-structure.
 when_to_use: Writing or reviewing how a function or file READS line by line -- guard-clause control flow, naming for the reader across a set, and the order and locality that shrink what a reader must hold in mind.
 user-invocable: false
 ---
@@ -49,7 +49,7 @@ Shrink the working set a reader must carry to understand one line.
 
 What this skill leaves to others, one reason each:
 
-- **Deleting anything -- OUT.** A restating comment, a dead branch, a name that lies or says nothing is `code-hygiene`'s; this skill only reshapes code that stays.
+- **Deleting anything -- OUT.** A restating comment is `comment-hygiene`'s; a dead branch or a name that lies or says nothing is `code-hygiene`'s; this skill only reshapes code that stays.
 - **Where a seam falls, how big a unit is -- OUT.** Decomposition, module depth, and the size-vs-depth resolution are `code-structure`'s. A guard clause here flattens nesting; it does not decide what to extract.
 - **Naming a single liability name -- OUT.** A name that lies (`get_*` that writes) or says nothing (`tmp`, `data`) is hygiene's rename-or-delete; this skill judges the consistency and scope-fit of the whole *set*.
 - **Formatting, whitespace, line length, alignment -- OUT.** Auto-formatter territory; legislating layout would smuggle in numeric thresholds. A genuine phase seam (a structural break, not a blank-line count) is the rule above.
