@@ -57,6 +57,7 @@ Local checks, run by CI and by the pre-commit hook:
 ```bash
 make lint
 make verify
+make test
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and conventions.

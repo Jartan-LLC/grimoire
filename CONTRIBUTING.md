@@ -22,6 +22,7 @@ error.
 ```bash
 make lint
 make verify
+make test
 ```
 
 Both must pass -- CI runs the same checks. `make help` lists what each target
