@@ -21,6 +21,9 @@ A Claude Code plugin marketplace. Each plugin lives in `plugins/<name>/` with a
   frontmatter `skills:` (a hard, resolve-or-fail load like `gitwise:github-conventions`);
   a prose `see plugin:skill` pointer is soft and needs none
 - Update the affected READMEs and skills alongside any change
+- Executable code earns tests by one rule -- pure input, silent-wrong output --
+  and hook entry points earn a process contract; `CONTRIBUTING.md` holds the
+  rule, the runners, the layout and the CI wiring
 - Reviewer agents tier findings with the `review-severity` skill; agents name their
   lens and reference skills -- they do not restate a skill's rules (agents = role,
   skills = knowledge; see `claudivis:claude-config`)
@@ -58,6 +61,9 @@ done, confirm:
 make verify
 make lint
 ```
+
+`make test` joins these two once the suite lands -- it is specified in
+`CONTRIBUTING.md` and arrives with its first tests, not ahead of them.
 
 CI runs the same checks. `AGENTS.md` is a symlink to this file, not a second
 source of truth -- edit `CLAUDE.md`.
