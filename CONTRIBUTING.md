@@ -22,10 +22,12 @@ error.
 ```bash
 make lint
 make verify
+make test
 ```
 
-Both must pass -- CI runs the same checks. `make help` lists what each target
-covers. `make test` joins them once the suite lands; see [Tests](#tests).
+All three must pass -- CI runs the same checks. `make help` lists what each
+target covers, and [Tests](#tests) has what the suite covers, what it
+deliberately does not, and where a new test goes.
 
 ## Tests
 
