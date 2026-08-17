@@ -89,6 +89,18 @@ Narrates the **change** that produced the code (what was removed, moved, renamed
 | `# CVE-2025-1234 in libfoo <= 2.3, no fixed release as of 2026-08-05; affected parser unreachable here` | keep | Dated advisory -- anchored, dated, scoped; a fix retires it. |
 | The same "Geyser owns the config after first boot" in six files | split | Retold fact -- keep it where a change would falsify it; the rest point. |
 
+### Density -- judge the diff, not just the comment
+
+Every rule above weighs one comment against the code beside it, so a diff can pass at every single site and still ship bloat: *"does this fact earn a comment?"* is a different question from *"does this file need this many?"*. Ask the second one once, over the whole diff.
+
+**Trigger** -- a signal to re-read, never a budget to hit: added comment lines approaching or exceeding added code lines, or a rationale on nearly every changed block. Then re-read each one with the presumption reversed, because the first pass was made in the mood that wrote them.
+
+**The usual cause is PR narration** -- the author explains the change to the reviewer, then writes that explanation into the file. Sort by reader: a sentence aimed at whoever reads the **diff** belongs in the PR body, where it is read once by the reader it was written for and never rots; only a sentence aimed at whoever reads the **file** years later stays. The migration story, the measurement that justified the switch, and the comparison to what used to be here are all the first kind (and the last is a Tombstone besides).
+
+**A rejected alternative splits on that same test.** One a future editor would otherwise re-attempt is a WHY and stays inline; one that only explains why *this change* looks the way it does goes in the PR body.
+
+What survives is one invariant per non-obvious decision, at the site whose own change would falsify it -- the sites that share it name the topic and point (*Retold fact*).
+
 ### Meta-rule
 
 Prefer self-documenting code over a comment. A better name or an extracted function is **load-bearing** -- a refactor carries it along, so it can't drift out of sync the way a bystander comment silently does. If a rename or extraction would carry the fact, do that instead. Reach for a comment only for the residue the code genuinely can't hold: a WHY, a gotcha, an external anchor.

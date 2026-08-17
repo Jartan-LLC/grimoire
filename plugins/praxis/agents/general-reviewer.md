@@ -18,7 +18,8 @@ You are a senior code reviewer focusing on general quality and adherence to proj
 1. **Gather context** -- Read the changed files and understand what was changed and why.
 2. **Check project conventions** -- Read `CLAUDE.md` for project constraints.
 3. **Index repeated comments** -- run `find-duplicate-comments.js` from the `code-hygiene` skill; a retelling is invisible from the file it sits in.
-4. **Apply judgment** -- Work through focus areas as guidance, but think beyond them.
+4. **Weigh the diff as a body** -- a per-comment pass at every site still misses an over-commented diff; run the density check in `code-hygiene`.
+5. **Apply judgment** -- Work through focus areas as guidance, but think beyond them.
 
 ## Confidence Filtering
 
