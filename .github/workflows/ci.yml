@@ -3,6 +3,13 @@ name: CI
 on:
   pull_request:
     branches: [main]
+  # A build on `main` plus a weekly one: pre-commit hooks pull their own envs and
+  # the lychee/docker hooks reach the network, so `main` can break with no commit
+  # touching it. Without these, the next unrelated PR is what discovers the drift.
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 7 * * 1" # weekly, Monday 07:00 UTC (offset from external-link-check)
   workflow_dispatch:
 
 permissions:
@@ -49,9 +56,10 @@ jobs:
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
           restore-keys: pre-commit-${{ runner.os }}-
 
-      # Pinned: every hook below is frozen to a SHA, but Dependabot's pre-commit
-      # ecosystem watches the hook repos, not the runner itself.
-      - run: pip install pre-commit==4.6.1
+      # Every hook is frozen to a SHA, but Dependabot's pre-commit ecosystem
+      # watches the hook repos, not the runner itself -- so the runner is pinned
+      # in ci/requirements.txt, which the "/ci" pip entry does watch.
+      - run: pip install -r ci/requirements.txt
 
       - name: Lint
         run: make lint

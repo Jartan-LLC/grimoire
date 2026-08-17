@@ -17,6 +17,27 @@ updates:
     cooldown:
       default-days: 7
 
+  # The CI tool runners themselves (ci/requirements.txt), exact-pinned so a run
+  # depends on the commit rather than on the day. This is the only pip manifest
+  # in the repo -- grimoire ships no Python package.
+  - package-ecosystem: "pip"
+    directory: "/ci"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependency"
+    groups:
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    cooldown:
+      default-days: 7
+      semver-major-days: 7
+
   # No update-types filter here: a pre-commit dependency's version is the frozen
   # SHA, so filtering empties the group and Dependabot falls back to one PR per
   # hook (dependabot-core#15266). Majors therefore land in this group too, where

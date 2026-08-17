@@ -1,0 +1,9 @@
+# Third-party tools that CI and `make` install by name, pinned to an exact
+# version so a run's result depends on this commit and not on what PyPI served
+# that morning. Dependabot watches this file (the "/ci" pip entry in
+# .github/dependabot.yml), so an upgrade arrives as a PR someone reads.
+#
+# Only tools installed by a workflow or a Makefile recipe belong here. Anything
+# the project itself declares stays in its own manifest.
+
+pre-commit==4.6.2

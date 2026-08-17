@@ -7,7 +7,7 @@ help:  ## Show available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  %-12s %s\n", $$1, $$2}'
 
 install:  ## Install pre-commit and wire the git hook
-	pip install --quiet pre-commit
+	pip install --quiet -r ci/requirements.txt
 	# Skip hook wiring outside a git checkout; real failures still surface.
 	if git rev-parse --git-dir >/dev/null 2>&1; then pre-commit install; fi
 
