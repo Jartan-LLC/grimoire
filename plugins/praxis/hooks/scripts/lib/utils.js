@@ -499,6 +499,7 @@ module.exports = {
   getProjectName,
 
   // File operations
+  filterByPatterns,
   findFiles,
   readFile,
   writeFile,

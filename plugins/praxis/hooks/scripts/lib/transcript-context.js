@@ -176,6 +176,8 @@ function resolveContextInterval(env) {
 
 module.exports = {
   MAX_TOKEN_SETTING,
+  readFileTail,
+  extractUsageTokens,
   readLatestContextTokens,
   resolveContextThreshold,
   resolveContextInterval
