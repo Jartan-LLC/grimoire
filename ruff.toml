@@ -38,13 +38,13 @@ select = [
     "RUF",      # ruff-specific
 ]
 ignore = [
-    "E501", # line length is enforced by the formatter
+    "E501",
 ]
 
 [lint.per-file-ignores]
 "scripts/**" = ["T201"] # command-line tools: print is their output
 
 [lint.pydocstyle]
-# Google-style docstrings; this also disables the D rules that conflict with the
-# formatter and the mutually-incompatible D203/D211 and D212/D213 pairs.
+# Google-style docstrings; the convention also settles the mutually-incompatible
+# D203/D211 and D212/D213 pairs.
 convention = "google"

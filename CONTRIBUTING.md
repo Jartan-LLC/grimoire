@@ -93,9 +93,9 @@ buy nothing.
 | Location | `tests/<source path>/<name>.test.js` | `tests/<source path>/test_<name>.py` |
 | Invocation | `node --test <file list>` | `python3 -m unittest <file list>` |
 
-Nothing is installed to run the suite, and there is no `package.json` and no
-`pyproject.toml`: one Python script needs no package manifest. `pytest` is not
-used: it would earn its keep across a codebase, not across one Python file.
+Nothing is installed to run the suite: there is no `package.json`, and one
+Python script needs no `pyproject.toml`. `pytest` is not used: it would earn its
+keep across a codebase, not across one Python file.
 
 **Tests live in `tests/`, not beside the code.** Two reasons, both specific to
 this repository. Anything under `plugins/<name>/` is shipped to everyone who

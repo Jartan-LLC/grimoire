@@ -72,11 +72,11 @@ def parse_frontmatter(text: str, path: pathlib.Path) -> tuple[Frontmatter, str]:
     """Split a Markdown document into its YAML frontmatter and body.
 
     Deliberately minimal: our agent frontmatter is single-line scalars plus a
-    `skills:` list, so a YAML dependency would buy nothing. Any other YAML form
-    (quoted or block scalars, flow collections) is rejected rather than misread.
-    `path` is carried only so a malformed file names itself -- otherwise a bare
-    ValueError from here points a reader at the generator rather than the file
-    to fix.
+    `skills:` list, so a YAML dependency would buy nothing. A quoted, block or
+    flow value, or a line that is not a key, list item or comment, raises rather
+    than being misread. `path` is carried only so a malformed file names itself
+    -- otherwise a bare ValueError from here points a reader at the generator
+    rather than the file to fix.
     """
     lines = text.split("\n")
     if lines[0].strip() != "---":

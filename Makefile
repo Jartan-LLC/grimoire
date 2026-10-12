@@ -57,7 +57,7 @@ fix:  ## Apply ruff's safe fixes and formatting via its pre-commit hooks (git-tr
 	pre-commit run ruff-check --all-files || pre-commit run ruff-check --all-files
 	pre-commit run ruff-format --all-files || pre-commit run ruff-format --all-files
 
-typecheck:  ## Static type check (pyright, strict)
+typecheck:  ## Type-check the Python code (pyright, strict)
 	pyright
 
 # `git grep -l` exits 1 on no match, so `|| true` would turn the ASCII gate into
