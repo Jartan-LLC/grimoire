@@ -1,6 +1,6 @@
 # Changelog
 
-Earlier versions: the `praxis--v*` tags.
+Earlier versions: compare the `praxis--v*` tags.
 
 ## 1.5.0
 

@@ -1,6 +1,6 @@
 # Changelog
 
-Earlier versions: the `recursio--v*` tags.
+Earlier versions: compare the `recursio--v*` tags.
 
 ## 1.1.2
 

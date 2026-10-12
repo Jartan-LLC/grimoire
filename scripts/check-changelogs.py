@@ -40,7 +40,11 @@ def missing_entry(plugin: pathlib.Path, version: str) -> str:
 
 
 def problems() -> list[str]:
-    """One message per plugin whose changelog lacks a current-version entry."""
+    """One message per problem found.
+
+    The problems: no plugin manifests, a manifest without a version, or a
+    changelog without that version's entry.
+    """
     manifests = sorted(ROOT.glob("plugins/*/.claude-plugin/plugin.json"))
     if not manifests:
         return ["no plugins/*/.claude-plugin/plugin.json found -- nothing was checked"]

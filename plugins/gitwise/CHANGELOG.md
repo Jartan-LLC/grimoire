@@ -1,6 +1,6 @@
 # Changelog
 
-Earlier versions: the `gitwise--v*` tags.
+Earlier versions: compare the `gitwise--v*` tags.
 
 ## 1.1.1
 

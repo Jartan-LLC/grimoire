@@ -1,6 +1,6 @@
 # Changelog
 
-Earlier versions: the `pythonica--v*` tags.
+Earlier versions: compare the `pythonica--v*` tags.
 
 ## 1.1.1
 

@@ -164,9 +164,9 @@ bump the `ref` in each consuming repository's `.claude/settings.json` in the sam
 change. Until that bump lands, consumers keep loading the older tag: that is the
 point, not a bug. Merging to `main` alone reaches nobody.
 
-Before tagging, record the release in the root `CHANGELOG.md`: a `## <version>`
-section holding the `## Unreleased` entries and each plugin version that changed
-since the last marketplace tag.
+Before tagging, record the release in the root `CHANGELOG.md`: rename
+`## Unreleased` to `## <version>`, add each plugin version that changed since the
+last marketplace tag, and start a new, empty `## Unreleased` above it.
 
 Don't reach for a SHA instead: a marketplace `source` takes no `sha`, only a
 `ref` that is cloned with `git clone --branch`, which rejects one (commit
