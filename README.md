@@ -53,8 +53,9 @@ See [RELEASING.md](RELEASING.md) for the full workflow and tag convention.
 
 ## Contributing
 
-New plugins go in `plugins/<name>/` with a `.claude-plugin/plugin.json` manifest.
-Add an entry to `.claude-plugin/marketplace.json` and submit a PR.
+New plugins go in `plugins/<name>/` with a `.claude-plugin/plugin.json` manifest
+and a `CHANGELOG.md` with an entry for its first version. Add an entry to
+`.claude-plugin/marketplace.json` and submit a PR.
 
 Local checks (CI runs these too):
 
