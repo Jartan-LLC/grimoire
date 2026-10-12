@@ -1,7 +1,5 @@
 # Changelog
 
-Earlier versions: compare the `claudivis--v*` tags.
-
 ## 1.1.2
 
 - The `claude-config` skill now advises leaving both invocation fields unset on

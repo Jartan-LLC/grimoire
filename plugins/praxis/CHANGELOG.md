@@ -1,7 +1,5 @@
 # Changelog
 
-Earlier versions: compare the `praxis--v*` tags.
-
 ## 1.5.0
 
 - New `comment-hygiene` skill: the comment rules (what to keep, delete or
