@@ -68,4 +68,4 @@ verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift)
 	@echo "Checking generated Codex files against their sources..."
 	@python3 scripts/generate-codex.py --check
 
-check: lint verify  ## Run every CI check (lint, verify)
+check: lint verify  ## Run CI's lint and verify checks

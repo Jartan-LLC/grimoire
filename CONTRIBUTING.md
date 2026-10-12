@@ -12,9 +12,9 @@ make install
 ```
 
 That installs the pinned tools and registers the git hook, so the linters run on
-every commit. In the dev container they go into the system Python. Elsewhere,
-`make install` runs uv, so install [uv](https://docs.astral.sh/uv/) first, and
-needs an environment: create one with `uv venv`, or activate one.
+every commit. Outside the dev container, install
+[uv](https://docs.astral.sh/uv/) first, and create a virtual environment with
+`uv venv` (or activate one) before running `make install`.
 
 Some hooks need Docker (lychee, actionlint) and Node (markdownlint); the dev
 container has both. The Docker hooks resolve the workspace by inspecting the
@@ -28,9 +28,8 @@ error.
 make check
 ```
 
-It runs `make lint` and `make verify`, the same checks CI runs. `make help`
-lists what each target covers. `make test` joins them once the suite lands; see
-[Tests](#tests).
+It runs `make lint` and `make verify`, which CI runs too. `make help` lists
+what each target covers.
 
 ## Tests
 

@@ -55,7 +55,7 @@ See [RELEASING.md](RELEASING.md) for the full workflow and tag convention.
 New plugins go in `plugins/<name>/` with a `.claude-plugin/plugin.json` manifest.
 Add an entry to `.claude-plugin/marketplace.json` and submit a PR.
 
-Local checks, the same ones CI runs:
+Local checks (CI runs these too):
 
 ```bash
 make check
