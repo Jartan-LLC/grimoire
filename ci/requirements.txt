@@ -8,3 +8,4 @@
 
 uv==0.12.23
 pre-commit==4.6.2
+pyright==1.1.414

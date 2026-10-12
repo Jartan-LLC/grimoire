@@ -1,7 +1,7 @@
 # CI calls these targets directly, so this file is the single definition of the
 # checks. Recipes run under dash both here and on the runners -- no bashisms.
 
-.PHONY: help install lint verify check
+.PHONY: help install lint fix typecheck verify check
 
 # Every target uses one Python environment, chosen here: this
 # checkout's .venv, else the active one, else, in the main checkout only, the system
@@ -49,8 +49,16 @@ install:  ## Install every tracked Python and Node manifest, then wire the pre-c
 	elif [ -n "$$(git config core.hooksPath)" ]; then echo "core.hooksPath is set; skipping pre-commit install"; \
 	else pre-commit install; fi
 
-lint:  ## Lint all files via pre-commit (codespell, shellcheck, markdownlint, lychee, actionlint, zizmor, hygiene)
+lint:  ## Lint all files via pre-commit (ruff, codespell, shellcheck, markdownlint, lychee, actionlint, zizmor, hygiene)
 	pre-commit run --all-files --show-diff-on-failure
+
+# A hook run that rewrites files exits 1; the rerun passes unless a finding or error remains.
+fix:  ## Apply ruff's safe fixes and formatting via its pre-commit hooks (git-tracked files: `git add` new ones first)
+	pre-commit run ruff-check --all-files || pre-commit run ruff-check --all-files
+	pre-commit run ruff-format --all-files || pre-commit run ruff-format --all-files
+
+typecheck:  ## Type-check the Python code (pyright, strict)
+	pyright
 
 # `git grep -l` exits 1 on no match, so `|| true` would turn the ASCII gate into
 # a permanent no-op and any other non-zero means the invocation itself failed.
@@ -68,4 +76,4 @@ verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift)
 	@echo "Checking generated Codex files against their sources..."
 	@python3 scripts/generate-codex.py --check
 
-check: lint verify  ## Run CI's lint and verify checks
+check: lint typecheck verify  ## Run CI's lint, typecheck and verify checks

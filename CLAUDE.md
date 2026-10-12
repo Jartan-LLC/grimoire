@@ -17,7 +17,7 @@ loads them into every session:
 
 ## Verify
 
-Run `make check` before declaring work done -- it runs CI's lint and verify checks:
+Run `make check` before declaring work done -- it runs CI's lint, typecheck and verify checks:
 
 ```bash
 make check

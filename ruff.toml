@@ -1,0 +1,50 @@
+# The Python lint and format config. ruff itself is versioned by its hook rev in
+# .pre-commit-config.yaml.
+
+target-version = "py312"
+line-length = 100
+# ruff formats the Python blocks in Markdown too. The Markdown here is mostly plugin
+# content, where any change needs a release, so its examples stay as written.
+extend-exclude = ["*.md"]
+
+# Comprehensive lint: bugs, security, perf, modernization, imports, naming.
+# `ruff format` owns formatting, so line length (E501) is left to it.
+[lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort (import sorting)
+    "N",        # pep8-naming
+    "D",        # pydocstyle (docstring discipline; convention set below)
+    "UP",       # pyupgrade (modern syntax)
+    "B",        # flake8-bugbear (likely bugs)
+    "A",        # flake8-builtins (shadowing builtins)
+    "C4",       # flake8-comprehensions
+    "DTZ",      # flake8-datetimez (tz-aware datetimes)
+    "T20",      # flake8-print (no stray print)
+    "PT",       # flake8-pytest-style
+    "RET",      # flake8-return
+    "SIM",      # flake8-simplify
+    "TID",      # flake8-tidy-imports
+    "PTH",      # flake8-use-pathlib
+    "PERF",     # perflint
+    "FURB",     # refurb (more modernization)
+    "PIE",      # flake8-pie
+    "ARG",      # unused arguments
+    "LOG", "G", # logging correctness
+    "ASYNC",    # async gotchas
+    "S",        # flake8-bandit (security)
+    "PL",       # pylint (C/E/R/W)
+    "RUF",      # ruff-specific
+]
+ignore = [
+    "E501",
+]
+
+[lint.per-file-ignores]
+"scripts/**" = ["T201"] # command-line tools: print is their output
+
+[lint.pydocstyle]
+# Google-style docstrings; the convention also settles the mutually-incompatible
+# D203/D211 and D212/D213 pairs.
+convention = "google"
