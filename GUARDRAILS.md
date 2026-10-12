@@ -38,8 +38,7 @@ every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `
 - Read `README.md` and `RELEASING.md` before changing plugin structure or versioning.
 - Update the affected READMEs and skills alongside any change.
 - Executable code earns tests by one rule -- pure input, silent-wrong output -- and hook
-  entry points earn a process contract; `CONTRIBUTING.md` holds the rule, the runners,
-  the layout and the CI wiring.
+  entry points earn a process contract; `CONTRIBUTING.md` holds the rule and the layout.
 - Reviewer agents tier findings with the `review-severity` skill; agents name their lens
   and reference skills (agents = role, skills = knowledge; see `claudivis:claude-config`).
 - Don't restate a referenced skill's rules or examples inside an agent or command --
