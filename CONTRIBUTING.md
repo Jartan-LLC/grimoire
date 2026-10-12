@@ -30,7 +30,8 @@ make check
 ```
 
 It runs `make lint`, `make typecheck` and `make verify`, which CI runs too.
-`make help` lists what each target covers.
+`make fix` applies ruff's safe fixes and formatting. `make help` lists what each
+target covers.
 
 ## Tests
 
@@ -93,8 +94,8 @@ buy nothing.
 | Invocation | `node --test <file list>` | `python3 -m unittest <file list>` |
 
 Nothing is installed to run the suite, and there is no `package.json` and no
-`pyproject.toml`. `pytest` is not used: it would earn its keep across a codebase, not
-across one Python file.
+`pyproject.toml`: one Python script needs no package manifest. `pytest` is not
+used: it would earn its keep across a codebase, not across one Python file.
 
 **Tests live in `tests/`, not beside the code.** Two reasons, both specific to
 this repository. Anything under `plugins/<name>/` is shipped to everyone who

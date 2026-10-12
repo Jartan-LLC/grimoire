@@ -103,10 +103,10 @@ def parse_frontmatter(text: str, path: pathlib.Path) -> tuple[Frontmatter, str]:
 
 
 def scalar(fields: Frontmatter, key: str) -> str:
-    """The single-line value of a frontmatter key, which must not be a list."""
-    value = fields[key]
+    """The single-line value of a frontmatter key, which must be present and non-empty."""
+    value = fields.get(key)
     if not isinstance(value, str):
-        raise ValueError(f"frontmatter {key!r} must be a single value, not a list")
+        raise ValueError(f"frontmatter {key!r} must be a single non-empty value")
     return value
 
 
@@ -143,7 +143,7 @@ def render_agent_toml(fields: Frontmatter, body: str, plugin: str) -> str:
     name = scalar(fields, "name")
     skills = fields.get("skills", [])
     if isinstance(skills, str):
-        raise ValueError(f"{name}: skills must be a list, not a single value")
+        raise ValueError("frontmatter 'skills' must be a list, not a single value")
     instructions = body
     if skills:
         named = ", ".join(f"`{qualify(s, plugin)}`" for s in skills)
@@ -152,7 +152,7 @@ def render_agent_toml(fields: Frontmatter, body: str, plugin: str) -> str:
     # Literal strings take no escapes, so the Markdown body survives verbatim --
     # basic strings would mangle every backslash in it.
     if "'''" in instructions:
-        raise ValueError(f"{name}: body contains ''' and cannot be a TOML literal")
+        raise ValueError("body contains ''' and cannot be a TOML literal")
 
     lines = [
         f"name = {basic_string(name)}",
@@ -168,13 +168,15 @@ def render_agent_toml(fields: Frontmatter, body: str, plugin: str) -> str:
 
 def agent_targets(source: pathlib.Path, plugin: str) -> list[Target]:
     """Every agent role file for one plugin, as (path, contents) pairs."""
-    return [
-        (
-            source / "codex" / "agents" / f"{agent.stem}.toml",
-            render_agent_toml(*parse_frontmatter(agent.read_text(), agent), plugin),
-        )
-        for agent in sorted((source / "agents").glob("*.md"))
-    ]
+    targets: list[Target] = []
+    for agent in sorted((source / "agents").glob("*.md")):
+        fields, body = parse_frontmatter(agent.read_text(), agent)
+        try:
+            contents = render_agent_toml(fields, body, plugin)
+        except ValueError as error:
+            raise ValueError(f"{agent}: {error}") from None
+        targets.append((source / "codex" / "agents" / f"{agent.stem}.toml", contents))
+    return targets
 
 
 def plugin_manifest(entry: Json) -> tuple[pathlib.Path, Json]:
