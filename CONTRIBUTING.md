@@ -40,7 +40,10 @@ target.
 - Pure ASCII in every tracked file. See `GUARDRAILS.md` for the substitution table.
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org/).
 - Any content change under `plugins/<name>/` needs a `version` bump in that
-  plugin's `plugin.json`. See [RELEASING.md](RELEASING.md).
+  plugin's `plugin.json` and an entry for that version in its `CHANGELOG.md`.
+  See [RELEASING.md](RELEASING.md).
+- A change to the marketplace itself, such as a plugin added or removed, gets an
+  entry under `## Unreleased` in the root `CHANGELOG.md`.
 - Never hand-edit the generated Codex files. Run `python3 scripts/generate-codex.py`
   and commit its output.
 - Report security issues privately via [SECURITY.md](.github/SECURITY.md).

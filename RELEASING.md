@@ -32,6 +32,10 @@ against the last released version, so what matters is the delta from `main`, not
 how many commits touched the plugin. A branch that fixes some wording and adds a
 skill lands a single MINOR bump, not a PATCH followed by a MINOR.
 
+Every bump adds an entry under `## <version>` in `plugins/<name>/CHANGELOG.md`,
+saying what changes for someone upgrading; `make verify` fails without one.
+Editing only a `CHANGELOG.md` is not a bump trigger.
+
 Editing only a plugin's `marketplace.json` metadata (`description`, `keywords`)
 is **not** a bump trigger -- those fields sit outside `plugins/<name>/`, the only
 path the bump rule watches.
@@ -40,8 +44,8 @@ path the bump rule watches.
 
 Version discipline is enforced by **PR review**. Before merging, confirm any
 plugin with changed content under `plugins/<name>/` has a bumped `version` in its
-`plugin.json`. CI gates pure ASCII, JSON parsing, generated-file drift and the
-full lint set, but nothing there checks the bump rule.
+`plugin.json`. CI gates pure ASCII, JSON parsing, generated-file drift, changelog entries
+and the full lint set, but nothing there checks the bump rule.
 
 ## Tag a release
 
@@ -62,9 +66,9 @@ These tags give each plugin an independent version line and are what dependency
 constraints resolve against (see [Dependencies](#dependencies)).
 
 Pushing the tag is the only manual step: `release.yml` creates the GitHub
-Release from it. The body is a fixed pointer, not generated notes -- GitHub's
-generated notes diff repo-wide and would attribute other plugins' commits to
-this release. The changelog lives in the commit history and the per-plugin tags.
+Release from it, with that version's changelog entry as the body. Not GitHub's
+generated notes: they diff repo-wide and would attribute other plugins' commits
+to this release.
 
 A version carrying a prerelease suffix (`praxis--v2.0.0-rc1`) tags and releases
 the same way. `release.yml` marks it a GitHub prerelease, so it stays off the
@@ -148,7 +152,8 @@ single dash keeps this line out of that trigger deliberately.
 
 Cut a new `marketplace-v*` tag when consumers should pick up plugin changes, and
 bump the `ref` in each consuming repository's `.claude/settings.json` in the same
-change. Until that bump lands, consumers keep loading the older tag: that is the
+change. Before tagging, move the root `CHANGELOG.md`'s `## Unreleased` entries
+under the new version. Until that bump lands, consumers keep loading the older tag: that is the
 point, not a bug. Merging to `main` alone reaches nobody.
 
 Don't reach for a SHA instead: a marketplace `source` takes no `sha`, only a

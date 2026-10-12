@@ -21,9 +21,14 @@ jobs:
     permissions:
       contents: write
     steps:
-      # gh resolves the repo from GH_REPO, so no checkout; the view guard keeps
-      # re-runs idempotent. No --generate-notes: GitHub diffs them repo-wide, so
-      # a praxis tag would be captioned with recursio's commits.
+      # The notes come from the plugin's CHANGELOG.md at the tagged commit.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The view guard keeps re-runs idempotent. No --generate-notes: GitHub
+      # diffs them repo-wide, so a praxis tag would be captioned with recursio's
+      # commits.
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -37,9 +42,12 @@ jobs:
           case "$version" in
             *-*) flags+=(--prerelease) ;;
           esac
-          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 \
-            || gh release create "$GITHUB_REF_NAME" \
-                 --title "$GITHUB_REF_NAME" \
-                 --verify-tag \
-                 "${flags[@]}" \
-                 --notes "Release of the $plugin plugin, version $version. Install with '/plugin install $plugin'. See RELEASING.md for the per-plugin versioning rules."
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            exit 0
+          fi
+          python3 scripts/check-changelogs.py --notes "$plugin" "$version" > notes.md
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --verify-tag \
+            "${flags[@]}" \
+            --notes-file notes.md
