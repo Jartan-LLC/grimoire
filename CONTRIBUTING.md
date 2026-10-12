@@ -13,7 +13,8 @@ make install
 
 That installs the pinned tools and registers the git hook, so the linters run on
 every commit. In the dev container they go into the system Python. Elsewhere,
-`make install` needs an environment: create one with `uv venv`, or activate one.
+`make install` runs uv, so install [uv](https://docs.astral.sh/uv/) first, and
+needs an environment: create one with `uv venv`, or activate one.
 
 Some hooks need Docker (lychee, actionlint) and Node (markdownlint); the dev
 container has both. The Docker hooks resolve the workspace by inspecting the
@@ -157,10 +158,11 @@ The Makefile owns every check, so `make test` is the single definition and CI
 calls the target rather than restating the commands. Three edits, and the last
 two are the ones to get right:
 
-1. `Makefile` -- add `test` to the `.PHONY` line, and a `test:` target with a
-   `##` help line and two recipe lines, Node then Python. Make stops at the
-   first failing line, so a Node failure hides the Python result. That matches
-   `verify`, which stops at its first failing sub-check, and is deliberate.
+1. `Makefile` -- add `test` to the `.PHONY` line and to the `check:`
+   prerequisites, and a `test:` target with a `##` help line and two recipe
+   lines, Node then Python. Make stops at the first failing line, so a Node
+   failure hides the Python result. That matches `verify`, which stops at its
+   first failing sub-check, and is deliberate.
 2. `.github/workflows/ci.yml` -- a new `test` job alongside `verify` and `lint`,
    pinning Node to 20 with `actions/setup-node` rather than taking the runner's
    default. The hook scripts run under whatever Node the user's harness carries,

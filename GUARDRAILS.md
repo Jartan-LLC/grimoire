@@ -40,9 +40,10 @@ every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `
 - Executable code earns tests by one rule -- pure input, silent-wrong output -- and hook
   entry points earn a process contract; `CONTRIBUTING.md` holds the rule, the runners,
   the layout and the CI wiring.
-- Reviewer agents tier findings with the `review-severity` skill. Agents name their lens
-  and reference skills; they do not restate a skill's rules or examples (agents = role,
-  skills = knowledge; see `claudivis:claude-config`).
+- Reviewer agents tier findings with the `review-severity` skill; agents name their lens
+  and reference skills (agents = role, skills = knowledge; see `claudivis:claude-config`).
+- Don't restate a referenced skill's rules or examples inside an agent or command --
+  point to the skill.
 - Write plans to `.claude/workspace/` in the project root for non-trivial changes.
 - Don't wrap things the underlying library already expresses clearly.
 - Don't speculate about fixes -- investigate first, then propose.
