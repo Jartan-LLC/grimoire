@@ -1,5 +1,8 @@
 # Grimoire
 
+[![CI](https://github.com/Jartan-LLC/grimoire/actions/workflows/ci.yml/badge.svg)](https://github.com/Jartan-LLC/grimoire/actions/workflows/ci.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Jartan-LLC/grimoire/badge)](https://scorecard.dev/viewer/?uri=github.com/Jartan-LLC/grimoire)
+
 Curated plugins for development workflows, for Claude Code and Codex.
 
 ## Setup
@@ -52,11 +55,10 @@ See [RELEASING.md](RELEASING.md) for the full workflow and tag convention.
 New plugins go in `plugins/<name>/` with a `.claude-plugin/plugin.json` manifest.
 Add an entry to `.claude-plugin/marketplace.json` and submit a PR.
 
-Local checks, run by CI and by the pre-commit hook:
+Local checks (CI runs these too):
 
 ```bash
-make lint
-make verify
+make check
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and conventions.

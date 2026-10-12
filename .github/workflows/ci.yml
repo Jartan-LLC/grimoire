@@ -3,9 +3,9 @@ name: CI
 on:
   pull_request:
     branches: [main]
-  # A build on `main` plus a weekly one: pre-commit hooks pull their own envs and
-  # the lychee/docker hooks reach the network, so `main` can break with no commit
-  # touching it. Without these, the next unrelated PR is what discovers the drift.
+  # Hook envs and the dev container Features' create-time downloads resolve at run
+  # time, so `main` can go red with no commit touching it; these catch that before the
+  # next PR does.
   push:
     branches: [main]
   schedule:
@@ -15,9 +15,14 @@ on:
 permissions:
   contents: read
 
+env:
+  UV_SYSTEM_PYTHON: 1
+
+# A PR's new push cancels its old run; main's runs never cancel each other, so each
+# finishes its dev container image-cache export.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   verify:
@@ -32,7 +37,7 @@ jobs:
       # install and nothing to key a cache on.
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: "3.12"
+          python-version-file: .python-version
 
       - name: Verify
         run: make verify
@@ -47,7 +52,7 @@ jobs:
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
-          python-version: "3.12"
+          python-version-file: .python-version
 
       # Caches the hook environments only; the docker hooks pull fresh images.
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -56,13 +61,74 @@ jobs:
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
           restore-keys: pre-commit-${{ runner.os }}-
 
+      # `version-file` is required: without it this action installs uv `latest`,
+      # not the ci/requirements.txt pin.
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version-file: ci/requirements.txt
+          enable-cache: true
+
       # Every hook is frozen to a SHA, but Dependabot's pre-commit ecosystem
       # watches the hook repos, not the runner itself -- so the runner is pinned
       # in ci/requirements.txt, which the "/ci" pip entry does watch.
-      - run: pip install -r ci/requirements.txt
+      - run: uv pip install -r ci/requirements.txt
 
       - name: Lint
         run: make lint
+
+  changes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      devcontainer: ${{ steps.diff.outputs.devcontainer }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      # A PR's merge commit has its base as first parent. With no base (a scheduled or
+      # manual run, a failed fetch) the dev container job runs, rather than risk skipping a change.
+      - id: diff
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          case "$EVENT" in
+            pull_request) base=HEAD^1 ;;
+            push) git fetch -q --depth=1 origin "$BEFORE" && base=$BEFORE ;;
+          esac
+          changed=$([ -z "${base:-}" ] || git diff --name-only "$base" HEAD)
+          # Everything the dev container build reads, make install's manifests included.
+          if [ -z "${base:-}" ] \
+              || grep -qE -e '^\.devcontainer/' -e '^\.github/workflows/ci\.yml$' -e '^Makefile$' -e '^\.claude/settings\.json$' \
+                -e '(^|/)(pyproject\.toml|requirements\.txt|package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|\.npmrc)$' <<<"$changed"; then
+            echo devcontainer=true >>"$GITHUB_OUTPUT"
+          fi
+
+  devcontainer:
+    name: Dev container
+    needs: changes
+    if: needs.changes.outputs.devcontainer == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      # The gha cache backend reads these; devcontainers/ci doesn't pass them to buildx.
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            for (const name of ["ACTIONS_RUNTIME_TOKEN", "ACTIONS_RESULTS_URL", "ACTIONS_CACHE_URL", "ACTIONS_CACHE_SERVICE_V2"]) {
+              if (process.env[name]) core.exportVariable(name, process.env[name]);
+            }
+      - uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3.1900000450
+        with:
+          push: never
+          cacheFrom: type=gha,scope=devcontainer
+          cacheTo: type=gha,mode=max,scope=devcontainer
+          runCmd: bash .devcontainer/verify.sh
 
   # The required status check. Do NOT add a `name:` -- the ruleset matches the
   # context by job id, so naming it silently stops the check from matching.
@@ -70,12 +136,12 @@ jobs:
     if: always()
     # When you add jobs above, add them to BOTH the needs list and the results
     # array below.
-    needs: [verify, lint]
+    needs: [verify, lint, changes, devcontainer]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
       - run: |
-          results=("${{ needs.verify.result }}" "${{ needs.lint.result }}")
+          results=("${{ needs.verify.result }}" "${{ needs.lint.result }}" "${{ needs.changes.result }}" "${{ needs.devcontainer.result }}")
           for r in "${results[@]}"; do
             if [[ "$r" != "success" && "$r" != "skipped" ]]; then
               echo "Check failed: $r"

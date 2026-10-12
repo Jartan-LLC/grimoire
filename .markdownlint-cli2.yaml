@@ -14,5 +14,6 @@ globs:
   - "**/*.md"
 ignores:
   - "node_modules"
+  - ".venv" # a worktree's or bare host's venv; its packages ship .md files
   - ".claude/workspace"
   - "AGENTS.md" # symlink to CLAUDE.md -- lint the target, not the alias

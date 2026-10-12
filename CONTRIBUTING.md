@@ -2,17 +2,22 @@
 
 ## Setup
 
-Grimoire has no build step. The only local tooling is
-[pre-commit](https://pre-commit.com/), which the devcontainer wires up for you
-on create:
+Grimoire has no build step. Its local tooling is the CI tools pinned in
+`ci/requirements.txt` -- [uv](https://docs.astral.sh/uv/) and
+[pre-commit](https://pre-commit.com/) -- which the dev container installs on
+create:
 
 ```bash
 make install
 ```
 
-That installs pre-commit and registers the git hook, so the linters run on every
-commit. Some hooks need Docker (lychee, actionlint) and Node (markdownlint); the
-devcontainer has both. The Docker hooks resolve the workspace by inspecting the
+That installs the pinned tools and registers the git hook, so the linters run on
+every commit. Outside the dev container, install
+[uv](https://docs.astral.sh/uv/) first, and create a virtual environment with
+`uv venv` (or activate one) before running `make install`.
+
+Some hooks need Docker (lychee, actionlint) and Node (markdownlint); the dev
+container has both. The Docker hooks resolve the workspace by inspecting the
 container, so run them from the bind-mounted project directory -- from a
 worktree or a copy elsewhere they report missing files rather than a mount
 error.
@@ -20,12 +25,11 @@ error.
 ## Before opening a PR
 
 ```bash
-make lint
-make verify
+make check
 ```
 
-Both must pass -- CI runs the same checks. `make help` lists what each target
-covers. `make test` joins them once the suite lands; see [Tests](#tests).
+It runs `make lint` and `make verify`, which CI runs too. `make help` lists
+what each target covers.
 
 ## Tests
 
@@ -153,10 +157,11 @@ The Makefile owns every check, so `make test` is the single definition and CI
 calls the target rather than restating the commands. Three edits, and the last
 two are the ones to get right:
 
-1. `Makefile` -- add `test` to the `.PHONY` line, and a `test:` target with a
-   `##` help line and two recipe lines, Node then Python. Make stops at the
-   first failing line, so a Node failure hides the Python result. That matches
-   `verify`, which stops at its first failing sub-check, and is deliberate.
+1. `Makefile` -- add `test` to the `.PHONY` line and to the `check:`
+   prerequisites, and a `test:` target with a `##` help line and two recipe
+   lines, Node then Python. Make stops at the first failing line, so a Node
+   failure hides the Python result. That matches `verify`, which stops at its
+   first failing sub-check, and is deliberate.
 2. `.github/workflows/ci.yml` -- a new `test` job alongside `verify` and `lint`,
    pinning Node to 20 with `actions/setup-node` rather than taking the runner's
    default. The hook scripts run under whatever Node the user's harness carries,
@@ -174,7 +179,7 @@ checked nothing, which is worse than no gate at all.
 
 ## Conventions
 
-- Pure ASCII in every tracked file. See `CLAUDE.md` for the substitution table.
+- Pure ASCII in every tracked file. See `GUARDRAILS.md` for the substitution table.
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org/)
   (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`).
 - Any content change under `plugins/<name>/` needs a `version` bump in that

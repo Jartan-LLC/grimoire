@@ -1,5 +1,6 @@
-# Normalize line endings
-* text=auto
+# LF on checkout for every text file, overriding each clone's core.autocrlf to match
+# .editorconfig. The file's only eol setting; other patterns set none.
+* text=auto eol=lf
 
 # Explicit text files
 *.md text diff=markdown
@@ -29,7 +30,7 @@
 *.astro text
 *.vue text
 *.svelte text
-*.sh text eol=lf diff=bash
+*.sh text diff=bash
 
 # Binary files
 *.png binary
@@ -46,6 +47,5 @@
 *.zip binary
 *.gz binary
 
-# Lock files -- treat as binary for cleaner diffs. Scaffold also marks
-# *-lock.json, which here would hide devcontainer-lock.json, a file we hand-edit.
-*.lock binary
+# GitHub collapses lock files by Linguist's generated list, which misses this one
+devcontainer-lock.json linguist-generated=true
