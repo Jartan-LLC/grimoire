@@ -44,6 +44,8 @@ every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `
   and reference skills (agents = role, skills = knowledge; see `claudivis:claude-config`).
 - Don't restate a referenced skill's rules or examples inside an agent or command --
   point to the skill.
+- Write Google-style docstrings for public modules, classes, and functions in the Python
+  code (enforced by ruff `D`) and full type annotations (enforced by pyright `strict`).
 - Write plans to `.claude/workspace/` in the project root for non-trivial changes.
 - Don't wrap things the underlying library already expresses clearly.
 - Don't speculate about fixes -- investigate first, then propose.

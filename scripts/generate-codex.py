@@ -27,6 +27,11 @@ import json
 import pathlib
 import re
 import sys
+from typing import Any
+
+type Json = dict[str, Any]
+type Frontmatter = dict[str, str | list[str]]
+type Target = tuple[pathlib.Path, str]
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 MARKETPLACE = ROOT / ".claude-plugin" / "marketplace.json"
@@ -43,27 +48,27 @@ CODEX_MARKETPLACE = ROOT / ".agents" / "plugins" / "marketplace.json"
 # `acceptEdits` and `readOnly`, returning None for `plan`. Emitting nothing
 # there would let a plan-mode reviewer inherit a writable sandbox, so `plan` is
 # mapped to the mode that actually matches its intent.
-# Shipped once per plugin because plugins install independently; kept identical.
-DUPLICATED_HOOK_SCRIPTS = ["hooks/scripts/sync-codex-agents.js"]
-
 PERMISSION_MODE_TO_SANDBOX = {
     "plan": "read-only",
     "readOnly": "read-only",
     "acceptEdits": "workspace-write",
 }
 
+# Shipped once per plugin because plugins install independently; kept identical.
+DUPLICATED_HOOK_SCRIPTS = ["hooks/scripts/sync-codex-agents.js"]
 
-def display_name(name):
+
+def display_name(name: str) -> str:
     """Codex renders this in the plugin browser; our names are single words."""
     return name[:1].upper() + name[1:]
 
 
-def short_description(description):
+def short_description(description: str) -> str:
     """Lead clause of our `<summary> -- <detail>` description convention."""
-    return description.split(" -- ")[0].strip()
+    return description.split(" -- ", maxsplit=1)[0].strip()
 
 
-def parse_frontmatter(text, path):
+def parse_frontmatter(text: str, path: pathlib.Path) -> tuple[Frontmatter, str]:
     """Split a Markdown document into its YAML frontmatter and body.
 
     Deliberately minimal: our agent frontmatter is single-line scalars plus a
@@ -78,31 +83,43 @@ def parse_frontmatter(text, path):
         end = lines.index("---", 1)
     except ValueError:
         raise ValueError(f"{path}: frontmatter has no closing ---") from None
-    fields, key = {}, None
+    fields: Frontmatter = {}
+    key = ""
 
     for line in lines[1:end]:
         item = re.match(r"\s+-\s+(.*)$", line)
         if item and key:
-            fields[key].append(item.group(1).strip())
+            values = fields[key]
+            if isinstance(values, str):
+                raise ValueError(f"{path}: {key} has both a value and list items")
+            values.append(item.group(1).strip())
             continue
         match = re.match(r"([A-Za-z_-]+):\s*(.*)$", line)
         if match:
-            key, value = match.group(1), match.group(2).strip()
-            fields[key] = value if value else []
+            key = match.group(1)
+            fields[key] = match.group(2).strip() or []
 
-    return fields, "\n".join(lines[end + 1:]).strip()
+    return fields, "\n".join(lines[end + 1 :]).strip()
 
 
-def qualify(skill, plugin):
+def scalar(fields: Frontmatter, key: str) -> str:
+    """The single-line value of a frontmatter key, which must not be a list."""
+    value = fields[key]
+    if not isinstance(value, str):
+        raise ValueError(f"frontmatter {key!r} must be a single value, not a list")
+    return value
+
+
+def qualify(skill: str, plugin: str) -> str:
     """Codex namespaces plugin skills as `plugin:skill`, same as Claude Code."""
     return skill if ":" in skill else f"{plugin}:{skill}"
 
 
-def basic_string(value):
-    """Quote a value as a TOML basic string.
+def basic_string(value: str) -> str:
+    r"""Quote a value as a TOML basic string.
 
     Basic strings process escapes, so an unescaped backslash silently corrupts
-    the value (`\\b` becomes a backspace) and an unescaped quote ends the string
+    the value (`\b` becomes a backspace) and an unescaped quote ends the string
     early. Control characters are rejected outright by the format. Any of them is
     worse than it sounds: Codex parses role files with `deny_unknown_fields`, so
     a malformed line takes down the whole role rather than the one field.
@@ -115,7 +132,7 @@ def basic_string(value):
     return f'"{escaped}"'
 
 
-def render_agent_toml(fields, body, plugin):
+def render_agent_toml(fields: Frontmatter, body: str, plugin: str) -> str:
     """Render one Claude Code agent as a Codex agent role.
 
     `skills:` has no Codex equivalent, so the preloaded skills are named in the
@@ -123,37 +140,44 @@ def render_agent_toml(fields, body, plugin):
     their severity model and conventions -- the grounding that makes findings
     land the same tier whoever raises them.
     """
+    name = scalar(fields, "name")
+    skills = fields.get("skills", [])
+    if isinstance(skills, str):
+        raise ValueError(f"{name}: skills must be a list, not a single value")
     instructions = body
-    if fields.get("skills"):
-        named = ", ".join(f"`{qualify(s, plugin)}`" for s in fields["skills"])
+    if skills:
+        named = ", ".join(f"`{qualify(s, plugin)}`" for s in skills)
         instructions += f"\n\n## Skills\n\nLoad these skills before starting: {named}."
 
     # Literal strings take no escapes, so the Markdown body survives verbatim --
     # basic strings would mangle every backslash in it.
     if "'''" in instructions:
-        raise ValueError(f"{fields['name']}: body contains ''' and cannot be a TOML literal")
+        raise ValueError(f"{name}: body contains ''' and cannot be a TOML literal")
 
     lines = [
-        f"name = {basic_string(fields['name'])}",
-        f"description = {basic_string(fields['description'])}",
+        f"name = {basic_string(name)}",
+        f"description = {basic_string(scalar(fields, 'description'))}",
     ]
-    sandbox = PERMISSION_MODE_TO_SANDBOX.get(fields.get("permissionMode"))
+    mode = scalar(fields, "permissionMode") if "permissionMode" in fields else None
+    sandbox = PERMISSION_MODE_TO_SANDBOX.get(mode) if mode else None
     if sandbox:
         lines.append(f'sandbox_mode = "{sandbox}"')
     lines.append(f"developer_instructions = '''\n{instructions}\n'''")
     return "\n".join(lines) + "\n"
 
 
-def agent_targets(source, plugin):
+def agent_targets(source: pathlib.Path, plugin: str) -> list[Target]:
     """Every agent role file for one plugin, as (path, contents) pairs."""
     return [
-        (source / "codex" / "agents" / f"{agent.stem}.toml",
-         render_agent_toml(*parse_frontmatter(agent.read_text(), agent), plugin))
+        (
+            source / "codex" / "agents" / f"{agent.stem}.toml",
+            render_agent_toml(*parse_frontmatter(agent.read_text(), agent), plugin),
+        )
         for agent in sorted((source / "agents").glob("*.md"))
     ]
 
 
-def plugin_manifest(entry):
+def plugin_manifest(entry: Json) -> tuple[pathlib.Path, Json]:
     """Build a Codex plugin manifest from the Claude Code one.
 
     `skills` and `hooks` are omitted deliberately: Codex defaults them to
@@ -171,7 +195,7 @@ def plugin_manifest(entry):
             f"marketplace entry {entry['name']!r}"
         )
 
-    manifest = {
+    manifest: Json = {
         "name": claude["name"],
         "version": claude["version"],
         "description": claude["description"],
@@ -188,7 +212,7 @@ def plugin_manifest(entry):
     return source / ".codex-plugin" / "plugin.json", manifest
 
 
-def marketplace_manifest(marketplace):
+def marketplace_manifest(marketplace: Json) -> Json:
     """Build the Codex marketplace catalog.
 
     `policy` is omitted: Codex defaults installation to AVAILABLE and
@@ -208,13 +232,14 @@ def marketplace_manifest(marketplace):
     }
 
 
-def as_json(manifest):
+def as_json(manifest: Json) -> str:
+    """Serialize a manifest the way the generated files are committed."""
     return json.dumps(manifest, indent=2) + "\n"
 
 
-def collect_targets(marketplace):
+def collect_targets(marketplace: Json) -> list[Target]:
     """Every generated file, as (path, contents) pairs."""
-    targets = [(CODEX_MARKETPLACE, as_json(marketplace_manifest(marketplace)))]
+    targets: list[Target] = [(CODEX_MARKETPLACE, as_json(marketplace_manifest(marketplace)))]
 
     for entry in marketplace["plugins"]:
         path, manifest = plugin_manifest(entry)
@@ -227,14 +252,14 @@ def collect_targets(marketplace):
     return targets
 
 
-def find_divergent_copies():
+def find_divergent_copies() -> list[pathlib.Path]:
     """Hook scripts that several plugins each ship a copy of.
 
     Plugins install independently, so they cannot share a module at hook runtime
     and the file has to be duplicated. Nothing else stops the copies drifting
     after a one-sided edit, so assert they are byte-identical here.
     """
-    divergent = []
+    divergent: list[pathlib.Path] = []
     for relative in DUPLICATED_HOOK_SCRIPTS:
         copies = sorted(ROOT.glob(f"plugins/*/{relative}"))
         if len({copy.read_bytes() for copy in copies}) > 1:
@@ -242,7 +267,7 @@ def find_divergent_copies():
     return divergent
 
 
-def find_orphans(targets):
+def find_orphans(targets: list[Target]) -> list[pathlib.Path]:
     """Generated files no longer produced by the generator.
 
     The forward pass only checks that each expected file is current, so a role
@@ -272,7 +297,8 @@ def find_orphans(targets):
     )
 
 
-def main():
+def main() -> int:
+    """Write the generated files, or with `--check` report any that are stale."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--check",
@@ -283,7 +309,7 @@ def main():
 
     targets = collect_targets(json.loads(MARKETPLACE.read_text()))
 
-    stale = []
+    stale: list[pathlib.Path] = []
     for path, contents in targets:
         if args.check:
             current = path.read_text() if path.is_file() else None

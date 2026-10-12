@@ -3,9 +3,10 @@
 ## Setup
 
 Grimoire has no build step. Its local tooling is the CI tools pinned in
-`ci/requirements.txt` -- [uv](https://docs.astral.sh/uv/) and
-[pre-commit](https://pre-commit.com/) -- which the dev container installs on
-create:
+`ci/requirements.txt` -- [uv](https://docs.astral.sh/uv/),
+[pre-commit](https://pre-commit.com/) and
+[pyright](https://microsoft.github.io/pyright/) -- which the dev container
+installs on create:
 
 ```bash
 make install
@@ -28,16 +29,16 @@ error.
 make check
 ```
 
-It runs `make lint` and `make verify`, which CI runs too. `make help` lists
-what each target covers.
+It runs `make lint`, `make typecheck` and `make verify`, which CI runs too.
+`make help` lists what each target covers.
 
 ## Tests
 
 This repository ships executable code -- the plugins' Node hook scripts and
 reviewer tooling under `plugins/*/hooks/scripts/` and `plugins/*/skills/`, plus
-`scripts/generate-codex.py`. `make lint` and `make verify` check ASCII, parsing,
-linting and Codex drift; neither one calls a function. `make test` is the third
-gate and the only one that does.
+`scripts/generate-codex.py`. `make lint`, `make typecheck` and `make verify`
+check ASCII, parsing, linting, types and Codex drift; none of them calls a
+function. `make test` is the gate that does.
 
 ### What earns a test
 
@@ -92,8 +93,7 @@ buy nothing.
 | Invocation | `node --test <file list>` | `python3 -m unittest <file list>` |
 
 Nothing is installed to run the suite, and there is no `package.json` and no
-`pyproject.toml` -- the same reason `.pre-commit-config.yaml` gives for leaving
-ruff out. `pytest` is not used: it would earn its keep across a codebase, not
+`pyproject.toml`. `pytest` is not used: it would earn its keep across a codebase, not
 across one Python file.
 
 **Tests live in `tests/`, not beside the code.** Two reasons, both specific to

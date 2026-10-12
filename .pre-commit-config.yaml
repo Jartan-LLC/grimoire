@@ -4,11 +4,16 @@
 # they only see files under the bind-mounted project directory. Run them from a
 # worktree or a copy and they report missing files, not a mount error.
 #
-# Deliberately absent, each of which looks like an obvious addition:
-#   ruff       governs one file and would drag in a pyproject.toml to hold its config
-#   prettier   fights generate-codex.py over plugins/*/.codex-plugin/plugin.json;
-#              no tree state satisfies both
+# Deliberately absent, though it looks like an obvious addition: prettier, which
+# fights generate-codex.py over plugins/*/.codex-plugin/plugin.json; no tree state
+# satisfies both.
 repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: f12be1ebaa5351c1fc76472de98db2c3446c8253 # frozen: v0.16.10
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
   - repo: https://github.com/codespell-project/codespell
     rev: 57b21406f092110c18776e39b0bda50d37c945c8 # frozen: v2.4.3
     hooks:
