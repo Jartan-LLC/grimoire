@@ -41,8 +41,7 @@ target.
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org/).
 - Any change under `plugins/<name>/` other than its `CHANGELOG.md` needs a
   `version` bump in that plugin's `plugin.json` and an entry for that version in
-  its `CHANGELOG.md`.
-  See [RELEASING.md](RELEASING.md).
+  its `CHANGELOG.md`. See [RELEASING.md](RELEASING.md).
 - A change to the marketplace itself, such as a plugin added or removed, gets an
   entry under `## Unreleased` in the root `CHANGELOG.md`. Plugin versions are
   listed there when a marketplace tag is cut.

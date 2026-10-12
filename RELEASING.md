@@ -21,7 +21,7 @@ A plugin's version lives in one place: the `"version"` field in
 it drifts -- the marketplace entries deliberately carry none.
 
 When you change any content under `plugins/<name>/` (skills, agents, commands,
-hooks, README), bump it:
+hooks, README) other than its `CHANGELOG.md`, bump it:
 
 - **PATCH** (`1.0.0` -> `1.0.1`) -- bug fixes, wording, non-behavioural tweaks
 - **MINOR** (`1.0.0` -> `1.1.0`) -- new skills/agents/commands, backward-compatible additions
@@ -43,9 +43,10 @@ path the bump rule watches.
 ## Enforcement
 
 Version discipline is enforced by **PR review**. Before merging, confirm any
-plugin with changed content under `plugins/<name>/` has a bumped `version` in its
-`plugin.json`. CI gates pure ASCII, JSON parsing, generated-file drift, per-plugin changelog
-entries and the full lint set, but nothing there checks the bump rule.
+plugin with changes under `plugins/<name>/` other than its `CHANGELOG.md` has a
+bumped `version` in its `plugin.json`. CI gates pure ASCII, JSON parsing,
+generated-file drift, per-plugin changelog entries and the full lint set, but
+nothing there checks the bump rule.
 
 ## Tag a release
 
@@ -68,8 +69,9 @@ constraints resolve against (see [Dependencies](#dependencies)).
 Pushing the tag is the only manual step: `release.yml` creates the GitHub
 Release from it, with that version's changelog entry as the body. Not GitHub's
 generated notes: they diff repo-wide and would attribute other plugins' commits
-to this release. The release reads the changelog at the tagged commit, so if it
-fails for a missing entry, land the entry and move the tag to that commit:
+to this release. The release reads the changelog at the tagged commit. If a
+release fails for a missing entry, land the entry and move that tag, which has no
+release yet, to the commit carrying it:
 
 ```bash
 git push --delete origin <name>--v<version>

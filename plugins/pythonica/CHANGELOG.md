@@ -4,4 +4,5 @@ Earlier versions: the `pythonica--v*` tags.
 
 ## 1.1.1
 
-- Markdown formatting fixes across the README and skills.
+- Three broken links to skills' reference files fixed, and Markdown formatting
+  fixes across the README and skills.

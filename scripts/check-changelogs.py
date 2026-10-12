@@ -25,21 +25,33 @@ def section(changelog: str, version: str) -> str:
     return "\n".join(lines[start:end]).strip()
 
 
+def missing_entry(plugin: pathlib.Path, version: str) -> str:
+    """Why the plugin's changelog has no entry for `version`; empty when it has one."""
+    changelog = plugin / "CHANGELOG.md"
+    name = plugin.relative_to(ROOT)
+    if not changelog.is_file():
+        return f"{name}: no CHANGELOG.md"
+    if not section(changelog.read_text(), version):
+        return (
+            f"{name}/CHANGELOG.md: no entry under a '## {version}' heading"
+            " (the version alone, matching plugin.json)"
+        )
+    return ""
+
+
 def problems() -> list[str]:
     """One message per plugin whose changelog lacks a current-version entry."""
+    manifests = sorted(ROOT.glob("plugins/*/.claude-plugin/plugin.json"))
+    if not manifests:
+        return ["no plugins/*/.claude-plugin/plugin.json found -- nothing was checked"]
     found: list[str] = []
-    for manifest in sorted(ROOT.glob("plugins/*/.claude-plugin/plugin.json")):
+    for manifest in manifests:
         plugin = manifest.parent.parent
-        version = json.loads(manifest.read_text())["version"]
-        changelog = plugin / "CHANGELOG.md"
-        name = plugin.relative_to(ROOT)
-        if not changelog.is_file():
-            found.append(f"{name}: no CHANGELOG.md")
-        elif not section(changelog.read_text(), version):
-            found.append(
-                f"{name}/CHANGELOG.md: no entry under a '## {version}' heading"
-                " (the version alone, matching plugin.json)"
-            )
+        version = json.loads(manifest.read_text()).get("version")
+        if not isinstance(version, str):
+            found.append(f"{manifest.relative_to(ROOT)}: no version")
+        elif message := missing_entry(plugin, version):
+            found.append(message)
     return found
 
 
@@ -50,13 +62,12 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.notes:
-        plugin, version = args.notes
-        changelog = ROOT / "plugins" / plugin / "CHANGELOG.md"
-        entry = section(changelog.read_text(), version) if changelog.is_file() else ""
-        if not entry:
-            print(f"plugins/{plugin}/CHANGELOG.md has no entry for {version}", file=sys.stderr)
+        name, version = args.notes
+        plugin = ROOT / "plugins" / name
+        if message := missing_entry(plugin, version):
+            print(message, file=sys.stderr)
             return 1
-        print(entry)
+        print(section((plugin / "CHANGELOG.md").read_text(), version))
         return 0
 
     found = problems()
