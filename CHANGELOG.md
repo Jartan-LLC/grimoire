@@ -4,10 +4,6 @@ Marketplace releases, tagged `marketplace-v<version>`: the version consumers pin
 in `extraKnownMarketplaces`. Each plugin's own changes are in its
 `plugins/<name>/CHANGELOG.md`.
 
-## Unreleased
-
-- praxis 1.5.0.
-
 ## 1.0.0
 
 - First tagged release, for Claude Code and Codex: claudivis 1.1.2, gitwise

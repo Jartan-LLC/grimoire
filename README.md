@@ -46,8 +46,8 @@ Codex config on session start instead.
 Each plugin uses [semantic versioning](https://semver.org), with its version in
 `.claude-plugin/plugin.json` (the marketplace entry carries none -- Claude Code
 resolves the manifest first), and is released with a `{plugin-name}--v{version}`
-git tag. Any content change needs a version bump and an entry in that plugin's
-`CHANGELOG.md`; the root `CHANGELOG.md` covers marketplace releases.
+git tag. Any change other than to its `CHANGELOG.md` needs a version bump and an
+entry in that changelog; the root `CHANGELOG.md` covers marketplace releases.
 
 See [RELEASING.md](RELEASING.md) for the full workflow and tag convention.
 

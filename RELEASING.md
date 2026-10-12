@@ -44,8 +44,8 @@ path the bump rule watches.
 
 Version discipline is enforced by **PR review**. Before merging, confirm any
 plugin with changed content under `plugins/<name>/` has a bumped `version` in its
-`plugin.json`. CI gates pure ASCII, JSON parsing, generated-file drift, changelog entries
-and the full lint set, but nothing there checks the bump rule.
+`plugin.json`. CI gates pure ASCII, JSON parsing, generated-file drift, per-plugin changelog
+entries and the full lint set, but nothing there checks the bump rule.
 
 ## Tag a release
 
@@ -68,7 +68,14 @@ constraints resolve against (see [Dependencies](#dependencies)).
 Pushing the tag is the only manual step: `release.yml` creates the GitHub
 Release from it, with that version's changelog entry as the body. Not GitHub's
 generated notes: they diff repo-wide and would attribute other plugins' commits
-to this release.
+to this release. The release reads the changelog at the tagged commit, so if it
+fails for a missing entry, land the entry and move the tag to that commit:
+
+```bash
+git push --delete origin <name>--v<version>
+git tag -f <name>--v<version> <commit>
+git push origin <name>--v<version>
+```
 
 A version carrying a prerelease suffix (`praxis--v2.0.0-rc1`) tags and releases
 the same way. `release.yml` marks it a GitHub prerelease, so it stays off the
@@ -147,14 +154,17 @@ marketplace-v{MAJOR}.{MINOR}.{PATCH}
 ```
 
 One dash, not two. `release.yml` triggers on `*--v[0-9]*`, so a double dash would
-publish a GitHub Release captioned "Release of the marketplace plugin" -- the
-single dash keeps this line out of that trigger deliberately.
+run it as if `marketplace` were a plugin -- the single dash keeps this line out of
+that trigger deliberately.
 
 Cut a new `marketplace-v*` tag when consumers should pick up plugin changes, and
 bump the `ref` in each consuming repository's `.claude/settings.json` in the same
-change. Before tagging, move the root `CHANGELOG.md`'s `## Unreleased` entries
-under the new version. Until that bump lands, consumers keep loading the older tag: that is the
+change. Until that bump lands, consumers keep loading the older tag: that is the
 point, not a bug. Merging to `main` alone reaches nobody.
+
+Before tagging, record the release in the root `CHANGELOG.md`: a `## <version>`
+section holding the `## Unreleased` entries and each plugin version that changed
+since the last marketplace tag.
 
 Don't reach for a SHA instead: a marketplace `source` takes no `sha`, only a
 `ref` that is cloned with `git clone --branch`, which rejects one (commit

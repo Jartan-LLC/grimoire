@@ -16,7 +16,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 def section(changelog: str, version: str) -> str:
     """The text under `## <version>`, up to the next `## ` heading; empty if none."""
-    lines = changelog.split("\n")
+    lines = [line.rstrip() for line in changelog.split("\n")]
     try:
         start = lines.index(f"## {version}") + 1
     except ValueError:
@@ -36,7 +36,10 @@ def problems() -> list[str]:
         if not changelog.is_file():
             found.append(f"{name}: no CHANGELOG.md")
         elif not section(changelog.read_text(), version):
-            found.append(f"{name}/CHANGELOG.md: no entry under '## {version}'")
+            found.append(
+                f"{name}/CHANGELOG.md: no entry under a '## {version}' heading"
+                " (the version alone, matching plugin.json)"
+            )
     return found
 
 
