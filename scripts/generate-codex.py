@@ -72,9 +72,11 @@ def parse_frontmatter(text: str, path: pathlib.Path) -> tuple[Frontmatter, str]:
     """Split a Markdown document into its YAML frontmatter and body.
 
     Deliberately minimal: our agent frontmatter is single-line scalars plus a
-    `skills:` list, so a YAML dependency would buy nothing. `path` is carried
-    only so a malformed file names itself -- otherwise a bare ValueError from
-    here points a reader at the generator rather than the file to fix.
+    `skills:` list, so a YAML dependency would buy nothing. Any other YAML form
+    (quoted or block scalars, flow collections) is rejected rather than misread.
+    `path` is carried only so a malformed file names itself -- otherwise a bare
+    ValueError from here points a reader at the generator rather than the file
+    to fix.
     """
     lines = text.split("\n")
     if lines[0].strip() != "---":
@@ -91,13 +93,18 @@ def parse_frontmatter(text: str, path: pathlib.Path) -> tuple[Frontmatter, str]:
         if item and key:
             values = fields[key]
             if isinstance(values, str):
-                raise ValueError(f"{path}: {key} has both a value and list items")
+                raise ValueError(f"{path}: frontmatter {key!r} has both a value and list items")
             values.append(item.group(1).strip())
             continue
         match = re.match(r"([A-Za-z_-]+):\s*(.*)$", line)
-        if match:
-            key = match.group(1)
-            fields[key] = match.group(2).strip() or []
+        if not match:
+            if line.strip() and not line.lstrip().startswith("#"):
+                raise ValueError(f"{path}: unsupported frontmatter line {line!r}")
+            continue
+        key, value = match.group(1), match.group(2).strip()
+        if value[:1] in ('"', "'", ">", "|", "[", "{"):
+            raise ValueError(f"{path}: frontmatter {key!r} must be a plain unquoted value")
+        fields[key] = value or []
 
     return fields, "\n".join(lines[end + 1 :]).strip()
 
@@ -158,8 +165,10 @@ def render_agent_toml(fields: Frontmatter, body: str, plugin: str) -> str:
         f"name = {basic_string(name)}",
         f"description = {basic_string(scalar(fields, 'description'))}",
     ]
-    mode = scalar(fields, "permissionMode") if "permissionMode" in fields else None
-    sandbox = PERMISSION_MODE_TO_SANDBOX.get(mode) if mode else None
+    if "permissionMode" in fields:
+        sandbox = PERMISSION_MODE_TO_SANDBOX.get(scalar(fields, "permissionMode"))
+    else:
+        sandbox = None
     if sandbox:
         lines.append(f'sandbox_mode = "{sandbox}"')
     lines.append(f"developer_instructions = '''\n{instructions}\n'''")
