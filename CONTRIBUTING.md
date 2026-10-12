@@ -2,17 +2,21 @@
 
 ## Setup
 
-Grimoire has no build step. The only local tooling is
-[pre-commit](https://pre-commit.com/), which the devcontainer wires up for you
-on create:
+Grimoire has no build step. Its local tooling is the CI tools pinned in
+`ci/requirements.txt` -- [uv](https://docs.astral.sh/uv/) and
+[pre-commit](https://pre-commit.com/) -- which the dev container installs on
+create:
 
 ```bash
 make install
 ```
 
-That installs pre-commit and registers the git hook, so the linters run on every
-commit. Some hooks need Docker (lychee, actionlint) and Node (markdownlint); the
-devcontainer has both. The Docker hooks resolve the workspace by inspecting the
+That installs the pinned tools and registers the git hook, so the linters run on
+every commit. In the dev container they go into the system Python. Elsewhere,
+`make install` needs an environment: create one with `uv venv`, or activate one.
+
+Some hooks need Docker (lychee, actionlint) and Node (markdownlint); the dev
+container has both. The Docker hooks resolve the workspace by inspecting the
 container, so run them from the bind-mounted project directory -- from a
 worktree or a copy elsewhere they report missing files rather than a mount
 error.
@@ -20,12 +24,12 @@ error.
 ## Before opening a PR
 
 ```bash
-make lint
-make verify
+make check
 ```
 
-Both must pass -- CI runs the same checks. `make help` lists what each target
-covers. `make test` joins them once the suite lands; see [Tests](#tests).
+It runs `make lint` and `make verify`, the same checks CI runs. `make help`
+lists what each target covers. `make test` joins them once the suite lands; see
+[Tests](#tests).
 
 ## Tests
 
@@ -174,7 +178,7 @@ checked nothing, which is worse than no gate at all.
 
 ## Conventions
 
-- Pure ASCII in every tracked file. See `CLAUDE.md` for the substitution table.
+- Pure ASCII in every tracked file. See `GUARDRAILS.md` for the substitution table.
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org/)
   (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`).
 - Any content change under `plugins/<name>/` needs a `version` bump in that

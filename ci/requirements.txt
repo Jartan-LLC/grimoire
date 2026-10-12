@@ -6,4 +6,5 @@
 # Only tools installed by a workflow or a Makefile recipe belong here. Anything
 # the project itself declares stays in its own manifest.
 
+uv==0.12.23
 pre-commit==4.6.2
