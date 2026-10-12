@@ -202,9 +202,11 @@ async function main() {
   process.exit(0);
 }
 
-main().catch(err => {
-  log(`[Hook] check-console-log error: ${err.message}`);
-  process.exit(0);
-});
+module.exports = { applyCooldown };
 
-module.exports = { run, applyCooldown };
+if (require.main === module) {
+  main().catch(err => {
+    log(`[Hook] check-console-log error: ${err.message}`);
+    process.exit(0);
+  });
+}

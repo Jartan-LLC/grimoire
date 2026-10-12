@@ -1,7 +1,7 @@
 # CI calls these targets directly, so this file is the single definition of the
 # checks. Recipes run under dash both here and on the runners -- no bashisms.
 
-.PHONY: help install lint fix typecheck verify check
+.PHONY: help install lint fix typecheck test verify check
 
 # Every target uses one Python environment, chosen here: this
 # checkout's .venv, else the active one, else, in the main checkout only, the system
@@ -60,6 +60,12 @@ fix:  ## Apply ruff's safe fixes and formatting via its pre-commit hooks (git-tr
 typecheck:  ## Type-check the Python code (pyright, strict)
 	pyright
 
+# Explicit file lists: `node --test` reads a directory or glob argument differently
+# across Node versions, and with no argument at all it walks the whole tree.
+test:  ## Run the Node and Python tests (node:test, pytest)
+	@python3 -c "import subprocess,sys; files=subprocess.run(['git','ls-files',':(glob)tests/**/*.test.js'],capture_output=True,text=True,check=True).stdout.split(); assert files, 'git ls-files matched no Node tests -- gate would pass having checked nothing'; sys.exit(subprocess.run(['node','--test',*files]).returncode)"
+	@python3 -c "import subprocess,sys; files=subprocess.run(['git','ls-files',':(glob)tests/**/test_*.py'],capture_output=True,text=True,check=True).stdout.split(); assert files, 'git ls-files matched no Python tests -- gate would pass having checked nothing'; sys.exit(subprocess.run([sys.executable,'-m','pytest',*files]).returncode)"
+
 # `git grep -l` exits 1 on no match, so `|| true` would turn the ASCII gate into
 # a permanent no-op and any other non-zero means the invocation itself failed.
 # One logical line because Make gives each recipe line its own shell.
@@ -78,4 +84,4 @@ verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift, changelog
 	@echo "Checking each plugin's changelog has its current version..."
 	@python3 scripts/check-changelogs.py
 
-check: lint typecheck verify  ## Run CI's lint, typecheck and verify checks
+check: lint typecheck test verify  ## Run CI's lint, typecheck, test and verify checks

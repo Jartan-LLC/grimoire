@@ -26,6 +26,13 @@ target.
 
 ## Tests
 
+`make test` runs both suites. To run one file:
+
+```bash
+node --test tests/<source path>/<name>.test.js      # node:test, Node 20 or newer
+python3 -m pytest tests/<source path>/test_<name>.py # pytest, from ci/requirements.txt
+```
+
 - A function earns a test when it takes its input as an argument and a wrong
   answer from it would be silent.
 - Every shipped hook entry point earns a process test: whatever arrives on stdin,

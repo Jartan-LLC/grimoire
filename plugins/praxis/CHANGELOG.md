@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.1
+
+- No behaviour change: `check-console-log.js` and `find-duplicate-comments.js`
+  export the functions this repository's tests import.
+
 ## 1.5.0
 
 - New `comment-hygiene` skill: the comment rules (what to keep, delete or

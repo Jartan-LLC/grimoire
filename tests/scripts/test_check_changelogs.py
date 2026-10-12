@@ -1,0 +1,150 @@
+import importlib.util
+import json
+import pathlib
+import sys
+from types import ModuleType
+
+import pytest
+
+SCRIPT = pathlib.Path(__file__).resolve().parents[2] / "scripts" / "check-changelogs.py"
+
+
+def load_script() -> ModuleType:
+    spec = importlib.util.spec_from_file_location("check_changelogs", SCRIPT)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+cc = load_script()
+
+CHANGELOG = """# Changelog
+
+## 1.2.0
+
+- New skill.
+
+### Upgrading
+
+- Re-run the installer.
+
+## 1.1.10
+
+- Ten.
+
+## 1.1.1
+
+- One.
+
+## 1.1.0
+"""
+
+
+def test_section_is_the_text_up_to_the_next_level_two_heading() -> None:
+    assert (
+        cc.section(CHANGELOG, "1.2.0") == "- New skill.\n\n### Upgrading\n\n- Re-run the installer."
+    )
+
+
+def test_section_matches_the_whole_version_not_a_prefix() -> None:
+    assert cc.section(CHANGELOG, "1.1.1") == "- One."
+    assert cc.section(CHANGELOG, "1.1.10") == "- Ten."
+    assert cc.section(CHANGELOG, "1.1") == ""
+
+
+def test_section_is_empty_for_a_missing_or_bodiless_entry() -> None:
+    assert cc.section(CHANGELOG, "9.9.9") == ""
+    assert cc.section(CHANGELOG, "1.1.0") == ""
+
+
+def test_section_runs_to_the_end_of_the_file() -> None:
+    assert cc.section("## 2.0.0\n\n- Last.\n", "2.0.0") == "- Last."
+
+
+def test_section_ignores_trailing_whitespace_on_the_heading() -> None:
+    assert cc.section("## 2.0.0  \n\n- Last.\n", "2.0.0") == "- Last."
+
+
+def test_section_does_not_match_a_heading_with_more_than_the_version() -> None:
+    assert cc.section("## 2.0.0 - 2026-10-12\n\n- Last.\n", "2.0.0") == ""
+
+
+HEADING = " heading (the version alone, matching plugin.json)"
+
+
+def plugin(root: pathlib.Path, name: str, version: str | None, changelog: str | None) -> None:
+    manifest = root / "plugins" / name / ".claude-plugin" / "plugin.json"
+    manifest.parent.mkdir(parents=True)
+    fields = {"name": name} if version is None else {"name": name, "version": version}
+    manifest.write_text(json.dumps(fields))
+    if changelog is not None:
+        (root / "plugins" / name / "CHANGELOG.md").write_text(changelog)
+
+
+def test_problems_names_each_plugin_without_a_current_entry(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(cc, "ROOT", tmp_path)
+    plugin(tmp_path, "current", "1.0.0", "## 1.0.0\n\n- Shipped.\n")
+    plugin(tmp_path, "behind", "1.1.0", "## 1.0.0\n\n- Shipped.\n")
+    plugin(tmp_path, "bodiless", "2.0.0", "## 2.0.0\n\n## 1.0.0\n\n- Old.\n")
+    plugin(tmp_path, "missing", "1.0.0", None)
+    plugin(tmp_path, "unversioned", None, "## 1.0.0\n\n- Shipped.\n")
+    assert cc.problems() == [
+        f"plugins/behind/CHANGELOG.md: no entry under a '## 1.1.0'{HEADING}",
+        f"plugins/bodiless/CHANGELOG.md: no entry under a '## 2.0.0'{HEADING}",
+        "plugins/missing: no CHANGELOG.md",
+        "plugins/unversioned/.claude-plugin/plugin.json: no version",
+    ]
+
+
+def test_problems_fails_when_no_plugin_is_found(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(cc, "ROOT", tmp_path)
+    assert cc.problems() == ["no plugins/*/.claude-plugin/plugin.json found -- nothing was checked"]
+
+
+def test_problems_is_empty_when_every_plugin_is_current(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(cc, "ROOT", tmp_path)
+    plugin(tmp_path, "a", "1.0.0", "## 1.0.0\n\n- A.\n")
+    plugin(tmp_path, "b", "0.1.0", "## 0.1.0\n\n- B.\n")
+    assert cc.problems() == []
+
+
+def test_notes_prints_the_entry(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(cc, "ROOT", tmp_path)
+    plugin(tmp_path, "demo", "1.2.0", CHANGELOG)
+    monkeypatch.setattr(sys, "argv", ["check-changelogs.py", "--notes", "demo", "1.1.1"])
+    assert cc.main() == 0
+    assert capsys.readouterr() == ("- One.\n", "")
+
+
+@pytest.mark.parametrize(
+    ("args", "message"),
+    [
+        (("demo", "3.0.0"), f"plugins/demo/CHANGELOG.md: no entry under a '## 3.0.0'{HEADING}"),
+        (("demo", "1.1.0"), f"plugins/demo/CHANGELOG.md: no entry under a '## 1.1.0'{HEADING}"),
+        (("absent", "1.0.0"), "plugins/absent: no CHANGELOG.md"),
+    ],
+)
+def test_notes_fails_without_an_entry(
+    args: tuple[str, str],
+    message: str,
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr(cc, "ROOT", tmp_path)
+    plugin(tmp_path, "demo", "1.2.0", CHANGELOG)
+    monkeypatch.setattr(sys, "argv", ["check-changelogs.py", "--notes", *args])
+    assert cc.main() == 1
+    out, err = capsys.readouterr()
+    assert out == ""
+    assert err == f"{message}\n"
