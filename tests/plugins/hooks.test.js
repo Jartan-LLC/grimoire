@@ -15,11 +15,7 @@ const PLUGINS = path.join(REPO_ROOT, 'plugins');
 
 // Contract breaks in shipped hooks, keyed "<plugin> <description>|<payload label or *>",
 // each with the failure the defect produces.
-const ECHOES_MALFORMED = { issue: 'grimoire#77', expected: /stdout is not one JSON value/ };
 const KNOWN_DEFECTS = {
-  'gitwise Load github-conventions for GitHub writes (gh pr/issue create/comment/edit, gh pr review, git commit/push/tag)|malformed JSON':
-    ECHOES_MALFORMED,
-  'praxis Reminder before git push to review changes|malformed JSON': ECHOES_MALFORMED,
   // The shell turns the \\ in [\/\\] into one backslash, so node -e fails to parse.
   'praxis Warn about non-standard documentation files|*': {
     issue: 'grimoire#76',
