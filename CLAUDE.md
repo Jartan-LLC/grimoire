@@ -27,5 +27,5 @@ make check
 second source of truth -- edit `CLAUDE.md`.
 
 Then confirm by inspection: each skill/agent frontmatter `name` matches its directory, and
-any plugin with changed content under `plugins/<name>/` has a bumped `version` in
-`plugin.json`.
+any plugin with changes under `plugins/<name>/` other than its `CHANGELOG.md` has a bumped
+`version` in `plugin.json`.

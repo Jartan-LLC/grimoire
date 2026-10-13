@@ -19,8 +19,9 @@ every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `
   descriptions, and hook scripts alike.
 - Run the Verify command in `CLAUDE.md` before declaring work done or submitting it for
   review.
-- Version lives only in `plugin.json`; bump it on any content change under
-  `plugins/<name>/` (marketplace entries carry no `version` -- see `RELEASING.md`).
+- Version lives only in `plugin.json`; bump it on any change under `plugins/<name>/`
+  other than its `CHANGELOG.md`, with an entry for the new version in that changelog
+  (marketplace entries carry no `version` -- see `RELEASING.md`).
 - Declare a plugin `dependency` for every cross-plugin skill an agent loads in its
   frontmatter `skills:` (a hard, resolve-or-fail load like `gitwise:github-conventions`);
   a prose `see plugin:skill` pointer is soft and needs none. Add no plugin `dependency`

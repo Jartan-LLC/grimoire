@@ -63,7 +63,7 @@ typecheck:  ## Type-check the Python code (pyright, strict)
 # `git grep -l` exits 1 on no match, so `|| true` would turn the ASCII gate into
 # a permanent no-op and any other non-zero means the invocation itself failed.
 # One logical line because Make gives each recipe line its own shell.
-verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift)
+verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift, changelogs)
 	@echo "Checking for non-ASCII characters..."
 	@set +e; git grep -lP '[^\x00-\x7F]'; rc=$$?; set -e; \
 	case "$$rc" in \
@@ -75,5 +75,7 @@ verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift)
 	@python3 -c "import json,subprocess; files=subprocess.run(['git','ls-files','*.json'],capture_output=True,text=True,check=True).stdout.split(); assert files, 'git ls-files matched no JSON -- gate would pass having checked nothing'; [json.load(open(f)) for f in files]"
 	@echo "Checking generated Codex files against their sources..."
 	@python3 scripts/generate-codex.py --check
+	@echo "Checking each plugin's changelog has its current version..."
+	@python3 scripts/check-changelogs.py
 
 check: lint typecheck verify  ## Run CI's lint, typecheck and verify checks
