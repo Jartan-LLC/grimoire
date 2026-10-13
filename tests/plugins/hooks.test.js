@@ -103,6 +103,14 @@ test('finds hook entries to check', () => {
   assert.ok(entries.length > 0, 'no command hooks found under plugins/*/hooks/hooks.json');
 });
 
+// Both tables key on a hook's free-text description, so a renamed hook would
+// otherwise drop out of them silently.
+test('every hook named in the defect and output tables exists', () => {
+  const hooks = new Set(entries.map(entry => `${entry.plugin} ${entry.description}`));
+  const named = [...Object.keys(KNOWN_DEFECTS).map(key => key.split('|')[0]), ...SPEAKS_ON_LARGE_CONTEXT];
+  assert.deepEqual(named.filter(key => !hooks.has(key)), []);
+});
+
 for (const entry of entries) {
   const name = `${entry.plugin} ${entry.event} ${entry.matcher || '(no matcher)'}: ${entry.description}`;
   describe(name, () => {
