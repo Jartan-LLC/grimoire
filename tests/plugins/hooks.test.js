@@ -73,6 +73,8 @@ function payloads(event, transcript) {
   };
 }
 
+const PAYLOAD_LABELS = Object.keys(payloads('', ''));
+
 /** A git checkout holding an untracked console.log, and a transcript past the context threshold. */
 function workspace(t) {
   const cwd = initRepo(t, { 'README.md': 'fixture\n' });
@@ -104,7 +106,7 @@ test('finds hook entries to check', () => {
 for (const entry of entries) {
   const name = `${entry.plugin} ${entry.event} ${entry.matcher || '(no matcher)'}: ${entry.description}`;
   describe(name, () => {
-    for (const label of Object.keys(payloads('', ''))) {
+    for (const label of PAYLOAD_LABELS) {
       const key = `${entry.plugin} ${entry.description}`;
       const defect = KNOWN_DEFECTS[`${key}|${label}`] || KNOWN_DEFECTS[`${key}|*`];
       const body = t => {
