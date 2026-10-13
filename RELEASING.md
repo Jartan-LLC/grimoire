@@ -179,9 +179,3 @@ last marketplace tag, and start a new, empty `## Unreleased` above it.
 therefore check this repository out at a `marketplace-v*` tag with
 `actions/checkout` and pass the resulting **local path** to
 `plugin_marketplaces`, which pins exactly.
-
-## Release channels
-
-Per-plugin release channels (say, a stable line and a bleeding-edge line) are not
-set up. If needed later, express them with a `ref` on the marketplace `source` or
-with separate marketplace entries -- future work.

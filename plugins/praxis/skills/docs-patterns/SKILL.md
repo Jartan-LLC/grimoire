@@ -84,7 +84,7 @@ Prose that narrates the change which produced the page, or inventories where els
 
 `Or from source. This project installs with uv rather than pip -- in CI, in the devcontainer and in the Docker image:` -- the reader is installing locally. Which installer the project stopped using, and the three other places the new one is also used, change nothing they type. `Or from source, with uv:` is the whole of it.
 
-Change narration's code-comment form is `comment-hygiene`'s *Density*, and one migration commonly produces both, so a diff carrying it in comments is worth reading for it in the docs too. Rationale that needs a home goes in the PR body.
+Change narration's code-comment form is what `comment-hygiene`'s *Density* calls PR narration, and one migration commonly produces both, so a diff carrying it in comments is worth reading for it in the docs too. Rationale that needs a home goes in the PR body.
 
 ## What to Avoid
 
