@@ -44,6 +44,10 @@ differently there.
 
 - `/recursio:recursive-implement` -- build a project using the full recursive development pipeline
 
+### Hooks
+
+- **SessionStart** -- installs this plugin's Codex agent roles (no-op outside Codex)
+
 ## Quick Start
 
 ```text

@@ -26,7 +26,7 @@ codex plugin add gitwise@grimoire
 
 ### Hooks
 
-- **PreToolUse** -- automatically loads conventions when running GitHub write operations (`gh pr create`, `gh issue comment`, `git commit`, `git push`). Skips read-only commands (`gh pr view`, `gh pr list`, `git status`).
+- **PreToolUse** -- prompts the model to load the conventions before a GitHub write: `gh pr` or `gh issue` `create`/`comment`/`edit`, `gh pr review`, `git commit`, `git push` and `git tag`. Read-only commands (`gh pr view`, `gh pr list`, `git status`) pass through.
 
 ## License
 

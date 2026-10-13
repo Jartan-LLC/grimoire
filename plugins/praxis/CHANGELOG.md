@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.2
+
+- `comment-hygiene`: a standing hot-path measurement stays inline as a WHY; only
+  a change's before/after numbers go to the PR body. The density re-read now
+  presumes each comment goes unless the skill's own rules keep it.
+
 ## 1.5.1
 
 - No user-visible change.

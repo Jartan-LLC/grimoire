@@ -159,33 +159,23 @@ One dash, not two. `release.yml` triggers on `*--v[0-9]*`, so a double dash woul
 run it as if `marketplace` were a plugin -- the single dash keeps this line out of
 that trigger deliberately.
 
-Cut a new `marketplace-v*` tag when consumers should pick up plugin changes, and
-bump the `ref` in each consuming repository's `.claude/settings.json` in the same
-change. Until that bump lands, consumers keep loading the older tag: that is the
+A tag, not a SHA: a `github` marketplace source takes no `sha`, only a `ref`,
+cloned with `git clone --branch`, which rejects a SHA. A tag can be moved, so a
+tag ruleset protects `marketplace-v*` from deletion and updates.
+
+Cut a new `marketplace-v*` tag when consumers should pick up plugin changes, then
+bump the `ref` in each consuming repository's `.claude/settings.json`, this one
+included. Until that bump lands, consumers keep loading the older tag: that is the
 point, not a bug. Merging to `main` alone reaches nobody.
 
 Before tagging, record the release in the root `CHANGELOG.md`: rename
 `## Unreleased` to `## <version>`, add each plugin version that changed since the
 last marketplace tag, and start a new, empty `## Unreleased` above it.
 
-Don't reach for a SHA instead: a marketplace `source` takes no `sha`, only a
-`ref` that is cloned with `git clone --branch`, which rejects one (commit
-`2325fd9` carries the derivation). A tag is the strongest pin available here and
-it is mutable, so protect `marketplace-v*` with a tag ruleset -- otherwise a push
-can move a pin consumers already trust.
-
 ### CI
 
-`anthropics/claude-code-action` cannot pin either. Its `plugin_marketplaces`
-input runs `claude plugin marketplace add <url>`, which takes no ref, and the
-input validator rejects anything after the `.git` suffix. Consuming workflows
+`anthropics/claude-code-action`'s `plugin_marketplaces` input accepts only an
+`https://...git` URL or a local path, so it can't take a ref. Consuming workflows
 therefore check this repository out at a `marketplace-v*` tag with
 `actions/checkout` and pass the resulting **local path** to
-`plugin_marketplaces`, which pins exactly. See `.github/workflows/claude.yml` in
-`scaffold`, `merlin` or `sonde` for the shape.
-
-## Release channels
-
-Per-plugin release channels (say, a stable line and a bleeding-edge line) are not
-set up. If needed later, express them with a `ref` on the marketplace `source` or
-with separate marketplace entries -- future work.
+`plugin_marketplaces`, which pins exactly.
