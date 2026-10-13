@@ -7,7 +7,7 @@ user-invocable: false
 
 # Comment Hygiene
 
-Split from `code-hygiene` -- this is comment truthfulness only; dead code, reinvention/duplication, naming, and faking done stay in `code-hygiene`, which this skill sits alongside as a sibling of `code-structure` (the units and their contracts) and `readable-code` (how a body reads).
+Comment truthfulness only. Dead code, reinvention/duplication, naming and faking done are `code-hygiene`'s; `code-structure` shapes the units and their contracts, and `readable-code` how a body reads.
 
 A comment earns its place only by telling the reader something the **code cannot**. Sharp test: *could a competent reader recover this fact from the code (and the repo)? Yes -> delete; No -> maybe keep.* One fact survives that test despite being recoverable -- the sole exception, so bake it into the test: a **legal/provenance header** is recoverable from `LICENSE` yet kept inline by mandate (see EXEMPT). The **external-anchor WHY** looks like a second exception but isn't one: naming a constant recovers its *value*, never the spec/constraint that dictated it, so that rationale stays genuinely unrecoverable and keeps on the mainline (see KEEP).
 
@@ -91,13 +91,11 @@ Narrates the **change** that produced the code (what was removed, moved, renamed
 
 Every rule above weighs one comment against the code beside it, so a diff can pass at every single site and still ship bloat: *"does this fact earn a comment?"* is a different question from *"does this file need this many?"*. Ask the second one once, over the whole diff.
 
-**Trigger** -- a signal to re-read, never a budget to hit: added comment lines approaching or exceeding added code lines, or a rationale on nearly every changed block. Then re-read each one with the presumption reversed, because the first pass was made in the mood that wrote them.
+**Trigger** -- a signal to re-read, never a budget to hit: added comment lines approaching or exceeding added code lines, or a rationale on nearly every changed block. Then re-read each one presuming it goes; keep only what passes KEEP.
 
-**The usual cause is PR narration** -- the author explains the change to the reviewer, then writes that explanation into the file. Sort by reader: a sentence aimed at whoever reads the **diff** belongs in the PR body, where it is read once by the reader it was written for and never rots; only a sentence aimed at whoever reads the **file** years later stays. The migration story, the measurement that justified the switch, and the comparison to what used to be here are all the first kind (and the last is a Tombstone besides).
+**The usual cause is PR narration** -- the author explains the change to the reviewer, then writes that explanation into the file. Sort by reader: a sentence aimed at whoever reads the **diff** belongs in the PR body, where it is read once by the reader it was written for and never rots; only a sentence aimed at whoever reads the **file** years later stays. The migration story, this change's before/after measurement (a standing hot-path fact a future editor needs is a WHY -- see KEEP), and the comparison to what used to be here are all the first kind (and the last is a Tombstone besides).
 
 **A rejected alternative splits on that same test.** One a future editor would otherwise re-attempt is a WHY and stays inline; one that only explains why *this change* looks the way it does goes in the PR body.
-
-What survives is one invariant per non-obvious decision, at the site whose own change would falsify it -- the sites that share it name the topic and point (*Retold fact*).
 
 ## Meta-rule
 

@@ -32,7 +32,6 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 ### Important
 
 - Reinvention and orphaned abstractions (speculative generality) -- see `code-hygiene`
-- Comments that don't earn their place -- see `comment-hygiene`
 - Blanket linter/type/test suppressions -- see `code-hygiene`
 - Duplication a maintainer must untangle -- see `code-hygiene`
 - Retold facts -- a keep-category comment told again at another site -- see `comment-hygiene`
@@ -41,6 +40,7 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 
 - Non-conventional naming (casing, prefixes, project style)
 - Dead code, commented-out code, and debug/scaffolding output left behind -- see `code-hygiene`
+- Comments that don't earn their place -- see `comment-hygiene`
 - Unanchored TODOs -- see `comment-hygiene`
 
 ## Deferred

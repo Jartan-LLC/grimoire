@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.2
+
+- `comment-hygiene`: a standing hot-path measurement stays inline as a WHY; only
+  a change's before/after numbers go to the PR body. The density re-read now asks
+  whether each comment passes KEEP.
+- The general reviewer rates comments that don't earn their place Minor, matching
+  `review-severity`.
+
 ## 1.5.1
 
 - No user-visible change.
