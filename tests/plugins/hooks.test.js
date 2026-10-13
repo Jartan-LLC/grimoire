@@ -9,6 +9,7 @@ const path = require('node:path');
 const { describe, test } = require('node:test');
 
 const { REPO_ROOT, gitEnv, initRepo, tempDir, writeFiles } = require('../helpers/fixture');
+const { knownDefect } = require('../helpers/known-defect');
 
 const PLUGINS = path.join(REPO_ROOT, 'plugins');
 
@@ -92,8 +93,8 @@ for (const entry of entries) {
   describe(name, () => {
     for (const label of Object.keys(payloads('', ''))) {
       const key = `${entry.plugin} ${entry.description}`;
-      const todo = KNOWN_DEFECTS[`${key}|${label}`] || KNOWN_DEFECTS[`${key}|*`];
-      test(`exits 0 and prints nothing or one JSON object on ${label}`, { todo }, t => {
+      const defect = KNOWN_DEFECTS[`${key}|${label}`] || KNOWN_DEFECTS[`${key}|*`];
+      const body = t => {
         const { cwd, transcript, scratch } = workspace(t);
         const pluginRoot = path.join(PLUGINS, entry.plugin);
         const result = spawnSync('sh', ['-c', entry.command], {
@@ -112,7 +113,11 @@ for (const entry of entries) {
           }),
         });
         assertContract(result);
-      });
+      };
+      test(
+        `exits 0 and prints nothing or one JSON object on ${label}`,
+        defect ? knownDefect(defect, body) : body,
+      );
     }
   });
 }

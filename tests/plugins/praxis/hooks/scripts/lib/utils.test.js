@@ -4,6 +4,7 @@ const path = require('node:path');
 const { describe, test } = require('node:test');
 
 const { REPO_ROOT, tempDir, writeFiles } = require('../../../../../helpers/fixture');
+const { knownDefect } = require('../../../../../helpers/known-defect');
 
 const { findFiles, countInFile, grepFile } = require(
   path.join(REPO_ROOT, 'plugins/praxis/hooks/scripts/lib/utils.js'),
@@ -108,13 +109,13 @@ describe('grepFile', () => {
     assert.deepEqual(lines(grepFile(file, /hit/g)), [1, 2, 3, 5]);
   });
 
+  // grepFile strips g but not y, so a sticky RegExp keeps lastIndex across lines.
   test(
     'a sticky RegExp still matches consecutive lines',
-    { todo: 'grimoire#78: grepFile strips g but not y; a sticky RegExp keeps lastIndex across lines and skips every other match' },
-    t => {
+    knownDefect('grimoire#78', t => {
       const file = textFile(t, 'hit\nhit\nhit\n');
       assert.deepEqual(lines(grepFile(file, /hit/y)), [1, 2, 3]);
-    },
+    }),
   );
 
   test('keeps the other flags', t => {

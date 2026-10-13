@@ -2,8 +2,7 @@
 
 ## 1.5.1
 
-- No behaviour change: `check-console-log.js` and `find-duplicate-comments.js`
-  export the functions this repository's tests import.
+- No user-visible change.
 
 ## 1.5.0
 

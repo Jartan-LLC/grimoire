@@ -60,11 +60,14 @@ fix:  ## Apply ruff's safe fixes and formatting via its pre-commit hooks (git-tr
 typecheck:  ## Type-check the Python code (pyright, strict)
 	pyright
 
+# Runs $(2), a Python list of argv items, on the git-tracked files matching $(1).
 # Explicit file lists: `node --test` reads a directory or glob argument differently
 # across Node versions, and with no argument at all it walks the whole tree.
-test:  ## Run the Node and Python tests (node:test, pytest)
-	@python3 -c "import subprocess,sys; files=subprocess.run(['git','ls-files',':(glob)tests/**/*.test.js'],capture_output=True,text=True,check=True).stdout.split(); assert files, 'git ls-files matched no Node tests -- gate would pass having checked nothing'; sys.exit(subprocess.run(['node','--test',*files]).returncode)"
-	@python3 -c "import subprocess,sys; files=subprocess.run(['git','ls-files',':(glob)tests/**/test_*.py'],capture_output=True,text=True,check=True).stdout.split(); assert files, 'git ls-files matched no Python tests -- gate would pass having checked nothing'; sys.exit(subprocess.run([sys.executable,'-m','pytest',*files]).returncode)"
+run_tracked = @python3 -c "import subprocess,sys; files=subprocess.run(['git','ls-files','$(1)'],capture_output=True,text=True,check=True).stdout.split(); assert files, 'git ls-files matched nothing for $(1) -- gate would pass having checked nothing'; sys.exit(subprocess.run([$(2),*files]).returncode)"
+
+test:  ## Run the Node and Python tests (git-tracked files: `git add` new ones first)
+	$(call run_tracked,:(glob)tests/**/*.test.js,'node'$(comma)'--test')
+	$(call run_tracked,:(glob)tests/**/test_*.py,sys.executable$(comma)'-m'$(comma)'pytest')
 
 # `git grep -l` exits 1 on no match, so `|| true` would turn the ASCII gate into
 # a permanent no-op and any other non-zero means the invocation itself failed.

@@ -1,24 +1,11 @@
-import importlib.util
 import pathlib
 import re
 import tomllib
-from types import ModuleType
 
 import pytest
+from script_loader import load_script
 
-SCRIPT = pathlib.Path(__file__).resolve().parents[2] / "scripts" / "generate-codex.py"
-
-
-def load_script() -> ModuleType:
-    spec = importlib.util.spec_from_file_location("generate_codex", SCRIPT)
-    assert spec is not None
-    assert spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-gc = load_script()
+gc = load_script("generate-codex.py")
 PATH = pathlib.Path("agents/demo.md")
 
 

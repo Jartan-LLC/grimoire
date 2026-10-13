@@ -26,7 +26,8 @@ target.
 
 ## Tests
 
-`make test` runs both suites. To run one file:
+`make test` runs both suites over git-tracked files, so `git add` a new test
+first. To run one file:
 
 ```bash
 node --test tests/<source path>/<name>.test.js      # node:test, Node 20 or newer

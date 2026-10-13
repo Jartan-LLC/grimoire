@@ -1,24 +1,11 @@
-import importlib.util
 import json
 import pathlib
 import sys
-from types import ModuleType
 
 import pytest
+from script_loader import load_script
 
-SCRIPT = pathlib.Path(__file__).resolve().parents[2] / "scripts" / "check-changelogs.py"
-
-
-def load_script() -> ModuleType:
-    spec = importlib.util.spec_from_file_location("check_changelogs", SCRIPT)
-    assert spec is not None
-    assert spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-cc = load_script()
+cc = load_script("check-changelogs.py")
 
 CHANGELOG = """# Changelog
 
