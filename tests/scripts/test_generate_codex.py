@@ -69,6 +69,7 @@ def test_parse_frontmatter_rejects_what_it_would_misread(text: str, message: str
 
 @pytest.mark.xfail(
     strict=True,
+    raises=AssertionError,
     reason="grimoire#79: a trailing ' # comment' is kept as part of the value; YAML, which Claude Code reads, drops it",
 )
 def test_parse_frontmatter_does_not_keep_an_inline_comment_in_the_value() -> None:
@@ -81,6 +82,7 @@ def test_parse_frontmatter_does_not_keep_an_inline_comment_in_the_value() -> Non
 
 @pytest.mark.xfail(
     strict=True,
+    raises=AssertionError,
     reason="grimoire#80: quoting is rejected on key values but not on list items, which keep their quotes",
 )
 def test_parse_frontmatter_does_not_keep_quotes_on_a_list_item() -> None:

@@ -112,7 +112,7 @@ describe('grepFile', () => {
   // grepFile strips g but not y, so a sticky RegExp keeps lastIndex across lines.
   test(
     'a sticky RegExp still matches consecutive lines',
-    knownDefect('grimoire#78', t => {
+    knownDefect('grimoire#78', /strictly deep-equal/, t => {
       const file = textFile(t, 'hit\nhit\nhit\n');
       assert.deepEqual(lines(grepFile(file, /hit/y)), [1, 2, 3]);
     }),

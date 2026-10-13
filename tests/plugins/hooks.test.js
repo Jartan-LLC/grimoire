@@ -13,15 +13,28 @@ const { knownDefect } = require('../helpers/known-defect');
 
 const PLUGINS = path.join(REPO_ROOT, 'plugins');
 
-// Contract breaks in shipped hooks, keyed "<plugin> <description>|<payload label or *>".
-const ECHOES_MALFORMED = 'grimoire#77: echoes unparsable stdin back verbatim, so stdout is not JSON';
+// Contract breaks in shipped hooks, keyed "<plugin> <description>|<payload label or *>",
+// each with the failure it currently produces.
+const ECHOES_MALFORMED = { issue: 'grimoire#77', expected: /stdout is not one JSON value/ };
 const KNOWN_DEFECTS = {
   'gitwise Load github-conventions for write operations (pr/issue create/comment, git commit/push)|malformed JSON':
     ECHOES_MALFORMED,
   'praxis Reminder before git push to review changes|malformed JSON': ECHOES_MALFORMED,
-  'praxis Warn about non-standard documentation files|*':
-    'grimoire#76: the shell turns the \\\\ in [\\/\\\\] into one backslash, so node -e fails with a regex SyntaxError and exit 1',
+  // The shell turns the \\ in [\/\\] into one backslash, so node -e fails to parse.
+  'praxis Warn about non-standard documentation files|*': {
+    issue: 'grimoire#76',
+    expected: /^exit 1 .*SyntaxError: Invalid regular expression/s,
+  },
 };
+
+// Hooks the large-context payload drives down their output path, so silence there
+// means the hook stopped doing its job.
+const SPEAKS_ON_LARGE_CONTEXT = new Set([
+  'gitwise Load github-conventions for write operations (pr/issue create/comment, git commit/push)',
+  'praxis Prompt the model to load the skills relevant to the task',
+  'praxis Suggest manual compaction at logical intervals',
+  'praxis Check for console.log in changed files after an edit',
+]);
 
 function hookEntries() {
   const entries = [];
@@ -113,10 +126,13 @@ for (const entry of entries) {
           }),
         });
         assertContract(result);
+        if (label === 'transcript_path to a large context' && SPEAKS_ON_LARGE_CONTEXT.has(key)) {
+          assert.notEqual(result.stdout.trim(), '', 'expected output on this payload');
+        }
       };
       test(
         `exits 0 and prints nothing or one JSON object on ${label}`,
-        defect ? knownDefect(defect, body) : body,
+        defect ? knownDefect(defect.issue, defect.expected, body) : body,
       );
     }
   });

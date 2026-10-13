@@ -11,9 +11,9 @@ make install
 ```
 
 It installs the tools pinned in `ci/requirements.txt` and the pre-commit hook.
-The hooks also need Docker (lychee, actionlint) and Node (markdownlint). Run the
-Docker hooks from the bind-mounted project directory: from a worktree or a copy
-they report missing files.
+The hooks also need Docker (lychee, actionlint) and Node (markdownlint), and the
+tests need Node 20 or newer. Run the Docker hooks from the bind-mounted project
+directory: from a worktree or a copy they report missing files.
 
 ## Before opening a PR
 
@@ -42,6 +42,9 @@ python3 -m pytest tests/<source path>/test_<name>.py # pytest, from ci/requireme
 - A fixture repository is built with `git init` in a temporary directory, never
   this checkout. Fixtures write nothing outside their directory and reach no
   network.
+- A test that exposes a shipped defect stays, wrapped in `knownDefect` (Node) or
+  marked `xfail(strict=True, raises=AssertionError)` (pytest), naming the issue.
+  The fix removes the wrapper.
 
 ## Conventions
 
