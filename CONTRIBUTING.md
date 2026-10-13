@@ -26,11 +26,11 @@ target.
 
 ## Tests
 
-`make test` runs both suites over git-tracked files, so `git add` a new test
-first. To run one file:
+`make test` runs the Node and Python tests over git-tracked files, so `git add` a
+new test first. To run one file:
 
 ```bash
-node --test tests/<source path>/<name>.test.js      # node:test, Node 20 or newer
+node --test tests/<source path>/<name>.test.js       # node:test, Node 20 or newer
 python3 -m pytest tests/<source path>/test_<name>.py # pytest, from ci/requirements.txt
 ```
 
@@ -42,9 +42,10 @@ python3 -m pytest tests/<source path>/test_<name>.py # pytest, from ci/requireme
 - A fixture repository is built with `git init` in a temporary directory, never
   this checkout. Fixtures write nothing outside their directory and reach no
   network.
-- A test that exposes a shipped defect stays, wrapped in `knownDefect` (Node) or
-  marked `xfail(strict=True, raises=AssertionError)` (pytest), naming the issue.
-  The fix removes the wrapper.
+- A test that exposes a shipped defect stays, wrapped in `knownDefect` from
+  `tests/helpers/known-defect.js` (Node) or marked
+  `xfail(strict=True, raises=AssertionError)` (pytest), naming the issue. The fix
+  removes the wrapper.
 
 ## Conventions
 

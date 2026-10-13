@@ -60,7 +60,7 @@ fix:  ## Apply ruff's safe fixes and formatting via its pre-commit hooks (git-tr
 typecheck:  ## Type-check the Python code (pyright, strict)
 	pyright
 
-# Runs $(2), a Python list of argv items, on the git-tracked files matching $(1).
+# Runs $(2), comma-separated Python argv items, on the git-tracked files matching $(1).
 # Explicit file lists: `node --test` reads a directory or glob argument differently
 # across Node versions, and with no argument at all it walks the whole tree.
 run_tracked = @python3 -c "import subprocess,sys; files=subprocess.run(['git','ls-files','$(1)'],capture_output=True,text=True,check=True).stdout.split(); assert files, 'git ls-files matched nothing for $(1) -- gate would pass having checked nothing'; sys.exit(subprocess.run([$(2),*files]).returncode)"

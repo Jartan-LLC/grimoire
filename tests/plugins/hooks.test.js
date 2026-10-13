@@ -14,7 +14,7 @@ const { knownDefect } = require('../helpers/known-defect');
 const PLUGINS = path.join(REPO_ROOT, 'plugins');
 
 // Contract breaks in shipped hooks, keyed "<plugin> <description>|<payload label or *>",
-// each with the failure it currently produces.
+// each with the failure the defect produces.
 const ECHOES_MALFORMED = { issue: 'grimoire#77', expected: /stdout is not one JSON value/ };
 const KNOWN_DEFECTS = {
   'gitwise Load github-conventions for write operations (pr/issue create/comment, git commit/push)|malformed JSON':
@@ -108,6 +108,7 @@ for (const entry of entries) {
   describe(name, () => {
     for (const label of PAYLOAD_LABELS) {
       const key = `${entry.plugin} ${entry.description}`;
+      const speaks = label === 'transcript_path to a large context' && SPEAKS_ON_LARGE_CONTEXT.has(key);
       const defect = KNOWN_DEFECTS[`${key}|${label}`] || KNOWN_DEFECTS[`${key}|*`];
       const body = t => {
         const { cwd, transcript, scratch } = workspace(t);
@@ -128,12 +129,10 @@ for (const entry of entries) {
           }),
         });
         assertContract(result);
-        if (label === 'transcript_path to a large context' && SPEAKS_ON_LARGE_CONTEXT.has(key)) {
-          assert.notEqual(result.stdout.trim(), '', 'expected output on this payload');
-        }
+        if (speaks) assert.notEqual(result.stdout.trim(), '', 'expected output on this payload');
       };
       test(
-        `exits 0 and prints nothing or one JSON object on ${label}`,
+        `exits 0 and prints ${speaks ? 'one JSON object' : 'nothing or one JSON object'} on ${label}`,
         defect ? knownDefect(defect.issue, defect.expected, body) : body,
       );
     }

@@ -1,4 +1,5 @@
-// A test for a shipped defect that stays failing until the defect is fixed.
+// A test for a shipped defect: it passes while the defect reproduces and fails
+// once the defect is fixed.
 // node:test's `todo` passes whether or not its body fails, so a fix would go
 // unnoticed and a later regression would stay green.
 

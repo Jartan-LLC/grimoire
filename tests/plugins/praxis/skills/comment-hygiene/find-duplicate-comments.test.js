@@ -236,7 +236,7 @@ describe('buildCommentIndex', () => {
 });
 
 describe('command line', () => {
-  /** A repository whose `feature` branch adds `added` on top of `base`, both on `main`. */
+  /** A repository with `base` committed on `main` and `added` on a `feature` branch from it. */
   function branchRepo(t, base, added) {
     const dir = initRepo(t, base);
     git(dir, 'checkout', '-q', '-b', 'feature');
