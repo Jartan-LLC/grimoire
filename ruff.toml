@@ -43,6 +43,7 @@ ignore = [
 
 [lint.per-file-ignores]
 "scripts/**" = ["T201"] # command-line tools: print is their output
+"tests/**" = ["S101", "ARG", "PLR2004", "D"] # asserts, fixtures, magic values, docstrings
 
 [lint.pydocstyle]
 # Google-style docstrings; the convention also settles the mutually-incompatible

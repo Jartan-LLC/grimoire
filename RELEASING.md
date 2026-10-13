@@ -45,8 +45,8 @@ path the bump rule watches.
 Version discipline is enforced by **PR review**. Before merging, confirm any
 plugin with changes under `plugins/<name>/` other than its `CHANGELOG.md` has a
 bumped `version` in its `plugin.json`. CI gates pure ASCII, JSON parsing,
-generated-file drift, per-plugin changelog entries and the full lint set, but
-nothing there checks the bump rule.
+generated-file drift, per-plugin changelog entries, the test suite and the full
+lint set, but nothing there checks the bump rule.
 
 ## Tag a release
 

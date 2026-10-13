@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.1
+
+- No user-visible change.
+
 ## 1.5.0
 
 - New `comment-hygiene` skill: the comment rules (what to keep, delete or
