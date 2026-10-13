@@ -2,7 +2,7 @@
 
 ## 1.1.2
 
-- The README lists every command the hook fires on.
+- The README and the hook's description list every command the hook fires on.
 
 ## 1.1.1
 

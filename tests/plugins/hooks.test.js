@@ -17,7 +17,7 @@ const PLUGINS = path.join(REPO_ROOT, 'plugins');
 // each with the failure the defect produces.
 const ECHOES_MALFORMED = { issue: 'grimoire#77', expected: /stdout is not one JSON value/ };
 const KNOWN_DEFECTS = {
-  'gitwise Load github-conventions for write operations (pr/issue create/comment, git commit/push)|malformed JSON':
+  'gitwise Load github-conventions for GitHub writes (gh pr/issue create/comment/edit, gh pr review, git commit/push/tag)|malformed JSON':
     ECHOES_MALFORMED,
   'praxis Reminder before git push to review changes|malformed JSON': ECHOES_MALFORMED,
   // The shell turns the \\ in [\/\\] into one backslash, so node -e fails to parse.
@@ -30,7 +30,7 @@ const KNOWN_DEFECTS = {
 // Hooks the large-context payload drives down their output path, so silence there
 // means the hook stopped doing its job.
 const SPEAKS_ON_LARGE_CONTEXT = new Set([
-  'gitwise Load github-conventions for write operations (pr/issue create/comment, git commit/push)',
+  'gitwise Load github-conventions for GitHub writes (gh pr/issue create/comment/edit, gh pr review, git commit/push/tag)',
   'praxis Prompt the model to load the skills relevant to the task',
   'praxis Suggest manual compaction at logical intervals',
   'praxis Check for console.log in changed files after an edit',

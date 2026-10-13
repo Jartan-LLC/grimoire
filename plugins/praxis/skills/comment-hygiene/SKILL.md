@@ -91,7 +91,7 @@ Narrates the **change** that produced the code (what was removed, moved, renamed
 
 Every rule above weighs one comment against the code beside it, so a diff can pass at every single site and still ship bloat: *"does this fact earn a comment?"* is a different question from *"does this file need this many?"*. Ask the second one once, over the whole diff.
 
-**Trigger** -- a signal to re-read, never a budget to hit: added comment lines approaching or exceeding added code lines, or a rationale on nearly every changed block. Then re-read each one presuming it goes; keep only what passes KEEP.
+**Trigger** -- a signal to re-read, never a budget to hit: added comment lines approaching or exceeding added code lines, or a rationale on nearly every changed block. Then re-read each one presuming it goes; keep only what KEEP, EXEMPT or CONDITIONAL keeps.
 
 **The usual cause is PR narration** -- the author explains the change to the reviewer, then writes that explanation into the file. Sort by reader: a sentence aimed at whoever reads the **diff** belongs in the PR body, where it is read once by the reader it was written for and never rots; only a sentence aimed at whoever reads the **file** years later stays. The migration story, this change's before/after measurement (a standing hot-path fact a future editor needs is a WHY -- see KEEP), and the comparison to what used to be here are all the first kind (and the last is a Tombstone besides).
 
