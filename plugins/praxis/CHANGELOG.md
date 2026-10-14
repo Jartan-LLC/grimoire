@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.3
+
+- The `git push` hook prints nothing when stdin is not a JSON object (malformed JSON, `[]`, `"x"`); it used to echo it back.
+
 ## 1.5.2
 
 - `comment-hygiene`: a standing hot-path measurement stays inline as a WHY; only
