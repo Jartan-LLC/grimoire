@@ -2,7 +2,7 @@
 
 ## 1.5.3
 
-- The `git push` hook prints nothing for stdin that is valid JSON but not an object (such as `[]` or `"x"`), so it no longer echoes it back.
+- The `git push` hook prints nothing when stdin is not a JSON object (malformed JSON, `[]`, `"x"`); it used to echo it back.
 
 ## 1.5.2
 

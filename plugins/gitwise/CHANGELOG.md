@@ -2,7 +2,7 @@
 
 ## 1.1.3
 
-- The `PreToolUse` hook prints nothing for stdin that is valid JSON but not an object (such as `[]` or `"x"`), so it no longer echoes it back.
+- The `PreToolUse` hook prints nothing when stdin is not a JSON object (malformed JSON, `[]`, `"x"`); it used to echo it back.
 
 ## 1.1.2
 
