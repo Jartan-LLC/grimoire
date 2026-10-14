@@ -63,6 +63,7 @@ function payloads(event, transcript) {
     'malformed JSON': '{"session_id": ',
     'empty input': '',
     'empty object': '{}',
+    'valid JSON that is not an object': '[]',
     'fields of the wrong type': JSON.stringify({ session_id: 7, transcript_path: 7, hook_event_name: 7, tool_input: 'x' }),
     'missing transcript_path': JSON.stringify(wellFormed),
     'transcript_path to a large context': JSON.stringify({ ...wellFormed, transcript_path: transcript }),
