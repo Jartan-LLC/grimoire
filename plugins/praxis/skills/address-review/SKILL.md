@@ -38,11 +38,7 @@ Work through each finding sequentially. For each one:
 
 Do NOT blindly apply every suggestion. Investigate first -- the reviewer may have missed context, flagged a pattern that's intentional, or suggested a fix that creates inconsistency with the rest of the codebase.
 
-When the user agrees to skip a finding, post a brief PR comment explaining why it was declined:
-
-```bash
-gh pr comment <pr-number> --body "**Re: <finding title>** -- <concise reason for skipping>"
-```
+When the user agrees to skip a finding, note it and the reason; it goes in the round's one PR comment (step 4), not a comment of its own.
 
 ### 4. Commit
 
@@ -54,10 +50,10 @@ The user may ask to commit at any point during the review -- commit what's been 
 
 While a commit is not yet pushed, fold a further fix to the same change into it (`git commit --amend` for the last commit) instead of adding a commit. Never rewrite a pushed commit.
 
-Put the finding-by-finding answers in one PR comment for the round, not in the commit message. After committing, check that the PR title still names the whole change; if not, update it (`gh pr edit <pr-number> --title "<title>"`) or tell the user. Never push unless the user explicitly asks.
+Put the finding-by-finding answers in one PR comment for the round, not in the commit message: for each finding, fixed (and where), fixed differently (how and why), or declined (why). After committing, check that the PR title still names the whole change; if not, update it (`gh pr edit <pr-number> --title "<title>"`) or tell the user. Never push unless the user explicitly asks.
 
 ### 5. Refresh the PR Title and Description
 
 At the start of the task (step 2) and after each round's commits are pushed, compare the PR title and description (`gh pr view <pr-number> --json title,body`) with `git diff <base>...HEAD`, and fix what no longer holds (`gh pr edit <pr-number>`). Start from the current text, keep what a person added, and tell the user what you changed. If the round's commits are not pushed yet, tell the user the PR title and description need this check after the push.
 
-Where the PR description becomes the squash commit's message (see `gitwise:github-conventions`), rewrite the PR title and description to describe the head commit before asking for another review: the final design first, each dropped design as a rejected alternative with its reason, and nothing about the review or its rounds.
+Where the PR description becomes the squash commit's message (see `merge-setting.md` in `gitwise:github-conventions`), rewrite the PR title and description to describe the whole change as of the last commit before asking for another review: the final design first, each dropped design as a rejected alternative with its reason, and nothing about the review or its rounds.

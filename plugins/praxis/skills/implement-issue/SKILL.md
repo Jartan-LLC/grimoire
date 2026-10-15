@@ -44,7 +44,7 @@ Run the Verify commands from `CLAUDE.md`. Fix any failures and commit the fixes 
 
 ### 7. Push
 
-Push the branch with all commits. If a PR exists and its description becomes the squash commit's message (see `gitwise:github-conventions`), rewrite the PR title and description to describe the head commit after the push, as `address-review` step 5 describes.
+Push the branch with all commits. If a PR exists and its description becomes the squash commit's message (see `merge-setting.md` in `gitwise:github-conventions`), rewrite the PR title and description to describe the whole change as of the last commit after the push, as `address-review` step 5 describes.
 
 ### 8. Post Summary
 

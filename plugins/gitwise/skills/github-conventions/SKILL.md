@@ -34,27 +34,7 @@ Mark a change that breaks something for the project's consumers the way the conv
 
 ## Merge Setting
 
-Which text becomes the commit on the default branch depends on how the project merges. Before writing the PR title or the PR description, learn it from the first source that answers:
-
-1. The project's statement, in its agent instruction files or CONTRIBUTING. A statement wins over what the repository's settings show: practice can differ from settings.
-2. The repository's settings: `gh api repos/OWNER/REPO`, fields `allow_squash_merge`, `allow_rebase_merge`, `allow_merge_commit`, `squash_merge_commit_title`, `squash_merge_commit_message` and `merge_commit_message`. The message fields read null without admin rights, and the settings decide only when one merge method is enabled.
-3. The default branch. Take the newest squash commit of a PR with two or more commits (its subject ends "(#N)"). Blocks that open with "* " mean the branch's commit messages land. A body equal to that PR's description (GitHub re-wraps it at 72 columns) means the PR description lands. A subject with no body but trailers means only the PR title lands. A commit with two parents is a merge commit.
-4. Ask the user.
-
-What lands on the default branch:
-
-- Squash with GitHub's default message: the PR title, then every commit message on the branch, oldest first (a one-commit PR lands that commit's own message). Write each commit message for a later reader of the default branch.
-- Squash with "Pull request title and description" (or a bot that builds the commit from them): the PR title and the PR description. The PR description then carries the reasons; reviewer-only notes go in a PR comment.
-- Squash with "Pull request title" only: the PR title. The PR description, which "(#N)" leads to, holds the reasons.
-- Rebase merge, merge commit, direct push: each commit message as its own commit.
-
-When the merge setting is still unknown and nobody can be asked:
-
-- write every commit message to land, as under every setting;
-- give the reasons in the commit messages and in the PR description;
-- write a merge dependency in the PR description as a fact ("Requires #52.");
-- put reading guidance and requests to the reviewer in a PR comment;
-- say in that PR comment, not in the PR description, that the merge setting was not found.
+The merge setting decides which text becomes the commit on the default branch. Before writing a PR title or PR description, read [merge-setting.md](merge-setting.md): how to find the setting and what to write under each.
 
 ## Issues
 
