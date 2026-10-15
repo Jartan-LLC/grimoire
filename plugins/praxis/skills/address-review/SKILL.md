@@ -46,4 +46,4 @@ The user may ask to commit at any point during the review -- commit what's been 
 
 ### 5. Close the Round
 
-Write the round's answers as one PR comment: for each finding, fixed (and where), fixed differently (how and why), or declined (why). Once the round's commits are pushed, post it (`gh pr comment <pr-number> --body "<answers>"`) and check the PR title and description as in step 2. Until then, tell the user the comment is ready and that the PR title and description need that check after the push.
+Write the round's answers as one PR comment: for each finding, fixed (and where), fixed differently (how and why), already the case (where in the code), or declined (why). Post it at the end of every round, once the round's commits are pushed or at once if the round needs none (`gh pr comment <pr-number> --body "<answers>"`), then check the PR title and description as in step 2. If the round's commits are not pushed yet, tell the user the comment and that check wait for the push.
