@@ -52,7 +52,7 @@ every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `
 - Don't hardcode derived counts in prose or comments -- they drift silently.
 - Comments state only the load-bearing why; a change's reason goes in its commit message.
 - Grimoire squash-merges PRs with GitHub's default commit message, unedited, so every
-  commit message on a branch lands on `main`. Before writing a commit message, a PR title
+  commit message on a branch, merges from `main` aside, lands on `main`. Before writing a commit message, a PR title
   or a PR description, read `plugins/gitwise/skills/commit-pr-writing/SKILL.md` (the
   `gitwise:commit-pr-writing` skill); a commit message never lists files or narrates
   review rounds.

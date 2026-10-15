@@ -27,7 +27,7 @@ codex plugin add gitwise@grimoire
 
 ### Hooks
 
-- **PreToolUse** -- prompts the model to load the skills before a GitHub write: `commit-pr-writing` and `github-conventions` before `git commit`, `git push`, `gh pr create` and `gh pr edit`; `github-conventions` alone before `gh issue` `create`/`comment`/`edit`, `gh pr comment`, `gh pr review` and `git tag`. Read-only commands (`gh pr view`, `gh pr list`, `git status`) pass through.
+- **PreToolUse** -- prompts the model to load the skills when it makes a GitHub write (the prompt arrives with that command's result, so it shapes the next write, not the one that fired it): `commit-pr-writing` and `github-conventions` before `git commit`, `git push`, `gh pr create` and `gh pr edit`; `github-conventions` alone before `gh issue` `create`/`comment`/`edit`, `gh pr comment`, `gh pr review` and `git tag`. Read-only commands (`gh pr view`, `gh pr list`, `git status`) pass through.
 
 ## License
 

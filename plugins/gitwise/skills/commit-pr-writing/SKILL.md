@@ -11,7 +11,7 @@ The project's own rules win where they speak. No style or brevity pass over a co
 
 ## The Commit Message
 
-Write every commit message to land on the default branch, whatever the merge setting. Under GitHub's default squash merge, every commit message on the branch goes into the squash commit's message.
+Write every commit message to land on the default branch, whatever the merge setting. Under GitHub's default squash merge, every commit message on the branch goes into the squash commit's message (merges from the base branch aside).
 
 - Say why the change was made and why this way; where alternatives were weighed, name the one a later reader would propose and why it lost.
 - Describe the change as merged; narrate no review rounds, requests, attempts, CI re-runs or branch history, and let the subject name the change (never "address review findings").
