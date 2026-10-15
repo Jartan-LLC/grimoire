@@ -6,11 +6,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const i=JSON.parse(d);const cmd=i.tool_input?.command||'';if(/\\bgh\\s+(pr|issue)\\s+(create|comment|edit)|\\bgh\\s+pr\\s+review\\b|\\bgit\\s+(commit|push|tag)\\b/.test(cmd)){console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'PreToolUse',additionalContext:'Load the github-conventions skill. Use 1./2./3. for numbered lists, never #1/#2/#3. Follow the project\\'s commit convention; Conventional Commits where none is stated.'}}));}else if(i&&typeof i==='object'&&!Array.isArray(i)){console.log(d)}}catch{}})\"",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const i=JSON.parse(d);const cmd=i.tool_input?.command||'';const n=' Use 1./2./3. for numbered lists, never #1/#2/#3.';const m=/\\bgit\\s+(commit|push)\\b|\\bgh\\s+pr\\s+(create|edit)\\b/.test(cmd)?'Load the gitwise:commit-pr-writing and gitwise:github-conventions skills.'+n:/\\bgh\\s+(pr|issue)\\s+(create|comment|edit)|\\bgh\\s+pr\\s+review\\b|\\bgit\\s+tag\\b/.test(cmd)?'Load the gitwise:github-conventions skill.'+n:'';if(m){console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'PreToolUse',additionalContext:m}}));}else if(i&&typeof i==='object'&&!Array.isArray(i)){console.log(d)}}catch{}})\"",
             "statusMessage": "Checking GitHub conventions..."
           }
         ],
-        "description": "Load github-conventions for GitHub writes (gh pr/issue create/comment/edit, gh pr review, git commit/push/tag)"
+        "description": "Load commit-pr-writing and github-conventions before git commit/push and gh pr create/edit, github-conventions alone before gh issue create/comment/edit, gh pr comment/review and git tag"
       }
     ]
   }

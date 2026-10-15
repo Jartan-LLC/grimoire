@@ -6,5 +6,5 @@
     "name": "Jartan LLC",
     "url": "https://github.com/Jartan-LLC"
   },
-  "dependencies": [{ "name": "gitwise", "version": "^1.0.0" }]
+  "dependencies": [{ "name": "gitwise", "version": "^1.2.0" }]
 }

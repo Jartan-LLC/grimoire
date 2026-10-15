@@ -7,8 +7,9 @@
 - Your agent follows your project's commit convention, and Conventional Commits only
   where none is stated. It marks a change as breaking only when it breaks something
   for your users.
-- Before writing a PR title and description, the agent checks how your repository
-  merges PRs, so it knows which text ends up on your default branch.
+- New `commit-pr-writing` skill: what a commit message, a PR title and a PR description say, and which of them lands on your default branch under your repository's merge setting.
+- `github-conventions`: a fix to a commit not yet pushed is folded into that commit, and a pushed commit is never rewritten.
+- The hook names `commit-pr-writing` and `github-conventions` before `git commit`, `git push`, `gh pr create` and `gh pr edit`, and `github-conventions` alone before other GitHub writes.
 
 ## 1.1.2
 

@@ -50,12 +50,12 @@ every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `
 - Don't wrap things the underlying library already expresses clearly.
 - Don't speculate about fixes -- investigate first, then propose.
 - Don't hardcode derived counts in prose or comments -- they drift silently.
-- Comments state only the load-bearing why. A change's reason goes in its commit message,
-  written for a later reader of `main` (the squash commit keeps every branch commit
-  message): what changed in brief, then the reason and technical detail -- no file lists,
-  no review-round narration, from debugging only what was learned. The PR description
-  briefs the reviewer: what the change is for, what the diff alone hides, how it was
-  verified, and anything the merger must do.
+- Comments state only the load-bearing why; a change's reason goes in its commit message.
+- Grimoire squash-merges PRs with GitHub's default commit message, unedited, so every
+  commit message on a branch lands on `main`. Before writing a commit message, a PR title
+  or a PR description, read `plugins/gitwise/skills/commit-pr-writing/SKILL.md` (the
+  `gitwise:commit-pr-writing` skill); a commit message never lists files or narrates
+  review rounds.
 
 ## Tier 3 (Preferences)
 <!-- Degraded gracefully. -->

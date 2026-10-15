@@ -18,9 +18,10 @@ codex plugin marketplace add Jartan-LLC/grimoire
 codex plugin add praxis@grimoire
 ```
 
-Praxis requires the `gitwise` plugin for commit format, branch naming, and PR
-conventions, and declares it as a dependency -- Claude Code installs `gitwise`
-automatically. To install it explicitly, run `/plugin install gitwise`.
+Praxis requires the `gitwise` plugin for commit format, commit message and PR
+description writing, branch naming, and PR conventions, and declares it as a
+dependency -- Claude Code installs `gitwise` automatically. To install it
+explicitly, run `/plugin install gitwise`.
 
 Codex does not read plugin dependencies, so install it there yourself:
 

@@ -26,7 +26,7 @@ const KNOWN_DEFECTS = {
 // Hooks the large-context payload drives down their output path, so silence there
 // means the hook stopped doing its job.
 const SPEAKS_ON_LARGE_CONTEXT = new Set([
-  'gitwise Load github-conventions for GitHub writes (gh pr/issue create/comment/edit, gh pr review, git commit/push/tag)',
+  'gitwise Load commit-pr-writing and github-conventions before git commit/push and gh pr create/edit, github-conventions alone before gh issue create/comment/edit, gh pr comment/review and git tag',
   'praxis Prompt the model to load the skills relevant to the task',
   'praxis Suggest manual compaction at logical intervals',
   'praxis Check for console.log in changed files after an edit',
