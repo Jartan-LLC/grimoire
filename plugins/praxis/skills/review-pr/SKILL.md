@@ -36,7 +36,7 @@ If code changed public behavior, `doc-reviewer` must run -- it owns doc-code mis
 
 ### 4. Post Review
 
-Reviewers flag findings they could not confirm as `suspected` (they have no web access, and some issues resist static reading). Before posting, resolve each: verify post-cutoff versions against a live source, confirm others by re-reading the code; post anything still unresolved under **Suspected** as a question -- never silently dropped. Then post the review as a PR comment following `review-format.md` in the `gitwise:github-conventions` skill, ending with the reply hint `-- reply with /praxis:address-review <pr-number> to work through findings`:
+Reviewers flag findings they could not confirm as `suspected` (they have no web access, and some issues resist static reading). Before posting, resolve each: verify post-cutoff versions against a live source, confirm others by re-reading the code; post anything still unresolved under **Suspected** as a question -- never silently dropped. Then post the review as a PR comment following `review-format.md` in the `gitwise:github-conventions` skill:
 
 ```bash
 gh pr comment <pr-number> --body "<review comment>"

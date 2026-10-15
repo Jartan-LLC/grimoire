@@ -3,6 +3,7 @@
 ## 1.5.3
 
 - The `git push` hook prints nothing when stdin is not a JSON object (malformed JSON, `[]`, `"x"`); it used to echo it back.
+- `plan-issue`, `implement-issue`, `create-pr` and `review-pr` no longer end the comment they post with a hint naming the next `/praxis:` command to run.
 
 ## 1.5.2
 
