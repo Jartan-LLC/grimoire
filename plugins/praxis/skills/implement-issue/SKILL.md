@@ -8,6 +8,8 @@ argument-hint: Issue number (may include additional context)
 
 Implement changes for a GitHub issue.
 
+Where the project's own rules say otherwise, follow them.
+
 ## Process
 
 ### 1. Load Context
@@ -22,7 +24,7 @@ Also check `.claude/workspace/` for any plan files related to this issue. If no 
 
 ### 2. Setup Branch
 
-Check existing local and remote branches for one related to this issue -- it may be named by issue number (`feature/issue-123`) or by description (`feature/audit-improvements`). If one exists, check it out. If not, create a new branch. For sub-issues of a larger feature, branch from the parent feature branch rather than main.
+Load the `gitwise:github-conventions` skill. Check existing local and remote branches for one related to this issue -- it may be named by issue number (`feature/issue-123`) or by description (`feature/audit-improvements`). If one exists, check it out. If not, create a new branch. For sub-issues of a larger feature, branch from the parent feature branch rather than main.
 
 ### 3. Read Relevant Docs
 
@@ -30,7 +32,7 @@ Based on the issue area, read the appropriate project documentation in `docs/`.
 
 ### 4. Implement
 
-Follow the plan if one exists. Work through changes methodically. Make progressive commits as logical units of work are completed rather than one monolithic commit at the end.
+Load the `gitwise:commit-pr-writing` skill. Follow the plan if one exists. Work through changes methodically. Make progressive commits as logical units of work are completed rather than one monolithic commit at the end, writing each commit message as `gitwise:commit-pr-writing` says.
 
 ### 5. Update Documentation
 
@@ -42,7 +44,7 @@ Run the Verify commands from `CLAUDE.md`. Fix any failures and commit the fixes 
 
 ### 7. Push
 
-Push the branch with all commits.
+Push the branch with all commits. If the branch already has a PR (`gh pr view --json number,title,body,baseRefName`), check its title and description against `git diff <baseRefName>...HEAD`, update what no longer holds as `gitwise:commit-pr-writing` says (`gh pr edit <number>`), and tell the user what you changed.
 
 ### 8. Post Summary
 

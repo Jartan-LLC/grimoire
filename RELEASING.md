@@ -100,11 +100,13 @@ tags above:
 }
 ```
 
-`praxis` declares `gitwise` (`^1.0.0`): its reviewer and planner agents load the
+`praxis` declares `gitwise` (`^1.2.0`): its reviewer and planner agents load the
 `gitwise:github-conventions` skill, so `gitwise` must be present for them to
-resolve. Declaring it makes Claude Code auto-install `gitwise` alongside
-`praxis`. Add a `dependencies` entry only for a real requirement like this, and
-keep its constraint pinned to a tested range.
+resolve, and `implement-issue`, `create-pr` and `address-review` load
+`gitwise:commit-pr-writing`, which gitwise 1.2.0 ships first. Declaring it makes
+Claude Code auto-install `gitwise` alongside `praxis`. Add a `dependencies` entry
+only for a real requirement like this, and keep its constraint pinned to a tested
+range.
 
 Because constraints resolve against the `{plugin-name}--v{version}` tags above, a
 dependency must be tagged **before or with** the plugin that requires it -- tag

@@ -31,7 +31,7 @@ every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `
 - Commit or push only when explicitly asked or instructed by a command. A Liza workflow
   step that commits counts as that instruction; none counts for pushing or opening pull
   requests, which stay human-initiated.
-- State the reason for every dependency you add.
+- State the reason for every dependency you add in the commit message that adds it.
 
 ## Tier 2 (Strong Defaults)
 <!-- Best-effort under pressure. -->
@@ -50,8 +50,12 @@ every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `
 - Don't wrap things the underlying library already expresses clearly.
 - Don't speculate about fixes -- investigate first, then propose.
 - Don't hardcode derived counts in prose or comments -- they drift silently.
-- Comments state only the load-bearing why. Rationale goes in the commit message; a PR
-  body carries only the gotchas.
+- Comments state only the load-bearing why; a change's reason goes in its commit message.
+- Grimoire squash-merges PRs with GitHub's default commit message, unedited, so every
+  commit message on a branch, merges from `main` aside, lands on `main`. Before writing a commit message, a PR title
+  or a PR description, read `plugins/gitwise/skills/commit-pr-writing/SKILL.md` (the
+  `gitwise:commit-pr-writing` skill); a commit message never lists files or narrates
+  review rounds.
 
 ## Tier 3 (Preferences)
 <!-- Degraded gracefully. -->

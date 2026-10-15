@@ -1,7 +1,6 @@
 ## Summary
 
-<!-- What changed and why. Focus on motivation, not restating the diff.
-     Note any breaking changes. -->
+<!-- What this is for, and what the diff alone would let a reviewer miss. The reasons go in the commit messages. -->
 
 ## Related issues
 
@@ -9,4 +8,4 @@
 
 ## How to verify
 
-<!-- How you tested this, or how a reviewer can verify it works. Delete this section if N/A. -->
+<!-- What you ran and what it showed. -->

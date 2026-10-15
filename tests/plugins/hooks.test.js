@@ -27,6 +27,7 @@ const KNOWN_DEFECTS = {
 // means the hook stopped doing its job.
 const SPEAKS_ON_LARGE_CONTEXT = new Set([
   'gitwise Load github-conventions for GitHub writes (gh pr/issue create/comment/edit, gh pr review, git commit/push/tag)',
+  'gitwise Load commit-pr-writing on commit and PR text writes (git commit/push, gh pr create/edit)',
   'praxis Prompt the model to load the skills relevant to the task',
   'praxis Suggest manual compaction at logical intervals',
   'praxis Check for console.log in changed files after an edit',

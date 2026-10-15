@@ -9,6 +9,8 @@ user-invocable: false
 
 CRITICAL: `#<number>` auto-links to issues/PRs on GitHub. Use `1.`/`2.`/`3.` for numbered lists and "Finding 1:"/"Item 1:" for labeled items -- never `#1`, `#2`, `#3` as markers.
 
+Where the project's own rules say otherwise, follow them.
+
 ## Authentication
 
 **Never reconfigure auth transport to unblock a command.** Don't switch the remote
@@ -26,10 +28,13 @@ For sub-issues of a larger feature, branch from the parent feature branch rather
 
 ## Commits
 
-Conventional commits format: `<type>: description`
+Follow the project's commit convention, as CONTRIBUTING, a commitlint config or the agent instructions state it, or as recent single-commit subjects on the default branch show it. Where none does, use Conventional Commits: `<type>(<scope>): <description>`, with a type from commitlint's config-conventional (`build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`, `test`); the scope is optional.
 
-Types: `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`, `chore:`
-Optional scope: `feat(frontend): description`
+Mark a change that breaks something for the project's consumers the way the convention and the project's release tool read it: `!` before the colon, a `BREAKING CHANGE:` footer, or both; where you cannot tell, both. A one-time action only contributors owe (rebuild the dev container) takes no breaking mark.
+
+While a commit is not yet pushed, fold a further fix to the same change into it (`git commit --amend` for the last commit) instead of adding a commit. Never rewrite a pushed commit.
+
+For what a commit message, a PR title and a PR description say, and which of them lands on the default branch, load `gitwise:commit-pr-writing`.
 
 ## Issues
 

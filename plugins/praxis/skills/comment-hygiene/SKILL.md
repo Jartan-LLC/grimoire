@@ -93,9 +93,9 @@ Every rule above weighs one comment against the code beside it, so a diff can pa
 
 **Trigger** -- a signal to re-read, never a budget to hit: added comment lines approaching or exceeding added code lines, or a rationale on nearly every changed block. Then re-read each one presuming it goes; keep only what KEEP, EXEMPT or CONDITIONAL keeps.
 
-**The usual cause is PR narration** -- the author explains the change to the reviewer, then writes that explanation into the file. Sort by reader: a sentence aimed at whoever reads the **diff** belongs in the PR body, where it is read once by the reader it was written for and never rots; only a sentence aimed at whoever reads the **file** years later stays. The migration story, this change's before/after measurement, and the comparison to what used to be here are all the first kind (and the last is a Tombstone besides). A standing hot-path fact a future editor needs is a WHY and stays (see KEEP).
+**The usual cause is PR narration** -- the author explains the change to the reviewer, then writes that explanation into the file. Sort by reader: a sentence aimed at whoever reads the **diff** is about the change, not the file. The change's reason, its before/after measurement, and the comparison to what used to be here (a Tombstone besides) go in the commit message, where whoever traces the change finds them; a note only the reviewer needs goes in the PR description; the story of how the work went goes nowhere. Under another merge setting, `gitwise:commit-pr-writing` says where these go. Only a sentence aimed at whoever reads the **file** years later stays. A standing hot-path fact a future editor needs is a WHY and stays (see KEEP).
 
-**A rejected alternative splits on that same test.** One a future editor would otherwise re-attempt is a WHY and stays inline; one that only explains why *this change* looks the way it does goes in the PR body.
+**A rejected alternative splits on that same test.** One a future editor would otherwise re-attempt is a WHY and stays inline; one that only explains why *this change* looks the way it does goes in the commit message.
 
 ## Meta-rule
 

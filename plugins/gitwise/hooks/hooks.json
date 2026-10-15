@@ -6,11 +6,22 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const i=JSON.parse(d);const cmd=i.tool_input?.command||'';if(/\\bgh\\s+(pr|issue)\\s+(create|comment|edit)|\\bgh\\s+pr\\s+review\\b|\\bgit\\s+(commit|push|tag)\\b/.test(cmd)){console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'PreToolUse',additionalContext:'Load the github-conventions skill. Use 1./2./3. for numbered lists, never #1/#2/#3. Follow conventional commits for commit messages.'}}));}else if(i&&typeof i==='object'&&!Array.isArray(i)){console.log(d)}}catch{}})\"",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const i=JSON.parse(d);const cmd=i.tool_input?.command||'';if(/\\bgh\\s+(pr|issue)\\s+(create|comment|edit)|\\bgh\\s+pr\\s+review\\b|\\bgit\\s+(commit|push|tag)\\b/.test(cmd)){console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'PreToolUse',additionalContext:'Load the gitwise:github-conventions skill.'}}));}else if(i&&typeof i==='object'&&!Array.isArray(i)){console.log(d)}}catch{}})\"",
             "statusMessage": "Checking GitHub conventions..."
           }
         ],
         "description": "Load github-conventions for GitHub writes (gh pr/issue create/comment/edit, gh pr review, git commit/push/tag)"
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const i=JSON.parse(d);const cmd=i.tool_input?.command||'';if(/\\bgit\\s+(commit|push)\\b|\\bgh\\s+pr\\s+(create|edit)\\b/.test(cmd)){console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'PreToolUse',additionalContext:'Load the gitwise:commit-pr-writing skill.'}}));}else if(i&&typeof i==='object'&&!Array.isArray(i)){console.log(d)}}catch{}})\"",
+            "statusMessage": "Checking commit and PR writing..."
+          }
+        ],
+        "description": "Load commit-pr-writing on commit and PR text writes (git commit/push, gh pr create/edit)"
       }
     ]
   }

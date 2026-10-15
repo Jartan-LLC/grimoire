@@ -8,6 +8,8 @@ argument-hint: Issue number (may include additional context)
 
 Create a pull request from the current implementation branch for a GitHub issue.
 
+Where the project's own rules say otherwise, follow them.
+
 ## Process
 
 ### 1. Verify Branch
@@ -16,25 +18,29 @@ Check existing local and remote branches for one related to this issue -- it may
 
 ### 2. Get Issue Context
 
-Determine the issue number from the user's request and fetch details:
+Determine the issue number from the user's request and fetch the issue with its comments, the plan among them:
 
 ```bash
-gh issue view <issue-number>
+gh issue view <issue-number> --comments
 ```
 
 ### 3. Review All Changes
 
-Determine the correct base branch -- `main` for regular branches, or the parent feature branch for sub-issue branches. Read `git diff <base>` to understand the full scope of changes. Note what was added, modified, and removed.
+Load the `gitwise:commit-pr-writing` and `gitwise:github-conventions` skills. Determine the correct base branch -- `main` for regular branches, or the parent feature branch for sub-issue branches. Read `git diff <base>...HEAD` and the branch's commit messages (`git log <base>..HEAD`). Note what this session changed outside the diff (settings, tags, secrets) or did not run, and ask the user about changes outside the diff that this session did not make.
 
 ### 4. Create Pull Request
 
-Read `.github/PULL_REQUEST_TEMPLATE.md` for the expected format, then create the PR:
+Read `.github/PULL_REQUEST_TEMPLATE.md` if the project has one, and write the PR title and description as `gitwise:commit-pr-writing` says. Then create the PR:
 
 ```bash
-gh pr create --title "<type>: <description>" --body "<body following template>" --base <base-branch>
+gh pr create --title "<title>" --body "<description>" --base <base-branch>
 ```
 
-Include `Closes #<issue-number>` in the body.
+Include `Closes #<issue-number>` in the body. If `gitwise:commit-pr-writing` puts notes for the reviewer in a PR comment, post it:
+
+```bash
+gh pr comment <pr-number> --body "<notes>"
+```
 
 ### 5. Post Update
 

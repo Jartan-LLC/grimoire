@@ -22,11 +22,14 @@ codex plugin add gitwise@grimoire
 
 ### Skills
 
-- **github-conventions** -- branch naming (`feature/<desc>`), conventional commits (`feat:`, `fix:`, etc.), numbered list formatting (avoids `#N` auto-linking), plan format for implementation plans
+- **commit-pr-writing** -- what a commit message, a PR title and a PR description say, and which of them lands on the default branch under the repository's merge setting
+- **github-conventions** -- branch naming (`feature/<desc>`), commit format (the project's convention, Conventional Commits where none is stated), numbered list formatting (avoids `#N` auto-linking), plan format for implementation plans
 
 ### Hooks
 
-- **PreToolUse** -- prompts the model to load the conventions before a GitHub write: `gh pr` or `gh issue` `create`/`comment`/`edit`, `gh pr review`, `git commit`, `git push` and `git tag`. Read-only commands (`gh pr view`, `gh pr list`, `git status`) pass through.
+- **PreToolUse**, two hooks that prompt the model to load a skill when it makes a GitHub write. The prompt arrives with that command's result, so it shapes the next write, not the one that fired it. Read-only commands (`gh pr view`, `gh pr list`, `git status`) pass through.
+  - `github-conventions` on `gh pr`/`gh issue` `create`/`comment`/`edit`, `gh pr review` and `git commit`/`push`/`tag`.
+  - `commit-pr-writing` on `git commit`, `git push`, `gh pr create` and `gh pr edit`.
 
 ## License
 

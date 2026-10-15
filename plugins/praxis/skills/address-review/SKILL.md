@@ -10,6 +10,8 @@ Work through code review findings on a pull request, investigating each one and 
 
 **Always pause for the user's decision on each finding** -- even in auto mode, even if the reviewer or your own assessment recommends skipping. Auto mode grants tool access, not decision authority; the user decides what to fix, skip, or adjust.
 
+Where the project's own rules say otherwise, follow them.
+
 ## Process
 
 ### 1. Load Review
@@ -24,7 +26,7 @@ There may be multiple review comments in the history -- use only the most recent
 
 ### 2. Check Out Branch
 
-Ensure the PR's branch is checked out locally so fixes can be applied.
+Ensure the PR's branch is checked out locally so fixes can be applied. Load the `gitwise:commit-pr-writing` and `gitwise:github-conventions` skills. Check the PR title and description (`gh pr view <pr-number> --json title,body,baseRefName`) against `git diff <baseRefName>...HEAD`, update what no longer holds as `gitwise:commit-pr-writing` says (`gh pr edit <pr-number>`), and tell the user what you changed.
 
 ### 3. Walk Through Findings
 
@@ -36,18 +38,12 @@ Work through each finding sequentially. For each one:
 
 Do NOT blindly apply every suggestion. Investigate first -- the reviewer may have missed context, flagged a pattern that's intentional, or suggested a fix that creates inconsistency with the rest of the codebase.
 
-When the user agrees to skip a finding, post a brief PR comment explaining why it was declined:
-
-```bash
-gh pr comment <pr-number> --body "**Re: <finding title>** -- <concise reason for skipping>"
-```
+When the user agrees to skip a finding, note it and the reason for the round's PR comment (step 5).
 
 ### 4. Commit
 
-The user may ask to commit at any point during the review -- commit what's been done so far and continue with the remaining findings. Use the format:
+The user may ask to commit at any point during the review -- commit what's been done so far and continue with the remaining findings. Write each commit message as `gitwise:commit-pr-writing` says. Never push unless the user explicitly asks.
 
-```text
-fix(<scope>): address code review findings
-```
+### 5. Close the Round
 
-Include a bulleted list of what was changed in the commit body. Never push unless the user explicitly asks.
+Write the round's answers as one PR comment: for each finding, fixed (and where), fixed differently (how and why), or declined (why). Once the round's commits are pushed, post it (`gh pr comment <pr-number> --body "<answers>"`) and check the PR title and description as in step 2. Until then, tell the user the comment is ready and that the PR title and description need that check after the push.
