@@ -8,6 +8,8 @@ argument-hint: Issue number (may include additional context)
 
 Create a pull request from the current implementation branch for a GitHub issue.
 
+Where the project's own rules say otherwise, follow them.
+
 ## Process
 
 ### 1. Verify Branch
@@ -24,14 +26,22 @@ gh issue view <issue-number>
 
 ### 3. Review All Changes
 
-Determine the correct base branch -- `main` for regular branches, or the parent feature branch for sub-issue branches. Read `git diff <base>` to understand the full scope of changes. Note what was added, modified, and removed.
+Determine the correct base branch -- `main` for regular branches, or the parent feature branch for sub-issue branches. Read `git diff <base>...HEAD`, the branch's commit messages (`git log <base>..HEAD`), the issue and its plan comment (`gh issue view <issue-number> --comments`), and what this session changed outside the diff (settings, tags, secrets) or did not run. From them, find what the diff alone would let a reviewer miss; ask the user about changes outside the diff that this session did not make. Do not list what was added, modified, and removed.
 
 ### 4. Create Pull Request
 
-Read `.github/PULL_REQUEST_TEMPLATE.md` for the expected format, then create the PR:
+Learn how the project merges, as `gitwise:github-conventions` describes: the merge setting decides which text becomes the squash commit's message.
+
+**Title.** Write the PR title as a commit subject: GitHub uses it as the squash commit's subject for a PR with two or more commits under the default setting, and for every PR under the "Pull request title ..." settings. Name the one change and its component in the project's commit format (`<type>(<scope>): <description>` under Conventional Commits). Mark a change that breaks something for the project's consumers the way the project's convention and release tool read it: under Conventional Commits, `!` before the colon, a `BREAKING CHANGE:` footer in the commit, or both; where you cannot tell, both. A one-time action only contributors owe (rebuild the dev container) takes no breaking mark: flag it in the PR description.
+
+**Description.** Read `.github/PULL_REQUEST_TEMPLATE.md` if the project has one, then write for the merge setting:
+
+- Where the PR description does not become the squash commit's message (GitHub's default), it is the reviewer's briefing: a merge dependency first, as a fact ("Requires #52."), if there is one; what the change is for, in a sentence or two; what the diff alone would let a reviewer miss; how the change was verified; anything the merger or contributors must do. The reasons stay in the commit messages: do not retell them or the diff. Under "Pull request title", add the reasons to the PR description too.
+- Where the PR description becomes the squash commit's message, write it as that commit message: start from `git log <base>..HEAD` and the final diff (for a single-commit PR, from that commit's message); give the reasons, and write the intent, flags and verification as facts; each paragraph on one unwrapped line; no template comments or placeholder. Post reviewer notes in a PR comment after creating the PR.
+- Where the merge setting is unknown and nobody can be asked, follow the default in `gitwise:github-conventions`.
 
 ```bash
-gh pr create --title "<type>: <description>" --body "<body following template>" --base <base-branch>
+gh pr create --title "<title>" --body "<description>" --base <base-branch>
 ```
 
 Include `Closes #<issue-number>` in the body.

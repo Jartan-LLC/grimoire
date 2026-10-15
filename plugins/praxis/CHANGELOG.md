@@ -3,6 +3,12 @@
 ## 1.5.3
 
 - The `git push` hook prints nothing when stdin is not a JSON object (malformed JSON, `[]`, `"x"`); it used to echo it back.
+- Commit messages your agent writes, review fixes included, give the reason for the
+  change instead of a list of edits, and say nothing about review rounds.
+- PR descriptions brief the reviewer: what the change is for, what the diff hides, how
+  it was verified, and anything to do at merge. After each review round the agent
+  checks that the PR title and description still match the change.
+- The workflow skills follow your project's own rules where they differ.
 
 ## 1.5.2
 

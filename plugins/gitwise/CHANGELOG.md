@@ -3,6 +3,11 @@
 ## 1.1.3
 
 - The `PreToolUse` hook prints nothing when stdin is not a JSON object (malformed JSON, `[]`, `"x"`); it used to echo it back.
+- Your agent follows your project's commit convention, and Conventional Commits only
+  where none is stated. It marks a change as breaking only when it breaks something
+  for your users.
+- Before writing a PR title and description, the agent checks how your repository
+  merges PRs, so it knows which text ends up on your default branch.
 
 ## 1.1.2
 

@@ -22,7 +22,7 @@ codex plugin add gitwise@grimoire
 
 ### Skills
 
-- **github-conventions** -- branch naming (`feature/<desc>`), conventional commits (`feat:`, `fix:`, etc.), numbered list formatting (avoids `#N` auto-linking), plan format for implementation plans
+- **github-conventions** -- branch naming (`feature/<desc>`), commit format (the project's convention, Conventional Commits where none is stated), how the merge setting decides which text lands on the default branch, numbered list formatting (avoids `#N` auto-linking), plan format for implementation plans
 
 ### Hooks
 

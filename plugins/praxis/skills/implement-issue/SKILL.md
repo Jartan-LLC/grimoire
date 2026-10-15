@@ -8,6 +8,8 @@ argument-hint: Issue number (may include additional context)
 
 Implement changes for a GitHub issue.
 
+Where the project's own rules say otherwise, follow them.
+
 ## Process
 
 ### 1. Load Context
@@ -30,7 +32,7 @@ Based on the issue area, read the appropriate project documentation in `docs/`.
 
 ### 4. Implement
 
-Follow the plan if one exists. Work through changes methodically. Make progressive commits as logical units of work are completed rather than one monolithic commit at the end.
+Follow the plan if one exists. Work through changes methodically. Make progressive commits as logical units of work are completed rather than one monolithic commit at the end. Write each commit message for a later reader of the default branch: its subject names its change; its body gives the reason and the technical detail, not a list of changed files; from debugging, keep what was learned and drop the chronology. Under GitHub's default squash every commit message goes into the squash commit's message.
 
 ### 5. Update Documentation
 
@@ -42,7 +44,7 @@ Run the Verify commands from `CLAUDE.md`. Fix any failures and commit the fixes 
 
 ### 7. Push
 
-Push the branch with all commits.
+Push the branch with all commits. If a PR exists and its description becomes the squash commit's message (see `gitwise:github-conventions`), rewrite the PR title and description to describe the head commit after the push, as `address-review` step 5 describes.
 
 ### 8. Post Summary
 

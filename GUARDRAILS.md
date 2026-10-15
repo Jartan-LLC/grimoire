@@ -31,7 +31,7 @@ every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `
 - Commit or push only when explicitly asked or instructed by a command. A Liza workflow
   step that commits counts as that instruction; none counts for pushing or opening pull
   requests, which stay human-initiated.
-- State the reason for every dependency you add.
+- State the reason for every dependency you add in the commit message that adds it.
 
 ## Tier 2 (Strong Defaults)
 <!-- Best-effort under pressure. -->
@@ -50,8 +50,12 @@ every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `
 - Don't wrap things the underlying library already expresses clearly.
 - Don't speculate about fixes -- investigate first, then propose.
 - Don't hardcode derived counts in prose or comments -- they drift silently.
-- Comments state only the load-bearing why. Rationale goes in the commit message; a PR
-  body carries only the gotchas.
+- Comments state only the load-bearing why. A change's reason goes in its commit message,
+  written for a later reader of `main` (the squash commit keeps every branch commit
+  message): what changed in brief, then the reason and technical detail -- no file lists,
+  no review-round narration, from debugging only what was learned. The PR description
+  briefs the reviewer: what the change is for, what the diff alone hides, how it was
+  verified, and anything the merger must do.
 
 ## Tier 3 (Preferences)
 <!-- Degraded gracefully. -->
