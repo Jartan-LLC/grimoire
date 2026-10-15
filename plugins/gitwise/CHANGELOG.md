@@ -9,7 +9,7 @@
   for your users.
 - New `commit-pr-writing` skill: what a commit message, a PR title and a PR description say, and which of them lands on your default branch under your repository's merge setting.
 - `github-conventions`: a fix to a commit not yet pushed is folded into that commit, and a pushed commit is never rewritten.
-- The hook names `commit-pr-writing` and `github-conventions` before `git commit`, `git push`, `gh pr create` and `gh pr edit`, and `github-conventions` alone before other GitHub writes.
+- A second hook prompts the model to load `commit-pr-writing` on `git commit`, `git push`, `gh pr create` and `gh pr edit`. The existing hook now only names `github-conventions`, which already holds the numbered-list and commit-convention rules it used to repeat.
 
 ## 1.1.2
 
