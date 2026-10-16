@@ -2,7 +2,7 @@
 
 ## 1.7.0
 
-- `docs-patterns` has rules for READMEs, CONTRIBUTING.md, release procedures such as RELEASING.md, changelog entries and release notes, and agent instruction files such as CLAUDE.md and AGENTS.md. Before writing a convention your project has not settled, your agent asks you; when nobody can answer, it leaves the convention out and says so in the PR description.
+- `docs-patterns` has rules for READMEs, CONTRIBUTING.md, release procedures such as RELEASING.md, changelog entries and release notes, and agent instruction files such as CLAUDE.md and AGENTS.md. When it writes CONTRIBUTING.md, a release procedure or an agent instruction file, your agent asks you before adding a convention your project has not settled; when nobody can answer, it leaves the convention out and says so in the PR description.
 - `implement-issue` searches your READMEs and agent instruction files for what the change makes false, updates CONTRIBUTING.md, the release procedure and the changelog where the change touches them, and reads that document's rules before writing it.
 - `doc-reviewer` checks a changed README, CONTRIBUTING.md, release procedure, changelog or agent instruction file against that document's review checks, and its summary names the reference files it applied.
 

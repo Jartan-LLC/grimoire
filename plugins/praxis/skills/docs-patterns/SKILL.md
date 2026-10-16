@@ -38,7 +38,7 @@ Before editing one of these, read its file in this skill's directory; a reviewer
 | A README, including a package page or a component's README | `readme.md` |
 | CONTRIBUTING.md or other contributor docs | `contributing.md` |
 | RELEASING.md or another release procedure | `releasing.md` |
-| CLAUDE.md, AGENTS.md, the files they import, `.claude/rules/` | `agent-files.md` |
+| CLAUDE.md, AGENTS.md, the files they import or name as the rules, `.claude/rules/`, other tools' equivalents | `agent-files.md` |
 
 ## Section Structure
 
