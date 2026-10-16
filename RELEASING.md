@@ -32,6 +32,10 @@ push. A tag you push by hand still triggers `release.yml` on its own.
 job creates only the tags that do not exist yet, never moves one, and passes every tag
 the commit owes to `release.yml`, which skips a GitHub Release that already exists.
 
+**CI failed on the push that bumped a version**, so `release-tags` never ran and a
+later push will not tag it: each run looks only at its own push. Once CI can pass at
+that commit, re-run its CI run; if it cannot, tag the version by hand as below.
+
 **A version needs a tag by hand** (the job cannot run, or the version predates it).
 Check that its dependencies have tags their constraints accept
 ([Dependencies](#dependencies)) and that you may push tags (an agent only when

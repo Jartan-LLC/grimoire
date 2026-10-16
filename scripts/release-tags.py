@@ -37,7 +37,7 @@ def parse_manifest(text: str) -> Manifest:
     return Manifest(version=str(data["version"]), dependencies=frozenset(names))
 
 
-def due_tags(head: dict[str, Manifest], base: dict[str, Manifest]) -> list[str]:
+def due_tags(*, base: dict[str, Manifest], head: dict[str, Manifest]) -> list[str]:
     """Tags for plugins whose version differs from base, dependencies first.
 
     A plugin new at head counts as changed. Plugins with no ordering constraint
@@ -63,8 +63,17 @@ def due_tags(head: dict[str, Manifest], base: dict[str, Manifest]) -> list[str]:
 
 
 def manifests_at(ref: str) -> dict[str, Manifest]:
-    """Every plugin's manifest at a git ref; empty when the ref does not exist."""
+    """Every plugin's manifest at a git ref; empty when that commit has no plugins/.
+
+    A ref that does not name a commit raises CalledProcessError: read as "no
+    plugins", a bad base would make every plugin look new.
+    """
     # Argument lists, never a shell: a ref is one argv item however it is spelt.
+    subprocess.run(  # noqa: S603
+        [GIT, "rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}"],
+        capture_output=True,
+        check=True,
+    )
     listing = subprocess.run(  # noqa: S603
         [GIT, "ls-tree", "-d", "--name-only", f"{ref}:plugins"],
         capture_output=True,
@@ -93,7 +102,7 @@ def main() -> int:
     except ValueError:
         print(__doc__, file=sys.stderr)
         return 2
-    for tag in due_tags(manifests_at(head_ref), manifests_at(base_ref)):
+    for tag in due_tags(base=manifests_at(base_ref), head=manifests_at(head_ref)):
         print(tag)
     return 0
 

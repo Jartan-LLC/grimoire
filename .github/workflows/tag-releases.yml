@@ -11,23 +11,21 @@ permissions: {}
 jobs:
   tag:
     runs-on: ubuntu-24.04
-    concurrency:
-      group: tag-releases
-      cancel-in-progress: false
     timeout-minutes: 10
     permissions:
       contents: write
     outputs:
       tags: ${{ steps.plan.outputs.tags }}
     steps:
-      # The commit CI tested, with its parent: main is squash-merged, so the parent
-      # is the state before this PR.
+      # The commit CI tested, with full history: the push's base can be several
+      # commits back (a rebase merge pushes them all at once).
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
-          fetch-depth: 2
+          fetch-depth: 0
           persist-credentials: false
 
+      # Diffs the push's base against its tip, so a bump anywhere in the push counts.
       # Refs go through the API, so no git credential is left in the checkout. An
       # existing tag is never moved, but it is still released: on a re-run after a
       # failed release, release.yml skips any release that already exists.
@@ -37,16 +35,24 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           HEAD_SHA: ${{ github.sha }}
+          BEFORE: ${{ github.event.before }}
         run: |
+          base="$BEFORE"
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+            base="$HEAD_SHA^"
+          fi
           gh api --paginate "repos/$GH_REPO/git/matching-refs/tags/" \
             --jq '.[].ref | sub("^refs/tags/"; "")' > existing.txt
-          python3 scripts/release-tags.py "$HEAD_SHA^" "$HEAD_SHA" > due.txt
+          python3 scripts/release-tags.py "$base" "$HEAD_SHA" > due.txt
           while read -r tag; do
             if grep -qxF "$tag" existing.txt; then
               echo "exists $tag"
-            else
-              gh api "repos/$GH_REPO/git/refs" -f ref="refs/tags/$tag" -f sha="$HEAD_SHA" > /dev/null
+            elif gh api "repos/$GH_REPO/git/refs" -f ref="refs/tags/$tag" -f sha="$HEAD_SHA" > /dev/null; then
               echo "tagged $tag"
+            elif gh api "repos/$GH_REPO/git/ref/tags/$tag" > /dev/null 2>&1; then
+              echo "exists $tag (created meanwhile)"
+            else
+              exit 1
             fi
           done < due.txt
           echo "tags=$(jq -R -s -c 'split("\n") | map(select(length > 0))' due.txt)" >> "$GITHUB_OUTPUT"
