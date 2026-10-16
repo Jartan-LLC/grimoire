@@ -2,8 +2,8 @@ name: Tag plugin releases
 
 # A version is released once it is on main (RELEASING.md), so each version a push to
 # main changes gets its {plugin}--v{version} tag, at the push's tip, and its GitHub
-# Release here. ci.yml calls this as its last job on that push, once every check has
-# passed.
+# Release here. ci.yml calls this on that push once verify, lint, typecheck and test
+# have passed; it does not wait for the dev container build.
 on:
   workflow_call:
 

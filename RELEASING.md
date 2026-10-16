@@ -13,8 +13,9 @@ Release, so tag every version.
 
 ## Tag a version
 
-Merging a version bump to `main` tags and releases it. Once every CI job passes on
-the push, `ci.yml`'s `release-tags` job (`release-tags.yml`) creates a
+Merging a version bump to `main` tags and releases it. Once CI's verify, lint,
+typecheck and test jobs pass on the push (the dev container build is not waited
+for), `ci.yml`'s `release-tags` job (`release-tags.yml`) creates a
 `{plugin-name}--v{version}` tag (double dash, leading `v`) at the push's tip for each
 plugin whose version the push changed, a dependency before the plugin that needs
 it, and calls `release.yml` for each. `release.yml` creates the GitHub Release, with
@@ -45,9 +46,9 @@ from before the per-plugin changelogs (praxis 1.5.0 and earlier, for one) lack; 
 the run fails without writing anything, so recreate the release by hand with
 `gh release create <tag> --verify-tag --notes-file <file>`.
 
-**CI failed on the push that bumped a version**, so `release-tags` never ran and a
-later push will not tag it: each run looks only at its own push. Once CI can pass at
-that commit, re-run its failed jobs; if it cannot, or `main`'s workflow files have
+**Verify, lint, typecheck or test failed on the push that bumped a version**, so
+`release-tags` never ran and a later push will not tag it: each run looks only at its
+own push. Once they can pass at that commit, re-run its failed jobs; if it cannot, or `main`'s workflow files have
 changed since, tag the version by hand as below.
 
 **A version needs a tag by hand** (the job cannot run, or the version predates it).

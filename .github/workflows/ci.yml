@@ -197,12 +197,17 @@ jobs:
             fi
           done
 
-  # Tags and releases each plugin version this push puts on main, once check has
-  # passed. The result test is explicit: an implicit success() also fails on a job
-  # skipped further up the chain (devcontainer, usually), which would skip this.
+  # Tags and releases each plugin version this push puts on main, once the checks of
+  # what a plugin ships have passed. The dev container build is not one of them, and
+  # it can run for most of an hour. Each result is tested explicitly: an implicit
+  # success() would also fail on a skipped job.
   release-tags:
-    needs: check
-    if: ${{ !cancelled() && needs.check.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs: [verify, lint, typecheck, test]
+    if: >-
+      ${{ !cancelled()
+      && needs.verify.result == 'success' && needs.lint.result == 'success'
+      && needs.typecheck.result == 'success' && needs.test.result == 'success'
+      && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     permissions:
       contents: write
     # actionlint 1.7.12 rejects the $/ self-repository form for a reusable workflow;
