@@ -92,8 +92,11 @@ def repo(tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> pathlib.Pat
 
 
 def test_manifests_at_reads_every_plugin_at_a_commit(repo: pathlib.Path) -> None:
+    # A directory under plugins/ without a plugin.json is not a plugin.
+    (repo / "plugins" / "notes").mkdir(parents=True)
+    (repo / "plugins" / "notes" / "README.md").write_text("x\n")
     sha = commit_plugins(repo, {"a": "1.0.0", "b": "2.0.0"}, "two plugins")
-    (repo / "plugins" / "notes").mkdir()
+    assert "notes" in git(repo, "ls-tree", "-d", "--name-only", f"{sha}:plugins").split()
     assert rt.manifests_at(sha) == {"a": m("1.0.0"), "b": m("2.0.0")}
 
 

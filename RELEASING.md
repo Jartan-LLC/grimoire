@@ -14,13 +14,13 @@ Release, so tag every version.
 ## Tag a version
 
 Merging a version bump to `main` tags and releases it. Once every CI job passes on
-the push, `ci.yml`'s `release-tags` job (`tag-releases.yml`) creates a
-`{plugin-name}--v{version}` tag (double dash, leading `v`) at that commit for each
-plugin whose version the commit changed, a dependency before the plugin that needs
+the push, `ci.yml`'s `release-tags` job (`release-tags.yml`) creates a
+`{plugin-name}--v{version}` tag (double dash, leading `v`) at the push's tip for each
+plugin whose version the push changed, a dependency before the plugin that needs
 it, and calls `release.yml` for each. `release.yml` creates the GitHub Release, with
 that version's changelog section at the tagged commit as its body. To confirm,
 `gh release view <name>--v<version>` shows the release, and the job's log is in the
-CI run for that commit (`gh run list --workflow ci.yml --commit <full commit sha>`).
+CI run for that push (`gh run list --workflow ci.yml --commit <full commit sha>`).
 
 The job creates tags through the API with `GITHUB_TOKEN`, and a tag created that way
 starts no workflow, so `release.yml` runs because the job calls it, not on the tag
@@ -30,12 +30,16 @@ push. A tag you push by hand still triggers `release.yml` on its own.
 
 **The `release-tags` job failed.** Re-run the CI run (`gh run rerun <run-id>`): the
 job creates only the tags that do not exist yet, never moves one, and passes every tag
-the commit owes to `release.yml`, which skips a GitHub Release that already exists.
+the push owes to `release.yml`, which skips a GitHub Release that already exists.
 
 **A GitHub Release needs rebuilding** (it was deleted to fix its notes, or it failed
 and its CI run can no longer be re-run). Run `release.yml` for the existing tag:
 `gh workflow run release.yml -f tag=<name>--v<version>`, or Run workflow on its
 Actions page. It never creates a tag, and it skips a release that already exists.
+It builds the notes with `scripts/check-changelogs.py --notes` at the tag, which tags
+from before the per-plugin changelogs (praxis 1.5.0 and earlier, for one) lack; there
+the run fails without writing anything, so recreate the release by hand with
+`gh release create <tag> --verify-tag --notes-file <file>`.
 
 **CI failed on the push that bumped a version**, so `release-tags` never ran and a
 later push will not tag it: each run looks only at its own push. Once CI can pass at
@@ -72,7 +76,9 @@ git switch -
 
 The forced push replaces the tag and runs `release.yml` again.
 
-**The tag points at the wrong commit.** The oldest commit that
+**The tag points at the wrong commit.** `main` takes squash merges only, so a push
+carries one commit and the tag sits on the commit that set the version. The oldest
+commit that
 `git log --reverse -G'"version": "<version>"' -- plugins/<name>/.claude-plugin/plugin.json`
 lists set the version. The tag is wrong when the plugin's files differ there:
 `git diff <that commit> <name>--v<version> -- plugins/<name> ':!plugins/<name>/CHANGELOG.md'`

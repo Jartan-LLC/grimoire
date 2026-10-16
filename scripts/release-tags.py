@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Name the plugin release tags a commit on main owes, in the order to create them.
+"""Name the plugin release tags a push to main owes, in the order to create them.
 
 A version is released once it is on main (RELEASING.md), so every version that a
-commit changes gets a `{plugin}--v{version}` tag at that commit. A dependency is
+push changes gets a `{plugin}--v{version}` tag at the push's tip. A dependency is
 tagged before the plugin that needs it, because constraints resolve against these
-tags. `tag-releases.yml` runs this after CI passes on a push to main, creates the
+tags. `release-tags.yml` runs this after CI passes on a push to main, creates the
 tags that do not exist yet and releases them all.
 
-Usage: release-tags.py <base-ref> <head-ref>
-Prints one tag per line; nothing when the commit changes no version.
+Usage: release-tags.py <base-ref> <head-ref>  (the push's base and its tip)
+Prints one tag per line; nothing when the push changes no version.
 """
 
 import json
@@ -96,7 +96,7 @@ def manifests_at(ref: str) -> dict[str, Manifest]:
 
 
 def main() -> int:
-    """Print the tags the head commit owes."""
+    """Print the tags the push from base to head owes."""
     try:
         base_ref, head_ref = sys.argv[1:]
     except ValueError:

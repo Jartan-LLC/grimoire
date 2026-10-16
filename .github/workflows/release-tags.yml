@@ -1,8 +1,9 @@
 name: Tag plugin releases
 
-# A version is released once it is on main (RELEASING.md), so each version a commit
-# on main changes gets its {plugin}--v{version} tag and GitHub Release here. ci.yml
-# calls this as its last job on a push to main, once every check has passed.
+# A version is released once it is on main (RELEASING.md), so each version a push to
+# main changes gets its {plugin}--v{version} tag, at the push's tip, and its GitHub
+# Release here. ci.yml calls this as its last job on that push, once every check has
+# passed.
 on:
   workflow_call:
 
@@ -15,7 +16,7 @@ jobs:
     permissions:
       contents: write
     outputs:
-      tags: ${{ steps.plan.outputs.tags }}
+      tags: ${{ steps.create.outputs.tags }}
     steps:
       # The commit CI tested, with full history: the push's base can be several
       # commits back (a rebase merge pushes them all at once).
@@ -30,7 +31,7 @@ jobs:
       # existing tag is never moved, but it is still released: on a re-run after a
       # failed release, release.yml skips any release that already exists.
       - name: Create due tags
-        id: plan
+        id: create
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -61,11 +62,14 @@ jobs:
     needs: tag
     if: needs.tag.outputs.tags != '[]'
     strategy:
+      # Each tag's release stands alone: one failing must not cancel the rest.
+      fail-fast: false
       matrix:
         tag: ${{ fromJSON(needs.tag.outputs.tags) }}
     permissions:
       contents: write
-    # actionlint does not parse the $/ self-repository form for a reusable workflow yet.
+    # actionlint 1.7.12 rejects the $/ self-repository form for a reusable workflow;
+    # drop this ignore once a newer pin parses it.
     uses: ./.github/workflows/release.yml # zizmor: ignore[self-repository]
     with:
       tag: ${{ matrix.tag }}

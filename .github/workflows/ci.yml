@@ -197,7 +197,7 @@ jobs:
             fi
           done
 
-  # Tags and releases each plugin version this commit puts on main, once check has
+  # Tags and releases each plugin version this push puts on main, once check has
   # passed. The result test is explicit: an implicit success() also fails on a job
   # skipped further up the chain (devcontainer, usually), which would skip this.
   release-tags:
@@ -205,5 +205,6 @@ jobs:
     if: ${{ !cancelled() && needs.check.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     permissions:
       contents: write
-    # actionlint does not parse the $/ self-repository form for a reusable workflow yet.
-    uses: ./.github/workflows/tag-releases.yml # zizmor: ignore[self-repository]
+    # actionlint 1.7.12 rejects the $/ self-repository form for a reusable workflow;
+    # drop this ignore once a newer pin parses it.
+    uses: ./.github/workflows/release-tags.yml # zizmor: ignore[self-repository]
