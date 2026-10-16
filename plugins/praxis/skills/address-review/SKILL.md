@@ -46,4 +46,8 @@ The user may ask to commit at any point during the review -- commit what's been 
 
 ### 5. Close the Round
 
-Write the round's answers as one PR comment: for each finding, fixed (and where), fixed differently (how and why), or declined (why). Once the round's commits are pushed, post it (`gh pr comment <pr-number> --body "<answers>"`) and check the PR title and description as in step 2. Until then, tell the user the comment is ready and that the PR title and description need that check after the push.
+Write the round's answers as one PR comment. Title each answer by what the finding asks for, then say: fixed (and where), fixed differently (how and why), already the case (where in the code), or declined (why).
+
+Post the comment at the end of the round: after its commits are pushed, or straight away if the round made no commit (`gh pr comment <pr-number> --body "<answers>"`). Then update the PR title and description as in step 2, and add each declined finding where `gitwise:commit-pr-writing` says declines go.
+
+If the round's commits are not pushed yet, tell the user the comment and the update are ready for after the push.

@@ -9,6 +9,8 @@ user-invocable: false
 
 The project's own rules win where they speak. No style or brevity pass over a commit message or a PR description: keep every verification line, issue id and reason.
 
+Before you state how the code behaves when it runs (its output, what a test catches, why a result comes out as it does), run it or watch it. If you only reasoned it out, check it now or leave it out. This does not apply to what the change does or why you chose it.
+
 ## The Commit Message
 
 Write every commit message to land on the default branch, whatever the merge setting. Under GitHub's default squash merge, every commit message on the branch goes into the squash commit's message (merges from the base branch aside).
@@ -31,7 +33,7 @@ The PR title names one change, as a commit subject in the project's commit forma
 The PR description:
 
 - Open with any merge dependency as a fact ("Requires #52."), then what the change does and why, in a sentence or two.
-- One line per flag a careful reviewer could miss. Mark each decision review drove, with its reason: "Changed in review: ..., because ...", "Declined from review: ..., because ...". Leave out a suggestion that changed no design or behaviour. Name any PR you took code from.
+- One line per flag a careful reviewer could miss. Mark each decision review drove, with its reason: "Changed in review: ..., because ...", "Declined from review: ..., because ...". Leave out an adopted suggestion that changed no design or behaviour; a declined one keeps its line. Name any PR you took code from.
 - Say where to start reading: the file, function or commit subject holding the core logic.
 - State verification as results: what ran, what it showed, what was not run. No checkboxes or pasted output.
 - Do not retell the commit messages or the diff.
