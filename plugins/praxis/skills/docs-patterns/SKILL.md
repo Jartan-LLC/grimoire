@@ -1,7 +1,7 @@
 ---
 name: docs-patterns
 description: Documentation writing conventions -- style, structure, tone, and quality standards.
-when_to_use: Writing, editing, or reviewing documentation files.
+when_to_use: Writing, editing, or reviewing documentation -- a README, CONTRIBUTING.md, a release procedure such as RELEASING.md, changelog entries and release notes, docs pages, or agent instruction files such as CLAUDE.md and AGENTS.md.
 user-invocable: false
 ---
 
@@ -28,9 +28,21 @@ Pick the type before the shape -- the four Diataxis types each want a different 
 
 The **Section Structure** below is the **reference** shape. Don't force tutorials, how-tos, or explanations into it -- each has its own shape above.
 
+## Files with their own rules
+
+Before editing one of these, read its file in this skill's directory; a reviewer reads the matching file under `references/`.
+
+| Document | Read |
+|---|---|
+| A changelog or release notes | `changelog.md` |
+| A README, including a package page or a component's README | `readme.md` |
+| CONTRIBUTING.md or other contributor docs | `contributing.md` |
+| RELEASING.md or another release procedure | `releasing.md` |
+| CLAUDE.md, AGENTS.md, the files they import, `.claude/rules/` | `agent-files.md` |
+
 ## Section Structure
 
-The **reference** shape (see Doc Types). All reference- and README-style docs follow a consistent pattern:
+The **reference** shape (see Doc Types). Reference pages follow a consistent pattern:
 
 1. **H1 title** with a one-line description
 2. **Overview** -- brief intro, bullet list of capabilities/features
