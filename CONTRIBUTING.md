@@ -12,8 +12,9 @@ make install
 
 It installs the tools pinned in `ci/requirements.txt` and the pre-commit hook.
 The hooks also need Docker (lychee, actionlint) and Node (markdownlint), and the
-tests need Node 20 or newer. Run the Docker hooks from the bind-mounted project
-directory: from a worktree or a copy they report missing files.
+tests need Node 20 or newer. Run the Docker hooks from inside the bind-mounted
+project directory (a worktree under it works): from a worktree or a copy
+elsewhere they cannot see the files and pass or fail wrongly.
 
 ## Before opening a PR
 
@@ -22,7 +23,7 @@ make check
 ```
 
 `make fix` applies ruff's safe fixes and formatting. `make help` lists every
-target.
+target. CI runs more than this: see `.github/workflows/ci.yml`.
 
 ## Tests
 
@@ -51,16 +52,45 @@ python3 -m pytest tests/<source path>/test_<name>.py # pytest, from ci/requireme
 
 - Pure ASCII in every tracked file. See `GUARDRAILS.md` for the substitution table.
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org/).
+- We squash-merge with GitHub's default message, so every commit message on your
+  branch (merges from `main` aside) lands on `main`: write each for a later reader
+  (`GUARDRAILS.md`).
 - Any change under `plugins/<name>/` other than its `CHANGELOG.md` needs a
   `version` bump in that plugin's `plugin.json` and an entry for that version in
   its `CHANGELOG.md`. See [RELEASING.md](RELEASING.md).
 - A change to the marketplace itself, such as a plugin added or removed, gets an
   entry under `## Unreleased` in the root `CHANGELOG.md`.
-- Never hand-edit the generated Codex files. Run `python3 scripts/generate-codex.py`
-  and commit its output.
+- The Codex files are generated: `plugins/<name>/.codex-plugin/plugin.json`,
+  `.agents/plugins/marketplace.json` and `plugins/<name>/codex/agents/*.toml`.
+  Never hand-edit them. After a change to a plugin's name, version, description,
+  keywords, category or agents, run `python3 scripts/generate-codex.py` and commit
+  its output; `make verify` fails until you do, and names any orphaned file for
+  you to delete.
+- A hook script that ships from more than one plugin (`DUPLICATED_HOOK_SCRIPTS`
+  in `scripts/generate-codex.py`) must stay byte-identical: edit every copy in the
+  same commit (`make verify` fails while they differ), and bump each plugin that
+  ships one. `find-duplicate-comments.js` reports the comments in these copies as
+  retold; dismiss it.
 - Report security issues privately via [SECURITY.md](.github/SECURITY.md).
+- Ask questions in Discussions (Q&A) and report bugs and feature requests through
+  the issue forms; everyone taking part follows the
+  [code of conduct](.github/CODE_OF_CONDUCT.md).
 
-## Updating the lint hooks
+## Adding a plugin
+
+1. Create `plugins/<name>/` with `.claude-plugin/plugin.json` (`name`,
+   `version`, `description`, `author`), a `README.md` saying what the plugin
+   gives and how to install it, and a `CHANGELOG.md` with an entry for that
+   version.
+2. Add its entry to `.claude-plugin/marketplace.json` with the fields the other
+   entries carry (`name`, `source`, `description`, `category`, `keywords`,
+   `author`, `license`), and its row to the plugin table in `README.md`.
+3. Run `python3 scripts/generate-codex.py` and commit the output.
+4. Add a line under `## Unreleased` in the root `CHANGELOG.md`.
+
+## Maintaining
+
+### Updating the lint hooks
 
 Dependabot proposes hook bumps weekly, except lychee's. Bump that one by hand:
 

@@ -2,17 +2,109 @@
 
 Grimoire ships several independently versioned plugins from one repository.
 Each follows [semantic versioning](https://semver.org) (`MAJOR.MINOR.PATCH`)
-and is released with its own git tag.
+and each version gets its own git tag.
 
-## Why versions matter
+## When a version is released
+
+A version is released once it is on `main` in `plugin.json`: a marketplace added
+without a ref follows the default branch, and Claude Code updates a plugin when its
+`version` changes. Tags serve `#ref` pins, dependency constraints and the GitHub
+Release, so tag every version.
+
+## Release a plugin
+
+Releases are git tags named `{plugin-name}--v{version}` (double dash, leading
+`v`). Before you start, check that:
+
+- the PR that bumped the version has merged and CI passed on its squash commit on
+  `main` (`gh run list --workflow ci.yml --commit <full commit sha>`);
+- every plugin it depends on already has a tag its constraint accepts
+  ([Dependencies](#dependencies));
+- you can push tags to this repository (an agent only when asked: `GUARDRAILS.md`).
+
+Then tag that commit and push the tag:
+
+```bash
+git switch --detach <commit>
+claude plugin tag plugins/<name> --push
+git switch -
+```
+
+`claude plugin tag` reads the version from `plugin.json` at that commit, checks the
+marketplace entry agrees, and refuses a tag that already exists. `release.yml` then
+creates the GitHub Release, with that version's changelog section at the tagged
+commit as its body. `gh release view <name>--v<version>` confirms it; a failed run
+shows in `gh run list --workflow release.yml`.
+
+## If a release fails
+
+Check `gh release view <name>--v<version>` before any `-f`: `claude plugin tag -f
+--push` replaces the tag on GitHub without a warning, even one that has a release,
+and `release.yml` still reports success.
+
+**`release.yml` fails with `no entry under a '## <version>' heading`.** No release
+exists yet, so the tag may move: land the entry, then at the commit carrying it run
+
+```bash
+git switch --detach <commit>
+claude plugin tag plugins/<name> -f --push
+git switch -
+```
+
+The forced push replaces the tag and runs `release.yml` again.
+
+**The tag points at the wrong commit.** `git rev-list -n 1 <name>--v<version>` gives
+the tagged commit. The oldest commit that
+`git log --reverse -G'"version": "<version>"' -- plugins/<name>/.claude-plugin/plugin.json`
+lists set the version. If no release exists, move the tag as above. If one does,
+leave the tag and ship any fix as a new version.
+
+**A version shipped something bad.** Users who updated keep that version until the
+version changes, so fix forward: fix or revert on a branch with a version bump, and
+release that. Never move or delete the bad version's tag: dependency constraints
+resolve against it, and a moved tag sends the next install a different commit under
+the same version.
+
+## Prereleases
+
+A version carrying a prerelease suffix (`praxis--v2.0.0-rc1`) tags and releases
+the same way. `release.yml` marks it a GitHub prerelease, so it stays off the
+repo's "Latest" badge.
+
+## Marketplace releases
+
+The per-plugin tags above version a plugin. They do not version the marketplace,
+and a consumer's `extraKnownMarketplaces` entry names the repository, not a
+plugin. So consumers pin to a second, repo-level tag line:
+
+```text
+marketplace-v{MAJOR}.{MINOR}.{PATCH}
+```
+
+One dash, not two. `release.yml` triggers on `*--v[0-9]*`, so a double dash would
+run it as if `marketplace` were a plugin -- the single dash keeps this line out of
+that trigger deliberately.
+
+A tag, not a SHA: a `github` marketplace source takes no `sha`, only a `ref`,
+cloned with `git clone --branch`, which rejects a SHA. A tag can be moved, so a
+tag ruleset protects `marketplace-v*` from deletion and updates.
+
+After each plugin release, cut the next `marketplace-v*` tag and bump the `ref` in
+this repository's `.claude/settings.json`. Merging to `main` alone reaches no
+consumer pinned to a `marketplace-v*` tag; consumers pin as
+[README.md](README.md) says.
+
+Before tagging, record the release in the root `CHANGELOG.md`: rename
+`## Unreleased` to `## <version>`, add each plugin version that changed since the
+last marketplace tag, and start a new, empty `## Unreleased` above it.
+
+## Version-bump rules
 
 Claude Code uses a plugin's `version` as the cache key for updates: users only
 receive changes when you bump it. Push new commits without a bump and everyone
 stays on the cached copy -- `/plugin update` reports "already at the latest
-version." Every plugin here declares a `version`, so **every user-visible change
-needs a version bump**.
-
-## Version-bump rules
+version." Every plugin here declares a `version`, so a change reaches users only
+with a bump.
 
 A plugin's version lives in one place: the `"version"` field in
 `plugins/<name>/.claude-plugin/plugin.json`. Claude Code resolves the version from
@@ -27,10 +119,12 @@ hooks, README) other than its `CHANGELOG.md`, bump it:
 - **MINOR** (`1.0.0` -> `1.1.0`) -- new skills/agents/commands, backward-compatible additions
 - **MAJOR** (`1.0.0` -> `2.0.0`) -- breaking changes to existing behaviour or invocation
 
-Bump **once per release, not once per change**. The version is a cache key
-against the last released version, so what matters is the delta from `main`, not
-how many commits touched the plugin. A branch that fixes some wording and adds a
-skill lands a single MINOR bump, not a PATCH followed by a MINOR.
+Bump **once per branch, not once per change**. What matters is the delta from
+`main`, not how many commits touched the plugin: a branch that fixes some wording
+and adds a skill lands a single MINOR bump, not a PATCH followed by a MINOR. A
+version already on `main` is released
+([When a version is released](#when-a-version-is-released)), so a later branch
+bumps again and never folds its changes into that version.
 
 Every bump adds an entry under `## <version>` in `plugins/<name>/CHANGELOG.md`,
 saying what changes for someone upgrading; `make verify` fails without one.
@@ -40,48 +134,10 @@ Editing only a plugin's `marketplace.json` metadata (`description`, `keywords`)
 is **not** a bump trigger -- those fields sit outside `plugins/<name>/`, the only
 path the bump rule watches.
 
-## Enforcement
-
-Version discipline is enforced by **PR review**. Before merging, confirm any
-plugin with changes under `plugins/<name>/` other than its `CHANGELOG.md` has a
-bumped `version` in its `plugin.json`. CI gates pure ASCII, JSON parsing,
-generated-file drift, per-plugin changelog entries, the test suite and the full
-lint set, but nothing there checks the bump rule.
-
-## Tag a release
-
-Releases are resolved from git tags named `{plugin-name}--v{version}` (double
-dash, leading `v`), where `{version}` matches that commit's `plugin.json`. Tag
-the merge commit and push:
-
-```bash
-git tag <name>--v<version>
-git push origin <name>--v<version>
-```
-
-The version in the tag must match `plugin.json` at that commit, and the tag must
-not already exist -- nothing checks either for you, and a tag pointing at the
-wrong commit is what the resolver will hand users.
-
-These tags give each plugin an independent version line and are what dependency
-constraints resolve against (see [Dependencies](#dependencies)).
-
-Pushing the tag is the only manual step: `release.yml` creates the GitHub
-Release from it, with that version's changelog entry as the body. Not GitHub's
-generated notes: they diff repo-wide and would attribute other plugins' commits
-to this release. The release reads the changelog at the tagged commit. If a
-release fails for a missing entry, land the entry and move that tag, which has no
-release yet, to the commit carrying it:
-
-```bash
-git push --delete origin <name>--v<version>
-git tag -f <name>--v<version> <commit>
-git push origin <name>--v<version>
-```
-
-A version carrying a prerelease suffix (`praxis--v2.0.0-rc1`) tags and releases
-the same way. `release.yml` marks it a GitHub prerelease, so it stays off the
-repo's "Latest" badge.
+Version discipline is enforced by **PR review**. Before merging, confirm the bump
+rule above holds for every plugin the branch changes. CI gates pure ASCII, JSON
+parsing, generated-file drift, per-plugin changelog entries, the test suite and
+the full lint set, but nothing there checks the bump rule.
 
 ## Dependencies
 
@@ -100,13 +156,11 @@ tags above:
 }
 ```
 
-`praxis` declares `gitwise` (`^1.2.0`): its reviewer and planner agents load the
-`gitwise:github-conventions` skill, so `gitwise` must be present for them to
-resolve, and `implement-issue`, `create-pr` and `address-review` load
-`gitwise:commit-pr-writing`, which gitwise 1.2.0 ships first. Declaring it makes
-Claude Code auto-install `gitwise` alongside `praxis`. Add a `dependencies` entry
-only for a real requirement like this, and keep its constraint pinned to a tested
-range.
+`praxis` declares `gitwise`: its `general-reviewer` and `issue-planner` agents
+load `gitwise:github-conventions`, and `implement-issue`, `create-pr` and
+`address-review` load `gitwise:commit-pr-writing`. Declaring it makes Claude Code
+auto-install `gitwise` alongside `praxis`. Add a `dependencies` entry only for a
+real requirement like this, and keep its constraint pinned to a tested range.
 
 Because constraints resolve against the `{plugin-name}--v{version}` tags above, a
 dependency must be tagged **before or with** the plugin that requires it -- tag
@@ -117,8 +171,7 @@ cross-marketplace rules and conflict resolution.
 
 ## Codex
 
-Codex consumes this repo as a marketplace too, so releasing has a second axis.
-Verified against codex-cli 0.146.0:
+Codex consumes this repo as a marketplace too, so releasing has a second axis:
 
 - **Version bumps do reach Codex users.** The plugin cache is keyed by version
   (`~/.codex/plugins/cache/<marketplace>/<plugin>/<version>`), and an installed
@@ -128,56 +181,5 @@ Verified against codex-cli 0.146.0:
   marketplace, not our tags, and refreshes on `codex plugin marketplace upgrade`.
   The tags stay a Claude Code concern, as do `dependencies` -- Codex ignores
   those, which is why `praxis` documents installing `gitwise` explicitly.
-- **The Codex files are generated -- never hand-edit them.** That means
-  `plugins/<name>/.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`,
-  and `plugins/<name>/codex/agents/*.toml`. Run `scripts/generate-codex.py` after
-  any change to a plugin's name, version, description, keywords, category, or
-  agents, and commit the result.
-- **`--check` fails on more than staleness**: a generated file out of date with
-  its source, an orphan whose source is gone, and a duplicated hook script whose
-  copies have diverged.
-
-## Duplicated hook scripts
-
-Some hook scripts ship from more than one plugin and must stay byte-identical;
-`generate-codex.py` names them in `DUPLICATED_HOOK_SCRIPTS`. Edit every copy in
-the same commit, or `--check` fails. Each plugin shipping one has changed content
-under `plugins/<name>/`, so each takes its own version bump.
-
-Expect `find-duplicate-comments.js` to report comments in these copies as retold,
-and dismiss it.
-
-## Marketplace tags: what consumers pin to
-
-The per-plugin tags above version a plugin. They do not version the marketplace,
-and a consumer's `extraKnownMarketplaces` entry names the repository, not a
-plugin. So consumers pin to a second, repo-level tag line:
-
-```text
-marketplace-v{MAJOR}.{MINOR}.{PATCH}
-```
-
-One dash, not two. `release.yml` triggers on `*--v[0-9]*`, so a double dash would
-run it as if `marketplace` were a plugin -- the single dash keeps this line out of
-that trigger deliberately.
-
-A tag, not a SHA: a `github` marketplace source takes no `sha`, only a `ref`,
-cloned with `git clone --branch`, which rejects a SHA. A tag can be moved, so a
-tag ruleset protects `marketplace-v*` from deletion and updates.
-
-Cut a new `marketplace-v*` tag when consumers should pick up plugin changes, then
-bump the `ref` in each consuming repository's `.claude/settings.json`, this one
-included. Until that bump lands, consumers keep loading the older tag: that is the
-point, not a bug. Merging to `main` alone reaches nobody.
-
-Before tagging, record the release in the root `CHANGELOG.md`: rename
-`## Unreleased` to `## <version>`, add each plugin version that changed since the
-last marketplace tag, and start a new, empty `## Unreleased` above it.
-
-### CI
-
-`anthropics/claude-code-action`'s `plugin_marketplaces` input accepts only an
-`https://...git` URL or a local path, so it can't take a ref. Consuming workflows
-therefore check this repository out at a `marketplace-v*` tag with
-`actions/checkout` and pass the resulting **local path** to
-`plugin_marketplaces`, which pins exactly.
+- **A bump changes the version in the generated Codex files**: regenerate them
+  ([CONTRIBUTING.md](CONTRIBUTING.md)).

@@ -6,8 +6,9 @@ A Claude Code plugin marketplace. Each plugin lives in `plugins/<name>/` with a
 
 ## Rules
 
-The project rules live in `GUARDRAILS.md`, ranked by how firmly each holds; this import
-loads them into every session:
+The project rules live in `GUARDRAILS.md`, ranked by how firmly each holds. Claude Code
+loads them through the import below; any other agent reads `GUARDRAILS.md` before
+starting work.
 
 @GUARDRAILS.md
 

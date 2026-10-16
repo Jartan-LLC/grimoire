@@ -43,27 +43,38 @@ Codex config on session start instead.
 
 ## Versioning & Releases
 
-Each plugin uses [semantic versioning](https://semver.org), with its version in
-`.claude-plugin/plugin.json` (the marketplace entry carries none -- Claude Code
-resolves the manifest first), and is released with a `{plugin-name}--v{version}`
-git tag. Any change other than to its `CHANGELOG.md` needs a version bump and an
-entry in that changelog; the root `CHANGELOG.md` covers marketplace releases.
+Each plugin follows [semantic versioning](https://semver.org), and each version
+gets a `{plugin-name}--v{version}` git tag. Each plugin has its own
+`CHANGELOG.md`, and the root `CHANGELOG.md` covers marketplace releases.
 
-See [RELEASING.md](RELEASING.md) for the full workflow and tag convention.
+To update, run `/plugin marketplace update grimoire` in a Claude Code session
+(or `claude plugin update <plugin>@grimoire` in a shell), or
+`codex plugin marketplace upgrade` in Codex. To pin a project to a marketplace
+release, set `ref` to a `marketplace-v<version>` tag in its
+`.claude/settings.json`:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "grimoire": {
+      "source": { "source": "github", "repo": "Jartan-LLC/grimoire", "ref": "marketplace-v1.0.0" }
+    }
+  }
+}
+```
+
+A pinned project gets newer plugin versions only when you move `ref` to a newer
+`marketplace-v*` tag.
+
+In CI, check this repository out at the pinned tag and pass the local path
+to `anthropics/claude-code-action`'s `plugin_marketplaces` input, which takes
+no ref.
 
 ## Contributing
 
-New plugins go in `plugins/<name>/` with a `.claude-plugin/plugin.json` manifest
-and a `CHANGELOG.md` with an entry for its first version. Add an entry to
-`.claude-plugin/marketplace.json` and submit a PR.
-
-Local checks (CI runs these too):
-
-```bash
-make check
-```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and conventions.
+See [CONTRIBUTING.md](CONTRIBUTING.md) to set up, check a change or add a
+plugin, and [RELEASING.md](RELEASING.md) to cut a release. Report security
+issues privately: [SECURITY.md](.github/SECURITY.md).
 
 ## License
 
