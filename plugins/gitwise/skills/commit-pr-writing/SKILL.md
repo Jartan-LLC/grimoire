@@ -9,7 +9,7 @@ user-invocable: false
 
 The project's own rules win where they speak. No style or brevity pass over a commit message or a PR description: keep every verification line, issue id and reason.
 
-State as fact only what you checked: what the code does, why it behaves that way, what a test catches, what was run. A claim you reasoned out but did not check is either checked now or left out.
+State as fact only what you checked: what the code does, why it behaves that way, what a test catches, what was run. Checked means you ran it or observed it; reading the code and reasoning about it is not checking. A claim you reasoned out is either checked now or left out.
 
 ## The Commit Message
 
