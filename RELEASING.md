@@ -90,9 +90,10 @@ A tag, not a SHA: a `github` marketplace source takes no `sha`, only a `ref`,
 cloned with `git clone --branch`, which rejects a SHA. A tag can be moved, so a
 tag ruleset protects `marketplace-v*` from deletion and updates.
 
-Cut the next `marketplace-v*` tag after each plugin release; merging to `main`
-alone reaches no consumer pinned to a `marketplace-v*` tag, and consumers pin as
-[README.md](README.md) says:
+Cut the next `marketplace-v*` tag when the maintainer decides pinned consumers
+should pick up the plugin releases since the last one; a plugin release alone does
+not call for one. Until then, merging to `main` reaches no consumer pinned to a
+`marketplace-v*` tag, and consumers pin as [README.md](README.md) says. To cut one:
 
 1. In a PR, record the release in the root `CHANGELOG.md`: rename
    `## Unreleased` to `## <version>`, add each plugin version that changed since
