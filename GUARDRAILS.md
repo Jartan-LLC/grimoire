@@ -36,8 +36,14 @@ every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `
 ## Tier 2 (Strong Defaults)
 <!-- Best-effort under pressure. -->
 
-- Read `README.md` and `RELEASING.md` before changing plugin structure or versioning.
-- Update the affected READMEs and skills alongside any change.
+- Read `CONTRIBUTING.md` before adding or restructuring a plugin, and `RELEASING.md`
+  before changing versions or dependencies.
+- Update, in the same change, every README, doc, skill and agent file the change makes
+  false: search them for each name, flag, path and default the diff changes.
+- Run the Docker pre-commit hooks (lychee, actionlint), and so `make lint` and
+  `make check`, from inside the bind-mounted checkout (worktrees under it work): from a
+  worktree or copy outside it they cannot see the files and pass or fail wrongly (see
+  `CONTRIBUTING.md`).
 - Executable code earns tests by one rule -- pure input, silent-wrong output -- and hook
   entry points earn a process contract; `CONTRIBUTING.md` holds the rule and the layout.
 - Reviewer agents tier findings with the `review-severity` skill; agents name their lens
