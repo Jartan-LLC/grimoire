@@ -15,6 +15,14 @@ on:
         description: The {plugin}--v{version} tag to release
         required: true
         type: string
+  # Rebuilds the release of a tag that already exists (a deleted or failed release);
+  # it never creates a tag: checking out a missing tag fails the run.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The existing {plugin}--v{version} tag to release
+        required: true
+        type: string
 
 permissions: {}
 
@@ -24,7 +32,7 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write
-    # One run per tag: in a called workflow, github.ref is the caller's branch.
+    # One run per tag: when called or dispatched, github.ref is a branch, not the tag.
     concurrency:
       group: release-${{ inputs.tag || github.ref_name }}
       cancel-in-progress: false
