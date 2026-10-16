@@ -1,0 +1,65 @@
+name: Tag plugin releases
+
+# A version is released once it is on main (RELEASING.md), so each version a commit
+# on main changes gets its {plugin}--v{version} tag and GitHub Release here. ci.yml
+# calls this as its last job on a push to main, once every check has passed.
+on:
+  workflow_call:
+
+permissions: {}
+
+jobs:
+  tag:
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: tag-releases
+      cancel-in-progress: false
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    outputs:
+      tags: ${{ steps.plan.outputs.tags }}
+    steps:
+      # The commit CI tested, with its parent: main is squash-merged, so the parent
+      # is the state before this PR.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+
+      # Refs go through the API, so no git credential is left in the checkout. An
+      # existing tag is never moved, but it is still released: on a re-run after a
+      # failed release, release.yml skips any release that already exists.
+      - name: Create due tags
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          gh api --paginate "repos/$GH_REPO/git/matching-refs/tags/" \
+            --jq '.[].ref | sub("^refs/tags/"; "")' > existing.txt
+          python3 scripts/release-tags.py "$HEAD_SHA^" "$HEAD_SHA" > due.txt
+          while read -r tag; do
+            if grep -qxF "$tag" existing.txt; then
+              echo "exists $tag"
+            else
+              gh api "repos/$GH_REPO/git/refs" -f ref="refs/tags/$tag" -f sha="$HEAD_SHA" > /dev/null
+              echo "tagged $tag"
+            fi
+          done < due.txt
+          echo "tags=$(jq -R -s -c 'split("\n") | map(select(length > 0))' due.txt)" >> "$GITHUB_OUTPUT"
+
+  release:
+    needs: tag
+    if: needs.tag.outputs.tags != '[]'
+    strategy:
+      matrix:
+        tag: ${{ fromJSON(needs.tag.outputs.tags) }}
+    permissions:
+      contents: write
+    # actionlint does not parse the $/ self-repository form for a reusable workflow yet.
+    uses: ./.github/workflows/release.yml # zizmor: ignore[self-repository]
+    with:
+      tag: ${{ matrix.tag }}

@@ -13,15 +13,29 @@ Release, so tag every version.
 
 ## Tag a version
 
-Version tags are named `{plugin-name}--v{version}` (double dash, leading `v`). Before you start, check that:
+Merging a version bump to `main` tags and releases it. Once every CI job passes on
+the push, `ci.yml`'s `release-tags` job (`tag-releases.yml`) creates a
+`{plugin-name}--v{version}` tag (double dash, leading `v`) at that commit for each
+plugin whose version the commit changed, a dependency before the plugin that needs
+it, and calls `release.yml` for each. `release.yml` creates the GitHub Release, with
+that version's changelog section at the tagged commit as its body. To confirm,
+`gh release view <name>--v<version>` shows the release, and the job's log is in the
+CI run for that commit (`gh run list --workflow ci.yml --commit <full commit sha>`).
 
-- the PR that bumped the version has merged and CI passed on its squash commit on
-  `main` (`gh run list --workflow ci.yml --commit <full commit sha>`);
-- every plugin it depends on already has a tag its constraint accepts
-  ([Dependencies](#dependencies));
-- you can push tags to this repository (an agent only when asked: `GUARDRAILS.md`).
+The job creates tags through the API with `GITHUB_TOKEN`, and a tag created that way
+starts no workflow, so `release.yml` runs because the job calls it, not on the tag
+push. A tag you push by hand still triggers `release.yml` on its own.
 
-Then tag that commit and push the tag:
+## If a release fails
+
+**The `release-tags` job failed.** Re-run the CI run (`gh run rerun <run-id>`): the
+job creates only the tags that do not exist yet, never moves one, and passes every tag
+the commit owes to `release.yml`, which skips a GitHub Release that already exists.
+
+**A version needs a tag by hand** (the job cannot run, or the version predates it).
+Check that its dependencies have tags their constraints accept
+([Dependencies](#dependencies)) and that you may push tags (an agent only when
+asked: `GUARDRAILS.md`), then:
 
 ```bash
 git switch --detach <commit>
@@ -30,19 +44,16 @@ git switch -
 ```
 
 `claude plugin tag` reads the version from `plugin.json` at that commit, checks the
-marketplace entry agrees, and refuses a tag that already exists. `release.yml` then
-creates the GitHub Release, with that version's changelog section at the tagged
-commit as its body. `gh release view <name>--v<version>` confirms it; a failed run
-shows in `gh run list --workflow release.yml`.
-
-## If a release fails
+marketplace entry agrees, and refuses a tag that already exists.
 
 Check `gh release view <name>--v<version>` before any `-f`: `claude plugin tag -f
 --push` replaces the tag on GitHub without a warning, even one that has a GitHub
 Release, and `release.yml` still reports success.
 
-**`release.yml` fails with `no entry under a '## <version>' heading`.** No GitHub
-Release exists yet, so the tag may move: land the entry, then at the commit carrying it run
+**`release.yml` fails with `no entry under a '## <version>' heading`.** This needs a
+hand-pushed tag, since CI fails a version on `main` without its entry. No GitHub
+Release exists yet, so the tag may move: land the entry, then at the commit carrying
+it run
 
 ```bash
 git switch --detach <commit>

@@ -196,3 +196,13 @@ jobs:
               exit 1
             fi
           done
+
+  # Tags and releases each plugin version this commit puts on main. Needs check, so
+  # it runs only after every job above passed.
+  release-tags:
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    # actionlint does not parse the $/ self-repository form for a reusable workflow yet.
+    uses: ./.github/workflows/tag-releases.yml # zizmor: ignore[self-repository]
