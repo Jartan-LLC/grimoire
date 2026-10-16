@@ -9,7 +9,7 @@ user-invocable: false
 
 The project's own rules win where they speak. No style or brevity pass over a commit message or a PR description: keep every verification line, issue id and reason.
 
-State a claim about how the code behaves when it runs -- what it outputs, what a test catches, why a result comes out as it does, what was run -- as fact only if you ran or observed it; reasoning about the code is not checking it. A claim you reasoned out is either checked now or left out. What the diff changes and why you chose it need no run.
+Before you state how the code behaves when it runs (its output, what a test catches, why a result comes out as it does), run it or watch it. If you only reasoned it out, check it now or leave it out. This does not apply to what the change does or why you chose it.
 
 ## The Commit Message
 
