@@ -18,8 +18,8 @@ jobs:
     outputs:
       tags: ${{ steps.create.outputs.tags }}
     steps:
-      # The commit CI tested, with full history: the push's base can be several
-      # commits back (a rebase merge pushes them all at once).
+      # The commit CI tested, with full history: the job diffs the push's base
+      # (github.event.before), which it does not assume is HEAD^.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
@@ -48,11 +48,17 @@ jobs:
           while read -r tag; do
             if grep -qxF "$tag" existing.txt; then
               echo "exists $tag"
-            elif gh api "repos/$GH_REPO/git/refs" -f ref="refs/tags/$tag" -f sha="$HEAD_SHA" > /dev/null; then
+            elif err=$(gh api "repos/$GH_REPO/git/refs" -f ref="refs/tags/$tag" -f sha="$HEAD_SHA" 2>&1 > /dev/null); then
               echo "tagged $tag"
             elif gh api "repos/$GH_REPO/git/ref/tags/$tag" > /dev/null 2>&1; then
               echo "exists $tag (created meanwhile)"
             else
+              echo "::error::could not create $tag: $err"
+              # GITHUB_TOKEN cannot be given the workflows permission, and GitHub then
+              # refuses a tag on a commit whose .github/workflows differ from main's tip.
+              case "$err" in
+                *"HTTP 403"*) echo "::error::main's workflow files changed after this push; tag $tag by hand (RELEASING.md, If a release fails)" ;;
+              esac
               exit 1
             fi
           done < due.txt

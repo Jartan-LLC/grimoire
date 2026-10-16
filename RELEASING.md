@@ -28,9 +28,13 @@ push. A tag you push by hand still triggers `release.yml` on its own.
 
 ## If a release fails
 
-**The `release-tags` job failed.** Re-run the CI run (`gh run rerun <run-id>`): the
-job creates only the tags that do not exist yet, never moves one, and passes every tag
-the push owes to `release.yml`, which skips a GitHub Release that already exists.
+**The `release-tags` job failed.** Re-run its failed jobs
+(`gh run rerun --failed <run-id>`): the job creates only the tags that do not exist
+yet, never moves one, and passes every tag the push owes to `release.yml`, which skips
+a GitHub Release that already exists. If it fails with HTTP 403, a commit changing
+`.github/workflows/` landed on `main` after that push: GitHub refuses a tag that
+`GITHUB_TOKEN` creates on a commit whose workflow files differ from `main`'s tip, so
+no re-run can create it. Tag the version by hand as below.
 
 **A GitHub Release needs rebuilding** (it was deleted to fix its notes, or it failed
 and its CI run can no longer be re-run). Run `release.yml` for the existing tag:
@@ -43,7 +47,8 @@ the run fails without writing anything, so recreate the release by hand with
 
 **CI failed on the push that bumped a version**, so `release-tags` never ran and a
 later push will not tag it: each run looks only at its own push. Once CI can pass at
-that commit, re-run its CI run; if it cannot, tag the version by hand as below.
+that commit, re-run its failed jobs; if it cannot, or `main`'s workflow files have
+changed since, tag the version by hand as below.
 
 **A version needs a tag by hand** (the job cannot run, or the version predates it).
 Check that its dependencies have tags their constraints accept

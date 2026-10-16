@@ -1,4 +1,5 @@
 import json
+import os
 import pathlib
 import subprocess
 
@@ -75,18 +76,25 @@ def commit_plugins(repo: pathlib.Path, plugins: dict[str, str], message: str) ->
         manifest.parent.mkdir(parents=True, exist_ok=True)
         manifest.write_text(json.dumps({"name": name, "version": version}))
     git(repo, "add", "-A")
-    git(repo, "-c", "user.name=t", "-c", "user.email=t@example.invalid", "commit", "-qm", message)
+    git(repo, "commit", "-qm", message)
     return git(repo, "rev-parse", "HEAD")
 
 
 @pytest.fixture
 def repo(tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> pathlib.Path:
+    # As tests/helpers/fixture.js gitEnv(): a contributor's git settings (autocrlf,
+    # hooks, signing) and a leaked GIT_DIR cannot reach the fixture.
+    for key in [k for k in os.environ if k.startswith("GIT_")]:
+        monkeypatch.delenv(key)
+    monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", os.devnull)
+    for role in ("AUTHOR", "COMMITTER"):
+        monkeypatch.setenv(f"GIT_{role}_NAME", "Fixture")
+        monkeypatch.setenv(f"GIT_{role}_EMAIL", "fixture@example.com")
     git(tmp_path, "init", "-q")
     (tmp_path / "README.md").write_text("x\n")
     git(tmp_path, "add", "README.md")
-    git(
-        tmp_path, "-c", "user.name=t", "-c", "user.email=t@example.invalid", "commit", "-qm", "root"
-    )
+    git(tmp_path, "commit", "-qm", "root")
     monkeypatch.chdir(tmp_path)
     return tmp_path
 

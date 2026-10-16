@@ -32,7 +32,10 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write
-    # One run per tag: when called or dispatched, github.ref is a branch, not the tag.
+    # The tag this run is for: the input when called or dispatched (github.ref is then a
+    # branch), else the pushed tag. Concurrency cannot read env, so it keeps its own copy.
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
     concurrency:
       group: release-${{ inputs.tag || github.ref_name }}
       cancel-in-progress: false
@@ -40,7 +43,7 @@ jobs:
       # The notes come from the plugin's CHANGELOG.md at the tagged commit.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: refs/tags/${{ inputs.tag || github.ref_name }}
+          ref: refs/tags/${{ env.TAG }}
           persist-credentials: false
 
       # The view guard keeps re-runs idempotent. No --generate-notes: GitHub
@@ -50,7 +53,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          TAG: ${{ inputs.tag || github.ref_name }}
         run: |
           plugin="${TAG%%--v*}"
           version="${TAG#*--v}"
