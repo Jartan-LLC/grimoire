@@ -85,8 +85,12 @@ python3 -m pytest tests/<source path>/test_<name>.py # pytest, from ci/requireme
 2. Add its entry to `.claude-plugin/marketplace.json` with the fields the other
    entries carry (`name`, `source`, `description`, `category`, `keywords`,
    `author`, `license`), and its row to the plugin table in `README.md`.
-3. Run `python3 scripts/generate-codex.py` and commit the output.
-4. Add a line under `## Unreleased` in the root `CHANGELOG.md`.
+3. If the plugin ships agents, copy `hooks/scripts/sync-codex-agents.js` from
+   `plugins/recursio/` and add its `SessionStart` entry from
+   `plugins/recursio/hooks/hooks.json`: Codex gets the agents only through that
+   hook, and nothing checks that it is there.
+4. Run `python3 scripts/generate-codex.py` and commit the output.
+5. Add a line under `## Unreleased` in the root `CHANGELOG.md`.
 
 ## Maintaining
 

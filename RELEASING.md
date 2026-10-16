@@ -11,10 +11,9 @@ without a ref follows the default branch, and Claude Code updates a plugin when 
 `version` changes. Tags serve `#ref` pins, dependency constraints and the GitHub
 Release, so tag every version.
 
-## Release a plugin
+## Tag a version
 
-Releases are git tags named `{plugin-name}--v{version}` (double dash, leading
-`v`). Before you start, check that:
+Version tags are named `{plugin-name}--v{version}` (double dash, leading `v`). Before you start, check that:
 
 - the PR that bumped the version has merged and CI passed on its squash commit on
   `main` (`gh run list --workflow ci.yml --commit <full commit sha>`);
@@ -39,11 +38,11 @@ shows in `gh run list --workflow release.yml`.
 ## If a release fails
 
 Check `gh release view <name>--v<version>` before any `-f`: `claude plugin tag -f
---push` replaces the tag on GitHub without a warning, even one that has a release,
-and `release.yml` still reports success.
+--push` replaces the tag on GitHub without a warning, even one that has a GitHub
+Release, and `release.yml` still reports success.
 
-**`release.yml` fails with `no entry under a '## <version>' heading`.** No release
-exists yet, so the tag may move: land the entry, then at the commit carrying it run
+**`release.yml` fails with `no entry under a '## <version>' heading`.** No GitHub
+Release exists yet, so the tag may move: land the entry, then at the commit carrying it run
 
 ```bash
 git switch --detach <commit>
@@ -53,10 +52,12 @@ git switch -
 
 The forced push replaces the tag and runs `release.yml` again.
 
-**The tag points at the wrong commit.** `git rev-list -n 1 <name>--v<version>` gives
-the tagged commit. The oldest commit that
+**The tag points at the wrong commit.** The oldest commit that
 `git log --reverse -G'"version": "<version>"' -- plugins/<name>/.claude-plugin/plugin.json`
-lists set the version. If no release exists, move the tag as above. If one does,
+lists set the version. The tag is wrong when the plugin's files differ there:
+`git diff <that commit> <name>--v<version> -- plugins/<name> ':!plugins/<name>/CHANGELOG.md'`
+prints anything (a tag moved to the commit carrying a missing changelog entry
+prints nothing). If no GitHub Release exists, move the tag as above. If one does,
 leave the tag and ship any fix as a new version.
 
 **A version shipped something bad.** Users who updated keep that version until the
@@ -89,14 +90,22 @@ A tag, not a SHA: a `github` marketplace source takes no `sha`, only a `ref`,
 cloned with `git clone --branch`, which rejects a SHA. A tag can be moved, so a
 tag ruleset protects `marketplace-v*` from deletion and updates.
 
-After each plugin release, cut the next `marketplace-v*` tag and bump the `ref` in
-this repository's `.claude/settings.json`. Merging to `main` alone reaches no
-consumer pinned to a `marketplace-v*` tag; consumers pin as
-[README.md](README.md) says.
+Cut the next `marketplace-v*` tag after each plugin release; merging to `main`
+alone reaches no consumer pinned to a `marketplace-v*` tag, and consumers pin as
+[README.md](README.md) says:
 
-Before tagging, record the release in the root `CHANGELOG.md`: rename
-`## Unreleased` to `## <version>`, add each plugin version that changed since the
-last marketplace tag, and start a new, empty `## Unreleased` above it.
+1. In a PR, record the release in the root `CHANGELOG.md`: rename
+   `## Unreleased` to `## <version>`, add each plugin version that changed since
+   the last marketplace tag, and start a new, empty `## Unreleased` above it.
+2. Once it merges, tag its squash commit and push the tag:
+
+   ```bash
+   git tag marketplace-v<version> <commit>
+   git push origin marketplace-v<version>
+   ```
+
+3. In a PR, bump the `ref` in this repository's `.claude/settings.json` to the new
+   tag.
 
 ## Version-bump rules
 

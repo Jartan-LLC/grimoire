@@ -1,8 +1,8 @@
 # Bump every rev: pre-commit autoupdate --freeze
 #
 # The docker hooks resolve the workspace mount by inspecting this container, so
-# they only see files under the bind-mounted project directory. Run them from a
-# worktree or a copy and they report missing files, not a mount error.
+# they only see files under the bind-mounted project directory: see
+# CONTRIBUTING.md (Setup) for where to run them.
 #
 # Deliberately absent, though it looks like an obvious addition: prettier, which
 # fights generate-codex.py over plugins/*/.codex-plugin/plugin.json; no tree state

@@ -47,9 +47,10 @@ Each plugin follows [semantic versioning](https://semver.org), and each version
 gets a `{plugin-name}--v{version}` git tag. Each plugin has its own
 `CHANGELOG.md`, and the root `CHANGELOG.md` covers marketplace releases.
 
-To update, run `/plugin marketplace update grimoire` in a Claude Code session
-(or `claude plugin update <plugin>@grimoire` in a shell), or
-`codex plugin marketplace upgrade` in Codex. To pin a project to a marketplace
+To update, open `/plugin` in a Claude Code session, select grimoire on the
+Marketplaces tab and choose **Update marketplace** (turn on auto-update there to
+update at each session start), or run `claude plugin update <plugin>@grimoire` in
+a shell; in Codex, run `codex plugin marketplace upgrade`. To pin a project to a marketplace
 release, set `ref` to a `marketplace-v<version>` tag in its
 `.claude/settings.json`:
 
