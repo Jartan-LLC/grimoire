@@ -136,6 +136,21 @@ def test_manifests_at_rejects_a_directory_named_unlike_its_manifest(repo: pathli
         rt.manifests_at("HEAD")
 
 
+def test_manifests_at_keeps_dependencies_in_the_marketplace_named_at_that_commit(
+    repo: pathlib.Path,
+) -> None:
+    (repo / ".claude-plugin").mkdir()
+    (repo / ".claude-plugin" / "marketplace.json").write_text(json.dumps({"name": "home"}))
+    commit_plugins(repo, {"base": "1.0.0"}, "base")
+    manifest = repo / "plugins" / "app" / ".claude-plugin" / "plugin.json"
+    manifest.parent.mkdir(parents=True)
+    deps = ["base@home", {"name": "far", "marketplace": "away"}]
+    manifest.write_text(json.dumps({"name": "app", "version": "1.0.0", "dependencies": deps}))
+    git(repo, "add", "-A")
+    git(repo, "commit", "-qm", "app")
+    assert rt.manifests_at("HEAD")["app"] == m("app", "1.0.0", "base")
+
+
 def test_cli_due_and_untagged_as_the_workflow_calls_them(
     repo: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:

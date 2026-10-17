@@ -79,41 +79,27 @@ def due_tags(*, base: dict[str, Manifest], head: dict[str, Manifest]) -> list[st
     return order
 
 
+def git(*args: str, check: bool = False) -> subprocess.CompletedProcess[str]:
+    """Run git with these arguments, capturing its output as text."""
+    # Argument lists, never a shell: a ref is one argv item however it is spelt.
+    return subprocess.run([GIT, *args], capture_output=True, text=True, check=check)  # noqa: S603
+
+
 def manifests_at(ref: str) -> dict[str, Manifest]:
     """Every plugin's manifest at a git ref; empty when that commit has no plugins/.
 
     A ref that does not name a commit raises CalledProcessError: read as "no
     plugins", a bad base would make every plugin look new.
     """
-    # Argument lists, never a shell: a ref is one argv item however it is spelt.
-    subprocess.run(  # noqa: S603
-        [GIT, "rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}"],
-        capture_output=True,
-        check=True,
-    )
-    listing = subprocess.run(  # noqa: S603
-        [GIT, "ls-tree", "-d", "--name-only", f"{ref}:plugins"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    git("rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}", check=True)
+    listing = git("ls-tree", "-d", "--name-only", f"{ref}:plugins")
     if listing.returncode != 0:
         return {}
-    catalog = subprocess.run(  # noqa: S603
-        [GIT, "show", f"{ref}:.claude-plugin/marketplace.json"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    catalog = git("show", f"{ref}:.claude-plugin/marketplace.json")
     own = str(json.loads(catalog.stdout).get("name", "")) if catalog.returncode == 0 else ""
     found: dict[str, Manifest] = {}
     for name in listing.stdout.split():
-        shown = subprocess.run(  # noqa: S603
-            [GIT, "show", f"{ref}:plugins/{name}/.claude-plugin/plugin.json"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
+        shown = git("show", f"{ref}:plugins/{name}/.claude-plugin/plugin.json")
         if shown.returncode == 0:
             manifest = parse_manifest(shown.stdout, own)
             # due_tags matches dependency names, which are manifest names, against these
