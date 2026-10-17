@@ -1,3 +1,4 @@
+import json
 import pathlib
 import re
 import tomllib
@@ -262,3 +263,29 @@ def test_find_divergent_copies_is_empty_while_copies_match(
     monkeypatch.setattr(gc, "DUPLICATED_HOOK_SCRIPTS", ["hooks/scripts/shared.js"])
     touch(tmp_path, *(f"plugins/{p}/hooks/scripts/shared.js" for p in plugins), contents="same")
     assert gc.find_divergent_copies() == []
+
+
+def write_plugin(root: pathlib.Path, directory: str, name: str) -> None:
+    manifest = root / "plugins" / directory / ".claude-plugin" / "plugin.json"
+    manifest.parent.mkdir(parents=True)
+    manifest.write_text(json.dumps({"name": name, "version": "1.0.0", "description": "A plugin."}))
+
+
+def test_plugin_manifest_rejects_a_directory_named_unlike_its_plugin(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(gc, "ROOT", tmp_path)
+    write_plugin(tmp_path, "old-name", "new-name")
+    with pytest.raises(ValueError, match="directory name does not match"):
+        gc.plugin_manifest({"name": "new-name", "source": "./plugins/old-name"})
+
+
+def test_plugin_manifest_accepts_a_directory_named_like_its_plugin(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(gc, "ROOT", tmp_path)
+    write_plugin(tmp_path, "same", "same")
+    _, manifest = gc.plugin_manifest(
+        {"name": "same", "source": "./plugins/same", "category": "development"}
+    )
+    assert manifest["name"] == "same"
