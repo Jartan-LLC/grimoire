@@ -26,10 +26,12 @@ codex plugin marketplace add Jartan-LLC/grimoire
 codex plugin add <plugin>@grimoire
 ```
 
-Skills and hooks behave the same under both. Two things differ: Codex ignores
-plugin dependencies, so `praxis` needs `gitwise` installed explicitly, and it has
-no plugin-level agent surface, so plugins shipping agents install them into your
-Codex config on session start instead.
+Skills and hooks behave the same under both. Codex differs in these ways:
+
+- It ignores plugin dependencies, so `praxis` needs `gitwise` installed
+  explicitly.
+- A Codex plugin cannot provide agents, so plugins that ship agents install
+  them into your Codex config on session start instead.
 
 ## Available Plugins
 
@@ -45,14 +47,18 @@ Codex config on session start instead.
 
 Each plugin follows [semantic versioning](https://semver.org), and each version
 gets a `{plugin-name}--v{version}` git tag. Each plugin has its own
-`CHANGELOG.md`, and the root `CHANGELOG.md` covers marketplace releases.
+`CHANGELOG.md`. The root `CHANGELOG.md` covers marketplace releases.
 
-To update, open `/plugin` in a Claude Code session, select grimoire on the
-Marketplaces tab and choose **Update marketplace** (turn on auto-update there to
-update at each session start), or run `claude plugin update <plugin>@grimoire` in
-a shell; in Codex, run `codex plugin marketplace upgrade`. To pin a project to a marketplace
-release, set `ref` to a `marketplace-v<version>` tag in its
-`.claude/settings.json`:
+To update:
+
+- In a Claude Code session, open `/plugin`, select grimoire on the Marketplaces
+  tab and choose **Update marketplace**. Turn on auto-update there to update at
+  each session start.
+- In a shell, run `claude plugin update <plugin>@grimoire`.
+- In Codex, run `codex plugin marketplace upgrade`.
+
+To pin a project to a marketplace release, set `ref` to a
+`marketplace-v<version>` tag in its `.claude/settings.json`:
 
 ```json
 {
@@ -67,14 +73,14 @@ release, set `ref` to a `marketplace-v<version>` tag in its
 A pinned project gets newer plugin versions only when you move `ref` to a newer
 `marketplace-v*` tag.
 
-In CI, check this repository out at the pinned tag and pass the local path
-to `anthropics/claude-code-action`'s `plugin_marketplaces` input, which takes
-no ref.
+In CI, the `plugin_marketplaces` input of `anthropics/claude-code-action` takes
+no ref. Check this repository out at the pinned tag and pass the local path to
+that input.
 
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) to set up, check a change or add a
-plugin, and [RELEASING.md](RELEASING.md) to cut a release. Report security
+plugin. See [RELEASING.md](RELEASING.md) to cut a release. Report security
 issues privately: [SECURITY.md](.github/SECURITY.md).
 
 ## License

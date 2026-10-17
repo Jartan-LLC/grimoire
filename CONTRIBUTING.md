@@ -2,7 +2,7 @@
 
 ## Setup
 
-The dev container installs everything on create. Elsewhere, install
+The dev container installs everything on creation. Elsewhere, install
 [uv](https://docs.astral.sh/uv/), create a virtual environment with `uv venv`
 (or activate one), then run:
 
@@ -10,11 +10,13 @@ The dev container installs everything on create. Elsewhere, install
 make install
 ```
 
-It installs the tools pinned in `ci/requirements.txt` and the pre-commit hook.
-The hooks also need Docker (lychee, actionlint) and Node (markdownlint), and the
-tests need Node 20 or newer. Run the Docker hooks from inside the bind-mounted
-project directory (a worktree under it works): from a worktree or a copy
-elsewhere they cannot see the files and pass or fail wrongly.
+This installs the tools pinned in `ci/requirements.txt` and the pre-commit hook.
+The lychee and actionlint hooks need Docker, and the markdownlint hook needs
+Node. The tests need Node 20 or newer.
+
+Run the Docker hooks from inside the bind-mounted project directory, or from a
+worktree under it. From a worktree or copy outside it, the hooks cannot see the
+files and pass or fail wrongly.
 
 ## Before opening a PR
 
@@ -22,8 +24,8 @@ elsewhere they cannot see the files and pass or fail wrongly.
 make check
 ```
 
-`make fix` applies ruff's safe fixes and formatting. `make help` lists every
-target. CI runs more than this: see `.github/workflows/ci.yml`.
+`make fix` applies ruff's safe fixes and formatting, and `make help` lists every
+target. CI runs more than `make check`: see `.github/workflows/ci.yml`.
 
 ## Tests
 
@@ -37,58 +39,65 @@ python3 -m pytest tests/<source path>/test_<name>.py # pytest, from ci/requireme
 
 - A function earns a test when it takes its input as an argument and a wrong
   answer from it would be silent.
-- Every shipped hook entry point earns a process test: whatever arrives on stdin,
-  it exits 0 and prints nothing or one well-formed JSON object.
+- Every shipped hook entry point earns a process test: whatever arrives on
+  stdin, it exits 0 and prints nothing or one well-formed JSON object.
 - Tests live under `tests/`, mirroring the source path, never under `plugins/`.
-- A fixture repository is built with `git init` in a temporary directory, never
+- Build a fixture repository with `git init` in a temporary directory, never in
   this checkout. Fixtures write nothing outside their directory and reach no
   network.
-- A test that exposes a shipped defect stays, wrapped in `knownDefect` from
-  `tests/helpers/known-defect.js` (Node) or marked
+- Keep a test that exposes a shipped defect. Wrap it in `knownDefect` from
+  `tests/helpers/known-defect.js` (Node) or mark it
   `xfail(strict=True, raises=AssertionError)` (pytest), naming the issue. The fix
   removes the wrapper.
 
 ## Conventions
 
-- Pure ASCII in every tracked file. See `GUARDRAILS.md` for the substitution table.
+- Pure ASCII in every tracked file. `GUARDRAILS.md` has the substitution table.
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org/).
 - We squash-merge with GitHub's default message, so every commit message on your
-  branch (merges from `main` aside) lands on `main`: write each for a later reader
-  (`GUARDRAILS.md`).
+  branch lands on `main`, except merges from `main`. Write each for a later
+  reader (`GUARDRAILS.md`).
 - Any change under `plugins/<name>/` other than its `CHANGELOG.md` needs a
   `version` bump in that plugin's `plugin.json` and an entry for that version in
   its `CHANGELOG.md`. See [RELEASING.md](RELEASING.md).
-- A change to the marketplace itself, such as a plugin added or removed, gets an
-  entry under `## Unreleased` in the root `CHANGELOG.md`.
-- The Codex files are generated: `plugins/<name>/.codex-plugin/plugin.json`,
-  `.agents/plugins/marketplace.json` and `plugins/<name>/codex/agents/*.toml`.
-  Never hand-edit them. After a change to a plugin's name, version, description,
-  keywords, category or agents, run `python3 scripts/generate-codex.py` and commit
-  its output; `make verify` fails until you do, and names any orphaned file for
-  you to delete.
-- A hook script that ships from more than one plugin (`DUPLICATED_HOOK_SCRIPTS`
-  in `scripts/generate-codex.py`) must stay byte-identical: edit every copy in the
-  same commit (`make verify` fails while they differ), and bump each plugin that
-  ships one. `find-duplicate-comments.js` reports the comments in these copies as
-  retold; dismiss it.
+- A change to the marketplace itself, such as adding or removing a plugin, gets
+  an entry under `## Unreleased` in the root `CHANGELOG.md`.
+- The Codex files are generated, so never hand-edit them:
+  - `plugins/<name>/.codex-plugin/plugin.json`
+  - `.agents/plugins/marketplace.json`
+  - `plugins/<name>/codex/agents/*.toml`
+
+  After you change a plugin's name, version, description, keywords, category or
+  agents, run `python3 scripts/generate-codex.py` and commit its output. Until
+  you do, `make verify` fails.
+
+  `make verify` also names any orphaned file. Delete those yourself.
+- Some hook scripts ship from more than one plugin (`DUPLICATED_HOOK_SCRIPTS` in
+  `scripts/generate-codex.py`). Edit every copy in the same commit so they stay
+  byte-identical; `make verify` fails while they differ. Bump each plugin that
+  ships a copy.
+
+  `find-duplicate-comments.js` reports the comments in these copies as retold;
+  dismiss it.
 - Report security issues privately via [SECURITY.md](.github/SECURITY.md).
-- Ask questions in Discussions (Q&A) and report bugs and feature requests through
-  the issue forms; everyone taking part follows the
+- Ask questions in Discussions (Q&A). Report bugs and feature requests through
+  the issue forms. Everyone taking part follows the
   [code of conduct](.github/CODE_OF_CONDUCT.md).
 
 ## Adding a plugin
 
-1. Create `plugins/<name>/` with `.claude-plugin/plugin.json` (`name`,
-   `version`, `description`, `author`), a `README.md` saying what the plugin
-   gives and how to install it, and a `CHANGELOG.md` with an entry for that
-   version.
+1. Create `plugins/<name>/` with:
+   - `.claude-plugin/plugin.json`, with `name`, `version`, `description` and
+     `author`
+   - a `README.md` saying what the plugin gives and how to install it
+   - a `CHANGELOG.md` with an entry for that version
 2. Add its entry to `.claude-plugin/marketplace.json` with the fields the other
    entries carry (`name`, `source`, `description`, `category`, `keywords`,
-   `author`, `license`), and its row to the plugin table in `README.md`.
+   `author`, `license`). Add its row to the plugin table in `README.md`.
 3. If the plugin ships agents, copy `hooks/scripts/sync-codex-agents.js` from
    `plugins/recursio/` and add its `SessionStart` entry from
-   `plugins/recursio/hooks/hooks.json`: Codex gets the agents only through that
-   hook, and nothing checks that it is there.
+   `plugins/recursio/hooks/hooks.json`. Codex gets the agents only through that
+   hook, and nothing checks that the hook is there.
 4. Run `python3 scripts/generate-codex.py` and commit the output.
 5. Add a line under `## Unreleased` in the root `CHANGELOG.md`.
 
@@ -96,7 +105,7 @@ python3 -m pytest tests/<source path>/test_<name>.py # pytest, from ci/requireme
 
 ### Updating the lint hooks
 
-Dependabot proposes hook bumps weekly, except lychee's. Bump that one by hand:
+Dependabot proposes weekly hook bumps, except for lychee. Bump lychee by hand:
 
 ```bash
 pre-commit autoupdate --freeze --repo https://github.com/lycheeverse/lychee
