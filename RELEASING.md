@@ -55,9 +55,11 @@ one), the run fails without writing anything, since it builds the notes with tha
 tag's own `scripts/check-changelogs.py --notes`. Recreate that release with
 `gh release create <tag> --verify-tag --notes-file <file>`.
 
-**A check failed on the push that bumped a version.** If it was one of the checks
-`release-tags` waits on, `release-tags` never ran for that push. No later push tags
-the version either, because each run looks only at its own push.
+**A check failed on the push that bumped a version.** If it was the dev container
+build, `release-tags` does not wait on it, so the version is tagged and there is
+nothing to do. If it was verify, lint, typecheck or test, `release-tags` never ran
+for that push, and no later push tags the version either, because each run looks
+only at its own push:
 
 - If the failure was transient, re-run the run's failed jobs. A re-run tests the
   same commit.
@@ -100,8 +102,9 @@ git switch -
 
 The forced push replaces the tag and runs `release.yml` again.
 
-**The tag points at the wrong commit.** `main` takes squash merges only, so a tag
-belongs on the commit that set its version, the oldest one this lists:
+**The tag points at the wrong commit.** `main` takes squash merges only, so each
+push is one commit and a tag belongs on the commit that set its version, the oldest
+one this lists:
 
 ```bash
 git log --reverse -G'"version": "<version>"' -- plugins/<name>/.claude-plugin/plugin.json
