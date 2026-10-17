@@ -135,3 +135,147 @@ def test_notes_fails_without_an_entry(
     out, err = capsys.readouterr()
     assert out == ""
     assert err == f"{message}\n"
+
+
+@pytest.mark.parametrize(
+    ("constraint", "version", "verdict"),
+    [
+        ("^1.2.0", "1.2.0", True),
+        ("^1.2.0", "1.9.3", True),
+        ("^1.2.0", "2.0.0", False),
+        ("^1.2.0", "1.1.9", False),
+        ("^0.3.1", "0.3.9", True),
+        ("^0.3.1", "0.4.0", False),
+        ("~1.2.0", "1.2.7", True),
+        ("~1.2.0", "1.3.0", False),
+        ("1.2.0", "1.2.0", True),
+        ("1.2.0", "1.2.1", False),
+        ("=1.2.0", "1.2.0", True),
+        ("^0.0.3", "0.0.3", True),
+        ("^0.0.3", "0.0.4", False),
+        ("^2.0.0", "2.0.0-rc1", False),
+        ("^1.2.0", "1.3.0-rc.1", False),
+        ("1.2.0", "1.2.0-rc1", False),
+        ("^2.0.0-0", "2.0.0-rc1", None),
+        ("^2.0.0-0", "2.0.0", True),
+        (">=1.0.0", "1.2.0", None),
+        ("^1.2", "1.2.0", None),
+        ("", "1.2.0", None),
+        ("=1.2.3-rc1", "1.2.3", False),
+        ("1.2.3-rc1", "1.2.3", False),
+        ("^01.2.3", "1.2.3", None),
+        ("1.2.3", "01.2.3", None),
+        ("^1.2.0", "1.2.0+build.5", None),
+    ],
+)
+def test_accepts_reads_caret_tilde_and_exact_ranges(
+    constraint: str, version: str, verdict: bool | None
+) -> None:
+    assert cc.accepts(constraint, version) is verdict
+
+
+def test_problems_names_a_directory_named_unlike_its_manifest(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(cc, "ROOT", tmp_path)
+    plugin(tmp_path, "dir", "1.0.0", "## 1.0.0\n\n- Shipped.\n")
+    manifest = tmp_path / "plugins" / "dir" / ".claude-plugin" / "plugin.json"
+    manifest.write_text(json.dumps({"name": "other", "version": "1.0.0"}))
+    assert cc.problems() == [
+        "plugins/dir/.claude-plugin/plugin.json: name 'other' differs from its directory"
+    ]
+
+
+def test_problems_names_a_dependency_range_the_tree_does_not_meet(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(cc, "ROOT", tmp_path)
+    plugin(tmp_path, "base", "1.2.0", "## 1.2.0\n\n- Shipped.\n")
+    plugin(tmp_path, "app", "1.0.0", "## 1.0.0\n\n- Shipped.\n")
+    manifest = tmp_path / "plugins" / "app" / ".claude-plugin" / "plugin.json"
+    deps = [
+        {"name": "base", "version": "^1.3.0"},
+        {"name": "elsewhere", "version": "^9.0.0"},
+        {"name": "base", "version": "^9.0.0", "marketplace": "other"},
+        "base",
+        {"version": "^1.0.0"},
+    ]
+    manifest.write_text(json.dumps({"name": "app", "version": "1.0.0", "dependencies": deps}))
+    where = "plugins/app/.claude-plugin/plugin.json"
+    assert cc.problems() == [
+        f"{where}: needs base ^1.3.0, but base here is 1.2.0",
+        f"{where}: needs elsewhere, which is not a plugin here",
+        f"{where}: a dependency that is neither a name nor an object with one",
+    ]
+
+
+def test_problems_names_a_dependency_this_marketplace_lacks(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(cc, "ROOT", tmp_path)
+    (tmp_path / ".claude-plugin").mkdir()
+    (tmp_path / ".claude-plugin" / "marketplace.json").write_text(json.dumps({"name": "home"}))
+    plugin(tmp_path, "base", "1.2.0", "## 1.2.0\n\n- Shipped.\n")
+    plugin(tmp_path, "app", "1.0.0", "## 1.0.0\n\n- Shipped.\n")
+    manifest = tmp_path / "plugins" / "app" / ".claude-plugin" / "plugin.json"
+    deps = [
+        "bsae",
+        "absent@home",
+        "far@away",
+        {"name": "gone", "marketplace": "home"},
+        {"name": "far", "marketplace": "away"},
+        "base",
+        "base@home",
+    ]
+    manifest.write_text(json.dumps({"name": "app", "version": "1.0.0", "dependencies": deps}))
+    where = "plugins/app/.claude-plugin/plugin.json"
+    assert cc.problems() == [
+        f"{where}: needs bsae, which is not a plugin here",
+        f"{where}: needs absent, which is not a plugin here",
+        f"{where}: needs gone, which is not a plugin here",
+    ]
+
+
+@pytest.mark.parametrize(
+    ("dependencies", "message"),
+    [
+        ({"name": "base", "version": "^9.0.0"}, "dependencies is not a list"),
+        ("base", "dependencies is not a list"),
+        (
+            [{"name": "base", "version": ">=1.0.0"}],
+            "cannot check the range '>=1.0.0' for base 1.2.0",
+        ),
+        ([{"name": "base", "version": 1}], "the version range for base is not a string"),
+        ([{"name": "base", "version": None}], "the version range for base is not a string"),
+    ],
+)
+def test_problems_names_dependencies_it_cannot_check(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, dependencies: object, message: str
+) -> None:
+    monkeypatch.setattr(cc, "ROOT", tmp_path)
+    plugin(tmp_path, "base", "1.2.0", "## 1.2.0\n\n- Shipped.\n")
+    plugin(tmp_path, "app", "1.0.0", "## 1.0.0\n\n- Shipped.\n")
+    manifest = tmp_path / "plugins" / "app" / ".claude-plugin" / "plugin.json"
+    manifest.write_text(
+        json.dumps({"name": "app", "version": "1.0.0", "dependencies": dependencies})
+    )
+    assert cc.problems() == [f"plugins/app/.claude-plugin/plugin.json: {message}"]
+
+
+def test_problems_checks_a_range_that_names_this_marketplace(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(cc, "ROOT", tmp_path)
+    (tmp_path / ".claude-plugin").mkdir()
+    (tmp_path / ".claude-plugin" / "marketplace.json").write_text(json.dumps({"name": "home"}))
+    plugin(tmp_path, "base", "1.2.0", "## 1.2.0\n\n- Shipped.\n")
+    plugin(tmp_path, "app", "1.0.0", "## 1.0.0\n\n- Shipped.\n")
+    manifest = tmp_path / "plugins" / "app" / ".claude-plugin" / "plugin.json"
+    deps = [
+        {"name": "base", "version": "^9.0.0", "marketplace": "home"},
+        {"name": "base", "version": "^9.0.0", "marketplace": "away"},
+    ]
+    manifest.write_text(json.dumps({"name": "app", "version": "1.0.0", "dependencies": deps}))
+    assert cc.problems() == [
+        "plugins/app/.claude-plugin/plugin.json: needs base ^9.0.0, but base here is 1.2.0"
+    ]

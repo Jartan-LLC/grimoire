@@ -7,10 +7,22 @@ on:
       # for a pattern starting with '*'. Do NOT tighten to full semver: tag
       # filters are whole-ref matches, so praxis--v2.0.0-rc1 would stop firing.
       - "*--v[0-9]*"
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
+  # release-tags.yml creates tags with GITHUB_TOKEN, and a push made with that token
+  # starts no workflow, so it calls this one for each tag instead.
+  workflow_call:
+    inputs:
+      tag:
+        description: The {plugin}--v{version} tag to release
+        required: true
+        type: string
+  # Rebuilds the release of a tag that already exists (a deleted or failed release);
+  # it never creates a tag: checking out a missing tag fails the run.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The existing {plugin}--v{version} tag to release
+        required: true
+        type: string
 
 permissions: {}
 
@@ -20,10 +32,18 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write
+    # The tag this run is for: the input when called or dispatched (github.ref is then a
+    # branch), else the pushed tag. Concurrency cannot read env, so it keeps its own copy.
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+    concurrency:
+      group: release-${{ inputs.tag || github.ref_name }}
+      cancel-in-progress: false
     steps:
       # The notes come from the plugin's CHANGELOG.md at the tagged commit.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: refs/tags/${{ env.TAG }}
           persist-credentials: false
 
       # The view guard keeps re-runs idempotent. No --generate-notes: GitHub
@@ -34,20 +54,20 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          plugin="${GITHUB_REF_NAME%%--v*}"
-          version="${GITHUB_REF_NAME#*--v}"
+          plugin="${TAG%%--v*}"
+          version="${TAG#*--v}"
           # GitHub picks "Latest" as the newest non-prerelease by created_at, so
           # an unmarked rc would present as current.
           flags=()
           case "$version" in
             *-*) flags+=(--prerelease) ;;
           esac
-          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+          if gh release view "$TAG" >/dev/null 2>&1; then
             exit 0
           fi
           python3 scripts/check-changelogs.py --notes "$plugin" "$version" > notes.md
-          gh release create "$GITHUB_REF_NAME" \
-            --title "$GITHUB_REF_NAME" \
+          gh release create "$TAG" \
+            --title "$TAG" \
             --verify-tag \
             "${flags[@]}" \
             --notes-file notes.md

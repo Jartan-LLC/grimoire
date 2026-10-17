@@ -1,0 +1,121 @@
+name: Tag plugin releases
+
+# A version is released once it is on main (RELEASING.md), so each version a push to
+# main changes gets its {plugin}--v{version} tag, at the push's tip, and its GitHub
+# Release here. ci.yml's release-tags job calls this on that push; its needs list
+# says which checks must pass first.
+on:
+  workflow_call:
+
+permissions: {}
+
+jobs:
+  tag:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    outputs:
+      tags: ${{ steps.create.outputs.tags }}
+    # bash, not the default shell, for pipefail: the warning step pipes the script into
+    # a loop, and a failure there would otherwise read as "nothing untagged".
+    defaults:
+      run:
+        shell: bash
+    steps:
+      # The commit CI tested, with full history: the job diffs the push's base
+      # (github.event.before), not HEAD^, so a bump anywhere in the push counts.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      # Refs go through the API, so no git credential is left in the checkout. An
+      # existing tag is never moved, but it is still released: on a re-run after a
+      # failed release, release.yml skips any release that already exists.
+      - name: Create due tags
+        id: create
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.sha }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          base="$BEFORE"
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+            base="$HEAD_SHA^"
+          fi
+          gh api --paginate "repos/$GH_REPO/git/matching-refs/tags/" \
+            --jq '.[].ref | sub("^refs/tags/"; "")' > existing.txt
+          python3 scripts/release-tags.py due "$base" "$HEAD_SHA" > due.txt
+          : > ready.txt
+          : > failed.txt
+          # A reused version number leaves the tag on an older commit, and its release
+          # (if any) is then skipped: say so rather than pass silently. The lookup only
+          # feeds a warning, so its failure must not stop the step.
+          check_existing() {
+            echo "exists $1$2"
+            if ! at=$(gh api "repos/$GH_REPO/commits/$1" --jq .sha); then
+              echo "::warning::could not look up the commit $1 names"
+            elif [ "$at" != "$HEAD_SHA" ]; then
+              echo "::warning::$1 already points at $at, not this push's $HEAD_SHA; check it as RELEASING.md's wrong-commit entry says"
+            fi
+          }
+          while read -r tag; do
+            if grep -qxF "$tag" existing.txt; then
+              check_existing "$tag" ""
+            elif err=$(gh api "repos/$GH_REPO/git/refs" -f ref="refs/tags/$tag" -f sha="$HEAD_SHA" 2>&1 > /dev/null); then
+              echo "tagged $tag"
+            elif gh api "repos/$GH_REPO/git/ref/tags/$tag" > /dev/null 2>&1; then
+              check_existing "$tag" " (created meanwhile)"
+            else
+              echo "::error::could not create $tag: $err"
+              # GITHUB_TOKEN cannot be given the workflows permission, and GitHub then
+              # refuses a tag on a commit whose .github/workflows differ from main's tip.
+              # Other permission gaps also return 403, so the message says "likely".
+              case "$err" in
+                *"HTTP 403"*) echo "::error::likely cause: main's workflow files changed after this push, so no re-run can create $tag; tag it by hand (RELEASING.md, If a release fails)" ;;
+              esac
+              echo "$tag" >> failed.txt
+              continue
+            fi
+            echo "$tag" >> ready.txt
+          done < due.txt
+          echo "tags=$(jq -R -s -c 'split("\n") | map(select(length > 0))' ready.txt)" >> "$GITHUB_OUTPUT"
+
+      # An earlier push whose checks failed leaves its version untagged, and no later
+      # run tags it (each looks only at its own push). Main's runs overlap, so the
+      # earlier push's own run may still be about to tag it.
+      - name: Warn about untagged versions
+        env:
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          cat existing.txt due.txt > known.txt
+          python3 scripts/release-tags.py untagged "$HEAD_SHA" known.txt | while read -r tag; do
+            echo "::warning::$tag has no tag; once no CI run for the commit that set it is still going, tag it by hand there (RELEASING.md)"
+          done
+
+      - name: Fail if a due tag was not created
+        run: |
+          if [ -s failed.txt ]; then
+            echo "::error::not created: $(tr '\n' ' ' < failed.txt)"
+            exit 1
+          fi
+
+  release:
+    needs: tag
+    # Releases the tags that exist even when another could not be created.
+    if: ${{ !cancelled() && needs.tag.outputs.tags != '[]' && needs.tag.outputs.tags != '' }}
+    strategy:
+      # Each tag's release stands alone: one failing must not cancel the rest.
+      fail-fast: false
+      matrix:
+        tag: ${{ fromJSON(needs.tag.outputs.tags) }}
+    permissions:
+      contents: write
+    # actionlint 1.7.12 rejects the $/ self-repository form for a reusable workflow;
+    # drop this ignore once a newer pin parses it.
+    uses: ./.github/workflows/release.yml # zizmor: ignore[self-repository]
+    with:
+      tag: ${{ matrix.tag }}
