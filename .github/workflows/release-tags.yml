@@ -56,8 +56,10 @@ jobs:
               echo "exists $tag"
               # A reused version number leaves the tag on an older commit, and its
               # release (if any) is then skipped: say so rather than pass silently.
-              at=$(gh api "repos/$GH_REPO/commits/$tag" --jq .sha)
-              if [ "$at" != "$HEAD_SHA" ]; then
+              # The lookup only feeds a warning, so its failure must not stop the step.
+              if ! at=$(gh api "repos/$GH_REPO/commits/$tag" --jq .sha); then
+                echo "::warning::could not look up the commit $tag names"
+              elif [ "$at" != "$HEAD_SHA" ]; then
                 echo "::warning::$tag already points at $at, not this push's $HEAD_SHA; check it as RELEASING.md's wrong-commit entry says"
               fi
             elif err=$(gh api "repos/$GH_REPO/git/refs" -f ref="refs/tags/$tag" -f sha="$HEAD_SHA" 2>&1 > /dev/null); then

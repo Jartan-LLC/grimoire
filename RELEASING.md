@@ -208,8 +208,10 @@ auto-install `gitwise` alongside `praxis`. Add a `dependencies` entry only for a
 real requirement like this, and keep its constraint pinned to a tested range.
 `make verify` fails a range on a plugin in this repository that the depended-on
 plugin's version here does not meet. It reads `^X.Y.Z`, `~X.Y.Z` and an exact
-`X.Y.Z` or `=X.Y.Z`, rejects a prerelease version as node-semver (which Claude Code
-resolves ranges with) does, and reports any other form as one it cannot read.
+`X.Y.Z` or `=X.Y.Z` and rejects a prerelease version as node-semver (which Claude
+Code resolves ranges with) does. It reports as one it cannot check any other range
+form, a prerelease version under a range that opts into prereleases on the same
+version, and a version with build metadata.
 
 Because constraints resolve against the `{plugin-name}--v{version}` tags above, a
 dependency must be tagged **before or with** the plugin that requires it -- tag

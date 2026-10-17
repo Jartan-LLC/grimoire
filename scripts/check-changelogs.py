@@ -52,7 +52,8 @@ def accepts(constraint: str, version: str) -> bool | None:
     Reads `^X.Y.Z`, `~X.Y.Z` and an exact `X.Y.Z` or `=X.Y.Z`, the forms make verify
     supports. As in node-semver, which Claude Code resolves ranges with, a
     prerelease version is accepted only by a range that opts into prereleases on the
-    same X.Y.Z; that case is left unread (None) rather than ordered here.
+    same X.Y.Z; that case is left unchecked (None) rather than ordered here, as is a
+    version with build metadata.
     """
 
     def split(text: str) -> tuple[tuple[int, int, int] | None, str]:
@@ -97,7 +98,9 @@ def dependency_problems(
     """
     found: list[str] = []
     deps = fields.get("dependencies", [])
-    for dep in cast("list[object]", deps if isinstance(deps, list) else []):
+    if not isinstance(deps, list):
+        return [f"{where}: dependencies is not a list"]
+    for dep in cast("list[object]", deps):
         if isinstance(dep, str):
             continue
         entry = cast("dict[str, object]", dep) if isinstance(dep, dict) else {}
@@ -110,7 +113,7 @@ def dependency_problems(
             continue
         verdict = accepts(wanted, have)
         if verdict is None:
-            found.append(f"{where}: cannot read the range {wanted!r} for {name}")
+            found.append(f"{where}: cannot check the range {wanted!r} for {name} {have}")
         elif not verdict:
             found.append(f"{where}: needs {name} {wanted}, but {name} here is {have}")
     return found
