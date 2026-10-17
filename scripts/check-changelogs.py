@@ -47,7 +47,7 @@ SEMVER_CORE = 3  # MAJOR.MINOR.PATCH
 
 
 def accepts(constraint: str, version: str) -> bool | None:
-    """Whether a dependency range accepts a version, as node-semver decides; None if unread.
+    """Whether a dependency range accepts a version, as node-semver decides; None if unchecked.
 
     Reads `^X.Y.Z`, `~X.Y.Z` and an exact `X.Y.Z` or `=X.Y.Z`, the forms make verify
     supports. As in node-semver, which Claude Code resolves ranges with, a
@@ -109,6 +109,9 @@ def dependency_problems(
             found.append(f"{where}: a dependency that is neither a name nor an object with one")
             continue
         have = versions.get(name)
+        if "version" in entry and not isinstance(wanted, str):
+            found.append(f"{where}: the version range for {name} is not a string")
+            continue
         if "marketplace" in entry or not isinstance(wanted, str) or not isinstance(have, str):
             continue
         verdict = accepts(wanted, have)
@@ -124,7 +127,7 @@ def problems() -> list[str]:
 
     The problems: no plugin manifests, a manifest without a version, a changelog
     without that version's entry, a directory named unlike its manifest, or a
-    dependency range that rejects (or cannot read) the version of a plugin in
+    dependency range that rejects (or cannot be checked against) the version of a plugin in
     this tree.
     """
     manifests = sorted(ROOT.glob("plugins/*/.claude-plugin/plugin.json"))

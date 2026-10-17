@@ -217,6 +217,8 @@ def test_problems_names_a_dependency_range_the_tree_does_not_meet(
             [{"name": "base", "version": ">=1.0.0"}],
             "cannot check the range '>=1.0.0' for base 1.2.0",
         ),
+        ([{"name": "base", "version": 1}], "the version range for base is not a string"),
+        ([{"name": "base", "version": None}], "the version range for base is not a string"),
     ],
 )
 def test_problems_names_dependencies_it_cannot_check(

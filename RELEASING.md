@@ -213,10 +213,12 @@ Code resolves ranges with) does. It reports as one it cannot check any other ran
 form, a prerelease version under a range that opts into prereleases on the same
 version, and a version with build metadata.
 
-Because constraints resolve against the `{plugin-name}--v{version}` tags above, a
-dependency must be tagged **before or with** the plugin that requires it -- tag
-`gitwise` before shipping a `praxis` release that depends on it, or the resolver
-has no version to match. See the upstream
+Constraints resolve against the `{plugin-name}--v{version}` tags above, so tag a
+dependency **before or with** the plugin that requires it (`release-tags` does so
+within a push). These plugins have relative-path sources, so when no tag meets a
+range, Claude Code uses the marketplace's current copy of the dependency and checks
+the range when the plugin loads; the range check `make verify` runs keeps that copy
+inside the range. See the upstream
 [dependency guide](https://code.claude.com/docs/en/plugin-dependencies) for
 cross-marketplace rules and conflict resolution.
 
