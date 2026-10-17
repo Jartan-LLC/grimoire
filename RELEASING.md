@@ -57,9 +57,9 @@ tag's own `scripts/check-changelogs.py --notes`. Recreate that release with
 
 **A check failed on the push that bumped a version.** If it was the dev container
 build, `release-tags` does not wait on it, so the version is tagged and there is
-nothing to do. If it was verify, lint, typecheck or test, `release-tags` never ran
-for that push, and no later push tags the version either, because each run looks
-only at its own push:
+nothing to do. If it was one of the checks it waits on
+([Tag a version](#tag-a-version)), `release-tags` never ran for that push, and no
+later push tags the version either, because each run looks only at its own push:
 
 - If the failure was transient, re-run the run's failed jobs. A re-run tests the
   same commit.
