@@ -26,7 +26,7 @@ codex plugin marketplace add Jartan-LLC/grimoire
 codex plugin add <plugin>@grimoire
 ```
 
-Skills and hooks behave the same under both. Codex differs in these ways:
+Under Codex:
 
 - It ignores plugin dependencies, so `praxis` needs `gitwise` installed
   explicitly.
@@ -45,9 +45,9 @@ Skills and hooks behave the same under both. Codex differs in these ways:
 
 ## Versioning & Releases
 
-Each plugin follows [semantic versioning](https://semver.org), and each version
-gets a `{plugin-name}--v{version}` git tag. Each plugin has its own
-`CHANGELOG.md`. The root `CHANGELOG.md` covers marketplace releases.
+Each plugin follows [semantic versioning](https://semver.org) and has its own
+`CHANGELOG.md`. The root `CHANGELOG.md` lists the `marketplace-v*` releases you
+can pin.
 
 To update:
 
@@ -73,15 +73,13 @@ To pin a project to a marketplace release, set `ref` to a
 A pinned project gets newer plugin versions only when you move `ref` to a newer
 `marketplace-v*` tag.
 
-In CI, the `plugin_marketplaces` input of `anthropics/claude-code-action` takes
-no ref. Check this repository out at the pinned tag and pass the local path to
-that input.
+In CI, `anthropics/claude-code-action`'s `plugin_marketplaces` input takes no
+ref: check this repository out at the pinned tag and pass that local path.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) to set up, check a change or add a
-plugin. See [RELEASING.md](RELEASING.md) to cut a release. Report security
-issues privately: [SECURITY.md](.github/SECURITY.md).
+To contribute, see [CONTRIBUTING.md](CONTRIBUTING.md). Report security issues
+privately: [SECURITY.md](.github/SECURITY.md).
 
 ## License
 

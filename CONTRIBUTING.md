@@ -10,9 +10,7 @@ The dev container installs everything on creation. Elsewhere, install
 make install
 ```
 
-This installs the tools pinned in `ci/requirements.txt` and the pre-commit hook.
-The lychee and actionlint hooks need Docker, and the markdownlint hook needs
-Node. The tests need Node 20 or newer.
+The lychee and actionlint hooks need Docker, and the tests need Node 20 or newer.
 
 In the dev container, run the Docker hooks from inside the bind-mounted project
 directory, or from a worktree under it. From a worktree or copy outside it, the
@@ -24,8 +22,8 @@ hooks cannot see the files and pass or fail wrongly.
 make check
 ```
 
-`make fix` applies ruff's safe fixes and formatting, and `make help` lists every
-target. CI runs more than `make check`: see `.github/workflows/ci.yml`.
+`make help` lists every target, such as `make fix` for ruff's safe fixes and
+formatting.
 
 ## Tests
 
@@ -33,8 +31,8 @@ target. CI runs more than `make check`: see `.github/workflows/ci.yml`.
 new test first. To run one file:
 
 ```bash
-node --test tests/<source path>/<name>.test.js       # node:test, Node 20 or newer
-python3 -m pytest tests/<source path>/test_<name>.py # pytest, from ci/requirements.txt
+node --test tests/<source path>/<name>.test.js
+python3 -m pytest tests/<source path>/test_<name>.py
 ```
 
 - A function earns a test when it takes its input as an argument and a wrong
@@ -47,8 +45,7 @@ python3 -m pytest tests/<source path>/test_<name>.py # pytest, from ci/requireme
   network.
 - Keep a test that exposes a shipped defect. Wrap it in `knownDefect` from
   `tests/helpers/known-defect.js` (Node) or mark it
-  `xfail(strict=True, raises=AssertionError)` (pytest), naming the issue. The fix
-  removes the wrapper.
+  `xfail(strict=True, raises=AssertionError)` (pytest), naming the issue.
 
 ## Conventions
 
@@ -62,26 +59,16 @@ python3 -m pytest tests/<source path>/test_<name>.py # pytest, from ci/requireme
   its `CHANGELOG.md`. See [RELEASING.md](RELEASING.md).
 - A change to the marketplace itself, such as adding or removing a plugin, gets
   an entry under `## Unreleased` in the root `CHANGELOG.md`.
-- The Codex files are generated, so never hand-edit them:
-  - `plugins/<name>/.codex-plugin/plugin.json`
-  - `.agents/plugins/marketplace.json`
-  - `plugins/<name>/codex/agents/*.toml`
-
-  After you change a plugin's name, version, description, keywords, category or
-  agents, run `python3 scripts/generate-codex.py` and commit its output. Until
-  you do, `make verify` fails.
-
-  `make verify` also names any orphaned file. Delete those yourself.
-- Some hook scripts ship from more than one plugin (`DUPLICATED_HOOK_SCRIPTS` in
-  `scripts/generate-codex.py`). Edit every copy in the same commit so they stay
-  byte-identical; `make verify` fails while they differ. Bump each plugin that
-  ships a copy.
-
-  `find-duplicate-comments.js` reports the comments in these copies as retold;
-  dismiss it.
-- Report security issues privately via [SECURITY.md](.github/SECURITY.md).
-- Ask questions in Discussions (Q&A). Report bugs and feature requests through
-  the issue forms. Everyone taking part follows the
+- The Codex files (`plugins/<name>/.codex-plugin/plugin.json`,
+  `.agents/plugins/marketplace.json`, `plugins/<name>/codex/agents/*.toml`) are
+  generated: after you change a plugin's name, version, description, keywords,
+  category or agents, run `python3 scripts/generate-codex.py` and commit its
+  output.
+- `find-duplicate-comments.js` reports comments in the identical copies of
+  `hooks/scripts/sync-codex-agents.js` as retold; dismiss it.
+- Report security issues privately via [SECURITY.md](.github/SECURITY.md). Ask
+  questions in Discussions (Q&A); report bugs and feature requests through the
+  issue forms. Everyone taking part follows the
   [code of conduct](.github/CODE_OF_CONDUCT.md).
 
 ## Adding a plugin
@@ -94,10 +81,9 @@ python3 -m pytest tests/<source path>/test_<name>.py # pytest, from ci/requireme
 2. Add its entry to `.claude-plugin/marketplace.json` with the fields the other
    entries carry (`name`, `source`, `description`, `category`, `keywords`,
    `author`, `license`). Add its row to the plugin table in `README.md`.
-3. If the plugin ships agents, copy `hooks/scripts/sync-codex-agents.js` from
-   `plugins/recursio/` and add its `SessionStart` entry from
-   `plugins/recursio/hooks/hooks.json`. Codex gets the agents only through that
-   hook, and nothing checks that the hook is there.
+3. If the plugin ships agents, copy `hooks/scripts/sync-codex-agents.js` and its
+   `SessionStart` entry in `hooks/hooks.json` from `plugins/recursio/`. Nothing
+   checks that they are there.
 4. Run `python3 scripts/generate-codex.py` and commit the output.
 5. Add a line under `## Unreleased` in the root `CHANGELOG.md`.
 
