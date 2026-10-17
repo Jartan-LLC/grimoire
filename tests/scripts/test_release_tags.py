@@ -115,3 +115,7 @@ def test_manifests_at_a_commit_without_plugins_is_empty(repo: pathlib.Path) -> N
 def test_manifests_at_a_ref_that_names_no_commit_raises(repo: pathlib.Path) -> None:
     with pytest.raises(subprocess.CalledProcessError):
         rt.manifests_at("no-such-ref")
+
+
+def test_current_tags_names_every_plugin_by_name() -> None:
+    assert rt.current_tags({"b": m("2.0.0"), "a": m("1.0.0")}) == ["a--v1.0.0", "b--v2.0.0"]

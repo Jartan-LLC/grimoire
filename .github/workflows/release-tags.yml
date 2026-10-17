@@ -50,8 +50,6 @@ jobs:
               echo "exists $tag"
             elif err=$(gh api "repos/$GH_REPO/git/refs" -f ref="refs/tags/$tag" -f sha="$HEAD_SHA" 2>&1 > /dev/null); then
               echo "tagged $tag"
-            elif gh api "repos/$GH_REPO/git/ref/tags/$tag" > /dev/null 2>&1; then
-              echo "exists $tag (created meanwhile)"
             else
               echo "::error::could not create $tag: $err"
               # GITHUB_TOKEN cannot be given the workflows permission, and GitHub then
@@ -62,6 +60,13 @@ jobs:
               exit 1
             fi
           done < due.txt
+          # An earlier push whose checks failed leaves its version untagged, and no later
+          # run tags it (each looks only at its own push), so say so on every run.
+          python3 scripts/release-tags.py --current "$HEAD_SHA" | while read -r tag; do
+            if ! grep -qxF "$tag" existing.txt && ! grep -qxF "$tag" due.txt; then
+              echo "::warning::$tag has no tag; tag it by hand at the commit that set it (RELEASING.md)"
+            fi
+          done
           echo "tags=$(jq -R -s -c 'split("\n") | map(select(length > 0))' due.txt)" >> "$GITHUB_OUTPUT"
 
   release:

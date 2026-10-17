@@ -48,7 +48,7 @@ the run fails without writing anything, so recreate the release by hand with
 
 **Verify, lint, typecheck or test failed on the push that bumped a version**, so
 `release-tags` never ran and a later push will not tag it: each run looks only at its
-own push. Once those checks can pass at that commit, re-run the run's failed jobs; if
+own push, though each later run's log warns that the version has no tag. Once those checks can pass at that commit, re-run the run's failed jobs; if
 they cannot, or `main`'s workflow files have changed since, tag the version by hand as
 below.
 

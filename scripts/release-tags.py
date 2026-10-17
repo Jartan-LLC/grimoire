@@ -9,6 +9,10 @@ runs this, creates the tags that do not exist yet and releases them all.
 
 Usage: release-tags.py <base-ref> <head-ref>  (the push's base and its tip)
 Prints one tag per line; nothing when the push changes no version.
+
+       release-tags.py --current <ref>
+Prints the tag each plugin's version at <ref> should have, so the workflow can
+warn about a version an earlier push left untagged.
 """
 
 import json
@@ -95,10 +99,20 @@ def manifests_at(ref: str) -> dict[str, Manifest]:
     return found
 
 
+def current_tags(manifests: dict[str, Manifest]) -> list[str]:
+    """The tag each plugin's current version should have, by plugin name."""
+    return [f"{name}--v{m.version}" for name, m in sorted(manifests.items())]
+
+
 def main() -> int:
-    """Print the tags the push from base to head owes."""
+    """Print the tags the push from base to head owes, or with --current every plugin's."""
+    args = sys.argv[1:]
+    if len(args) == 2 and args[0] == "--current":  # noqa: PLR2004
+        for tag in current_tags(manifests_at(args[1])):
+            print(tag)
+        return 0
     try:
-        base_ref, head_ref = sys.argv[1:]
+        base_ref, head_ref = args
     except ValueError:
         print(__doc__, file=sys.stderr)
         return 2

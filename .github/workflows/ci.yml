@@ -197,10 +197,10 @@ jobs:
             fi
           done
 
-  # Tags and releases each plugin version this push puts on main, once the checks of
-  # what a plugin ships have passed. The dev container build is not one of them: it
-  # can run for most of an hour. These four jobs have no needs of their own, so the
-  # implicit success() gates on exactly them.
+  # The dev container build is not gated on: it ships in no plugin and can run for
+  # most of an hour. The jobs in needs have no needs or conditions of their own, so
+  # the implicit success() gates on exactly them; giving one either would skip this
+  # job whenever that one skips.
   release-tags:
     needs: [verify, lint, typecheck, test]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
