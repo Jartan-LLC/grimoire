@@ -17,6 +17,11 @@ jobs:
       contents: write
     outputs:
       tags: ${{ steps.create.outputs.tags }}
+    # bash, not the default shell, for pipefail: the warning step pipes the script into
+    # a loop, and a failure there would otherwise read as "nothing untagged".
+    defaults:
+      run:
+        shell: bash
     steps:
       # The commit CI tested, with full history: the job diffs the push's base
       # (github.event.before), not HEAD^, so a bump anywhere in the push counts.
