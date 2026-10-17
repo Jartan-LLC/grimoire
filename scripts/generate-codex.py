@@ -205,13 +205,6 @@ def plugin_manifest(entry: Json) -> tuple[pathlib.Path, Json]:
             f"{source}: plugin.json name {claude['name']!r} does not match "
             f"marketplace entry {entry['name']!r}"
         )
-    # release-tags.py matches dependency names against plugin directories, and
-    # release.yml reads plugins/<name>/ for a tag's notes: a mismatch merged to main
-    # would stop tagging for every plugin, so it fails here, before merge.
-    if source.name != claude["name"]:
-        raise ValueError(
-            f"{source}: directory name does not match plugin.json name {claude['name']!r}"
-        )
 
     manifest: Json = {
         "name": claude["name"],

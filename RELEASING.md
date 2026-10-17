@@ -46,13 +46,12 @@ from before the per-plugin changelogs (praxis 1.5.0 and earlier, for one) lack; 
 the run fails without writing anything, so recreate the release by hand with
 `gh release create <tag> --verify-tag --notes-file <file>`.
 
-**Verify, lint, typecheck or test failed on the push that bumped a version**, so
+**A check `release-tags` waits on failed on the push that bumped a version**, so
 `release-tags` never ran and a later push will not tag it: each run looks only at its
 own push. Each later run's log warns that the version has no tag, but only while it is
 still that plugin's current version: tag it by hand before the plugin is bumped again.
-Once those checks can pass at that commit, re-run the run's failed jobs; if they
-cannot, or `main`'s workflow files have changed since, tag the version by hand as
-below.
+Once it can pass at that commit, re-run the run's failed jobs; if it cannot, or
+`main`'s workflow files have changed since, tag the version by hand as below.
 
 **A version needs a tag by hand** (the job cannot run, or the version predates it).
 Check that its dependencies have tags their constraints accept

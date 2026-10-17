@@ -135,3 +135,57 @@ def test_notes_fails_without_an_entry(
     out, err = capsys.readouterr()
     assert out == ""
     assert err == f"{message}\n"
+
+
+@pytest.mark.parametrize(
+    ("constraint", "version", "verdict"),
+    [
+        ("^1.2.0", "1.2.0", True),
+        ("^1.2.0", "1.9.3", True),
+        ("^1.2.0", "2.0.0", False),
+        ("^1.2.0", "1.1.9", False),
+        ("^0.3.1", "0.3.9", True),
+        ("^0.3.1", "0.4.0", False),
+        ("~1.2.0", "1.2.7", True),
+        ("~1.2.0", "1.3.0", False),
+        ("1.2.0", "1.2.0", True),
+        ("1.2.0", "1.2.1", False),
+        ("^2.0.0", "2.0.0-rc1", True),
+        (">=1.0.0", "1.2.0", None),
+        ("^1.2", "1.2.0", None),
+    ],
+)
+def test_accepts_reads_caret_tilde_and_exact_ranges(
+    constraint: str, version: str, verdict: bool | None
+) -> None:
+    assert cc.accepts(constraint, version) is verdict
+
+
+def test_problems_names_a_directory_named_unlike_its_manifest(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(cc, "ROOT", tmp_path)
+    plugin(tmp_path, "dir", "1.0.0", "## 1.0.0\n\n- Shipped.\n")
+    manifest = tmp_path / "plugins" / "dir" / ".claude-plugin" / "plugin.json"
+    manifest.write_text(json.dumps({"name": "other", "version": "1.0.0"}))
+    assert cc.problems() == [
+        "plugins/dir/.claude-plugin/plugin.json: name 'other' differs from its directory"
+    ]
+
+
+def test_problems_names_a_dependency_range_the_tree_does_not_meet(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(cc, "ROOT", tmp_path)
+    plugin(tmp_path, "base", "1.2.0", "## 1.2.0\n\n- Shipped.\n")
+    plugin(tmp_path, "app", "1.0.0", "## 1.0.0\n\n- Shipped.\n")
+    manifest = tmp_path / "plugins" / "app" / ".claude-plugin" / "plugin.json"
+    deps = [
+        {"name": "base", "version": "^1.3.0"},
+        {"name": "elsewhere", "version": "^9.0.0"},
+        "base",
+    ]
+    manifest.write_text(json.dumps({"name": "app", "version": "1.0.0", "dependencies": deps}))
+    assert cc.problems() == [
+        "plugins/app/.claude-plugin/plugin.json: needs base ^1.3.0, but base here is 1.2.0"
+    ]
