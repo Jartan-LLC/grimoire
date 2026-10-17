@@ -58,21 +58,24 @@ def accepts(constraint: str, version: str) -> bool | None:
     def split(text: str) -> tuple[tuple[int, int, int] | None, str]:
         core, _, pre = text.partition("-")
         parts = core.split(".")
-        if len(parts) != SEMVER_CORE or not all(part.isdigit() for part in parts):
+        # node-semver rejects a leading zero in a numeric part ("01").
+        if len(parts) != SEMVER_CORE or not all(
+            part.isdigit() and (part == "0" or not part.startswith("0")) for part in parts
+        ):
             return None, pre
         return (int(parts[0]), int(parts[1]), int(parts[2])), pre
 
     if not constraint:
         return None
-    kind = constraint[0] if constraint[0] in "^~=" else "="
-    floor, floor_pre = split(constraint[1:] if constraint[0] in "^~=" else constraint)
+    kind, body = (constraint[0], constraint[1:]) if constraint[0] in "^~=" else ("=", constraint)
+    floor, floor_pre = split(body)
     have, have_pre = split(version)
     if have is None or floor is None:
         return None
     if have_pre:
         return None if floor_pre and have == floor else False
     if kind == "=":
-        return have == floor
+        return have == floor and not floor_pre
     if kind == "~":
         ceiling = (floor[0], floor[1] + 1, 0)
     elif floor[0] > 0:
@@ -82,6 +85,35 @@ def accepts(constraint: str, version: str) -> bool | None:
     else:
         ceiling = (0, 0, floor[2] + 1)
     return floor <= have < ceiling
+
+
+def dependency_problems(
+    where: str, fields: dict[str, object], versions: dict[str, object]
+) -> list[str]:
+    """One message per dependency entry that is malformed, or whose range the tree fails.
+
+    A bare name accepts any version. An entry naming another marketplace, or a plugin
+    not in this tree, is not checked: only `versions`, this tree's, can answer it.
+    """
+    found: list[str] = []
+    deps = fields.get("dependencies", [])
+    for dep in cast("list[object]", deps if isinstance(deps, list) else []):
+        if isinstance(dep, str):
+            continue
+        entry = cast("dict[str, object]", dep) if isinstance(dep, dict) else {}
+        name, wanted = entry.get("name"), entry.get("version")
+        if not isinstance(name, str):
+            found.append(f"{where}: a dependency that is neither a name nor an object with one")
+            continue
+        have = versions.get(name)
+        if "marketplace" in entry or not isinstance(wanted, str) or not isinstance(have, str):
+            continue
+        verdict = accepts(wanted, have)
+        if verdict is None:
+            found.append(f"{where}: cannot read the range {wanted!r} for {name}")
+        elif not verdict:
+            found.append(f"{where}: needs {name} {wanted}, but {name} here is {have}")
+    return found
 
 
 def problems() -> list[str]:
@@ -108,26 +140,7 @@ def problems() -> list[str]:
             found.append(message)
         if fields.get("name") != plugin.name:
             found.append(f"{where}: name {fields.get('name')!r} differs from its directory")
-        for dep in fields.get("dependencies", []):
-            if isinstance(dep, str):
-                continue  # a bare name accepts any version
-            if not isinstance(dep, dict) or not isinstance(
-                cast("dict[str, object]", dep).get("name"), str
-            ):
-                found.append(f"{where}: a dependency that is neither a name nor an object with one")
-                continue
-            entry = cast("dict[str, object]", dep)
-            if "marketplace" in entry:
-                continue  # from another marketplace, not this tree
-            name, wanted = entry.get("name"), entry.get("version")
-            have = versions.get(name) if isinstance(name, str) else None
-            if not isinstance(wanted, str) or not isinstance(have, str):
-                continue  # no range, or a plugin from outside this tree
-            verdict = accepts(wanted, have)
-            if verdict is None:
-                found.append(f"{where}: cannot read the range {wanted!r} for {name}")
-            elif not verdict:
-                found.append(f"{where}: needs {name} {wanted}, but {name} here is {have}")
+        found.extend(dependency_problems(str(where), fields, versions))
     return found
 
 

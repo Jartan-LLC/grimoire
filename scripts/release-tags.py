@@ -33,7 +33,10 @@ def parse_manifest(text: str) -> Manifest:
     data = json.loads(text)
     names: set[str] = set()
     for dep in data.get("dependencies", []):
-        names.add(dep if isinstance(dep, str) else dep["name"])
+        if isinstance(dep, str):
+            names.add(dep)
+        elif "marketplace" not in dep:  # another marketplace's plugin is not in this tree
+            names.add(dep["name"])
     return Manifest(
         name=str(data["name"]), version=str(data["version"]), dependencies=frozenset(names)
     )

@@ -161,6 +161,10 @@ def test_notes_fails_without_an_entry(
         (">=1.0.0", "1.2.0", None),
         ("^1.2", "1.2.0", None),
         ("", "1.2.0", None),
+        ("=1.2.3-rc1", "1.2.3", False),
+        ("1.2.3-rc1", "1.2.3", False),
+        ("^01.2.3", "1.2.3", None),
+        ("1.2.3", "01.2.3", None),
     ],
 )
 def test_accepts_reads_caret_tilde_and_exact_ranges(

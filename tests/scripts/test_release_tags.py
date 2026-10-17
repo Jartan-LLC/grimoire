@@ -151,3 +151,11 @@ def test_cli_due_and_untagged_as_the_workflow_calls_them(
     monkeypatch.setattr("sys.argv", ["release-tags.py", "untagged", "HEAD", str(known)])
     assert rt.main() == 0
     assert capsys.readouterr().out.split() == ["b--v1.0.0"]
+
+
+def test_parse_manifest_leaves_out_another_marketplaces_dependency() -> None:
+    text = (
+        '{"name": "p", "version": "1.0.0", "dependencies": '
+        '[{"name": "gitwise", "version": "^1", "marketplace": "other"}, "local"]}'
+    )
+    assert rt.parse_manifest(text) == m("p", "1.0.0", "local")
