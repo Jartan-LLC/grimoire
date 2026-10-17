@@ -183,7 +183,8 @@ jobs:
   check:
     if: always()
     # When you add jobs above, add them to BOTH the needs list and the results
-    # array below.
+    # array below. If the job checks what a plugin ships, add it to release-tags'
+    # needs and to RELEASING.md's "Tag a version" too.
     needs: [verify, lint, typecheck, test, changes, devcontainer]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
