@@ -232,3 +232,22 @@ def test_problems_names_dependencies_it_cannot_check(
         json.dumps({"name": "app", "version": "1.0.0", "dependencies": dependencies})
     )
     assert cc.problems() == [f"plugins/app/.claude-plugin/plugin.json: {message}"]
+
+
+def test_problems_checks_a_range_that_names_this_marketplace(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(cc, "ROOT", tmp_path)
+    (tmp_path / ".claude-plugin").mkdir()
+    (tmp_path / ".claude-plugin" / "marketplace.json").write_text(json.dumps({"name": "home"}))
+    plugin(tmp_path, "base", "1.2.0", "## 1.2.0\n\n- Shipped.\n")
+    plugin(tmp_path, "app", "1.0.0", "## 1.0.0\n\n- Shipped.\n")
+    manifest = tmp_path / "plugins" / "app" / ".claude-plugin" / "plugin.json"
+    deps = [
+        {"name": "base", "version": "^9.0.0", "marketplace": "home"},
+        {"name": "base", "version": "^9.0.0", "marketplace": "away"},
+    ]
+    manifest.write_text(json.dumps({"name": "app", "version": "1.0.0", "dependencies": deps}))
+    assert cc.problems() == [
+        "plugins/app/.claude-plugin/plugin.json: needs base ^9.0.0, but base here is 1.2.0"
+    ]

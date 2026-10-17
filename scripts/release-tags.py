@@ -28,14 +28,21 @@ class Manifest:
     dependencies: frozenset[str]
 
 
-def parse_manifest(text: str) -> Manifest:
-    """Read the name, version and dependency names from a plugin.json's text."""
+def parse_manifest(text: str, own: str = "") -> Manifest:
+    """Read the name, version and dependency names from a plugin.json's text.
+
+    Only dependencies in `own`, this repository's marketplace, are kept: another
+    marketplace's plugin (`name@other`, or a `marketplace` other than `own`) is not
+    in this tree.
+    """
     data = json.loads(text)
     names: set[str] = set()
     for dep in data.get("dependencies", []):
         if isinstance(dep, str):
-            names.add(dep)
-        elif "marketplace" not in dep:  # another marketplace's plugin is not in this tree
+            name, _, market = dep.partition("@")
+            if not market or market == own:
+                names.add(name)
+        elif dep.get("marketplace", own) == own:
             names.add(dep["name"])
     return Manifest(
         name=str(data["name"]), version=str(data["version"]), dependencies=frozenset(names)
@@ -92,6 +99,13 @@ def manifests_at(ref: str) -> dict[str, Manifest]:
     )
     if listing.returncode != 0:
         return {}
+    catalog = subprocess.run(  # noqa: S603
+        [GIT, "show", f"{ref}:.claude-plugin/marketplace.json"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    own = str(json.loads(catalog.stdout).get("name", "")) if catalog.returncode == 0 else ""
     found: dict[str, Manifest] = {}
     for name in listing.stdout.split():
         shown = subprocess.run(  # noqa: S603
@@ -101,7 +115,7 @@ def manifests_at(ref: str) -> dict[str, Manifest]:
             check=False,
         )
         if shown.returncode == 0:
-            manifest = parse_manifest(shown.stdout)
+            manifest = parse_manifest(shown.stdout, own)
             # due_tags matches dependency names, which are manifest names, against these
             # directory keys, and release.yml reads plugins/<tag's plugin>/ for the notes,
             # so a directory and its manifest name must agree.

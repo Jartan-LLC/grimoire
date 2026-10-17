@@ -159,3 +159,12 @@ def test_parse_manifest_leaves_out_another_marketplaces_dependency() -> None:
         '[{"name": "gitwise", "version": "^1", "marketplace": "other"}, "local"]}'
     )
     assert rt.parse_manifest(text) == m("p", "1.0.0", "local")
+
+
+def test_parse_manifest_keeps_a_dependency_named_in_its_own_marketplace() -> None:
+    text = (
+        '{"name": "p", "version": "1.0.0", "dependencies": ['
+        '{"name": "gitwise", "version": "^1", "marketplace": "grimoire"}, '
+        '"tools@grimoire", "far@other"]}'
+    )
+    assert rt.parse_manifest(text, "grimoire") == m("p", "1.0.0", "gitwise", "tools")

@@ -89,12 +89,13 @@ def accepts(constraint: str, version: str) -> bool | None:
 
 
 def dependency_problems(
-    where: str, fields: dict[str, object], versions: dict[str, object]
+    where: str, fields: dict[str, object], versions: dict[str, object], own: str = ""
 ) -> list[str]:
     """One message per dependency entry that is malformed, or whose range the tree fails.
 
-    A bare name accepts any version. An entry naming another marketplace, or a plugin
-    not in this tree, is not checked: only `versions`, this tree's, can answer it.
+    A bare name accepts any version. An entry naming another marketplace than `own`,
+    this repository's, or a plugin not in this tree, is not checked: only `versions`,
+    this tree's, can answer it.
     """
     found: list[str] = []
     deps = fields.get("dependencies", [])
@@ -112,7 +113,8 @@ def dependency_problems(
         if "version" in entry and not isinstance(wanted, str):
             found.append(f"{where}: the version range for {name} is not a string")
             continue
-        if "marketplace" in entry or not isinstance(wanted, str) or not isinstance(have, str):
+        foreign = "marketplace" in entry and entry["marketplace"] != own
+        if foreign or not isinstance(wanted, str) or not isinstance(have, str):
             continue
         verdict = accepts(wanted, have)
         if verdict is None:
@@ -136,6 +138,8 @@ def problems() -> list[str]:
     found: list[str] = []
     data = {manifest: json.loads(manifest.read_text()) for manifest in manifests}
     versions = {m.parent.parent.name: d.get("version") for m, d in data.items()}
+    catalog = ROOT / ".claude-plugin" / "marketplace.json"
+    own = json.loads(catalog.read_text()).get("name", "") if catalog.is_file() else ""
     for manifest, fields in data.items():
         plugin = manifest.parent.parent
         where = manifest.relative_to(ROOT)
@@ -146,7 +150,7 @@ def problems() -> list[str]:
             found.append(message)
         if fields.get("name") != plugin.name:
             found.append(f"{where}: name {fields.get('name')!r} differs from its directory")
-        found.extend(dependency_problems(str(where), fields, versions))
+        found.extend(dependency_problems(str(where), fields, versions, own))
     return found
 
 

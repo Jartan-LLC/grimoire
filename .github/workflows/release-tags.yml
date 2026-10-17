@@ -51,21 +51,24 @@ jobs:
           python3 scripts/release-tags.py due "$base" "$HEAD_SHA" > due.txt
           : > ready.txt
           : > failed.txt
+          # A reused version number leaves the tag on an older commit, and its release
+          # (if any) is then skipped: say so rather than pass silently. The lookup only
+          # feeds a warning, so its failure must not stop the step.
+          check_existing() {
+            echo "exists $1$2"
+            if ! at=$(gh api "repos/$GH_REPO/commits/$1" --jq .sha); then
+              echo "::warning::could not look up the commit $1 names"
+            elif [ "$at" != "$HEAD_SHA" ]; then
+              echo "::warning::$1 already points at $at, not this push's $HEAD_SHA; check it as RELEASING.md's wrong-commit entry says"
+            fi
+          }
           while read -r tag; do
             if grep -qxF "$tag" existing.txt; then
-              echo "exists $tag"
-              # A reused version number leaves the tag on an older commit, and its
-              # release (if any) is then skipped: say so rather than pass silently.
-              # The lookup only feeds a warning, so its failure must not stop the step.
-              if ! at=$(gh api "repos/$GH_REPO/commits/$tag" --jq .sha); then
-                echo "::warning::could not look up the commit $tag names"
-              elif [ "$at" != "$HEAD_SHA" ]; then
-                echo "::warning::$tag already points at $at, not this push's $HEAD_SHA; check it as RELEASING.md's wrong-commit entry says"
-              fi
+              check_existing "$tag" ""
             elif err=$(gh api "repos/$GH_REPO/git/refs" -f ref="refs/tags/$tag" -f sha="$HEAD_SHA" 2>&1 > /dev/null); then
               echo "tagged $tag"
             elif gh api "repos/$GH_REPO/git/ref/tags/$tag" > /dev/null 2>&1; then
-              echo "exists $tag (created meanwhile)"
+              check_existing "$tag" " (created meanwhile)"
             else
               echo "::error::could not create $tag: $err"
               # GITHUB_TOKEN cannot be given the workflows permission, and GitHub then
