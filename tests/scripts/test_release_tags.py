@@ -134,3 +134,20 @@ def test_manifests_at_rejects_a_directory_named_unlike_its_manifest(repo: pathli
     git(repo, "commit", "-qm", "mismatch")
     with pytest.raises(ValueError, match="declares name 'other'"):
         rt.manifests_at("HEAD")
+
+
+def test_cli_due_and_untagged_as_the_workflow_calls_them(
+    repo: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    first = commit_plugins(repo, {"a": "1.0.0", "b": "1.0.0"}, "first")
+    commit_plugins(repo, {"a": "1.1.0"}, "bump a")
+    (repo / "README.md").write_text("y\n")
+    git(repo, "commit", "-qam", "no bump")
+    monkeypatch.setattr("sys.argv", ["release-tags.py", "due", first, "HEAD"])
+    assert rt.main() == 0
+    assert capsys.readouterr().out.split() == ["a--v1.1.0"]
+    known = repo / "known.txt"
+    known.write_text("a--v1.1.0\n")
+    monkeypatch.setattr("sys.argv", ["release-tags.py", "untagged", "HEAD", str(known)])
+    assert rt.main() == 0
+    assert capsys.readouterr().out.split() == ["b--v1.0.0"]

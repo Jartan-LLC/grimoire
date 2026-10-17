@@ -29,7 +29,7 @@ class Manifest:
 
 
 def parse_manifest(text: str) -> Manifest:
-    """Read the version and dependency names from a plugin.json's text."""
+    """Read the name, version and dependency names from a plugin.json's text."""
     data = json.loads(text)
     names: set[str] = set()
     for dep in data.get("dependencies", []):
@@ -117,12 +117,12 @@ def main() -> int:
     """Print the tags `due` or `untagged` names."""
     parser = argparse.ArgumentParser(description=__doc__)
     modes = parser.add_subparsers(dest="mode", required=True)
-    due = modes.add_parser("due", help="tags the push from BASE to HEAD owes")
-    due.add_argument("base")
-    due.add_argument("head")
-    missing = modes.add_parser("untagged", help="current versions at REF with no tag")
-    missing.add_argument("ref")
-    missing.add_argument("known", type=pathlib.Path, help="file of tag names, one per line")
+    due_mode = modes.add_parser("due", help="tags the push from BASE to HEAD owes")
+    due_mode.add_argument("base")
+    due_mode.add_argument("head")
+    untagged_mode = modes.add_parser("untagged", help="current versions at REF with no tag")
+    untagged_mode.add_argument("ref")
+    untagged_mode.add_argument("known", type=pathlib.Path, help="file of tag names, one per line")
     args = parser.parse_args()
     if args.mode == "due":
         tags = due_tags(base=manifests_at(args.base), head=manifests_at(args.head))
