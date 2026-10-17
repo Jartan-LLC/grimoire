@@ -9,7 +9,7 @@ from script_loader import load_script
 rt = load_script("release-tags.py")
 
 
-def m(version: str, *deps: str, name: str = "p") -> object:
+def m(name: str, version: str, *deps: str) -> object:
     return rt.Manifest(name=name, version=version, dependencies=frozenset(deps))
 
 
@@ -17,48 +17,48 @@ def test_parse_manifest_reads_string_and_object_dependencies() -> None:
     text = (
         '{"name": "p", "version": "1.7.0", "dependencies": ["a", {"name": "b", "version": "^1"}]}'
     )
-    assert rt.parse_manifest(text) == m("1.7.0", "a", "b")
+    assert rt.parse_manifest(text) == m("p", "1.7.0", "a", "b")
 
 
 def test_parse_manifest_without_dependencies() -> None:
-    assert rt.parse_manifest('{"name": "p", "version": "2.0.0-rc1"}') == m("2.0.0-rc1")
+    assert rt.parse_manifest('{"name": "p", "version": "2.0.0-rc1"}') == m("p", "2.0.0-rc1")
 
 
 def test_only_changed_versions_are_tagged() -> None:
-    head = {"gitwise": m("1.2.0"), "praxis": m("1.7.0", "gitwise")}
-    base = {"gitwise": m("1.2.0"), "praxis": m("1.6.0", "gitwise")}
+    head = {"gitwise": m("gitwise", "1.2.0"), "praxis": m("praxis", "1.7.0", "gitwise")}
+    base = {"gitwise": m("gitwise", "1.2.0"), "praxis": m("praxis", "1.6.0", "gitwise")}
     assert rt.due_tags(base=base, head=head) == ["praxis--v1.7.0"]
 
 
 def test_no_version_change_tags_nothing() -> None:
-    same = {"gitwise": m("1.2.0")}
+    same = {"gitwise": m("gitwise", "1.2.0")}
     assert rt.due_tags(base=same, head=same) == []
 
 
 def test_dependency_is_tagged_before_the_plugin_that_needs_it() -> None:
     # "praxis" sorts after "gitwise" either way, so use a name that sorts first.
-    head = {"aaa": m("2.0.0", "zzz"), "zzz": m("1.1.0")}
-    base = {"aaa": m("1.0.0", "zzz"), "zzz": m("1.0.0")}
+    head = {"aaa": m("aaa", "2.0.0", "zzz"), "zzz": m("zzz", "1.1.0")}
+    base = {"aaa": m("aaa", "1.0.0", "zzz"), "zzz": m("zzz", "1.0.0")}
     assert rt.due_tags(base=base, head=head) == ["zzz--v1.1.0", "aaa--v2.0.0"]
 
 
 def test_unrelated_plugins_come_out_by_name() -> None:
-    head = {"b": m("1.1.0"), "a": m("1.1.0")}
-    base = {"b": m("1.0.0"), "a": m("1.0.0")}
+    head = {"b": m("b", "1.1.0"), "a": m("a", "1.1.0")}
+    base = {"b": m("b", "1.0.0"), "a": m("a", "1.0.0")}
     assert rt.due_tags(base=base, head=head) == ["a--v1.1.0", "b--v1.1.0"]
 
 
 def test_a_plugin_new_at_head_is_tagged() -> None:
-    assert rt.due_tags(base={}, head={"new": m("0.1.0")}) == ["new--v0.1.0"]
+    assert rt.due_tags(base={}, head={"new": m("new", "0.1.0")}) == ["new--v0.1.0"]
 
 
 def test_a_removed_plugin_tags_nothing() -> None:
-    assert rt.due_tags(base={"old": m("1.0.0")}, head={}) == []
+    assert rt.due_tags(base={"old": m("old", "1.0.0")}, head={}) == []
 
 
 def test_a_dependency_cycle_raises_instead_of_dropping_tags() -> None:
-    head = {"a": m("1.1.0", "b"), "b": m("1.1.0", "a")}
-    base = {"a": m("1.0.0", "b"), "b": m("1.0.0", "a")}
+    head = {"a": m("a", "1.1.0", "b"), "b": m("b", "1.1.0", "a")}
+    base = {"a": m("a", "1.0.0", "b"), "b": m("b", "1.0.0", "a")}
     with pytest.raises(ValueError, match="cycle"):
         rt.due_tags(base=base, head=head)
 
@@ -105,7 +105,7 @@ def test_manifests_at_reads_every_plugin_at_a_commit(repo: pathlib.Path) -> None
     (repo / "plugins" / "notes" / "README.md").write_text("x\n")
     sha = commit_plugins(repo, {"a": "1.0.0", "b": "2.0.0"}, "two plugins")
     assert "notes" in git(repo, "ls-tree", "-d", "--name-only", f"{sha}:plugins").split()
-    assert rt.manifests_at(sha) == {"a": m("1.0.0", name="a"), "b": m("2.0.0", name="b")}
+    assert rt.manifests_at(sha) == {"a": m("a", "1.0.0"), "b": m("b", "2.0.0")}
 
 
 def test_manifests_at_a_commit_without_plugins_is_empty(repo: pathlib.Path) -> None:
@@ -117,8 +117,13 @@ def test_manifests_at_a_ref_that_names_no_commit_raises(repo: pathlib.Path) -> N
         rt.manifests_at("no-such-ref")
 
 
-def test_current_tags_names_every_plugin_by_name() -> None:
-    assert rt.current_tags({"b": m("2.0.0"), "a": m("1.0.0")}) == ["a--v1.0.0", "b--v2.0.0"]
+def test_untagged_lists_current_versions_without_a_known_tag_by_name() -> None:
+    plugins = {"b": m("b", "2.0.0"), "a": m("a", "1.0.0"), "c": m("c", "3.0.0")}
+    assert rt.untagged(plugins, {"c--v3.0.0", "a--v0.9.0"}) == ["a--v1.0.0", "b--v2.0.0"]
+
+
+def test_untagged_is_empty_when_every_version_is_known() -> None:
+    assert rt.untagged({"a": m("a", "1.0.0")}, {"a--v1.0.0"}) == []
 
 
 def test_manifests_at_rejects_a_directory_named_unlike_its_manifest(repo: pathlib.Path) -> None:

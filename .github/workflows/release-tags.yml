@@ -29,7 +29,8 @@ jobs:
       # Diffs the push's base against its tip, so a bump anywhere in the push counts.
       # Refs go through the API, so no git credential is left in the checkout. An
       # existing tag is never moved, but it is still released: on a re-run after a
-      # failed release, release.yml skips any release that already exists.
+      # failed release, release.yml skips any release that already exists. A tag that
+      # cannot be created is recorded and the rest still go ahead.
       - name: Create due tags
         id: create
         env:
@@ -44,7 +45,9 @@ jobs:
           fi
           gh api --paginate "repos/$GH_REPO/git/matching-refs/tags/" \
             --jq '.[].ref | sub("^refs/tags/"; "")' > existing.txt
-          python3 scripts/release-tags.py "$base" "$HEAD_SHA" > due.txt
+          python3 scripts/release-tags.py due "$base" "$HEAD_SHA" > due.txt
+          : > ready.txt
+          : > failed.txt
           while read -r tag; do
             if grep -qxF "$tag" existing.txt; then
               echo "exists $tag"
@@ -59,22 +62,36 @@ jobs:
               case "$err" in
                 *"HTTP 403"*) echo "::error::main's workflow files changed after this push; tag $tag by hand (RELEASING.md, If a release fails)" ;;
               esac
-              exit 1
+              echo "$tag" >> failed.txt
+              continue
             fi
+            echo "$tag" >> ready.txt
           done < due.txt
-          # An earlier push whose checks failed leaves its version untagged, and no later
-          # run tags it (each looks only at its own push), so say so on every run. Main's
-          # runs overlap, so the earlier push's own run may still be about to tag it.
-          python3 scripts/release-tags.py --current "$HEAD_SHA" | while read -r tag; do
-            if ! grep -qxF "$tag" existing.txt && ! grep -qxF "$tag" due.txt; then
-              echo "::warning::$tag has no tag; once no CI run for the commit that set it is still going, tag it by hand there (RELEASING.md)"
-            fi
+          echo "tags=$(jq -R -s -c 'split("\n") | map(select(length > 0))' ready.txt)" >> "$GITHUB_OUTPUT"
+
+      # An earlier push whose checks failed leaves its version untagged, and no later
+      # run tags it (each looks only at its own push). Main's runs overlap, so the
+      # earlier push's own run may still be about to tag it.
+      - name: Warn about untagged versions
+        env:
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          cat existing.txt due.txt > known.txt
+          python3 scripts/release-tags.py untagged "$HEAD_SHA" known.txt | while read -r tag; do
+            echo "::warning::$tag has no tag; once no CI run for the commit that set it is still going, tag it by hand there (RELEASING.md)"
           done
-          echo "tags=$(jq -R -s -c 'split("\n") | map(select(length > 0))' due.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Fail if a due tag was not created
+        run: |
+          if [ -s failed.txt ]; then
+            echo "::error::not created: $(tr '\n' ' ' < failed.txt)"
+            exit 1
+          fi
 
   release:
     needs: tag
-    if: needs.tag.outputs.tags != '[]'
+    # Releases the tags that exist even when another could not be created.
+    if: ${{ !cancelled() && needs.tag.outputs.tags != '[]' && needs.tag.outputs.tags != '' }}
     strategy:
       # Each tag's release stands alone: one failing must not cancel the rest.
       fail-fast: false

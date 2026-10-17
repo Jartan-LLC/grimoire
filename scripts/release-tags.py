@@ -1,21 +1,16 @@
 #!/usr/bin/env python3
-"""Name the plugin release tags a push to main owes, in the order to create them.
+"""Which plugin versions a push to main changed, and which current versions have no tag.
 
-A version is released once it is on main (RELEASING.md), so every version that a
-push changes gets a `{plugin}--v{version}` tag at the push's tip. A dependency is
-tagged before the plugin that needs it, because constraints resolve against these
-tags. `release-tags.yml`, which ci.yml's release-tags job calls on a push to main,
-runs this, creates the tags that do not exist yet and releases them all.
-
-Usage: release-tags.py <base-ref> <head-ref>  (the push's base and its tip)
-Prints one tag per line; nothing when the push changes no version.
-
-       release-tags.py --current <ref>
-Prints the tag each plugin's version at <ref> should have, so the workflow can
-warn about a version an earlier push left untagged.
+`due BASE HEAD` prints the tag each version the push changed should get, one per
+line, a dependency before the plugin that needs it (constraints resolve against
+these tags). `untagged REF KNOWN` prints the tag of each plugin version at REF
+that KNOWN, a file of tag names, does not list. release-tags.yml uses both and
+decides where and when tags are created.
 """
 
+import argparse
 import json
+import pathlib
 import shutil
 import subprocess
 import sys
@@ -44,9 +39,9 @@ def parse_manifest(text: str) -> Manifest:
     )
 
 
-def tag_name(name: str, manifest: Manifest) -> str:
+def tag_name(manifest: Manifest) -> str:
     """The release tag for a plugin's version: `{plugin}--v{version}`."""
-    return f"{name}--v{manifest.version}"
+    return f"{manifest.name}--v{manifest.version}"
 
 
 def due_tags(*, base: dict[str, Manifest], head: dict[str, Manifest]) -> list[str]:
@@ -69,7 +64,7 @@ def due_tags(*, base: dict[str, Manifest], head: dict[str, Manifest]) -> list[st
         if not ready:
             raise ValueError(f"dependency cycle among {sorted(changed.keys() - placed)}")
         for name in ready:
-            order.append(tag_name(name, changed[name]))
+            order.append(tag_name(changed[name]))
             placed.add(name)
     return order
 
@@ -112,24 +107,28 @@ def manifests_at(ref: str) -> dict[str, Manifest]:
     return found
 
 
-def current_tags(manifests: dict[str, Manifest]) -> list[str]:
-    """The tag each plugin's current version should have, by plugin name."""
-    return [tag_name(name, m) for name, m in sorted(manifests.items())]
+def untagged(manifests: dict[str, Manifest], known: set[str]) -> list[str]:
+    """The tag of each plugin's current version that `known` lacks, by plugin name."""
+    return [tag_name(m) for _, m in sorted(manifests.items()) if tag_name(m) not in known]
 
 
 def main() -> int:
-    """Print the tags the push from base to head owes, or with --current every plugin's."""
-    args = sys.argv[1:]
-    if len(args) == 2 and args[0] == "--current":  # noqa: PLR2004
-        for tag in current_tags(manifests_at(args[1])):
-            print(tag)
-        return 0
-    try:
-        base_ref, head_ref = args
-    except ValueError:
-        print(__doc__, file=sys.stderr)
-        return 2
-    for tag in due_tags(base=manifests_at(base_ref), head=manifests_at(head_ref)):
+    """Print the tags `due` or `untagged` names."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    modes = parser.add_subparsers(dest="mode", required=True)
+    due = modes.add_parser("due", help="tags the push from BASE to HEAD owes")
+    due.add_argument("base")
+    due.add_argument("head")
+    missing = modes.add_parser("untagged", help="current versions at REF with no tag")
+    missing.add_argument("ref")
+    missing.add_argument("known", type=pathlib.Path, help="file of tag names, one per line")
+    args = parser.parse_args()
+    if args.mode == "due":
+        tags = due_tags(base=manifests_at(args.base), head=manifests_at(args.head))
+    else:
+        known = {line.strip() for line in args.known.read_text().splitlines()}
+        tags = untagged(manifests_at(args.ref), known)
+    for tag in tags:
         print(tag)
     return 0
 
