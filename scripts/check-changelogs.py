@@ -2,9 +2,10 @@
 """Check each plugin's manifest: its changelog entry, its name and its dependencies.
 
 A version bump without an entry fails here, so the entry lands with the bump. So
-does a plugin directory named unlike its plugin.json, and a dependency range that
-rejects the depended-on plugin's version in the same tree: release tagging relies
-on both (scripts/release-tags.py), and each would only show after merge.
+does a plugin directory named unlike its plugin.json, a dependency on a plugin this
+marketplace lacks, and a dependency range that rejects the depended-on plugin's
+version in the same tree: release tagging relies on these (scripts/release-tags.py),
+and each would only show after merge.
 `--notes <plugin> <version>` prints that version's entry instead, for the
 GitHub Release body.
 """
@@ -91,11 +92,12 @@ def accepts(constraint: str, version: str) -> bool | None:
 def dependency_problems(
     where: str, fields: dict[str, object], versions: dict[str, object], own: str = ""
 ) -> list[str]:
-    """One message per dependency entry that is malformed, or whose range the tree fails.
+    """One message per dependency entry that is malformed, or that the tree fails.
 
-    A bare name accepts any version. An entry naming another marketplace than `own`,
-    this repository's, or a plugin not in this tree, is not checked: only `versions`,
-    this tree's, can answer it.
+    An entry names a plugin in `own`, this repository's marketplace, unless it names
+    another; every plugin there is in this tree, so `versions` must have it. An entry
+    naming another marketplace is not checked: only that marketplace can answer it. A
+    bare name accepts any version.
     """
     found: list[str] = []
     deps = fields.get("dependencies", [])
@@ -103,6 +105,9 @@ def dependency_problems(
         return [f"{where}: dependencies is not a list"]
     for dep in cast("list[object]", deps):
         if isinstance(dep, str):
+            name, _, market = dep.partition("@")
+            if market in ("", own) and name not in versions:
+                found.append(f"{where}: needs {name}, which is not a plugin here")
             continue
         entry = cast("dict[str, object]", dep) if isinstance(dep, dict) else {}
         name, wanted = entry.get("name"), entry.get("version")
@@ -113,8 +118,12 @@ def dependency_problems(
         if "version" in entry and not isinstance(wanted, str):
             found.append(f"{where}: the version range for {name} is not a string")
             continue
-        foreign = "marketplace" in entry and entry["marketplace"] != own
-        if foreign or not isinstance(wanted, str) or not isinstance(have, str):
+        if "marketplace" in entry and entry["marketplace"] != own:
+            continue
+        if name not in versions:
+            found.append(f"{where}: needs {name}, which is not a plugin here")
+            continue
+        if not isinstance(wanted, str) or not isinstance(have, str):
             continue
         verdict = accepts(wanted, have)
         if verdict is None:
@@ -128,9 +137,9 @@ def problems() -> list[str]:
     """One message per problem found.
 
     The problems: no plugin manifests, a manifest without a version, a changelog
-    without that version's entry, a directory named unlike its manifest, or a
-    dependency range that rejects (or cannot be checked against) the version of a plugin in
-    this tree.
+    without that version's entry, a directory named unlike its manifest, a
+    dependency on a plugin this marketplace lacks, or a dependency range that rejects
+    (or cannot be checked against) the version of a plugin in this tree.
     """
     manifests = sorted(ROOT.glob("plugins/*/.claude-plugin/plugin.json"))
     if not manifests:
@@ -174,7 +183,7 @@ def main() -> int:
         print(message)
     if found:
         return 1
-    print("every plugin has its changelog entry, its own name and dependency ranges that hold")
+    print("every plugin has its changelog entry, its own name and dependencies this tree meets")
     return 0
 
 

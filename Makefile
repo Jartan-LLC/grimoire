@@ -84,7 +84,7 @@ verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift, changelog
 	@python3 -c "import json,subprocess; files=subprocess.run(['git','ls-files','*.json'],capture_output=True,text=True,check=True).stdout.split(); assert files, 'git ls-files matched no JSON -- gate would pass having checked nothing'; [json.load(open(f)) for f in files]"
 	@echo "Checking generated Codex files against their sources..."
 	@python3 scripts/generate-codex.py --check
-	@echo "Checking each plugin's changelog entry, name and dependency ranges..."
+	@echo "Checking each plugin's changelog entry, name and dependencies..."
 	@python3 scripts/check-changelogs.py
 
 check: lint typecheck test verify  ## Run CI's lint, typecheck, test and verify checks

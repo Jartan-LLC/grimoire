@@ -181,8 +181,8 @@ path the bump rule watches.
 Version discipline is enforced by **PR review**. Before merging, confirm the bump
 rule above holds for every plugin the branch changes. CI gates pure ASCII, JSON
 parsing, generated-file drift, per-plugin changelog entries, plugin directories named
-like their manifests, in-tree dependency ranges, the test suite and the full lint
-set, but nothing there checks the bump rule.
+like their manifests, in-tree dependency names and ranges, the test suite and the full
+lint set, but nothing there checks the bump rule.
 
 ## Dependencies
 
@@ -206,8 +206,10 @@ load `gitwise:github-conventions`, and `implement-issue`, `create-pr` and
 `address-review` load `gitwise:commit-pr-writing`. Declaring it makes Claude Code
 auto-install `gitwise` alongside `praxis`. Add a `dependencies` entry only for a
 real requirement like this, and keep its constraint pinned to a tested range.
-`make verify` fails a range on a plugin in this repository that the depended-on
-plugin's version here does not meet. It reads `^X.Y.Z`, `~X.Y.Z` and an exact
+`make verify` fails a dependency on a plugin this marketplace does not have (an
+entry names a plugin in its own marketplace unless it names another), and a range on
+a plugin in this repository that the depended-on plugin's version here does not
+meet. It reads `^X.Y.Z`, `~X.Y.Z` and an exact
 `X.Y.Z` or `=X.Y.Z` and rejects a prerelease version as node-semver (which Claude
 Code resolves ranges with) does. It reports as one it cannot check any other range
 form, a prerelease version under a range that opts into prereleases on the same

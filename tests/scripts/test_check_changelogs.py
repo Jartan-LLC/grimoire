@@ -204,7 +204,35 @@ def test_problems_names_a_dependency_range_the_tree_does_not_meet(
     where = "plugins/app/.claude-plugin/plugin.json"
     assert cc.problems() == [
         f"{where}: needs base ^1.3.0, but base here is 1.2.0",
+        f"{where}: needs elsewhere, which is not a plugin here",
         f"{where}: a dependency that is neither a name nor an object with one",
+    ]
+
+
+def test_problems_names_a_dependency_this_marketplace_lacks(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(cc, "ROOT", tmp_path)
+    (tmp_path / ".claude-plugin").mkdir()
+    (tmp_path / ".claude-plugin" / "marketplace.json").write_text(json.dumps({"name": "home"}))
+    plugin(tmp_path, "base", "1.2.0", "## 1.2.0\n\n- Shipped.\n")
+    plugin(tmp_path, "app", "1.0.0", "## 1.0.0\n\n- Shipped.\n")
+    manifest = tmp_path / "plugins" / "app" / ".claude-plugin" / "plugin.json"
+    deps = [
+        "bsae",
+        "absent@home",
+        "far@away",
+        {"name": "gone", "marketplace": "home"},
+        {"name": "far", "marketplace": "away"},
+        "base",
+        "base@home",
+    ]
+    manifest.write_text(json.dumps({"name": "app", "version": "1.0.0", "dependencies": deps}))
+    where = "plugins/app/.claude-plugin/plugin.json"
+    assert cc.problems() == [
+        f"{where}: needs bsae, which is not a plugin here",
+        f"{where}: needs absent, which is not a plugin here",
+        f"{where}: needs gone, which is not a plugin here",
     ]
 
 
