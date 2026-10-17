@@ -21,7 +21,7 @@ GIT = shutil.which("git") or "git"
 
 @dataclass(frozen=True)
 class Manifest:
-    """The fields of a plugin.json that decide its release tag."""
+    """The fields of a plugin.json that decide its release tag and its tagging order."""
 
     name: str
     version: str
@@ -57,8 +57,9 @@ def tag_name(manifest: Manifest) -> str:
 def due_tags(*, base: dict[str, Manifest], head: dict[str, Manifest]) -> list[str]:
     """Tags for plugins whose version differs from base, dependencies first.
 
-    A plugin new at head counts as changed. Plugins with no ordering constraint
-    between them come out by name, so the order is the same on every run.
+    A plugin new at head counts as changed. Tags come out in rounds, each plugin a
+    round after its changed dependencies, and by name within a round, so the order
+    is the same on every run.
     """
     changed = {
         name: m for name, m in head.items() if name not in base or base[name].version != m.version

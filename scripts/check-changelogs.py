@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Check each plugin's manifest: its changelog entry, its name and its dependencies.
 
-A version bump without an entry fails here, so the entry lands with the bump. So
-does a plugin directory named unlike its plugin.json, a dependency on a plugin this
-marketplace lacks, and a dependency range that rejects the depended-on plugin's
-version in the same tree: release tagging relies on these (scripts/release-tags.py),
-and each would only show after merge.
+A version bump without an entry fails here, so the entry lands with the bump. So do
+a plugin directory named unlike its plugin.json, which release tagging relies on
+(scripts/release-tags.py, release.yml), and a dependency the tree cannot meet (a
+plugin this marketplace lacks, or a range rejecting the version here), which would
+leave the dependent plugin failing to load once released. Each would otherwise
+show only after merge.
 `--notes <plugin> <version>` prints that version's entry instead, for the
 GitHub Release body.
 """
@@ -96,8 +97,8 @@ def dependency_problems(
 
     An entry names a plugin in `own`, this repository's marketplace, unless it names
     another; every plugin there is in this tree, so `versions` must have it. An entry
-    naming another marketplace is not checked: only that marketplace can answer it. A
-    bare name accepts any version.
+    naming another marketplace is checked only for its shape: only that marketplace
+    can say whether it resolves. A bare name accepts any version.
     """
     found: list[str] = []
     deps = fields.get("dependencies", [])
@@ -137,9 +138,8 @@ def problems() -> list[str]:
     """One message per problem found.
 
     The problems: no plugin manifests, a manifest without a version, a changelog
-    without that version's entry, a directory named unlike its manifest, a
-    dependency on a plugin this marketplace lacks, or a dependency range that rejects
-    (or cannot be checked against) the version of a plugin in this tree.
+    without that version's entry, a directory named unlike its manifest, or any that
+    dependency_problems() finds.
     """
     manifests = sorted(ROOT.glob("plugins/*/.claude-plugin/plugin.json"))
     if not manifests:

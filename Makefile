@@ -72,7 +72,7 @@ test:  ## Run the Node and Python tests (git-tracked files: `git add` new ones f
 # `git grep -l` exits 1 on no match, so `|| true` would turn the ASCII gate into
 # a permanent no-op and any other non-zero means the invocation itself failed.
 # One logical line because Make gives each recipe line its own shell.
-verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift, changelogs)
+verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift, changelogs, plugin names and dependencies)
 	@echo "Checking for non-ASCII characters..."
 	@set +e; git grep -lP '[^\x00-\x7F]'; rc=$$?; set -e; \
 	case "$$rc" in \

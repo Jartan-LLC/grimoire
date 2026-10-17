@@ -36,7 +36,8 @@ def test_no_version_change_tags_nothing() -> None:
 
 
 def test_dependency_is_tagged_before_the_plugin_that_needs_it() -> None:
-    # "praxis" sorts after "gitwise" either way, so use a name that sorts first.
+    # The dependent sorts before its dependency by name, so only the dependency
+    # order can tag it second.
     head = {"aaa": m("aaa", "2.0.0", "zzz"), "zzz": m("zzz", "1.1.0")}
     base = {"aaa": m("aaa", "1.0.0", "zzz"), "zzz": m("zzz", "1.0.0")}
     assert rt.due_tags(base=base, head=head) == ["zzz--v1.1.0", "aaa--v2.0.0"]

@@ -22,6 +22,8 @@ it, and calls `release.yml` for each. `release.yml` creates the GitHub Release, 
 that version's changelog section at the tagged commit as its body. To confirm,
 `gh release view <name>--v<version>` shows the release, and the job's log is in the
 CI run for that push (`gh run list --workflow ci.yml --commit <full commit sha>`).
+A green run can still warn, about a version with no tag or a tag on another commit,
+so read its warnings too.
 
 The job creates tags through the API with `GITHUB_TOKEN`, and a tag created that way
 starts no workflow, so `release.yml` runs because the job calls it, not on the tag
@@ -46,12 +48,13 @@ from before the per-plugin changelogs (praxis 1.5.0 and earlier, for one) lack; 
 the run fails without writing anything, so recreate the release by hand with
 `gh release create <tag> --verify-tag --notes-file <file>`.
 
-**A check `release-tags` waits on failed on the push that bumped a version**, so
-`release-tags` never ran and a later push will not tag it: each run looks only at its
-own push. Each later run's log warns that the version has no tag, but only while it is
-still that plugin's current version: tag it by hand before the plugin is bumped again.
-Once it can pass at that commit, re-run the run's failed jobs; if it cannot, or
-`main`'s workflow files have changed since, tag the version by hand as below.
+**One of the checks `release-tags` waits on failed on the push that bumped a
+version.** `release-tags` never ran for that push, and no later push tags the
+version: each run looks only at its own push. If the failure was transient, re-run
+the run's failed jobs (a re-run tests the same commit). If it was not, or `main`'s
+workflow files have changed since, tag the version by hand at that commit as below.
+Do either before the plugin is bumped again: each later run's log warns that the
+version has no tag only while it is still that plugin's current version.
 
 **A version needs a tag by hand** (the job cannot run, or the version predates it).
 Check that its dependencies have tags their constraints accept
@@ -64,8 +67,12 @@ claude plugin tag plugins/<name> --push
 git switch -
 ```
 
-`claude plugin tag` reads the version from `plugin.json` at that commit, checks the
-marketplace entry agrees, and refuses a tag that already exists.
+`<commit>` is the commit that set the version: the push's commit in the failed run,
+or the oldest commit the `git log` under "The tag points at the wrong commit" below
+lists. `claude plugin tag`
+reads the version from `plugin.json` at that commit, checks the marketplace entry
+agrees, and refuses a tag that already exists. The pushed tag starts `release.yml`;
+`gh release view <name>--v<version>` confirms the release.
 
 Check `gh release view <name>--v<version>` before any `-f`: `claude plugin tag -f
 --push` replaces the tag on GitHub without a warning, even one that has a GitHub
@@ -93,6 +100,13 @@ lists set the version. The tag is wrong when the plugin's files differ there:
 prints anything (a tag moved to the commit carrying a missing changelog entry
 prints nothing). If no GitHub Release exists, move the tag as above. If one does,
 leave the tag and ship any fix as a new version.
+
+When `release-tags` warns that a due tag already points at another commit, compare
+the two commits the warning names instead:
+`git diff <tag's commit> <push's commit> -- plugins/<name> ':!plugins/<name>/CHANGELOG.md'`.
+If it prints anything, the push reused a version number, and the check above cannot
+see it (the oldest commit setting that version is the tag's own). Leave the tag and
+ship the push's content as a new version.
 
 **A version shipped something bad.** Users who updated keep that version until the
 version changes, so fix forward: fix or revert on a branch with a version bump, and
@@ -206,14 +220,14 @@ load `gitwise:github-conventions`, and `implement-issue`, `create-pr` and
 `address-review` load `gitwise:commit-pr-writing`. Declaring it makes Claude Code
 auto-install `gitwise` alongside `praxis`. Add a `dependencies` entry only for a
 real requirement like this, and keep its constraint pinned to a tested range.
-`make verify` fails a dependency on a plugin this marketplace does not have (an
-entry names a plugin in its own marketplace unless it names another), and a range on
-a plugin in this repository that the depended-on plugin's version here does not
-meet. It reads `^X.Y.Z`, `~X.Y.Z` and an exact
+`make verify` fails a malformed dependency entry, a dependency on a plugin this
+marketplace does not have (an entry naming no marketplace, or this one, must name a
+plugin here), and a range on a plugin in this repository that the depended-on
+plugin's version here does not meet. It reads `^X.Y.Z`, `~X.Y.Z` and an exact
 `X.Y.Z` or `=X.Y.Z` and rejects a prerelease version as node-semver (which Claude
-Code resolves ranges with) does. It reports as one it cannot check any other range
-form, a prerelease version under a range that opts into prereleases on the same
-version, and a version with build metadata.
+Code resolves ranges with) does. It also fails, as a range it cannot check, any
+other range form, a prerelease version under a range that opts into that version's
+prereleases, and a version with build metadata.
 
 Constraints resolve against the `{plugin-name}--v{version}` tags above, so tag a
 dependency **before or with** the plugin that requires it (`release-tags` does so
