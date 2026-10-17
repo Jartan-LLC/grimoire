@@ -43,35 +43,44 @@ def missing_entry(plugin: pathlib.Path, version: str) -> str:
     return ""
 
 
-def accepts(constraint: str, version: str) -> bool | None:
-    """Whether a dependency range accepts a version; None for a range form not handled.
+SEMVER_CORE = 3  # MAJOR.MINOR.PATCH
 
-    Handles the forms the plugins use: `^X.Y.Z`, `~X.Y.Z` and an exact `X.Y.Z`. A
-    prerelease suffix is ignored on both sides.
+
+def accepts(constraint: str, version: str) -> bool | None:
+    """Whether a dependency range accepts a version, as node-semver decides; None if unread.
+
+    Reads `^X.Y.Z`, `~X.Y.Z` and an exact `X.Y.Z` or `=X.Y.Z`, the forms make verify
+    supports. As in node-semver, which Claude Code resolves ranges with, a
+    prerelease version is accepted only by a range that opts into prereleases on the
+    same X.Y.Z; that case is left unread (None) rather than ordered here.
     """
 
-    def triple(text: str) -> tuple[int, int, int] | None:
-        parts = text.split("-", 1)[0].split(".")
-        if len(parts) != 3 or not all(part.isdigit() for part in parts):  # noqa: PLR2004
-            return None
-        return int(parts[0]), int(parts[1]), int(parts[2])
+    def split(text: str) -> tuple[tuple[int, int, int] | None, str]:
+        core, _, pre = text.partition("-")
+        parts = core.split(".")
+        if len(parts) != SEMVER_CORE or not all(part.isdigit() for part in parts):
+            return None, pre
+        return (int(parts[0]), int(parts[1]), int(parts[2])), pre
 
-    have = triple(version)
-    kind, floor = (
-        (constraint[0], triple(constraint[1:]))
-        if constraint[:1] in "^~"
-        else ("=", triple(constraint))
-    )
+    if not constraint:
+        return None
+    kind = constraint[0] if constraint[0] in "^~=" else "="
+    floor, floor_pre = split(constraint[1:] if constraint[0] in "^~=" else constraint)
+    have, have_pre = split(version)
     if have is None or floor is None:
         return None
+    if have_pre:
+        return None if floor_pre and have == floor else False
     if kind == "=":
         return have == floor
     if kind == "~":
         ceiling = (floor[0], floor[1] + 1, 0)
     elif floor[0] > 0:
         ceiling = (floor[0] + 1, 0, 0)
-    else:
+    elif floor[1] > 0:
         ceiling = (0, floor[1] + 1, 0)
+    else:
+        ceiling = (0, 0, floor[2] + 1)
     return floor <= have < ceiling
 
 
@@ -100,9 +109,16 @@ def problems() -> list[str]:
         if fields.get("name") != plugin.name:
             found.append(f"{where}: name {fields.get('name')!r} differs from its directory")
         for dep in fields.get("dependencies", []):
-            if not isinstance(dep, dict):
+            if isinstance(dep, str):
                 continue  # a bare name accepts any version
+            if not isinstance(dep, dict) or not isinstance(
+                cast("dict[str, object]", dep).get("name"), str
+            ):
+                found.append(f"{where}: a dependency that is neither a name nor an object with one")
+                continue
             entry = cast("dict[str, object]", dep)
+            if "marketplace" in entry:
+                continue  # from another marketplace, not this tree
             name, wanted = entry.get("name"), entry.get("version")
             have = versions.get(name) if isinstance(name, str) else None
             if not isinstance(wanted, str) or not isinstance(have, str):
