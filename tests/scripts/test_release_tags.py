@@ -9,8 +9,8 @@ from script_loader import load_script
 rt = load_script("release-tags.py")
 
 
-def m(version: str, *deps: str) -> object:
-    return rt.Manifest(version=version, dependencies=frozenset(deps))
+def m(version: str, *deps: str, name: str = "p") -> object:
+    return rt.Manifest(name=name, version=version, dependencies=frozenset(deps))
 
 
 def test_parse_manifest_reads_string_and_object_dependencies() -> None:
@@ -105,7 +105,7 @@ def test_manifests_at_reads_every_plugin_at_a_commit(repo: pathlib.Path) -> None
     (repo / "plugins" / "notes" / "README.md").write_text("x\n")
     sha = commit_plugins(repo, {"a": "1.0.0", "b": "2.0.0"}, "two plugins")
     assert "notes" in git(repo, "ls-tree", "-d", "--name-only", f"{sha}:plugins").split()
-    assert rt.manifests_at(sha) == {"a": m("1.0.0"), "b": m("2.0.0")}
+    assert rt.manifests_at(sha) == {"a": m("1.0.0", name="a"), "b": m("2.0.0", name="b")}
 
 
 def test_manifests_at_a_commit_without_plugins_is_empty(repo: pathlib.Path) -> None:
@@ -119,3 +119,13 @@ def test_manifests_at_a_ref_that_names_no_commit_raises(repo: pathlib.Path) -> N
 
 def test_current_tags_names_every_plugin_by_name() -> None:
     assert rt.current_tags({"b": m("2.0.0"), "a": m("1.0.0")}) == ["a--v1.0.0", "b--v2.0.0"]
+
+
+def test_manifests_at_rejects_a_directory_named_unlike_its_manifest(repo: pathlib.Path) -> None:
+    manifest = repo / "plugins" / "dir" / ".claude-plugin" / "plugin.json"
+    manifest.parent.mkdir(parents=True)
+    manifest.write_text(json.dumps({"name": "other", "version": "1.0.0"}))
+    git(repo, "add", "-A")
+    git(repo, "commit", "-qm", "mismatch")
+    with pytest.raises(ValueError, match="declares name 'other'"):
+        rt.manifests_at("HEAD")

@@ -28,6 +28,7 @@ GIT = shutil.which("git") or "git"
 class Manifest:
     """The fields of a plugin.json that decide its release tag."""
 
+    name: str
     version: str
     dependencies: frozenset[str]
 
@@ -38,7 +39,14 @@ def parse_manifest(text: str) -> Manifest:
     names: set[str] = set()
     for dep in data.get("dependencies", []):
         names.add(dep if isinstance(dep, str) else dep["name"])
-    return Manifest(version=str(data["version"]), dependencies=frozenset(names))
+    return Manifest(
+        name=str(data["name"]), version=str(data["version"]), dependencies=frozenset(names)
+    )
+
+
+def tag_name(name: str, manifest: Manifest) -> str:
+    """The release tag for a plugin's version: `{plugin}--v{version}`."""
+    return f"{name}--v{manifest.version}"
 
 
 def due_tags(*, base: dict[str, Manifest], head: dict[str, Manifest]) -> list[str]:
@@ -61,7 +69,7 @@ def due_tags(*, base: dict[str, Manifest], head: dict[str, Manifest]) -> list[st
         if not ready:
             raise ValueError(f"dependency cycle among {sorted(changed.keys() - placed)}")
         for name in ready:
-            order.append(f"{name}--v{changed[name].version}")
+            order.append(tag_name(name, changed[name]))
             placed.add(name)
     return order
 
@@ -95,13 +103,18 @@ def manifests_at(ref: str) -> dict[str, Manifest]:
             check=False,
         )
         if shown.returncode == 0:
-            found[name] = parse_manifest(shown.stdout)
+            manifest = parse_manifest(shown.stdout)
+            # Dependencies and `claude plugin tag` name a plugin by its manifest name,
+            # and the tag uses the directory name: they must agree.
+            if manifest.name != name:
+                raise ValueError(f"plugins/{name}/ declares name {manifest.name!r}")
+            found[name] = manifest
     return found
 
 
 def current_tags(manifests: dict[str, Manifest]) -> list[str]:
     """The tag each plugin's current version should have, by plugin name."""
-    return [f"{name}--v{m.version}" for name, m in sorted(manifests.items())]
+    return [tag_name(name, m) for name, m in sorted(manifests.items())]
 
 
 def main() -> int:
