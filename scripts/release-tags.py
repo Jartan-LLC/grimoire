@@ -99,8 +99,9 @@ def manifests_at(ref: str) -> dict[str, Manifest]:
         )
         if shown.returncode == 0:
             manifest = parse_manifest(shown.stdout)
-            # Dependencies and `claude plugin tag` name a plugin by its manifest name,
-            # and the tag uses the directory name: they must agree.
+            # due_tags matches dependency names, which are manifest names, against these
+            # directory keys, and release.yml reads plugins/<tag's plugin>/ for the notes,
+            # so a directory and its manifest name must agree.
             if manifest.name != name:
                 raise ValueError(f"plugins/{name}/ declares name {manifest.name!r}")
             found[name] = manifest

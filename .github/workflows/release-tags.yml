@@ -19,18 +19,16 @@ jobs:
       tags: ${{ steps.create.outputs.tags }}
     steps:
       # The commit CI tested, with full history: the job diffs the push's base
-      # (github.event.before), which it does not assume is HEAD^.
+      # (github.event.before), not HEAD^, so a bump anywhere in the push counts.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
 
-      # Diffs the push's base against its tip, so a bump anywhere in the push counts.
       # Refs go through the API, so no git credential is left in the checkout. An
       # existing tag is never moved, but it is still released: on a re-run after a
-      # failed release, release.yml skips any release that already exists. A tag that
-      # cannot be created is recorded and the rest still go ahead.
+      # failed release, release.yml skips any release that already exists.
       - name: Create due tags
         id: create
         env:
@@ -59,8 +57,9 @@ jobs:
               echo "::error::could not create $tag: $err"
               # GITHUB_TOKEN cannot be given the workflows permission, and GitHub then
               # refuses a tag on a commit whose .github/workflows differ from main's tip.
+              # Other permission gaps also return 403, so the message says "likely".
               case "$err" in
-                *"HTTP 403"*) echo "::error::main's workflow files changed after this push; tag $tag by hand (RELEASING.md, If a release fails)" ;;
+                *"HTTP 403"*) echo "::error::likely cause: main's workflow files changed after this push, so no re-run can create $tag; tag it by hand (RELEASING.md, If a release fails)" ;;
               esac
               echo "$tag" >> failed.txt
               continue
