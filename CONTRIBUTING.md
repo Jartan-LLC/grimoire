@@ -14,9 +14,9 @@ This installs the tools pinned in `ci/requirements.txt` and the pre-commit hook.
 The lychee and actionlint hooks need Docker, and the markdownlint hook needs
 Node. The tests need Node 20 or newer.
 
-Run the Docker hooks from inside the bind-mounted project directory, or from a
-worktree under it. From a worktree or copy outside it, the hooks cannot see the
-files and pass or fail wrongly.
+In the dev container, run the Docker hooks from inside the bind-mounted project
+directory, or from a worktree under it. From a worktree or copy outside it, the
+hooks cannot see the files and pass or fail wrongly.
 
 ## Before opening a PR
 

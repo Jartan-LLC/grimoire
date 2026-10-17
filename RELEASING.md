@@ -10,14 +10,15 @@ A version is released once it is on `main` in `plugin.json`, because a marketpla
 added without a ref follows the default branch and Claude Code updates a plugin when
 its `version` changes.
 
-Tag every version anyway: a `#ref` pin to a plugin version, a dependency's version
-range ([Dependencies](#dependencies)) and the GitHub Release all point at its tag.
+Tag every version anyway: a marketplace `ref` set to the tag (README.md shows one
+for `marketplace-v*` tags), a dependency's version range
+([Dependencies](#dependencies)) and the GitHub Release all point at it.
 
 ## Tag a version
 
-Merging a version bump to `main` tags and releases it, once CI's verify, lint,
-typecheck and test jobs pass on the push. It does not wait for the dev container
-build. Then:
+Merging a version bump to `main` tags it and creates its GitHub Release, once CI's
+verify, lint, typecheck and test jobs pass on the push. It does not wait for the
+dev container build. Then:
 
 1. `ci.yml`'s `release-tags` job (`release-tags.yml`) tags each plugin whose version
    the push changed, tagging a dependency before any plugin that needs it. Each tag is
@@ -55,11 +56,11 @@ one), the run fails without writing anything, since it builds the notes with tha
 tag's own `scripts/check-changelogs.py --notes`. Recreate that release with
 `gh release create <tag> --verify-tag --notes-file <file>`.
 
-**A check failed on the push that bumped a version.** If it was the dev container
-build, `release-tags` does not wait on it, so the version is tagged and there is
-nothing to do. If it was one of the checks it waits on
-([Tag a version](#tag-a-version)), `release-tags` never ran for that push, and no
-later push tags the version either, because each run looks only at its own push:
+**A check failed on the push that bumped a version.** If it was not one of the
+checks `release-tags` waits on ([Tag a version](#tag-a-version)), such as the dev
+container build, the version is tagged and there is nothing to do. If it was one of
+them, `release-tags` never ran for that push, and no later push tags the version
+either, because each run looks only at its own push:
 
 - If the failure was transient, re-run the run's failed jobs. A re-run tests the
   same commit.
@@ -203,8 +204,10 @@ again and never folds its changes into that version.
 Every bump adds an entry under `## <version>` in `plugins/<name>/CHANGELOG.md`,
 saying what changes for someone upgrading. `make verify` fails without one.
 
-Editing only a plugin's `CHANGELOG.md`, or only its `marketplace.json` metadata
-(`description`, `keywords`, which sit outside `plugins/<name>/`), needs no bump.
+Editing only a plugin's `CHANGELOG.md`, or only its `description` in
+`marketplace.json`, needs no bump. Its marketplace `keywords` and `category` are
+different: `scripts/generate-codex.py` copies them into
+`plugins/<name>/.codex-plugin/plugin.json`, so the bump rule applies.
 
 No CI check enforces the bump rule, so PR review does: before merging, confirm it
 holds for every plugin the branch changes.
