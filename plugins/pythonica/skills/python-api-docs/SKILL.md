@@ -7,7 +7,7 @@ user-invocable: false
 
 # Python API Documentation
 
-This skill renders google-style docstrings into a published API reference. The toolchain is Sphinx + `autodoc` + `napoleon` + MyST, gated strictly in CI so the reference can't silently rot.
+This skill renders google-style docstrings into a published API reference. Use it with `python-code-style` for writing the docstrings and type hints it renders. The toolchain is Sphinx + `autodoc` + `napoleon` + MyST, gated strictly in CI so the reference can't silently rot.
 
 ## Core Concepts
 

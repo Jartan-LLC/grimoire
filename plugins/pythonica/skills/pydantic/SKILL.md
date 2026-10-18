@@ -7,6 +7,8 @@ user-invocable: false
 
 # Pydantic Validation Skill
 
+Use it with `python-configuration` for how an application loads its configuration and secrets, `python-error-handling` for exception design around `ValidationError`, `python-type-safety` for protocols, generics and type narrowing, and `python-testing` for testing models.
+
 ## Quick Start
 
 ```python

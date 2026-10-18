@@ -7,7 +7,7 @@ user-invocable: false
 
 # Python Anti-Patterns Checklist
 
-A reference checklist of common mistakes and anti-patterns in Python code. Review this before finalizing implementations to catch issues early.
+A reference checklist of common mistakes and anti-patterns in Python code. Review this before finalizing implementations to catch issues early. Use it with `python-patterns` for the patterns to follow instead.
 
 ## Core Concepts
 

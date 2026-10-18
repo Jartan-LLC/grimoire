@@ -7,7 +7,7 @@ user-invocable: false
 
 # Python Development Patterns
 
-Idiomatic Python patterns and best practices for building robust, efficient, and maintainable applications.
+Idiomatic Python patterns and best practices for building robust, efficient, and maintainable applications. Use it with `python-project-structure` for project layout and imports, `python-code-style` for linter, formatter and type-checker configuration, and `python-anti-patterns` for the pre-merge review checklist.
 
 ## Core Concepts
 
