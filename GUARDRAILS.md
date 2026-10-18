@@ -26,8 +26,9 @@ every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `
   frontmatter `skills:` (a hard, resolve-or-fail load like `gitwise:github-conventions`). Add
   no plugin `dependency` without a real runtime requirement (see `RELEASING.md`).
 - Name no other plugin, and no skill, agent or command of another plugin, in a skill, agent or
-  command unless its plugin declares that plugin; drop such a pointer rather than add a
-  dependency for it.
+  command unless its plugin declares that plugin. Drop a prose pointer to an undeclared plugin
+  rather than add a dependency for it; a `skills:` load or a step that loads another plugin's
+  skill is a runtime requirement and takes the dependency above.
 - Ask first before changing a plugin's public surface (command, agent or skill names) or
   a skill's severity mapping, deleting files, or removing a plugin or feature.
 - Commit or push only when explicitly asked or instructed by a command. A Liza workflow
