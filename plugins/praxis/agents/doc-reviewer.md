@@ -38,7 +38,7 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 ### Important
 
 - Factually incorrect information -- the doc doesn't match what the code does
-- Unsupported claims -- a claim, rule, count or "only" the sources do not support, including praise or claims the reader cannot check that the sources do not state, and `plain-writing`'s Inflated significance, Shallow -ing riders, Borrowed authority and Knowledge-limit disclaimers patterns (13, 15, 17, 23)
+- Unsupported claims -- a claim, rule, count or "only" the sources do not support, including praise or claims the sources do not state and the reader cannot check, and `plain-writing`'s Inflated significance, Shallow -ing riders, Borrowed authority and Knowledge-limit disclaimers patterns (13, 15, 17, 23)
 - Code examples that won't run
 - Broken cross-references and dead external links -- internal, reference-style, or URLs to nonexistent targets (flag obviously-dead on read)
 - Bloat -- sections or passages no reader of the doc needs, judged by `plain-writing`'s keep and cut lists, beyond the Minor items below; length alone is not a finding unless the type's reference sets a limit

@@ -128,7 +128,7 @@ Shapes and punctuation applied everywhere, whether or not the meaning asks for t
 > The event features keynote sessions, panel discussions, and networking opportunities. Attendees can expect innovation, inspiration, and industry insights.
 
 **After:**
-> The event includes keynote sessions, panel discussions and networking.
+> The event includes keynote sessions, panel discussions, and networking.
 
 **Before (paragraph scale):**
 > A career can look promising and fail. A relationship can feel important and end. A skill can take years and remain useless. These decisions rarely explain themselves.
@@ -282,7 +282,7 @@ Templates and visual editors also produce clean formatting. The tell is decorati
 
 ### 19. Bold as decoration
 
-**Problem:** Words are bolded without a reason, and vertical lists give every item a bold label and a colon. Remove the bold. Turn a labeled list into prose when the labels carry no information of their own.
+**Problem:** Words are bolded without a reason, and vertical lists give every item a bold label and a colon. Remove the bold. Turn a labeled list into prose when each label only repeats the first words of its item, as below; keep labels readers scan for.
 **Before:**
 > It blends **OKRs (Objectives and Key Results)**, **KPIs (Key Performance Indicators)**, and visual strategy tools such as the **Business Model Canvas (BMC)** and **Balanced Scorecard (BSC)**.
 
