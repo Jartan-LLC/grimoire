@@ -7,7 +7,7 @@ user-invocable: false
 
 # Code Hygiene
 
-Don't leave -- or write -- code that lies, hides, or that git (or an existing solution) already owns. Every line is a permanent liability someone must read, test, and carry forward, so each must earn its place. This skill is language-agnostic and guides both authors and reviewers. This skill only deletes; its constructive siblings shape what survives -- `code-structure` (the units and their contracts) and `readable-code` (how a body reads). Comment truthfulness is `comment-hygiene`'s. (Python-specific pitfalls live in `pythonica:python-anti-patterns`; documentation prose in `docs-patterns` and `plain-writing`.)
+Don't leave -- or write -- code that lies, hides, or that git (or an existing solution) already owns. Every line is a permanent liability someone must read, test, and carry forward, so each must earn its place. This skill is language-agnostic and guides both authors and reviewers. Use it with `code-structure` and `readable-code` for shaping the code that stays, `comment-hygiene` for comment truthfulness and `plain-writing` for documentation prose.
 
 ## Dead code & speculative generality
 

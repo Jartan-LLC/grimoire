@@ -7,9 +7,7 @@ user-invocable: false
 
 # Python Anti-Patterns Checklist
 
-A reference checklist of common mistakes and anti-patterns in Python code. Review this before finalizing implementations to catch issues early.
-
-**Note:** This skill focuses on what to avoid. For guidance on positive patterns and architecture, see the `python-patterns` skill.
+A reference checklist of common mistakes and anti-patterns in Python code. Review this before finalizing implementations to catch issues early. Use it with `python-patterns` for the patterns to follow instead.
 
 ## Core Concepts
 

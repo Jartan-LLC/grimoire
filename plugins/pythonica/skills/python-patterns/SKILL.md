@@ -7,7 +7,7 @@ user-invocable: false
 
 # Python Development Patterns
 
-Idiomatic Python patterns and best practices for building robust, efficient, and maintainable applications.
+Idiomatic Python patterns and best practices for building robust, efficient, and maintainable applications. Use it with `python-project-structure` for project layout and imports, `python-code-style` for linter, formatter and type-checker configuration, and `python-anti-patterns` for the pre-merge review checklist.
 
 ## Core Concepts
 
@@ -492,10 +492,6 @@ async def fetch_all(urls: list[str]) -> dict[str, str]:
     return dict(zip(urls, results))
 ```
 
-## Package Organization
-
-For project layout, `__init__.py` patterns, and import conventions, see the `python-project-structure` skill.
-
 ## Memory and Performance
 
 ### Using __slots__ for Memory Efficiency
@@ -551,10 +547,6 @@ for item in items:
 result = buffer.getvalue()
 ```
 
-## Tooling
-
-For ruff, mypy, black, and pyproject.toml configuration, see the `python-code-style` skill.
-
 ## Quick Reference: Python Idioms
 
 | Idiom | Description |
@@ -569,9 +561,5 @@ For ruff, mypy, black, and pyproject.toml configuration, see the `python-code-st
 | f-strings | For string formatting (Python 3.6+) |
 | `pathlib.Path` | For path operations (Python 3.4+) |
 | `enumerate` | For index-element pairs in loops |
-
-## Anti-Patterns
-
-For common Python mistakes and a pre-merge review checklist, see the `python-anti-patterns` skill.
 
 __Remember__: Python code should be readable, explicit, and follow the principle of least surprise. When in doubt, prioritize clarity over cleverness.

@@ -7,7 +7,7 @@ user-invocable: false
 
 # Python API Documentation
 
-`pythonica:python-code-style` teaches you to *write* google-style docstrings; this skill *renders* them into a published API reference. The toolchain is Sphinx + `autodoc` + `napoleon` + MyST, gated strictly in CI so the reference can't silently rot. For the general documentation rules this toolchain serves, see `praxis:docs-patterns` (doc types, structure) and `praxis:plain-writing` (what to keep and cut, plain voice).
+This skill renders google-style docstrings into a published API reference. Use it with `python-code-style` for writing the docstrings and type hints it renders. The toolchain is Sphinx + `autodoc` + `napoleon` + MyST, gated strictly in CI so the reference can't silently rot.
 
 ## Core Concepts
 
@@ -122,7 +122,7 @@ def get_user(user_id: str, *, include_deleted: bool = False) -> User:
     """
 ```
 
-Autodoc renders `user_id (str)` from the annotation itself. See `pythonica:python-code-style` Pattern 5 for the docstring shape this builds on.
+Autodoc renders `user_id (str)` from the annotation itself.
 
 ### Pattern 3: Build the reference page -- avoid the thin-`__init__` trap
 
@@ -237,9 +237,3 @@ Add `docs` to the aggregate check job's `needs`, and audit `.[docs]` for CVEs al
 6. **Escape the thin-`__init__` trap** -- per-module `automodule` or autosummary `:recursive:`, never a bare package `automodule`.
 7. **Strict build in CI** -- `sphinx-build -W` for HTML and doctest, plus `-b linkcheck` for external links; wire it into the check gate.
 8. **Prefer Sphinx today** -- the MkDocs/mkdocstrings/Zensical stack is mid-transition; revisit when it stabilizes.
-
-## See Also
-
-- `pythonica:python-code-style` -- writing the google-style docstrings and type hints this renders.
-- `praxis:docs-patterns` -- the general documentation structure and strictness rules this toolchain serves.
-- `praxis:plain-writing` -- the documentation's prose: what to keep and cut, plain voice.
