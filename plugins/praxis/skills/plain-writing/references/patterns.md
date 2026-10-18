@@ -1,8 +1,10 @@
 # Wording patterns
 
-Adapted from humanizer 3.1.0 by Siqi Chen (MIT; see `../LICENSE`). The patterns and several
-examples come from Wikipedia's [Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing)
-(CC BY-SA 4.0), maintained by WikiProject AI Cleanup.
+Adapted from humanizer 3.1.0 by Siqi Chen (MIT; see `../LICENSE`) and from Wikipedia's
+[Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing), maintained by
+WikiProject AI Cleanup and licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+This file modifies both: it is ported to ASCII and trimmed, and several examples are reworded. As an
+adaptation of CC BY-SA material, this file is licensed under CC BY-SA 4.0.
 
 The wording pass in `SKILL.md` reads this list after the content is settled. Each pattern is a
 habit that adds words without adding a fact. Fix it by stating the point directly; never add a
