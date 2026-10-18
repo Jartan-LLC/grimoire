@@ -192,7 +192,7 @@ The fact underneath is usually sound. Keep it and remove the dressing.
 > Additionally, a distinctive feature of Somali cuisine is the incorporation of camel meat. An enduring testament to Italian colonial influence is the widespread adoption of pasta in the local culinary landscape, showcasing how these dishes have integrated into the traditional diet.
 
 **After:**
-> Somali cuisine also includes camel meat. Pasta, a sign of Italian colonial influence, is widely eaten.
+> Somali cuisine also includes camel meat. Pasta, a sign of Italian colonial influence, is widely eaten in Somalia.
 
 ### 13. Inflated significance
 
@@ -283,7 +283,7 @@ Templates and visual editors also produce clean formatting. The tell is decorati
 > It blends **OKRs (Objectives and Key Results)**, **KPIs (Key Performance Indicators)**, and visual strategy tools such as the **Business Model Canvas (BMC)** and **Balanced Scorecard (BSC)**.
 
 **After:**
-> It blends OKRs, KPIs, and visual strategy tools like the Business Model Canvas and Balanced Scorecard.
+> It blends OKRs (Objectives and Key Results), KPIs (Key Performance Indicators), and visual strategy tools such as the Business Model Canvas (BMC) and Balanced Scorecard (BSC).
 
 **Before (labeled list):**
 
