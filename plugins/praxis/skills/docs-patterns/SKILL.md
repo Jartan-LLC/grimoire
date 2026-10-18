@@ -1,6 +1,6 @@
 ---
 name: docs-patterns
-description: Documentation conventions -- doc types, structure, tone, per-type rules, and quality standards.
+description: Documentation conventions -- doc types, structure, register, per-type rules, and quality standards.
 when_to_use: Writing, editing, or reviewing documentation -- a README, CONTRIBUTING.md, a release procedure such as RELEASING.md, changelog entries and release notes, docs pages, or agent instruction files such as CLAUDE.md and AGENTS.md.
 user-invocable: false
 ---

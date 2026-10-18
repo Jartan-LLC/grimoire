@@ -33,7 +33,7 @@ These are the strongest and most frequent tells in current model prose.
 > This does not mean every choice is equal. It means there is no external system that confirms which choice is right.
 
 **After:**
-> No external system confirms which choice is right, though not every choice is equal.
+> No external system confirms which choice is right.
 
 **Before (clipped tail):**
 > The options come from the selected item, no guessing.
@@ -130,7 +130,7 @@ Shapes and punctuation applied everywhere, whether or not the meaning asks for t
 > A career can look promising and fail. A relationship can feel important and end. A skill can take years and remain useless. These decisions rarely explain themselves.
 
 **After:**
-> A career can look promising and fail. So can a relationship that felt important and ended, or a skill that took years and remained useless. These decisions rarely explain themselves.
+> A career can look promising and fail, a relationship can feel important and end, and a skill can take years and remain useless; these decisions rarely explain themselves.
 
 ### 7. Repeated sentence openings
 
@@ -234,7 +234,7 @@ The fact underneath is usually sound. Keep it and remove the dressing.
 > The temple's color palette of blue, green, and gold resonates with the region's natural beauty, symbolizing Texas bluebonnets, the Gulf of Mexico, and the diverse Texan landscapes, reflecting the community's deep connection to the land.
 
 **After:**
-> The temple's blue, green, and gold stand for Texas bluebonnets and the Gulf of Mexico.
+> The temple's blue, green, and gold stand for Texas bluebonnets, the Gulf of Mexico, and the Texan landscapes.
 
 ### 16. Sales language
 
@@ -341,8 +341,8 @@ Remove the wrapper; keep any fact or caveat it carries, as each pattern says.
 
 ### 23. Knowledge-limit disclaimers and guesses
 
-**Watch for:** as of [date], up to my last training update, while specific details are limited, based on available information, not publicly available, not widely documented or disclosed, in the provided or available sources, maintains a low profile, keeps personal details private, likely [grew up, studied, began], it is believed that
-**Problem:** The text mentions where the model's knowledge ends, or admits it found no source and then fills the gap with a plausible guess. State what the source does not show, or remove the sentence.
+**Watch for:** as of my last update, up to my last training update, while specific details are limited, based on available information, not publicly available, not widely documented or disclosed, maintains a low profile, keeps personal details private, likely [grew up, studied, began], it is believed that
+**Problem:** The text mentions where the model's knowledge ends, or admits it found no source and then fills the gap with a plausible guess. State what the source does not show, or remove the sentence. A dated statement of a fact, such as a deprecation notice or an advisory, is not this pattern, and saying plainly what the sources do not show is the fix, not the tell.
 **Before (cutoff disclaimer):**
 > While specific details about the company's founding are not extensively documented in readily available sources, it appears to have been established sometime in the 1990s.
 
