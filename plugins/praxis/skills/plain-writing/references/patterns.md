@@ -120,7 +120,7 @@ Shapes and punctuation applied everywhere, whether or not the meaning asks for t
 
 ### 8. Dashes as the universal connector
 
-**Rule:** The final rewrite must not contain em dash or en dash characters unless the writer's sample uses them; then match the sample's rate. Replace each dash with a period, comma, colon, or parentheses, or rewrite the sentence. This includes spaced dashes and double hyphens (` -- `) used as dashes. Leave dashes and hyphens inside code blocks, inline code, commands, paths, and URLs alone.
+**Rule:** In text you write, do not reach for em dash or en dash characters; where the writer's sample or the project's style uses them (a pure-ASCII project may write ` -- `), match its rate. Replace each dash with a period, comma, colon, or parentheses, or rewrite the sentence. This includes spaced dashes and double hyphens (` -- `) used as dashes. Leave dashes and hyphens inside code blocks, inline code, commands, paths, and URLs alone.
 **Problem:** A dash lets the writer skip choosing how two clauses relate, so a model reaches for it everywhere. Many editors and journalists also use dashes, so one dash is *weak alone*; a text full of them is not.
 **Before:**
 > The new policy -- announced without warning -- affects thousands of workers. The changes -- long overdue according to critics -- will take effect immediately.
@@ -356,4 +356,4 @@ A model writes for a reader who shares no context, because that fits the widest 
 **After:**
 > Agreed, this is a workaround. Fixing it properly in `MergeService` would widen this ticket well past its scope: it is shared code, so it means checking the merge flow for every account, plus a backfill for the rows that are already wrong.
 >
-> I'd rather keep this PR account specific and open a separate ticket for the `MergeService` fix and the backfill. Let me know if that works.
+> I'd rather keep this PR account specific and open a separate ticket for the `MergeService` fix and the backfill.

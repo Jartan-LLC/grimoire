@@ -152,6 +152,6 @@ the rename misses the default. Minor.
 support for PostgreSQL 12 ends in November 2024. Django 5.1 supports PostgreSQL 13 and higher."
 Raise a reason that changes nothing users do or decide; it lengthens the entry they scan.
 
-**Length.** Raise nothing on length alone, whatever the general brevity guidance says: an entry
+**Length.** Raise nothing on length alone: an entry
 is not bloated when every clause is an effect, an action or a limit users need, and a short entry
 that drops the effect or the action is worse.

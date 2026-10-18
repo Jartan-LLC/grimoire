@@ -53,6 +53,7 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 ### Minor
 
 - Verbose prose where a table or code example would be clearer
+- Filler and wordiness within a passage that stays -- `plain-writing`'s wording items and `references/patterns.md`
 - Missing code examples where they would clarify usage
 - Overly detailed explanations of obvious concepts
 - Sections that could be consolidated, or content that belongs in a different doc
