@@ -11,7 +11,7 @@ Comment truthfulness only. Dead code, reinvention/duplication, naming and faking
 
 A comment earns its place only by telling the reader something the **code cannot**. Sharp test: *could a competent reader recover this fact from the code (and the repo)? Yes -> delete; No -> maybe keep.* One fact survives that test despite being recoverable -- the sole exception, so bake it into the test: a **legal/provenance header** is recoverable from `LICENSE` yet kept inline by mandate (see EXEMPT). The **external-anchor WHY** looks like a second exception but isn't one: naming a constant recovers its *value*, never the spec/constraint that dictated it, so that rationale stays genuinely unrecoverable and keeps on the mainline (see KEEP).
 
-This truthfulness standard applies wherever the annotation lives -- inline comment, block comment, or docstring/doc-comment prose. A doc-comment that restates the signature, lies about behavior, or narrates a change is the same anti-pattern as an inline one. Docstring *format/completeness* defers to the language plugin (`pythonica`); *prose quality* to `docs-patterns`.
+This truthfulness standard applies wherever the annotation lives -- inline comment, block comment, or docstring/doc-comment prose. A doc-comment that restates the signature, lies about behavior, or narrates a change is the same anti-pattern as an inline one. Docstring *format/completeness* defers to the language plugin (`pythonica`); *prose quality* to `plain-writing`.
 
 ## KEEP -- the code can't say it
 

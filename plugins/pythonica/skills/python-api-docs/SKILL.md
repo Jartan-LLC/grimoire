@@ -7,7 +7,7 @@ user-invocable: false
 
 # Python API Documentation
 
-`pythonica:python-code-style` teaches you to *write* google-style docstrings; this skill *renders* them into a published API reference. The toolchain is Sphinx + `autodoc` + `napoleon` + MyST, gated strictly in CI so the reference can't silently rot. For the general documentation rules (tone, brevity, structure) this toolchain serves, see `praxis:docs-patterns`.
+`pythonica:python-code-style` teaches you to *write* google-style docstrings; this skill *renders* them into a published API reference. The toolchain is Sphinx + `autodoc` + `napoleon` + MyST, gated strictly in CI so the reference can't silently rot. For the general documentation rules this toolchain serves, see `praxis:docs-patterns` (doc types, structure) and `praxis:plain-writing` (what to keep and cut, plain voice).
 
 ## Core Concepts
 
@@ -241,4 +241,5 @@ Add `docs` to the aggregate check job's `needs`, and audit `.[docs]` for CVEs al
 ## See Also
 
 - `pythonica:python-code-style` -- writing the google-style docstrings and type hints this renders.
-- `praxis:docs-patterns` -- the general documentation style, structure, and strictness rules this toolchain serves.
+- `praxis:docs-patterns` -- the general documentation structure and strictness rules this toolchain serves.
+- `praxis:plain-writing` -- the documentation's prose: what to keep and cut, plain voice.

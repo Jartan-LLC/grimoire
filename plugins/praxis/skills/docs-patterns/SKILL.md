@@ -1,19 +1,17 @@
 ---
 name: docs-patterns
-description: Documentation writing conventions -- style, structure, tone, and quality standards.
+description: Documentation conventions -- doc types, structure, register, per-type rules, and quality standards.
 when_to_use: Writing, editing, or reviewing documentation -- a README, CONTRIBUTING.md, a release procedure such as RELEASING.md, changelog entries and release notes, docs pages, or agent instruction files such as CLAUDE.md and AGENTS.md.
 user-invocable: false
 ---
 
 # Documentation Writing Patterns
 
-Before writing, **read 2-3 existing docs in the same category** to match their tone and structure.
+Before writing or reviewing, **load `praxis:plain-writing`** (what to keep and cut, plain voice, the final wording pass) and **read 2-3 existing docs in the same category** to match their structure and register; plain-writing's voice rules still apply to what you add.
 
 ## Writing Style
 
-**Tone:** Technical but accessible. Imperative for instructions ("Use X..."), declarative for specifications ("The User model has these fields..."). No marketing language.
-
-**Brevity is paramount.** A doc that could be 100 lines should not be 300. Every paragraph must earn its place. If a table communicates it better than prose, use a table. If a link to another doc covers it, don't restate it. Be precise, not exhaustive.
+Imperative for instructions ("Use X..."), declarative for specifications ("The User model has these fields..."). If a table communicates it better than prose, use a table.
 
 ## Doc Types
 
@@ -85,7 +83,6 @@ Language toolchain implementing these bars (plus API docs generated from docstri
 - **Tables** for reference content (settings, fields, endpoints). 3-4 columns max.
 - **Code examples** in Usage sections -- complete enough to copy-paste, with error handling where relevant.
 - **Internal links** use relative markdown: `[Doc Name](FILENAME.md)`
-- **No redundancy** -- don't repeat information documented elsewhere. Link instead.
 - **Code examples must work** -- enforce with the tested-snippets bar (see Strictness Bars), not manual review alone.
 
 ## Change narration
@@ -101,7 +98,5 @@ Change narration's code-comment form is what `comment-hygiene`'s *Density* calls
 ## What to Avoid
 
 - Verbose explanations where a table or code block would be clearer
-- Repeating content from other docs (link to it)
-- Obvious statements that don't add value
-- Multiple ways of saying the same thing
+- Anything `plain-writing`'s Cut list names
 - Documentation that doesn't match the actual code
