@@ -104,5 +104,5 @@ session you may want a higher `COMPACT_CONTEXT_THRESHOLD`.
 ## License
 
 MIT, except `skills/plain-writing/references/patterns.md`, which is
-[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) as an adaptation of Wikipedia's
-Signs of AI writing (see its header).
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) as an
+adaptation of Wikipedia's Signs of AI writing (see its header).

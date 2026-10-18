@@ -2,7 +2,9 @@
 
 ## 1.1.2
 
-- `python-api-docs` points to `praxis:plain-writing` for documentation prose (what to keep and cut, plain voice) alongside `praxis:docs-patterns` for doc types and structure.
+- `python-api-docs` points to `praxis:plain-writing` for documentation prose
+  (what to keep and cut, plain voice) alongside `praxis:docs-patterns` for doc
+  types and structure.
 
 ## 1.1.1
 
