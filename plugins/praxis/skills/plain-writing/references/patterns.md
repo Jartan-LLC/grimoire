@@ -1,14 +1,7 @@
 # Wording patterns
 
-Adapted from humanizer 3.1.0 by Siqi Chen (MIT; see `../LICENSE-humanizer`) and from Wikipedia's
-[Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing), maintained by
-WikiProject AI Cleanup and licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
-This file modifies both: it is ported to ASCII and trimmed, and several examples are reworded. As an
-adaptation of CC BY-SA material, this file is licensed under CC BY-SA 4.0.
-
-The wording pass in `SKILL.md` reads this list after the content is settled. Each pattern is a
-habit that adds words without adding a fact. Fix it by stating the point directly; never add a
-fact, drop one a reader needs, or reorder steps while doing so.
+Each pattern is a habit that adds words without adding a fact. Fix it by stating the point
+directly; never add a fact, drop one a reader needs, or reorder steps while doing so.
 
 - Act on one sighting of any pattern not marked *weak alone*; patterns 1-5 are the most frequent.
   A pattern marked *weak alone* needs other patterns in the same passage before you act.
