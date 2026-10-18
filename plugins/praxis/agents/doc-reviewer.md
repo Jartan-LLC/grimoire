@@ -53,7 +53,7 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 ### Minor
 
 - Verbose prose where a table or code example would be clearer
-- Filler and wordiness within a passage that stays -- `plain-writing`'s filler and wordiness cut items and the `references/patterns.md` in the `plain-writing` skill's directory, except pattern 25's account of what the text replaced (change narration, Important above)
+- Filler and wordiness within a passage that stays -- `plain-writing`'s filler and wordiness cut items and the `references/patterns.md` in the `plain-writing` skill's directory, except pattern 25's account of what the text replaced (change narration) and the patterns that cut unsupported claims (13, 15, 17, 23), which stay Important above
 - Missing code examples where they would clarify usage
 - Overly detailed explanations of obvious concepts
 - Sections that could be consolidated, or content that belongs in a different doc

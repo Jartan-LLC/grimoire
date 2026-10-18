@@ -11,8 +11,9 @@ fact, drop one a reader needs, or reorder steps while doing so.
 - In informational text, keep the structure readers scan: headings they look up, a label that
   names what each list item is, tables, code, commands, paths and link targets. Pattern 19 is
   about bold used for decoration, not those labels.
-- The project's own style rules override any pattern they speak to, and an edited file's punctuation
-  overrides patterns 8 and 20 (dashes, heading case), as `SKILL.md` says. Its wording pass sets the limits on what a fix may change.
+- The project's own style rules override any pattern they speak to, and an edited file's dashes,
+  quotes and heading case override pattern 8, pattern 21 and pattern 20's heading case, as
+  `SKILL.md` says.
 
 ## A. Staging instead of stating
 
@@ -233,7 +234,7 @@ The fact underneath is usually sound. Keep it and remove the dressing.
 > The temple's color palette of blue, green, and gold resonates with the region's natural beauty, symbolizing Texas bluebonnets, the Gulf of Mexico, and the diverse Texan landscapes, reflecting the community's deep connection to the land.
 
 **After:**
-> The temple is painted blue, green, and gold, colors meant to evoke Texas bluebonnets and the Gulf of Mexico.
+> The temple's blue, green, and gold stand for Texas bluebonnets and the Gulf of Mexico.
 
 ### 16. Sales language
 
