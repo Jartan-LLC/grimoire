@@ -40,7 +40,7 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 - Factually incorrect information -- the doc doesn't match what the code does
 - Code examples that won't run
 - Broken cross-references and dead external links -- internal, reference-style, or URLs to nonexistent targets (flag obviously-dead on read)
-- Bloat -- passages no reader needs, judged by `plain-writing`'s keep and cut lists; length alone is not a finding unless the type's reference sets a limit
+- Bloat -- sections or passages no reader of the doc needs, judged by `plain-writing`'s keep and cut lists, beyond the Minor items below; length alone is not a finding unless the type's reference sets a limit
 - Redundancy -- repeating information documented elsewhere instead of linking
 - Missing critical information that comparable docs include
 - Structure inconsistent with similar docs in the same category
@@ -55,7 +55,8 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 - Verbose prose where a table or code example would be clearer
 - Filler and wordiness within a passage that stays -- `plain-writing`'s filler and wordiness cut items and the `references/patterns.md` in the `plain-writing` skill's directory
 - Missing code examples where they would clarify usage
-- Sections that could be consolidated
+- Overly detailed explanations of obvious concepts
+- Sections that could be consolidated, or content that belongs in a different doc
 
 ## Output Format
 

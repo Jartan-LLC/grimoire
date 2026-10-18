@@ -83,7 +83,6 @@ Language toolchain implementing these bars (plus API docs generated from docstri
 - **Tables** for reference content (settings, fields, endpoints). 3-4 columns max.
 - **Code examples** in Usage sections -- complete enough to copy-paste, with error handling where relevant.
 - **Internal links** use relative markdown: `[Doc Name](FILENAME.md)`
-- **No redundancy** -- don't repeat information documented elsewhere. Link instead.
 - **Code examples must work** -- enforce with the tested-snippets bar (see Strictness Bars), not manual review alone.
 
 ## Change narration

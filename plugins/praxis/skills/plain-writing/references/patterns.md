@@ -4,7 +4,7 @@ Adapted from humanizer 3.1.0 by Siqi Chen (MIT; see `../LICENSE`).
 
 The wording pass in `SKILL.md` reads this list after the content is settled. Each pattern is a
 habit that adds words without adding a fact. Fix it by stating the point directly; never drop,
-add or reorder a fact while doing so.
+add a fact, drop one a reader needs, or reorder steps while doing so.
 
 - Patterns 1-5 justify an edit on one sighting. A pattern marked *weak alone* needs other
   patterns in the same passage before you act.
@@ -24,11 +24,11 @@ These are the strongest and most frequent tells in current model prose. Act on o
 **Before:**
 > It's not just about the beat riding under the vocals; it's part of the aggression and atmosphere. It's not merely a song, it's a statement.
 **After:**
-> The heavy beat adds to the aggressive tone.
+> The beat under the vocals adds to the aggression and atmosphere.
 **Before (split across sentences):**
 > This does not mean every choice is equal. It means there is no external system that confirms which choice is right.
 **After:**
-> No external system confirms which choice is right, although the choices still have different consequences.
+> No external system confirms which choice is right, though not every choice is equal.
 **Before (clipped tail):**
 > The options come from the selected item, no guessing.
 **After:**
@@ -41,7 +41,7 @@ These are the strongest and most frequent tells in current model prose. Act on o
 **Before:**
 > Then AlphaEvolve arrived. It had no preference for symmetry. No aesthetic prior. No nostalgia for human taste. The old rules were gone.
 **After:**
-> AlphaEvolve changed the search because it did not favor symmetry or human-looking designs. That made some of the older assumptions less useful.
+> AlphaEvolve had no preference for symmetry, no aesthetic prior and no taste for human-looking designs, and the old rules stopped applying.
 **Before (repeated closer):**
 > Caching cuts repeat work.
 >
@@ -58,15 +58,15 @@ These are the strongest and most frequent tells in current model prose. Act on o
 ### 3. Sayings that sound deep
 
 **Watch for:** the real question is, at its core, in reality, what really matters, fundamentally, the deeper issue, the heart of the matter, X is the Y of Z, X becomes a trap, X is not a tool but a mirror, the language of, the currency of, the architecture of
-**Problem:** An ordinary point is dressed as a hidden truth or an aphorism, and the dressing adds no detail. Replace the saying with the specific claim.
+**Problem:** An ordinary point is dressed as a hidden truth or an aphorism, and the dressing adds no detail. Replace the saying with the specific claim the text supports; if it supports none, cut it.
 **Before:**
 > The real question is whether teams can adapt. At its core, what really matters is organizational readiness.
 **After:**
-> The question is whether teams can adapt. That mostly depends on whether the organization is ready to change its habits.
+> The question is whether teams can adapt, which depends on organizational readiness.
 **Before (aphorism):**
 > Symmetry is the language of trust. Efficiency becomes a trap when teams forget the human layer.
 **After:**
-> Symmetric layouts often feel more predictable to users. Teams can over-optimize workflows and miss how people actually use them.
+> (Cut both sentences unless the text says what it means by them.)
 
 ### 4. Staged run-up before the point
 
@@ -75,7 +75,7 @@ These are the strongest and most frequent tells in current model prose. Act on o
 **Before:**
 > Let's dive into how caching works in Next.js. Here's what you need to know.
 **After:**
-> Next.js caches data at multiple layers, including request memoization, the data cache, and the router cache.
+> (Cut both sentences and start with the first fact about Next.js caching.)
 **Before (staged candor):**
 > Is it worth the price? Honestly? It depends on how often you'll use it.
 **After:**
@@ -104,7 +104,7 @@ Shapes and punctuation applied everywhere, whether or not the meaning asks for t
 **Before:**
 > The event features keynote sessions, panel discussions, and networking opportunities. Attendees can expect innovation, inspiration, and industry insights.
 **After:**
-> The event includes talks and panels. There's also time for informal networking between sessions.
+> The event includes keynote sessions, panel discussions and networking.
 **Before (paragraph scale):**
 > A career can look promising and fail. A relationship can feel important and end. A skill can take years and remain useless. These decisions rarely explain themselves.
 **After:**
@@ -177,7 +177,7 @@ The fact underneath is usually sound. Keep it and remove the dressing.
 **Before (stock section):**
 > Despite its industrial prosperity, Korattur faces challenges typical of urban areas, including traffic congestion and water scarcity. Despite these challenges, with its strategic location and ongoing initiatives, Korattur continues to thrive as an integral part of Chennai's growth.
 **After:**
-> Korattur has recurring traffic congestion and water shortages.
+> Korattur has traffic congestion and water scarcity.
 **Before (send-off):**
 > The future looks bright for the company. Exciting times lie ahead as they continue their journey toward excellence.
 **After:**
