@@ -99,6 +99,7 @@ session you may want a higher `COMPACT_CONTEXT_THRESHOLD`.
 ## Credits
 
 - [humanizer](https://github.com/blader/humanizer) by Siqi Chen -- `plain-writing`'s wording patterns
+- Wikipedia's [Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) (CC BY-SA 4.0) -- the patterns and several of their examples
 
 ## License
 
