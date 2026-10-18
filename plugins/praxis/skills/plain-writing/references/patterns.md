@@ -6,17 +6,17 @@ The wording pass in `SKILL.md` reads this list after the content is settled. Eac
 habit that adds words without adding a fact. Fix it by stating the point directly; never add a
 fact, drop one a reader needs, or reorder steps while doing so.
 
-- Patterns 1-5 justify an edit on one sighting. A pattern marked *weak alone* needs other
-  patterns in the same passage before you act.
+- Act on one sighting of any pattern not marked *weak alone*; patterns 1-5 are the most frequent.
+  A pattern marked *weak alone* needs other patterns in the same passage before you act.
 - In informational text, keep the structure readers scan: headings they look up, a label that
   names what each list item is, tables, code, commands, paths and link targets. Pattern 19 is
   about bold used for decoration, not those labels.
 - The project's own style rules override any pattern they speak to, and an edited file's punctuation
-  overrides pattern 8, as `SKILL.md` says. Its wording pass sets the limits on what a fix may change.
+  overrides patterns 8 and 20 (dashes, heading case), as `SKILL.md` says. Its wording pass sets the limits on what a fix may change.
 
 ## A. Staging instead of stating
 
-These are the strongest and most frequent tells in current model prose. Act on one sighting.
+These are the strongest and most frequent tells in current model prose.
 
 ### 1. Not X but Y
 

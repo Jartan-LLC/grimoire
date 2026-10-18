@@ -7,7 +7,7 @@ user-invocable: false
 
 # Documentation Writing Patterns
 
-Before writing, **load `praxis:plain-writing`** (what to keep and cut, plain voice, the final wording pass) and **read 2-3 existing docs in the same category** to match their tone and structure.
+Before writing or reviewing, **load `praxis:plain-writing`** (what to keep and cut, plain voice, the final wording pass) and **read 2-3 existing docs in the same category** to match their structure and register; plain-writing's voice rules still apply to what you add.
 
 ## Writing Style
 
