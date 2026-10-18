@@ -39,7 +39,8 @@ Cut:
 
 - false or stale content, or fix it when a reader needs the fact;
 - filler, intensifiers, buzzwords, claims your sources do not state and the reader cannot check,
-  and hedges that state no condition (keep "may fail outside the container");
+  and hedges that state no condition and no real uncertainty (keep "may fail outside the
+  container");
 - wordiness: doublets, wordy phrases, nouns doing a verb's work, "there is" openings, "you can"
   for something that is not optional;
 - background at the top of a task document (move it to the end or an explanation page);
@@ -67,7 +68,8 @@ knowledge; answer a question where readers look for it, not in an FAQ.
 - State only what your sources support: no rule, coupling, behaviour, count or "only" they do not
   state, and no maintenance rule guessed from history.
 - Keep the mechanics intact: code, commands, paths, link targets, step order, headings readers
-  look up, list labels and tables, unless the change you are documenting alters them.
+  look up, list labels readers scan for and tables, unless the change you are documenting
+  alters them.
 
 ## Then one wording pass
 

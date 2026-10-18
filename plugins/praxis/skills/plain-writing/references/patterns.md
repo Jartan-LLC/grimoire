@@ -12,9 +12,9 @@ fact, drop one a reader needs, or reorder steps while doing so.
 
 - Act on one sighting of any pattern not marked *weak alone*; patterns 1-5 are the most frequent.
   A pattern marked *weak alone* needs other patterns in the same passage before you act.
-- In informational text, keep the structure readers scan: headings they look up, a label that
-  names what each list item is, tables, code, commands, paths and link targets. Pattern 19 is
-  about bold used for decoration, not those labels.
+- In informational text, keep the structure readers scan: headings they look up, list labels
+  readers scan for, tables, code, commands, paths and link targets. Pattern 19 turns a labeled
+  list into prose only when each label repeats the first words of its item.
 - The project's own style rules override any pattern they speak to, and an edited file's dashes,
   quotes and heading case override pattern 8, pattern 21 and pattern 20's heading case, as
   `SKILL.md` says.

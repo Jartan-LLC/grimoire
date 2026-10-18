@@ -79,6 +79,6 @@ Status: confirmed, or `suspected -- verify X` if you could not confirm it
 | Important | X |
 | Minor | X |
 
-**References applied**: each `references/<type>.md` you read, or "none: no changed file has one"
+**References applied**: each docs-patterns `references/<type>.md` you read, or "none: no changed file has one"
 
 **Verdict**: APPROVE / WARNING / BLOCK
