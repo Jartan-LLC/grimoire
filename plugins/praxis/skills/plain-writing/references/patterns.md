@@ -21,8 +21,6 @@ fact, drop one a reader needs, or reorder steps while doing so.
 
 ## A. Staging instead of stating
 
-These are the most frequent tells in current model prose.
-
 ### 1. Not X but Y
 
 **Watch for:** not X but Y; not just, not only, or not merely X, but Y; it's not X, it's Y; the reversed form X rather than Y; the same contrast split across sentences ("This does not mean X. It means Y."); a clipped negative tail ("..., no guessing"). The formula appears in every language; treat the equivalent construction the same way.
