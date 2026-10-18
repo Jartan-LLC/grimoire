@@ -7,7 +7,7 @@ user-invocable: false
 
 # Readable Code
 
-This skill shapes how a single body reads once its units exist: control flow, the naming of a *set* of identifiers, and the order and locality that let a reader follow it straight down. Out of scope: deleting code or a single name that misleads or says nothing (`code-hygiene`), comments (`comment-hygiene`), where a seam falls or how big a unit is (`code-structure`), formatting other than a phase seam, and language-specific constructs.
+This skill shapes how a single body reads once its units exist: control flow, the naming of a *set* of identifiers, symmetry, and the order, locality and working set that let a reader follow it straight down. Out of scope: deleting code, and renaming a single name that misleads or says nothing (`code-hygiene`), comments (`comment-hygiene`), where a seam falls or how big a unit is (`code-structure`), formatting other than a phase seam, and language-specific constructs.
 
 Every rule below is a recognizable **smell** (something a reader or author can actually spot) -> the **principle** it violates -> a **fix** direction. No line or nesting-depth count gates any rule; that false precision is what these qualitative smells replace.
 

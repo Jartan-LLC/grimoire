@@ -7,9 +7,9 @@ user-invocable: false
 
 # Code Structure
 
-This skill shapes the units of code that should exist: decomposition, cohesion, coupling, interfaces, failure contracts, data invariants, and designing for change. Out of scope: deleting code (`code-hygiene`), comments (`comment-hygiene`), how a single body reads (`readable-code`), formatting, fail-fast assertions, error-message wording and naming encodings, large-scale layering, and language-specific constructs.
+This skill shapes the units of code that should exist: decomposition, cohesion, coupling, interfaces, failure contracts, data invariants, and designing for change. Out of scope: deleting code (`code-hygiene`), comments (`comment-hygiene`), how a single body reads (`readable-code`), formatting, fail-fast assertions, error-message wording, names that encode a wrong type (`code-hygiene`), large-scale layering, and language-specific constructs.
 
-Read `code-hygiene` and `comment-hygiene` first: shaping code that should have been deleted is wasted work. Identical *text* in two places is `code-hygiene`'s duplication rule; the same *decision* in two unlike forms is this skill's (DRY-as-knowledge, below).
+Read `code-hygiene` and `comment-hygiene` first: shaping code that should have been deleted is wasted work.
 
 Every rule below is a recognizable **smell** (something a reader or author can actually spot) -> the **principle** it violates -> a **fix** direction. No line, parameter, or nesting-depth count gates any rule here: that false precision is the size-fallacy this skill exists to replace. (Illustrative counts like "a two-line loop index" still appear -- they describe an example, they do not set a threshold.)
 
