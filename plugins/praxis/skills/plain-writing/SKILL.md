@@ -1,7 +1,7 @@
 ---
 name: plain-writing
 description: Plain, accurate prose that informs -- what to keep, what to cut, plain voice, and a final wording pass that removes filler and AI writing patterns.
-when_to_use: Load together with docs-patterns whenever you write or edit a document. Writing, editing or reviewing prose meant to inform -- docs and doc pages, READMEs, explanation pages, answers to questions, emails, release notes -- or asked to make text clearer, simpler or less wordy. Not for blog posts, essays, site copy or personal writing (praxis:voiced-writing), commit messages or PR text (gitwise:commit-pr-writing), or deciding whether a code comment should exist (comment-hygiene); a docstring's or comment's prose is in scope.
+when_to_use: Load together with docs-patterns whenever you write or edit a document. Writing, editing or reviewing prose meant to inform -- docs and doc pages, READMEs, explanation pages, answers to questions, emails, release notes -- or asked to make text clearer, simpler or less wordy. Not for blog posts, essays, site copy or personal writing, commit messages or PR text (gitwise:commit-pr-writing), or deciding whether a code comment should exist (comment-hygiene); a docstring's or comment's prose is in scope.
 user-invocable: false
 ---
 
@@ -47,7 +47,9 @@ Cut:
 - a second copy of something maintained elsewhere: point to it;
 - alternatives when one default works (keep a named fallback for when it cannot run);
 - future plans in task and reference documents;
-- an intro that repeats its heading, and empty sections.
+- an intro that repeats its heading, and empty sections;
+- in a reply, the background, diagnosis and proof the reader already has: lead with the answer
+  and keep the one fact they lack.
 
 Defaults for the calls in between: keep a short reason for a project rule and cut reasons that
 repeat; put brief content the reader needs on the spot inline and link background; there is no
@@ -67,9 +69,8 @@ knowledge; answer a question where readers look for it, not in an FAQ.
 
 Read `references/patterns.md` and fix the patterns you find in the text you wrote or were handed;
 in a file, that is the text your change writes, not the lines around it, unless you were asked to
-make the file itself clearer. The pass changes wording
-only: it never drops, adds or reorders a fact, and it leaves everything the previous section
-protects.
+make the file itself clearer. The pass changes wording only: it never drops, adds or reorders a
+fact, and it leaves everything the previous section protects.
 
 Leave a pattern alone inside a quotation, a title or a proper name, in text that discusses the
 pattern rather than uses it, and where the writer chose it on purpose.
@@ -80,6 +81,7 @@ pattern rather than uses it, and where the writer chose it on purpose.
 - Nothing was added that your sources do not support.
 - Every fact the change made false is fixed.
 
-Return pasted text as the rewrite, with a short note of anything you cut that a reader might
-miss. When asked to make a file clearer, edit it in place and change prose only. Inside another task, return the final
-text only. When reviewing, judge the text by these rules and report findings; do not rewrite it.
+Return pasted text as the rewrite, with a short note of anything you cut that a reader might miss.
+When asked to make a file clearer, edit it in place and change prose only. Inside another task,
+return the final text only. When reviewing, judge the text by these rules and report findings; do
+not rewrite it.

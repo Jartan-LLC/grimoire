@@ -164,7 +164,7 @@ The fact underneath is usually sound. Keep it and remove the dressing.
 **Before:**
 > Additionally, a distinctive feature of Somali cuisine is the incorporation of camel meat. An enduring testament to Italian colonial influence is the widespread adoption of pasta in the local culinary landscape, showcasing how these dishes have integrated into the traditional diet.
 **After:**
-> Somali cuisine also includes camel meat, which is considered a delicacy. Pasta dishes, introduced during Italian colonization, remain common, especially in the south.
+> Somali cuisine also includes camel meat. Pasta, introduced during Italian colonization, is widely eaten.
 
 ### 13. Inflated significance
 
@@ -221,7 +221,7 @@ The fact underneath is usually sound. Keep it and remove the dressing.
 **Before (prestige list):**
 > Her views have been cited in The New York Times, BBC, Financial Times, and The Hindu. She maintains an active social media presence with over 500,000 followers.
 **After:**
-> Her views have been cited in The New York Times and the BBC.
+> (Cut both sentences unless the source says what the outlets reported.)
 
 ### 18. Avoiding is, are, and has
 
@@ -230,7 +230,7 @@ The fact underneath is usually sound. Keep it and remove the dressing.
 **Before:**
 > Gallery 825 serves as LAAA's exhibition space for contemporary art. The gallery features four separate spaces and boasts over 3,000 square feet.
 **After:**
-> Gallery 825 is LAAA's exhibition space for contemporary art. The gallery has four rooms totaling 3,000 square feet.
+> Gallery 825 is LAAA's exhibition space for contemporary art. The gallery has four separate spaces and over 3,000 square feet.
 
 ## D. Formatting by rule
 
@@ -250,7 +250,7 @@ Templates and visual editors also produce clean formatting. The tell is decorati
 - **Security:** Security has been strengthened with end-to-end encryption.
 
 **After:**
-> The update improves the interface, speeds up load times through optimized algorithms, and adds end-to-end encryption.
+> The update adds a new interface, optimized algorithms and end-to-end encryption.
 
 ### 20. Decorative headings
 
@@ -271,7 +271,7 @@ Templates and visual editors also produce clean formatting. The tell is decorati
 > [rocket emoji] **Launch Phase:** The product launches in Q3
 > [light bulb emoji] **Key Insight:** Users prefer simplicity
 **After:**
-> The product launches in Q3. User research showed a preference for simplicity.
+> The product launches in Q3. Users prefer simplicity.
 
 ### 21. Curly quotation marks
 
@@ -283,7 +283,7 @@ Templates and visual editors also produce clean formatting. The tell is decorati
 
 ## E. Leftovers from the chat and the draft
 
-Remove these outright. Nothing here needs rewriting.
+Remove the wrapper; keep any fact or caveat it carries, as each pattern says.
 
 ### 22. Chatbot residue
 
@@ -335,25 +335,8 @@ When users hit a slow page, they leave.
 **Before:**
 > This function was added to replace the previous approach of iterating through all items, which caused O(n^2) performance.
 **After:**
-> This function uses a hash map for O(1) lookups, avoiding the O(n^2) cost of naive iteration.
+> This function avoids the O(n^2) cost of iterating through all items.
 **Before (method narration):**
 > The figures below are drawn from each vendor's published pricing; anything we could not confirm is flagged rather than guessed.
 **After:**
-> Prices are each vendor's published rate. Two vendors publish nothing; call them.
-
-## F. Writing for the wrong reader
-
-A model writes for a reader who shares no context, because that fits the widest range of cases. A reply in a thread has a reader who already knows the background. Act on this pattern when you can see the surrounding conversation, or when the text plainly is a reply. If you cannot tell, ask or leave the text alone.
-
-### 26. Re-explaining what the reader knows
-
-**Watch for:** a short reply that restates the problem, walks through the diagnosis, and lays out the evidence before it reaches the decision; a query, command, or set of numbers included to prove a plan will work; background the other person wrote or already agreed to; the answer itself sitting in the last line.
-**Problem:** In a reply the reader already has the context, so rebuilding it adds nothing and buries the point. Each sentence can read fine on its own, so this survives sentence-level cleanup. Lead with the decision and keep only the reasoning that would change whether the reader agrees: usually one fact they lack and any link they need to act. The diagnosis and the proof that a plan will work belong in the ticket or document that follows; a reviewer raising a topic is not a request for the full write-up.
-**Before:**
-> Yeah, you're right, this works around the issue rather than fixing it. The real fix is in `MergeService`: when we move a child under a new parent, it should update `pipeline_id` along with `parent_id`. We can backfill the bad rows from the audit log with `Change.where(field: "pipeline_id", source: "merge")`. I checked QA: 123 past merges, only 6 rows wrong now, so the cleanup is small.
->
-> Since `MergeService` is shared and not specific to this account, I'd rather open a separate ticket than widen this PR. The fallback here is fine to keep until then.
-**After:**
-> Agreed, this is a workaround. Fixing it properly in `MergeService` would widen this ticket well past its scope: it is shared code, so it means checking the merge flow for every account, plus a backfill for the rows that are already wrong.
->
-> I'd rather keep this PR account specific and open a separate ticket for the `MergeService` fix and the backfill.
+> Prices are each vendor's published rate; figures that could not be confirmed are marked.

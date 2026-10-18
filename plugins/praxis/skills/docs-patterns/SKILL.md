@@ -99,5 +99,5 @@ Change narration's code-comment form is what `comment-hygiene`'s *Density* calls
 ## What to Avoid
 
 - Verbose explanations where a table or code block would be clearer
-- Anything `plain-writing`'s Cut list names, such as content repeated from other docs (link to it)
+- Anything `plain-writing`'s Cut list names
 - Documentation that doesn't match the actual code

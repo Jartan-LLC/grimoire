@@ -96,6 +96,10 @@ session you may want a higher `COMPACT_CONTEXT_THRESHOLD`.
 /praxis:address-review 43      -> work through findings
 ```
 
+## Credits
+
+- [humanizer](https://github.com/blader/humanizer) by Siqi Chen -- `plain-writing`'s wording patterns
+
 ## License
 
 MIT
