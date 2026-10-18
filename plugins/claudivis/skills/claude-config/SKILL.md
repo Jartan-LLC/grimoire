@@ -83,9 +83,9 @@ Knowledge sets `user-invocable: false`, which keeps a `/` menu from filling with
 
 ## Naming
 
-- **Agents** answer "who is this?" -- `backend-reviewer`, `issue-planner`
-- **Skills** answer "what does this teach?" -- `logging-patterns`, `github-conventions`
-- **Commands** answer "what does this do?" -- `plan-issue`, `review-pr`
+- **Agents** answer "who is this?" -- `security-reviewer`, `release-planner`
+- **Skills** answer "what does this teach?" -- `error-format`, `deploy-checklist`
+- **Commands** answer "what does this do?" -- `triage-issue`, `deploy-app`
 
 Naming should be predictable within a category but not forced into a single suffix.
 

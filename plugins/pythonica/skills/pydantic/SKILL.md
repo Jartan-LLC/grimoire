@@ -1242,15 +1242,6 @@ class Document(AuditMixin):
         return data
 ```
 
-## Related Skills
-
-When using Pydantic, consider these complementary pythonica skills:
-
-- **python-testing**: Testing strategies for Pydantic models and validation
-- **python-error-handling**: Exception hierarchies and validation patterns
-- **python-configuration**: pydantic-settings for environment and config management
-- **python-type-safety**: Protocols, generics, and type narrowing
-
 ## Additional Resources
 
 - [Pydantic Documentation](https://docs.pydantic.dev/)

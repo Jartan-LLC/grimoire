@@ -91,7 +91,7 @@ Prose that narrates the change which produced the page, or inventories where els
 
 `Or from source. This project installs with uv rather than pip -- in CI, in the devcontainer and in the Docker image:` -- the reader is installing locally. Which installer the project stopped using, and the three other places the new one is also used, change nothing they type. `Or from source, with uv:` is the whole of it.
 
-A diff that narrates in its comments often narrates in its docs too. Rationale that needs a home goes in the commit message (under a merge setting that drops it, where `gitwise:commit-pr-writing` says), or in a decision record the project keeps.
+When a diff narrates in its comments, read its docs for narration too. Rationale that needs a home goes in the commit message (under a merge setting that drops it, where `gitwise:commit-pr-writing` says), or in a decision record the project keeps.
 
 ## What to Avoid
 
