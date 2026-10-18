@@ -147,7 +147,7 @@ Shapes and punctuation applied everywhere, whether or not the meaning asks for t
 
 ### 8. Dashes as the universal connector
 
-**Rule:** In text you write, replace each em dash or en dash with a period, comma, colon, or parentheses, or rewrite the sentence. This includes spaced dashes and double hyphens (` -- `) used as dashes. Leave dashes and hyphens inside code blocks, inline code, commands, paths, and URLs alone. Exception: where the writer's sample or the project's style uses dashes (a pure-ASCII project may write ` -- `), match its rate instead.
+**Rule:** In text you write, replace each em dash or en dash with a period, comma, colon, or parentheses, or rewrite the sentence. This includes spaced dashes and double hyphens (` -- `) used as dashes. Leave dashes and hyphens inside code blocks, inline code, commands, paths, and URLs alone. Exception: where the edited file or the project's style uses dashes (a pure-ASCII project may write ` -- `), match its rate instead.
 **Problem:** A dash lets the writer skip choosing how two clauses relate, so a model reaches for it everywhere. Many editors and journalists also use dashes, so in text you were handed or are reviewing, one dash is *weak alone*; a text full of them is the tell.
 **Before:**
 > The new policy -- announced without warning -- affects thousands of workers. The changes -- long overdue according to critics -- will take effect immediately.
@@ -319,7 +319,9 @@ Templates and visual editors also produce clean formatting. The tell is decorati
 > [light bulb emoji] **Key Insight:** Users prefer simplicity
 
 **After:**
-> The product launches in Q3. Users prefer simplicity.
+> Launch phase: the product launches in Q3.
+>
+> Key insight: users prefer simplicity.
 
 ### 21. Curly quotation marks
 
