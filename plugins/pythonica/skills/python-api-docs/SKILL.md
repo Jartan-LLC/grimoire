@@ -241,4 +241,4 @@ Add `docs` to the aggregate check job's `needs`, and audit `.[docs]` for CVEs al
 ## See Also
 
 - `pythonica:python-code-style` -- writing the google-style docstrings and type hints this renders.
-- `praxis:docs-patterns` -- the general documentation structure and strictness rules this toolchain serves; `praxis:plain-writing` -- its prose.
+- `praxis:docs-patterns` -- the general documentation structure and strictness rules this toolchain serves; `praxis:plain-writing` -- the documentation's prose: what to keep and cut, plain voice.

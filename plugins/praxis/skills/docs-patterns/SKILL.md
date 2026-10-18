@@ -1,6 +1,6 @@
 ---
 name: docs-patterns
-description: Documentation writing conventions -- style, structure, tone, and quality standards.
+description: Documentation conventions -- doc types, structure, tone, per-type rules, and quality standards.
 when_to_use: Writing, editing, or reviewing documentation -- a README, CONTRIBUTING.md, a release procedure such as RELEASING.md, changelog entries and release notes, docs pages, or agent instruction files such as CLAUDE.md and AGENTS.md.
 user-invocable: false
 ---
@@ -99,7 +99,5 @@ Change narration's code-comment form is what `comment-hygiene`'s *Density* calls
 ## What to Avoid
 
 - Verbose explanations where a table or code block would be clearer
-- Repeating content from other docs (link to it)
-- Obvious statements that don't add value
-- Multiple ways of saying the same thing
+- Anything `plain-writing`'s Cut list names, such as content repeated from other docs (link to it)
 - Documentation that doesn't match the actual code

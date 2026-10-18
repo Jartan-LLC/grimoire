@@ -61,12 +61,13 @@ knowledge; answer a question where readers look for it, not in an FAQ.
 - State only what your sources support: no rule, coupling, behaviour, count or "only" they do not
   state, and no maintenance rule guessed from history.
 - Keep the mechanics intact: code, commands, paths, link targets, step order, headings readers
-  look up, list labels and tables.
+  look up, list labels and tables, unless the change you are documenting alters them.
 
 ## Then one wording pass
 
 Read `references/patterns.md` and fix the patterns you find in the text you wrote or were handed;
-in a file, that is the text your change writes, not the lines around it. The pass changes wording
+in a file, that is the text your change writes, not the lines around it, unless you were asked to
+make the file itself clearer. The pass changes wording
 only: it never drops, adds or reorders a fact, and it leaves everything the previous section
 protects.
 
@@ -80,5 +81,5 @@ pattern rather than uses it, and where the writer chose it on purpose.
 - Every fact the change made false is fixed.
 
 Return pasted text as the rewrite, with a short note of anything you cut that a reader might
-miss. For a file, edit it in place and change prose only. Inside another task, return the final
+miss. When asked to make a file clearer, edit it in place and change prose only. Inside another task, return the final
 text only. When reviewing, judge the text by these rules and report findings; do not rewrite it.
