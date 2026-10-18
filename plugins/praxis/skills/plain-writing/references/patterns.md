@@ -1,6 +1,6 @@
 # Wording patterns
 
-Adapted from humanizer 3.1.0 by Siqi Chen (MIT; see `../LICENSE`) and from Wikipedia's
+Adapted from humanizer 3.1.0 by Siqi Chen (MIT; see `../LICENSE-humanizer`) and from Wikipedia's
 [Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing), maintained by
 WikiProject AI Cleanup and licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
 This file modifies both: it is ported to ASCII and trimmed, and several examples are reworded. As an
@@ -21,7 +21,7 @@ fact, drop one a reader needs, or reorder steps while doing so.
 
 ## A. Staging instead of stating
 
-These are the strongest and most frequent tells in current model prose.
+These are the most frequent tells in current model prose.
 
 ### 1. Not X but Y
 
@@ -123,7 +123,7 @@ Shapes and punctuation applied everywhere, whether or not the meaning asks for t
 
 ### 6. Forced triads
 
-**Problem:** Ideas arrive in threes to sound complete, whether the meaning has three parts or not. The tell can be one sentence ("innovation, inspiration, and insights"), three parallel examples, or three short facts followed by a lesson. Check that each item adds a distinct idea. Merge examples, develop the strongest one, or vary the structure when they do not. Keep three real items when the meaning needs three.
+**Problem:** Ideas arrive in threes to sound complete, whether the meaning has three parts or not. The tell can be one sentence ("innovation, inspiration, and insights"), three parallel examples, or three short facts followed by a lesson. Check that each item adds a distinct idea. Merge examples, keep the strongest one, or vary the structure when they do not. Keep three real items when the meaning needs three.
 **Before:**
 > The event features keynote sessions, panel discussions, and networking opportunities. Attendees can expect innovation, inspiration, and industry insights.
 
@@ -134,7 +134,7 @@ Shapes and punctuation applied everywhere, whether or not the meaning asks for t
 > A career can look promising and fail. A relationship can feel important and end. A skill can take years and remain useless. These decisions rarely explain themselves.
 
 **After:**
-> A career can look promising and fail; these decisions rarely explain themselves.
+> A career choice can look promising and fail; such decisions rarely explain themselves.
 
 ### 7. Repeated sentence openings
 
@@ -191,7 +191,7 @@ The fact underneath is usually sound. Keep it and remove the dressing.
 ### 12. Overused AI words
 
 **Watch for:** Actually, additionally, align with, bolstered, crucial, deep dive, delve, enduring, enhance, garner, gate/gated/gating (figurative; keep technical uses), highlight (verb), interplay, intricate/intricacies, key (adjective), landscape (abstract noun), meticulous/meticulously, pivotal, quietly, robust (figurative; keep technical uses), showcase, tapestry (abstract noun), testament, underscore (verb), valuable, vibrant
-**Problem:** Models use these words far more often than people do, especially in groups. The watch lists in patterns 13 to 18 hold phrases that are tells because of how they are used; this list holds words that are tells wherever they appear. A formal word outside these lists is not a tell by itself.
+**Problem:** Models use these words far more often than people do, especially in groups. The watch lists in patterns 13 to 18 hold phrases that are tells because of how they are used; this list holds words that are tells in any sentence, within the use each entry names. A formal word outside these lists is not a tell by itself.
 **Before:**
 > Additionally, a distinctive feature of Somali cuisine is the incorporation of camel meat. An enduring testament to Italian colonial influence is the widespread adoption of pasta in the local culinary landscape, showcasing how these dishes have integrated into the traditional diet.
 
@@ -296,7 +296,7 @@ Templates and visual editors also produce clean formatting. The tell is decorati
 - **Security:** Security has been strengthened with end-to-end encryption.
 
 **After:**
-> The update brings a new interface, optimized algorithms and end-to-end encryption.
+> A new interface improves the user experience, optimized algorithms improve performance, and end-to-end encryption improves security.
 
 ### 20. Decorative headings
 

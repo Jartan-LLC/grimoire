@@ -38,8 +38,8 @@ Always keep:
 Cut:
 
 - false or stale content, or fix it when a reader needs the fact;
-- filler, intensifiers, buzzwords, claims the reader cannot check, and hedges that state no
-  condition (keep "may fail outside the container");
+- filler, intensifiers, buzzwords, claims the reader cannot check that your sources do not
+  state, and hedges that state no condition (keep "may fail outside the container");
 - wordiness: doublets, wordy phrases, nouns doing a verb's work, "there is" openings, "you can"
   for something that is not optional;
 - background at the top of a task document (move it to the end or an explanation page);

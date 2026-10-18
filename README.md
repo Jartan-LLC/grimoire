@@ -83,4 +83,6 @@ privately: [SECURITY.md](.github/SECURITY.md).
 
 ## License
 
-MIT
+MIT, except `plugins/praxis/skills/plain-writing/references/patterns.md`, which is
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/); see the
+[praxis README](plugins/praxis/README.md#license).
