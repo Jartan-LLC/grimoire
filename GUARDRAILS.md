@@ -24,8 +24,8 @@ every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `
   (marketplace entries carry no `version` -- see `RELEASING.md`).
 - Declare a plugin `dependency` for every cross-plugin skill an agent loads in its
   frontmatter `skills:` or a skill or command step loads (a hard, resolve-or-fail load like
-  `gitwise:github-conventions`). Add
-  no plugin `dependency` without a real runtime requirement (see `RELEASING.md`).
+  `gitwise:github-conventions`). Add no plugin `dependency` without a real runtime
+  requirement (see `RELEASING.md`).
 - Name no other plugin, and no skill, agent or command of another plugin, in a skill, agent or
   command unless its plugin declares that plugin. Drop a prose pointer to an undeclared plugin
   rather than add a dependency for it; a `skills:` load or a step that loads another plugin's
