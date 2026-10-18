@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.0
+
+- New `plain-writing` skill for prose that informs: docs, READMEs, explanation pages, answers, emails, release notes, and requests to make text clearer. Your agent decides what a reader needs before it writes, keeps warnings, conditions, exact commands and prerequisites, cuts filler and wordiness, writes in a plain voice without first-person asides or claims your sources do not support, and finishes with one pass over the wording. It does not apply to commit messages, PR text or code comments.
+
 ## 1.7.0
 
 - `docs-patterns` has rules for READMEs, CONTRIBUTING.md, release procedures such as RELEASING.md, changelog entries and release notes, and agent instruction files such as CLAUDE.md and AGENTS.md. When it writes CONTRIBUTING.md, a release procedure or an agent instruction file, your agent asks you before adding a convention your project has not settled; when nobody can answer, it leaves the convention out and says so in the PR description.

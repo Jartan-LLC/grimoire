@@ -59,6 +59,7 @@ codex plugin add gitwise@grimoire
 - **docs-patterns** -- writing style, structure, brevity, and rules for READMEs, CONTRIBUTING, release procedures, changelogs and agent instruction files
 - **frontend-patterns** -- design tokens, mobile-first, component isolation
 - **logging-patterns** -- log levels, formatting, structured output
+- **plain-writing** -- prose that informs: what to keep and cut, plain voice, a final wording pass
 - **readable-code** -- local clarity: control-flow shape, naming for the reader, reading order and working set
 - **review-severity** -- Critical/Important/Minor by consequence-if-shipped
 - **testing-patterns** -- integration tests, fixture composition, canary markers
