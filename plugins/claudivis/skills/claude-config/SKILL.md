@@ -20,7 +20,7 @@ An agent defines **who you are**. It shapes focus, identity, and constraints for
 - What the agent cares about (evaluation criteria, output format, confidence thresholds)
 - Runs in an isolated subagent context
 
-**Agents are not workflows.** They define a lens for approaching work, not steps to follow. A security reviewer says "you care about async correctness and session handling" -- not "Step 1: read the diff."
+**Agents are not workflows.** They define a lens for approaching work, not steps to follow. A backend reviewer says "you care about async correctness and session handling" -- not "Step 1: read the diff."
 
 **Good:** Role identity, focus areas, evaluation criteria, output format, what to read for context.
 **Bad:** Step-by-step procedures, bash scripts, workflow orchestration.

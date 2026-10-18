@@ -2,8 +2,7 @@
 
 ## 1.8.0
 
-- `code-hygiene`, `code-structure`, `comment-hygiene`, `docs-patterns` and `logging-patterns` no longer point your agent to pythonica skills, which may not be installed.
-- `code-structure` and `readable-code` state their scope in one line instead of a list of which sibling owns what.
+- `code-hygiene`, `code-structure`, `comment-hygiene`, `docs-patterns`, `logging-patterns` and `readable-code` no longer point your agent to pythonica, which may not be installed.
 - New `plain-writing` skill for prose that informs: docs, READMEs, explanation pages, answers, emails, release notes, and requests to make text clearer. Your agent decides what a reader needs before it writes, keeps warnings, conditions, exact commands and prerequisites, cuts filler and wordiness, writes in a plain voice without asides, opinions or claims your sources do not support (and no first person in documents), and finishes with one pass over the wording. In an existing file it changes only the text it writes, and keeps the file's own dashes, quotes and heading case, unless you ask it to make the file clearer. It does not apply to blog posts, essays, site copy, personal writing, commit messages or PR text, and `comment-hygiene` still decides whether a code comment should exist; the prose of the comments and docstrings that stay is in scope.
 - `plain-writing`'s `references/patterns.md` is licensed CC BY-SA 4.0, as an adaptation of Wikipedia's Signs of AI writing; the rest of praxis stays MIT.
 - Your agent loads `plain-writing` alongside `docs-patterns` when it writes or reviews a document, and `implement-issue`'s documentation step loads both. The "brevity is paramount" rule is gone; `plain-writing`'s keep and cut lists replace it.
