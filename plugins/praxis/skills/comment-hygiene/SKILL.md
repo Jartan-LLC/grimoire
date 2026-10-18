@@ -7,11 +7,11 @@ user-invocable: false
 
 # Comment Hygiene
 
-Comment truthfulness only. Dead code, reinvention/duplication, naming and faking done are `code-hygiene`'s; `code-structure` shapes the units and their contracts, and `readable-code` how a body reads.
+Comment truthfulness only. Out of scope: dead code, duplication, naming and faked implementations (`code-hygiene`), and the shape of the code (`code-structure`, `readable-code`).
 
 A comment earns its place only by telling the reader something the **code cannot**. Sharp test: *could a competent reader recover this fact from the code (and the repo)? Yes -> delete; No -> maybe keep.* One fact survives that test despite being recoverable -- the sole exception, so bake it into the test: a **legal/provenance header** is recoverable from `LICENSE` yet kept inline by mandate (see EXEMPT). The **external-anchor WHY** looks like a second exception but isn't one: naming a constant recovers its *value*, never the spec/constraint that dictated it, so that rationale stays genuinely unrecoverable and keeps on the mainline (see KEEP).
 
-This truthfulness standard applies wherever the annotation lives -- inline comment, block comment, or docstring/doc-comment prose. A doc-comment that restates the signature, lies about behavior, or narrates a change is the same anti-pattern as an inline one. Docstring *format/completeness* defers to the language plugin (`pythonica`); *prose quality* to `plain-writing`.
+This truthfulness standard applies wherever the annotation lives -- inline comment, block comment, or docstring/doc-comment prose. A doc-comment that restates the signature, lies about behavior, or narrates a change is the same anti-pattern as an inline one. Docstring format and completeness are language-specific and out of scope; prose quality is `plain-writing`'s.
 
 ## KEEP -- the code can't say it
 
@@ -40,7 +40,7 @@ Cover the comment, read only the code; if a competent reader learns nothing new,
 - **Stale / misleading** -- the current code contradicts it. Worse than none: correct it into a keep-category fact, or delete.
 - **Nonlocal** -- asserts a fact another file/service/config owns; it drifts silently when *that* source changes. State it at the source. (Cross-ownership drift: told here, never at its owner -- move it there. If the repo already states it at the owner, that copy is *Retold fact* under CONDITIONAL -- point, don't restate.)
 - **Noise / banner / attribution** -- section dividers (`# ==== HELPERS ====`), closing-brace labels (`} // end for`), author/date bylines. Structure and `git blame` carry these; if a file needs dividers to navigate, split it. (A `# region` fold or codegen sentinel is a tooling directive, not a banner.)
-- **Commented-out code** -- delete unconditionally; git owns it (`git log -G` recovers it). "Disabled with a why" is no loophole -- the code still goes, only the codeless knowledge survives as a tracked note. See `code-hygiene`'s *Dead code*. Carve-out: an illustrative snippet inside a docstring/example config is documentation-by-example, not disabled program code -> keep.
+- **Commented-out code** -- delete unconditionally; git owns it (`git log -G` recovers it). "Disabled with a why" is no loophole -- the code still goes, only the codeless knowledge survives as a tracked note. Carve-out: an illustrative snippet inside a docstring/example config is documentation-by-example, not disabled program code -> keep.
 - **Mandated boilerplate** -- a comment satisfying only a "comment everything" rule, or a header restating the signature's name/params/return. If a header is required, make it say what the signature cannot.
 
 ### Tombstone -- narrates the change, not the state

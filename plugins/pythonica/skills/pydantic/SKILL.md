@@ -1005,10 +1005,6 @@ class UserModel(BaseModel):
 user_model = UserModel.model_validate(user)
 ```
 
-## Testing
-
-For testing Pydantic models with pytest, see the `python-testing` skill.
-
 ## Migration Guide (v1 -> v2)
 
 ### Key Changes

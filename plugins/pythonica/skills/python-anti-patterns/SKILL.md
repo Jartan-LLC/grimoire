@@ -9,8 +9,6 @@ user-invocable: false
 
 A reference checklist of common mistakes and anti-patterns in Python code. Review this before finalizing implementations to catch issues early.
 
-**Note:** This skill focuses on what to avoid. For guidance on positive patterns and architecture, see the `python-patterns` skill.
-
 ## Core Concepts
 
 ### 1. Centralize Cross-Cutting Concerns

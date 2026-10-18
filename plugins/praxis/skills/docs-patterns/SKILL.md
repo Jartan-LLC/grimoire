@@ -76,8 +76,6 @@ Both trace to one source: **docstrings + type annotations**. The "use it" doc na
 | Nav / table-of-contents completeness | Orphan and unlisted pages nothing links to |
 | Cross-reference check | Broken reference-style pointers to renamed or removed targets |
 
-Language toolchain implementing these bars (plus API docs generated from docstrings): see `pythonica:python-api-docs`.
-
 ## Conventions
 
 - **Tables** for reference content (settings, fields, endpoints). 3-4 columns max.
@@ -93,7 +91,7 @@ Prose that narrates the change which produced the page, or inventories where els
 
 `Or from source. This project installs with uv rather than pip -- in CI, in the devcontainer and in the Docker image:` -- the reader is installing locally. Which installer the project stopped using, and the three other places the new one is also used, change nothing they type. `Or from source, with uv:` is the whole of it.
 
-Change narration's code-comment form is what `comment-hygiene`'s *Density* calls PR narration, and one migration commonly produces both, so a diff carrying it in comments is worth reading for it in the docs too. Rationale that needs a home goes in the commit message (under a merge setting that drops it, where `gitwise:commit-pr-writing` says), or in a decision record the project keeps.
+A diff that narrates in its comments often narrates in its docs too. Rationale that needs a home goes in the commit message (under a merge setting that drops it, where `gitwise:commit-pr-writing` says), or in a decision record the project keeps.
 
 ## What to Avoid
 

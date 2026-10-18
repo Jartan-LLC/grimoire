@@ -7,12 +7,7 @@ user-invocable: false
 
 # Readable Code
 
-The local-clarity sibling of `code-structure`. `code-structure` carves the units and their contracts; this skill shapes how a single body reads to a human once those units exist. Four owners, one test:
-
-- **hygiene = DELETE** what git or a library already owns -- a restating comment, dead code, a name that lies or says nothing. A rule that says *delete X* is hygiene's.
-- **readable-code = READ** -- shape control flow, the naming of a *set* of identifiers, and the order and locality of a body so a reader follows it straight down holding as little in mind as possible.
-- **code-structure = SHAPE THE UNITS** -- decomposition and depth, cohesion, coupling, interfaces, contracts, data invariants. Anything about *where a seam falls* or *how big a unit should be* is `code-structure`'s (it owns the size-vs-depth resolution); this skill assumes the units are already carved and asks only whether each reads clearly.
-- **pythonica = Python mechanics** -- a rule naming a Python construct (a comprehension, `match`, a context manager) is pythonica's; keep this skill language-agnostic.
+This skill shapes how a single body reads once its units exist: control flow, the naming of a *set* of identifiers, and the order and locality that let a reader follow it straight down. Out of scope: deleting code or a single misleading name (`code-hygiene`), comments (`comment-hygiene`), where a seam falls or how big a unit is (`code-structure`), formatting, and language-specific constructs.
 
 Every rule below is a recognizable **smell** (something a reader or author can actually spot) -> the **principle** it violates -> a **fix** direction. No line or nesting-depth count gates any rule; that false precision is what these qualitative smells replace.
 
@@ -44,15 +39,6 @@ Shrink the working set a reader must carry to understand one line.
 - **Parallel work in different shapes** -- SMELL: two operations doing parallel work wear different shapes -- one a declarative map/filter, its sibling a hand-rolled loop; one handler returns early, its twin sets a flag and falls through -- and the reader cannot tell whether the difference means anything. At codebase scale: new code adopts a different error style or layout than everything around it for no stated reason. PRINCIPLE: say the same thing the same way, and reserve variation to mark real difference -- so that when code looks different, it means something different. FIX: normalize parallel code to one shape and place symmetric operations (acquire/release) together; match the surrounding convention, or if the old way is wrong, change it everywhere and say so.
 - **An undifferentiated wall of statements** -- SMELL: a body runs validate, compute, format, and emit together with no break, so the reader cannot see where one thought ends and the next begins. Tell-tale patch: a `# ==== compute ====` banner doing the structural work a real seam should do. PRINCIPLE: sequential phases should be visible in the structure before the reader parses any single line. This is the shaping complement to hygiene: hygiene *deletes* the divider banner, this rule *supplies* the real seam the banner was faking. FIX: put a genuine seam between phases -- a blank line at least, an extracted named step when a chunk is itself a concept (not merely because the body is long).
 - **Behavior smeared up an inheritance chain (the yo-yo)** -- SMELL: to understand one leaf method you ping-pong up and down a class hierarchy -- a bit of behavior in the leaf, more in a middle base, a template hook two levels up -- so you must hold the whole chain live to know what one call does. PRINCIPLE: behavior spread across an inheritance chain inflates the reader's working set the same way scattered helpers do; a hierarchy earns its keep only when each level is a genuine, independently comprehensible abstraction, not a sliver unreadable without its ancestors. FIX: flatten or collapse levels that exist only to share a little code; prefer composition where inheritance was reused purely for reuse, so one case reads in one place. (Distinct from refused bequest in `code-structure` (Data and type modeling), which is contract *violation*; this is reading *cost*.)
-
-## Scope
-
-What this skill leaves to others, one reason each:
-
-- **Deleting anything -- OUT.** A restating comment is `comment-hygiene`'s; a dead branch or a name that lies or says nothing is `code-hygiene`'s; this skill only reshapes code that stays.
-- **Where a seam falls, how big a unit is -- OUT.** Decomposition, module depth, and the size-vs-depth resolution are `code-structure`'s. A guard clause here flattens nesting; it does not decide what to extract.
-- **Naming a single liability name -- OUT.** A name that lies (`get_*` that writes) or says nothing (`tmp`, `data`) is hygiene's rename-or-delete; this skill judges the consistency and scope-fit of the whole *set*.
-- **Formatting, whitespace, line length, alignment -- OUT.** Auto-formatter territory; legislating layout would smuggle in numeric thresholds. A genuine phase seam (a structural break, not a blank-line count) is the rule above.
 
 ## Sources
 
