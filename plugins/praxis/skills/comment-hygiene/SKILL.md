@@ -7,7 +7,7 @@ user-invocable: false
 
 # Comment Hygiene
 
-Comment truthfulness only. Out of scope: dead code, duplication, naming and faked implementations (`code-hygiene`), and the shape of the code (`code-structure`, `readable-code`).
+Comment truthfulness only. Out of scope: dead code, duplication, a single misleading or empty name and faked implementations (`code-hygiene`), and the shape of the code (`code-structure`, `readable-code`).
 
 A comment earns its place only by telling the reader something the **code cannot**. Sharp test: *could a competent reader recover this fact from the code (and the repo)? Yes -> delete; No -> maybe keep.* One fact survives that test despite being recoverable -- the sole exception, so bake it into the test: a **legal/provenance header** is recoverable from `LICENSE` yet kept inline by mandate (see EXEMPT). The **external-anchor WHY** looks like a second exception but isn't one: naming a constant recovers its *value*, never the spec/constraint that dictated it, so that rationale stays genuinely unrecoverable and keeps on the mainline (see KEEP).
 
