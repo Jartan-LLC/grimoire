@@ -89,5 +89,5 @@ pattern rather than uses it, and where the writer chose it on purpose.
 
 Return pasted text as the rewrite, with a short note of anything you cut that a reader might miss.
 When asked to make a file clearer, edit it in place and change prose only. Inside another task,
-return the final text only. When reviewing, judge the text by these rules and report findings; do
-not rewrite it.
+return the final text only. When reviewing, judge the text the change under review writes or makes
+false by these rules and report findings; do not rewrite it.

@@ -132,7 +132,7 @@ Shapes and punctuation applied everywhere, whether or not the meaning asks for t
 > A career can look promising and fail. A relationship can feel important and end. A skill can take years and remain useless. These decisions rarely explain themselves.
 
 **After:**
-> A career, a relationship or a skill can seem worth the years and still come to nothing; these decisions rarely explain themselves.
+> A career can look promising and fail; these decisions rarely explain themselves.
 
 ### 7. Repeated sentence openings
 
@@ -146,7 +146,7 @@ Shapes and punctuation applied everywhere, whether or not the meaning asks for t
 ### 8. Dashes as the universal connector
 
 **Rule:** In text you write, replace each em dash or en dash with a period, comma, colon, or parentheses, or rewrite the sentence. This includes spaced dashes and double hyphens (` -- `) used as dashes. Leave dashes and hyphens inside code blocks, inline code, commands, paths, and URLs alone. Exception: where the writer's sample or the project's style uses dashes (a pure-ASCII project may write ` -- `), match its rate instead.
-**Problem:** A dash lets the writer skip choosing how two clauses relate, so a model reaches for it everywhere. Many editors and journalists also use dashes; a text full of them is the tell.
+**Problem:** A dash lets the writer skip choosing how two clauses relate, so a model reaches for it everywhere. Many editors and journalists also use dashes, so in text you were handed or are reviewing, one dash is *weak alone*; a text full of them is the tell.
 **Before:**
 > The new policy -- announced without warning -- affects thousands of workers. The changes -- long overdue according to critics -- will take effect immediately.
 
