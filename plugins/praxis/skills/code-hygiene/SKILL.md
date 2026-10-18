@@ -7,7 +7,7 @@ user-invocable: false
 
 # Code Hygiene
 
-Don't leave -- or write -- code that lies, hides, or that git (or an existing solution) already owns. Every line is a permanent liability someone must read, test, and carry forward, so each must earn its place. This skill is language-agnostic and guides both authors and reviewers. Out of scope: shaping what stays (`code-structure`, `readable-code`), comment truthfulness (`comment-hygiene`), documentation prose (`plain-writing`) and language-specific pitfalls.
+Don't leave -- or write -- code that lies, hides, or that git (or an existing solution) already owns. Every line is a permanent liability someone must read, test, and carry forward, so each must earn its place. This skill is language-agnostic and guides both authors and reviewers. Use it with `code-structure` and `readable-code` for shaping the code that stays, `comment-hygiene` for comment truthfulness and `plain-writing` for documentation prose.
 
 ## Dead code & speculative generality
 

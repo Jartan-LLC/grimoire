@@ -7,7 +7,7 @@ user-invocable: false
 
 # Code Structure
 
-This skill shapes the units of code that should exist: decomposition, cohesion, coupling, interfaces, failure contracts, data invariants, and designing for change. Out of scope: deleting code (`code-hygiene`), comments (`comment-hygiene`), how a single body reads (`readable-code`), formatting, fail-fast assertions, error-message wording, names that encode a wrong type (`code-hygiene`), large-scale layering, and language-specific constructs.
+This skill shapes the units of code that should exist: decomposition, cohesion, coupling, interfaces, failure contracts, data invariants, and designing for change. Use it with `code-hygiene` for code to delete or rename, `comment-hygiene` for comments and `readable-code` for how a single body reads. This skill does not judge formatting, fail-fast assertions, error-message wording or large-scale layering, and gives principles, not a language's constructs.
 
 Read `code-hygiene` and `comment-hygiene` first: shaping code that should have been deleted is wasted work.
 
@@ -61,7 +61,7 @@ The interface is everything a caller must learn to use the module; keep it simpl
 
 ## Error and edge-case handling
 
-Failure is part of the interface. This family owns the *contract* -- which situations are errors at all, and how a failure reaches the caller. The mechanics (which exception type, `Result` versus `Option`, syntax) are language-specific and out of scope.
+Failure is part of the interface. This family owns the *contract* -- which situations are errors at all, and how a failure reaches the caller. The mechanics (which exception type, `Result` versus `Option`, syntax) follow the language's conventions.
 
 - **An error that could have been an ordinary outcome** -- SMELL: an interface raises or returns failure for a situation the semantics could absorb -- removing an already-absent key raises, a slice past the end throws instead of clamping, a lookup miss errors where an empty result would do -- and every caller sprouts the matching guard until the guarding outweighs the work. PRINCIPLE: every condition treated as an error is a new path each caller must handle; the best special case is the one the semantics make impossible. FIX: redefine the operation so the former error is an ordinary outcome (deleting an absent key is success; an over-long slice clamps; a miss returns empty). Broaden what counts as ordinary -- never swallow a genuine, unrecoverable fault.
 - **A failure you can forget to check** -- SMELL: a routine reports failure by returning a sentinel, status code, or null the caller must remember to inspect; forgetting compiles clean and passes review, then fails later far from the cause. PRINCIPLE: a condition that *is* a failure must be impossible to overlook -- separate the error channel from the return value so an unhandled error is loud, not silently dropped. FIX: raise it, or return an explicit result the caller cannot use without unwrapping, so ignoring the error takes a visible, deliberate act. The invariant is un-ignorability; the vehicle is a language choice. (When absence is an ordinary outcome, return the empty result -- that is the rule above, not this one.)
@@ -70,7 +70,7 @@ Failure is part of the interface. This family owns the *contract* -- which situa
 
 ## Data and type modeling
 
-Push invariants into the shape of the data so they cannot be forgotten. (How a language spells these -- sum types, value objects, newtypes -- is out of scope.)
+Push invariants into the shape of the data so they cannot be forgotten. (How a language spells these -- sum types, value objects, newtypes -- follows its conventions.)
 
 - **Primitive obsession / data clump** -- SMELL: a domain idea travels as raw primitives -- money as a bare float, a point as two `x`, `y` arguments, a date range as two strings -- and the same little cluster reappears signature after signature, re-validated at every site. PRINCIPLE: a recurring group of primitives, or a primitive carrying its own rules, is a missing type. FIX: introduce the type (`Money`, `DateRange`) and pass it whole, moving its guarding rules onto it. Wrap only when rules travel with the value; wrapping every bare primitive manufactures thin, empty wrappers.
 - **Illegal states are representable** -- SMELL: a record can hold combinations that cannot happen -- both an `error` and a `result` field populated at once, or a `status` that is any free-form string when only a fixed set is legal -- so every reader re-checks the invariant defensively. PRINCIPLE: model data so illegal states cannot be constructed; let the type carry the invariant instead of scattering runtime checks that can be forgotten. FIX: reshape so the impossible combination has no representation -- a variant for the either-or, a bounded type for the constraint. Model the invariants that actually bite, not every conceivable one.
