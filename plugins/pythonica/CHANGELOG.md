@@ -3,8 +3,7 @@
 ## 1.1.2
 
 - `python-api-docs` no longer points to praxis skills, which may not be
-  installed, and `python-patterns`, `python-anti-patterns` and `pydantic` drop
-  their "see the other skill" sections.
+  installed.
 
 ## 1.1.1
 
