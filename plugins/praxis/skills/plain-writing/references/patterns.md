@@ -3,8 +3,8 @@
 Adapted from humanizer 3.1.0 by Siqi Chen (MIT; see `../LICENSE`).
 
 The wording pass in `SKILL.md` reads this list after the content is settled. Each pattern is a
-habit that adds words without adding a fact. Fix it by stating the point directly; never drop,
-add a fact, drop one a reader needs, or reorder steps while doing so.
+habit that adds words without adding a fact. Fix it by stating the point directly; never add a
+fact, drop one a reader needs, or reorder steps while doing so.
 
 - Patterns 1-5 justify an edit on one sighting. A pattern marked *weak alone* needs other
   patterns in the same passage before you act.
@@ -32,7 +32,7 @@ These are the strongest and most frequent tells in current model prose. Act on o
 **Before (clipped tail):**
 > The options come from the selected item, no guessing.
 **After:**
-> The options come from the selected item without forcing the user to guess.
+> The options come from the selected item.
 
 ### 2. One-line closers and dramatic fragments
 
@@ -41,7 +41,7 @@ These are the strongest and most frequent tells in current model prose. Act on o
 **Before:**
 > Then AlphaEvolve arrived. It had no preference for symmetry. No aesthetic prior. No nostalgia for human taste. The old rules were gone.
 **After:**
-> AlphaEvolve had no preference for symmetry, no aesthetic prior and no taste for human-looking designs, and the old rules stopped applying.
+> AlphaEvolve had no preference for symmetry, no aesthetic prior and no nostalgia for human taste, and the old rules stopped applying.
 **Before (repeated closer):**
 > Caching cuts repeat work.
 >
@@ -62,7 +62,7 @@ These are the strongest and most frequent tells in current model prose. Act on o
 **Before:**
 > The real question is whether teams can adapt. At its core, what really matters is organizational readiness.
 **After:**
-> The question is whether teams can adapt, which depends on organizational readiness.
+> The question is whether teams can adapt; organizational readiness matters most.
 **Before (aphorism):**
 > Symmetry is the language of trust. Efficiency becomes a trap when teams forget the human layer.
 **After:**
@@ -164,7 +164,7 @@ The fact underneath is usually sound. Keep it and remove the dressing.
 **Before:**
 > Additionally, a distinctive feature of Somali cuisine is the incorporation of camel meat. An enduring testament to Italian colonial influence is the widespread adoption of pasta in the local culinary landscape, showcasing how these dishes have integrated into the traditional diet.
 **After:**
-> Somali cuisine also includes camel meat. Pasta, introduced during Italian colonization, is widely eaten.
+> Somali cuisine also includes camel meat. Pasta, a sign of Italian colonial influence, is widely eaten.
 
 ### 13. Inflated significance
 
@@ -190,7 +190,7 @@ The fact underneath is usually sound. Keep it and remove the dressing.
 **Before:**
 > He is associated with the Rajhans Orchestra, which he founded and conducts. The concerts were organised in connection with the celebrations of Pakistan's 50th anniversary.
 **After:**
-> He founded and conducts the Rajhans Orchestra. The concerts were part of the celebrations of Pakistan's 50th anniversary.
+> He founded and conducts the Rajhans Orchestra. The concerts were organised in connection with the celebrations of Pakistan's 50th anniversary.
 
 ### 15. Shallow -ing riders
 
@@ -217,7 +217,7 @@ The fact underneath is usually sound. Keep it and remove the dressing.
 **Before (unnamed authority):**
 > Due to its unique characteristics, the Haolai River is of interest to researchers and conservationists. Experts believe it plays a crucial role in the regional ecosystem.
 **After:**
-> Researchers and conservationists study the Haolai River for its unusual characteristics.
+> The Haolai River interests researchers and conservationists for its unusual characteristics.
 **Before (prestige list):**
 > Her views have been cited in The New York Times, BBC, Financial Times, and The Hindu. She maintains an active social media presence with over 500,000 followers.
 **After:**
