@@ -7,6 +7,7 @@ color: blue
 permissionMode: plan
 skills:
   - docs-patterns
+  - plain-writing
   - review-severity
 ---
 
@@ -39,7 +40,7 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 - Factually incorrect information -- the doc doesn't match what the code does
 - Code examples that won't run
 - Broken cross-references and dead external links -- internal, reference-style, or URLs to nonexistent targets (flag obviously-dead on read)
-- Bloated docs -- a 300-line doc that should be 100. Brevity is paramount
+- Bloat -- passages no reader needs, judged by `plain-writing`'s keep and cut lists; length alone is not a finding
 - Redundancy -- repeating information documented elsewhere instead of linking
 - Missing critical information that comparable docs include
 - Structure inconsistent with similar docs in the same category

@@ -7,13 +7,11 @@ user-invocable: false
 
 # Documentation Writing Patterns
 
-Before writing, **read 2-3 existing docs in the same category** to match their tone and structure.
+Before writing, **load `praxis:plain-writing`** (what to keep and cut, plain voice, the final wording pass) and **read 2-3 existing docs in the same category** to match their tone and structure.
 
 ## Writing Style
 
-**Tone:** Technical but accessible. Imperative for instructions ("Use X..."), declarative for specifications ("The User model has these fields..."). No marketing language.
-
-**Brevity is paramount.** A doc that could be 100 lines should not be 300. Every paragraph must earn its place. If a table communicates it better than prose, use a table. If a link to another doc covers it, don't restate it. Be precise, not exhaustive.
+Imperative for instructions ("Use X..."), declarative for specifications ("The User model has these fields..."). If a table communicates it better than prose, use a table.
 
 ## Doc Types
 

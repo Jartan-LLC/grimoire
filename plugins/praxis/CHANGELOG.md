@@ -3,6 +3,8 @@
 ## 1.8.0
 
 - New `plain-writing` skill for prose that informs: docs, READMEs, explanation pages, answers, emails, release notes, and requests to make text clearer. Your agent decides what a reader needs before it writes, keeps warnings, conditions, exact commands and prerequisites, cuts filler and wordiness, writes in a plain voice without first-person asides or claims your sources do not support, and finishes with one pass over the wording. It does not apply to commit messages, PR text or code comments.
+- `docs-patterns` loads `plain-writing` before writing a document, and so does `implement-issue`'s documentation step. The "brevity is paramount" rule is gone; `plain-writing`'s keep and cut lists replace it.
+- `doc-reviewer` judges bloat by those lists and no longer flags a document for its length alone.
 
 ## 1.7.0
 
