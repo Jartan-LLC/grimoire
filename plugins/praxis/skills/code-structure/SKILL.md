@@ -7,7 +7,7 @@ user-invocable: false
 
 # Code Structure
 
-This skill shapes the units of code that should exist: decomposition, coupling, interfaces, failure contracts, data invariants. Out of scope: deleting code (`code-hygiene`), comments (`comment-hygiene`), how a single body reads (`readable-code`), formatting, fail-fast assertions and error-message wording, large-scale layering, and language-specific constructs.
+This skill shapes the units of code that should exist: decomposition, cohesion, coupling, interfaces, failure contracts, data invariants, and designing for change. Out of scope: deleting code (`code-hygiene`), comments (`comment-hygiene`), how a single body reads (`readable-code`), formatting, fail-fast assertions and error-message wording, large-scale layering, and language-specific constructs.
 
 Read `code-hygiene` and `comment-hygiene` first: shaping code that should have been deleted is wasted work. Identical *text* in two places is `code-hygiene`'s duplication rule; the same *decision* in two unlike forms is this skill's (DRY-as-knowledge, below).
 
