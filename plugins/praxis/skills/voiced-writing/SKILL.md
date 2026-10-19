@@ -14,19 +14,20 @@ change, unless you were asked to rework the piece.
 ## Find the voice
 
 Take the voice from a writing sample when there is one: posts or pages of its kind already on the
-site, a sample the writer gives, which wins over the site's posts, or, when you add to an existing
-piece, the piece itself. Read two or three before you write, and match their sentence length, word
-choice, punctuation, openings, transitions, and use of headings, lists and bold. The sample
-overrides the wording patterns and the shape rules below, their rules on dashes, quotes and heading
-case included. It sets the voice only: facts come from the notes and brief for this piece, and from
-the piece itself when you add to it.
+site, or a sample the writer gives, which wins over the site's posts. Read two or three before you
+write, and match their sentence length, word choice, punctuation, openings, transitions, and use of
+headings, lists and bold. The sample overrides the wording patterns and the shape rules below, their
+rules on dashes, quotes and heading case included. It sets the voice only: facts come from your
+inputs for this piece (the notes, the brief, and the piece you rework or add to), never from the
+sample.
 
 A piece you rework or review is not its own sample: keep its voice, and judge its patterns, and
 outside site copy its shape, against the site's other posts or pages of its kind or the writer's
-sample, or by the rules alone when there is none. Text added to an existing piece, whether you write
-it or review it, takes the rest of that piece as its sample.
+sample, or by the rules alone when there is none. Text you add to or change in part of an existing
+piece, without reworking the whole, takes the rest of that piece as its sample, ahead of any other,
+whether you write it or review it.
 
-Without a sample, take the voice from the kind of text:
+Without a sample, a new piece takes its voice from the kind of text:
 
 - A blog post, essay or personal piece keeps the opinions, uncertainty, mixed feelings, humour and
   asides the writer gives, and uses contractions where the writer would. A bio or personal statement
