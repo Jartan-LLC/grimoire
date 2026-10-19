@@ -42,14 +42,17 @@ parses (trailers, frontmatter, a tool's marked blocks) are the project's, except
    absolute path outside the repository, no path `git check-ignore` matches, and no session link
    (a claude.ai session URL) in any shared text.
 3. A restatement of what the reader has open: a hand-written list of changed files whose entries
-   add nothing to the name, a hand-written diffstat, a bare pass or fail total for a run CI reports
-   on the same commit, the issue body restated under itself, backlinks the forge shows.
+   add nothing to the name, a hand-written diffstat, a pass or fail count pasted from a run CI
+   reports on the same commit, the issue body restated under itself, backlinks the forge shows. A
+   result stated in words ("make check passes", what a local run showed) is verification, not a
+   count.
 4. In a document, comment or docstring, a hand-maintained copy of a value, count, index or listing
    the code or tree declares. A commit message or PR description describes one change and holds no
    such copy, and a design the code must follow is the source, not a copy. A generated, drift-checked copy, an entry that adds what the code does not say, and a measurement
    stated with its conditions are not copies.
 5. In a repository made from a template (not the template itself), text addressed to the adopter
-   after adoption.
+   after adoption. Treat a repository as made from a template only when it says so or still carries
+   the template's adoption markers; never on a guess.
 6. Exploit or reproduction detail of a flaw whose fix is not released, in public text, unless the
    text links the released fix or a public advisory or the repository is private. Describe the fix
    neutrally; the detail goes to the private channel the project's SECURITY.md names.
@@ -75,9 +78,9 @@ For each passage a change writes or makes false:
 4. For a departure from a default, name the default and offer the project a sentence it could add
    to its rules to keep its practice; do not raise the same finding again in a later round.
 
-Tier findings with `review-severity`: rule 6 is Critical; rules 1-5 are Important; information
-outside its default home is Minor, or Important when it misleads a reader or leaves them without
-something they need.
+Tier findings with `review-severity`: rule 6 is Critical; rules 1 and 2 are Important; rules 3-5 are
+Minor; information outside its default home is Minor, or Important when it misleads a reader or
+leaves them without something they need.
 
 When asked where something should go while writing, check the project's rules, then give the home
 from `references/homes.md` and any pointer the other homes should carry.
