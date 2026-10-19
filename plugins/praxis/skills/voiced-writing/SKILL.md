@@ -1,7 +1,7 @@
 ---
 name: voiced-writing
-description: Writing in a person's or a project's voice -- blog posts, essays, site copy and personal writing: voice from a sample or the kind of text, inventing nothing, keeping what carries the voice, and a final wording pass.
-when_to_use: Writing, editing or reviewing a blog post, an essay or opinion piece, personal writing such as a bio, a personal statement or a letter (one sent by email included), or site copy such as a landing page, an about page or a project's home page. Not for docs, READMEs, explanation pages, answers to questions, emails, or release notes, including a release announcement posted as a blog post (plain-writing), or commit messages and PR text (gitwise:commit-pr-writing).
+description: Writing in a person's or a project's voice for blog posts, essays, site copy and personal writing -- voice from a sample or the kind of text, inventing nothing, keeping what carries the voice, and a final wording pass.
+when_to_use: Writing, editing or reviewing a blog post, an essay or opinion piece, personal writing such as a bio, a personal statement or a personal letter (one sent by email included), or site copy such as a landing page, an about page or a project's home page. Not for docs, a docs site's home page included, READMEs, explanation pages, answers to questions, emails, or release notes, including a release announcement posted as a blog post (plain-writing), or commit messages and PR text (gitwise:commit-pr-writing).
 user-invocable: false
 ---
 
@@ -13,24 +13,25 @@ change, unless you were asked to rework the piece.
 
 ## Find the voice
 
-Take the voice from a writing sample when there is one: posts or pages already on the site, a sample
-the writer gives, or, when you add to an existing piece, the piece itself. Read two or three before
-you write, and match their sentence length, word choice, punctuation, openings, transitions, and use
-of headings, lists and bold. The sample overrides the wording patterns and the shape rules below,
-their rules on dashes, quotes and heading case included. It sets the voice only: facts come from the
-notes and brief for this piece.
+Take the voice from a writing sample when there is one: posts or pages of its kind already on the
+site, a sample the writer gives, which wins over the site's posts, or, when you add to an existing
+piece, the piece itself. Read two or three before you write, and match their sentence length, word
+choice, punctuation, openings, transitions, and use of headings, lists and bold. The sample
+overrides the wording patterns and the shape rules below, their rules on dashes, quotes and heading
+case included. It sets the voice only: facts come from the notes and brief for this piece, and from
+the piece itself when you add to it.
 
-A piece you rework, or a new piece under review, is not its own sample: keep its voice, and judge
-its patterns, and a post's shape, against the site's other posts or pages of its kind or the
-writer's sample, or by the rules alone when there is none. Text added to an existing piece, whether
-you write it or review it, takes the rest of that piece as its sample.
+A piece you rework or review is not its own sample: keep its voice, and judge its patterns, and
+outside site copy its shape, against the site's other posts or pages of its kind or the writer's
+sample, or by the rules alone when there is none. Text added to an existing piece, whether you write
+it or review it, takes the rest of that piece as its sample.
 
 Without a sample, take the voice from the kind of text:
 
 - A blog post, essay or personal piece keeps the opinions, uncertainty, mixed feelings, humour and
   asides the writer gives, and uses contractions where the writer would. A bio or personal statement
-  is in the person the brief asks for or the notes are written in; a bio with neither is in the
-  third person.
+  is in the person the brief asks for or the notes are written in; with neither, a bio is in the
+  third person and a personal statement in the first.
 - Site copy speaks for the project to a visitor: what it is and does, in concrete terms, as "we",
   "I" or the project's name, whichever the brief asks for or the notes are written in, and the
   project's name when neither says.
@@ -48,7 +49,8 @@ sentence.
 - specific, unusual details: an address, an odd quote, a name;
 - quotes as quotes, never recast as reported speech;
 - the writer's own lines and punchlines, word for word; a quote the notes only paraphrase is
-  reported as that person's view, and a joke whose wording the notes do not give is left out;
+  reported as what that person said, and a joke whose wording the notes do not give, a quip
+  included, is left out;
 - hedges as the writer gave them: a claim they hedged never becomes certain;
 - mixed feelings and tension the writer leaves unresolved;
 - dated, era-bound references;
@@ -84,6 +86,7 @@ it does not make text sound like a person, so never count patterns as a score.
 Return a new piece, or pasted text as the rewrite, with a short note of anything you cut or left out
 that the writer might miss. When asked to rework a file, edit it in place and change prose only:
 code, commands, links, front matter and data stay as they are. Inside another task, return the final
-text only. When reviewing, judge the text the change under review writes or makes false by these
-rules, the patterns included, and report findings; do not rewrite it. Judge invention against the
-inputs when you have them, and otherwise flag only claims you can check.
+text only. When reviewing, judge the text the change under review writes or makes false, or the
+whole piece when you are asked to review it, by these rules, the patterns included, and report
+findings; do not rewrite it. Judge invention against the inputs when you have them, and otherwise
+flag only claims you can check.

@@ -1,7 +1,7 @@
 ---
 name: plain-writing
 description: Plain, accurate prose that informs -- what to keep, what to cut, plain voice, and a final wording pass that removes filler and AI writing patterns.
-when_to_use: Load together with docs-patterns whenever you write, edit or review a document. Writing, editing or reviewing prose meant to inform -- docs and doc pages, READMEs, explanation pages, answers to questions, emails, release notes (a release announcement posted as a blog post included), the prose of a docstring or code comment -- or asked to make text clearer, simpler or less wordy. Not for blog posts, essays, site copy or personal writing, a personal letter sent by email included (voiced-writing), commit messages or PR text (gitwise:commit-pr-writing), or deciding whether a code comment should exist (comment-hygiene); a docstring's or comment's prose is in scope.
+when_to_use: Load together with docs-patterns whenever you write, edit or review a document. Writing, editing or reviewing prose meant to inform -- docs and doc pages (a docs site's home page included), READMEs, explanation pages, answers to questions, emails, release notes (a release announcement posted as a blog post included), the prose of a docstring or code comment -- or asked to make text clearer, simpler or less wordy. Not for blog posts, essays, site copy or personal writing, a personal letter sent by email included (voiced-writing), commit messages or PR text (gitwise:commit-pr-writing), or deciding whether a code comment should exist (comment-hygiene); a docstring's or comment's prose is in scope.
 user-invocable: false
 ---
 
