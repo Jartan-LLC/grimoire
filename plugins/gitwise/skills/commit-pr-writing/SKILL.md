@@ -36,7 +36,7 @@ The PR description:
 - One line per flag a careful reviewer could miss. Mark each decision review drove, with its reason: "Changed in review: ..., because ...", "Declined from review: ..., because ...". Leave out an adopted suggestion that changed no design or behaviour; a declined one keeps its line. Name any PR you took code from.
 - Say where to start reading: the file, function or commit subject holding the core logic.
 - State verification as results: what ran, what it showed, what was not run. No checkboxes or pasted output.
-- Do not retell the commit messages or the diff.
+- Do not retell the commit messages or the diff beyond that opening and the flags with their reasons.
 - End with what the merger or contributors must do, or that merging is all.
 
 To update a PR title or description, start from the current text, keep what a person added, and make both hold for the whole change as of the last commit.
