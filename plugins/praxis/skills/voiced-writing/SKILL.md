@@ -43,16 +43,17 @@ Without a sample, a new piece takes its voice from the kind of text:
 Voice is how you tell what you were given, never new material. Add no fact, name, number, date,
 quote, link, relationship or role, sequence, cause, experience, practice, advice, lesson, opinion,
 feeling or verdict that your inputs do not give; one word counts ("another team" when the notes say
-"a team"). When a sentence needs a detail you do not have, ask the writer for it or write a simpler
-sentence.
+"a team"). A view or feeling the notes give is told the way the writer would say it ("I'm glad", "I
+think"); only ones they do not give are barred. When a sentence needs a detail you do not have, ask
+the writer for it or write a simpler sentence.
 
 ## Keep what carries the voice
 
 - specific, unusual details: an address, an odd quote, a name;
 - quotes as quotes, never recast as reported speech;
-- the writer's own lines and punchlines, word for word; a quote the notes only paraphrase is
-  reported as what that person said, and a joke whose wording the notes do not give is reported as
-  what was joked, never rebuilt or explained as a punchline;
+- the writer's own lines and punchlines, word for word; someone else's quote that the notes only
+  paraphrase is reported as what that person said; the writer's own joke may be told as a joke in
+  their voice from what the notes give, adding no fact and never explained;
 - hedges as the writer gave them: a claim they hedged never becomes certain;
 - mixed feelings and tension the writer leaves unresolved;
 - dated, era-bound references;
