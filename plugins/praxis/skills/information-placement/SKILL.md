@@ -33,7 +33,9 @@ parses (trailers, frontmatter, a tool's marked blocks) are the project's, except
    removed", "fails on main". Text states what is true after the change; a commit message, a
    changelog entry or a PR description states change relative to the state before it ("failed
    before this change") or to a version. A "now" that says what the change made true is fine, and
-   so is a merge condition or a stacked PR stated as a fact ("Requires #52."). Review replies and issue and plan
+   so is a merge condition or a stacked PR stated as a fact ("Requires #52."). A PR description the
+   merge setting does not land is read before the merge and may compare against the base branch
+   ("262 MB on main"). Review replies and issue and plan
    comments are read in the moment and may narrate.
 2. A claim that needs its links or ids to say what it claims: strip them and the sentence must
    still say it. A line that only relates the change to a reference ("Refs #159.") passes. No
