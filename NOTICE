@@ -3,5 +3,6 @@ This repository is licensed under the MIT License in LICENSE, with these excepti
 - plugins/praxis/skills/plain-writing/references/patterns.md is licensed CC BY-SA 4.0
   (https://creativecommons.org/licenses/by-sa/4.0/) as an adaptation of Wikipedia's
   "Signs of AI writing"; see plugins/praxis/README.md.
-- Parts of plugins/praxis/skills/plain-writing/ are adapted from humanizer by Siqi Chen, under
-  the MIT notice in that directory's LICENSE-humanizer, which must ship with them.
+- Parts of plugins/praxis/skills/plain-writing/ and plugins/praxis/skills/voiced-writing/ are
+  adapted from humanizer by Siqi Chen, under the MIT notice in each directory's
+  LICENSE-humanizer, which must ship with them.
