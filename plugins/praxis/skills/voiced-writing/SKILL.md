@@ -13,20 +13,25 @@ or change, unless you were asked to rework the piece.
 
 ## Find the voice
 
-Take the voice from a writing sample when there is one: posts or pages already on the site, the
-file you are editing, or a sample the writer gives. Read two or three before you write, and match
-their sentence length, word choice, punctuation, openings, transitions, and use of headings, lists
-and bold. The sample overrides the wording patterns and the shape rules below, their rules on
-dashes, quotes and heading case included. When you rework a piece, its voice is the one to keep,
-but its patterns are what the rework is for: fix them unless the site's other posts or the
-writer's sample use them too.
+Take the voice from a writing sample when there is one: posts or pages already on the site, a
+sample the writer gives, or, when you add to an existing piece, the piece itself. Read two or three
+before you write, and match their sentence length, word choice, punctuation, openings,
+transitions, and use of headings, lists and bold. The sample overrides the wording patterns and the
+shape rules below, their rules on dashes, quotes and heading case included. It sets the voice only:
+facts come from the notes and brief for this piece.
+
+A piece you rework or review is not its own sample. Keep its voice, and judge its patterns and its
+shape against the site's other posts or the writer's sample, or by the rules alone when there is
+none.
 
 Without a sample, take the voice from the kind of text:
 
 - A blog post, essay or personal piece keeps the opinions, uncertainty, mixed feelings, humour
-  and asides the writer gives, and uses contractions where the writer would.
-- Site copy speaks for the project to a visitor: what it is and does, in concrete terms, in the
-  person the brief names (ask when it names none).
+  and asides the writer gives, and uses contractions where the writer would. A bio or personal
+  statement is in the person the brief or notes use; a bio with neither is in the third person.
+- Site copy speaks for the project to a visitor: what it is and does, in concrete terms, as "we",
+  "I" or the project's name, whichever the brief or notes use, and the project's name when they use
+  none.
 
 ## Invent nothing
 
@@ -40,8 +45,8 @@ write a simpler sentence.
 
 - specific, unusual details: an address, an odd quote, a name;
 - quotes as quotes, never recast as reported speech;
-- the writer's own lines and punchlines, word for word; when the notes only paraphrase a quote or
-  a joke, tell it in your own words or leave it out, never rebuild its wording;
+- the writer's own lines and punchlines, word for word; a quote the notes only paraphrase is
+  reported as that person's view, and a joke whose wording the notes do not give is left out;
 - hedges as the writer gave them: a claim they hedged never becomes certain;
 - mixed feelings and tension the writer leaves unresolved;
 - dated, era-bound references;
@@ -72,11 +77,11 @@ person, so never count patterns as a score.
 - Nothing was added that your inputs do not support.
 - Nothing the writer gave that a reader needs is gone.
 - Every hedge is still a hedge.
-- Read aloud, it sounds like the writer, not like a summary of them.
+- Read aloud, it sounds like the writer, not like a generic summary of them.
 
 Return pasted text as the rewrite, with a short note of anything you cut that the writer might
 miss. When asked to rework a file, edit it in place and change prose only: code, commands, links,
 front matter and data stay as they are. Inside another task, return the final text only. When
-reviewing, judge the text by these rules, the patterns included, and report findings; do not
-rewrite it. Judge invention against the inputs when you have them, and otherwise flag only claims
-you can check.
+reviewing, judge the text the change under review writes or makes false by these rules, the
+patterns included, and report findings; do not rewrite it. Judge invention against the inputs when
+you have them, and otherwise flag only claims you can check.

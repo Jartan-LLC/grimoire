@@ -9,8 +9,9 @@ directly; never add a fact, drop one a reader needs, or reorder steps while doin
   readers scan for, tables, code, commands, paths and link targets. Pattern 19 turns a labeled
   list into prose only when each label repeats the first words of its item.
 - The project's own style rules override any pattern they speak to. A writing sample overrides the
-  patterns that the skill you are applying says it does; an edited file's dashes, quotes and
-  heading case override pattern 8, pattern 21 and pattern 20's heading case.
+  patterns that the skill you are applying names; where that skill makes an edited file the sample
+  for its dashes, quotes and heading case, they override pattern 8, pattern 21 and pattern 20's
+  heading case.
 
 ## A. Staging instead of stating
 
@@ -138,7 +139,7 @@ Shapes and punctuation applied everywhere, whether or not the meaning asks for t
 
 ### 8. Dashes as the universal connector
 
-**Rule:** In text you write, replace each em dash or en dash with a period, comma, colon, or parentheses, or rewrite the sentence. This includes spaced dashes and double hyphens (` -- `) used as dashes. Leave dashes and hyphens inside code blocks, inline code, commands, paths, and URLs alone. Exception: where the edited file or the project's style uses dashes (a pure-ASCII project may write ` -- `), match its rate instead.
+**Rule:** In text you write, replace each em dash or en dash with a period, comma, colon, or parentheses, or rewrite the sentence. This includes spaced dashes and double hyphens (` -- `) used as dashes. Leave dashes and hyphens inside code blocks, inline code, commands, paths, and URLs alone. Exception: where the writing sample the skill you are applying names, or the project's style, uses dashes (a pure-ASCII project may write ` -- `), match its rate instead.
 **Problem:** A dash lets the writer skip choosing how two clauses relate, so a model reaches for it everywhere. Many editors and journalists also use dashes, so in text you were handed or are reviewing, one dash is *weak alone*; a text full of them is the tell.
 **Before:**
 > The new policy -- announced without warning -- affects thousands of workers. The changes -- long overdue according to critics -- will take effect immediately.
