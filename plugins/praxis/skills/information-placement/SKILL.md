@@ -46,7 +46,7 @@ parses (trailers, frontmatter, a tool's marked blocks) are the project's, except
    on the same commit, the issue body restated under itself, backlinks the forge shows.
 4. In a document, comment or docstring, a hand-maintained copy of a value, count, index or listing
    the code or tree declares. A commit message or PR description describes one change and holds no
-   such copy. A generated, drift-checked copy, an entry that adds what the code does not say, and a measurement
+   such copy, and a design the code must follow is the source, not a copy. A generated, drift-checked copy, an entry that adds what the code does not say, and a measurement
    stated with its conditions are not copies.
 5. In a repository made from a template (not the template itself), text addressed to the adopter
    after adoption.
@@ -64,7 +64,10 @@ For each passage a change writes or makes false:
 2. Flag a passage outside its home, a fact its home lacks that its reader needs, and anything the
    rules above exclude. Say where the information goes instead, or that it goes nowhere. Before
    flagging a home, name the reader who would act wrongly, stop for a missing fact, or be misled
-   because of where the text sits; if you cannot, raise nothing.
+   because of where the text sits; if you cannot, raise nothing. The PR description is the home of
+   what only the reviewer and the merger need: the intent, flags, verification and what was not run,
+   open questions for the review. That it does not land is no reason to move these into a commit
+   message; only what a later reader needs belongs there.
 3. Raise nothing where a project rule decides, and never flag text for following one. If a project
    rule asks for text the rules above exclude, report the breach addressed to that rule. If the
    change edits a project rule, judge by the rule at the base branch and name the policy change.
