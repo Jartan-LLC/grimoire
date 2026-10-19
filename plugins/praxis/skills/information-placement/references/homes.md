@@ -15,7 +15,7 @@ fallback the row gives; never create a document type the project has not chosen 
 | Reference facts: options, defaults, environment variables, messages and what to do about them | the source the tool reads or prints (`--help`, a schema, generated reference), else a docs reference page | pages link that source | a hand copy of a generated fact; history in a table cell; one fact listed twice |
 | How it works, as far as a user needs it | a docs explanation page; a README section when there are no user docs | one README line | README "implementation details" that change nothing a user does |
 | Limits: what it does not do or defend against, by decision | where the user decides or meets it: a README caveat, a limitations page, the docstring at the call | a changelog entry when a release changes one; a one-line PR flag | only in a PR description |
-| What a call means beyond its signature: edge cases, failure, call order | the symbol's docstring | reference generated from it | types or defaults restated where the signature is annotated (unless the project's docstring style requires them); version-tied plans; history; maintainer rationale on a rendered surface |
+| What a call means beyond its signature: edge cases, failure, call order | the symbol's docstring | reference generated from it | types or defaults restated where the signature is annotated (unless the project's docstring style requires them); an undecided plan (a decided deprecation or removal version is fine); history; maintainer rationale on a rendered surface |
 
 ## Change records
 
@@ -25,7 +25,7 @@ fallback the row gives; never create a document type the project has not chosen 
 | What a consumer or operator must do to upgrade | the changelog entry for the version that needs it | a docs migration page when long; the release notes | only in the PR description or commit message |
 | A security fix, after its release | the changelog's security entry; the advisory | the release notes | anything before the release (see the vulnerability row) |
 | The change, in one line | the PR title, which becomes the squash commit's subject; under rebase or merge commits, each commit's subject | | "address review", "round 2", two changes joined by "and", branch names |
-| Why the change was made: the problem, the cause, the approach over named alternatives, accepted costs, why a dependency was added, versions verified against | the commit message | the PR description gives the intent and points to it; a document carries at most a one-clause reason that changes what its reader does | a second account in the PR description; the changelog; code comments, except a reason an editor at the line needs |
+| Why the change was made: the problem, the cause, the approach over named alternatives, accepted costs, why a dependency was added, versions verified against | the commit message | the PR description gives the intent and the why in a sentence or two; a document carries at most a one-clause reason that changes what its reader does | the changelog; code comments, except a reason an editor at the line needs |
 | A decision with its alternatives and evidence | the commit message of the deciding change, or the project's decision record | the issue keeps the discussion; a rule that follows from it points to it | README, CONTRIBUTING or RELEASING bodies |
 | Something contributors must do once after pulling (rebuild the dev container) | the first paragraph of the commit message that makes the change, with no breaking mark | a one-line PR flag; CONTRIBUTING when it recurs | the changelog; the PR description as its only home |
 | Authorship, co-authors, sign-off | trailers on the commit message | the project's AI-contribution policy in CONTRIBUTING | prose bylines in files; persona or agent names in public text |
@@ -34,7 +34,7 @@ fallback the row gives; never create a document type the project has not chosen 
 
 | Information | Home | Elsewhere, at most | Never |
 |---|---|---|---|
-| Intent, and flags for what the diff alone would let a reviewer misjudge | the PR description | | file inventories; restated commit messages; process narration; raw tool output; template skeletons |
+| Intent, and flags for what the diff alone would let a reviewer misjudge | the PR description | | file inventories; a retelling of the commit messages beyond that sentence or two; process narration; raw tool output; template skeletons |
 | Verification: what ran and what it showed, what was not run | the PR description; the commit message when there is no PR | the commit message keeps the versions verified against | test docstrings; docs; raw output (link the run); totals CI already shows |
 | Where to start reading | the PR description; a PR comment where the PR description becomes the squash commit's message | | |
 | Merge conditions and what merging sets off | the PR description, as facts that stay true ("Requires #52.", "Merging publishes 0.3.0.") | RELEASING holds the standing sequence | merge-status narration ("not merging yet") |

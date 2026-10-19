@@ -8,7 +8,9 @@ user-invocable: false
 # Information Placement
 
 Each piece of information has a reader and one home that reader opens when they need it; other
-homes carry at most a pointer or a one-line flag. `references/homes.md` in this skill's directory
+homes carry at most a pointer or a one-line flag. A short account told for another reader in that
+reader's own home, such as the PR description's intent or a changelog line, is not a second copy.
+`references/homes.md` in this skill's directory
 lists the default home for each kind of information. What the text in a home says is for that
 home's skill: `gitwise:commit-pr-writing` for commit messages and PR text, `docs-patterns` for
 documents, `comment-hygiene` for code comments and docstrings.
@@ -31,7 +33,7 @@ parses (trailers, frontmatter, a tool's marked blocks) are the project's, except
    removed", "fails on main". Text states what is true after the change; a commit message, a
    changelog entry or a PR description states change relative to the state before it ("failed
    before this change") or to a version. A "now" that says what the change made true is fine, and
-   so is a merge condition stated as a fact ("Requires #52."). Review replies and issue and plan
+   so is a merge condition or a stacked PR stated as a fact ("Requires #52."). Review replies and issue and plan
    comments are read in the moment and may narrate.
 2. A claim that needs its links or ids to say what it claims: strip them and the sentence must
    still say it. A line that only relates the change to a reference ("Refs #159.") passes. No
@@ -40,10 +42,12 @@ parses (trailers, frontmatter, a tool's marked blocks) are the project's, except
 3. A restatement of what the reader has open: a hand-written list of changed files whose entries
    add nothing to the name, a hand-written diffstat, a bare pass or fail total for a run CI reports
    on the same commit, the issue body restated under itself, backlinks the forge shows.
-4. A hand-maintained copy of a value, count, index or listing the code or tree declares. A
-   generated, drift-checked copy, an entry that adds what the code does not say, and a measurement
+4. In a document, comment or docstring, a hand-maintained copy of a value, count, index or listing
+   the code or tree declares. A commit message or PR description describes one change and holds no
+   such copy. A generated, drift-checked copy, an entry that adds what the code does not say, and a measurement
    stated with its conditions are not copies.
-5. In a repository made from a template, text addressed to the adopter after adoption.
+5. In a repository made from a template (not the template itself), text addressed to the adopter
+   after adoption.
 6. Exploit or reproduction detail of a flaw whose fix is not released, in public text, unless the
    text links the released fix or a public advisory or the repository is private. Describe the fix
    neutrally; the detail goes to the private channel the project's SECURITY.md names.
@@ -56,7 +60,9 @@ For each passage a change writes or makes false:
    commit message" there as the text the merge setting lands, which
    `gitwise:commit-pr-writing` explains.
 2. Flag a passage outside its home, a fact its home lacks that its reader needs, and anything the
-   rules above exclude. Say where the information goes instead, or that it goes nowhere.
+   rules above exclude. Say where the information goes instead, or that it goes nowhere. Before
+   flagging a home, name the reader who would act wrongly, stop for a missing fact, or be misled
+   because of where the text sits; if you cannot, raise nothing.
 3. Raise nothing where a project rule decides, and never flag text for following one. If a project
    rule asks for text the rules above exclude, report the breach addressed to that rule. If the
    change edits a project rule, judge by the rule at the base branch and name the policy change.
