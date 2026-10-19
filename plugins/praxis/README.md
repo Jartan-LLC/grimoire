@@ -63,6 +63,7 @@ codex plugin add gitwise@grimoire
 - **readable-code** -- local clarity: control-flow shape, naming for the reader, reading order and working set
 - **review-severity** -- Critical/Important/Minor by consequence-if-shipped
 - **testing-patterns** -- integration tests, fixture composition, canary markers
+- **voiced-writing** -- writing in a person's or a project's voice: blog posts, essays, site copy, personal writing
 
 ### Hooks
 
@@ -98,7 +99,7 @@ session you may want a higher `COMPACT_CONTEXT_THRESHOLD`.
 
 ## Credits
 
-- [humanizer](https://github.com/blader/humanizer) by Siqi Chen -- `plain-writing`'s wording patterns and parts of its SKILL.md (MIT; `skills/plain-writing/LICENSE-humanizer`)
+- [humanizer](https://github.com/blader/humanizer) by Siqi Chen -- `plain-writing`'s wording patterns and parts of its SKILL.md, and parts of `voiced-writing`'s SKILL.md (MIT; `LICENSE-humanizer` in each skill's directory)
 - Wikipedia's [Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) ([CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)) -- the patterns and several of their examples
 
 ## License
