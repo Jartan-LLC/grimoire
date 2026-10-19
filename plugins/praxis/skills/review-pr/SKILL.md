@@ -17,6 +17,7 @@ Determine the PR number from the user's request, which may carry context beyond 
 ```bash
 gh pr view <pr-number>
 gh pr diff <pr-number>
+gh pr view <pr-number> --json title,body,commits
 ```
 
 ### 2. Categorize and Review
@@ -28,7 +29,7 @@ Launch relevant reviewer agents based on changed files:
 - Documentation changes, or code that changes public behavior -> `doc-reviewer`
 - CI/test changes -> `test-reviewer`
 - Non-trivial code changes -> `structure-reviewer`
-- All changes -> `general-reviewer`
+- All changes -> `general-reviewer`, given the PR title, the PR description and the commit messages
 
 ### 3. Verify Documentation
 
