@@ -6,7 +6,7 @@
 # Only tools installed by a workflow or a Makefile recipe belong here. Anything
 # the project itself declares stays in its own manifest.
 
-uv==0.13.0
+uv==0.13.4
 pre-commit==4.7.0
 pyright==1.1.414
 pytest==9.1.1
