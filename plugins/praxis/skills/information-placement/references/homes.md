@@ -27,7 +27,7 @@ fallback the row gives; never create a document type the project has not chosen 
 | The change, in one line | the PR title, which becomes the squash commit's subject; under rebase or merge commits, each commit's subject | | "address review", "round 2", two changes joined by "and", branch names |
 | Why the change was made: the problem, the cause, the approach over named alternatives, accepted costs, why a dependency was added, versions verified against | the commit message | the PR description gives the intent and the why in a sentence or two; a document carries at most a one-clause reason that changes what its reader does | the changelog; code comments, except a reason an editor at the line needs |
 | A decision with its alternatives and evidence | the commit message of the deciding change, or the project's decision record | the issue keeps the discussion; a rule that follows from it points to it | README, CONTRIBUTING or RELEASING bodies |
-| Something contributors must do once after pulling (rebuild the dev container) | the first paragraph of the commit message that makes the change, with no breaking mark | a one-line PR flag; CONTRIBUTING when it recurs | the changelog; the PR description as its only home |
+| Something contributors must do once after pulling (rebuild the dev container) | the first paragraph of the commit message that makes the change, with no breaking mark; under a squash merge it stays there, wherever that message falls in the squash | a one-line PR flag; CONTRIBUTING when it recurs | the changelog; the PR description as its only home |
 | Authorship, co-authors, sign-off | trailers on the commit message | the project's AI-contribution policy in CONTRIBUTING | prose bylines in files; persona or agent names in public text |
 
 ## For the reviewer and the merger
@@ -35,7 +35,7 @@ fallback the row gives; never create a document type the project has not chosen 
 | Information | Home | Elsewhere, at most | Never |
 |---|---|---|---|
 | Intent, and flags for what the diff alone would let a reviewer misjudge | the PR description | | file inventories; a retelling of the commit messages beyond that sentence or two; process narration; raw tool output; template skeletons |
-| Verification: what ran and what it showed, what was not run | the PR description; the commit message when there is no PR | the commit message keeps the versions verified against | test docstrings; docs; raw output (link the run); totals CI already shows |
+| Verification: what ran and what it showed, what was not run | the PR description; the commit message when there is no PR | the commit message keeps the versions verified against; results a commit message already states need no copy in the PR description | test docstrings; docs; raw output (link the run); totals CI already shows |
 | Where to start reading | the PR description; a PR comment where the PR description becomes the squash commit's message | | |
 | Merge conditions and what merging sets off | the PR description, as facts that stay true ("Requires #52.", "Merging publishes 0.3.0.") | RELEASING holds the standing sequence | merge-status narration ("not merging yet") |
 | Review findings | the posted review; inline where the line is the context | | "files reviewed" inventories; praise; empty severity sections; vulnerability detail in a public repository |

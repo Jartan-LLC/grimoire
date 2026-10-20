@@ -33,10 +33,10 @@ parses (trailers, frontmatter, a tool's marked blocks) are the project's, except
    removed", "fails on main". Text states what is true after the change; a commit message, a
    changelog entry or a PR description states change relative to the state before it ("failed
    before this change") or to a version. A "now" that says what the change made true is fine, and
-   so is a merge condition or a stacked PR stated as a fact ("Requires #52."). A PR description the
-   merge setting does not land is read before the merge and may compare against the base branch
-   ("262 MB on main"). Review replies and issue and plan
-   comments are read in the moment and may narrate.
+   so is a merge condition or a stacked PR stated as a fact ("Requires #52.", "the PRs stacked on
+   this one merge with it"). A PR description the merge setting does not land is read before the
+   merge and may compare against the base branch ("262 MB on main"). Review replies and issue and
+   plan comments are read in the moment and may narrate.
 2. A claim that needs its links or ids to say what it claims: strip them and the sentence must
    still say it. A line that only relates the change to a reference ("Refs #159.") passes. No
    absolute path outside the repository, no path `git check-ignore` matches, and no session link
@@ -51,15 +51,16 @@ parses (trailers, frontmatter, a tool's marked blocks) are the project's, except
    such copy, and a design the code must follow is the source, not a copy. A generated, drift-checked copy, an entry that adds what the code does not say, and a measurement
    stated with its conditions are not copies.
 5. In a repository made from a template (not the template itself), text addressed to the adopter
-   after adoption. Treat a repository as made from a template only when it says so or still carries
-   the template's adoption markers; never on a guess.
+   after adoption. Treat a repository as made from a template only when it says so (its agent file,
+   README or configuration names the template it came from); never on a guess.
 6. Exploit or reproduction detail of a flaw whose fix is not released, in public text, unless the
    text links the released fix or a public advisory or the repository is private. Describe the fix
    neutrally; the detail goes to the private channel the project's SECURITY.md names.
 
 ## The check
 
-For each passage a change writes or makes false:
+For each passage a change writes or makes false (a file the change leaves untouched and true is
+not flagged for what it lacks):
 
 1. Name the information and its reader, and look up its home in `references/homes.md`. Read "the
    commit message" there as the text the merge setting lands, which
