@@ -45,8 +45,8 @@ no project tool generates or parses is prose wherever it sits, such as a harness
    merge condition, what merging sets off, or a stacked PR stated as a fact ("Requires #52.",
    "Merging publishes 0.3.0.", "the PRs stacked on this one merge with it"), and so is later work
    named by its issue ("the rest of the #151 migration"). A PR description the merge setting does
-   not land, where more than the PR title lands, is read before the merge: it may compare against
-   the base branch ("262 MB on main") and mark what review changed or declined, with the reason.
+   not land is read before the merge: it may mark what review changed or declined, with the reason,
+   and, where more than the PR title lands, compare against the base branch ("262 MB on main").
    Review replies and other PR comments, issue and plan comments, a commit message the merge setting
    does not land (step 1), and a `fixup!` or `squash!` commit in a project that folds them before
    merging are read in the moment; narration in them is not flagged here.
@@ -64,8 +64,8 @@ no project tool generates or parses is prose wherever it sits, such as a harness
    the code or tree declares. A value a commit message or PR description gives is not such a copy,
    since each describes one change, and a design the code must follow is the source, not a copy. A
    generated, drift-checked copy, an entry that adds what the code does not say, a field the
-   project's docstring style defines (numpydoc's type and default fields), and a measurement stated
-   with its conditions are not copies.
+   project's docstring style requires (numpydoc's Returns type), and a measurement stated with its
+   conditions are not copies.
 5. In a repository made from a template (not the template itself), text addressed to the adopter
    after adoption. Treat a repository as a template, or as made from one, only when it says so (its
    agent file, README or configuration names it as a template or names the template it came from, or
