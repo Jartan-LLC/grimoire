@@ -64,11 +64,12 @@ python3 -m pytest tests/<source path>/test_<name>.py
   generated: after you change a plugin's name, version, description, keywords,
   category or agents, run `python3 scripts/generate-codex.py` and commit its
   output.
-- `plugins/praxis/skills/information-placement/SKILL.md` restates how
+- `plugins/praxis/skills/information-placement/SKILL.md` and its
+  `references/homes.md` restate how
   `plugins/gitwise/skills/commit-pr-writing/merge-setting.md` finds the merge
-  setting and what lands under each, because `general-reviewer` and `doc-reviewer` do not preload
-  `gitwise:commit-pr-writing` and cannot load a skill while they run: change
-  both together.
+  setting and what lands under each, because `general-reviewer` and
+  `doc-reviewer` do not preload `gitwise:commit-pr-writing` and cannot load a
+  skill while they run: change both together.
 - `find-duplicate-comments.js` reports comments in the identical copies of
   `hooks/scripts/sync-codex-agents.js` as retold; dismiss it.
 - Report security issues privately via [SECURITY.md](.github/SECURITY.md). Ask

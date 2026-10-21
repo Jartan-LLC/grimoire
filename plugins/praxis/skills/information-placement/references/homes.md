@@ -69,15 +69,15 @@ fallback the row gives; never create a document type the project has not chosen 
 |---|---|---|---|
 | The problem, its scope and constraints | the issue body, edited to stay current | the commit message states the problem in a sentence; the PR description links the issue | a scope change recorded only in a comment; "as decided on #N" without the decision |
 | The plan | one plan comment on the issue, edited in place | the PR description flags departures; a plan template the planning tool uses (such as `gitwise:github-conventions`' plan format) decides its own sections | a restatement of the issue; a new full plan per revision |
-| Working notes: step lists, `file:line` pointers, files to touch | the author's workspace, never a shared home | a step list marked as a suggested approach in the issue body; files to touch, anchored by symbol or pinned SHA, in a plan for an implementer on another machine | the issue, the plan comment, the PR, beyond those |
+| Working notes: step lists, `file:line` pointers, files to touch | the author's workspace, never a shared home | a step list marked as a suggested approach in the issue body; files to touch, anchored by symbol or pinned SHA, in a plan for an implementer on another machine | the issue, the plan comment, the PR, beyond those and what the plan template asks for |
 | Findings during the work; why an issue closed with no change | the issue comment where they arose; a finding that moves scope is also edited into the issue body | the commit message carries the evidence that decided the shipped design | |
 | Deferred work, known defects | an issue per item | `TODO(#N)` at the site; "Deferred: #N" in the PR description or reply; a planned state in a document, marked as planned and linked to its issue | "the next PR"; undecided version-tied plans in docstrings ("will fix in 2.1") |
 | Status: opened, merged, blocked, released | the forge's own state: issue and PR state, closing links, labels, tags | a comment only for status the forge cannot show (a PR into a non-default branch, "released in vX" for an outside filer) | status in docs, code, commit messages or PR descriptions |
-| Detail of a vulnerability whose fix is not released | the private channel SECURITY.md names | public text describes the fix neutrally | an issue, branch name, commit, PR, review, code comment or unreleased changelog section in a public repository |
+| Detail of a vulnerability rule 6 covers, before its fix is released | the private channel SECURITY.md names | public text describes the fix neutrally | an issue, branch name, commit, PR, review, code comment or unreleased changelog section in a public repository |
 
 ## Nowhere
 
 | Information | Exceptions |
 |---|---|
-| How the work went: rounds, agents, timings, CI re-runs, the debugging story | the texts rule 1 says are read in the moment: review replies, issue and plan comments, a commit message the merge setting does not land, a folded `fixup!` commit; a PR description the merge setting does not land may mark what review changed or declined, with the reason |
+| How the work went: rounds, agents, timings, CI re-runs, the debugging story | the texts rule 1 says are read in the moment; a PR description the merge setting does not land may mark what review changed or declined, with the reason |
 | Restated or derived content: change inventories, diffstats, counts, the signature, indexes, empty form sections, boilerplate, praise | a list whose items each give a reason; fields the project's docstring style defines (numpydoc's type and default fields); public names a change removes (what a later reader would search for); generated, drift-checked copies; measurements stated with their conditions |
