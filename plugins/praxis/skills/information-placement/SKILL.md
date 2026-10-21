@@ -83,9 +83,8 @@ not flagged for what it lacks):
    to its rules to keep its practice; do not raise the same finding again in a later round.
 
 Tier findings with `review-severity`: rule 6 is Critical; rules 1 and 2 are Important; rules 3-5 are
-Minor; information outside its default home is Minor, or Important only when a reader who goes by
-the text as it stands would act wrongly or miss something they need; a fact that is in the right
-home but not at its top, or that a reader can still find where they look, is Minor.
+Minor; information outside its default home is Minor, or Important when it misleads a reader or
+leaves them without something they need.
 
 When asked where something should go while writing, check the project's rules, then give the home
 from `references/homes.md` and any pointer the other homes should carry.
