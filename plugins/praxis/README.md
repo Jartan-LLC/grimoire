@@ -45,7 +45,7 @@ codex plugin add gitwise@grimoire
 - **issue-planner** (opus) -- analyzes issues and designs implementation approaches
 - **backend-reviewer** -- reviews backend code for patterns, async correctness, security
 - **frontend-reviewer** -- reviews frontend code for design system compliance, accessibility
-- **general-reviewer** -- reviews code for general quality, naming, organization, and comment hygiene, and where information sits in comments, commit messages and the PR description
+- **general-reviewer** -- reviews code for general quality, naming, organization, and comment hygiene
 - **structure-reviewer** -- reviews structure and readability: decomposition, coupling, interfaces, data modeling, control flow, naming
 - **test-reviewer** -- reviews test coverage and CI/CD correctness
 - **doc-reviewer** -- reviews documentation for conciseness, accuracy, consistency
