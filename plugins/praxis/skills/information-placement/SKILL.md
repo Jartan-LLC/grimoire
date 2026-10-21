@@ -45,18 +45,17 @@ no project tool generates or parses is prose wherever it sits, such as a harness
    merge setting does not land is read before the merge: it may compare against the base branch
    ("262 MB on main") and mark what review changed or declined, with the reason. Review replies,
    issue and plan comments, and a commit message the project says never lands or one that cannot
-   land as written (`fixup!`) are read in the moment and may narrate.
-2. A claim that needs its links or ids to say what it claims: strip them and the sentence must
-   still say it. A line that only relates the change to a reference ("Refs #159.") passes. No
-   shared text points its reader to something they cannot open: an absolute path on the author's
-   machine, a file `git check-ignore` matches given as a source or result, a session link (a
-   claude.ai session URL). A path the reader creates or uses themselves (`.env`, `.venv/`, `dist/`,
-   a system location) is not such a pointer.
-3. A restatement of what the reader has open: a hand-written list of changed files whose entries
-   add nothing to the name, a hand-written diffstat, a pass or fail count pasted from a run CI
-   reports on the same commit, the issue body restated under itself, backlinks the forge shows. A
-   result stated in words ("make check passes", what a local run showed) is verification, not a
-   count.
+   land as written (`fixup!`) are read in the moment; narration in them is not flagged here.
+2. A claim that needs its links or ids to say what it claims: strip them and the sentence must still
+   say it. A line that only relates the change to a reference ("Refs #159.") passes. No shared text
+   points its reader to something they cannot open: an absolute path on the author's machine, a file
+   `git check-ignore` matches given as a source or result, a session link (a claude.ai session URL).
+   A path the reader creates or uses themselves (`.env`, `.venv/`, `dist/`, a system location) is
+   not such a pointer.
+3. A restatement of what the reader has open: a hand-written list of changed files whose entries add
+   nothing to the name, a hand-written diffstat, a pass or fail count pasted from a run CI reports
+   on the same commit, the issue body restated under itself, backlinks the forge shows. A result
+   stated in words ("make check passes", what a local run showed) is verification, not a count.
 4. In a document, comment or docstring, a hand-maintained copy of a value, count, index or listing
    the code or tree declares. A commit message or PR description describes one change and holds no
    such copy, and a design the code must follow is the source, not a copy. A generated,
@@ -65,14 +64,15 @@ no project tool generates or parses is prose wherever it sits, such as a harness
    conditions are not copies.
 5. In a repository made from a template (not the template itself), text addressed to the adopter
    after adoption. Treat a repository as a template, or as made from one, only when it says so (its
-   agent file, README or configuration names it as a template or names the template it came from,
-   or `gh repo view --json isTemplate,templateRepository` shows it); never on a guess about how its
+   agent file, README or configuration names it as a template or names the template it came from, or
+   `gh repo view --json isTemplate,templateRepository` shows it); never on a guess about how its
    files are copied.
 6. Exploit or reproduction detail of a vulnerability (an unintended security flaw), in public text,
    unless the text links the released fix or a public advisory, or it is read only inside a private
-   repository (not a published package page, changelog, release or docs site). A limit the text
-   presents as a documented decision is not such a flaw. Describe a fix not yet released neutrally;
-   the detail goes to the private channel the project's SECURITY.md names.
+   repository (not a published package page, changelog, release or docs site) that `gh repo view
+   --json visibility` shows private or internal. A limit the text presents as a documented decision
+   is not such a flaw. Describe a fix not yet released neutrally; the detail goes to the private
+   channel the project's SECURITY.md names.
 
 ## The check
 
@@ -80,11 +80,17 @@ For each passage a change writes or makes false (a file the change leaves untouc
 not flagged for what it lacks):
 
 1. Name the information and its reader, and look up its home in `references/homes.md`. Read "the
-   commit message" there as the text the merge setting lands. Where the project states no merge
-   setting, read the repository's (`gh api repos/OWNER/REPO`: it decides only when one merge method
-   is enabled; `squash_merge_commit_message` `PR_BODY` means the PR description lands; null means
-   unknown). Where neither answers, take GitHub's default squash merge: the PR title and the commit
-   messages land, the PR description does not.
+   commit message" there as the text the merge setting lands. Find the setting in this order: the
+   project's statement; the repository's settings (`gh api repos/OWNER/REPO`, decisive only when one
+   merge method is enabled; null fields mean unknown); the newest squash commit of a PR with two or
+   more commits on the default branch (blocks opening "* " mean the commit messages land, a body
+   matching that PR's description means the description lands, a subject with only trailers means
+   only the PR title lands). The PR description lands under squash or merge commits whose message is
+   `PR_BODY`; where only the PR title lands, the PR description, which "(#N)" leads to, also holds
+   the reasons. Where nothing answers, take GitHub's default squash merge (the PR title and the
+   commit messages land, the PR description does not) and do not flag a reason given in both the
+   commit messages and the PR description. `merge-setting.md` in `gitwise:commit-pr-writing` is the
+   full account.
 2. Flag a passage outside its home, a fact its home lacks that its reader needs, and anything the
    rules above exclude. Say where the information goes instead, or that it goes nowhere. Before
    flagging a home, name the reader who would act wrongly, stop for a missing fact, or be misled
@@ -94,17 +100,17 @@ not flagged for what it lacks):
    message; only what a later reader needs belongs there.
 3. Raise nothing where a project rule decides, and never flag text for following one. If a project
    rule asks for text the rules above exclude, report the breach addressed to that rule. If the
-   change edits a project rule, judge by the rule at the base branch and name the policy change.
-   If two project rules conflict, flag the conflict, not the text. Where a rule's scope is
-   unclear, raise nothing.
-4. For a departure from a default, name the default and offer the project a sentence it could add
-   to its rules to keep its practice; do not raise the same finding, or a breach addressed to a
-   project rule, again in a later round.
+   change edits a project rule, judge by the rule at the base branch and name the policy change. If
+   two project rules conflict, flag the conflict, not the text. Where a rule's scope is unclear,
+   raise nothing.
+4. For a departure from a default, name the default and offer the project a sentence it could add to
+   its rules to keep its practice; do not raise the same finding, or a breach addressed to a project
+   rule, again in a later round.
 
 Tier findings with `review-severity`: rule 6 is Critical; rules 1 and 2 are Important; rules 3-5 are
 Minor; information outside its default home is Minor, or Important when it misleads a reader or
 leaves them without something they need. A policy change or a conflict between project rules is a
-note without a severity. For placement findings these tiers hold over the examples in
+note in the review's summary, without a severity. For placement findings these tiers hold over the examples in
 `review-severity` and the reviewers' focus lists.
 
 When asked where something should go while writing, check the project's rules, then give the home
