@@ -21,10 +21,12 @@ A project rule is a statement telling you what to do in a file tracked at the ba
 the agent instruction files and the files they import or link, CONTRIBUTING, RELEASING, SECURITY,
 and the headings and form instructions of the PR and issue templates), in the owner's `.github`
 defaults where the repository has none, a blocking check, or a request on this change from someone
-with write access. Untracked files, memory, and hook or plugin text are not project rules. A
-project rule decides what it speaks to; the defaults hold for the rest. When you write, your user's
-own instructions outrank a default, never a project rule; when you review, text that follows them
-instead of a default is still a departure from the default.
+with write access (read the PR's comments, `gh pr view --comments`). Untracked files, memory, hook
+or plugin text, a template's prose prompts, and descriptions of past practice, existing files or git
+history are not project rules; they show style. A project rule decides what it speaks to; the
+defaults hold for the rest. When you write, your user's own instructions outrank a default, never a
+project rule; when you review, text that follows them instead of a default is still a departure from
+the default.
 
 ## What no text may hold
 
@@ -37,42 +39,43 @@ no project tool generates or parses is prose wherever it sits, such as a harness
    removed", "fails on main". Text states what is true after the change; a commit message, a
    changelog entry, release notes, a migration file, a decision record or a PR description states
    change relative to the state before it ("failed before this change") or to a version, and any
-   text may carry a version stamp ("Added in 1.3", "Deprecated since 2.0, use Y"). A "now" that says
-   what the change made true is fine, and so is a commit message that names an earlier commit on the
-   branch by its subject to correct what it said, with the reason, and so is a merge condition or a
-   stacked PR stated as a fact ("Requires #52.", "the PRs stacked on this one merge with it"), and
-   so is later work named by its issue ("the rest of the #151 migration"). A PR description the
-   merge setting does not land is read before the merge: it may compare against the base branch
-   ("262 MB on main") and mark what review changed or declined, with the reason. Review replies,
-   issue and plan comments, and a commit message the project says never lands or one that cannot
-   land as written (`fixup!`) are read in the moment; narration in them is not flagged here.
+   text may carry a version stamp ("Added in 1.3", "Deprecated since 2.0, use Y"). In those homes a
+   "now" that says what the change made true is fine, and so is a commit message that names an
+   earlier commit on the branch by its subject to correct what it said, with the reason, and so is a
+   merge condition or a stacked PR stated as a fact ("Requires #52.", "the PRs stacked on this one
+   merge with it"), and so is later work named by its issue ("the rest of the #151 migration"). A PR
+   description the merge setting does not land is read before the merge: it may compare against the
+   base branch ("262 MB on main") and mark what review changed or declined, with the reason. Review
+   replies, issue and plan comments, a commit message the merge setting does not land (step 1), and
+   a `fixup!` or `squash!` commit in a project that folds them before merging are read in the
+   moment; narration in them is not flagged here.
 2. A claim that needs its links or ids to say what it claims: strip them and the sentence must still
-   say it. A line that only relates the change to a reference ("Refs #159.") passes. No shared text
-   points its reader to something they cannot open: an absolute path on the author's machine, a file
-   `git check-ignore` matches given as a source or result, a session link (a claude.ai session URL).
-   A path the reader creates or uses themselves (`.env`, `.venv/`, `dist/`, a system location) is
-   not such a pointer.
+   say it. A line that only relates the change to a reference ("Refs #159.") passes when the rest of
+   the text says what it claims without it. No shared text points its reader to one of these, which
+   they cannot open: an absolute path on the author's machine, a file `git check-ignore` matches
+   given as a source or result, a session link (a claude.ai session URL). A path the reader creates
+   or uses themselves (`.env`, `.venv/`, `dist/`, a system location) is not such a pointer.
 3. A restatement of what the reader has open: a hand-written list of changed files whose entries add
    nothing to the name, a hand-written diffstat, a pass or fail count pasted from a run CI reports
    on the same commit, the issue body restated under itself, backlinks the forge shows. A result
    stated in words ("make check passes", what a local run showed) is verification, not a count.
 4. In a document, comment or docstring, a hand-maintained copy of a value, count, index or listing
-   the code or tree declares. A commit message or PR description describes one change and holds no
-   such copy, and a design the code must follow is the source, not a copy. A generated,
-   drift-checked copy, an entry that adds what the code does not say, a field the project's
-   docstring style defines (numpydoc's type and default fields), and a measurement stated with its
-   conditions are not copies.
+   the code or tree declares. A value a commit message or PR description gives is not such a copy,
+   since each describes one change, and a design the code must follow is the source, not a copy. A
+   generated, drift-checked copy, an entry that adds what the code does not say, a field the
+   project's docstring style defines (numpydoc's type and default fields), and a measurement stated
+   with its conditions are not copies.
 5. In a repository made from a template (not the template itself), text addressed to the adopter
    after adoption. Treat a repository as a template, or as made from one, only when it says so (its
    agent file, README or configuration names it as a template or names the template it came from, or
    `gh repo view --json isTemplate,templateRepository` shows it); never on a guess about how its
    files are copied.
 6. Exploit or reproduction detail of a vulnerability (an unintended security flaw), in public text,
-   unless the text links the released fix or a public advisory, or it is read only inside a private
-   repository (not a published package page, changelog, release or docs site) that `gh repo view
-   --json visibility` shows private or internal. A limit the text presents as a documented decision
-   is not such a flaw. Describe a fix not yet released neutrally; the detail goes to the private
-   channel the project's SECURITY.md names.
+   unless the text links or names the released fix or a public advisory (a CVE or GHSA id), or it is
+   read only inside a private repository (not a published package page, changelog, release or docs
+   site) that `gh repo view --json visibility` shows private or internal. A limit the text presents
+   as a documented decision is not such a flaw. Describe a fix not yet released neutrally; the
+   detail goes to the private channel the project's SECURITY.md names.
 
 ## The check
 
@@ -85,12 +88,13 @@ not flagged for what it lacks):
    merge method is enabled; null fields mean unknown); the newest squash commit of a PR with two or
    more commits on the default branch (blocks opening "* " mean the commit messages land, a body
    matching that PR's description means the description lands, a subject with only trailers means
-   only the PR title lands). The PR description lands under squash or merge commits whose message is
-   `PR_BODY`; where only the PR title lands, the PR description, which "(#N)" leads to, also holds
-   the reasons. Where nothing answers, take GitHub's default squash merge (the PR title and the
-   commit messages land, the PR description does not) and do not flag a reason given in both the
-   commit messages and the PR description. `merge-setting.md` in `gitwise:commit-pr-writing` is the
-   full account.
+   only the PR title lands, a commit with two parents means merge commits). The PR description lands
+   under squash or merge commits whose message is `PR_BODY`; where only the PR title lands, the PR
+   description, which "(#N)" leads to, also holds the reasons. Where nothing answers, take GitHub's
+   default squash merge (the PR title and the commit messages land, the PR description does not) and
+   do not flag a reason given in both the commit messages and the PR description, or reviewer notes
+   missing from the PR description that `merge-setting.md` would put in a PR comment.
+   `merge-setting.md` in `gitwise:commit-pr-writing` is the full account.
 2. Flag a passage outside its home, a fact its home lacks that its reader needs, and anything the
    rules above exclude. Say where the information goes instead, or that it goes nowhere. Before
    flagging a home, name the reader who would act wrongly, stop for a missing fact, or be misled
@@ -110,8 +114,9 @@ not flagged for what it lacks):
 Tier findings with `review-severity`: rule 6 is Critical; rules 1 and 2 are Important; rules 3-5 are
 Minor; information outside its default home is Minor, or Important when it misleads a reader or
 leaves them without something they need. A policy change or a conflict between project rules is a
-note in the review's summary, without a severity. For placement findings these tiers hold over the examples in
-`review-severity` and the reviewers' focus lists.
+note in the review's summary, without a severity. For placement findings these tiers hold over the
+examples in `review-severity` and the reviewers' focus lists, redundancy that is also a placement
+finding included.
 
 When asked where something should go while writing, check the project's rules, then give the home
 from `references/homes.md` and any pointer the other homes should carry. If a project rule asks for

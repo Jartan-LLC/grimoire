@@ -64,6 +64,9 @@ python3 -m pytest tests/<source path>/test_<name>.py
   generated: after you change a plugin's name, version, description, keywords,
   category or agents, run `python3 scripts/generate-codex.py` and commit its
   output.
+- `plugins/praxis/skills/information-placement/SKILL.md` restates how
+  `plugins/gitwise/skills/commit-pr-writing/merge-setting.md` finds the merge
+  setting, for reviewers that cannot load gitwise: change both together.
 - `find-duplicate-comments.js` reports comments in the identical copies of
   `hooks/scripts/sync-codex-agents.js` as retold; dismiss it.
 - Report security issues privately via [SECURITY.md](.github/SECURITY.md). Ask
