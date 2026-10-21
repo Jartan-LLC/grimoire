@@ -35,15 +35,17 @@ no project tool generates or parses is prose wherever it sits, such as a harness
 
 1. Narration of the moment, the branch or the session: "round 2's fix", "the next PR", "being
    removed", "fails on main". Text states what is true after the change; a commit message, a
-   changelog entry or a PR description states change relative to the state before it ("failed
-   before this change") or to a version. A "now" that says what the change made true is fine, and
-   so is a merge condition or a stacked PR stated as a fact ("Requires #52.", "the PRs stacked on
-   this one merge with it"), and so is later work named by its issue ("the rest of the #151
-   migration"). A PR description the merge setting does not land is read before the merge: it may
-   compare against the base branch ("262 MB on main") and mark what review changed or declined,
-   with the reason. Review replies, issue and plan comments, and a commit message the project says
-   never lands or one that cannot land as written (`fixup!`) are read in the moment and may
-   narrate.
+   changelog entry, release notes, a migration file, a decision record or a PR description states
+   change relative to the state before it ("failed before this change") or to a version, and any
+   text may carry a version stamp ("Added in 1.3", "Deprecated since 2.0, use Y"). A "now" that says
+   what the change made true is fine, and so is a commit message that names an earlier commit on the
+   branch by its subject to correct what it said, with the reason, and so is a merge condition or a
+   stacked PR stated as a fact ("Requires #52.", "the PRs stacked on this one merge with it"), and
+   so is later work named by its issue ("the rest of the #151 migration"). A PR description the
+   merge setting does not land is read before the merge: it may compare against the base branch
+   ("262 MB on main") and mark what review changed or declined, with the reason. Review replies,
+   issue and plan comments, and a commit message the project says never lands or one that cannot
+   land as written (`fixup!`) are read in the moment and may narrate.
 2. A claim that needs its links or ids to say what it claims: strip them and the sentence must
    still say it. A line that only relates the change to a reference ("Refs #159.") passes. No
    shared text points its reader to something they cannot open: an absolute path on the author's
@@ -63,13 +65,14 @@ no project tool generates or parses is prose wherever it sits, such as a harness
    conditions are not copies.
 5. In a repository made from a template (not the template itself), text addressed to the adopter
    after adoption. Treat a repository as a template, or as made from one, only when it says so (its
-   agent file, README or configuration names it as a template or names the template it came from);
-   never on a guess about how its files are copied.
-6. Exploit or reproduction detail of an unintended flaw, in public text, unless the text links the
-   released fix or a public advisory, or it is read only inside a private repository (not a
-   published package page, changelog, release or docs site). A limit the text presents as a
-   documented decision is not such a flaw. Describe a fix not yet released neutrally; the detail
-   goes to the private channel the project's SECURITY.md names.
+   agent file, README or configuration names it as a template or names the template it came from,
+   or `gh repo view --json isTemplate,templateRepository` shows it); never on a guess about how its
+   files are copied.
+6. Exploit or reproduction detail of a vulnerability (an unintended security flaw), in public text,
+   unless the text links the released fix or a public advisory, or it is read only inside a private
+   repository (not a published package page, changelog, release or docs site). A limit the text
+   presents as a documented decision is not such a flaw. Describe a fix not yet released neutrally;
+   the detail goes to the private channel the project's SECURITY.md names.
 
 ## The check
 
@@ -78,9 +81,10 @@ not flagged for what it lacks):
 
 1. Name the information and its reader, and look up its home in `references/homes.md`. Read "the
    commit message" there as the text the merge setting lands. Where the project states no merge
-   setting, take GitHub's default squash merge: the PR title and the commit messages land, the PR
-   description does not; under "Pull request title and description" the PR description is the
-   commit message.
+   setting, read the repository's (`gh api repos/OWNER/REPO`: it decides only when one merge method
+   is enabled; `squash_merge_commit_message` `PR_BODY` means the PR description lands; null means
+   unknown). Where neither answers, take GitHub's default squash merge: the PR title and the commit
+   messages land, the PR description does not.
 2. Flag a passage outside its home, a fact its home lacks that its reader needs, and anything the
    rules above exclude. Say where the information goes instead, or that it goes nowhere. Before
    flagging a home, name the reader who would act wrongly, stop for a missing fact, or be misled
@@ -100,7 +104,8 @@ not flagged for what it lacks):
 Tier findings with `review-severity`: rule 6 is Critical; rules 1 and 2 are Important; rules 3-5 are
 Minor; information outside its default home is Minor, or Important when it misleads a reader or
 leaves them without something they need. A policy change or a conflict between project rules is a
-note without a severity.
+note without a severity. For placement findings these tiers hold over the examples in
+`review-severity` and the reviewers' focus lists.
 
 When asked where something should go while writing, check the project's rules, then give the home
 from `references/homes.md` and any pointer the other homes should carry. If a project rule asks for
