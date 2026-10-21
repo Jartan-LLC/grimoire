@@ -47,9 +47,10 @@ no project tool generates or parses is prose wherever it sits, such as a harness
    named by its issue ("the rest of the #151 migration"). A PR description the merge setting does
    not land is read before the merge: it may mark what review changed or declined, with the reason,
    and, where more than the PR title lands, compare against the base branch ("262 MB on main").
-   Review replies and other PR comments, issue and plan comments, a commit message the merge setting
-   does not land (step 1), and a `fixup!` or `squash!` commit in a project that folds them before
-   merging are read in the moment; narration in them is not flagged here.
+   Review replies and other PR comments, issue and plan comments, a commit message in a project that
+   states its branch commit messages never land, or whose only enabled merge method does not land
+   them, and a `fixup!` or `squash!` commit in a project that folds them before merging are read in
+   the moment; narration in them is not flagged here.
 2. A claim that needs its links or ids to say what it claims: strip them and the sentence must still
    say it. A line that only relates the change to a reference ("Refs #159.") passes when the rest of
    the text says what it claims without it. No shared text points its reader to one of these, which
