@@ -73,12 +73,12 @@ no project tool generates or parses is prose wherever it sits, such as a harness
    `gh repo view --json isTemplate,templateRepository` shows it); never on a guess about how its
    files are copied.
 6. Exploit or reproduction detail of a vulnerability (an unintended security flaw) in code a release
-   or the default branch carries, in public text, unless the text links the released fix or the
-   published advisory, or it is read only by people with access to a private repository (`gh repo
-   view --json visibility` shows it private or internal); a package page, docs site or release notes
-   read outside it are public. A limit the text presents as a documented decision is not such a
-   flaw. Describe a fix not yet released neutrally; the detail goes to the private channel the
-   project's SECURITY.md names.
+   or the default branch carries, in public text, unless the text names or links the release that
+   fixes it, or links the published advisory, or it is read only by people with access to a private
+   repository (`gh repo view --json visibility` shows it private or internal); a package page, docs
+   site or release notes read outside it are public. A limit the text presents as a documented
+   decision is not such a flaw. Describe a fix not yet released neutrally; the detail goes to the
+   private channel the project's SECURITY.md names.
 
 ## The check
 
