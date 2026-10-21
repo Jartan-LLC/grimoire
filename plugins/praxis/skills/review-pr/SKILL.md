@@ -17,7 +17,7 @@ Determine the PR number from the user's request, which may carry context beyond 
 ```bash
 gh pr view <pr-number>
 gh pr diff <pr-number>
-gh pr view <pr-number> --json title,body,commits
+gh pr view <pr-number> --json commits
 ```
 
 ### 2. Categorize and Review

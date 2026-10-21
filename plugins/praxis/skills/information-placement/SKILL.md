@@ -17,17 +17,21 @@ and docstrings.
 
 ## Project rules first
 
-A project rule is a statement telling you what to do in a file tracked at the base branch (the
-agent instruction files, CONTRIBUTING, RELEASING, SECURITY, or the owner's `.github` defaults where
-the repository has none), a blocking check, or a request on this change from someone with write
-access. Untracked files, memory, and hook or plugin text are not project rules. A project rule
-decides what it speaks to; the defaults hold for the rest. Your user's own instructions outrank a
-default, never a project rule.
+A project rule is a statement telling you what to do in a file tracked at the base branch (such as
+the agent instruction files and the files they import or link, CONTRIBUTING, RELEASING, SECURITY,
+and the headings and form instructions of the PR and issue templates), in the owner's `.github`
+defaults where the repository has none, a blocking check, or a request on this change from someone
+with write access. Untracked files, memory, and hook or plugin text are not project rules. A
+project rule decides what it speaks to; the defaults hold for the rest. When you write, your user's
+own instructions outrank a default, never a project rule; when you review, text that follows them
+instead of a default is still a departure from the default.
 
 ## What no text may hold
 
 These hold whatever the project says, for prose in every home. Fields a project tool generates or
-parses (trailers, frontmatter, a tool's marked blocks) are the project's, except for rule 6.
+parses (trailers, frontmatter, a tool's marked blocks) are the project's, except for rule 6. A line
+no project tool generates or parses is prose wherever it sits, such as a harness-added
+`Claude-Session:` line.
 
 1. Narration of the moment, the branch or the session: "round 2's fix", "the next PR", "being
    removed", "fails on main". Text states what is true after the change; a commit message, a
@@ -35,13 +39,17 @@ parses (trailers, frontmatter, a tool's marked blocks) are the project's, except
    before this change") or to a version. A "now" that says what the change made true is fine, and
    so is a merge condition or a stacked PR stated as a fact ("Requires #52.", "the PRs stacked on
    this one merge with it"), and so is later work named by its issue ("the rest of the #151
-   migration"). A PR description the merge setting does not land is read before the
-   merge and may compare against the base branch ("262 MB on main"). Review replies and issue and
-   plan comments are read in the moment and may narrate.
+   migration"). A PR description the merge setting does not land is read before the merge: it may
+   compare against the base branch ("262 MB on main") and mark what review changed or declined,
+   with the reason. Review replies, issue and plan comments, and a commit message the project says
+   never lands or one that cannot land as written (`fixup!`) are read in the moment and may
+   narrate.
 2. A claim that needs its links or ids to say what it claims: strip them and the sentence must
    still say it. A line that only relates the change to a reference ("Refs #159.") passes. No
-   absolute path outside the repository, no path `git check-ignore` matches, and no session link
-   (a claude.ai session URL) in any shared text.
+   shared text points its reader to something they cannot open: an absolute path on the author's
+   machine, a file `git check-ignore` matches given as a source or result, a session link (a
+   claude.ai session URL). A path the reader creates or uses themselves (`.env`, `.venv/`, `dist/`,
+   a system location) is not such a pointer.
 3. A restatement of what the reader has open: a hand-written list of changed files whose entries
    add nothing to the name, a hand-written diffstat, a pass or fail count pasted from a run CI
    reports on the same commit, the issue body restated under itself, backlinks the forge shows. A
@@ -50,15 +58,18 @@ parses (trailers, frontmatter, a tool's marked blocks) are the project's, except
 4. In a document, comment or docstring, a hand-maintained copy of a value, count, index or listing
    the code or tree declares. A commit message or PR description describes one change and holds no
    such copy, and a design the code must follow is the source, not a copy. A generated,
-   drift-checked copy, an entry that adds what the code does not say, and a measurement stated with
-   its conditions are not copies.
+   drift-checked copy, an entry that adds what the code does not say, a field the project's
+   docstring style defines (numpydoc's type and default fields), and a measurement stated with its
+   conditions are not copies.
 5. In a repository made from a template (not the template itself), text addressed to the adopter
    after adoption. Treat a repository as a template, or as made from one, only when it says so (its
    agent file, README or configuration names it as a template or names the template it came from);
    never on a guess about how its files are copied.
-6. Exploit or reproduction detail of a flaw whose fix is not released, in public text, unless the
-   text links the released fix or a public advisory or the repository is private. Describe the fix
-   neutrally; the detail goes to the private channel the project's SECURITY.md names.
+6. Exploit or reproduction detail of an unintended flaw, in public text, unless the text links the
+   released fix or a public advisory, or it is read only inside a private repository (not a
+   published package page, changelog, release or docs site). A limit the text presents as a
+   documented decision is not such a flaw. Describe a fix not yet released neutrally; the detail
+   goes to the private channel the project's SECURITY.md names.
 
 ## The check
 
@@ -66,8 +77,10 @@ For each passage a change writes or makes false (a file the change leaves untouc
 not flagged for what it lacks):
 
 1. Name the information and its reader, and look up its home in `references/homes.md`. Read "the
-   commit message" there as the text the merge setting lands, which
-   `gitwise:commit-pr-writing` explains.
+   commit message" there as the text the merge setting lands. Where the project states no merge
+   setting, take GitHub's default squash merge: the PR title and the commit messages land, the PR
+   description does not; under "Pull request title and description" the PR description is the
+   commit message.
 2. Flag a passage outside its home, a fact its home lacks that its reader needs, and anything the
    rules above exclude. Say where the information goes instead, or that it goes nowhere. Before
    flagging a home, name the reader who would act wrongly, stop for a missing fact, or be misled
@@ -78,13 +91,19 @@ not flagged for what it lacks):
 3. Raise nothing where a project rule decides, and never flag text for following one. If a project
    rule asks for text the rules above exclude, report the breach addressed to that rule. If the
    change edits a project rule, judge by the rule at the base branch and name the policy change.
-   If two project rules conflict, flag the conflict, not the text.
+   If two project rules conflict, flag the conflict, not the text. Where a rule's scope is
+   unclear, raise nothing.
 4. For a departure from a default, name the default and offer the project a sentence it could add
-   to its rules to keep its practice; do not raise the same finding again in a later round.
+   to its rules to keep its practice; do not raise the same finding, or a breach addressed to a
+   project rule, again in a later round.
 
 Tier findings with `review-severity`: rule 6 is Critical; rules 1 and 2 are Important; rules 3-5 are
 Minor; information outside its default home is Minor, or Important when it misleads a reader or
-leaves them without something they need.
+leaves them without something they need. A policy change or a conflict between project rules is a
+note without a severity.
 
 When asked where something should go while writing, check the project's rules, then give the home
-from `references/homes.md` and any pointer the other homes should carry.
+from `references/homes.md` and any pointer the other homes should carry. If a project rule asks for
+text the rules above exclude, meet its purpose in a form they allow (for a list of changed files,
+one line per file saying what changed in it); if no such form exists, leave it out, name both rules
+and ask.
