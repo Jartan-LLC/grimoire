@@ -21,7 +21,7 @@ You are a senior code reviewer focusing on general quality and adherence to proj
 2. **Check project conventions** -- Read `CLAUDE.md` for project constraints.
 3. **Index repeated comments** -- run `find-duplicate-comments.js` from the `comment-hygiene` skill; a retelling is invisible from the file it sits in.
 4. **Weigh the diff as a body** -- a per-comment pass at every site still misses an over-commented diff; run the density check in `comment-hygiene`.
-5. **Check placement** -- For the PR title, the PR description and the commit messages (`review-pr` hands them over; reviewing a branch without a PR, read `git log --no-merges --format=%B <base>..HEAD`) and the comments and docstrings the diff writes, run the check in `information-placement`, reading its `references/homes.md`.
+5. **Check placement** -- For the PR title, the PR description and the commit messages (`review-pr` hands them over; reviewing a branch without a PR, read `git log --no-merges --format=%B <base>..HEAD`) and the comments and docstrings the diff writes or makes false, run the check in `information-placement`, reading its `references/homes.md`.
 6. **Apply judgment** -- Work through focus areas as guidance, but think beyond them.
 
 ## Confidence Filtering

@@ -23,10 +23,11 @@ and the headings and form instructions of the PR and issue templates), in the ow
 defaults where the repository has none, a blocking check, or an explicit request about this change's
 text on the PR from someone with write access (`gh pr view <number> --comments`), other than a
 review's findings. Untracked files, memory and hook or plugin text are not project rules; a
-template's prose prompts, unless a project rule adopts them, descriptions of past practice, existing
-files and git history show style. A project rule decides what it speaks to; the defaults hold for
-the rest. When you write, your user's own instructions outrank a default, never a project rule; when
-you review, text that follows them instead of a default is still a departure from the default.
+template's prose prompts (unless a project rule adopts them), descriptions of past practice, and the
+rest of existing files and git history show style, not rules. A project rule decides what it speaks
+to; the defaults hold for the rest. When you write, your user's own instructions outrank a default,
+never a project rule; when you review, text that follows them instead of a default is still a
+departure from the default.
 
 ## What no text may hold
 
@@ -73,12 +74,12 @@ no project tool generates or parses is prose wherever it sits, such as a harness
    `gh repo view --json isTemplate,templateRepository` shows it); never on a guess about how its
    files are copied.
 6. Exploit or reproduction detail of a vulnerability (an unintended security flaw) in code a release
-   or the default branch carries, in public text, unless the text names or links the release that
-   fixes it, or links the published advisory, or it is read only by people with access to a private
-   repository (`gh repo view --json visibility` shows it private or internal); a package page, docs
-   site or release notes read outside it are public. A limit the text presents as a documented
-   decision is not such a flaw. Describe a fix not yet released neutrally; the detail goes to the
-   private channel the project's SECURITY.md names.
+   or the default branch carries, in public text, unless the text names or links a published release
+   that fixes it, or links the published advisory, or it is read only by people with access to a
+   private repository (`gh repo view --json visibility` shows it private or internal); a package
+   page, docs site or release notes read outside it are public. A limit the text presents as a
+   documented decision is not such a flaw. Describe a fix not yet released neutrally; the detail
+   goes to the private channel the project's SECURITY.md names.
 
 ## The check
 
@@ -96,9 +97,9 @@ not flagged for what it lacks):
    whose message is `PR_BODY`; where only the PR title lands, the PR description, which "(#N)" leads
    to, also holds the reasons. Where nothing answers, take GitHub's default squash merge (the PR
    title and the commit messages land, the PR description does not) and do not flag a reason given
-   in both the commit messages and the PR description, or where to start reading, "Changed in
-   review" and "Declined from review" lines or requests to the reviewer missing from the PR
-   description (`merge-setting.md` puts them in a PR comment). `merge-setting.md` in
+   in both the commit messages and the PR description. Nor flag where to start reading, "Changed in
+   review" and "Declined from review" lines or requests to the reviewer when the PR description
+   lacks them (`merge-setting.md` puts them in a PR comment). `merge-setting.md` in
    `gitwise:commit-pr-writing` is the full account.
 2. Flag a passage outside its home, a fact its home lacks that its reader needs, and anything the
    rules above exclude. Say where the information goes instead, or that it goes nowhere. Before
@@ -111,9 +112,10 @@ not flagged for what it lacks):
 3. Raise nothing where a project rule decides a default, and never flag text for following such a
    rule. If a project rule asks for text the rules above exclude, and the text could meet it in a
    form they allow (for a list of changed files, one line per file saying what changed in it), flag
-   the text with that form; otherwise report the breach addressed to that rule. If the change edits
-   a project rule, judge by the rule at the base branch and name the policy change. If two project
-   rules conflict, flag the conflict, not the text. Where a rule's scope is unclear, raise nothing.
+   the text and give that form as the fix; otherwise report the breach as a finding against that
+   project rule, not the text. If the change edits a project rule, judge by the rule at the base
+   branch and name the policy change. If two project rules conflict, flag the conflict, not the
+   text. Where a rule's scope is unclear, raise nothing.
 4. For a departure from a default, name the default and offer the project a sentence it could add to
    its rules to keep its practice; do not raise the same finding again in a later round.
 
