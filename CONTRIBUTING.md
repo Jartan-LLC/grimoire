@@ -66,7 +66,9 @@ python3 -m pytest tests/<source path>/test_<name>.py
   output.
 - `plugins/praxis/skills/information-placement/SKILL.md` restates how
   `plugins/gitwise/skills/commit-pr-writing/merge-setting.md` finds the merge
-  setting, for reviewers that cannot load gitwise: change both together.
+  setting, because `general-reviewer` and `doc-reviewer` do not preload
+  `gitwise:commit-pr-writing` and cannot load a skill while they run: change
+  both together.
 - `find-duplicate-comments.js` reports comments in the identical copies of
   `hooks/scripts/sync-codex-agents.js` as retold; dismiss it.
 - Report security issues privately via [SECURITY.md](.github/SECURITY.md). Ask

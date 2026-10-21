@@ -40,7 +40,7 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 - Diataxis doc-type fit -- the doc's shape matches its type
 - Two-audience register -- use-it vs navigate/change-it, with claims tracing to docstrings/types
 - Change narration -- prose written for whoever reviews the diff rather than whoever reads the page -- see `docs-patterns`
-- Placement -- narration, unreadable links or paths, or information outside its home that misleads a reader or leaves them without what they need -- see `information-placement`, which tiers the rest
+- Placement -- narration, claims that need their links, unreadable links or paths, or information outside its home that misleads a reader or leaves them without what they need -- see `information-placement`, which tiers the rest
 - Heading hierarchy -- no skipped levels
 - Nav / ToC completeness -- no orphan or unlisted pages
 

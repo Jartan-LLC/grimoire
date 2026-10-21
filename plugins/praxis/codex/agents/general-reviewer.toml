@@ -37,7 +37,7 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 - Blanket linter/type/test suppressions -- see `code-hygiene`
 - Duplication a maintainer must untangle -- see `code-hygiene`
 - Retold facts -- a keep-category comment told again at another site -- see `comment-hygiene`
-- Placement -- narration, unreadable links or paths, or information outside its home that misleads a reader or leaves them without what they need -- see `information-placement`, which tiers the rest
+- Placement -- narration, claims that need their links, unreadable links or paths, or information outside its home that misleads a reader or leaves them without what they need -- see `information-placement`, which tiers the rest
 
 ### Minor
 
