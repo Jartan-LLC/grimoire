@@ -10,10 +10,10 @@ user-invocable: false
 Each piece of information has a reader and one home that reader opens when they need it; other
 homes carry at most a pointer or a one-line flag. A short account told for another reader in that
 reader's own home, such as the PR description's intent or a changelog line, is not a second copy.
-`references/homes.md` in this skill's directory
-lists the default home for each kind of information. What the text in a home says is for that
-home's skill: `gitwise:commit-pr-writing` for commit messages and PR text, `docs-patterns` for
-documents, `comment-hygiene` for code comments and docstrings.
+`references/homes.md` in this skill's directory lists the default home for each kind of
+information. What the text in a home says is for that home's skill: `gitwise:commit-pr-writing`
+for commit messages and PR text, `docs-patterns` for documents, `comment-hygiene` for code comments
+and docstrings.
 
 ## Project rules first
 
@@ -34,7 +34,8 @@ parses (trailers, frontmatter, a tool's marked blocks) are the project's, except
    changelog entry or a PR description states change relative to the state before it ("failed
    before this change") or to a version. A "now" that says what the change made true is fine, and
    so is a merge condition or a stacked PR stated as a fact ("Requires #52.", "the PRs stacked on
-   this one merge with it"). A PR description the merge setting does not land is read before the
+   this one merge with it"), and so is later work named by its issue ("the rest of the #151
+   migration"). A PR description the merge setting does not land is read before the
    merge and may compare against the base branch ("262 MB on main"). Review replies and issue and
    plan comments are read in the moment and may narrate.
 2. A claim that needs its links or ids to say what it claims: strip them and the sentence must
@@ -48,11 +49,13 @@ parses (trailers, frontmatter, a tool's marked blocks) are the project's, except
    count.
 4. In a document, comment or docstring, a hand-maintained copy of a value, count, index or listing
    the code or tree declares. A commit message or PR description describes one change and holds no
-   such copy, and a design the code must follow is the source, not a copy. A generated, drift-checked copy, an entry that adds what the code does not say, and a measurement
-   stated with its conditions are not copies.
+   such copy, and a design the code must follow is the source, not a copy. A generated,
+   drift-checked copy, an entry that adds what the code does not say, and a measurement stated with
+   its conditions are not copies.
 5. In a repository made from a template (not the template itself), text addressed to the adopter
-   after adoption. Treat a repository as made from a template only when it says so (its agent file,
-   README or configuration names the template it came from); never on a guess.
+   after adoption. Treat a repository as a template, or as made from one, only when it says so (its
+   agent file, README or configuration names it as a template or names the template it came from);
+   never on a guess about how its files are copied.
 6. Exploit or reproduction detail of a flaw whose fix is not released, in public text, unless the
    text links the released fix or a public advisory or the repository is private. Describe the fix
    neutrally; the detail goes to the private channel the project's SECURITY.md names.
@@ -80,8 +83,9 @@ not flagged for what it lacks):
    to its rules to keep its practice; do not raise the same finding again in a later round.
 
 Tier findings with `review-severity`: rule 6 is Critical; rules 1 and 2 are Important; rules 3-5 are
-Minor; information outside its default home is Minor, or Important when it misleads a reader or
-leaves them without something they need.
+Minor; information outside its default home is Minor, or Important only when a reader who goes by
+the text as it stands would act wrongly or miss something they need; a fact that is in the right
+home but not at its top, or that a reader can still find where they look, is Minor.
 
 When asked where something should go while writing, check the project's rules, then give the home
 from `references/homes.md` and any pointer the other homes should carry.
