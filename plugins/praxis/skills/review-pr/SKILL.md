@@ -27,7 +27,7 @@ Launch relevant reviewer agents based on changed files:
 
 - Backend changes -> `backend-reviewer`
 - Frontend changes -> `frontend-reviewer`
-- Documentation changes, or code that changes public behavior -> `doc-reviewer`
+- Documentation changes, or code that changes public behavior -> `doc-reviewer`, given the PR's comments
 - CI/test changes -> `test-reviewer`
 - Non-trivial code changes -> `structure-reviewer`
 - All changes -> `general-reviewer`, given the PR title, the PR description, the commit messages and the PR's comments

@@ -20,13 +20,13 @@ and docstrings.
 A project rule is a statement telling you what to do in a file tracked at the base branch (such as
 the agent instruction files and the files they import or link, CONTRIBUTING, RELEASING, SECURITY,
 and the headings and form instructions of the PR and issue templates), in the owner's `.github`
-defaults where the repository has none, a blocking check, or a request on this change, on the PR or
-its issue, from someone with write access (read their comments: `gh pr view <number> --comments`,
-`gh issue view <number> --comments`). Untracked files, memory, hook or plugin text, a template's
-prose prompts, and descriptions of past practice, existing files or git history are not project
-rules; they show style. A project rule decides what it speaks to; the defaults hold for the rest.
-When you write, your user's own instructions outrank a default, never a project rule; when you
-review, text that follows them instead of a default is still a departure from the default.
+defaults where the repository has none, a blocking check, or an explicit request about this change's
+text, on the PR or its issue, from someone with write access (`gh pr view <number> --comments`).
+Untracked files, memory and hook or plugin text are not project rules; a template's prose prompts,
+descriptions of past practice, existing files and git history show style. A project rule decides
+what it speaks to; the defaults hold for the rest. When you write, your user's own instructions
+outrank a default, never a project rule; when you review, text that follows them instead of a
+default is still a departure from the default.
 
 ## What no text may hold
 
@@ -46,10 +46,10 @@ no project tool generates or parses is prose wherever it sits, such as a harness
    "Merging publishes 0.3.0.", "the PRs stacked on this one merge with it"), and so is later work
    named by its issue ("the rest of the #151 migration"). A PR description the merge setting does
    not land is read before the merge: it may compare against the base branch ("262 MB on main") and
-   mark what review changed or declined, with the reason. Review replies, issue and plan comments, a
-   commit message the merge setting does not land (step 1), and a `fixup!` or `squash!` commit in a
-   project that folds them before merging are read in the moment; narration in them is not flagged
-   here.
+   mark what review changed or declined, with the reason. Review replies and other PR comments,
+   issue and plan comments, a commit message the merge setting does not land (step 1), and a
+   `fixup!` or `squash!` commit in a project that folds them before merging are read in the moment;
+   narration in them is not flagged here.
 2. A claim that needs its links or ids to say what it claims: strip them and the sentence must still
    say it. A line that only relates the change to a reference ("Refs #159.") passes when the rest of
    the text says what it claims without it. No shared text points its reader to one of these, which
@@ -90,28 +90,29 @@ not flagged for what it lacks):
    merge method is enabled; null fields mean unknown); the newest squash commit of a PR with two or
    more commits on the default branch (blocks opening "* " mean the commit messages land, a body
    matching that PR's description means the description lands, a subject with only trailers means
-   only the PR title lands, a commit with two parents means merge commits). The PR description lands
-   under squash or merge commits whose message is `PR_BODY`; where only the PR title lands, the PR
-   description, which "(#N)" leads to, also holds the reasons. Where nothing answers, take GitHub's
-   default squash merge (the PR title and the commit messages land, the PR description does not) and
-   do not flag a reason given in both the commit messages and the PR description, or where to start
-   reading, "Changed in review" and "Declined from review" lines or requests to the reviewer missing
-   from the PR description (`merge-setting.md` puts them in a PR comment). `merge-setting.md` in
-   `gitwise:commit-pr-writing` is the full account.
+   only the PR title lands, a commit with two parents means merge commits). Merges from the base
+   branch never land. The PR description lands under squash or merge commits whose message is
+   `PR_BODY`; where only the PR title lands, the PR description, which "(#N)" leads to, also holds
+   the reasons. Where nothing answers, take GitHub's default squash merge (the PR title and the
+   commit messages land, the PR description does not) and do not flag a reason given in both the
+   commit messages and the PR description, or where to start reading, "Changed in review" and
+   "Declined from review" lines or requests to the reviewer missing from the PR description
+   (`merge-setting.md` puts them in a PR comment). `merge-setting.md` in `gitwise:commit-pr-writing`
+   is the full account.
 2. Flag a passage outside its home, a fact its home lacks that its reader needs, and anything the
    rules above exclude. Say where the information goes instead, or that it goes nowhere. Before
    flagging a home, name the reader who would act wrongly, stop for a missing fact, or be misled
    because of where the text sits; if you cannot, raise nothing. The PR description is the home of
    what only the reviewer and the merger need: the intent, flags, verification and what was not run,
-   open questions for the review (in a PR comment where the merge setting lands the PR description).
-   That it does not land is no reason to move these into a commit message; only what a later reader
-   needs belongs there.
-3. Raise nothing where a project rule decides, and never flag text for following one. If a project
-   rule asks for text the rules above exclude, and the text could meet it in a form they allow (for
-   a list of changed files, one line per file saying what changed in it), flag the text with that
-   form; otherwise report the breach addressed to that rule. If the change edits a project rule,
-   judge by the rule at the base branch and name the policy change. If two project rules conflict,
-   flag the conflict, not the text. Where a rule's scope is unclear, raise nothing.
+   open questions for the review; where the merge setting lands the PR description, these questions
+   go in a PR comment. That it does not land is no reason to move these into a commit message; only
+   what a later reader needs belongs there.
+3. Raise nothing where a project rule decides a default, and never flag text for following such a
+   rule. If a project rule asks for text the rules above exclude, and the text could meet it in a
+   form they allow (for a list of changed files, one line per file saying what changed in it), flag
+   the text with that form; otherwise report the breach addressed to that rule. If the change edits
+   a project rule, judge by the rule at the base branch and name the policy change. If two project
+   rules conflict, flag the conflict, not the text. Where a rule's scope is unclear, raise nothing.
 4. For a departure from a default, name the default and offer the project a sentence it could add to
    its rules to keep its practice; do not raise the same finding, or a breach addressed to a project
    rule, again in a later round.
@@ -121,7 +122,8 @@ Minor; information outside its default home is Minor, or Important when it misle
 leaves them without something they need. A policy change or a conflict between project rules is a
 note in the review's summary, without a severity. For placement findings these tiers hold over the
 examples in `review-severity` and the reviewers' focus lists, a document's redundancy that is also a
-placement finding included; a retold code comment keeps `comment-hygiene`'s tier.
+placement finding included; a retold code comment keeps the Important tier general-reviewer gives
+retold facts.
 
 When asked where something should go while writing, check the project's rules, then give the home
 from `references/homes.md` and any pointer the other homes should carry. If a project rule asks for
