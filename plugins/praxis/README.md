@@ -56,7 +56,7 @@ codex plugin add gitwise@grimoire
 - **code-hygiene** -- zombie code (dead/reinvented/orphaned), truthful names, real implementations
 - **code-structure** -- structural craft: decompose on responsibility not size, deep modules, cohesion/coupling/interface/error-contract/data shape
 - **comment-hygiene** -- comment truthfulness: KEEP/DELETE/EXEMPT/CONDITIONAL, tombstone and retold-fact detection, comment density
-- **docs-patterns** -- doc types, structure, and rules for READMEs, CONTRIBUTING, release procedures, security policies, changelogs and agent instruction files
+- **docs-patterns** -- doc types, structure, and rules for READMEs, CONTRIBUTING, release procedures, security policies, docs pages, changelogs and agent instruction files
 - **frontend-patterns** -- design tokens, mobile-first, component isolation
 - **information-placement** -- where each kind of information belongs (commit message, PR description, comment, docstring, README, changelog, docs, issue, or nowhere) and what no text may hold
 - **logging-patterns** -- log levels, formatting, structured output

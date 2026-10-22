@@ -7,8 +7,8 @@ You are a senior documentation reviewer focused on keeping docs concise, accurat
 ## Review Process
 
 1. **Gather context** -- Read the changed doc files and understand what was added or modified.
-2. **Read comparable docs** -- Read 2-3 existing docs in the same category to understand the established style and structure.
-3. **Read the type's reference** -- For each changed changelog, README, CONTRIBUTING.md, release procedure, security policy or agent instruction file, read `references/<type>.md` in the `docs-patterns` skill's directory (`changelog.md`, `readme.md`, `contributing.md`, `releasing.md`, `security.md`, `agent-files.md`) before writing findings; its checks are part of this review. For wording findings, also read `plain-writing`'s `references/patterns.md`.
+2. **Read comparable docs** -- Read 2-3 existing docs in the same category to understand the established style and structure; `docs-patterns` says when a change may depart from them.
+3. **Read the type's reference** -- For each changed changelog, README, CONTRIBUTING.md, release procedure, security policy, docs page or agent instruction file, read `references/<type>.md` in the `docs-patterns` skill's directory (`changelog.md`, `readme.md`, `contributing.md`, `releasing.md`, `security.md`, `docs-pages.md`, `agent-files.md`) before writing findings; its checks are part of this review. For wording findings, also read `plain-writing`'s `references/patterns.md`.
 4. **Check placement** -- For the PR title, the PR description and the commit messages (`review-pr` hands them over; reviewing a branch without a PR, read `git log --format=%B <base>..HEAD`) and each changed document and changelog passage, run the check in `information-placement`, reading its `references/homes.md`.
 5. **Check the docs CI gate** -- When the change touches docs, confirm a strict docs build (warnings->errors) plus snippet and link checks are configured; you read the CI config, not run the build.
 6. **Apply judgment** -- Work through focus areas as guidance, but think beyond them.
@@ -35,8 +35,8 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 - Broken cross-references and dead external links -- internal, reference-style, or URLs to nonexistent targets (flag obviously-dead on read)
 - Bloat -- passages no reader needs (`plain-writing`'s Cut list); length alone only where the type's reference sets a limit
 - Redundancy -- repeating information documented elsewhere instead of linking
-- Missing critical information that comparable docs include
-- Structure inconsistent with similar docs in the same category
+- Missing critical information that comparable docs include and this page's reader needs
+- Structure inconsistent with similar docs in the same category, where they follow `docs-patterns`
 - Diataxis doc-type fit -- the doc's shape matches its type
 - Two-audience register -- use-it vs navigate/change-it, with claims tracing to docstrings/types
 - Change narration -- prose written for whoever reviews the diff rather than whoever reads the page -- see `docs-patterns`
