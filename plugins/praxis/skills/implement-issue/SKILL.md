@@ -20,7 +20,7 @@ Determine the issue number from the user's request, which may carry context beyo
 gh issue view <issue-number> --comments
 ```
 
-Also check `.claude/workspace/` for any plan files related to this issue. If no plan exists for a complex issue, suggest running `/praxis:plan-issue` first.
+Also read `.claude/workspace/issue-<issue-number>-plan.md`, or any other plan file in `.claude/workspace/` for this issue. If no plan exists for a complex issue, suggest running `/praxis:plan-issue` first.
 
 ### 2. Setup Branch
 
@@ -45,17 +45,3 @@ Run the Verify commands from `CLAUDE.md`. Fix any failures and commit the fixes 
 ### 7. Push
 
 Push the branch with all commits. If the branch already has a PR (`gh pr view --json number,title,body,baseRefName`), check its title and description against `git diff <baseRefName>...HEAD`, update what no longer holds as `gitwise:commit-pr-writing` says (`gh pr edit <number>`), and tell the user what you changed.
-
-### 8. Post Summary
-
-```bash
-gh issue comment <issue-number> --body "## Implementation Complete
-
-Branch: \`<branch-name>\`
-
-### Changes
-- [categorized list of what was added/modified/removed]
-
-### Documentation
-- [docs created or updated, or 'No doc changes needed']"
-```
