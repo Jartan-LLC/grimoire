@@ -12,7 +12,7 @@ is Critical; an ordinary mismatch between the page and the code is Important.
 
 **Unreleased behaviour shown as current.** A reader on the released version configures a setting that does not exist
 or skips an upgrade step that applies to them: Important, or Critical where it hides an upgrade or migration step from
-them. It arises only where the page reaches readers before the release that ships the change; raise nothing where the
+them. It arises only where the page reaches readers before the release that ships the change; raise no missing mark where the
 page publishes with each release (per-version docs, a site the release workflow deploys), says it describes the default
 branch, or the install builds from the branch the page describes. Verify: when the page reaches readers (the docs deploy workflow's `on:`, or the repository
 view for files read on the forge), and what their install gives (the image tag the compose file pulls, the package
@@ -21,8 +21,8 @@ or the newest tag with no pre-release part from `git tag --list '<package>*'
 --sort=-v:refname`, without the pattern where tags carry no package name). Where the check applies,
 each line the change adds must hold for that release or carry a version mark from the tree or the release record, or
 "unreleased", and anything the change documents unmarked that the changelog still lists under its unreleased section is
-a finding. Search the added lines for "an earlier version", "a version that", "a version carrying", "now" and "no
-longer".
+a finding, as is "now" or "no longer" in such a line. On any page, a version named vaguely ("an earlier version", "a
+version that", "a version carrying") is a finding: name it by number.
 
 - Bad: "Servers started by a version carrying this guard refuse ..." Better: "Servers from 0.2.0 refuse ..."
 
