@@ -20,10 +20,10 @@ Determine the PR number from the user's request. Read the review in `.claude/wor
 
 ```bash
 gh pr view <pr-number> --comments
-gh api repos/{owner}/{repo}/pulls/<pr-number>/comments
+gh api --paginate repos/{owner}/{repo}/pulls/<pr-number>/comments
 ```
 
-Take the saved review's findings and each posted finding that no later commit or reply has answered, and parse them into a numbered list grouped by severity (Critical > Important > Minor).
+Take each finding, from the saved review or posted, that no later commit or reply has answered, and parse them into a numbered list grouped by severity (Critical > Important > Minor).
 
 ### 2. Check Out Branch
 
@@ -49,6 +49,6 @@ The user may ask to commit at any point during the review -- commit what's been 
 
 Update the PR title and description as in step 2. A declined finding, or a fix made differently than asked, is a decision a reviewer might question: give it its line there as `gitwise:commit-pr-writing` says.
 
-Where a person posted a finding that the round declined, fixed differently or found already the case, reply to it with what was done and why: in its thread when it was posted on a line (`gh api repos/{owner}/{repo}/pulls/<pr-number>/comments/<comment-id>/replies -f body=...`), otherwise as a PR comment. Answer nothing else on the PR.
+Where a person posted a finding that the round declined, fixed differently or found already the case, reply to it with what was done and why: in its thread when it was posted on a line (`gh api repos/{owner}/{repo}/pulls/<pr-number>/comments/<comment-id>/replies -f body=...`, with the id of the thread's first comment: the finding's `in_reply_to_id` when it has one), otherwise as a PR comment. Answer nothing else on the PR.
 
 If the round's commits are not pushed yet, tell the user the update and any reply are ready for after the push.
