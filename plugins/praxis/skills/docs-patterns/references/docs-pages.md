@@ -11,8 +11,8 @@ is Critical; an ordinary mismatch between the page and the code is Important.
 
 **Unreleased behaviour shown as current.** A reader on the released version configures a setting that does not exist
 or skips an upgrade step that applies to them: Important, or Critical where it hides an upgrade or migration step from
-readers on the released version. Raise nothing where the docs are built per version or say they describe the default
-branch. Verify: find the newest release (`gh release list -L 1`,
+readers on the released version. Raise nothing where the docs are built per version, say they describe the default
+branch, or the project has no release. A version mark must come from the tree or the release record. Verify: find the newest release (`gh release list -L 1`,
 the image tag the compose file pulls, the package index); each line the change adds must hold for it or carry its
 version or "unreleased". Anything the changelog still lists under its unreleased section and the page documents
 unmarked is a finding. Search the added lines for "an earlier version", "a version that", "now" and "no longer".
@@ -21,7 +21,7 @@ unmarked is a finding. Search the added lines for "an earlier version", "a versi
 
 ## Names and planned state
 
-**A name that does not exist.** Every file, module, setting and command the page names (placeholders aside) must exist at the change's
+**A name that does not exist.** Every file, module, setting and command the page names (placeholders, and names the line marks removed or renamed with the version, aside) must exist at the change's
 head (`git ls-files`, `git grep`), or the sentence or section naming it must say it is planned, with its issue: a
 contributor otherwise builds against what is not there. Important. A single note at the top of the page does not mark
 the lines below it.
@@ -37,13 +37,14 @@ that points to the other instead of restating it raises nothing.
 
 **A stated procedure against the record.** A release procedure on a docs page is checked and tiered as
 `references/releasing.md` does. A sync or deploy step the page states must match the forge (`gh run list -w
-<workflow>` and the workflow's `on:`): Important where it does not.
+<workflow>` and the workflow's `on:`): Important where it does not, or Critical where following it deploys or publishes
+something that cannot be taken back, as `references/releasing.md` tiers it.
 
 ## Steps
 
 **Order and gaps.** A check that decides whether to go on must come before the step it guards, and an action another
 page requires of this task's reader must be in the steps or linked from them; otherwise the reader acts before they
-know, or misses the action: Important, or Critical for an upgrade, migration or recovery step. Verify: search the
+know, or misses the action: Important, or Critical for a migration, upgrade, removal, recovery or rollback step. Verify: search the
 sibling pages for "before", "must" and "run ... first".
 
 - Bad: a fork guide that checks for breaking `.env` changes after the merge and cleanup.
@@ -60,6 +61,6 @@ generator's targets (`automodule`, `:undoc-members:`, an include list) with the 
 
 ## What not to raise
 
-Raise nothing on adopter instructions in a template that are marked at their site, or on placeholders an adopter replaces, on a fragment a generator appends
+Raise nothing on a page another docs-patterns file covers (a changelog page), on adopter instructions in a template that are marked at their site, or on placeholders an adopter replaces, on a fragment a generator appends
 to a README, on a page type the project does not keep, or on a page's departure from the existing pages where those
 pages break a rule in docs-patterns, plain-writing or information-placement.
