@@ -1,7 +1,7 @@
 ---
 name: docs-patterns
 description: Documentation conventions -- doc types, structure, register, per-type rules, and quality standards.
-when_to_use: Writing, editing, or reviewing documentation -- a README, CONTRIBUTING.md, a release procedure such as RELEASING.md, changelog entries and release notes, docs pages, or agent instruction files such as CLAUDE.md and AGENTS.md.
+when_to_use: Writing, editing, or reviewing documentation -- a README, CONTRIBUTING.md, a release procedure such as RELEASING.md, a security policy (SECURITY.md), changelog entries and release notes, docs pages, or agent instruction files such as CLAUDE.md and AGENTS.md.
 user-invocable: false
 ---
 
@@ -36,6 +36,7 @@ Before editing one of these, read its file in this skill's directory; a reviewer
 | A README, including a package page or a component's README | `readme.md` |
 | CONTRIBUTING.md or other contributor docs | `contributing.md` |
 | RELEASING.md or another release procedure | `releasing.md` |
+| SECURITY.md, a repository's or the owner's default security policy | `security.md` |
 | CLAUDE.md, AGENTS.md, the files they import or name as the rules, `.claude/rules/`, other tools' equivalents | `agent-files.md` |
 
 ## Section Structure
