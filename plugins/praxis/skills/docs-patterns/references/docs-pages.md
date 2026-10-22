@@ -11,20 +11,23 @@ is Critical; an ordinary mismatch between the page and the code is Important.
 
 **Unreleased behaviour shown as current.** A reader on the released version configures a setting that does not exist
 or skips an upgrade step that applies to them: Important, or Critical where it hides an upgrade or migration step from
-readers on the released version. Raise nothing where the docs are built per version, say they describe the default
-branch, or the install steps build from it, or the project has no release. A version mark must come from the tree or the release record. Verify: find
-the release the install steps give: the image tag the compose file pulls, the package index, else the newest release of this
-page's component (`gh release list --exclude-drafts --exclude-pre-releases`, or the newest `git tag --list
-'<package>*' --sort=-v:refname` tag with no pre-release part, where tags carry a package name); each line the change adds must hold for it or carry its
-version or "unreleased". Anything the changelog still lists under its unreleased section and the page documents
-unmarked is a finding. Search the added lines for "an earlier version", "a version that", "a version carrying", "now" and "no longer".
+them. It arises only where the page reaches readers before the release that ships the change; raise nothing where the
+page publishes with each release (per-version docs, a site the release workflow deploys) or the install builds from the
+branch the page describes. Verify: when the page reaches readers (the docs deploy workflow's `on:`, or the repository
+view for files read on the forge), and what their install gives (the image tag the compose file pulls, the package
+index, else the newest release of this page's component: `gh release list --exclude-drafts --exclude-pre-releases`,
+or the newest `git tag --list '<package>*' --sort=-v:refname` tag with no pre-release part). Where the check applies,
+each line the change adds must hold for that release or carry a version mark from the tree or the release record, or
+"unreleased", and anything the changelog still lists under its unreleased section and the page documents unmarked is
+a finding. Search the added lines for "an earlier version", "a version that", "a version carrying", "now" and "no
+longer".
 
 - Bad: "Servers started by a version carrying this guard refuse ..." Better: "Servers from 0.2.0 refuse ..."
 
 ## Names and planned state
 
 **A name that does not exist.** Every file, module, setting and command the page names (placeholders, and names the line marks removed or renamed, with the version where the release check applies, aside) must exist at the change's
-head (`git ls-files`, `git grep`), or the sentence or section naming it must say it is planned, with its issue: a
+head (`git ls-files`, `git grep`), or the sentence naming it, or its section heading, must say it is planned, with its issue: a
 contributor otherwise builds against what is not there. Important. A single note at the top of the page does not mark
 the lines below it.
 
