@@ -48,7 +48,7 @@ codex plugin add gitwise@grimoire
 - **general-reviewer** -- reviews code for general quality, naming, organization, and comment hygiene
 - **structure-reviewer** -- reviews structure and readability: decomposition, coupling, interfaces, data modeling, control flow, naming
 - **test-reviewer** -- reviews test coverage and CI/CD correctness
-- **doc-reviewer** -- reviews documentation for conciseness, accuracy, consistency
+- **doc-reviewer** -- reviews documentation for conciseness, accuracy, consistency, and where information sits in every PR's title, description and commit messages
 
 ### Skills
 
@@ -58,6 +58,7 @@ codex plugin add gitwise@grimoire
 - **comment-hygiene** -- comment truthfulness: KEEP/DELETE/EXEMPT/CONDITIONAL, tombstone and retold-fact detection, comment density
 - **docs-patterns** -- doc types, structure, and rules for READMEs, CONTRIBUTING, release procedures, changelogs and agent instruction files
 - **frontend-patterns** -- design tokens, mobile-first, component isolation
+- **information-placement** -- where each kind of information belongs (commit message, PR description, comment, docstring, README, changelog, docs, issue, or nowhere) and what no text may hold
 - **logging-patterns** -- log levels, formatting, structured output
 - **plain-writing** -- prose that informs: what to keep and cut, plain voice, a final wording pass
 - **readable-code** -- local clarity: control-flow shape, naming for the reader, reading order and working set
