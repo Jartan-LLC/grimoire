@@ -208,9 +208,6 @@ def process_batch(
 ) -> BatchResult:
     """Process items concurrently using a worker pool.
 
-    Processes each item in the batch using the configured number of
-    workers. Progress can be monitored via the optional callback.
-
     Args:
         items: The items to process. Must not be empty.
         max_workers: Maximum concurrent workers.
