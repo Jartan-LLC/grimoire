@@ -17,8 +17,9 @@ exists: Critical. Verify: read every route the file gives ("Please open an issue
 no button or a dead service and gives up or goes public: Important. Verify: for GitHub private vulnerability reporting,
 `gh api repos/OWNER/REPO/private-vulnerability-reporting` must say `"enabled": true`; for an owner default, check each
 public, unarchived repository without its own file (`gh repo list OWNER --limit 1000 --visibility public
---no-archived`, and with `--visibility private` for the private ones you can read). Private reporting cannot be on in a private or archived repository, so raise nothing about the setting
-there, but a policy that covers a private repository must name a channel its readers can use besides GitHub's form.
+--no-archived`, and with `--visibility private` and `internal` for the ones you can read). Private reporting cannot be on in a private or archived repository, so raise nothing about the setting
+there, but a policy that covers a private, internal or archived repository must name a channel its readers can use besides
+GitHub's form.
 Fetch each URL and follow redirects, and check that a named service still takes this project's reports. A mailbox
 cannot be checked, but its domain can (`dig +short MX example.org`, then `dig +short A` and `dig +short AAAA` if that is
 empty): raise a domain with none of these records, or a null MX (`0 .`), which takes no mail.
@@ -39,7 +40,7 @@ default, which applies only from a public `.github` repository. A change made to
 ## Supported versions
 
 **Versions that do not match the releases.** A user on an old line reads that they are covered, or a listed version
-never existed: Important. Verify: `gh api repos/OWNER/REPO/releases --jq '.[0:5][].tag_name'` or `git tag -l`; the
+never existed: Important. Verify: `gh release list -R OWNER/REPO --exclude-drafts --exclude-pre-releases --limit 5` or `git tag -l --sort=-v:refname`; the
 current release must be covered, and the README must not contradict the file. A rule tied to releases ("the past two
 releases") stays true; raise nothing on it unless the releases break it.
 
@@ -59,7 +60,7 @@ that declines to promise ("we cannot guarantee any specific timeline").
 
 **References to a removed channel or program.** After a channel or program changes, a line that still points to it
 sends the reporter looking for something gone: Important where the policy then names no working channel, else Minor;
-leftover terms of a removed program (bounty rules, safe harbor) are tiered as under Promises.
+leftover terms of a removed program (bounty rules, safe harbor) are Important, as a promise nobody runs.
 Verify: search the file for "above", "below", "email", "bounty" and the old channel's name. A README, CONTRIBUTING.md
 or other doc line that still gives the old address or service is Important, as a pointer to a missing address is in
 `references/contributing.md`; search the tree for it.
@@ -73,4 +74,4 @@ when the example rows read as real versions. Verify: search for "Use this sectio
 
 **A retyped report form.** A what-to-include list for a channel that only GitHub's form serves drifts from the form:
 Minor. Where email or another channel is also named, a short list is fine. Verify against the repository's `.github/VULNERABILITY_REPORT.yml` (or `.yaml`), else the one in the owner's
-`.github` repository (in its `.github` folder or at its root), else GitHub's default form (summary, details, proof of concept, impact).
+`.github` repository (in its `.github` folder), else GitHub's default form (summary, details, proof of concept, impact).
