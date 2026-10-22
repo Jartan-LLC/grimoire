@@ -38,8 +38,4 @@ Read `.github/PULL_REQUEST_TEMPLATE.md` if the project has one, and write the PR
 gh pr create --title "<title>" --body "<description>" --base <base-branch>
 ```
 
-Include `Closes #<issue-number>` in the body. If `gitwise:commit-pr-writing` puts notes for the reviewer in a PR comment, post it:
-
-```bash
-gh pr comment <pr-number> --body "<notes>"
-```
+Include `Closes #<issue-number>` in the body.

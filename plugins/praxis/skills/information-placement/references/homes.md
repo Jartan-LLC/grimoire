@@ -34,12 +34,12 @@ fallback the row gives; never create a document type the project has not chosen 
 
 | Information | Home | Elsewhere, at most | Never |
 |---|---|---|---|
-| Intent, and flags for what the diff alone would let a reviewer misjudge | the PR description | | file inventories; a retelling of the commit messages beyond the opening what-and-why and the flags with their reasons; process narration; raw tool output; template skeletons |
+| Intent, and flags for what the diff alone would let a reviewer misjudge | the PR description | | file inventories; a retelling of the commit messages beyond the opening what-and-why and the flag and decision lines with their reasons; process narration; raw tool output; template skeletons |
 | Verification: what ran and what it showed, what was not run | the PR description; the commit message when there is no PR | the commit message keeps the versions verified against; results a commit message already states need no copy in the PR description | test docstrings; docs; raw output (link the run); totals CI already shows |
-| Where to start reading | the PR description; a PR comment where the PR description becomes the squash commit's message | | |
+| Where to start reading | the PR description, except where the merge setting lands it | | a PR comment |
 | Merge conditions and what merging sets off | the PR description, as facts that stay true ("Requires #52.", "Merging publishes 0.3.0.") | RELEASING holds the standing sequence | merge-status narration ("not merging yet") |
-| Review findings | the posted review; inline where the line is the context | | praise; vulnerability detail in a public repository |
-| Answers to findings | one reply per round covering every finding; inline threads answered in the thread | a lasting reason goes to its own home and the reply points there | commit messages as the answer |
+| Review findings | the review, where whoever asked for it reads it | | praise; vulnerability detail in a public repository |
+| Answers to findings | the fix; a decision a reviewer might question, a declined finding included, as a PR description flag with its reason | a reply on the PR to a finding a person posted that was declined, fixed differently or found already the case, in its thread when it was posted on a line; a lasting reason goes to its own home and the reply points there | commit messages as the answer; "changed in review" or "declined from review" lines; a reply per round or per fixed finding |
 
 ## In the code
 
@@ -67,16 +67,17 @@ fallback the row gives; never create a document type the project has not chosen 
 | Information | Home | Elsewhere, at most | Never |
 |---|---|---|---|
 | The problem, its scope and constraints, each place it shows | the issue body, edited to stay current | the commit message states the problem in a sentence; the PR description links the issue | a scope change recorded only in a comment; "as decided on #N" without the decision |
-| The plan | the author's workspace; one plan comment on the issue, edited in place and without the working notes below, where someone else must see it before the PR | the PR description flags departures | a restatement of the issue; a new full plan per revision |
-| Working notes: a fix's step-by-step checklist, `file:line` pointers for a fix, files to touch | the author's workspace, never a shared home | | the issue, the plan comment, the PR |
-| Findings during the work; why an issue closed with no change | the issue comment where they arose; a finding that moves scope is also edited into the issue body | the commit message carries the evidence that decided the shipped design | |
+| The plan | the author's workspace | the PR description flags departures | a restatement of the issue; a plan comment nobody asked for |
+| Working notes: a fix's step-by-step checklist, `file:line` pointers for a fix, files to touch | the author's workspace, never a shared home | | the issue, a posted plan, the PR |
+| Findings during the work | the author's workspace; a finding that moves scope is edited into the issue body | the commit message carries the evidence that decided the shipped design | an issue comment per finding |
+| Why an issue closed with no change | one comment when closing it | | |
 | Deferred work, known defects | an issue per item | `TODO(#N)` at the site; "Deferred: #N" in the PR description or reply; a planned state in a document, marked as planned and linked to its issue | "the next PR"; undecided version-tied plans in docstrings |
-| Status: opened, merged, blocked, released | the forge's own state: issue and PR state, closing links, labels, tags | a comment only for status the forge cannot show (a PR into a non-default branch, "released in vX" for an outside filer) | status in docs, code, commit messages or PR descriptions |
+| Status: opened, merged, blocked, released | the forge's own state: issue and PR state, closing links, labels, tags | a comment only for "released in vX" to an outside filer, which the forge does not show | status in docs, code, commit messages or PR descriptions |
 | Detail of a vulnerability whose fix is not released | the private channel SECURITY.md names | public text describes the fix neutrally | an issue, branch name, commit, PR, review, code comment or unreleased changelog section in a public repository |
 
 ## Nowhere
 
 | Information | Exceptions |
 |---|---|
-| How the work went: rounds, agents, timings, CI re-runs, the debugging story | during review, round answers reach the reviewer in the reply; a PR description the merge setting does not land may mark what review changed or declined |
+| How the work went: rounds, agents, timings, CI re-runs, the debugging story | a review reply and an issue or plan comment, read in the moment, may narrate |
 | Restated or derived content: change inventories, diffstats, counts CI or the code already shows, the signature, indexes, empty form sections, boilerplate, praise | a list whose items each give a reason; public names a change removes (what a later reader would search for); generated, drift-checked copies; measurements stated with their conditions |

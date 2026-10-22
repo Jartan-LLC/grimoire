@@ -26,17 +26,17 @@ Write every commit message to land on the default branch, whatever the merge set
 
 ## The PR Title and Description
 
-The lines below assume GitHub's default squash merge, where the commit messages land and the PR description does not. If the project's agent instruction files or CONTRIBUTING state another merge setting, follow it. Where that setting lands the PR description, write the description as the commit message for the whole branch: give the reasons, put any one-time action for contributors in its first paragraph rather than at the end, and post where to start reading and the "Changed in review" and "Declined from review" lines as a PR comment.
+The lines below assume GitHub's default squash merge, where the commit messages land and the PR description does not. If the project's agent instruction files or CONTRIBUTING state another merge setting, follow it. Where that setting lands the PR description, write the description as the commit message for the whole branch: give the reasons, put any one-time action for contributors in its first paragraph rather than at the end, and leave out where to start reading.
 
 The PR title names one change, as a commit subject in the project's commit format (`gitwise:github-conventions`): for a PR with two or more commits it becomes the squash commit's subject.
 
 The PR description:
 
 - Open with any merge dependency as a fact ("Requires #52."), then what the change does and why, in a sentence or two.
-- One line per flag a careful reviewer could miss. Mark each decision review drove, with its reason: "Changed in review: ..., because ...", "Declined from review: ..., because ...". Leave out an adopted suggestion that changed no design or behaviour; a declined one keeps its line. Name any PR you took code from.
+- One line per flag a careful reviewer could miss and per decision they might question, a change they would propose that you rejected included, each with its reason and stated as a fact about the change: "The parser keeps its old name, because the Codex mirror imports it." Do not say which review or request prompted a decision. Name any PR you took code from.
 - Say where to start reading: the file, function or commit subject holding the core logic.
 - State verification as results: what ran, what it showed, what was not run. No checkboxes or pasted output.
-- Do not retell the commit messages or the diff beyond that opening and the flags with their reasons.
+- Do not retell the commit messages or the diff beyond that opening and the flag and decision lines with their reasons.
 - End with what the merger or contributors must do, or that merging is all.
 
 To update a PR title or description, start from the current text, keep what a person added, and make both hold for the whole change as of the last commit.
