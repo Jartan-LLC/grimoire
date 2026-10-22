@@ -6,3 +6,8 @@ This repository is licensed under the MIT License in LICENSE, with these excepti
 - Parts of plugins/praxis/skills/plain-writing/ and plugins/praxis/skills/voiced-writing/ are
   adapted from humanizer by Siqi Chen, under the MIT notice in each directory's
   LICENSE-humanizer, which must ship with them.
+- plugins/praxis/hooks/scripts/lib/utils.js, lib/transcript-context.js, suggest-compact.js and
+  check-console-log.js, and the push-reminder and documentation-file hooks in
+  plugins/praxis/hooks/hooks.json, are adapted from everything-claude-code by Affaan Mustafa, under the
+  MIT notice in plugins/praxis/hooks/scripts/LICENSE-everything-claude-code, which must ship
+  with them.
