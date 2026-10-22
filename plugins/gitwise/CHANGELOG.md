@@ -2,7 +2,7 @@
 
 ## 1.3.0
 
-- `github-conventions` has rules for issue bodies (`issue-format.md`): your agent writes for whoever implements the issue, states the problem before any fix, keeps where the problem shows, the expected result, the scope and the constraints, and leaves out the files to touch, step lists, effort estimates and the story of the session, and titles it with the component, then the symptom or the need.
+- `github-conventions` has rules for issue bodies (`issue-format.md`): your agent writes for whoever implements the issue, states the problem before any fix, keeps where the problem shows, the expected result, the scope and the constraints, and leaves out the files to touch, the steps of a fix, effort estimates and the story of the session, and titles it with the component, then the symptom or the need.
 - `github-conventions` describes implementation plans as saved in `.claude/workspace/`, not posted on the issue, and a plan you have your agent post leaves out Patterns & Conventions Found, Files to Create/Modify and the Implementation Checklist, which are working notes.
 - `commit-pr-writing` assumes GitHub's default squash merge, where every commit message on the branch lands and the PR description does not, and no longer looks up your repository's merge setting. If you merge another way, state it in your agent instruction file or CONTRIBUTING.md and your agent follows it; where your PR description lands, your agent writes it as a commit message and posts where to start reading and the "Changed in review" and "Declined from review" lines as a PR comment.
 - `commit-pr-writing` no longer counts the PR description's opening what-and-why, or a flag with its reason, as retelling the commit messages.
