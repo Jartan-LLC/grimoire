@@ -14,15 +14,16 @@ outside the change is a note, not a finding. Where vulnerability detail may appe
 exists: Critical. Verify: read every route the file gives ("Please open an issue or send mail" offers one).
 
 **A channel that does not work.** The private channel must work for everyone the file covers, or the reporter finds
-no button or a dead service and gives up or goes public: Important. Verify: for GitHub private vulnerability reporting,
-`gh api repos/OWNER/REPO/private-vulnerability-reporting` must say `"enabled": true`; for an owner default, check each
-public, unarchived repository without its own file (`gh repo list OWNER --limit 1000 --visibility public
---no-archived`, and with `--visibility private` and `internal` for the ones you can read). Private reporting cannot be on in a private or archived repository, so raise nothing about the setting
-there, but a policy that covers a private, internal or archived repository must name a channel its readers can use besides
-GitHub's form.
-Fetch each URL and follow redirects, and check that a named service still takes this project's reports. A mailbox
-cannot be checked, but its domain can (`dig +short MX example.org`, then `dig +short A` and `dig +short AAAA` if that is
-empty): raise a domain with none of these records, or a null MX (`0 .`), which takes no mail.
+no button or a dead service and gives up or goes public: Important. Where the file also names a channel that works, a
+dead one beside it is tiered under References to a removed channel or program. Verify: for GitHub private vulnerability
+reporting, `gh api repos/OWNER/REPO/private-vulnerability-reporting` must say `"enabled": true` in each public,
+unarchived repository the file covers; for an owner default, list those with `gh repo list OWNER --limit 1000
+--visibility public --no-archived`. Private reporting cannot be on in a private, internal or archived repository, so
+raise nothing about the setting there, but a policy that covers one must name a channel its readers can use besides
+GitHub's form; list them with `--archived`, `--visibility private` and `--visibility internal`, where you can read
+them. Fetch each URL and follow redirects, and check that a named service still takes this project's reports. A
+mailbox cannot be checked, but its domain can (`dig +short MX example.org`, then `dig +short A` and `dig +short AAAA` if
+that is empty): raise a domain with none of these records, or a null MX (`0 .`), which takes no mail.
 
 - Bad: an owner default saying "click 'Report a vulnerability'" while most repositories it covers have private
   reporting off; "Report on huntr.dev", which stopped taking reports for projects outside AI and ML in 2023.
