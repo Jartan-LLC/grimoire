@@ -42,7 +42,7 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 ### Important
 
 - Reinvention and orphaned abstractions (speculative generality) -- see `code-hygiene`
-- A comment that misleads -- stale, contradicting the code, or pointing at what is gone; see `comment-hygiene`
+- A comment that misleads -- stale, contradicting the code, or describing as present something that is gone; see `comment-hygiene`
 - Blanket linter/type/test suppressions -- see `code-hygiene`
 - Duplication a maintainer must untangle -- see `code-hygiene`
 - Retold facts -- a keep-category comment told again at another site -- see `comment-hygiene`

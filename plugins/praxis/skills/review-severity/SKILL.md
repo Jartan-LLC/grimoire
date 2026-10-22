@@ -155,5 +155,5 @@ Tier a finding by running the spine, not by matching this list. These pin the bo
 | Debug `print` left behind | Minor | noise below the floor (Critical if it emits secrets) |
 | Dead / commented-out code | Minor | zero behavioral consequence; git owns it |
 | Non-conventional casing, comment restating code, unanchored TODO on an incomplete branch | Minor | preference / expected context |
-| Comment or docstring that misleads: stale, contradicting the code, or pointing at what is gone | Important | a future editor acts on it |
+| Comment or docstring that misleads: stale, contradicting the code, or describing as present something that is gone | Important | a future editor acts on it |
 | O(n^2) over a provably-bounded tiny list | Minor | reachability high, impact ~0 |
