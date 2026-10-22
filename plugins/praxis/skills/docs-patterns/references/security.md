@@ -28,8 +28,8 @@ that is empty): raise a domain with none of these records, or a null MX (`0 .`),
 - Bad: an owner default saying "click 'Report a vulnerability'" while most repositories it covers have private
   reporting off; "Report on huntr.dev", which stopped taking reports for projects outside AI and ML in 2023.
 
-**Steps for the wrong person.** Steps must name what the reporter sees: "Report a vulnerability" on the security page,
-or the `security/advisories/new` link. "New draft security advisory" is the maintainer's button: Minor. A link that works only from inside
+**Steps for the wrong person.** Steps must name what the reporter sees: the Security tab, then "Report a
+vulnerability". "New draft security advisory" is the maintainer's button: Minor. A link that works only from inside
 GitHub's UI (a redirector that needs a Referer header) fails for a raw read or a mirror: Minor.
 
 **An undocumented channel.** Where private reporting is on but the file names only another channel, reporters split
