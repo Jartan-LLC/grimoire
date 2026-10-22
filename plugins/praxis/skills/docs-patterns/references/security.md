@@ -1,35 +1,37 @@
 # Reviewing security policy changes
 
-Checks for a change to a security policy (SECURITY.md in `.github/`, the root or `docs/`, or the owner's `.github`
-repository default, which covers every repository without its own). Where the project's own rules, checks or tools
+Checks for a change to a security policy (SECURITY.md in `.github/`, the root or `docs/`, or the owner's public
+`.github` repository default, which covers every repository without its own). Where the project's own rules, checks or tools
 decide a point, raise nothing against them. First review against the lines of `security.md` in the docs-patterns skill
 folder (beside SKILL.md, not this file under `references/`), then apply these checks. Unless the PR's purpose is to write
-or rewrite the policy, raise only what the change adds or makes false. Where vulnerability detail may appear is
+or rewrite the policy, raise only what the change adds or makes false; a public route or a channel that does not work
+outside the change is a note, not a finding. Where vulnerability detail may appear is
 `information-placement`'s concern, not these checks'.
 
 ## The channel
 
-**A public route.** A line that sends reports to a public issue, discussion or chat discloses the flaw before a fix
+**A public route.** A line that sends reports to a public issue, pull request, discussion or chat discloses the flaw before a fix
 exists: Critical. Verify: read every route the file gives ("Please open an issue or send mail" offers one).
 
-**A channel that does not work.** The private channel must work for every repository the file covers, or the reporter
+**A channel that does not work.** The private channel must work for every public repository the file covers, or the reporter
 finds no button or a dead service and gives up or goes public: Important. Verify: for GitHub private vulnerability
 reporting, `gh api repos/OWNER/REPO/private-vulnerability-reporting` must say `"enabled": true`; for an owner default,
-check each repository without its own file (`gh api orgs/OWNER/repos`). Fetch each URL and follow redirects, and check
+check each public, unarchived repository without its own file (`gh repo list OWNER --limit 1000 --visibility public
+--no-archived`); private reporting cannot be on in a private or archived repository, so raise nothing for those. Fetch each URL and follow redirects, and check
 that a named service still takes this project's reports. An email address cannot be checked; raise nothing on it.
 
 - Bad: an owner default saying "click 'Report a vulnerability'" while most repositories it covers have private
   reporting off; "Report on huntr.dev", which stopped taking reports for projects outside AI and ML in 2023.
 
-**Steps for the wrong person.** Steps must name what the reporter sees: the Security tab, then "Report a
-vulnerability". "New draft security advisory" is the maintainer's button: Minor. A link that works only from inside
+**Steps for the wrong person.** Steps must name what the reporter sees: "Report a vulnerability" on the security page,
+or the `security/advisories/new` link. "New draft security advisory" is the maintainer's button: Minor. A link that works only from inside
 GitHub's UI (a redirector that needs a Referer header) fails for a raw read or a mirror: Minor.
 
 **An undocumented channel.** Where private reporting is on but the file names only another channel, reporters split
 between two routes or miss one: Minor. Verify with the API call above.
 
 **The file GitHub does not show.** GitHub shows `.github/SECURITY.md`, else the root file, else `docs/`, else the owner
-default. A change to a file another one shadows reaches no reporter: Important. Verify: list each location.
+default, which applies only from a public `.github` repository. A change to a file another one shadows reaches no reporter: Important. Verify: list each location.
 
 ## Supported versions
 
@@ -52,8 +54,9 @@ that declines to promise ("we cannot guarantee any specific timeline").
 ## What a change leaves behind
 
 **References to a removed channel or program.** After a channel or program changes, a line that still points to it
-sends the reporter looking for something gone: Important where the reporter can no longer find the channel, else Minor.
-Verify: search the file for "above", "below", "email", "bounty" and the old channel's name.
+sends the reporter looking for something gone: Important where the file then names no working channel, else Minor.
+Verify: search the file for "above", "below", "email", "bounty" and the old channel's name, and the tree for the old
+address or service (a README or CONTRIBUTING.md line that still gives it is the same finding).
 
 - Bad: "let one of the maintainers know at one of the email addresses at the top of this article", after the
   addresses were removed for private reporting; "no longer has a bug bounty program" beside bounty eligibility rules.
@@ -63,5 +66,5 @@ when the example rows read as real versions. Verify: search for "Use this sectio
 `5.1.x`, `4.0.x` and another project's name.
 
 **A retyped report form.** A what-to-include list for a channel that only GitHub's form serves drifts from the form:
-Minor. Where email or another channel is also named, a short list is fine. Verify against the project's `.github/VULNERABILITY_REPORT.yml` where one exists, else GitHub's default
-form (summary, details, proof of concept, impact).
+Minor. Where email or another channel is also named, a short list is fine. Verify against the repository's `.github/VULNERABILITY_REPORT.yml` (or `.yaml`), else the one at the root of the
+owner's `.github` repository, else GitHub's default form (summary, details, proof of concept, impact).
