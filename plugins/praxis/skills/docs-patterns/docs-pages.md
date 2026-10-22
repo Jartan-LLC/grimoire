@@ -7,5 +7,5 @@ Any page under `docs/` or on a docs site that has no file of its own in docs-pat
 - Give the page one reader and say its scope in its first lines: what it covers and which page has the rest. Where two readers need different parts, split the page or give each a section headed for them. Write the scope, not a label for the page's type.
 - Title a how-to by its task. Order its steps as the reader does them, with each check before the step it decides, and put every action the task needs in the steps or link it from the step where it applies.
 - A generated reference covers the surface the project supports; leave the rest out or label it internal.
-- In a runbook, start each scenario with containment where it has one, then the fix, and end it with how to tell it is over and, where it contained, the step that undoes the containment or why none is needed.
+- In a runbook, start each scenario with containment, then the fix, and end it with how to tell it is over and the step that undoes the containment.
 - Name only files, settings and commands that exist, unless the line or its section heading marks them planned, or the line marks them removed or renamed (with the mark the first line asks for), or they are placeholders an adopter replaces. Where another page states the same setting, default or step, keep it in one place and point to it from the others.
