@@ -17,8 +17,8 @@ page publishes with each release (per-version docs, a site the release workflow 
 branch, or the install builds from the branch the page describes. Verify: when the page reaches readers (the docs deploy workflow's `on:`, or the repository
 view for files read on the forge), and what their install gives (the image tag the compose file pulls, the package
 index, else the newest release of this page's component: `gh release list --exclude-drafts --exclude-pre-releases`,
-or the newest tag with no pre-release part matching the project's tag pattern: `git tag --list 'v*'
---sort=-v:refname`, or `'<package>--v*'` where tags carry a package name). Where the check applies,
+or the newest tag with no pre-release part from `git tag --list '<package>*'
+--sort=-v:refname`, `'v*'` where tags carry no package name). Where the check applies,
 each line the change adds must hold for that release or carry a version mark from the tree or the release record, or
 "unreleased", and anything the change documents unmarked that the changelog still lists under its unreleased section is
 a finding. Search the added lines for "an earlier version", "a version that", "a version carrying", "now" and "no
@@ -69,6 +69,6 @@ generator's targets (`automodule`, `:undoc-members:`, an include list) with the 
 ## What not to raise
 
 Raise nothing on a page another docs-patterns file covers (a changelog page), on a name or fact a later change made
-false in a dated record (a decision record, a blog post) that the change does not edit, on adopter instructions in a template that are marked at their site, or on placeholders an adopter replaces, on a fragment a generator appends
+false in a dated record (a decision record, a blog post), unless the PR's purpose is to rewrite that record, on adopter instructions in a template that are marked at their site, or on placeholders an adopter replaces, on a fragment a generator appends
 to a README, on a page type the project does not keep, or on a page's departure from the existing pages where those
 pages break a rule in docs-patterns, plain-writing or information-placement.
