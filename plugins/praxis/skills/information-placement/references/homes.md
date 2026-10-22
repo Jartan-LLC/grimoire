@@ -1,7 +1,7 @@
 # Where each kind of information goes
 
 Default homes. A project rule moves any of them. "The commit message" means the text the merge
-setting lands (`gitwise:commit-pr-writing`). Where a home does not exist in the project, use the
+setting lands. Where a home does not exist in the project, use the
 fallback the row gives; never create a document type the project has not chosen to keep.
 
 ## For users and consumers
@@ -24,7 +24,7 @@ fallback the row gives; never create a document type the project has not chosen 
 | A change a consumer sees: behaviour, breaking change, removal, deprecation, fix | the changelog entry for the version that ships it, written in the same change | release notes made from it; a breaking mark on the commit message only when the change breaks something consumers rely on, in the form the project's release tool reads; a one-line PR flag | internals, CI or tests outside a section the changelog keeps for them, or rationale and process that change nothing a user does, in the changelog; the PR description as its home |
 | What a consumer or operator must do to upgrade, for an action this change makes necessary | the changelog entry for the version that needs it | a docs migration page when long; the release notes | only in the PR description or commit message |
 | A security fix, after its release | the changelog's security entry; the advisory | the release notes | anything before the release (see the vulnerability row) |
-| The change, in one line | the PR title, which becomes the squash commit's subject for a PR with two or more commits (under the default squash message, a one-commit PR lands its commit's subject); under rebase or merge commits, each commit's subject | | "address review", "round 2", two changes joined by "and", branch names |
+| The change, in one line | the PR title, which becomes the squash commit's subject for a PR with two or more commits (a one-commit PR lands its commit's subject) | | "address review", "round 2", two changes joined by "and", branch names |
 | Why the change was made: the problem, the cause, the approach over named alternatives, accepted costs, why a dependency was added, versions verified against | the commit message | the PR description gives the intent and the why in a sentence or two; a document carries at most a one-clause reason that changes what its reader does | the changelog; code comments, except a reason an editor at the line needs |
 | A decision with its alternatives and evidence | the commit message of the deciding change, or the project's decision record | the issue keeps the discussion; a rule that follows from it points to it | README, CONTRIBUTING or RELEASING bodies |
 | Something contributors must do once after pulling (rebuild the dev container) | the first paragraph of the commit message that makes the change, with no breaking mark; under a squash merge it stays there, wherever that message falls in the squash | a one-line PR flag; CONTRIBUTING when it recurs | the changelog; the PR description as its only home |
