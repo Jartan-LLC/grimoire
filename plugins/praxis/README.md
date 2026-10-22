@@ -100,7 +100,7 @@ session you may want a higher `COMPACT_CONTEXT_THRESHOLD`.
 
 ## Credits
 
-- [everything-claude-code](https://github.com/affaan-m/everything-claude-code) by Affaan Mustafa -- `hooks/scripts/lib/utils.js`, `suggest-compact.js` and `check-console-log.js` (MIT)
+- [everything-claude-code](https://github.com/affaan-m/everything-claude-code) by Affaan Mustafa -- `hooks/scripts/lib/utils.js`, `hooks/scripts/lib/transcript-context.js`, `suggest-compact.js` and `check-console-log.js` (MIT; `hooks/scripts/LICENSE-everything-claude-code`)
 - [humanizer](https://github.com/blader/humanizer) by Siqi Chen -- `plain-writing`'s wording patterns and parts of its SKILL.md, and parts of `voiced-writing`'s SKILL.md (MIT; `LICENSE-humanizer` in each skill's directory)
 - Wikipedia's [Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) ([CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)) -- the patterns and several of their examples
 
