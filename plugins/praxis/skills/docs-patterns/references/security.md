@@ -13,12 +13,15 @@ outside the change is a note, not a finding. Where vulnerability detail may appe
 **A public route.** A line that sends reports to a public issue, pull request, discussion or chat discloses the flaw before a fix
 exists: Critical. Verify: read every route the file gives ("Please open an issue or send mail" offers one).
 
-**A channel that does not work.** The private channel must work for every public repository the file covers, or the reporter
-finds no button or a dead service and gives up or goes public: Important. Verify: for GitHub private vulnerability
-reporting, `gh api repos/OWNER/REPO/private-vulnerability-reporting` must say `"enabled": true`; for an owner default,
-check each public, unarchived repository without its own file (`gh repo list OWNER --limit 1000 --visibility public
---no-archived`); private reporting cannot be on in a private or archived repository, so raise nothing for those. Fetch each URL and follow redirects, and check
-that a named service still takes this project's reports. A mailbox cannot be checked, but its domain can (`dig +short MX example.org`); raise a domain that does not resolve.
+**A channel that does not work.** The private channel must work for everyone the file covers, or the reporter finds
+no button or a dead service and gives up or goes public: Important. Verify: for GitHub private vulnerability reporting,
+`gh api repos/OWNER/REPO/private-vulnerability-reporting` must say `"enabled": true`; for an owner default, check each
+public, unarchived repository without its own file (`gh repo list OWNER --limit 1000 --visibility public
+--no-archived`). Private reporting cannot be on in a private or archived repository, so raise nothing about the setting
+there, but a policy that covers a private repository must name a channel its readers can use besides GitHub's form.
+Fetch each URL and follow redirects, and check that a named service still takes this project's reports. A mailbox
+cannot be checked, but its domain can (`dig +short MX example.org`, then `dig +short A example.org` if that is empty):
+raise a domain with neither record, or a null MX (`0 .`), which takes no mail.
 
 - Bad: an owner default saying "click 'Report a vulnerability'" while most repositories it covers have private
   reporting off; "Report on huntr.dev", which stopped taking reports for projects outside AI and ML in 2023.
@@ -46,8 +49,9 @@ releases") stays true; raise nothing on it unless the releases break it.
 ## Promises
 
 **A promise with no source.** A response time, fix deadline, disclosure window, bounty, safe harbor or CVE process the
-change adds must trace to the task, the linked issue, the PR description or a foundation policy the project adopted;
-otherwise reporters escalate or disclose on a schedule nobody runs: Important. Verify: find each one in those places. A
+change adds must trace to the policy or another doc at the base branch, the owner's `.github` default, the task, the
+linked issue, the PR description or a foundation policy the project adopted; otherwise reporters escalate or disclose on
+a schedule nobody runs: Important. Verify: find each one in those places. A
 template's numbers ("within 3 working days", "90 day disclosure timeline") are not a source. Raise nothing on a policy
 that declines to promise ("we cannot guarantee any specific timeline").
 
