@@ -1,4 +1,5 @@
 // Originally from everything-claude-code by Affaan Mustafa (https://github.com/affaan-m/ECC)
+// SPDX-License-Identifier: MIT
 // Cross-platform helpers shared by the hook scripts.
 
 const fs = require('fs');
