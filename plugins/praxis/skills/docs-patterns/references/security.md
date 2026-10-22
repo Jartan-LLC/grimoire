@@ -18,7 +18,7 @@ finds no button or a dead service and gives up or goes public: Important. Verify
 reporting, `gh api repos/OWNER/REPO/private-vulnerability-reporting` must say `"enabled": true`; for an owner default,
 check each public, unarchived repository without its own file (`gh repo list OWNER --limit 1000 --visibility public
 --no-archived`); private reporting cannot be on in a private or archived repository, so raise nothing for those. Fetch each URL and follow redirects, and check
-that a named service still takes this project's reports. An email address cannot be checked; raise nothing on it.
+that a named service still takes this project's reports. A mailbox cannot be checked, but its domain can (`dig +short MX example.org`); raise a domain that does not resolve.
 
 - Bad: an owner default saying "click 'Report a vulnerability'" while most repositories it covers have private
   reporting off; "Report on huntr.dev", which stopped taking reports for projects outside AI and ML in 2023.
@@ -54,9 +54,10 @@ that declines to promise ("we cannot guarantee any specific timeline").
 ## What a change leaves behind
 
 **References to a removed channel or program.** After a channel or program changes, a line that still points to it
-sends the reporter looking for something gone: Important where the file then names no working channel, else Minor.
-Verify: search the file for "above", "below", "email", "bounty" and the old channel's name, and the tree for the old
-address or service (a README or CONTRIBUTING.md line that still gives it is the same finding).
+sends the reporter looking for something gone: Important where the policy then names no working channel, else Minor.
+Verify: search the file for "above", "below", "email", "bounty" and the old channel's name. A README, CONTRIBUTING.md
+or other doc line that still gives the old address or service is Important, as a pointer to a missing address is in
+`references/contributing.md`; search the tree for it.
 
 - Bad: "let one of the maintainers know at one of the email addresses at the top of this article", after the
   addresses were removed for private reporting; "no longer has a bug bounty program" beside bounty eligibility rules.
@@ -66,5 +67,5 @@ when the example rows read as real versions. Verify: search for "Use this sectio
 `5.1.x`, `4.0.x` and another project's name.
 
 **A retyped report form.** A what-to-include list for a channel that only GitHub's form serves drifts from the form:
-Minor. Where email or another channel is also named, a short list is fine. Verify against the repository's `.github/VULNERABILITY_REPORT.yml` (or `.yaml`), else the one at the root of the
-owner's `.github` repository, else GitHub's default form (summary, details, proof of concept, impact).
+Minor. Where email or another channel is also named, a short list is fine. Verify against the repository's `.github/VULNERABILITY_REPORT.yml` (or `.yaml`), else the one in the owner's
+`.github` repository (in its `.github` folder or at its root), else GitHub's default form (summary, details, proof of concept, impact).
