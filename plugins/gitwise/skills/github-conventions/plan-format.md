@@ -1,6 +1,6 @@
 # Implementation Plan Format
 
-Recommended structure for implementation plans posted to GitHub issues and saved in `.claude/workspace/`.
+Recommended structure for implementation plans saved in `.claude/workspace/`.
 
 ## Template
 

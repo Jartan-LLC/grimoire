@@ -47,11 +47,3 @@ Before creating the plan, think through:
 ### 6. Create Plan
 
 Write a plan in `.claude/workspace/` following the format in the `gitwise:github-conventions` skill (see `plan-format.md`).
-
-### 7. Post Plan
-
-```bash
-gh issue comment <issue-number> --body "## Implementation Plan
-
-[plan content]"
-```

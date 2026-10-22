@@ -55,4 +55,4 @@ recommended structure -- severity buckets and the `#N` footgun to avoid in the s
 
 ## Implementation Plans
 
-Plans are posted as issue comments and saved to `.claude/workspace/`. See [plan-format.md](plan-format.md) for the recommended structure.
+Plans are saved to `.claude/workspace/`. See [plan-format.md](plan-format.md) for the recommended structure.

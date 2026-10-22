@@ -18,11 +18,13 @@ Check existing local and remote branches for one related to this issue -- it may
 
 ### 2. Get Issue Context
 
-Determine the issue number from the user's request and fetch the issue with its comments, the plan among them:
+Determine the issue number from the user's request and fetch the issue with its comments:
 
 ```bash
 gh issue view <issue-number> --comments
 ```
+
+Also check `.claude/workspace/` for a plan file for this issue.
 
 ### 3. Review All Changes
 
