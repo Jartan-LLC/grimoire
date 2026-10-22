@@ -59,8 +59,9 @@ parses (trailers, frontmatter, a tool's marked blocks) are the project's, except
    never on a guess about how its files are copied.
 6. Exploit or reproduction detail of a vulnerability (an unintended security flaw) whose fix is not
    released, in public text, unless the text links the released fix or a public advisory or the
-   repository is private. Describe the fix neutrally; the detail goes to the private channel the
-   project's SECURITY.md names.
+   repository is private. A commit message may describe the flaw its own diff removes. Elsewhere,
+   describe the fix neutrally; the detail goes to the private channel the project's SECURITY.md
+   names.
 
 ## The check
 
