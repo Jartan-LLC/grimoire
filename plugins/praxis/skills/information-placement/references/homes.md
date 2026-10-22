@@ -39,7 +39,7 @@ fallback the row gives; never create a document type the project has not chosen 
 | Where to start reading | the PR description, except where it becomes the squash commit's message | | a PR comment |
 | Merge conditions and what merging sets off | the PR description, as facts that stay true ("Requires #52.", "Merging publishes 0.3.0.") | RELEASING holds the standing sequence | merge-status narration ("not merging yet") |
 | Review findings | the review, where whoever asked for it reads it | | praise; vulnerability detail in a public repository |
-| Answers to findings | the fix; a decision a reviewer might question, a declined finding included, as a PR description flag with its reason | a reply on the PR to a finding a person posted that was declined or fixed differently; a lasting reason goes to its own home and the reply points there | commit messages as the answer; "changed in review" or "declined from review" lines; a reply per round or per fixed finding |
+| Answers to findings | the fix; a decision a reviewer might question, a declined finding included, as a PR description flag with its reason | a reply on the PR to a finding a person posted that was declined, fixed differently or found already the case, in its thread when it was posted on a line; a lasting reason goes to its own home and the reply points there | commit messages as the answer; "changed in review" or "declined from review" lines; a reply per round or per fixed finding |
 
 ## In the code
 
