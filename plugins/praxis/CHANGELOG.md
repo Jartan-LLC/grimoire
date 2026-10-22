@@ -15,6 +15,7 @@
 - `create-pr` no longer comments on the issue that a pull request was created, and posts where to start reading and the review-decision lines as a PR comment only where your project states that its PR description lands.
 - `plan-issue` saves the plan in `.claude/workspace/` and no longer posts it on the issue, and `implement-issue` no longer posts an "Implementation Complete" comment, so the people watching your issues are not notified of either. The plan goes to `.claude/workspace/issue-<issue-number>-plan.md`, and `implement-issue` and `create-pr` read it there as well as from the issue's comments.
 - `create-pr` flags in the PR description where the change departs from the issue's plan.
+- `docs-patterns` has rules for security policies (SECURITY.md, including an owner's default), and `implement-issue` reads them before editing one: your agent names a private reporting channel that works for every repository the policy covers, states supported versions as a rule tied to releases, promises no response time, deadline, bounty or safe harbor your maintainers have not chosen, and asks you before writing a channel, promise or version rule your project has not settled. `doc-reviewer` checks a changed security policy against them, raising a public reporting route as Critical.
 - `comment-hygiene` and `docs-patterns` no longer point to `gitwise:commit-pr-writing` for other merge settings.
 - `doc-reviewer` raises a claim your sources do not support (inflated significance, borrowed authority, guesses, unverifiable praise) as an Important finding.
 
