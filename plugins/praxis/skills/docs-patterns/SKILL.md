@@ -42,7 +42,7 @@ Before editing one of these, read its file in this skill's directory; a reviewer
 
 ## Section Structure
 
-The **reference** shape (see Doc Types). Reference pages follow a consistent pattern:
+The default **reference** shape (see Doc Types), where the project has none of its own:
 
 1. **H1 title** with a one-line description
 2. **Overview** -- brief intro, bullet list of capabilities/features
