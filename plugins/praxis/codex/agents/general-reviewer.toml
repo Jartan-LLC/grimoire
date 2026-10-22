@@ -35,7 +35,7 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 - A comment that misleads -- stale, contradicting the code, or describing as present something that is gone; see `comment-hygiene`
 - Blanket linter/type/test suppressions -- see `code-hygiene`
 - Duplication a maintainer must untangle -- see `code-hygiene`
-- Retold facts -- a keep-category comment told again at another site -- see `comment-hygiene`
+- Retold facts and nonlocal comments -- a keep-category comment told again at another site, or a fact another file owns -- see `comment-hygiene`
 
 ### Minor
 
