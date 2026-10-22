@@ -190,7 +190,11 @@ Write docstrings for all public classes, methods, and functions.
 
 ```python
 def get_user(user_id: str) -> User:
-    """Retrieve a user; raises UserNotFoundError if no user has this ID."""
+    """Retrieve a user.
+
+    Raises:
+        UserNotFoundError: If no user has this ID.
+    """
     ...
 ```
 
