@@ -2,6 +2,7 @@
 
 ## 1.8.0
 
+- Needs gitwise 1.3.0 or later.
 - `code-hygiene`, `code-structure`, `comment-hygiene`, `docs-patterns`, `logging-patterns` and `readable-code` no longer point your agent to pythonica, which may not be installed.
 - New `plain-writing` skill for prose that informs: docs, READMEs, explanation pages, answers, emails, release notes, and requests to make text clearer. Your agent decides what a reader needs before it writes, keeps warnings, conditions, exact commands and prerequisites, cuts filler and wordiness, writes in a plain voice without asides, opinions or claims your sources do not support (and no first person in documents), and finishes with one pass over the wording. In an existing file it changes only the text it writes, and keeps the file's own dashes, quotes and heading case, unless you ask it to make the file clearer. It does not apply to blog posts, essays, site copy or personal writing, which go to `voiced-writing` (a personal letter sent by email included; a release announcement posted as a blog post and a docs site's home page stay with `plain-writing`), or to commit messages or PR text, and `comment-hygiene` still decides whether a code comment should exist; the prose of the comments and docstrings that stay is in scope.
 - New `voiced-writing` skill for blog posts, essays, opinion pieces, personal writing and site copy. Your agent takes the voice from posts or pages already on the site or from a sample you give, keeps your opinions, asides, hedges, quotes and contractions, adds no fact, relationship, opinion, advice or lesson your notes or brief do not give, writes prose instead of lists of takeaways, and finishes with a pass over `plain-writing`'s wording patterns in which your voice wins. `review-pr`'s `doc-reviewer` still judges a changed blog post or page by `plain-writing`.
@@ -11,6 +12,8 @@
 - Your agent loads `plain-writing` alongside `docs-patterns` when it writes or reviews a document, and `implement-issue`'s documentation step loads both. The "brevity is paramount" rule is gone; `plain-writing`'s keep and cut lists replace it.
 - `doc-reviewer` judges bloat by those lists and no longer flags a document for its length alone, except where a tool truncates that type of file, as with a long agent instruction file.
 - `doc-reviewer` files filler and wordiness inside a passage that stays as a Minor finding.
+- `create-pr` no longer comments on the issue that a pull request was created, and posts where to start reading and the review-decision lines as a PR comment only where your project states that its PR description lands.
+- `comment-hygiene` and `docs-patterns` no longer point to `gitwise:commit-pr-writing` for other merge settings.
 - `doc-reviewer` raises a claim your sources do not support (inflated significance, borrowed authority, guesses, unverifiable praise) as an Important finding.
 
 ## 1.7.0

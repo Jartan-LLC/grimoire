@@ -41,9 +41,3 @@ Include `Closes #<issue-number>` in the body. If `gitwise:commit-pr-writing` put
 ```bash
 gh pr comment <pr-number> --body "<notes>"
 ```
-
-### 5. Post Update
-
-```bash
-gh issue comment <issue-number> --body "Pull request created: <PR-link>"
-```

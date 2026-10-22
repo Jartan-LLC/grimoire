@@ -1,6 +1,6 @@
 ---
 name: commit-pr-writing
-description: What a commit message, a PR title and a PR description say, and which of them lands on the default branch under the repository's merge setting.
+description: What a commit message, a PR title and a PR description say, and which of them lands on the default branch under GitHub's default squash merge.
 when_to_use: Writing or updating a commit message, a PR title or a PR description, or reviewing one.
 user-invocable: false
 ---
@@ -26,7 +26,7 @@ Write every commit message to land on the default branch, whatever the merge set
 
 ## The PR Title and Description
 
-The lines below are for GitHub's default squash merge, where the commit messages land and the PR description does not. Under another merge setting, or where the project does not state one, [merge-setting.md](merge-setting.md) says how to find the setting and what changes.
+The lines below assume GitHub's default squash merge, where the commit messages land and the PR description does not. If the project's agent instruction files or CONTRIBUTING state another merge setting, follow it. Where that setting lands the PR description, write the description as the commit message for the whole branch: give the reasons, put any one-time action for contributors in its first paragraph rather than at the end, and post where to start reading and the "Changed in review" and "Declined from review" lines as a PR comment.
 
 The PR title names one change, as a commit subject in the project's commit format (`gitwise:github-conventions`): for a PR with two or more commits it becomes the squash commit's subject.
 

@@ -1,7 +1,8 @@
 # Changelog
 
-## 1.2.1
+## 1.3.0
 
+- `commit-pr-writing` assumes GitHub's default squash merge, where every commit message on the branch lands and the PR description does not, and no longer looks up your repository's merge setting. If you merge another way, state it in your agent instruction file or CONTRIBUTING.md and your agent follows it; where your PR description lands, your agent writes it as a commit message and posts where to start reading and the "Changed in review" and "Declined from review" lines as a PR comment.
 - `commit-pr-writing` no longer counts the PR description's opening what-and-why, or a flag with its reason, as retelling the commit messages.
 
 ## 1.2.0

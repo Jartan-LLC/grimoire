@@ -69,8 +69,7 @@ For each passage a change writes or makes false (a file the change leaves untouc
 not flagged for what it lacks):
 
 1. Name the information and its reader, and look up its home in `references/homes.md`. Read "the
-   commit message" there as the text the merge setting lands, which `gitwise:commit-pr-writing`
-   explains.
+   commit message" there as the text the merge setting lands.
 2. Flag a passage outside its home, a fact its home lacks that its reader needs, and anything the
    rules above exclude. Say where the information goes instead, or that it goes nowhere. Before
    flagging a home, name the reader who would act wrongly, stop for a missing fact, or be misled
