@@ -30,8 +30,9 @@ version that", "a version carrying") is a finding: name it by number.
 
 **A name that does not exist.** Every file, module, setting and command the page names (placeholders, and names the line marks removed or renamed, with the mark the release check asks for, aside) must exist at the change's
 head (`git ls-files`, `git grep`), or the sentence naming it, or its section heading, must say it is planned, with its issue: a
-contributor otherwise builds against what is not there. Important. A single note at the top of the page does not mark
-the lines below it.
+contributor otherwise builds against what is not there. Important. A single note at the top of a page that mixes current and
+planned state does not mark the lines below it; raise nothing on a page the project's rules, or its own title or
+opening, declare a target design.
 
 - Bad: an architecture page listing 29 files under "the code follows this layout", 15 of them missing, after one
   "parts of this are not built yet" note.
