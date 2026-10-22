@@ -36,7 +36,7 @@ The PR description:
 - One line per flag a careful reviewer could miss and per decision they might question, a change they would propose that you rejected included, each with its reason and stated as a fact about the change: "The parser keeps its old name, because the Codex mirror imports it." Do not say which review or request prompted a decision. Name any PR you took code from.
 - Say where to start reading: the file, function or commit subject holding the core logic.
 - State verification as results: what ran, what it showed, what was not run. No checkboxes or pasted output.
-- Do not retell the commit messages or the diff beyond that opening and the flags with their reasons.
+- Do not retell the commit messages or the diff beyond that opening and the flag and decision lines with their reasons.
 - End with what the merger or contributors must do, or that merging is all.
 
 To update a PR title or description, start from the current text, keep what a person added, and make both hold for the whole change as of the last commit.

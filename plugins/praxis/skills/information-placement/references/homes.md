@@ -34,7 +34,7 @@ fallback the row gives; never create a document type the project has not chosen 
 
 | Information | Home | Elsewhere, at most | Never |
 |---|---|---|---|
-| Intent, and flags for what the diff alone would let a reviewer misjudge | the PR description | | file inventories; a retelling of the commit messages beyond the opening what-and-why and the flags with their reasons; process narration; raw tool output; template skeletons |
+| Intent, and flags for what the diff alone would let a reviewer misjudge | the PR description | | file inventories; a retelling of the commit messages beyond the opening what-and-why and the flag and decision lines with their reasons; process narration; raw tool output; template skeletons |
 | Verification: what ran and what it showed, what was not run | the PR description; the commit message when there is no PR | the commit message keeps the versions verified against; results a commit message already states need no copy in the PR description | test docstrings; docs; raw output (link the run); totals CI already shows |
 | Where to start reading | the PR description, except where it becomes the squash commit's message | | a PR comment |
 | Merge conditions and what merging sets off | the PR description, as facts that stay true ("Requires #52.", "Merging publishes 0.3.0.") | RELEASING holds the standing sequence | merge-status narration ("not merging yet") |
