@@ -190,7 +190,7 @@ Write docstrings for all public classes, methods, and functions.
 
 ```python
 def get_user(user_id: str) -> User:
-    """Retrieve a user by their unique identifier."""
+    """Retrieve a user; raises UserNotFoundError if no user has this ID."""
     ...
 ```
 
@@ -209,7 +209,7 @@ def process_batch(
 
     Args:
         items: The items to process. Must not be empty.
-        max_workers: Maximum concurrent workers. Defaults to 4.
+        max_workers: Maximum concurrent workers.
         on_progress: Optional callback receiving (completed, total) counts.
 
     Returns:

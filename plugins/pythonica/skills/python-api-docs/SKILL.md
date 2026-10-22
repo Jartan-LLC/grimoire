@@ -158,7 +158,7 @@ A bare `.. automodule:: mypkg` on a re-export-only `__init__.py` renders **only 
 ```
 ````
 
-Use per-module for a handful of modules; switch to autosummary `:recursive:` when hand-listing them becomes the maintenance burden.
+Use per-module for a handful of modules; switch to autosummary `:recursive:` when hand-listing them becomes the maintenance burden. Either way, the page covers only what the project calls public (its `__all__`, or the modules its docs name as the API): list internal modules and they read as API callers may rely on.
 
 ## Advanced Patterns
 
