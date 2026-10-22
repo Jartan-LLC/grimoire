@@ -36,7 +36,7 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 - Bloat -- passages no reader needs (`plain-writing`'s Cut list); length alone only where the type's reference sets a limit
 - Redundancy -- repeating information documented elsewhere instead of linking
 - Missing critical information that comparable docs include and this page's reader needs
-- Structure inconsistent with similar docs in the same category, where they follow `docs-patterns`
+- Structure inconsistent with similar docs in the same category, where they follow `docs-patterns`, `plain-writing` and `information-placement`
 - Diataxis doc-type fit -- the doc's shape matches its type
 - Two-audience register -- use-it vs navigate/change-it, with claims tracing to docstrings/types
 - Change narration -- prose written for whoever reviews the diff rather than whoever reads the page -- see `docs-patterns`

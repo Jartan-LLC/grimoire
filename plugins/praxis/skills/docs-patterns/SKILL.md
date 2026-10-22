@@ -7,7 +7,7 @@ user-invocable: false
 
 # Documentation Writing Patterns
 
-Before writing or reviewing, **load `praxis:plain-writing`** (what to keep and cut, plain voice, the final wording pass) and **read 2-3 existing docs in the same category**. Match them in register, terminology and formatting; where they break a rule in this skill, plain-writing or information-placement, follow the rule in what you write instead of copying the fault, and a reviewer raises no finding for that departure.
+Before writing or reviewing, **load `praxis:plain-writing`** (what to keep and cut, plain voice, the final wording pass) and **read 2-3 existing docs in the same category**. Match them in register, terminology, structure and formatting; where they break a rule in this skill, plain-writing or information-placement, follow the rule in what you write instead of copying the fault, and a reviewer raises no finding for that departure.
 
 ## Writing Style
 
@@ -36,7 +36,7 @@ Before editing one of these, read its file in this skill's directory; a reviewer
 | A README, including a package page or a component's README | `readme.md` |
 | CONTRIBUTING.md or other contributor docs | `contributing.md` |
 | RELEASING.md or another release procedure | `releasing.md` |
-| A page under `docs/` or on a docs site: how-to, reference, explanation, tutorial, runbook, operator guide, architecture page | `docs-pages.md` |
+| A page under `docs/` or on a docs site: how-to, reference, explanation, tutorial, runbook, operator guide, architecture page, home page | `docs-pages.md` |
 | SECURITY.md, a repository's or the owner's default security policy | `security.md` |
 | CLAUDE.md, AGENTS.md, the files they import or name as the rules, `.claude/rules/`, other tools' equivalents | `agent-files.md` |
 
