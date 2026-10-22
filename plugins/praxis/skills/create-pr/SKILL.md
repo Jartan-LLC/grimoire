@@ -24,7 +24,7 @@ Determine the issue number from the user's request and fetch the issue with its 
 gh issue view <issue-number> --comments
 ```
 
-Also check `.claude/workspace/` for a plan file for this issue.
+Also read `.claude/workspace/issue-<issue-number>-plan.md`, or any other plan file in `.claude/workspace/` for this issue.
 
 ### 3. Review All Changes
 
@@ -32,7 +32,7 @@ Load the `gitwise:commit-pr-writing` and `gitwise:github-conventions` skills. De
 
 ### 4. Create Pull Request
 
-Read `.github/PULL_REQUEST_TEMPLATE.md` if the project has one, and write the PR title and description as `gitwise:commit-pr-writing` says. Then create the PR:
+Read `.github/PULL_REQUEST_TEMPLATE.md` if the project has one, and write the PR title and description as `gitwise:commit-pr-writing` says, flagging where the change departs from the plan. Then create the PR:
 
 ```bash
 gh pr create --title "<title>" --body "<description>" --base <base-branch>

@@ -67,7 +67,7 @@ fallback the row gives; never create a document type the project has not chosen 
 | Information | Home | Elsewhere, at most | Never |
 |---|---|---|---|
 | The problem, its scope and constraints | the issue body, edited to stay current | the commit message states the problem in a sentence; the PR description links the issue | a scope change recorded only in a comment; "as decided on #N" without the decision |
-| The plan | the author's workspace; one plan comment on the issue, edited in place, where someone else must see it before the PR | the PR description flags departures | a restatement of the issue; a new full plan per revision |
+| The plan | the author's workspace; one plan comment on the issue, edited in place and without the working notes below, where someone else must see it before the PR | the PR description flags departures | a restatement of the issue; a new full plan per revision |
 | Working notes: step lists, `file:line` pointers, files to touch | the author's workspace, never a shared home | | the issue, the plan comment, the PR |
 | Findings during the work; why an issue closed with no change | the issue comment where they arose; a finding that moves scope is also edited into the issue body | the commit message carries the evidence that decided the shipped design | |
 | Deferred work, known defects | an issue per item | `TODO(#N)` at the site; "Deferred: #N" in the PR description or reply; a planned state in a document, marked as planned and linked to its issue | "the next PR"; undecided version-tied plans in docstrings |

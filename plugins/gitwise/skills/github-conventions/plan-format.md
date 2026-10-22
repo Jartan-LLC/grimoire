@@ -42,4 +42,4 @@ Simple | Moderate | Complex
 - Always include alternatives considered, even if briefly
 - The documentation plan ensures docs stay current with code
 - Phases should be independently verifiable where possible
-- Never write a bare `#N` in the posted plan -- GitHub auto-links it to that issue/PR; use `1.` or `Finding 1` (see the numbering rule at the top of [SKILL.md](SKILL.md))
+- If the plan is posted on GitHub, never write a bare `#N` in it -- GitHub auto-links it to that issue/PR; use `1.` or `Finding 1` (see the numbering rule at the top of [SKILL.md](SKILL.md))
