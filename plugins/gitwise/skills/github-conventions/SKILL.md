@@ -50,8 +50,8 @@ Use `Closes #<number>` to link PRs to issues.
 
 ## Code Reviews
 
-Reviews are posted as PR comments. See [review-format.md](review-format.md) for the
-recommended structure -- severity buckets and the `#N` footgun to avoid in the summary.
+See [review-format.md](review-format.md) for the recommended structure of a code review --
+severity buckets and the `#N` footgun to avoid in the summary.
 
 ## Implementation Plans
 

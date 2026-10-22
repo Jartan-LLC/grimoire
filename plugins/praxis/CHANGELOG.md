@@ -12,7 +12,9 @@
 - Your agent loads `plain-writing` alongside `docs-patterns` when it writes or reviews a document, and `implement-issue`'s documentation step loads both. The "brevity is paramount" rule is gone; `plain-writing`'s keep and cut lists replace it.
 - `doc-reviewer` judges bloat by those lists and no longer flags a document for its length alone, except where a tool truncates that type of file, as with a long agent instruction file.
 - `doc-reviewer` files filler and wordiness inside a passage that stays as a Minor finding.
-- `create-pr` no longer comments on the issue that a pull request was created, and posts where to start reading and the review-decision lines as a PR comment only where your project states that its PR description lands.
+- `create-pr` no longer comments on the issue that a pull request was created, or on the PR itself.
+- `review-pr` no longer posts its review on the PR: it saves it to `.claude/workspace/pr-<number>-review.md` and shows it to you, so the people watching the PR are not notified of it. `address-review` reads it there, along with the comments people posted, and no longer posts a comment answering each round: it states declined findings and fixes made differently as decisions in the PR description, and replies on the PR only to a finding a person posted that it declined or fixed differently.
+- `information-placement` gives each answer to a review finding its home in the fix or in the PR description, keeps plans and findings made during the work in your workspace, and raises "Changed in review" lines in a PR description as narration.
 - `plan-issue` saves the plan in `.claude/workspace/` and no longer posts it on the issue, and `implement-issue` no longer posts an "Implementation Complete" comment, so the people watching your issues are not notified of either. The plan goes to `.claude/workspace/issue-<issue-number>-plan.md`, and `implement-issue` and `create-pr` read it there as well as from the issue's comments.
 - `create-pr` flags in the PR description where the change departs from the issue's plan.
 - `create-issue` writes the issue's title and body by `gitwise:github-conventions`' new issue rules.

@@ -35,10 +35,6 @@ Launch relevant reviewer agents based on changed files:
 
 `doc-reviewer` owns doc-code mismatch: where code changed public behavior, it checks the docs say so.
 
-### 4. Post Review
+### 4. Report Review
 
-Reviewers flag findings they could not confirm as `suspected` (they have no web access, and some issues resist static reading). Before posting, resolve each: verify post-cutoff versions against a live source, confirm others by re-reading the code; post anything still unresolved under **Suspected** as a question -- never silently dropped. Then post the review as a PR comment following `review-format.md` in the `gitwise:github-conventions` skill:
-
-```bash
-gh pr comment <pr-number> --body "<review comment>"
-```
+Reviewers flag findings they could not confirm as `suspected` (they have no web access, and some issues resist static reading). Before reporting, resolve each: verify post-cutoff versions against a live source, confirm others by re-reading the code; keep anything still unresolved under **Suspected** as a question -- never silently dropped. Then write the review as `review-format.md` in the `gitwise:github-conventions` skill says, save it to `.claude/workspace/pr-<pr-number>-review.md` (replacing any earlier one), show it to the user and give them the path.
