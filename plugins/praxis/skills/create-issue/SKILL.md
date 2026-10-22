@@ -27,11 +27,11 @@ Read the appropriate template from `.github/ISSUE_TEMPLATE/`:
 
 ### 4. Create Issue
 
-Create the issue following the template structure, with the correct label:
+Load the `gitwise:github-conventions` skill and write the title and body as its `issue-format.md` says, in the template's structure. Create the issue with the correct label:
 
 - Bug: label `bug`
 - Feature: label `enhancement`
 
 ```bash
-gh issue create --title "<title>" --label "<label>" --body "<body following template>"
+gh issue create --title "<title>" --label "<label>" --body "<body>"
 ```

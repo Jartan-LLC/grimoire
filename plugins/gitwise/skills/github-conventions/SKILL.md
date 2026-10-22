@@ -38,7 +38,7 @@ For what a commit message, a PR title and a PR description say, and which of the
 
 ## Issues
 
-Templates in `.github/ISSUE_TEMPLATE/` -- read them for section structure.
+Templates in `.github/ISSUE_TEMPLATE/` -- read them for section structure. Write the title and body as [issue-format.md](issue-format.md) says.
 
 - **Bug reports**: must have label `bug`
 - **Feature requests**: must have label `enhancement`
