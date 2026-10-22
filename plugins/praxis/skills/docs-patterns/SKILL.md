@@ -24,7 +24,7 @@ Pick the type before the shape -- the four Diataxis types each want a different 
 | Reference | Information-oriented -- authoritative facts consulted mid-task | Austere, structured to mirror the code, consistent patterns and tables | "Describing what *is* -- consulted, not read through." |
 | Explanation | Understanding-oriented -- the why, context, trade-offs | Discursive prose; weighs alternatives and reasoning | "Explaining *why* -- read away from the code to understand." |
 
-The **Section Structure** below is the **reference** shape. Don't force tutorials, how-tos, or explanations into it -- each has its own shape above.
+The **Section Structure** below is the default **reference** shape, for a project that has no established one; a project's own consistent reference shape is not a fault to depart from. Don't force tutorials, how-tos, or explanations into it -- each has its own shape above.
 
 ## Files with their own rules
 
