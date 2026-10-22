@@ -23,7 +23,7 @@ gh pr view <pr-number> --comments
 gh api --paginate repos/{owner}/{repo}/pulls/<pr-number>/comments
 ```
 
-Take each finding, from the saved review or posted, that no later commit, reply or line in the PR description has answered, and parse them into a numbered list grouped by severity (Critical > Important > Minor).
+If the saved review is missing, tell the user and ask where it is, or offer to run review-pr. Take each finding, from the saved review or posted, that no later commit, reply or line in the PR description has answered, and parse them into a numbered list grouped by severity (Critical > Important > Minor).
 
 ### 2. Check Out Branch
 
