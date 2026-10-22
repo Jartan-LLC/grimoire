@@ -61,9 +61,6 @@ none is needed (a scenario with no containment needs no undo): Critical where le
 
 ## Generated reference
 
-**Generated pages.** The release check covers the source lines a generated page shows (docstrings, generator input)
-that the change adds.
-
 **Surface beyond the supported one.** A generated reference that includes internals without labelling them internal invites readers to depend on
 them: Minor, or Important where the project states a public surface the reference contradicts. Verify: compare the
 generator's targets (`automodule`, `:undoc-members:`, an include list) with the project's stated surface (README,
@@ -71,6 +68,7 @@ generator's targets (`automodule`, `:undoc-members:`, an include list) with the 
 
 ## What not to raise
 
-Raise nothing on a page another docs-patterns file covers (a changelog page), on adopter instructions in a template that are marked at their site, or on placeholders an adopter replaces, on a fragment a generator appends
+Raise nothing on a page another docs-patterns file covers (a changelog page), on a name or fact a later change made
+false in a dated record (a decision record, a blog post) that the change does not edit, on adopter instructions in a template that are marked at their site, or on placeholders an adopter replaces, on a fragment a generator appends
 to a README, on a page type the project does not keep, or on a page's departure from the existing pages where those
 pages break a rule in docs-patterns, plain-writing or information-placement.
