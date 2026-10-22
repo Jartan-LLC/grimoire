@@ -17,11 +17,11 @@ exists: Critical. Verify: read every route the file gives ("Please open an issue
 no button or a dead service and gives up or goes public: Important. Verify: for GitHub private vulnerability reporting,
 `gh api repos/OWNER/REPO/private-vulnerability-reporting` must say `"enabled": true`; for an owner default, check each
 public, unarchived repository without its own file (`gh repo list OWNER --limit 1000 --visibility public
---no-archived`). Private reporting cannot be on in a private or archived repository, so raise nothing about the setting
+--no-archived`, and with `--visibility private` for the private ones you can read). Private reporting cannot be on in a private or archived repository, so raise nothing about the setting
 there, but a policy that covers a private repository must name a channel its readers can use besides GitHub's form.
 Fetch each URL and follow redirects, and check that a named service still takes this project's reports. A mailbox
-cannot be checked, but its domain can (`dig +short MX example.org`, then `dig +short A example.org` if that is empty):
-raise a domain with neither record, or a null MX (`0 .`), which takes no mail.
+cannot be checked, but its domain can (`dig +short MX example.org`, then `dig +short A` and `dig +short AAAA` if that is
+empty): raise a domain with none of these records, or a null MX (`0 .`), which takes no mail.
 
 - Bad: an owner default saying "click 'Report a vulnerability'" while most repositories it covers have private
   reporting off; "Report on huntr.dev", which stopped taking reports for projects outside AI and ML in 2023.
@@ -34,7 +34,7 @@ GitHub's UI (a redirector that needs a Referer header) fails for a raw read or a
 between two routes or miss one: Minor. Verify with the API call above.
 
 **The file GitHub does not show.** GitHub shows `.github/SECURITY.md`, else the root file, else `docs/`, else the owner
-default, which applies only from a public `.github` repository. A change to a file another one shadows reaches no reporter: Important. Verify: list each location.
+default, which applies only from a public `.github` repository. A change made to a shadowed file and not to the file GitHub shows reaches no reporter: Important. Verify: list each location.
 
 ## Supported versions
 
@@ -58,7 +58,8 @@ that declines to promise ("we cannot guarantee any specific timeline").
 ## What a change leaves behind
 
 **References to a removed channel or program.** After a channel or program changes, a line that still points to it
-sends the reporter looking for something gone: Important where the policy then names no working channel, else Minor.
+sends the reporter looking for something gone: Important where the policy then names no working channel, else Minor;
+leftover terms of a removed program (bounty rules, safe harbor) are tiered as under Promises.
 Verify: search the file for "above", "below", "email", "bounty" and the old channel's name. A README, CONTRIBUTING.md
 or other doc line that still gives the old address or service is Important, as a pointer to a missing address is in
 `references/contributing.md`; search the tree for it.
