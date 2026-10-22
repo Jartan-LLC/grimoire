@@ -79,5 +79,5 @@ fallback the row gives; never create a document type the project has not chosen 
 
 | Information | Exceptions |
 |---|---|
-| How the work went: rounds, agents, timings, CI re-runs, the debugging story | |
+| How the work went: rounds, agents, timings, CI re-runs, the debugging story | a review reply and an issue or plan comment, read in the moment, may narrate |
 | Restated or derived content: change inventories, diffstats, counts CI or the code already shows, the signature, indexes, empty form sections, boilerplate, praise | a list whose items each give a reason; public names a change removes (what a later reader would search for); generated, drift-checked copies; measurements stated with their conditions |
