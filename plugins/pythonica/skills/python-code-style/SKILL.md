@@ -214,7 +214,7 @@ def process_batch(
     Args:
         items: The items to process. Must not be empty.
         max_workers: Maximum concurrent workers.
-        on_progress: Optional callback receiving (completed, total) counts.
+        on_progress: Callback receiving (completed, total) counts.
 
     Returns:
         BatchResult containing succeeded items and any failures with
