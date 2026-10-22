@@ -7,7 +7,7 @@ user-invocable: false
 
 # Documentation Writing Patterns
 
-Before writing or reviewing, **load `praxis:plain-writing`** (what to keep and cut, plain voice, the final wording pass) and **read 2-3 existing docs in the same category** to match their structure and register; plain-writing's voice rules still apply to what you add.
+Before writing or reviewing, **load `praxis:plain-writing`** (what to keep and cut, plain voice, the final wording pass) and **read 2-3 existing docs in the same category**. Match them in register, terminology, structure and formatting; where they break a rule in this skill, plain-writing or information-placement, follow the rule in what you write instead of copying the fault, and a reviewer raises no finding for that departure.
 
 ## Writing Style
 
@@ -24,7 +24,7 @@ Pick the type before the shape -- the four Diataxis types each want a different 
 | Reference | Information-oriented -- authoritative facts consulted mid-task | Austere, structured to mirror the code, consistent patterns and tables | "Describing what *is* -- consulted, not read through." |
 | Explanation | Understanding-oriented -- the why, context, trade-offs | Discursive prose; weighs alternatives and reasoning | "Explaining *why* -- read away from the code to understand." |
 
-The **Section Structure** below is the **reference** shape. Don't force tutorials, how-tos, or explanations into it -- each has its own shape above.
+The **Section Structure** below is the default **reference** shape, for a project that has no established one; a project's own consistent reference shape is not a fault to depart from. Don't force tutorials, how-tos, or explanations into it -- each has its own shape above.
 
 ## Files with their own rules
 
@@ -36,12 +36,13 @@ Before editing one of these, read its file in this skill's directory; a reviewer
 | A README, including a package page or a component's README | `readme.md` |
 | CONTRIBUTING.md or other contributor docs | `contributing.md` |
 | RELEASING.md or another release procedure | `releasing.md` |
+| A page under `docs/` or on a docs site: how-to, reference, explanation, tutorial, runbook, operator guide, architecture page, home page | `docs-pages.md` |
 | SECURITY.md, a repository's or the owner's default security policy | `security.md` |
 | CLAUDE.md, AGENTS.md, the files they import or name as the rules, `.claude/rules/`, other tools' equivalents | `agent-files.md` |
 
 ## Section Structure
 
-The **reference** shape (see Doc Types). Reference pages follow a consistent pattern:
+The default **reference** shape (see Doc Types), where the project has none of its own:
 
 1. **H1 title** with a one-line description
 2. **Overview** -- brief intro, bullet list of capabilities/features
