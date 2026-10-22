@@ -18,7 +18,7 @@ branch, or the install builds from the branch the page describes. Verify: when t
 view for files read on the forge), and what their install gives (the image tag the compose file pulls, the package
 index, else the newest release of this page's component: `gh release list --exclude-drafts --exclude-pre-releases`,
 or the newest tag with no pre-release part from `git tag --list '<package>*'
---sort=-v:refname`, `'v*'` where tags carry no package name). Where the check applies,
+--sort=-v:refname`, without the pattern where tags carry no package name). Where the check applies,
 each line the change adds must hold for that release or carry a version mark from the tree or the release record, or
 "unreleased", and anything the change documents unmarked that the changelog still lists under its unreleased section is
 a finding. Search the added lines for "an earlier version", "a version that", "a version carrying", "now" and "no
@@ -64,7 +64,7 @@ none is needed (a scenario with no containment needs no undo): Critical where le
 **Surface beyond the supported one.** A generated reference that includes internals without labelling them internal invites readers to depend on
 them: Minor, or Important where the project states a public surface the reference contradicts. Verify: compare the
 generator's targets (`automodule`, `:undoc-members:`, an include list) with the project's stated surface (README,
-`__all__`).
+`__all__`). The generator's configuration is what this check reads; it does not decide the point.
 
 ## What not to raise
 
