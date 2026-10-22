@@ -55,7 +55,7 @@ codex plugin add gitwise@grimoire
 - **api-error-patterns** -- error response format, status codes
 - **code-hygiene** -- zombie code (dead/reinvented/orphaned), truthful names, real implementations
 - **code-structure** -- structural craft: decompose on responsibility not size, deep modules, cohesion/coupling/interface/error-contract/data shape
-- **comment-hygiene** -- comment truthfulness: KEEP/DELETE/EXEMPT/CONDITIONAL, tombstone and retold-fact detection, comment density
+- **comment-hygiene** -- comment truthfulness: KEEP/DELETE/EXEMPT/CONDITIONAL, tombstone and retold-fact detection, comment density; `writing.md` says what to write when adding comments, docstrings and file headers
 - **docs-patterns** -- doc types, structure, and rules for READMEs, CONTRIBUTING, release procedures, security policies, docs pages, changelogs and agent instruction files
 - **frontend-patterns** -- design tokens, mobile-first, component isolation
 - **information-placement** -- where each kind of information belongs (commit message, PR description, comment, docstring, README, changelog, docs, issue, or nowhere) and what no text may hold
@@ -100,6 +100,7 @@ session you may want a higher `COMPACT_CONTEXT_THRESHOLD`.
 
 ## Credits
 
+- [everything-claude-code](https://github.com/affaan-m/everything-claude-code) by Affaan Mustafa -- `hooks/scripts/lib/utils.js`, `suggest-compact.js` and `check-console-log.js` (MIT)
 - [humanizer](https://github.com/blader/humanizer) by Siqi Chen -- `plain-writing`'s wording patterns and parts of its SKILL.md, and parts of `voiced-writing`'s SKILL.md (MIT; `LICENSE-humanizer` in each skill's directory)
 - Wikipedia's [Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) ([CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)) -- the patterns and several of their examples
 
