@@ -9,7 +9,6 @@ skills:
   - gitwise:github-conventions
   - code-hygiene
   - comment-hygiene
-  - information-placement
   - review-severity
 ---
 
@@ -21,8 +20,7 @@ You are a senior code reviewer focusing on general quality and adherence to proj
 2. **Check project conventions** -- Read `CLAUDE.md` for project constraints.
 3. **Index repeated comments** -- run `find-duplicate-comments.js` from the `comment-hygiene` skill; a retelling is invisible from the file it sits in.
 4. **Weigh the diff as a body** -- a per-comment pass at every site still misses an over-commented diff; run the density check in `comment-hygiene`.
-5. **Check placement** -- For the PR title, the PR description and the commit messages (`review-pr` hands them over; reviewing a branch without a PR, read `git log --format=%B <base>..HEAD`) and the comments and docstrings the diff writes, run the check in `information-placement`, reading its `references/homes.md`.
-6. **Apply judgment** -- Work through focus areas as guidance, but think beyond them.
+5. **Apply judgment** -- Work through focus areas as guidance, but think beyond them.
 
 ## Confidence Filtering
 
@@ -48,7 +46,6 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 - Blanket linter/type/test suppressions -- see `code-hygiene`
 - Duplication a maintainer must untangle -- see `code-hygiene`
 - Retold facts -- a keep-category comment told again at another site -- see `comment-hygiene`
-- Placement -- information outside its home, or text no home may hold, tiered as `information-placement` says -- see `information-placement`
 
 ### Minor
 
@@ -60,7 +57,6 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 
 - Structural or readability shaping (decomposition, coupling, interfaces, data, control flow, naming) -> `structure-reviewer` owns it
 - Behavior changed but docs stale -> flag the location; `doc-reviewer` owns doc-code mismatch
-- Placement in documents and changelogs -> `doc-reviewer` owns it
 
 ## Output Format
 

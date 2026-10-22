@@ -48,7 +48,7 @@ codex plugin add gitwise@grimoire
 - **general-reviewer** -- reviews code for general quality, naming, organization, and comment hygiene
 - **structure-reviewer** -- reviews structure and readability: decomposition, coupling, interfaces, data modeling, control flow, naming
 - **test-reviewer** -- reviews test coverage and CI/CD correctness
-- **doc-reviewer** -- reviews documentation for conciseness, accuracy, consistency
+- **doc-reviewer** -- reviews documentation for conciseness, accuracy, consistency, and where information sits in every PR's title, description and commit messages
 
 ### Skills
 

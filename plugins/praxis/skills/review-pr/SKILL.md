@@ -26,14 +26,14 @@ Launch relevant reviewer agents based on changed files:
 
 - Backend changes -> `backend-reviewer`
 - Frontend changes -> `frontend-reviewer`
-- Documentation changes, or code that changes public behavior -> `doc-reviewer`
 - CI/test changes -> `test-reviewer`
 - Non-trivial code changes -> `structure-reviewer`
-- All changes -> `general-reviewer`, given the PR title, the PR description and the commit messages
+- All changes -> `general-reviewer`
+- All changes -> `doc-reviewer`, given the PR title, the PR description and the commit messages
 
 ### 3. Verify Documentation
 
-If code changed public behavior, `doc-reviewer` must run -- it owns doc-code mismatch.
+`doc-reviewer` owns doc-code mismatch: where code changed public behavior, it checks the docs say so.
 
 ### 4. Post Review
 
