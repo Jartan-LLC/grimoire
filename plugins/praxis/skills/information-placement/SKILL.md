@@ -32,8 +32,9 @@ parses (trailers, frontmatter, a tool's marked blocks) are the project's, except
 1. Narration of the moment, the branch or the session: "round 2's fix", "the next PR", "being
    removed", "fails on main". Text states what is true after the change; a commit message, a
    changelog entry or a PR description states change relative to the state before it ("failed before
-   this change") or to a version. Any text may carry a version stamp ("Added in 1.3"). A "now" that
-   says what the change made true is fine, and so is a commit message that names an earlier commit
+   this change") or to a version. Any text may carry a version stamp ("Added in 1.3"), and a
+   document the "unreleased" mark `docs-patterns` asks for. A "now" that says what the change made
+   true is fine, and so is a commit message that names an earlier commit
    by its subject to correct it, and so is a merge condition or a stacked PR stated as a fact
    ("Requires #52.", "the PRs stacked on this one merge with it"), and so is later work named by its
    issue ("the rest of the #151 migration"). A PR description the merge setting does not land is
