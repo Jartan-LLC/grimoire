@@ -8,6 +8,7 @@
 - `commit-pr-writing` no longer counts the PR description's opening what-and-why, or a flag with its reason, as retelling the commit messages.
 - The PR description states each decision a reviewer might question, a change they would propose that was rejected included, with its reason, and no longer has "Changed in review" and "Declined from review" lines that say what review prompted.
 - `github-conventions`' review format no longer assumes the review is posted on the PR, or asks for inline comments.
+- The PR description no longer ends with "merging is all"; it ends with a step for the merger or contributors only when there is one.
 
 ## 1.2.0
 
