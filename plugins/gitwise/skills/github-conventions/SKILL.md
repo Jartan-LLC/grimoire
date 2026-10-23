@@ -38,7 +38,7 @@ For what a commit message, a PR title and a PR description say, and which of the
 
 ## Issues
 
-Templates in `.github/ISSUE_TEMPLATE/` -- read them for section structure.
+Templates in `.github/ISSUE_TEMPLATE/` -- read them for section structure. Write the title and body as [issue-format.md](issue-format.md) says.
 
 - **Bug reports**: must have label `bug`
 - **Feature requests**: must have label `enhancement`
@@ -50,9 +50,9 @@ Use `Closes #<number>` to link PRs to issues.
 
 ## Code Reviews
 
-Reviews are posted as PR comments. See [review-format.md](review-format.md) for the
-recommended structure -- severity buckets and the `#N` footgun to avoid in the summary.
+See [review-format.md](review-format.md) for the recommended structure of a code review --
+severity buckets and the `#N` footgun to avoid in the summary.
 
 ## Implementation Plans
 
-Plans are posted as issue comments and saved to `.claude/workspace/`. See [plan-format.md](plan-format.md) for the recommended structure.
+Plans are saved to `.claude/workspace/`. See [plan-format.md](plan-format.md) for the recommended structure.

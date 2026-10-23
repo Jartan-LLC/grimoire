@@ -68,6 +68,8 @@ Define the public interface for every module. Unlisted members are internal impl
 
 ```python
 # mypackage/services/__init__.py
+"""Business services: the user and order workflows over the repositories."""
+
 from .user_service import UserService
 from .order_service import OrderService
 from .exceptions import ServiceError, ValidationError
@@ -242,4 +244,4 @@ Relative imports can break when modules are moved or reorganized.
 5. **Be consistent** - Apply patterns uniformly across the project
 6. **Match names to content** - File names should describe their purpose
 7. **Separate concerns** - Keep layers distinct and dependencies flowing one direction
-8. **Document your structure** - Include a README explaining the organization
+8. **Document your structure** - In a new project, or one that keeps component READMEs, give each component (a top-level sub-package or domain with its own boundaries) a README explaining its organization; give each package's `__init__.py` a docstring stating what it owns

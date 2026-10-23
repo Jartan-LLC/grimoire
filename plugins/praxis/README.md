@@ -48,20 +48,23 @@ codex plugin add gitwise@grimoire
 - **general-reviewer** -- reviews code for general quality, naming, organization, and comment hygiene
 - **structure-reviewer** -- reviews structure and readability: decomposition, coupling, interfaces, data modeling, control flow, naming
 - **test-reviewer** -- reviews test coverage and CI/CD correctness
-- **doc-reviewer** -- reviews documentation for conciseness, accuracy, consistency
+- **doc-reviewer** -- reviews documentation for conciseness, accuracy, consistency, and where information sits in every PR's title, description and commit messages
 
 ### Skills
 
 - **api-error-patterns** -- error response format, status codes
 - **code-hygiene** -- zombie code (dead/reinvented/orphaned), truthful names, real implementations
 - **code-structure** -- structural craft: decompose on responsibility not size, deep modules, cohesion/coupling/interface/error-contract/data shape
-- **comment-hygiene** -- comment truthfulness: KEEP/DELETE/EXEMPT/CONDITIONAL, tombstone and retold-fact detection, comment density
-- **docs-patterns** -- writing style, structure, brevity, and rules for READMEs, CONTRIBUTING, release procedures, changelogs and agent instruction files
+- **comment-hygiene** -- comment truthfulness: KEEP/DELETE/EXEMPT/CONDITIONAL, tombstone and retold-fact detection, comment density; `writing.md` says what to write when adding comments, docstrings and file headers
+- **docs-patterns** -- doc types, structure, and rules for READMEs, CONTRIBUTING, release procedures, security policies, docs pages, changelogs and agent instruction files
 - **frontend-patterns** -- design tokens, mobile-first, component isolation
+- **information-placement** -- where each kind of information belongs (commit message, PR description, comment, docstring, README, changelog, docs, issue, or nowhere) and what no text may hold
 - **logging-patterns** -- log levels, formatting, structured output
+- **plain-writing** -- prose that informs: what to keep and cut, plain voice, a final wording pass
 - **readable-code** -- local clarity: control-flow shape, naming for the reader, reading order and working set
 - **review-severity** -- Critical/Important/Minor by consequence-if-shipped
 - **testing-patterns** -- integration tests, fixture composition, canary markers
+- **voiced-writing** -- writing in a person's or a project's voice: blog posts, essays, site copy, personal writing
 
 ### Hooks
 
@@ -95,6 +98,15 @@ session you may want a higher `COMPACT_CONTEXT_THRESHOLD`.
 /praxis:address-review 43      -> work through findings
 ```
 
+## Credits
+
+- [everything-claude-code](https://github.com/affaan-m/everything-claude-code) by Affaan Mustafa -- `hooks/scripts/lib/utils.js`, `hooks/scripts/lib/transcript-context.js`, `suggest-compact.js`, `check-console-log.js` and the push-reminder and documentation-file hooks in `hooks/hooks.json` (MIT; `hooks/scripts/LICENSE-everything-claude-code`)
+- [humanizer](https://github.com/blader/humanizer) by Siqi Chen -- `plain-writing`'s wording patterns and parts of its SKILL.md, and parts of `voiced-writing`'s SKILL.md (MIT; `LICENSE-humanizer` in each skill's directory)
+- Wikipedia's [Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) ([CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)) -- the patterns and several of their examples
+
 ## License
 
-MIT
+MIT, except `skills/plain-writing/references/patterns.md`, which is
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) as an
+adaptation of Wikipedia's Signs of AI writing: ported to ASCII, trimmed,
+and some examples reworded.

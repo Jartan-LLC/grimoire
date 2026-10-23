@@ -190,7 +190,11 @@ Write docstrings for all public classes, methods, and functions.
 
 ```python
 def get_user(user_id: str) -> User:
-    """Retrieve a user by their unique identifier."""
+    """Retrieve a user.
+
+    Raises:
+        UserNotFoundError: If no user has this ID.
+    """
     ...
 ```
 
@@ -204,13 +208,10 @@ def process_batch(
 ) -> BatchResult:
     """Process items concurrently using a worker pool.
 
-    Processes each item in the batch using the configured number of
-    workers. Progress can be monitored via the optional callback.
-
     Args:
         items: The items to process. Must not be empty.
-        max_workers: Maximum concurrent workers. Defaults to 4.
-        on_progress: Optional callback receiving (completed, total) counts.
+        max_workers: Maximum concurrent workers.
+        on_progress: Callback receiving (completed, total) counts.
 
     Returns:
         BatchResult containing succeeded items and any failures with
@@ -289,7 +290,7 @@ error_message = (
 
 ### Pattern 7: Project Documentation
 
-**README Structure:**
+**README Structure** (for a new README, where a project that has a CONTRIBUTING.md gets a pointer to it instead of the Development section; keep an existing README's shape):
 
 ```markdown
 # Project Name
@@ -323,7 +324,7 @@ pytest
 \`\`\`
 ```
 
-**CHANGELOG Format (Keep a Changelog):**
+**CHANGELOG Format** (keep an existing CHANGELOG.md's format; for a new one, Keep a Changelog):
 
 ```markdown
 # Changelog

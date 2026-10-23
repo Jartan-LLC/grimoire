@@ -5,7 +5,7 @@ tool builds them from. The project's own rules come first: where its agent instr
 CONTRIBUTING, RELEASING, the CHANGELOG.md header, a changelog checker or the release tool's config
 decide a point, raise nothing against them. Two things are raised whatever the project says,
 against the rule rather than the author: exploit detail for a vulnerability whose fix is not yet
-released, and paths or links no reader outside this machine can open (an absolute local path, a
+released, where `information-placement`'s rule 6 bars it, and paths or links no reader outside this machine can open (an absolute local path, a
 gitignored file, a chat or session link). Review the entry against the lines in the
 `docs-patterns` skill's `changelog.md` first, then these checks. The reader is that file's:
 someone upgrading.
@@ -152,6 +152,5 @@ the rename misses the default. Minor.
 support for PostgreSQL 12 ends in November 2024. Django 5.1 supports PostgreSQL 13 and higher."
 Raise a reason that changes nothing users do or decide; it lengthens the entry they scan.
 
-**Length.** Raise nothing on length alone, whatever the general brevity guidance says: an entry
-is not bloated when every clause is an effect, an action or a limit users need, and a short entry
-that drops the effect or the action is worse.
+**Length.** Raise nothing on length alone: an entry is not bloated when every clause is an effect,
+an action or a limit users need, and a short entry that drops the effect or the action is worse.

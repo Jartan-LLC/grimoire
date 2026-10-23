@@ -1,19 +1,17 @@
 ---
 name: docs-patterns
-description: Documentation writing conventions -- style, structure, tone, and quality standards.
-when_to_use: Writing, editing, or reviewing documentation -- a README, CONTRIBUTING.md, a release procedure such as RELEASING.md, changelog entries and release notes, docs pages, or agent instruction files such as CLAUDE.md and AGENTS.md.
+description: Documentation conventions -- doc types, structure, register, per-type rules, and quality standards.
+when_to_use: Writing, editing, or reviewing documentation -- a README, CONTRIBUTING.md, a release procedure such as RELEASING.md, a security policy (SECURITY.md), changelog entries and release notes, docs pages, or agent instruction files such as CLAUDE.md and AGENTS.md.
 user-invocable: false
 ---
 
 # Documentation Writing Patterns
 
-Before writing, **read 2-3 existing docs in the same category** to match their tone and structure.
+Before writing or reviewing, **load `praxis:plain-writing`** (what to keep and cut, plain voice, the final wording pass) and **read 2-3 existing docs in the same category**. Match them in register, terminology, structure and formatting; where they break a rule in this skill, plain-writing or information-placement, follow the rule in what you write instead of copying the fault, and a reviewer raises no finding for that departure.
 
 ## Writing Style
 
-**Tone:** Technical but accessible. Imperative for instructions ("Use X..."), declarative for specifications ("The User model has these fields..."). No marketing language.
-
-**Brevity is paramount.** A doc that could be 100 lines should not be 300. Every paragraph must earn its place. If a table communicates it better than prose, use a table. If a link to another doc covers it, don't restate it. Be precise, not exhaustive.
+Imperative for instructions ("Use X..."), declarative for specifications ("The User model has these fields..."). If a table communicates it better than prose, use a table.
 
 ## Doc Types
 
@@ -26,7 +24,7 @@ Pick the type before the shape -- the four Diataxis types each want a different 
 | Reference | Information-oriented -- authoritative facts consulted mid-task | Austere, structured to mirror the code, consistent patterns and tables | "Describing what *is* -- consulted, not read through." |
 | Explanation | Understanding-oriented -- the why, context, trade-offs | Discursive prose; weighs alternatives and reasoning | "Explaining *why* -- read away from the code to understand." |
 
-The **Section Structure** below is the **reference** shape. Don't force tutorials, how-tos, or explanations into it -- each has its own shape above.
+The **Section Structure** below is the default **reference** shape, for a project that has no established one; a project's own consistent reference shape is not a fault to depart from. Don't force tutorials, how-tos, or explanations into it -- each has its own shape above.
 
 ## Files with their own rules
 
@@ -38,11 +36,13 @@ Before editing one of these, read its file in this skill's directory; a reviewer
 | A README, including a package page or a component's README | `readme.md` |
 | CONTRIBUTING.md or other contributor docs | `contributing.md` |
 | RELEASING.md or another release procedure | `releasing.md` |
+| A page under `docs/` or on a docs site: how-to, reference, explanation, tutorial, runbook, operator guide, architecture page, home page | `docs-pages.md` |
+| SECURITY.md, a repository's or the owner's default security policy | `security.md` |
 | CLAUDE.md, AGENTS.md, the files they import or name as the rules, `.claude/rules/`, other tools' equivalents | `agent-files.md` |
 
 ## Section Structure
 
-The **reference** shape (see Doc Types). Reference pages follow a consistent pattern:
+The default **reference** shape (see Doc Types), where the project has none of its own:
 
 1. **H1 title** with a one-line description
 2. **Overview** -- brief intro, bullet list of capabilities/features
@@ -78,14 +78,11 @@ Both trace to one source: **docstrings + type annotations**. The "use it" doc na
 | Nav / table-of-contents completeness | Orphan and unlisted pages nothing links to |
 | Cross-reference check | Broken reference-style pointers to renamed or removed targets |
 
-Language toolchain implementing these bars (plus API docs generated from docstrings): see `pythonica:python-api-docs`.
-
 ## Conventions
 
 - **Tables** for reference content (settings, fields, endpoints). 3-4 columns max.
 - **Code examples** in Usage sections -- complete enough to copy-paste, with error handling where relevant.
 - **Internal links** use relative markdown: `[Doc Name](FILENAME.md)`
-- **No redundancy** -- don't repeat information documented elsewhere. Link instead.
 - **Code examples must work** -- enforce with the tested-snippets bar (see Strictness Bars), not manual review alone.
 
 ## Change narration
@@ -96,12 +93,10 @@ Prose that narrates the change which produced the page, or inventories where els
 
 `Or from source. This project installs with uv rather than pip -- in CI, in the devcontainer and in the Docker image:` -- the reader is installing locally. Which installer the project stopped using, and the three other places the new one is also used, change nothing they type. `Or from source, with uv:` is the whole of it.
 
-Change narration's code-comment form is what `comment-hygiene`'s *Density* calls PR narration, and one migration commonly produces both, so a diff carrying it in comments is worth reading for it in the docs too. Rationale that needs a home goes in the commit message (under a merge setting that drops it, where `gitwise:commit-pr-writing` says), or in a decision record the project keeps.
+When a diff narrates in its comments, read its docs for narration too. Rationale that needs a home goes in the commit message, or in a decision record the project keeps.
 
 ## What to Avoid
 
 - Verbose explanations where a table or code block would be clearer
-- Repeating content from other docs (link to it)
-- Obvious statements that don't add value
-- Multiple ways of saying the same thing
+- Anything `plain-writing`'s Cut list names
 - Documentation that doesn't match the actual code

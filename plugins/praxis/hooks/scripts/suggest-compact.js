@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // Originally from everything-claude-code by Affaan Mustafa (https://github.com/affaan-m/ECC)
+// SPDX-License-Identifier: MIT
 /**
  * Strategic Compact Suggester
  *

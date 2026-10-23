@@ -27,7 +27,7 @@ logger.exception("SMTP send failed for %s", email)    # yes (in an except handle
 logger.info(f"Cleaned up {count} expired sessions")   # no
 ```
 
-`%s` deferral is stdlib-specific -- `structlog` uses kwargs, not `%s`. See `pythonica:python-observability`.
+`%s` deferral is stdlib-specific -- `structlog` uses kwargs, not `%s`.
 
 ## Level Conventions
 

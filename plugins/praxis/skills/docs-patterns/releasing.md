@@ -1,6 +1,6 @@
 # RELEASING.md and Release Procedures
 
-The project's own rules win where they speak (agent instruction files, CONTRIBUTING.md, the release tool's configuration). Keep the procedure where, and in the form, the project keeps it (a checklist, docs page, another repository), else add it to CONTRIBUTING.md or contributor docs. Edit only what this change makes wrong or missing, checked against the release workflows, scripts and settings it leaves; suggest other fixes in the PR description.
+The project's own rules win where they speak (agent instruction files, CONTRIBUTING.md, the release tool's configuration). Keep the procedure where, and in the form, the project keeps it (a checklist, docs page, another repository), else add it to CONTRIBUTING.md or contributor docs, asking the user first where the project has neither and naming their approval in the PR description. Edit only what this change makes wrong or missing, checked against the release workflows, scripts and settings it leaves; suggest other fixes in the PR description.
 
 Write for a first-time releaser using this file and its links. Ask the user, rather than decide, what the project has not settled (when a version counts as released, whether a bad tag may move); what the inputs state is settled; what the task asks you to define, write and flag in the PR description as a proposal. If nobody can answer, leave out only the unsettled part, keep what is settled around it, and say so in the PR description.
 

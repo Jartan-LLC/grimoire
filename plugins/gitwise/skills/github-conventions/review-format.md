@@ -1,6 +1,6 @@
 # Code Review Format
 
-Recommended structure for code-review comments posted to GitHub pull requests.
+Recommended structure for a code review of a pull request.
 
 ## Template
 
@@ -44,5 +44,3 @@ Recommended structure for code-review comments posted to GitHub pull requests.
   a complaint.
 - **Suspected** -- a finding you could not confirm goes here as a question ("possible X --
   verify Y"), never asserted as a graded verdict and never silently dropped.
-- **Line-specific findings** -- prefer an inline PR review comment on the exact line over a
-  bullet in the summary comment.

@@ -1,4 +1,5 @@
 // Vendored from everything-claude-code by Affaan Mustafa (https://github.com/affaan-m/ECC)
+// SPDX-License-Identifier: MIT
 /**
  * Transcript context-size helpers for the strategic-compact hook.
  *

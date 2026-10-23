@@ -15,7 +15,7 @@ user-invocable: false
 4. **Assign waves** -- no dependencies -> Wave 1. Depends on Wave 1 -> Wave 2. Wave 0 is always contracts/setup. Integration is final wave.
 5. **Assign scopes** -- each module gets a directory or file set. Zero overlap between parallel modules.
 6. **Specify conventions** -- language, test framework, type system, DI pattern, path handling, package manager
-7. **Plan deliverables** -- README, CHANGELOG, `--version`, runtime version access, coverage config
+7. **Plan deliverables** -- README, CHANGELOG (for a new project, or the entry an existing changelog owes), `--version`, runtime version access, coverage config
 
 ## Module Split Criteria
 
@@ -55,7 +55,7 @@ insist on in a code review.)
 ### Module A -- Owns: <scope>, Responsibility: <one line>
 ## Wave 2: <name>
 ### Module C -- Owns: <scope>, Depends on: <interfaces>, Responsibility: <one line>
-## Wave N: Integration + Documentation (README.md, CHANGELOG.md)
+## Wave N: Integration + Documentation (README.md; CHANGELOG.md for a new project or an existing changelog)
 
 ## File Ownership Map
 ### Complexity: Simple | Moderate | Complex

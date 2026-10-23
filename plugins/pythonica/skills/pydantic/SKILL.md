@@ -7,6 +7,8 @@ user-invocable: false
 
 # Pydantic Validation Skill
 
+Use it with `python-configuration` for how an application loads its configuration and secrets, `python-error-handling` for exception design around `ValidationError`, `python-type-safety` for protocols, generics and type narrowing, and `python-testing` for testing models.
+
 ## Quick Start
 
 ```python
@@ -1005,10 +1007,6 @@ class UserModel(BaseModel):
 user_model = UserModel.model_validate(user)
 ```
 
-## Testing
-
-For testing Pydantic models with pytest, see the `python-testing` skill.
-
 ## Migration Guide (v1 -> v2)
 
 ### Key Changes
@@ -1245,15 +1243,6 @@ class Document(AuditMixin):
             data['updated_at'] = datetime.utcnow()
         return data
 ```
-
-## Related Skills
-
-When using Pydantic, consider these complementary pythonica skills:
-
-- **python-testing**: Testing strategies for Pydantic models and validation
-- **python-error-handling**: Exception hierarchies and validation patterns
-- **python-configuration**: pydantic-settings for environment and config management
-- **python-type-safety**: Protocols, generics, and type narrowing
 
 ## Additional Resources
 

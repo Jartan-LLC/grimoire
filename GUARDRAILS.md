@@ -1,7 +1,7 @@
 # Project Guardrails
 
-The project rules, ranked by how firmly each holds. `CLAUDE.md` imports this file, so
-every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `CORE.md`).
+The project rules, ranked by how firmly each holds. `AGENTS.md` imports this file and
+`CLAUDE.md` imports `AGENTS.md`, so every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `CORE.md`).
 
 ## Tier 0 (Inviolable)
 <!-- Constraints that must NEVER be violated. Triggers mandatory halt (RESET). -->
@@ -17,15 +17,20 @@ every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `
   `x` (times), `^2` (superscript), `...` (ellipsis), plain `'` and `"` (quotes),
   and `|` `` ` `` `-` for directory trees. Applies to prose, code fences, JSON
   descriptions, and hook scripts alike.
-- Run the Verify command in `CLAUDE.md` before declaring work done or submitting it for
+- Run the Verify command in `AGENTS.md` before declaring work done or submitting it for
   review.
 - Version lives only in `plugin.json`; bump it on any change under `plugins/<name>/`
   other than its `CHANGELOG.md`, with an entry for the new version in that changelog
   (marketplace entries carry no `version` -- see `RELEASING.md`).
-- Declare a plugin `dependency` for every cross-plugin skill an agent loads in its
-  frontmatter `skills:` (a hard, resolve-or-fail load like `gitwise:github-conventions`);
-  a prose `see plugin:skill` pointer is soft and needs none. Add no plugin `dependency`
-  without a real runtime requirement (see `RELEASING.md`).
+- Declare a plugin `dependency` for every cross-plugin skill that an agent preloads in
+  its frontmatter `skills:` (a hard, resolve-or-fail load like
+  `gitwise:github-conventions`) or that a skill or command step tells the agent to load.
+  Add no plugin `dependency` without a real runtime requirement (see `RELEASING.md`).
+- Name no other plugin, and no skill, agent or command of another plugin, in a skill,
+  agent or command unless its plugin declares that plugin: an undeclared plugin may not be
+  installed, and a prose pointer does not reliably load it. Drop such a prose pointer
+  rather than add a dependency for it; a load the bullet above covers takes the
+  dependency.
 - Ask first before changing a plugin's public surface (command, agent or skill names) or
   a skill's severity mapping, deleting files, or removing a plugin or feature.
 - Commit or push only when explicitly asked or instructed by a command. A Liza workflow

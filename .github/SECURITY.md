@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-**Do not open a public issue for security vulnerabilities.**
+**Do not report security vulnerabilities in public issues, pull requests or discussions.**
 
 Please report security issues privately using [GitHub's security advisory feature](https://github.com/Jartan-LLC/grimoire/security/advisories/new).
 
