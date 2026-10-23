@@ -31,6 +31,8 @@ Ensure the PR's branch is checked out locally so fixes can be applied. Load the 
 
 ### 3. Walk Through Findings
 
+Before a fix edits code, read `writing.md` in the `praxis:comment-hygiene` skill; before it edits a document, read that document's file in the `praxis:docs-patterns` skill (its SKILL.md maps each document to its file). Read them even when the skill is already loaded: they cover the comments and documents a fix writes and the ones it makes false.
+
 Work through each finding sequentially. For each one:
 
 1. **Investigate** -- Read the relevant code. Understand whether the finding is a real problem, a theoretical concern, or a false positive. Check how the rest of the codebase handles the same pattern.
