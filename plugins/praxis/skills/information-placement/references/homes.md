@@ -42,7 +42,7 @@ change is missing.
 | Verification: what ran and what it showed, what was not run | the PR description; the commit message when there is no PR | the commit message keeps the versions verified against; results a commit message already states need no copy in the PR description | test docstrings; docs; raw output (link the run); totals CI already shows |
 | Where to start reading | the PR description, except where the merge setting lands it | | a PR comment |
 | Merge conditions and what merging sets off | the PR description, as facts that stay true ("Requires #52.", "Merging publishes 0.3.0.") | RELEASING holds the standing sequence | merge-status narration ("not merging yet") |
-| Review findings | the review, where whoever asked for it reads it | | praise; vulnerability detail in a public repository |
+| Review findings | the review, where whoever asked for it reads it | | praise; vulnerability detail the vulnerability row bars |
 | Answers to findings | the fix; a decision a reviewer might question, a declined finding included, as a PR description flag with its reason | a reply on the PR to a finding a person posted that was declined, fixed differently or found already the case, in its thread when it was posted on a line; a lasting reason goes to its own home and the reply points there | commit messages as the answer; "changed in review" or "declined from review" lines; a reply per round or per fixed finding |
 
 ## In the code
@@ -77,7 +77,7 @@ change is missing.
 | Why an issue closed with no change | one comment when closing it | | |
 | Deferred work, known defects | an issue per item | `TODO(#N)` at the site; "Deferred: #N" in the PR description or reply; a PR-description flag naming a defect the change found and left, until it is filed; a planned state in a document, marked as planned and linked to its issue | "the next PR"; undecided version-tied plans in docstrings |
 | Status: opened, merged, blocked, released | the forge's own state: issue and PR state, closing links, labels, tags | a comment only for "released in vX" to an outside filer, which the forge does not show; in a document, a version or "unreleased" mark on behaviour newer than the installed release | status in docs, code, commit messages or PR descriptions |
-| Detail of a vulnerability whose fix is not released | the private channel SECURITY.md names | public text describes the fix neutrally; the commit message whose diff removes the flaw, and text that links the released fix or a public advisory, may describe it | an issue, branch name, other commit message, PR, review, code comment or unreleased changelog section in a public repository |
+| Detail of a vulnerability whose fix is not released | the private channel SECURITY.md names | public text describes the fix neutrally; the commit message whose diff removes the flaw, and text that links the released fix or a public advisory, may describe it | an issue, branch name, other commit message, PR, review, code comment or unreleased changelog section in a public repository, unless it links the released fix or a public advisory |
 
 ## Nowhere
 
