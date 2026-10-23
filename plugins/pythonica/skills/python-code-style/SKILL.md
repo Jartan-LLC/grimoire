@@ -290,7 +290,7 @@ error_message = (
 
 ### Pattern 7: Project Documentation
 
-**README Structure:**
+**README Structure** (for a new README, where a project that has a CONTRIBUTING.md gets a pointer to it instead of the Development section; keep an existing README's shape):
 
 ```markdown
 # Project Name
@@ -324,7 +324,7 @@ pytest
 \`\`\`
 ```
 
-**CHANGELOG Format (Keep a Changelog):**
+**CHANGELOG Format** (keep an existing CHANGELOG.md's format; for a new one, Keep a Changelog):
 
 ```markdown
 # Changelog

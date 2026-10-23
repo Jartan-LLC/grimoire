@@ -6,6 +6,8 @@
   installed.
 - `python-api-docs` says to put only your project's public modules on the API reference page.
 - In `python-code-style`'s examples, `get_user`'s docstring no longer restates its signature, and `process_batch`'s no longer repeats the default its signature declares.
+- The README templates in `python-code-style` and `python-packaging` are for a new README, where a project that has a CONTRIBUTING.md gets a pointer to it instead of development setup; your agent keeps an existing README's shape. `python-code-style` keeps an existing CHANGELOG.md's format and uses Keep a Changelog only for a new one.
+- `python-project-structure` has your agent explain a component's organization in that component's own README, in a new project or one that keeps component READMEs, and state what each package owns in its `__init__.py` docstring.
 
 ## 1.1.1
 

@@ -1,7 +1,7 @@
 # Project Guardrails
 
-The project rules, ranked by how firmly each holds. `CLAUDE.md` imports this file, so
-every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `CORE.md`).
+The project rules, ranked by how firmly each holds. `AGENTS.md` imports this file and
+`CLAUDE.md` imports `AGENTS.md`, so every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `CORE.md`).
 
 ## Tier 0 (Inviolable)
 <!-- Constraints that must NEVER be violated. Triggers mandatory halt (RESET). -->
@@ -17,7 +17,7 @@ every Claude Code session loads it; Liza agents also enforce the tiers (Liza's `
   `x` (times), `^2` (superscript), `...` (ellipsis), plain `'` and `"` (quotes),
   and `|` `` ` `` `-` for directory trees. Applies to prose, code fences, JSON
   descriptions, and hook scripts alike.
-- Run the Verify command in `CLAUDE.md` before declaring work done or submitting it for
+- Run the Verify command in `AGENTS.md` before declaring work done or submitting it for
   review.
 - Version lives only in `plugin.json`; bump it on any change under `plugins/<name>/`
   other than its `CHANGELOG.md`, with an entry for the new version in that changelog

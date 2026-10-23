@@ -38,7 +38,7 @@ After each wave, spawn a `recursive-reviewer` scoped to the wave's output:
 
 **Post-implementation waves:** review for bugs, structural artifacts, cross-module consistency. Fix Critical findings via implementer agents (max 2 rounds). Note Important findings.
 
-**Post-final wave:** full codebase review. Fix Critical. Verify README.md and CHANGELOG.md exist -- create via implementer if missing.
+**Post-final wave:** full codebase review. Fix Critical. Verify README.md exists, and for a new project CHANGELOG.md too -- create via implementer if missing. Where the project keeps a changelog, verify the entry this work owes.
 
 **Report:** total tests, files, max nesting depth, findings summary (found/fixed).
 

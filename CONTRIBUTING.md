@@ -74,8 +74,9 @@ python3 -m pytest tests/<source path>/test_<name>.py
 ## Adding a plugin
 
 1. Create `plugins/<name>/` with:
-   - `.claude-plugin/plugin.json`, with `name`, `version`, `description` and
-     `author`
+   - `.claude-plugin/plugin.json`, with `name`, `version`, `description`
+     (`<summary> -- <detail>`; Codex shows the summary as the short description)
+     and `author`
    - a `README.md` saying what the plugin gives and how to install it
    - a `CHANGELOG.md` with an entry for that version
 2. Add its entry to `.claude-plugin/marketplace.json` with the fields the other
