@@ -24,8 +24,8 @@ before a fix exists: Critical. A pointer to a missing SECURITY.md or address is 
 reviewers merge a policy change unnoticed. Verify: find each rule the diff adds or changes in the
 PR description. A written rule that recent history ignores stays; the PR names the conflict instead of deleting it.
 
-**A guide nobody asked for.** Creating a CONTRIBUTING.md where none exists, unless the task or linked issue asks for
-one, is a finding; so is editing a file GitHub does not show while another is shown (a root CONTRIBUTING.md beside
+**A guide nobody asked for.** Creating a CONTRIBUTING.md where none exists, unless the task, a linked issue or the
+user's approval stated in the PR description asks for one, is a finding; so is editing a file GitHub does not show while another is shown (a root CONTRIBUTING.md beside
 `.github/CONTRIBUTING.md`). Contributors then read a guide other than the one changed. Verify: list each location above.
 
 ## What a change owes

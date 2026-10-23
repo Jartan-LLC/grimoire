@@ -1,8 +1,10 @@
 # Where each kind of information goes
 
 Default homes. A project rule moves any of them. "The commit message" means the text the merge
-setting lands. Where a home does not exist in the project, use the
-fallback the row gives; never create a document type the project has not chosen to keep.
+setting lands. Where a home does not exist in the project, use the fallback the row gives, or the
+commit message where it gives none. Create a document type the project does not keep only with the
+user's approval. A reviewer who finds the project needs one, or cannot tell whether it keeps one,
+raises it once, as a Minor question for the user, not as an entry the change is missing.
 
 ## For users and consumers
 
@@ -22,7 +24,7 @@ fallback the row gives; never create a document type the project has not chosen 
 | Information | Home | Elsewhere, at most | Never |
 |---|---|---|---|
 | A change a consumer sees: behaviour, breaking change, removal, deprecation, fix | the changelog entry for the version that ships it, written in the same change | release notes made from it; a breaking mark on the commit message only when the change breaks something consumers rely on, in the form the project's release tool reads; a one-line PR flag | internals, CI or tests outside a section the changelog keeps for them, or rationale and process that change nothing a user does, in the changelog; the PR description as its home |
-| What a consumer or operator must do to upgrade, for an action this change makes necessary | the changelog entry for the version that needs it | a docs migration page when long; the release notes | only in the PR description or commit message |
+| What a consumer or operator must do to upgrade, for an action this change makes necessary | the changelog entry for the version that needs it | a docs migration page when long; the release notes | only in the PR description; only in the commit message where the project keeps a changelog |
 | A security fix, after its release | the changelog's security entry; the advisory | the release notes | anything before the release (see the vulnerability row) |
 | The change, in one line | the PR title, which becomes the squash commit's subject for a PR with two or more commits (a one-commit PR lands its commit's subject) | | "address review", "round 2", two changes joined by "and", branch names |
 | Why the change was made: the problem, the cause, the approach over named alternatives, accepted costs, why a dependency was added, versions verified against | the commit message | the PR description gives the intent and the why in a sentence or two; a document carries at most a one-clause reason that changes what its reader does | the changelog; code comments, except a reason an editor at the line needs |
