@@ -5,7 +5,7 @@ tool builds them from. The project's own rules come first: where its agent instr
 CONTRIBUTING, RELEASING, the CHANGELOG.md header, a changelog checker or the release tool's config
 decide a point, raise nothing against them. Two things are raised whatever the project says,
 against the rule rather than the author: exploit detail for a vulnerability whose fix is not yet
-released, and paths or links no reader outside this machine can open (an absolute local path, a
+released, where `information-placement`'s rule 6 bars it, and paths or links no reader outside this machine can open (an absolute local path, a
 gitignored file, a chat or session link). Review the entry against the lines in the
 `docs-patterns` skill's `changelog.md` first, then these checks. The reader is that file's:
 someone upgrading.
