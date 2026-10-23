@@ -86,7 +86,8 @@ not flagged for what it lacks):
 
 Tier findings with `review-severity`: rule 6 is Critical; rules 1 and 2 are Important; rules 3-5 are
 Minor; information outside its default home is Minor, or Important when it misleads a reader or
-leaves them without something they need.
+leaves them without something they need; a question to the user about a document type the project
+does not keep, or may not keep, is Minor.
 
 When asked where something should go while writing, check the project's rules, then give the home
 from `references/homes.md` and any pointer the other homes should carry.

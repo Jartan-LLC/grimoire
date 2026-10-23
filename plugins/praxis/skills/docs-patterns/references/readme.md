@@ -15,8 +15,8 @@ step is Critical.
 - Translations (`README.<lang>.md`, or a directory such as `readme_i18n/`) left stale, unless the
   project keeps them in step with the source; then check them as the source. Where none exist, a
   translation claim in the PR description ("No translations to update.") is itself a finding.
-- A missing README, or a missing promise of what users may rely on across updates: the project's
-  call.
+- A missing README (beyond the one question to the user that `information-placement` allows), or a
+  missing promise of what users may rely on across updates: the project's call.
 
 ## Project rules the README must still meet
 

@@ -71,5 +71,5 @@ generator's targets (`automodule`, `:undoc-members:`, an include list) with the 
 
 Raise nothing on a page another docs-patterns file covers (a changelog page), on a name or fact a later change made
 false in a dated record (a decision record, a blog post), unless the PR's purpose is to rewrite that record, on adopter instructions in a template that are marked at their site, or on placeholders an adopter replaces, on a fragment a generator appends
-to a README, on a page type the project does not keep, or on a page's departure from the existing pages where those
+to a README, on a page type the project does not keep (beyond the one question to the user that `information-placement` allows), or on a page's departure from the existing pages where those
 pages break a rule in docs-patterns, plain-writing or information-placement.
