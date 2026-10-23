@@ -197,6 +197,8 @@ rm -rf test-env
 
 ### Pattern 18: README.md Template
 
+For a new README, where a project that has a CONTRIBUTING.md gets a pointer to it instead of the Development section; keep an existing README's shape.
+
 ````markdown
 # My Package
 
