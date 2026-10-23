@@ -72,7 +72,7 @@ fallback the row gives; never create a document type the project has not chosen 
 | Findings during the work | the author's workspace; a finding that moves scope is edited into the issue body | the commit message carries the evidence that decided the shipped design | an issue comment per finding |
 | Why an issue closed with no change | one comment when closing it | | |
 | Deferred work, known defects | an issue per item | `TODO(#N)` at the site; "Deferred: #N" in the PR description or reply; a PR-description flag naming a defect the change found and left, until it is filed; a planned state in a document, marked as planned and linked to its issue | "the next PR"; undecided version-tied plans in docstrings |
-| Status: opened, merged, blocked, released | the forge's own state: issue and PR state, closing links, labels, tags | a comment only for "released in vX" to an outside filer, which the forge does not show; in a document, the version or "unreleased" mark `docs-patterns` asks for | status in docs, code, commit messages or PR descriptions |
+| Status: opened, merged, blocked, released | the forge's own state: issue and PR state, closing links, labels, tags | a comment only for "released in vX" to an outside filer, which the forge does not show; in a document, a version or "unreleased" mark on behaviour newer than the installed release | status in docs, code, commit messages or PR descriptions |
 | Detail of a vulnerability whose fix is not released | the private channel SECURITY.md names | public text describes the fix neutrally | an issue, branch name, commit, PR, review, code comment or unreleased changelog section in a public repository |
 
 ## Nowhere
