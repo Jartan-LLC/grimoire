@@ -244,4 +244,4 @@ Relative imports can break when modules are moved or reorganized.
 5. **Be consistent** - Apply patterns uniformly across the project
 6. **Match names to content** - File names should describe their purpose
 7. **Separate concerns** - Keep layers distinct and dependencies flowing one direction
-8. **Document your structure** - State what each package owns in its `__init__.py` docstring
+8. **Document your structure** - Give each component a README explaining its organization, and each package's `__init__.py` a docstring stating what it owns
