@@ -2,7 +2,7 @@
 
 Default homes. A project rule moves any of them. "The commit message" means the text the merge
 setting lands: every commit message on the branch under GitHub's default squash merge, which holds
-unless the project's rules state another setting. Where a home does not exist in the project, use the
+unless the project's agent instruction files or CONTRIBUTING state another setting. Where a home does not exist in the project, use the
 fallback the row gives, or the commit message where it gives none. Create a document type the project
 does not keep only with the user's approval. A reviewer who finds the project needs one, or cannot
 tell whether it keeps one, raises it once, as a Minor question for the user, not as an entry the
