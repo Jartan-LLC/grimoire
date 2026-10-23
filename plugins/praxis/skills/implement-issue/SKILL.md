@@ -40,7 +40,7 @@ Load the `praxis:docs-patterns` and `praxis:plain-writing` skills. Before you ed
 
 ### 6. Verify
 
-Run the Verify commands from `CLAUDE.md`. Fix any failures and commit the fixes before pushing.
+Run the Verify commands from the agent instruction files (`CLAUDE.md`, `AGENTS.md` and the files they import). Fix any failures and commit the fixes before pushing.
 
 ### 7. Push
 
