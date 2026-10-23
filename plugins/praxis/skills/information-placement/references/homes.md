@@ -62,7 +62,7 @@ change is missing.
 |---|---|---|---|
 | Contributor setup, the checks to pass, conventions | CONTRIBUTING; the agent file when the project is solo with one agent harness; a README Development section where the project has no CONTRIBUTING | the agent file gives one-line triggers and pointers; README points to CONTRIBUTING | the full rule restated in README, agent files and RELEASING; the full CI check list |
 | Release steps and recovery | one release document (RELEASING, or a CONTRIBUTING section in a small project), with recovery in a runbook it points to | an agent-file trigger ("a change under X needs a version bump: see RELEASING") | PR descriptions as its only record; the changelog |
-| Maintainer chores: lint-hook upkeep, upstream or template sync | a maintaining section in CONTRIBUTING, or a maintainer page outside the user docs; a README Development section where the project has neither | | the user docs site |
+| Maintainer chores: lint-hook upkeep, upstream or template sync | a maintaining section in CONTRIBUTING, or a maintainer page outside the user docs; a README Development section where the project has no CONTRIBUTING | | the user docs site |
 | How to report a vulnerability | SECURITY.md, or the owner's default | CONTRIBUTING, README and the issue chooser point to it | vulnerability detail |
 | Template-adopter instructions | a marker at the site addressed to the adoption step | | anything that survives adoption |
 
