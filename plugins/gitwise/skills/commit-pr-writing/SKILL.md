@@ -11,6 +11,8 @@ The project's own rules win where they speak. No style or brevity pass over a co
 
 Before you state how the code behaves when it runs (its output, what a test catches, why a result comes out as it does), run it or watch it. If you only reasoned it out, check it now or leave it out. This does not apply to what the change does or why you chose it.
 
+Whatever the project's rules say, keep exploit and reproduction detail of a security flaw whose fix is not released out of the PR title and description and out of every commit message but the one whose diff removes the flaw, unless the text links the released fix or a public advisory.
+
 ## The Commit Message
 
 Write every commit message to land on the default branch, whatever the merge setting. Under GitHub's default squash merge, every commit message on the branch goes into the squash commit's message (merges from the base branch aside).
