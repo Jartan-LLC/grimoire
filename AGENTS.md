@@ -29,3 +29,7 @@ Code -- edit `AGENTS.md`.
 
 Then confirm by inspection: any plugin with changes under `plugins/<name>/` other than its
 `CHANGELOG.md` has a bumped `version` in `plugin.json`.
+
+If the change touches a skill, agent or command under `plugins/`, also run `make eval-plan`
+and follow what it prints; `tests/evals/README.md` says how, and what the PR description
+reports.
