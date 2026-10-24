@@ -190,6 +190,8 @@ version ranges resolve against the `{plugin-name}--v{version}` tags above.
 
 Add a `dependencies` entry only for a real runtime requirement, such as `praxis`'s
 agents loading `gitwise` skills, and keep its constraint pinned to a tested range.
+`make verify` fails a skill, agent or command that loads or names another plugin its
+manifest does not declare (`scripts/check-wiring.py`).
 
 Codex ignores `dependencies`, so a plugin that declares one says in its README how
 to install it in Codex, as praxis does.
