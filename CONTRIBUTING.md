@@ -43,6 +43,8 @@ python3 -m pytest tests/<source path>/test_<name>.py
 - Build a fixture repository with `git init` in a temporary directory, never in
   this checkout. Fixtures write nothing outside their directory and reach no
   network.
+- A change to how a skill, agent or command makes the agent behave is tested
+  with an eval suite, run locally: see [tests/evals/README.md](tests/evals/README.md).
 - Keep a test that exposes a shipped defect. Wrap it in `knownDefect` from
   `tests/helpers/known-defect.js` (Node) or mark it
   `xfail(strict=True, raises=AssertionError)` (pytest), naming the issue.
