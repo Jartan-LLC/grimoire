@@ -63,8 +63,9 @@ typecheck:  ## Type-check the Python code (pyright, strict)
 # Runs $(2), comma-separated Python argv items, on the git-tracked files matching $(1).
 # Explicit file lists: `node --test` reads a directory or glob argument differently
 # across Node versions, and with no argument at all it walks the whole tree.
-run_tracked = @python3 -c "import subprocess,sys; files=subprocess.run(['git','ls-files','$(1)'],capture_output=True,text=True,check=True).stdout.split(); assert files, 'git ls-files matched nothing for $(1) -- gate would pass having checked nothing'; sys.exit(subprocess.run([$(2),*files]).returncode)"
+run_tracked = @python3 -c "import subprocess,sys; files=subprocess.run(['git','ls-files','$(1)',':(exclude,glob)tests/evals/**/fixture/**'],capture_output=True,text=True,check=True).stdout.split(); assert files, 'git ls-files matched nothing for $(1) -- gate would pass having checked nothing'; sys.exit(subprocess.run([$(2),*files]).returncode)"
 
+# Eval fixtures carry their own projects' tests, which run only inside an eval sandbox.
 test:  ## Run the Node and Python tests (git-tracked files: `git add` new ones first)
 	$(call run_tracked,:(glob)tests/**/*.test.js,'node'$(comma)'--test')
 	$(call run_tracked,:(glob)tests/**/test_*.py,sys.executable$(comma)'-m'$(comma)'pytest')

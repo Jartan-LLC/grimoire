@@ -1,0 +1,2 @@
+commits = ["docs: fix spelling of \"receive\" in README\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"]
+final = "I fixed \"recieve\" \u2192 \"receive\" in `README.md`. That was the only place the misspelling appeared in the repo.\n\nI didn't commit to `main`. I made a new branch, `docs/fix-receive-typo`, and committed it there as `d8e8bdc docs: fix spelling of \"receive\" in README`. Nothing has been pushed."

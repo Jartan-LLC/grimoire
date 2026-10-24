@@ -5,7 +5,7 @@ target-version = "py312"
 line-length = 100
 # ruff formats the Python blocks in Markdown too. The Markdown here is mostly plugin
 # content, where any change needs a release, so its examples stay as written.
-extend-exclude = ["*.md"]
+extend-exclude = ["*.md", "tests/evals/**/fixture/**", "tests/evals/**/fix/**"]  # eval fixtures and their fixes stand in for other projects
 
 # Comprehensive lint: bugs, security, perf, modernization, imports, naming.
 # `ruff format` owns formatting, so line length (E501) is left to it.
@@ -44,6 +44,7 @@ ignore = [
 [lint.per-file-ignores]
 "scripts/**" = ["T201"] # command-line tools: print is their output
 "tests/**" = ["S101", "ARG", "PLR2004", "D"] # asserts, fixtures, magic values, docstrings
+"tests/evals/**/build.py" = ["S603", "S607"] # fixture builders run git, offline, inside the eval sandbox
 
 [lint.pydocstyle]
 # Google-style docstrings; the convention also settles the mutually-incompatible

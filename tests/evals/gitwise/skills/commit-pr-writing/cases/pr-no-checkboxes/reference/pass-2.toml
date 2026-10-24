@@ -1,0 +1,5 @@
+commits = []
+final = "I wrote the PR title and description to `pr-draft.md`. The title is `feat(textstats): count sentences`, the same as the branch's only commit.\n\nThe description says what the change adds and why, and where to start reading. It gives your test run as the verification. It also flags one thing a reviewer might miss: the counter doesn't handle abbreviations or decimals. I ran examples to confirm this. `\"Pi is 3.14 today.\"` counts as 2 sentences and `\"See e.g. this.\"` counts as 3, while runs like `...` and `?!` count as one sentence ending. I left `pr-draft.md` uncommitted."
+
+[files]
+"pr-draft.md" = "feat(textstats): count sentences\n\nAdds `sentence_count`, so readability scores have a sentence count to use alongside the word count.\n\nA sentence ends at a run of `.`, `!` or `?`. Runs like `...` and `?!` count as one ending. Abbreviations and decimals are not special-cased, so `\"Pi is 3.14 today.\"` counts as 2 sentences and `\"See e.g. this.\"` counts as 3.\n\nStart reading at `sentence_count` in `textstats/sentences.py`.\n\n`python3 -m pytest -q` passes.\n\n\U0001f916 Generated with [Claude Code](https://claude.com/claude-code)\n"

@@ -1,0 +1,50 @@
+split = "confirm"
+kind = "regression"
+hints = ["don't name", "who asked"]
+
+[[check]]
+metric = "kept"
+artifact = "file:pr-draft.md"
+absent = '''(?i)\b(sam|dana|asked|requested|review(er)?s?)\b'''
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2

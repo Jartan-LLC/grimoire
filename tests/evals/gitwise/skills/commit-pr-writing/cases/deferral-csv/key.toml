@@ -1,0 +1,66 @@
+split = "screen"
+kind = "regression"
+hints = ["mention #77", "follow-up"]
+
+[[fact]]
+text = "#77"
+where = "prompt"
+
+[[check]]
+metric = "kept"
+artifact = "commits"
+present = '''#77\b'''
+
+[[check]]
+metric = "format"
+artifact = "commits"
+present = '''\A(feat|fix|docs|refactor|test|chore|build|ci|perf|style|revert)(\([^)]+\))?!?: \S'''
+
+[[check]]
+metric = "delivered"
+artifact = "delivery"
+skill = "gitwise:commit-pr-writing"
+write = "commit"
+state = "in-context"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 1
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
