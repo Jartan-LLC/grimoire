@@ -11,7 +11,6 @@ import importlib.util
 import pathlib
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import cast
 
 from .proc import GIT, run
 from .suite import Suite, SuiteError, load_suite
@@ -41,7 +40,8 @@ def _references(root: pathlib.Path) -> dict[pathlib.Path, set[tuple[str, str]]]:
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     vars(module)["ROOT"] = root
-    return cast("Callable[[], dict[pathlib.Path, set[tuple[str, str]]]]", module.references)()
+    references: Callable[[], dict[pathlib.Path, set[tuple[str, str]]]] = module.references
+    return references()
 
 
 def changed_files(root: pathlib.Path, base: str) -> list[str]:

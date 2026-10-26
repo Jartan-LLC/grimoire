@@ -12,7 +12,7 @@ import json
 import os
 import pathlib
 from dataclasses import asdict, dataclass
-from typing import Any, cast
+from typing import Any
 
 
 def root() -> pathlib.Path:
@@ -61,7 +61,8 @@ def load(store: pathlib.Path, sample_key: str) -> Sample | None:
     path, _ = _paths(store, sample_key)
     if not path.is_file():
         return None
-    return Sample(**cast("dict[str, Any]", json.loads(path.read_text())))
+    fields: dict[str, Any] = json.loads(path.read_text())
+    return Sample(**fields)
 
 
 def events_path(store: pathlib.Path, sample_key: str) -> pathlib.Path:
