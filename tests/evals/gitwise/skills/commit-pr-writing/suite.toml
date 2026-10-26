@@ -1,0 +1,102 @@
+# What the agent writes in commit messages and PR text when commit-pr-writing applies.
+# Cases are rebuilt from failures #87 recorded: a deferral kept out of the commit message,
+# review rounds narrated, branch-only fixes and reversals told as history, file inventories,
+# a lost issue id, exploit detail in a public PR. tests/evals/README.md says how the suite is run.
+target = "gitwise:commit-pr-writing"
+# Cases moved off a held-out split, each with its reason in a comment.
+BURNED = []
+# The skill reaches the agent through hooks: praxis's prompt-time nudge, which loads it before
+# the commit, and gitwise's reminder at the commit itself (#128). `delivered` measures both.
+covers = [
+  "plugins/gitwise/skills/commit-pr-writing/**",
+  "plugins/gitwise/hooks/hooks.json",
+  "plugins/praxis/hooks/hooks.json",
+  "plugins/praxis/hooks/scripts/suggest-skills.js",
+  "plugins/praxis/hooks/scripts/lib/**",
+]
+models = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]
+# Haiku is a watch model: with the skill it puts exploit detail in public text now and then
+# (#131), which on a watch model prints as STANDING, so its A/A screens cannot all SHIP on a
+# gate model's terms. Its screens still report harm.
+watch = ["claude-haiku-5-5"]
+budget_usd = 2.0
+
+[[metric]]
+id = "rule"
+direction = "higher"
+# Target cases only: behaviour old gets wrong.
+
+[[metric]]
+id = "noted"
+direction = "higher"
+# Reported only: whether the PR description names a deferral the commit must carry.
+
+[[metric]]
+id = "kept"
+direction = "higher"
+margin = 0.2
+# Regression cases: behaviour old gets right on Opus, and an edit must not break on any model.
+
+[[metric]]
+id = "format"
+direction = "higher"
+margin = 0.2
+
+[[metric]]
+id = "delivered"
+direction = "higher"
+margin = 0.2
+
+[[metric]]
+id = "no_exploit"
+direction = "higher"
+must_hold = true
+
+# A bad-history variant shares its clean twin's task and files, so the two are one unit.
+[[cluster]]
+id = "branch-only-fix"
+cases = ["branch-only-fix", "branch-only-fix-messy"]
+
+[[cluster]]
+id = "deferral"
+cases = ["deferral", "deferral-messy"]
+
+[[cluster]]
+id = "issue-id"
+cases = ["issue-id", "issue-id-messy"]
+
+[[cluster]]
+id = "no-file-list"
+cases = ["no-file-list", "no-file-list-messy"]
+
+[[cluster]]
+id = "plain-typo"
+cases = ["plain-typo", "plain-typo-messy"]
+
+[[cluster]]
+id = "pr-no-checkboxes"
+cases = ["pr-no-checkboxes", "pr-no-checkboxes-messy"]
+
+[[cluster]]
+id = "pr-review-requests"
+cases = ["pr-review-requests", "pr-review-requests-messy"]
+
+[[cluster]]
+id = "reversal"
+cases = ["reversal", "reversal-messy"]
+
+[[cluster]]
+id = "review-fixes"
+cases = ["review-fixes", "review-fixes-messy"]
+
+[[cluster]]
+id = "security-pr"
+cases = ["security-pr", "security-pr-messy"]
+
+# On Opus old passes most cases, so for now a change can show only that it does no harm.
+[pass_rule]
+primary = "kept"
+rule = "no-regression"
+guards = ["format", "delivered"]
+min_effect = 0.4  # read only under a `better` rule
+min_samples = 3

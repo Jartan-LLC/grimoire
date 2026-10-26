@@ -1,0 +1,106 @@
+split = "dev"
+kind = "target"
+hints = ["mention #59", "in the commit"]
+
+[[fact]]
+text = "#59"
+where = "prompt"
+
+[[plant]]
+id = "zero-attempts-retries"
+verify = '''python3 -c "
+import sys
+from retry import retry
+calls = []
+def call():
+    calls.append(1)
+    if len(calls) < 4:
+        raise ValueError('fail')
+    return 'ok'
+try:
+    retry(call, attempts=0, sleep=lambda _: None)
+except ValueError:
+    pass
+sys.exit(len(calls) != 1)
+"'''
+
+[[plant]]
+id = "jitter-ignores-base"
+verify = '''python3 -c "
+import random
+import sys
+from retry import retry
+random.seed(0)
+waits = []
+def call():
+    raise ValueError('fail')
+try:
+    retry(call, attempts=3, base=0.001, sleep=waits.append)
+except ValueError:
+    pass
+sys.exit(not waits or max(waits) > 0.1)
+"'''
+
+[[check]]
+metric = "rule"
+artifact = "commits"
+present = '''#59\b'''
+
+[[check]]
+metric = "noted"
+artifact = "file:pr-draft.md"
+present = '''#59\b'''
+
+[[check]]
+metric = "format"
+artifact = "commits"
+present = '''\A(feat|fix|docs|refactor|test|chore|build|ci|perf|style|revert)(\([^)]+\))?!?: \S'''
+
+[[check]]
+metric = "delivered"
+artifact = "delivery"
+skill = "gitwise:commit-pr-writing"
+write = "commit"
+state = "in-context"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 2
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 1
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
