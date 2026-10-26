@@ -27,6 +27,5 @@ make check
 `make help` lists the individual targets. `CLAUDE.md` only imports this file, for Claude
 Code -- edit `AGENTS.md`.
 
-Then confirm by inspection: each skill/agent frontmatter `name` matches its directory, and
-any plugin with changes under `plugins/<name>/` other than its `CHANGELOG.md` has a bumped
-`version` in `plugin.json`.
+Then confirm by inspection: any plugin with changes under `plugins/<name>/` other than its
+`CHANGELOG.md` has a bumped `version` in `plugin.json`.
