@@ -1,7 +1,7 @@
 # CI calls these targets directly, so this file is the single definition of the
 # checks. Recipes run under dash both here and on the runners -- no bashisms.
 
-.PHONY: help install lint fix typecheck test verify check
+.PHONY: help install lint fix typecheck test verify check eval-plan eval-size eval-run eval-screen
 
 # Every target uses one Python environment, chosen here: this
 # checkout's .venv, else the active one, else, in the main checkout only, the system
@@ -72,7 +72,7 @@ test:  ## Run the Node and Python tests (git-tracked files: `git add` new ones f
 # `git grep -l` exits 1 on no match, so `|| true` would turn the ASCII gate into
 # a permanent no-op and any other non-zero means the invocation itself failed.
 # One logical line because Make gives each recipe line its own shell.
-verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift, changelogs, plugin names and dependencies, skill pointers)
+verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift, changelogs, plugin names and dependencies, skill pointers, eval suites)
 	@echo "Checking for non-ASCII characters..."
 	@set +e; git grep -lP '[^\x00-\x7F]'; rc=$$?; set -e; \
 	case "$$rc" in \
@@ -88,5 +88,22 @@ verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift, changelog
 	@python3 scripts/check-changelogs.py
 	@echo "Checking that every skill, agent and command pointer resolves within declared dependencies..."
 	@python3 scripts/check-wiring.py
+	@echo "Checking every eval suite..."
+	@python3 scripts/eval.py lint
 
 check: lint typecheck test verify  ## Run CI's lint, typecheck, test and verify checks
+
+# The eval targets run locally on your own `claude` login and are never part of check:
+# CI holds no inference token. eval-plan is free; eval-run and eval-screen start sessions.
+BASE ?= main
+eval-plan:  ## List the eval suites this change needs, against BASE (default main)
+	python3 scripts/eval.py plan --base $(BASE)
+
+eval-size:  ## Show what SUITE's splits can see on each model, from its recorded baselines
+	python3 scripts/eval.py size $(or $(SUITE),$(error set SUITE=tests/evals/...)) --base $(BASE)
+
+eval-run:  ## Run SUITE's cases on ARM (none, old or new), SAMPLES each (spends inference)
+	python3 scripts/eval.py run $(or $(SUITE),$(error set SUITE=tests/evals/...)) --arm $(or $(ARM),$(error set ARM=none, ARM=old or ARM=new)) $(if $(SAMPLES),--samples $(SAMPLES)) --base $(BASE) $(if $(SPLIT),--split $(SPLIT)) $(if $(MODEL),--model $(MODEL)) $(if $(RECORD),--record)
+
+eval-screen:  ## Compare old and new on SUITE's SPLIT (default screen) and print the result (spends inference)
+	python3 scripts/eval.py screen $(or $(SUITE),$(error set SUITE=tests/evals/...)) $(if $(SAMPLES),--samples $(SAMPLES)) --base $(BASE) $(if $(SPLIT),--split $(SPLIT)) $(if $(MODEL),--model $(MODEL)) $(if $(NEW_PLAN),--new-plan)
