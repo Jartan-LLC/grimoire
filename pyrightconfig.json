@@ -1,5 +1,7 @@
 {
   "include": ["scripts", "tests"],
+  "exclude": ["tests/evals/**/fixture", "tests/evals/**/fix", "**/node_modules", "**/__pycache__", "**/.*"],
+  "extraPaths": ["scripts"],
   "pythonVersion": "3.12",
   "typeCheckingMode": "strict"
 }

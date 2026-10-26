@@ -1,7 +1,7 @@
 # CI calls these targets directly, so this file is the single definition of the
 # checks. Recipes run under dash both here and on the runners -- no bashisms.
 
-.PHONY: help install lint fix typecheck test verify check
+.PHONY: help install lint fix typecheck test verify check eval-plan eval-size eval-run eval-screen
 
 # Every target uses one Python environment, chosen here: this
 # checkout's .venv, else the active one, else, in the main checkout only, the system
@@ -63,8 +63,9 @@ typecheck:  ## Type-check the Python code (pyright, strict)
 # Runs $(2), comma-separated Python argv items, on the git-tracked files matching $(1).
 # Explicit file lists: `node --test` reads a directory or glob argument differently
 # across Node versions, and with no argument at all it walks the whole tree.
-run_tracked = @python3 -c "import subprocess,sys; files=subprocess.run(['git','ls-files','$(1)'],capture_output=True,text=True,check=True).stdout.split(); assert files, 'git ls-files matched nothing for $(1) -- gate would pass having checked nothing'; sys.exit(subprocess.run([$(2),*files]).returncode)"
+run_tracked = @python3 -c "import subprocess,sys; files=subprocess.run(['git','ls-files','$(1)',':(exclude,glob)tests/evals/**/fixture/**',':(exclude,glob)tests/evals/**/fix/**'],capture_output=True,text=True,check=True).stdout.split(); assert files, 'git ls-files matched nothing for $(1) -- gate would pass having checked nothing'; sys.exit(subprocess.run([$(2),*files]).returncode)"
 
+# Eval fixtures and their fixes carry their own projects' tests, which run only inside an eval sandbox.
 test:  ## Run the Node and Python tests (git-tracked files: `git add` new ones first)
 	$(call run_tracked,:(glob)tests/**/*.test.js,'node'$(comma)'--test')
 	$(call run_tracked,:(glob)tests/**/test_*.py,sys.executable$(comma)'-m'$(comma)'pytest')
@@ -72,7 +73,7 @@ test:  ## Run the Node and Python tests (git-tracked files: `git add` new ones f
 # `git grep -l` exits 1 on no match, so `|| true` would turn the ASCII gate into
 # a permanent no-op and any other non-zero means the invocation itself failed.
 # One logical line because Make gives each recipe line its own shell.
-verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift, changelogs, plugin names and dependencies)
+verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift, changelogs, plugin names and dependencies, skill pointers, eval suites)
 	@echo "Checking for non-ASCII characters..."
 	@set +e; git grep -lP '[^\x00-\x7F]'; rc=$$?; set -e; \
 	case "$$rc" in \
@@ -86,5 +87,24 @@ verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift, changelog
 	@python3 scripts/generate-codex.py --check
 	@echo "Checking each plugin's changelog entry, name and dependencies..."
 	@python3 scripts/check-changelogs.py
+	@echo "Checking that every skill, agent and command pointer resolves within declared dependencies..."
+	@python3 scripts/check-wiring.py
+	@echo "Checking every eval suite..."
+	@python3 scripts/eval.py lint
 
 check: lint typecheck test verify  ## Run CI's lint, typecheck, test and verify checks
+
+# The eval targets run locally on your own `claude` login and are never part of check:
+# CI holds no inference token. eval-plan is free; eval-run and eval-screen start sessions.
+BASE ?= main
+eval-plan:  ## List the eval suites this change needs, against BASE (default main)
+	python3 scripts/eval.py plan --base $(BASE)
+
+eval-size:  ## Show what SUITE's splits can see on each model, from its recorded baselines
+	python3 scripts/eval.py size $(or $(SUITE),$(error set SUITE=tests/evals/...)) --base $(BASE)
+
+eval-run:  ## Run SUITE's cases on ARM (none, old or new), SAMPLES each (spends inference)
+	python3 scripts/eval.py run $(or $(SUITE),$(error set SUITE=tests/evals/...)) --arm $(or $(ARM),$(error set ARM=none, ARM=old or ARM=new)) $(if $(SAMPLES),--samples $(SAMPLES)) --base $(BASE) $(if $(SPLIT),--split $(SPLIT)) $(if $(MODEL),--model $(MODEL)) $(if $(RECORD),--record)
+
+eval-screen:  ## Compare old and new on SUITE's SPLIT (default screen) and print the result (spends inference)
+	python3 scripts/eval.py screen $(or $(SUITE),$(error set SUITE=tests/evals/...)) $(if $(SAMPLES),--samples $(SAMPLES)) --base $(BASE) $(if $(SPLIT),--split $(SPLIT)) $(if $(MODEL),--model $(MODEL)) $(if $(NEW_PLAN),--new-plan)
