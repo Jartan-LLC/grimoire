@@ -664,7 +664,6 @@ def _parser() -> argparse.ArgumentParser:
 def main() -> int:
     """Parse the command line and run one subcommand."""
     args = _parser().parse_args()
-    store = cache.root(ROOT)
 
     if args.command == "plan":
         return plan_command(args.base)
@@ -673,7 +672,7 @@ def main() -> int:
         print("\n".join(found) if found else "every eval suite passes its lint")
         return 1 if found else 0
     if args.command == "show":
-        return show(args.key, store)
+        return show(args.key, cache.root(ROOT))
     if args.command == "size":
         suite = load(args.suite)
         lines, weak = split_report(suite, old_holds(suite.target, args.base))
@@ -686,6 +685,7 @@ def main() -> int:
     model = args.model or suite.models[0]
     if model not in suite.models:
         raise SystemExit(f"{model} is not one of the suite's models {list(suite.models)}")
+    store = cache.root(ROOT)
     spec = session.Spec(model, claude_version(), suite.budget_usd, ROOT, store)
     if args.command == "screen":
         return screen(args, suite, spec, store)
