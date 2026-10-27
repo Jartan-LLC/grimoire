@@ -171,7 +171,8 @@ the PR how many versions you screened.
   `gh api` `body=` field, body file or stdin they passed. The calls Claude Code makes on its own
   (`gh pr view --json url` and `gh pr view <branch> --json url` on 2.1.311) are left out, so no check
   grades them. A reference gives it as `gh = "text"`. The lint fails a `gh` check on a case without a
-  remote.
+  remote. For "made no such call", which holds when the agent made no call at all, use
+  `present = '\A(?!(?:.+\n)*gh pr ready)'`: it reads the call lines, up to the first blank line.
 - **Judges are not built yet.** When a check cannot decide, a judge will answer one yes/no question about
   one output, with the reference answer, outputs stripped of skill and arm names, and "unknown" counted
   as a fail; and it will be calibrated first, against outputs the maintainer labelled.
