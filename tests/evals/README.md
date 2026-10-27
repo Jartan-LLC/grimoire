@@ -109,7 +109,8 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   one: a past commit's message need not match its diff unless the task depends on it.
 - **A task that pushes or calls GitHub** sets `remote = true` in the key. The session's repository then
   has an `origin`: a local bare repository holding every branch and tag the fixture and `build.py` made,
-  each branch tracking it, so `git push` works, and `origin/HEAD` names `main`, as in a clone. To start
+  each branch tracking it, so `git push` works, and `origin/HEAD` names `main`, as in a clone, when the
+  fixture keeps the `main` branch it starts on. To start
   with a branch ahead of, behind or missing from `origin`, `build.py` makes `origin` itself with
   `git init --bare -b <the fixture's default branch> ../origin.git`, pushes that branch, so `origin/HEAD`
   can name it, and pushes what else it wants there: the runner keeps an `origin` that `build.py` made as
