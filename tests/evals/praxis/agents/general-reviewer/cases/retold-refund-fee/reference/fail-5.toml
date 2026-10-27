@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n[IMPORTANT] `refund_cost` ignores `amount`; the fixed part is in `fees.py`, so test zero, partial and repeat refunds.\nFile: ledger/refunds.py:1\nIssue: `refund_cost` ignores `amount`; the fixed part is in `fees.py`, so test zero, partial and repeat refunds.\nFix: Change it.\nStatus: confirmed\n\n[MINOR] The comment repeats, word for word, the one fees.py already carries on CARD_FIXED.\nFile: ledger/refunds.py:10\nIssue: The comment repeats, word for word, the one fees.py already carries on CARD_FIXED.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**Verdict**: WARNING"

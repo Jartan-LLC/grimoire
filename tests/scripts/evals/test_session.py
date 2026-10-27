@@ -44,15 +44,35 @@ def test_sample_env_isolates_git_drops_the_checkout_and_the_parent_session(
 
 def test_claude_args_load_every_arm_plugin_and_switch_off_the_builtins() -> None:
     arm = Arm("new", "h", {"gitwise": "/a/gitwise", "praxis": "/a/praxis"})
-    args = session.claude_args("Do it.", arm, "claude-opus-5-5", 1.5)
+    args = session.claude_args("Do it.", arm, "claude-opus-5-5", 1.5, pathlib.Path("/s/debug.log"))
     assert args[1:3] == ["-p", "Do it."]
     assert args[args.index("--settings") + 1] == json.dumps(session.BUILTINS_OFF)
     assert args[args.index("--max-budget-usd") + 1] == "1.5"
-    for flag in ("--strict-mcp-config", "--no-session-persistence", "--include-hook-events"):
+    assert args[args.index("--debug-file") + 1] == "/s/debug.log"
+    for flag in (
+        "--strict-mcp-config", "--no-session-persistence", "--include-hook-events",
+        "--forward-subagent-text",
+    ):  # fmt: skip
         assert flag in args
     assert [args[i + 1] for i, a in enumerate(args) if a == "--plugin-dir"] == [
         "/a/gitwise",
         "/a/praxis",
+    ]
+
+
+def test_preloads_reads_only_the_skills_the_debug_log_says_an_agent_preloaded() -> None:
+    log = (
+        "2026-10-26T23:34:59.090Z [DEBUG] [Agent: praxis:general-reviewer] Preloaded skill "
+        "'gitwise:github-conventions'\n"
+        "2026-10-26T23:34:59.091Z [DEBUG] [Agent: praxis:general-reviewer] Preloaded skill "
+        "'code-hygiene'\n"
+        "2026-10-26T23:34:59.092Z [WARN] [Agent: praxis:test-reviewer] Warning: Skill "
+        "'gone' specified in frontmatter was not found\n"
+        "2026-10-26T23:34:59.093Z [DEBUG] Loaded skill 'other'\n"
+    )
+    assert session.preloads(log) == [
+        ("praxis:general-reviewer", "gitwise:github-conventions"),
+        ("praxis:general-reviewer", "code-hygiene"),
     ]
 
 

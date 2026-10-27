@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "**Critical**: none.\n\n**Minor**\n\n1. The docstring could name the unit.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 0 |\n| Minor | 1 |\n\n**Verdict**: APPROVE"

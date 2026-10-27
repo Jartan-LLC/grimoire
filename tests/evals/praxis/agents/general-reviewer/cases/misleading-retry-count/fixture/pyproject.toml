@@ -1,0 +1,4 @@
+[project]
+name = "fetchkit"
+version = "1.2.0"
+requires-python = ">=3.12"

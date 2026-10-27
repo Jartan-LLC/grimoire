@@ -49,6 +49,8 @@ class Sample:
     spoiled: str = ""
     # The `file:` paths the key named at draw time; None in samples drawn before it was kept.
     collected: list[str] | None = None
+    # The (agent, skill) pairs the debug log named as preloaded; None before they were kept.
+    preloads: list[list[str]] | None = None
 
 
 def _paths(store: pathlib.Path, sample_key: str) -> tuple[pathlib.Path, pathlib.Path]:

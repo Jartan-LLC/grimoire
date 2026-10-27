@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n[IMPORTANT] `poll` has no test; tests/test_retry.py already covers retry.py, so add tests/test_poll.py.\nFile: fetchkit/poll.py:1\nIssue: `poll` has no test; tests/test_retry.py already covers retry.py, so add tests/test_poll.py.\nFix: Change it.\nStatus: confirmed\n\n[MINOR] poll copies with_retries's loop and constants instead of sharing them.\nFile: fetchkit/poll.py:15\nIssue: poll copies with_retries's loop and constants instead of sharing them.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**Verdict**: WARNING"

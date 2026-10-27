@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n[IMPORTANT] The comment describes parse_rows's internals from cli.py, a fact another file owns.\nFile: tally/cli.py:15\nIssue: The comment describes parse_rows's internals from cli.py, a fact another file owns.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 0 |\n\n**Verdict**: WARNING"

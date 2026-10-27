@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "**Important (landmine): the poll window is about 1.5 s, which is likely too short** (`fetchkit/poll.py:8-9`)\n- The constants are copied from the HTTP retry policy, which suits retries, not a job that runs for minutes.\n\n**Minor: duplicated, same-named constants** (`fetchkit/poll.py:8-9`)\n- poll copies with_retries's loop and constants instead of sharing them.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**Verdict**: WARNING"

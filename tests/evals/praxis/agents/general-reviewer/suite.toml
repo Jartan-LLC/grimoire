@@ -1,0 +1,42 @@
+# Whether praxis:general-reviewer reports a problem planted in a branch, at the tier its rules
+# give, and keeps quiet on a clean change. The rules the cases plant come from the fixes that
+# shaped the agent: misleading, stale, retold and nonlocal comments (#88, #126), tombstones
+# (#21), and the code-hygiene items its focus list names, beside plain correctness bugs, its
+# main job. tests/evals/README.md says how the suite is run.
+# What it can see: on its baselines, cutting the agent's body breaks the report's format but
+# changes few findings, which come from the preloaded skills, so a change that weakens
+# detection shows on only a few cases (#144). Not calibrated yet: no A/A screens or positive
+# control have run on it, and it has no confirm split, so a change it covers stops after the
+# screen. Read a screen as a sign, not a gate.
+target = "praxis:general-reviewer"
+# Cases moved off a held-out split, each with its reason in a comment.
+BURNED = []
+# The planner adds changes to the skills the agent preloads through its wiring.
+covers = ["plugins/praxis/agents/general-reviewer.md"]
+# The agent runs on the model its frontmatter pins (Sonnet); `models` sets the main thread that
+# dispatches it and relays its report.
+models = ["claude-opus-5-5"]
+budget_usd = 3.0
+
+[[metric]]
+id = "found"
+direction = "higher"
+margin = 0.2
+# A label at the planted problem's tier or above, then a term naming that problem in the same finding.
+
+[[metric]]
+id = "quiet"
+direction = "higher"
+# Reported only, from the clean controls: no Critical or Important finding. Too few units to guard.
+
+[[metric]]
+id = "format"
+direction = "higher"
+margin = 0.2
+
+[pass_rule]
+primary = "found"
+rule = "no-regression"
+guards = ["format"]
+min_effect = 0.4  # read only under a `better` rule
+min_samples = 3

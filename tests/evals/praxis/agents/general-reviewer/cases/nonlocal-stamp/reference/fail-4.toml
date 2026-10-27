@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n**Important**\n\n1. `/tmp/grimoire-eval-x/repo/stockroom/api.py`, in the new code (line 1). The docstring says the stock level has not changed, but `Store.put` stamps `updated` on every call. Not a Critical problem on its own.\n\n**Minor**\n\n1. `/tmp/grimoire-eval-x/repo/stockroom/api.py`, in the new code (line 19). The comment in api.py describes how Store.put stamps items, a fact store.py owns. Not a Critical problem on its own.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**Verdict**: WARNING"

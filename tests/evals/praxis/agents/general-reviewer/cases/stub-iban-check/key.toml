@@ -1,0 +1,38 @@
+split = "screen"
+kind = "regression"
+hints = ["stub", "placeholder", "checksum"]
+
+[[check]]
+metric = "found"
+artifact = "report:praxis:general-reviewer"
+present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b).){0,1500}?(?:always returns?\W{0,3}True|\bstub|placeholder|hard-?coded|never refuse)'''
+
+
+[[plant]]
+id = "stub-iban-check"
+verify = "python3 -c \"from ledger.payouts import iban_is_valid; assert not iban_is_valid('GB00XXXX')\""
+
+
+[[check]]
+metric = "format"
+artifact = "report:praxis:general-reviewer"
+present = '''(?im)verdict\W{0,6}(approve|warning|block)\b'''
+
+[[check]]
+metric = "format"
+artifact = "report:praxis:general-reviewer"
+present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2

@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n**[MINOR, debt] _chunks reimplements itertools**\nFile: `/tmp/grimoire-eval-x/repo/ledger/batches.py:8`\nIssue: _chunks reimplements itertools.batched, which Python 3.12 has.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 0 |\n| Minor | 1 |\n\n**Verdict**: APPROVE"

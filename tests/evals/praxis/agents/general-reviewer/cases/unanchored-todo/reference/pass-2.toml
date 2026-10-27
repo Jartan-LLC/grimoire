@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n**[MINOR, debt] The module docstring could say more**\nFile: `/tmp/grimoire-eval-x/repo/tally/parse.py:1`\nIssue: The module docstring could say more.\nFix: Change it.\nStatus: confirmed\n\n**[MINOR, debt] A TODO with no issue or owner to anchor it**\nFile: `/tmp/grimoire-eval-x/repo/tally/parse.py:10`\nIssue: A TODO with no issue or owner to anchor it.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 0 |\n| Minor | 2 |\n\n**Verdict**: APPROVE"

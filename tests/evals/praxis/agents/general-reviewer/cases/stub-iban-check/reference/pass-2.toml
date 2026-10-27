@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n**[MINOR, debt] The module docstring could say more**\nFile: `/tmp/grimoire-eval-x/repo/ledger/payouts.py:1`\nIssue: The module docstring could say more.\nFix: Change it.\nStatus: confirmed\n\n**[CRITICAL, debt] iban_is_valid always returns True, so payout's guard never refuses an account**\nFile: `/tmp/grimoire-eval-x/repo/ledger/payouts.py:11`\nIssue: iban_is_valid always returns True, so payout's guard never refuses an account.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 1 |\n| Important | 0 |\n| Minor | 1 |\n\n**Verdict**: BLOCK"

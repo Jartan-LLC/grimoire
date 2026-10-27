@@ -1,4 +1,4 @@
-"""Events shaped as probe runs on Claude Code 2.1.309 emitted them."""
+"""Events shaped as probe runs on Claude Code 2.1.309 (2.1.311 for subagents) emitted them."""
 
 from evals import trace
 
@@ -110,9 +110,84 @@ def test_parse_classifies_writes_by_command_and_tool() -> None:
     ]  # fmt: skip
 
 
-def test_parse_leaves_out_a_subagents_events() -> None:
+def test_parse_leaves_out_an_event_whose_parent_is_no_agent_call() -> None:
     event = call("c1", "Bash", command="git commit -m x") | {"parent_tool_use_id": "agent-1"}
     assert trace.parse([event, result_of("c1")], PLUGINS).writes == []
+
+
+REVIEWER = "praxis:general-reviewer"
+
+
+def spawn(call_id: str, agent: str | None = REVIEWER) -> trace.Event:
+    return call(
+        call_id, "Agent", prompt="Review it.", **({"subagent_type": agent} if agent else {})
+    )
+
+
+def inside(call_id: str, events: list[trace.Event]) -> list[trace.Event]:
+    return [e | {"parent_tool_use_id": call_id} for e in events]
+
+
+def handed_back(call_id: str, *texts: str, error: bool = False) -> trace.Event:
+    content = [
+        {"type": "text", "text": "<tools-used-before-summary>Bash</tools-used-before-summary>\n"}
+    ]
+    content += [{"type": "text", "text": t} for t in texts]
+    return result_of(call_id, error=error) | {
+        "tool_use_result": {"resolvedModel": "claude-sonnet-5-5", "content": content}
+    }
+
+
+def test_parse_attributes_a_subagents_loads_writes_and_report_to_its_agent() -> None:
+    events = [
+        spawn("a1"),
+        *inside("a1", [*load_skill("s1", "gitwise:commit-pr-writing", CPW), *commit("c1")]),
+        handed_back("a1", "[CRITICAL] mean divides by n - 1", "Verdict: BLOCK"),
+        *commit("c2"),
+    ]
+    parsed = trace.parse(events, PLUGINS)
+    assert [(w.index, w.agent) for w in parsed.writes] == [(4, REVIEWER), (7, "")]
+    assert [(d.skill, d.agent) for d in parsed.deliveries] == [
+        ("gitwise:commit-pr-writing", REVIEWER)
+    ]
+    assert parsed.reports == [
+        trace.Report(
+            6, REVIEWER, "claude-sonnet-5-5", "[CRITICAL] mean divides by n - 1\nVerdict: BLOCK"
+        )
+    ]
+
+
+def test_parse_names_an_agent_call_without_a_type_general_purpose_and_skips_a_failed_report() -> (
+    None
+):
+    events = [spawn("a1", None), *inside("a1", commit("c1")), handed_back("a1", "x", error=True)]
+    parsed = trace.parse(events, PLUGINS)
+    assert [w.agent for w in parsed.writes] == ["general-purpose"]
+    assert parsed.reports == []
+
+
+def test_parse_places_each_preload_at_its_agents_call_in_order() -> None:
+    events = [spawn("a1"), *commit("c1"), spawn("a2"), spawn("t1", "praxis:test-reviewer")]
+    preloads = [
+        (REVIEWER, "review-severity"),
+        (REVIEWER, "gitwise:github-conventions"),
+        (REVIEWER, "review-severity"),
+        (REVIEWER, "review-severity"),  # a third preload, with only two calls to place it at
+        ("praxis:test-reviewer", "other:skill"),  # a plugin the arm does not hold
+    ]
+    deliveries = trace.parse(events, PLUGINS, preloads).deliveries
+    assert [(d.index, d.skill, d.agent) for d in deliveries] == [
+        (0, "praxis:review-severity", REVIEWER),
+        (0, "gitwise:github-conventions", REVIEWER),
+        (3, "praxis:review-severity", REVIEWER),
+    ]
+    assert deliveries[0].path == "/arm/plugins/praxis/skills/review-severity"
+
+
+def test_a_preload_is_in_context_at_its_agents_write() -> None:
+    events = [spawn("a1"), *inside("a1", commit("c1"))]
+    parsed = trace.parse(events, PLUGINS, [(REVIEWER, "review-severity")])
+    assert trace.state(parsed, parsed.writes[0], "praxis:review-severity") == ("in-context", False)
 
 
 def test_parse_reads_hook_context_and_compactions() -> None:

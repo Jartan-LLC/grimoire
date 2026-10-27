@@ -5,7 +5,7 @@ from evals import grade, trace
 from evals.cache import Sample
 from evals.suite import Check, load_suite
 from helpers import KEY, write_suite
-from test_trace import CPW, PLUGINS, commit, load_skill
+from test_trace import CPW, PLUGINS, REVIEWER, commit, handed_back, inside, load_skill, spawn
 
 
 def sample(commits: list[str], final: str, spoiled: str = "") -> Sample:
@@ -69,6 +69,35 @@ def test_text_of_reads_commits_final_and_collected_files() -> None:
     assert grade.text_of(["a"], "end", files, "final") == "end"
     assert grade.text_of(["a"], "end", files, "file:notes.md") == "kept #42"
     assert grade.text_of(["a"], "end", files, "file:missing.md") == ""
+
+
+def test_a_delivery_check_reads_only_its_own_agents_loads_and_writes() -> None:
+    main = Check(
+        "d", "delivery", skill="gitwise:commit-pr-writing", write="commit", state="in-context"
+    )
+    reviewer = Check(
+        "d", "delivery", skill="gitwise:commit-pr-writing", write="commit", state="in-context",
+        agent=REVIEWER,
+    )  # fmt: skip
+    loaded_inside = trace.parse(
+        [spawn("a1"), *inside("a1", [*load_skill("s1", "x", CPW), *commit("c1")]), *commit("c2")],
+        PLUGINS,
+    )
+    assert grade.delivery_score(reviewer, loaded_inside) == 1.0
+    assert grade.delivery_score(main, loaded_inside) == 0.0
+    loaded_outside = trace.parse(
+        [*load_skill("s1", "x", CPW), spawn("a1"), *inside("a1", commit("c1"))], PLUGINS
+    )
+    assert grade.delivery_score(reviewer, loaded_outside) == 0.0
+
+
+def test_a_report_check_reads_every_report_its_agent_handed_back() -> None:
+    parsed = trace.parse(
+        [spawn("a1"), handed_back("a1", "first"), spawn("a2"), handed_back("a2", "second")], PLUGINS
+    )
+    reports = grade.reports_of(parsed)
+    assert grade.text_of([], "", {}, f"report:{REVIEWER}", reports) == "first\n\nsecond"
+    assert grade.text_of([], "", {}, "report:praxis:test-reviewer", reports) == ""
 
 
 def test_case_failed_counts_the_cases_own_metrics_not_the_guards() -> None:

@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n[IMPORTANT] `last_updated` has no test; add one that checks the datetime is UTC-aware, repeat it for an unknown SKU.\nFile: stockroom/api.py:1\nIssue: `last_updated` has no test; add one that checks the datetime is UTC-aware, repeat it for an unknown SKU.\nFix: Change it.\nStatus: confirmed\n\n[MINOR] The comment retells the UTC rule models.py already states, so the two can drift apart.\nFile: stockroom/api.py:17\nIssue: The comment retells the UTC rule models.py already states, so the two can drift apart.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**Verdict**: WARNING"

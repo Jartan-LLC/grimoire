@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n[IMPORTANT] `get` has no test; add one that drives `with_retries` through a 5xx and checks the time budget.\nFile: fetchkit/client.py:1\nIssue: `get` has no test; add one that drives `with_retries` through a 5xx and checks the time budget.\nFix: Change it.\nStatus: confirmed\n\n[MINOR] The comment in client.py restates with_retries's delays, a fact retry.py owns, so it drifts when they change.\nFile: fetchkit/client.py:19\nIssue: The comment in client.py restates with_retries's delays, a fact retry.py owns, so it drifts when they change.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**Verdict**: WARNING"

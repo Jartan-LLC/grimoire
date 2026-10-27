@@ -1,0 +1,7 @@
+[project]
+name = "tally"
+version = "0.9.1"
+requires-python = ">=3.12"
+
+[project.scripts]
+tally = "tally.cli:main"

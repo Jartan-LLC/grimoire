@@ -144,6 +144,17 @@ def test_clusters_map_cases_to_one_unit(tmp_path: pathlib.Path) -> None:
         (SUITE, KEY.replace('arm = "old"', 'arm = "new"'), "'arm' must be one of"),
         ('watch = ["claude-haiku-5-5"]\n' + SUITE, KEY, "watch names"),
         (SUITE, KEY.replace('state = "in-context"', 'state = "loaded"'), "'state' must be one of"),
+        (SUITE, KEY.replace('artifact = "commits"', 'artifact = "report:"'), "is not commits"),
+        (
+            SUITE,
+            KEY.replace('artifact = "commits"', 'artifact = "commits"\nagent = "praxis:x"'),
+            "'agent' is for delivery checks",
+        ),
+        (
+            SUITE,
+            KEY.replace('state = "in-context"', 'state = "in-context"\nagent = 3'),
+            "'agent' must be a string",
+        ),
     ],
 )
 def test_load_suite_rejects_bad_new_fields(
@@ -151,3 +162,22 @@ def test_load_suite_rejects_bad_new_fields(
 ) -> None:
     with pytest.raises(SuiteError, match=message.replace("<", r"\<").replace("(", r"\(")):
         load_suite(write_suite(tmp_path, suite, key))
+
+
+def test_a_check_can_read_an_agents_report_and_its_deliveries(tmp_path: pathlib.Path) -> None:
+    key = KEY.replace(
+        'artifact = "commits"', 'artifact = "report:praxis:general-reviewer"'
+    ).replace('state = "in-context"', 'state = "in-context"\nagent = "praxis:general-reviewer"')
+    root = write_suite(tmp_path, key=key)
+    reference = root / "cases" / "c1" / "reference"
+    reference.mkdir()
+    (reference / "pass-1.toml").write_text('[reports]\n"praxis:general-reviewer" = "Closes #42"\n')
+    (reference / "fail-1.toml").write_text("reports = 3\n")
+    with pytest.raises(SuiteError, match="'reports' must be a table"):
+        load_suite(root)
+    (reference / "fail-1.toml").unlink()
+    case = load_suite(root).cases[0]
+    report, _, delivery = case.checks
+    assert report.artifact == "report:praxis:general-reviewer"
+    assert (delivery.agent, report.agent) == ("praxis:general-reviewer", "")
+    assert case.references[0].reports == {"praxis:general-reviewer": "Closes #42"}

@@ -12,6 +12,8 @@ WORSE; below 80%, the split cannot be trusted to catch harm, and the fix is more
 A suite lists the models its plugins run on, and every baseline and verdict is per model. A rule one
 model follows unaided is not redundant: another model, or the next version, may need the text to follow
 it. A case's kind and checks are the same on every model; its baselines show where it has room to gain.
+For an agent that pins `model:` in its frontmatter, `models` sets the main thread that dispatches it;
+the agent runs on its pinned model, which each sample records.
 
 Each model has a role, set by calibration. A gate model's screens decide SHIP. A watch model's screens
 are advisory: listed under `watch` in `suite.toml`, it is a model whose A/A screens cannot SHIP, such as
@@ -34,7 +36,8 @@ Run `make eval-plan`. It lists the suites that cover your change and the changed
 
 ## Layout
 
-A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a skill.
+A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a skill,
+`tests/evals/<plugin>/agents/<name>/` for an agent.
 
 - `suite.toml`: what it covers, the models it runs on, its metrics, its pass rule and its clusters.
 - `cases/<id>/prompt.md`: the task, as the user would type it.
@@ -104,6 +107,9 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   false behaves differently. Say it so the fixture cannot contradict it, as a decision or an issue
   tracked elsewhere, rather than build it in. A fixture's earlier history may be as untidy as a real
   one: a past commit's message need not match its diff unless the task depends on it.
+- **Keep tool configuration out of a fixture.** A fixture whose `pyproject.toml` has a `[tool.ruff]`
+  table gets a `.ruff_cache/` written into it by the commit hooks, and the case hash counts every file in
+  the fixture, so each hook run would redraw the case's samples.
 - **Check the checks.** Write several passing references that differ in wording, order and approach, and
   failing references for the target check. The lint runs the checks on all of them. Prefer checks on what
   the agent produced over checks on how it got there.
@@ -127,6 +133,9 @@ the PR how many versions you screened.
   `absent` check fails when the agent produced nothing to check.
 - **Whether a skill was in context when the agent wrote** is a guard or a diagnostic, not a primary
   metric, except in trigger cases, where loading the skill is the behaviour under test.
+- **A subagent's work:** `report:<agent>` is every report that agent handed back, and a delivery check
+  with `agent = "<plugin>:<agent>"` reads that subagent's skill loads and writes instead of the main
+  thread's. A reference gives a report under `[reports]`, as `"<plugin>:<agent>" = "text"`.
 - **Judges are not built yet.** When a check cannot decide, a judge will answer one yes/no question about
   one output, with the reference answer, outputs stripped of skill and arm names, and "unknown" counted
   as a fail; and it will be calibrated first, against outputs the maintainer labelled.
@@ -213,7 +222,7 @@ the PR how many versions you screened.
   `SPLIT=confirm` runs the confirm split, `NEW_PLAN=1` fixes a new plan. The result and the samples to
   read are also written to `$XDG_CACHE_HOME/grimoire-evals/evidence/` (default `~/.cache/...`).
 - `python3 scripts/eval.py show <key>`: one sample's commits, final reply, the files its checks read,
-  skill deliveries, writes and hook context.
+  skill deliveries and writes with the agent that made each, subagents' reports and hook context.
 - `python3 scripts/eval.py lint`: the mechanical checks from "Writing a case"; `make verify` runs it.
 
 ## Calibrating the runner
@@ -242,7 +251,10 @@ After changing the runner or the verdict rule:
 - Each session is one `claude -p` call: a case cannot test behaviour that should stop and ask the user.
 - The lint knows when a baseline predates the runner, not when the model or Claude Code changed; rerun
   baselines after either.
-- A subagent's own skill loads and writes are not followed yet, so no reviewer suite can be graded.
+- A subagent's own subagents are not followed, nor is an Agent call run in the background. A delivery
+  check with an `agent` reads every spawn of that agent as one. The skills an agent's frontmatter
+  preloads are read from a line of Claude Code's debug log, which it does not promise to keep: if that
+  line changes, every preload reads as absent.
 - A sample's venv uses the base Python's packages, the interpreter uv builds venvs on, not this
   checkout's `.venv`: that Python needs pytest, which the runner checks before the first session. The
   venv has no pip of its own, so a session's bare `pip install` reaches the base Python, where later

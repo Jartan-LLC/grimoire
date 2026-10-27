@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n[MINOR] The module docstring could say more.\nFile: fetchkit/retry.py:1\nIssue: The module docstring could say more.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 0 |\n| Minor | 1 |\n\n**Verdict**: APPROVE"

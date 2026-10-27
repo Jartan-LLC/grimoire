@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n[IMPORTANT] The docstring says the stock level has not changed, but `Store.put` stamps `updated` on every call.\nFile: stockroom/api.py:1\nIssue: The docstring says the stock level has not changed, but `Store.put` stamps `updated` on every call.\nFix: Change it.\nStatus: confirmed\n\n[MINOR] The comment in api.py describes how Store.put stamps items, a fact store.py owns.\nFile: stockroom/api.py:19\nIssue: The comment in api.py describes how Store.put stamps items, a fact store.py owns.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**Verdict**: WARNING"

@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n[CRITICAL] `> 500` leaves out 500 itself, so a plain Internal Server Error is no longer retried.\nFile: fetchkit/retry.py:13\nIssue: `> 500` leaves out 500 itself, so a plain Internal Server Error is no longer retried.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 1 |\n| Important | 0 |\n| Minor | 0 |\n\n**Verdict**: BLOCK"
