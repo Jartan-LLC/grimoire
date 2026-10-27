@@ -97,7 +97,7 @@ def build_arm(name: str, suite: Suite, base: str, new_ref: str | None, store: pa
     `new` is the working tree, or `new_ref` when given: the merge base itself there is
     an A/A comparison, and `none` (old without the target) is the positive control.
     """
-    arms = store / "arms"
+    arms = cache.arms(store)
     old = old_arm(ROOT, merge_base(ROOT, base), arms)
     if name == "old":
         return old

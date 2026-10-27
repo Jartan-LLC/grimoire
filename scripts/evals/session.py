@@ -324,7 +324,7 @@ def _session(
         parsed = trace.parse(trace.load(out), arm.plugins, loaded)
         private = private_paths(case, spec, sandbox)
         reasons, spoiled = trace.classify(
-            parsed, arm.plugins, spec.model, timed_out, private, arms=str(spec.store / "arms")
+            parsed, arm.plugins, spec.model, timed_out, private, arms=str(cache.arms(spec.store))
         )
         result = parsed.result or {}
         files = {p: (repo / p).read_text() for p in case.files() if (repo / p).is_file()}

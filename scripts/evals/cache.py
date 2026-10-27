@@ -40,6 +40,11 @@ def root(checkout: pathlib.Path) -> pathlib.Path:
     return common_dir(checkout) / "grimoire-evals"
 
 
+def arms(store: pathlib.Path) -> pathlib.Path:
+    """The directory in `store` holding every arm's copy of the plugins."""
+    return store / "arms"
+
+
 def key(case_hash: str, arm_hash: str, model: str, version: str, index: int) -> str:
     """A sample's identity: what its session depended on, and which repeat it is.
 

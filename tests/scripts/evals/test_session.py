@@ -50,7 +50,7 @@ def test_git_run_inside_an_arm_does_not_find_the_clone_holding_the_store(
     clone = tmp_path / "clone"
     run([GIT, "init", "-q", str(clone)], env=session.git_env(dict(os.environ)), check=True)
     store = clone / ".git" / "grimoire-evals"
-    arm = store / "arms" / "old" / "plugins" / "gitwise"
+    arm = cache.arms(store) / "old" / "plugins" / "gitwise"
     arm.mkdir(parents=True)
     env = session.sample_env(dict(os.environ), tmp_path / "checkout", tmp_path / "sandbox", store)
     found = run([GIT, "rev-parse", "--git-dir"], cwd=arm, env=env, capture_output=True, check=False)
