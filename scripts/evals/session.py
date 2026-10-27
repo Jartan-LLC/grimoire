@@ -52,6 +52,7 @@ PRELOADED = re.compile(r"\[Agent: ([^\]]+)\] Preloaded skill '([^']+)'")
 GH_STUB = pathlib.Path(__file__).with_name("gh_stub.py")
 REPLIES = "replies.json"
 GH_LOGIN = ("GH_TOKEN", "GITHUB_TOKEN", "GH_ENTERPRISE_TOKEN", "GITHUB_ENTERPRISE_TOKEN", "GH_HOST")
+SSH_AGENT = ("SSH_AUTH_SOCK", "SSH_AGENT_PID")
 
 
 @dataclass(frozen=True)
@@ -96,8 +97,9 @@ def sample_env(
     would tell the child it runs nested, and others (CLAUDE_EFFORT) would change it.
     The login ones stay, so a token, config-dir, Bedrock or Vertex login still works.
     With `gh_stub`, the sandbox's `bin/` comes first, so its `gh` answers every call, and
-    the user's gh login is gone (its token variables dropped, GH_CONFIG_DIR an empty
-    `gh-config/`), so a session that runs the real `gh` by its path reaches no account.
+    the user's gh login and SSH agent are gone (gh's token variables and the SSH agent's
+    dropped, GH_CONFIG_DIR an empty `gh-config/`), so neither the real `gh` run by its
+    path nor a push to a remote the session adds reaches the user's account.
     """
     env = {
         k: v
@@ -118,7 +120,7 @@ def sample_env(
     env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] = "1"
     env["GIT_CEILING_DIRECTORIES"] = str(store)
     if gh_stub:
-        for name in GH_LOGIN:
+        for name in (*GH_LOGIN, *SSH_AGENT):
             env.pop(name, None)
         env["GH_CONFIG_DIR"] = str(sandbox / "gh-config")
     return env

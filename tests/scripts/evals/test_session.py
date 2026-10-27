@@ -212,10 +212,11 @@ def test_a_commit_build_put_only_on_origin_is_not_the_sessions_once_pulled(
     assert session.new_commits(repo, env, heads) == ["fix: mine"]
 
 
-def test_sample_env_puts_the_gh_stub_first_and_drops_the_gh_login_only_for_a_case_that_asks(
+def test_sample_env_puts_the_gh_stub_first_and_drops_the_logins_only_for_a_case_that_asks(
     tmp_path: pathlib.Path,
 ) -> None:
-    login = dict.fromkeys(session.GH_LOGIN, "x") | {"GH_CONFIG_DIR": "/home/u/.config/gh"}
+    ssh = {"SSH_AUTH_SOCK": "/home/u/.ssh/agent.sock", "SSH_AGENT_PID": "1"}
+    login = dict.fromkeys(session.GH_LOGIN, "x") | {"GH_CONFIG_DIR": "/home/u/.config/gh"} | ssh
     base = {"PATH": "/usr/bin"} | login
     sandbox = tmp_path / "sandbox"
     plain = session.sample_env(base, tmp_path, sandbox, tmp_path / "store")
@@ -224,7 +225,7 @@ def test_sample_env_puts_the_gh_stub_first_and_drops_the_gh_login_only_for_a_cas
     stubbed = session.sample_env(base, tmp_path, sandbox, tmp_path / "store", gh_stub=True)
     assert stubbed["PATH"] == f"{sandbox}/bin:{sandbox}/venv/bin:/usr/bin"
     assert stubbed["GH_CONFIG_DIR"] == f"{sandbox}/gh-config"
-    assert not any(name in stubbed for name in session.GH_LOGIN)
+    assert not any(name in stubbed for name in (*session.GH_LOGIN, *ssh))
 
 
 def limited_sample(reason: str) -> cache.Sample:
