@@ -128,17 +128,39 @@ def test_the_gh_artifact_keeps_a_multi_line_body_off_the_call_lines() -> None:
     assert gh.split("\n")[0] == "gh pr create --body Fixes it.\\n\\nCloses #42 --draft"
 
 
+# The README's call-line forms: a flag on a subcommand, and no such call made.
+DRAFT = r"\A(?:.+\n)*gh (?:.* )?pr create\b.*--draft"
+NO_READY = r"\A(?!(?:.+\n)*gh (?:.* )?pr ready\b)"
+
+
 def test_a_check_on_a_flag_reads_the_call_lines_only_in_the_call_line_form() -> None:
     quoting = "Open it as a draft:\ngh pr create --draft --fill\n"
     call: dict[str, object] = {"argv": ["pr", "create", "-F", "b.md"], "stdin": ""}
     gh = grade.gh_text([{**call, "files": {"b.md": quoting}}])
     caret = Check("m", "gh", r"^gh pr create .*--draft", None)
-    call_lines = Check("m", "gh", r"\A(?:.+\n)*gh pr create .*--draft", None)
+    call_lines = Check("m", "gh", DRAFT, None)
     assert grade.text_score(caret, gh) == 1.0
     assert grade.text_score(call_lines, gh) == 0.0
     view: dict[str, object] = {"argv": ["pr", "view", "7"], "stdin": "", "files": {}}
     made = grade.gh_text([view, {**view, "argv": ["pr", "create", "--draft", "--fill"]}])
     assert grade.text_score(call_lines, made) == 1.0
+
+
+def test_the_call_line_forms_find_the_subcommand_after_a_gh_flag() -> None:
+    def call(*argv: str, body: str = "") -> dict[str, object]:
+        return {"argv": list(argv), "stdin": "", "files": {"b.md": body} if body else {}}
+
+    draft, no_ready = Check("m", "gh", DRAFT, None), Check("m", "gh", NO_READY, None)
+    made = grade.gh_text([call("-R", "o/r", "pr", "create", "--draft", "--fill")])
+    assert grade.text_score(draft, made) == 1.0
+    assert grade.text_score(no_ready, made) == 1.0
+    readied = grade.gh_text([call("pr", "view", "7"), call("-R", "a/b", "pr", "ready", "7")])
+    assert grade.text_score(no_ready, readied) == 0.0
+    quoting = "Then:\ngh -R o/r pr create --draft\ngh -R a/b pr ready 7\n"
+    quoted = grade.gh_text([call("-R", "o/r", "pr", "create", "-F", "b.md", body=quoting)])
+    assert grade.text_score(draft, quoted) == 0.0
+    assert grade.text_score(no_ready, quoted) == 1.0
+    assert grade.text_score(no_ready, grade.gh_text([])) == 1.0
 
 
 BODY = "Fixes the quoting.\nCloses #42"
