@@ -70,7 +70,7 @@ class Sample:
     collected: list[str] | None = None
     # The (agent, skill) pairs the debug log named as preloaded; None before they were kept.
     preloads: list[list[str]] | None = None
-    # Each call the sandbox's `gh` recorded (argv, stdin, body files); None for a case
+    # Each call the sandbox's `gh` recorded (argv, stdin, the files it named); None for a case
     # without a remote, and in samples drawn before it was kept.
     gh: list[dict[str, object]] | None = None
 

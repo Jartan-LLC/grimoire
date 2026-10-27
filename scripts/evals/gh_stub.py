@@ -5,6 +5,13 @@ The runner installs this file as `bin/gh` in a sample's sandbox, beside
 appends to). It reaches no network and uses only the standard library. A call no reply
 matches fails, so a session never reads a success the case did not script.
 
+It does not parse gh's flags, whose arity varies by command (`pr create -f` takes no
+value, `api -f` does). It logs the argv as given, then the text of every regular file an
+argument or a part of one names (`candidates`) inside its roots, and stdin when one of
+those is `-`. The roots are the sandbox and the runner's temp directory, which the runner
+names in the TEMP_ROOT variable; without that variable, the sandbox alone. That can
+include a file no gh command would read, and misses only one outside the roots.
+
 A change to what this stub answers, how it matches a call or what it logs, or to the
 remote setup in `session.py`, changes what a remote session can do: bump REMOTE_RUNNER
 there, so no remote sample drawn before it is reused.
@@ -15,61 +22,43 @@ import os
 import pathlib
 import re
 import sys
-from collections.abc import Callable, Iterator, Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 
-# gh reads a file for these: `pr create --body-file`, `release create --notes-file`,
-# `api --input`, each naming a path.
-PATH_FLAGS = ("--body-file", "--notes-file", "--input")
-# `-F` is the short `--body-file` or `--notes-file`, and `api`'s `--field`, a file only as
-# `key=@path`.
-FIELD_FLAGS = ("-F", "--field")
+# A two-character short flag with its value attached, `-bText` or `-Fbody=@b.md`.
+SHORT = re.compile(r"-[A-Za-z].+", re.DOTALL)
+# A key and its value, `--body=Text` or `body=@b.md`; a space before the `=` makes it text.
+KEY = re.compile(r"[^\s=]+=(.*)", re.DOTALL)
 STDIN = "-"
-# Flags whose value gh takes from the next argument when it is not attached. Some short
-# ones take none in other commands (`pr create -f` is `--fill`, `pr review -c` is
-# `--comment`), so a bare flag after one is read as a flag, not as its value.
-VALUE_FLAGS = (
-    *("--title", "-t", "--body", "-b", "--notes", "-n", "--comment", "-c"),
-    *("-f", "--raw-field", "-F", "--field", *PATH_FLAGS),
-)
-BARE_FLAG = re.compile(r"-[A-Za-z]|--[A-Za-z][\w-]*")
+MAX_BYTES = 1 << 20
+# Commands whose files and stdin are not logged: `gh secret set -f .env` reads a dotenv.
+# Any argument equal to one counts, since gh takes flags before the command (`-R o/r secret`).
+PRIVATE = ("secret", "variable", "auth")
+# The runner's temp directory: an agent writes a body file to `/tmp/pr-body.md` with the
+# Write tool, which the session's TMPDIR (the sandbox's `tmp`) does not redirect.
+TEMP_ROOT = "GRIMOIRE_GH_STUB_TEMP"
 
 
-def flag_values(argv: Sequence[str], flags: Sequence[str]) -> Iterator[tuple[str, str]]:
-    """Each (flag, value) in `argv` for one of `flags`, as `--flag value`, `--flag=value` or `-fvalue`.
+def candidates(arg: str) -> list[str]:
+    """The argument, and every text gh could read from it as a value, in the order found.
 
-    The last is the attached form gh's flag parser takes for a short flag, `-b"text"` in
-    a shell. An argument with a space after the flag (`-F b.md`) is not read as one: a
-    shell splits that in two unless it is quoted, and quoted it is text, a body's value.
-    Nor is the argument after a flag of `flags` or VALUE_FLAGS given alone, unless it is
-    a bare flag: gh reads it as that flag's value, so `--title "-Fix typo"` is a title,
-    not `-F`. A value that is itself a bare flag, a title of `-F`, is misread.
+    Each step looks only at the shape of the text, never at a flag's meaning: the rest
+    after a two-character short flag (`-bText`), the rest after a key's `=` (`--body=Text`,
+    `body=@b.md`), and the text past one leading `@`. They repeat, so `--field=body=@b.md`
+    gives `b.md`; a space before the `=` (`x = 1`) keeps a body whole.
     """
-    takes_value = {*VALUE_FLAGS, *flags}
-    is_value = False
-    for i, arg in enumerate(argv):
-        if is_value and not BARE_FLAG.fullmatch(arg):
-            is_value = False
-            continue
-        is_value = arg in takes_value
-        short, attached = arg[:2], arg[2:]
-        if short in flags and attached and attached[0] != "=" and not attached[0].isspace():
-            yield short, attached
-            continue
-        flag, eq, inline = arg.partition("=")
-        if flag in flags:
-            yield flag, inline if eq else (argv[i + 1] if i + 1 < len(argv) else "")
-
-
-def file_refs(argv: list[str]) -> list[str]:
-    """The files a call tells gh to read, in order; `-` stands for stdin."""
     found: list[str] = []
-    for flag, value in flag_values(argv, (*PATH_FLAGS, *FIELD_FLAGS)):
-        if flag in FIELD_FLAGS and "=" in value:
-            key_value = value.partition("=")[2]
-            if key_value.startswith("@"):
-                found.append(key_value[1:])
-        elif value:
-            found.append(value)
+    todo = [arg]
+    while todo:
+        text = todo.pop(0)
+        if text in found:
+            continue
+        found.append(text)
+        if SHORT.fullmatch(text):
+            todo.append(text[2:])
+        if key := KEY.match(text):
+            todo.append(key.group(1))
+        if text.startswith("@"):
+            todo.append(text[1:])
     return found
 
 
@@ -88,33 +77,65 @@ def answer(replies: Sequence[Mapping[str, object]], argv: list[str]) -> tuple[st
     return None
 
 
-def record(
-    argv: list[str], read_stdin: Callable[[], str], cwd: pathlib.Path
-) -> tuple[dict[str, object], list[str]]:
-    """The call's log entry (argv, stdin, each body file's text) and the files it could not read.
+def _readable(name: str, cwd: pathlib.Path, roots: Sequence[pathlib.Path]) -> pathlib.Path | None:
+    """The regular file `name` names from `cwd`, or None: a directory, a FIFO, a device, an invalid name.
 
-    Stdin is read only when the call names it, as gh does, so a call that does not
-    cannot hang on an open stdin. A byte that is not UTF-8 is read as U+FFFD, so the call
-    is still logged.
+    A file under none of `roots` is None too: the session runs as the user, and an argument
+    could name their credentials or `/proc/self/environ`.
     """
-    refs = file_refs(argv)
-    stdin = read_stdin() if STDIN in refs else ""
+    try:
+        path = (cwd / name).resolve()
+        if not any(path.is_relative_to(root.resolve()) for root in roots):
+            return None
+        return path if path.is_file() else None
+    except (OSError, ValueError, RuntimeError):  # a name too long, a NUL byte, a symlink loop
+        return None
+
+
+def record(
+    argv: list[str],
+    read_stdin: Callable[[], str],
+    cwd: pathlib.Path,
+    roots: Sequence[pathlib.Path],
+) -> dict[str, object]:
+    """The call's log entry: its argv, its stdin, and the text of each file its `candidates` name under `roots`.
+
+    Stdin is read only when a candidate is `-`, so a call that names none cannot hang on
+    an open stdin. A byte that is not UTF-8 is read as U+FFFD. A file over MAX_BYTES is
+    listed under `over_cap`, unread. A `PRIVATE` command's files and stdin are not read.
+    """
+    names = list(dict.fromkeys(c for arg in argv for c in candidates(arg)))
+    private = any(arg in PRIVATE for arg in argv)
+    stdin = read_stdin() if STDIN in names and not private else ""
     files: dict[str, str] = {}
-    missing: list[str] = []
-    for ref in refs:
-        if ref == STDIN:
+    over_cap: list[str] = []
+    for name in names:
+        path = None if private or name == STDIN else _readable(name, cwd, roots)
+        if path is None:
             continue
         try:
-            files[ref] = (cwd / ref).read_text(errors="replace")
+            with path.open("rb") as file:
+                data = file.read(MAX_BYTES + 1)
         except OSError:
-            missing.append(ref)
-    return {"argv": argv, "stdin": stdin, "files": files}, missing
+            continue
+        if len(data) > MAX_BYTES:
+            over_cap.append(name)
+        else:
+            files[name] = data.decode(errors="replace")
+    entry: dict[str, object] = {"argv": argv, "stdin": stdin, "files": files}
+    if over_cap:
+        entry["over_cap"] = over_cap
+    return entry
 
 
 def main(argv: list[str], state: pathlib.Path) -> int:
     """Log the call to `state/calls.jsonl`, then print the scripted reply or fail."""
-    entry, missing = record(
-        argv, lambda: sys.stdin.buffer.read().decode(errors="replace"), pathlib.Path.cwd()
+    temp = os.environ.get(TEMP_ROOT)
+    entry = record(
+        argv,
+        lambda: sys.stdin.buffer.read().decode(errors="replace"),
+        pathlib.Path.cwd(),
+        (state.parent, *([pathlib.Path(temp)] if temp else [])),
     )
     # One write to an O_APPEND file, so the log lines of calls made in parallel cannot interleave.
     log = os.open(state / "calls.jsonl", os.O_WRONLY | os.O_APPEND | os.O_CREAT)
@@ -122,9 +143,6 @@ def main(argv: list[str], state: pathlib.Path) -> int:
         os.write(log, (json.dumps(entry) + "\n").encode())
     finally:
         os.close(log)
-    if missing:
-        print(f"gh stub: cannot read {', '.join(missing)}", file=sys.stderr)
-        return 1
     replies = json.loads((state / "replies.json").read_text())
     reply = answer(replies, argv)
     if reply is None:

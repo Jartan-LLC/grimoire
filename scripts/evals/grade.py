@@ -9,17 +9,6 @@ from . import gh_stub, trace
 from .cache import Sample
 from .suite import BRIEF, REPORT, Case, Check, Reference
 
-# `-b` is `--body` only for these: `pr checkout -b` and `browse -b` name a branch.
-SHORT_BODY = {("pr", c) for c in ("create", "edit", "comment", "review", "merge")} | {
-    ("issue", c) for c in ("create", "edit", "comment")
-}
-# A release's body is its notes: `--notes`, or `-n`.
-NOTES = {("release", "create"), ("release", "edit")}
-# A closing or reopening comment's body is `--comment`, or `-c`.
-CLOSE = {(k, c) for k in ("pr", "issue") for c in ("close", "reopen")}
-# `api`'s fields; a `-F`/`--field` value `@path` is a file, which the stub reads.
-API_FIELDS = ("-f", "--raw-field", "-F", "--field")
-
 
 class Uncollected(Exception):  # noqa: N818 -- reads as the condition, like StopIteration
     """A check reads a file the sample was drawn without collecting."""
@@ -30,7 +19,7 @@ class Outputs:
     """What text checks read, from a session or a reference.
 
     `reports` and `briefs` map an agent to its joined texts; `gh` is the `gh_text` of the
-    recorded calls.
+    recorded calls, or a reference's `gh` without Claude Code's own call lines.
     """
 
     commits: Sequence[str] = ()
@@ -56,51 +45,31 @@ def text_of(outputs: Outputs, artifact: str) -> str:
     return outputs.files.get(artifact.removeprefix("file:"), "")
 
 
-def _command(argv: Sequence[str]) -> tuple[str, ...]:
-    """The call's command and subcommand (`pr`, `create`), past any `-R`/`--repo` and flag."""
-    words: list[str] = []
-    after_repo = False
-    for arg in argv:
-        if after_repo or arg.startswith("-"):
-            after_repo = arg in ("-R", "--repo")
-            continue
-        words.append(arg)
-    return tuple(words[:2])
-
-
-def _inline_bodies(argv: Sequence[str]) -> list[str]:
-    """The bodies a call passes as arguments: `--body`, `-b` where it means that, a release's notes, a closing or reopening comment, `api`'s `body=`."""
-    command = _command(argv)
-    flags = ("--body", "-b") if command in SHORT_BODY else ("--body",)
-    if command in NOTES:
-        flags = ("--notes", "-n")
-    if command in CLOSE:
-        flags = ("--comment", "-c")
-    found = [value for _, value in gh_stub.flag_values(argv, flags)]
-    if command[:1] == ("api",):
-        for flag, value in gh_stub.flag_values(argv, API_FIELDS):
-            key, eq, text = value.partition("=")
-            if key == "body" and eq and not (flag in gh_stub.FIELD_FLAGS and text.startswith("@")):
-                found.append(text)
-    return found
-
-
 def gh_text(calls: Sequence[dict[str, object]]) -> str:
-    """The calls the sandbox's `gh` recorded, one `gh <call_line>` line each, then their bodies.
+    """The agent's calls the sandbox's `gh` recorded, one `gh <call_line>` line each, then their texts.
 
-    The bodies are each call's `--body`, `-b` where it means that, a release's `--notes` or
-    `-n`, a closing or reopening comment's `--comment` or `-c` and `api` `body=` field
-    texts, then its stdin and body files, newlines kept.
+    The calls Claude Code makes on its own (`_claude_codes_call`) are dropped first; with
+    none left the text is empty. After the call lines and a blank line come every
+    non-blank text an argument could pass (`gh_stub.candidates`, titles and `--jq`
+    strings included), each call's stdin and the files it named, newlines kept, each
+    text once.
     """
+    texts: dict[str, None] = {}
     lines: list[str] = []
-    bodies: list[str] = []
     for call in calls:  # the stub's own log entries: argv, stdin, files
         argv = cast("list[str]", call.get("argv", []))
+        line = f"gh {gh_stub.call_line(argv)}"
+        if _claude_codes_call(line):
+            continue
+        lines.append(line)
         files = cast("dict[str, str]", call.get("files", {}))
-        lines.append(f"gh {gh_stub.call_line(argv)}")
-        inline = _inline_bodies(argv)
-        bodies += [t for t in (*inline, str(call.get("stdin", "")), *files.values()) if t.strip()]
-    return "\n\n".join(["\n".join(lines), *bodies]) if calls else ""
+        named = [c for arg in argv for c in gh_stub.candidates(arg)]
+        texts.update(
+            dict.fromkeys(
+                t for t in (*named, str(call.get("stdin", "")), *files.values()) if t.strip()
+            )
+        )
+    return "\n\n".join(["\n".join(lines), *texts]) if lines else ""
 
 
 def _claude_codes_call(line: str) -> bool:
@@ -119,7 +88,7 @@ def _claude_codes_call(line: str) -> bool:
 
 
 def agents_gh(text: str) -> str:
-    r"""The `gh` text without the lines of the calls Claude Code makes on its own.
+    r"""A reference's `gh` text without the lines of the calls Claude Code makes on its own.
 
     It splits on newlines alone, as `call_line` escapes only those: a body's `\r` stays
     inside its call's line.
@@ -158,9 +127,8 @@ def text_score(check: Check, text: str) -> float:
 
 
 def check_score(check: Check, outputs: Outputs) -> float:
-    """A text check's score on `outputs`; a `gh` check reads only the agent's calls (`agents_gh`)."""
-    text = text_of(outputs, check.artifact)
-    return text_score(check, agents_gh(text) if check.artifact == "gh" else text)
+    """A text check's score on `outputs`."""
+    return text_score(check, text_of(outputs, check.artifact))
 
 
 def delivery_score(check: Check, parsed: trace.Trace) -> float:
@@ -230,7 +198,7 @@ def reference_scores(case: Case, reference: Reference) -> list[tuple[Check, floa
     """Each text check's score on a reference; delivery checks need a session."""
     outputs = Outputs(
         reference.commits, reference.final, reference.files,
-        reference.reports, reference.gh, reference.briefs,
+        reference.reports, agents_gh(reference.gh), reference.briefs,
     )  # fmt: skip
     return [
         (check, check_score(check, outputs))

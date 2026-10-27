@@ -5,9 +5,10 @@ import json
 import os
 import pathlib
 import subprocess
+import tempfile
 
 import pytest
-from evals import cache, session
+from evals import cache, gh_stub, session
 from evals.arms import Arm
 from evals.proc import GIT, run
 from evals.suite import Case, load_suite
@@ -243,6 +244,8 @@ def test_sample_env_puts_the_gh_stub_first_and_drops_the_logins_only_for_a_case_
     assert stubbed["PATH"] == f"{sandbox}/bin:{sandbox}/venv/bin:/usr/bin"
     assert stubbed["GH_CONFIG_DIR"] == f"{sandbox}/gh-config"
     assert stubbed["GH_TOKEN"] == session.STUB_TOKEN
+    assert stubbed[gh_stub.TEMP_ROOT] == str(pathlib.Path(tempfile.gettempdir()).resolve())
+    assert gh_stub.TEMP_ROOT not in plain
     dropped = (*session.GH_LOGIN, *ssh)
     assert not any(name in stubbed for name in dropped if name != "GH_TOKEN")
     assert stubbed["GIT_ALLOW_PROTOCOL"] == "file"

@@ -27,6 +27,7 @@ from dataclasses import asdict, dataclass
 
 from . import cache, trace
 from .arms import Arm
+from .gh_stub import TEMP_ROOT
 from .proc import CLAUDE, GIT, UV, run
 from .suite import Case, Reply
 
@@ -47,7 +48,7 @@ LIMITED = re.compile(r"(?i)limiting requests|usage limit|rate limit|overloaded|\
 RUNNER = 2
 # Part of a remote case's sample key only: bump it when a change to the gh stub or to the
 # remote setup changes what a remote session can do, so only remote cases draw again.
-REMOTE_RUNNER = 2
+REMOTE_RUNNER = 3
 PRELOADED = re.compile(r"\[Agent: ([^\]]+)\] Preloaded skill '([^']+)'")
 GH_STUB = pathlib.Path(__file__).with_name("gh_stub.py")
 REPLIES = "replies.json"
@@ -105,9 +106,11 @@ def sample_env(
     With `gh_stub`, the sandbox's `bin/` comes first, so its `gh` answers every call. For
     the real `gh` run by its path: gh's token and host variables are dropped, GH_TOKEN is
     set to a dummy, which gh sends to github.com in place of a token from the OS keyring,
-    and GH_CONFIG_DIR is an empty `gh-config/`. For git: GIT_ALLOW_PROTOCOL=file refuses
-    every transport but a local path, so git reaches no https, ssh or git URL, with a key
-    under HOME or any other, and the SSH agent's variables are dropped.
+    and GH_CONFIG_DIR is an empty `gh-config/`. The stub's TEMP_ROOT is this process's temp
+    directory, where an agent may write a body file by its path. For git:
+    GIT_ALLOW_PROTOCOL=file refuses every transport but a local path, so git reaches no
+    https, ssh or git URL, with a key under HOME or any other, and the SSH agent's
+    variables are dropped.
     """
     env = {
         k: v
@@ -132,6 +135,7 @@ def sample_env(
             env.pop(name, None)
         env["GH_TOKEN"] = STUB_TOKEN
         env["GH_CONFIG_DIR"] = str(sandbox / "gh-config")
+        env[TEMP_ROOT] = str(pathlib.Path(tempfile.gettempdir()).resolve())
         env["GIT_ALLOW_PROTOCOL"] = "file"
     return env
 

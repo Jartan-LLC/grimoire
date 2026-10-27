@@ -1,8 +1,10 @@
 """The sandbox's `gh` stub: what it records, and that it answers only what a case scripted."""
 
 import json
+import os
 import pathlib
 import subprocess
+from typing import cast
 
 import pytest
 from evals import gh_stub, session
@@ -30,61 +32,134 @@ def test_answer_matches_a_call_with_a_multi_line_argument_as_one_line() -> None:
 
 
 @pytest.mark.parametrize(
-    ("argv", "refs"),
+    ("arg", "found"),
     [
-        (["pr", "create", "--body-file", "b.md"], ["b.md"]),
-        (["pr", "create", "--body-file=b.md"], ["b.md"]),
-        (["pr", "create", "-F", "b.md"], ["b.md"]),
-        (["pr", "create", "-F", "-"], ["-"]),
-        (["api", "x", "-F", "body=@b.md", "-F", "event=COMMENT"], ["b.md"]),
-        (["api", "x", "--field", "body=@-"], ["-"]),
-        (["api", "x", "--input", "q=1.json"], ["q=1.json"]),
-        (["api", "x", "--input=-"], ["-"]),
-        (["release", "create", "v1", "--notes-file", "n.md"], ["n.md"]),
-        (["release", "create", "v1", "-F", "n.md"], ["n.md"]),
-        (["release", "create", "v1", "-Fn.md"], ["n.md"]),
-        (["api", "x", "-Fbody=@b.md", "-Fevent=COMMENT"], ["b.md"]),
-        (["pr", "create", "--body", "-F b.md"], []),
-        (["pr", "create", "--title", "-Fix typo", "-F", "b.md"], ["b.md"]),
-        (["pr", "create", "-f", "-F", "b.md"], ["b.md"]),
-        (["issue", "close", "7", "-c", "-Fixed"], []),
-        (["pr", "create", "-F"], []),
+        ("--body=Text", ["--body=Text", "Text"]),
+        ("-bText", ["-bText", "Text"]),
+        ("-Fbody=@b.md", ["-Fbody=@b.md", "body=@b.md", "@b.md", "b.md"]),
+        ("--field=body=@b.md", ["--field=body=@b.md", "body=@b.md", "@b.md", "b.md"]),
+        ("@-", ["@-", "-"]),
+        ("-Fix typo", ["-Fix typo", "ix typo"]),
+        ("x = 1 =Closes", ["x = 1 =Closes"]),
+        ("cc @alice", ["cc @alice"]),
+        ("-F", ["-F"]),
     ],
 )
-def test_file_refs_names_each_file_gh_would_read(argv: list[str], refs: list[str]) -> None:
-    assert gh_stub.file_refs(argv) == refs
+def test_candidates_are_the_argument_and_its_tails_by_shape_alone(
+    arg: str, found: list[str]
+) -> None:
+    assert gh_stub.candidates(arg) == found
 
 
-def test_record_reads_body_files_and_stdin_only_when_the_call_names_it(
+def no_stdin() -> str:
+    raise AssertionError("stdin read for a call that names no `-`")
+
+
+def test_record_reads_each_file_an_argument_names_and_stdin_only_for_a_dash(
     tmp_path: pathlib.Path,
 ) -> None:
     (tmp_path / "b.md").write_text("Closes #42\n")
-
-    def no_stdin() -> str:
-        raise AssertionError("stdin read for a call that does not name it")
-
-    entry, missing = gh_stub.record(["pr", "create", "--body-file", "b.md"], no_stdin, tmp_path)
+    entry = gh_stub.record(["pr", "create", "--body-file", "b.md"], no_stdin, tmp_path, (tmp_path,))
     assert entry == {
         "argv": ["pr", "create", "--body-file", "b.md"],
         "stdin": "",
         "files": {"b.md": "Closes #42\n"},
     }
-    assert missing == []
-    entry, missing = gh_stub.record(
-        ["api", "x", "-F", "body=@-", "-F", "x=@gone.md"], lambda: "piped", tmp_path
-    )
-    assert (entry["stdin"], entry["files"], missing) == ("piped", {}, ["gone.md"])
+    argv = ["api", "x", "-F", "body=@-", "-F", "x=@gone.md"]
+    entry = gh_stub.record(argv, lambda: "piped", tmp_path, (tmp_path,))
+    assert (entry["stdin"], entry["files"]) == ("piped", {})
+
+
+def test_record_reads_a_body_file_outside_the_working_directory(tmp_path: pathlib.Path) -> None:
+    body = tmp_path / "elsewhere" / "b.md"
+    body.parent.mkdir()
+    body.write_text("Closes #42\n")
+    work = tmp_path / "repo"
+    work.mkdir()
+    entry = gh_stub.record(["pr", "create", "-F", str(body)], no_stdin, work, (tmp_path,))
+    assert entry["files"] == {str(body): "Closes #42\n"}
+
+
+def test_record_reads_nothing_that_is_not_a_regular_file(tmp_path: pathlib.Path) -> None:
+    (tmp_path / "dir").mkdir()
+    os.mkfifo(tmp_path / "fifo")
+    names = ["dir", "missing.md", "fifo", "/dev/zero", "x" * 300, "nul\0byte"]
+    argv = ["pr", "create", *(arg for name in names for arg in ("--body-file", name))]
+    entry = gh_stub.record(argv, no_stdin, tmp_path, (tmp_path,))
+    assert (entry["files"], "over_cap" in entry) == ({}, False)
+    inline = gh_stub.record(["pr", "create", "--body", "y" * 300], no_stdin, tmp_path, (tmp_path,))
+    assert inline["files"] == {}
+
+
+def test_record_notes_a_file_over_the_cap_unread(tmp_path: pathlib.Path) -> None:
+    (tmp_path / "big.md").write_bytes(b"x" * (gh_stub.MAX_BYTES + 1))
+    (tmp_path / "cap.md").write_bytes(b"x" * gh_stub.MAX_BYTES)
+    argv = ["pr", "create", "-F", "big.md", "--body-file=cap.md"]
+    entry = gh_stub.record(argv, no_stdin, tmp_path, (tmp_path,))
+    assert entry["over_cap"] == ["big.md"]
+    assert list(cast("dict[str, str]", entry["files"])) == ["cap.md"]
+
+
+@pytest.mark.parametrize(
+    "argv",
+    [
+        ["secret", "set", "-f", ".env"],
+        ["-R", "o/r", "secret", "set", "--env-file=.env"],
+        ["variable", "set", "-f", ".env"],
+        ["auth", "login", "--with-token", "-"],
+    ],
+)
+def test_record_reads_no_file_or_stdin_of_a_secret_variable_or_auth_call(
+    tmp_path: pathlib.Path, argv: list[str]
+) -> None:
+    (tmp_path / ".env").write_text("TOKEN=hunter2\n")
+    entry = gh_stub.record(argv, no_stdin, tmp_path, (tmp_path,))
+    assert (entry["argv"], entry["stdin"], entry["files"]) == (argv, "", {})
+
+
+def sandbox_and_temp(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> tuple[pathlib.Path, tuple[pathlib.Path, pathlib.Path]]:
+    """The sandbox's repo, and the roots: the sandbox and a temp root, beside a fake HOME."""
+    work = tmp_path / "sandbox" / "repo"
+    work.mkdir(parents=True)
+    (tmp_path / "tmp").mkdir()
+    (tmp_path / "home").mkdir()
+    monkeypatch.setenv("HOME", str(tmp_path / "home"))
+    return work, (work.parent, tmp_path / "tmp")
+
+
+def test_record_reads_a_file_under_the_sandbox_or_the_temp_root(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    work, roots = sandbox_and_temp(tmp_path, monkeypatch)
+    (work / "b.md").write_text("Closes #42\n")
+    body = tmp_path / "tmp" / "pr-body.md"
+    body.write_text("Fixes #7\n")
+    entry = gh_stub.record(["pr", "create", "-F", "b.md", "-F", str(body)], no_stdin, work, roots)
+    assert entry["files"] == {"b.md": "Closes #42\n", str(body): "Fixes #7\n"}
+
+
+@pytest.mark.parametrize("name", ["/proc/self/environ", "../../home/creds", "link.md"])
+def test_record_reads_no_file_under_neither_root(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, name: str
+) -> None:
+    work, roots = sandbox_and_temp(tmp_path, monkeypatch)
+    (tmp_path / "home" / "creds").write_text("secret\n")
+    (work / "link.md").symlink_to(tmp_path / "home" / "creds")
+    entry = gh_stub.record(["pr", "create", "-F", name], no_stdin, work, roots)
+    assert entry["files"] == {}
 
 
 def test_the_stub_logs_a_body_that_is_not_utf8(tmp_path: pathlib.Path) -> None:
     sandbox = tmp_path / "sandbox"
     sandbox.mkdir()
     session.install_gh(sandbox, (Reply("^pr create", "made"),))
-    (tmp_path / "b.md").write_bytes(b"Body \xff\n")
+    (sandbox / "b.md").write_bytes(b"Body \xff\n")
     for argv, stdin in ((["-F", "b.md"], b""), (["-F", "-"], b"Piped \xfe")):
         made = run(
             [str(sandbox / "bin" / "gh"), "pr", "create", *argv],
-            cwd=tmp_path, input=stdin, capture_output=True, check=False,
+            cwd=sandbox, input=stdin, capture_output=True, check=False,
         )  # fmt: skip
         assert (made.returncode, made.stdout) == (0, b"made")
     calls = session.gh_calls(sandbox)
@@ -93,11 +168,12 @@ def test_the_stub_logs_a_body_that_is_not_utf8(tmp_path: pathlib.Path) -> None:
 
 
 def run_stub(
-    sandbox: pathlib.Path, cwd: pathlib.Path, *argv: str
+    sandbox: pathlib.Path, cwd: pathlib.Path, *argv: str, env: dict[str, str] | None = None
 ) -> subprocess.CompletedProcess[str]:
     return run(
         [str(sandbox / "bin" / "gh"), *argv],
         cwd=cwd,
+        env=env,
         capture_output=True,
         text=True,
         stdin=subprocess.DEVNULL,
@@ -113,7 +189,7 @@ def test_the_installed_stub_logs_every_call_and_fails_one_it_has_no_reply_for(
     session.install_gh(
         sandbox, (Reply("^pr create", "https://github.com/o/r/pull/7\n"), Reply("^pr ready", "", 1))
     )
-    work = tmp_path / "repo"
+    work = sandbox / "repo"
     work.mkdir()
     (work / "b.md").write_text("Closes #42\n")
     created = run_stub(sandbox, work, "pr", "create", "--draft", "--body-file", "b.md")
@@ -132,3 +208,30 @@ def test_the_installed_stub_logs_every_call_and_fails_one_it_has_no_reply_for(
     assert calls[0]["files"] == {"b.md": "Closes #42\n"}
     assert json.loads((sandbox / "gh-stub" / "replies.json").read_text())[1]["exit"] == 1
     assert list((sandbox / "gh-config").iterdir()) == []
+
+
+def test_the_installed_stub_answers_a_call_whose_arguments_name_no_file(
+    tmp_path: pathlib.Path,
+) -> None:
+    sandbox = tmp_path / "sandbox"
+    sandbox.mkdir()
+    session.install_gh(sandbox, (Reply("^pr create", "made"),))
+    made = run_stub(sandbox, tmp_path, "pr", "create", "--title", "-Fix typo", "-F", "gone.md")
+    assert (made.returncode, made.stdout, made.stderr) == (0, "made", "")
+    assert session.gh_calls(sandbox)[0]["files"] == {}
+
+
+def test_the_installed_stub_reads_a_file_under_the_temp_root_only_when_the_runner_names_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    sandbox = tmp_path / "sandbox"
+    (sandbox / "repo").mkdir(parents=True)
+    session.install_gh(sandbox, (Reply("^pr create", "made"),))
+    body = tmp_path / "tmp" / "pr-body.md"
+    body.parent.mkdir()
+    body.write_text("Closes #42\n")
+    unset = {k: v for k, v in os.environ.items() if k != gh_stub.TEMP_ROOT}
+    for env in (unset | {gh_stub.TEMP_ROOT: str(body.parent)}, unset):
+        made = run_stub(sandbox, sandbox / "repo", "pr", "create", "-F", str(body), env=env)
+        assert made.returncode == 0
+    assert [c["files"] for c in session.gh_calls(sandbox)] == [{str(body): "Closes #42\n"}, {}]

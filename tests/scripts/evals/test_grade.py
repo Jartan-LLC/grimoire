@@ -1,7 +1,8 @@
 import pathlib
+import re
 
 import pytest
-from evals import grade, trace
+from evals import gh_stub, grade, trace
 from evals.cache import Sample
 from evals.suite import Check, load_suite
 from helpers import KEY, write_suite
@@ -100,66 +101,66 @@ def test_a_report_check_reads_every_report_its_agent_handed_back() -> None:
     assert grade.text_of(outputs, "report:praxis:test-reviewer") == ""
 
 
-def test_the_gh_artifact_lists_each_call_then_the_bodies_it_sent() -> None:
+def test_the_gh_artifact_lists_each_call_then_every_text_it_passed() -> None:
     calls: list[dict[str, object]] = [
         {"argv": ["pr", "create", "--draft", "-F", "b.md"], "stdin": "", "files": {"b.md": "Body"}},
         {"argv": ["pr", "view", "7"], "stdin": "", "files": {}},
         {"argv": ["api", "x", "-F", "body=@-"], "stdin": "Piped", "files": {}},
     ]
     gh = grade.gh_text(calls)
-    assert gh == (
-        "gh pr create --draft -F b.md\ngh pr view 7\ngh api x -F body=@-\n\nBody\n\nPiped"
-    )
+    lines, texts = gh.split("\n\n", 1)
+    assert lines == "gh pr create --draft -F b.md\ngh pr view 7\ngh api x -F body=@-"
+    assert texts.split("\n\n") == [
+        *("pr", "create", "--draft", "-F", "b.md", "Body", "view", "7"),
+        *("api", "x", "body=@-", "@-", "-", "Piped"),
+    ]
     assert grade.gh_text([]) == ""
     assert grade.text_of(grade.Outputs(gh=gh), "gh") == gh
 
 
 def test_the_gh_artifact_keeps_a_multi_line_body_off_the_call_lines() -> None:
     body = "Fixes it.\n\nCloses #42"
-    argv = ["pr", "create", "--body", body, "--draft", "-b=Second"]
+    argv = ["pr", "create", "--body", body, "--draft"]
     gh = grade.gh_text([{"argv": argv, "stdin": "", "files": {}}])
     lines = Check("m", "gh", r"^gh pr create.*--draft", None)
     assert grade.text_score(lines, gh) == 1.0
     assert grade.text_score(Check("m", "gh", r"^Closes #42$", None), gh) == 1.0
-    assert gh.endswith(f"\n\n{body}\n\nSecond")
+    assert gh.split("\n")[0] == "gh pr create --body Fixes it.\\n\\nCloses #42 --draft"
 
 
-@pytest.mark.parametrize(
-    ("argv", "bodies"),
-    [
-        (
-            ["api", "x", "-f", "body=Raw", "-F", "body=Typed", "--raw-field=body=Long"],
-            ["Raw", "Typed", "Long"],
-        ),
-        (["api", "x", "-F", "body=@b.md", "-f", "event=COMMENT", "--field", "body"], []),
-        (["api", "x", "-f", "body=@kept"], ["@kept"]),
-        (["api", "x", "-fbody=Attached", "-Fbody=@b.md"], ["Attached"]),
-        (["pr", "-R", "o/r", "comment", "7", "-b", "Short"], ["Short"]),
-        (["issue", "edit", "7", "--body", "Long", "-b=Short"], ["Long", "Short"]),
-        (["pr", "create", "-bAttached", "-b=x=y"], ["Attached", "x=y"]),
-        (["pr", "checkout", "7", "-blocal"], []),
-        (["pr", "create", "--title", "-bump deps", "-t", "-bump", "--body", "B"], ["B"]),
-        (["pr", "review", "7", "-c", "-b", "Looks good"], ["Looks good"]),
-        (["pr", "checkout", "7", "-b", "local"], []),
-        (["browse", "-b", "main"], []),
-        (["pr", "create", "-f", "body=x"], []),
-        (["release", "create", "v1", "--notes", "Long", "-n=Short"], ["Long", "Short"]),
-        (["release", "edit", "v1", "-n", "Short"], ["Short"]),
-        (["release", "edit", "v1", "-nNotes"], ["Notes"]),
-        (["pr", "create", "-n", "x"], []),
-        (["pr", "close", "7", "--comment", "Long", "-c=Short"], ["Long", "Short"]),
-        (["issue", "close", "7", "-c", "Short"], ["Short"]),
-        (["pr", "reopen", "7", "--comment", "Long", "-c=Short"], ["Long", "Short"]),
-        (["issue", "reopen", "7", "-c", "Short"], ["Short"]),
-        (["issue", "close", "7", "-cComment"], ["Comment"]),
-        (["issue", "list", "-c", "x"], []),
-    ],
-)
-def test_the_gh_artifact_takes_a_body_only_where_the_flag_means_one(
-    argv: list[str], bodies: list[str]
+BODY = "Fixes the quoting.\nCloses #42"
+# Each way gh takes a body: inline, from a file `f`, or from stdin.
+FORMS = [
+    ["--body", BODY], [f"--body={BODY}"], [f"-b{BODY}"], ["-b", BODY],
+    ["-f", f"body={BODY}"], [f"-fbody={BODY}"],
+    ["-F", "body=@f"], ["-Fbody=@f"], ["--field=body=@f"],
+    ["--body-file", "f"], ["--body-file=f"], ["-Ff"], ["--input", "f"],
+    ["--notes", BODY], ["-n", BODY], ["--comment", BODY], ["-c", BODY],
+    ["--body-file", "-"], ["--input", "@-"], ["-F", "k=@-"],
+]  # fmt: skip
+# Flags that take no value in these commands: none may swallow the form after it.
+BOOLEANS = [
+    ["pr", "create"], ["pr", "create", "-f"], ["pr", "create", "--fill"],
+    ["pr", "create", "--draft"], ["pr", "review", "7", "--comment"], ["pr", "review", "7", "-c"],
+]  # fmt: skip
+
+
+@pytest.mark.parametrize("before", BOOLEANS, ids=" ".join)
+@pytest.mark.parametrize("form", FORMS, ids=" ".join)
+def test_the_gh_artifact_holds_each_line_of_a_body_however_it_was_passed(
+    tmp_path: pathlib.Path, before: list[str], form: list[str]
 ) -> None:
-    gh = grade.gh_text([{"argv": argv, "stdin": "", "files": {}}])
-    assert gh.split("\n\n")[1:] == bodies
+    (tmp_path / "f").write_text(BODY)
+    piped = "-" in (c for arg in form for c in gh_stub.candidates(arg))
+
+    def stdin() -> str:
+        assert piped, "stdin read for a call that names no `-`"
+        return BODY
+
+    entry = gh_stub.record([*before, *form], stdin, tmp_path, (tmp_path,))
+    gh = grade.gh_text([entry])
+    for line in BODY.split("\n"):
+        assert grade.text_score(Check("m", "gh", f"^{re.escape(line)}$", None), gh) == 1.0
 
 
 def test_a_brief_check_reads_every_prompt_the_main_thread_sent_its_agent() -> None:
