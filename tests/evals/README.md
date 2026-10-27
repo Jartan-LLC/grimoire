@@ -174,7 +174,9 @@ the PR how many versions you screened.
   included, so a `present` check on a body can be met by a title or by another call's text. A check
   about one flag or command reads only the call lines, up to the first blank line, with the form
   `present = '\A(?:.+\n)*gh pr create .*--draft'`: checks match line by line, so `^` alone also
-  reaches the texts after the blank line, a body that quotes `gh pr create --draft` included. The stub
+  reaches the texts after the blank line, a body that quotes `gh pr create --draft` included. An
+  inline body stays on its own call line, so a body passed as `--body "... --draft ..."` can still
+  meet that form. The stub
   reads a file only inside the sandbox, the eval runner's temp directory or `/tmp`, where an agent may
   write `/tmp/pr-body.md`: a body file elsewhere reads as absent. It reads stdin whenever an argument
   or a tail of one is exactly `-`, a key's value included (`-f q=-`), where gh would not, so such a
