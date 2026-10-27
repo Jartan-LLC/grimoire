@@ -6,11 +6,12 @@
   lint                check every suite before any session runs (free; part of make verify)
   run SUITE --arm A   run SUITE's cases on arm none, old or new (spends inference)
   screen SUITE        run old and new side by side, then print the verdict (spends inference)
-  show KEY            print one cached sample: its commits, final reply, deliveries and writes
-                      by agent, and subagents' reports
+  show KEY            print one stored sample: its commits, final reply, every gh call logged
+                      and the gh text graded, deliveries and writes by agent, and subagents'
+                      briefs and reports
   size SUITE          what each split can see per model, from the recorded baselines (free)
 
-Sessions use the caller's own `claude` login; nothing here runs in CI. Samples are cached
+Sessions use the caller's own `claude` login; nothing here runs in CI. Samples are kept
 (see scripts/evals/cache.py), so a rerun after a usage-limit stop resumes.
 """
 
@@ -24,7 +25,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from typing import cast
 
-from evals import cache, grade, session, trace
+from evals import cache, gh_stub, grade, session, trace
 from evals.arms import Arm, merge_base, new_arm, none_arm, old_arm
 from evals.lint import lint
 from evals.plan import make_plan
@@ -97,7 +98,7 @@ def build_arm(name: str, suite: Suite, base: str, new_ref: str | None, store: pa
     `new` is the working tree, or `new_ref` when given: the merge base itself there is
     an A/A comparison, and `none` (old without the target) is the positive control.
     """
-    arms = store / "arms"
+    arms = cache.arms(store)
     old = old_arm(ROOT, merge_base(ROOT, base), arms)
     if name == "old":
         return old
@@ -132,7 +133,7 @@ def run_samples(work: list[Work], jobs: int) -> list[cache.Sample]:
 
 
 def parsed_trace(store: pathlib.Path, sample: cache.Sample) -> trace.Trace:
-    """The cached sample's trace, read with the skills its agents preloaded."""
+    """The stored sample's trace, read with the skills its agents preloaded."""
     preloads = [(agent, skill) for agent, skill in sample.preloads or []]
     return trace.parse(
         trace.load_text(cache.read_events(store, sample.key)), sample.plugins, preloads
@@ -230,8 +231,13 @@ def to_read(
 def pinned(
     suite: Suite, split: str, samples: int, spec: session.Spec, old: Arm
 ) -> dict[str, object]:
-    """What the plan fixes before the first run: a verdict is refused if any of it changes."""
+    """What the plan fixes before the first run: a verdict is refused if any of it changes.
+
+    The flags name the arm's plugin directories and the debug log by placeholder, so the
+    plan, and with it the screen's samples, do not depend on where the store is.
+    """
     files = [p for p in suite.path.rglob("*") if p.is_file() and not python_cache(p)]
+    placed = dataclasses.replace(old, plugins={n: f"<arm>/plugins/{n}" for n in old.plugins})
     return {
         "suite": tree_hash(suite.path, files),
         "split": split,
@@ -240,7 +246,7 @@ def pinned(
         "model": spec.model,
         "claude_code": spec.version,
         "flags": session.claude_args(
-            "", old, spec.model, spec.budget_usd, pathlib.Path("<sandbox>/debug.log")
+            "", placed, spec.model, spec.budget_usd, pathlib.Path("<sandbox>/debug.log")
         )[3:],
         "old": old.hash,
     }
@@ -252,7 +258,9 @@ def drawn(
     """What a screen's sessions depend on: its samples' identity, without the grading.
 
     A fix to a key or a metric regrades the samples already drawn instead of drawing
-    new ones; the plan pin still refuses a verdict until the change is acknowledged.
+    new ones; the plan pin still refuses a verdict until the change is acknowledged. A
+    remote case's `[[gh]]` replies, though in its key, are part of its hash: editing
+    them draws new samples.
     """
     session_inputs = {k: v for k, v in plan.items() if k != "suite"}
     return [{c.id: c.pinned() for c in cases}, session_inputs, arms["new"].hash, trial]
@@ -530,10 +538,14 @@ def _effect(effect: float) -> str:
 
 
 def show(key: str, store: pathlib.Path) -> int:
-    """Print one sample: its commits, final reply, graded files, deliveries, writes and hooks."""
+    """Print one sample: commits, final reply, graded files, gh calls and gh text, deliveries, writes, briefs, reports, hooks.
+
+    The gh calls are every call the stub logged, Claude Code's own included; the gh text
+    is what a check reads (`grade.gh_text`), without them.
+    """
     sample = cache.load(store, key)
     if sample is None:
-        raise SystemExit(f"no cached sample {key}")
+        raise SystemExit(f"no stored sample {key}")
     print(
         f"{sample.arm} {sample.case} #{sample.index} valid={sample.valid} spoiled={sample.spoiled or '-'} {sample.reasons}"
     )
@@ -542,6 +554,11 @@ def show(key: str, store: pathlib.Path) -> int:
     print(f"\n--- final reply\n{sample.final}")
     for path, text in sorted(sample.files.items()):
         print(f"\n--- file {path}\n{text}")
+    if sample.gh is not None:
+        argvs = [cast("list[str]", call.get("argv", [])) for call in sample.gh]
+        logged = "\n".join(f"gh {gh_stub.call_line(argv)}" for argv in argvs)
+        print(f"\n--- gh calls: every call the stub logged, Claude Code's own included\n{logged}")
+        print(f"\n--- gh text graded: Claude Code's own calls left out\n{grade.gh_text(sample.gh)}")
     parsed = parsed_trace(store, sample)
     print("\n--- skills delivered (event index, agent)")
     for d in parsed.deliveries:
@@ -549,6 +566,8 @@ def show(key: str, store: pathlib.Path) -> int:
     print("\n--- writes (event index, agent)")
     for w in parsed.writes:
         print(f"  {w.index} {w.kind} ok={w.ok} {w.agent or 'main'} {w.text[:120]!r}")
+    for b in parsed.briefs:
+        print(f"\n--- brief to {b.agent} (event index {b.index})\n{b.text}")
     for r in parsed.reports:
         print(f"\n--- report of {r.agent} on {r.model} (event index {r.index})\n{r.text}")
     print("\n--- hook context (event index)")
@@ -584,19 +603,23 @@ def baseline_counts(
                 f"  {case.id}: not recorded, {len(drawn_here) - len(valid)} sample(s) excluded; rerun"
             )
         elif args.record and valid:
-            record_baseline(case.path / "key.toml", spec.model, args.arm, failed, len(valid))
+            record_baseline(
+                case.path / "key.toml", spec.model, args.arm, failed, len(valid), remote=case.remote
+            )
 
 
-def record_baseline(key: pathlib.Path, model: str, arm: str, failures: int, runs: int) -> None:
+def record_baseline(  # noqa: PLR0913 -- `remote` adds a line to the entry the others make
+    key: pathlib.Path, model: str, arm: str, failures: int, runs: int, *, remote: bool = False
+) -> None:
     """Replace the key's [[baseline]] entry for (model, arm) with these counts.
 
     Entries are written in one fixed form, at the end of the key, so a later record
-    finds and replaces them.
+    finds and replaces them. A `remote` case's entry records REMOTE_RUNNER too.
     """
     entry = (
         f'[[baseline]]\nmodel = "{model}"\narm = "{arm}"\nfailures = {failures}\n'
         f"runs = {runs}\nrunner = {session.RUNNER}"
-    )
+    ) + (f"\nremote_runner = {session.REMOTE_RUNNER}" if remote else "")
     head = f'[[baseline]]\nmodel = "{model}"\narm = "{arm}"\n'
     blocks = key.read_text().rstrip("\n").split("\n\n")
     kept = [b for b in blocks if not b.startswith(head)]
@@ -657,7 +680,6 @@ def _parser() -> argparse.ArgumentParser:
 def main() -> int:
     """Parse the command line and run one subcommand."""
     args = _parser().parse_args()
-    store = cache.root()
 
     if args.command == "plan":
         return plan_command(args.base)
@@ -666,7 +688,7 @@ def main() -> int:
         print("\n".join(found) if found else "every eval suite passes its lint")
         return 1 if found else 0
     if args.command == "show":
-        return show(args.key, store)
+        return show(args.key, cache.root(ROOT))
     if args.command == "size":
         suite = load(args.suite)
         lines, weak = split_report(suite, old_holds(suite.target, args.base))
@@ -679,6 +701,7 @@ def main() -> int:
     model = args.model or suite.models[0]
     if model not in suite.models:
         raise SystemExit(f"{model} is not one of the suite's models {list(suite.models)}")
+    store = cache.root(ROOT)
     spec = session.Spec(model, claude_version(), suite.budget_usd, ROOT, store)
     if args.command == "screen":
         return screen(args, suite, spec, store)

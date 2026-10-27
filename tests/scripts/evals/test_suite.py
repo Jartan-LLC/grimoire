@@ -1,7 +1,7 @@
 import pathlib
 
 import pytest
-from evals.suite import SuiteError, load_suite
+from evals.suite import Reply, SuiteError, load_suite
 from helpers import KEY, SUITE, write_suite
 
 
@@ -181,3 +181,76 @@ def test_a_check_can_read_an_agents_report_and_its_deliveries(tmp_path: pathlib.
     assert report.artifact == "report:praxis:general-reviewer"
     assert (delivery.agent, report.agent) == ("praxis:general-reviewer", "")
     assert case.references[0].reports == {"praxis:general-reviewer": "Closes #42"}
+
+
+GH = """
+[[gh]]
+match = '^pr create'
+stdout = "https://github.com/o/r/pull/7\\n"
+
+[[gh]]
+match = '^pr ready'
+exit = 1
+"""
+
+
+def test_gh_replies_give_a_case_its_remote_and_count_in_its_hash(tmp_path: pathlib.Path) -> None:
+    root = write_suite(tmp_path, key=KEY + GH)
+    case = load_suite(root).cases[0]
+    assert case.remote
+    assert case.gh == (
+        Reply("^pr create", "https://github.com/o/r/pull/7\n", 0),
+        Reply("^pr ready", "", 1),
+    )
+    (root / "cases" / "c1" / "key.toml").write_text(KEY + GH.replace("exit = 1", "exit = 2"))
+    assert load_suite(root).cases[0].hash() != case.hash()
+    (root / "cases" / "c1" / "key.toml").write_text("remote = true\n" + KEY)
+    remote_only = load_suite(root).cases[0]
+    assert (remote_only.remote, remote_only.gh) == (True, ())
+    (root / "cases" / "c1" / "key.toml").write_text(KEY)
+    assert not load_suite(root).cases[0].remote
+
+
+@pytest.mark.parametrize(
+    ("key", "message"),
+    [
+        ('remote = "yes"\n' + KEY, "'remote' must be true or false"),
+        ("remote = false\n" + KEY + GH, "drop 'remote = false'"),
+        (KEY + GH.replace("match = '^pr ready'", ""), "a [[gh]] needs a 'match' string"),
+        (KEY + GH.replace("'^pr ready'", "'(['"), "bad regex"),
+        (KEY + GH.replace("exit = 1", "exit = true"), "'exit' must be an integer from 0 to 255"),
+        (KEY + GH.replace("exit = 1", "exit = 256"), "'exit' must be an integer from 0 to 255"),
+        (KEY + GH.replace('stdout = "', 'stdout = 3 #"'), "'stdout' must be a string"),
+        (
+            KEY + GH.replace("exit = 1", "exit_code = 1"),
+            "a [[gh]] takes only match, stdout and exit",
+        ),
+        (KEY.replace('artifact = "commits"', 'artifact = "brief:"'), "is not commits"),
+    ],
+)
+def test_load_suite_rejects_bad_remote_and_gh_fields(
+    tmp_path: pathlib.Path, key: str, message: str
+) -> None:
+    with pytest.raises(SuiteError, match=message.replace("[", r"\[").replace("(", r"\(")):
+        load_suite(write_suite(tmp_path, key=key))
+
+
+def test_a_check_can_read_the_gh_calls_and_an_agents_briefs(tmp_path: pathlib.Path) -> None:
+    key = KEY.replace('artifact = "commits"', 'artifact = "gh"')
+    key = key.replace('artifact = "final"', 'artifact = "brief:praxis:general-reviewer"') + GH
+    root = write_suite(tmp_path, key=key)
+    reference = root / "cases" / "c1" / "reference"
+    reference.mkdir()
+    (reference / "pass-1.toml").write_text(
+        'gh = "gh pr create --draft"\n[briefs]\n"praxis:general-reviewer" = "Review #42."\n'
+    )
+    case = load_suite(root).cases[0]
+    assert [c.artifact for c in case.checks[:2]] == ["gh", "brief:praxis:general-reviewer"]
+    (pass_1,) = case.references
+    assert (pass_1.gh, pass_1.briefs) == (
+        "gh pr create --draft",
+        {"praxis:general-reviewer": "Review #42."},
+    )
+    (reference / "pass-1.toml").write_text("gh = 3\n")
+    with pytest.raises(SuiteError, match="'final' and 'gh' must be strings"):
+        load_suite(root)

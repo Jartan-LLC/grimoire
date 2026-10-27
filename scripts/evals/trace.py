@@ -19,8 +19,9 @@ agent's frontmatter preloads reach no event: Claude Code's debug log names them,
 
 import json
 import pathlib
+import posixpath
 import re
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass, field
 from typing import cast
 
@@ -38,6 +39,9 @@ WRITES = (
     ("pr", re.compile(r"\bgh\s+pr\s+(create|edit|review)\b")),
     ("issue", re.compile(r"\bgh\s+issue\s+(create|comment)\b")),
 )
+
+# An absolute path in a tool call's input, so `..` in it can be resolved away.
+_PATH = re.compile(r"""(?<![\w.~-])/[^\s"'`;|&<>()]+""")
 
 type Event = dict[str, object]
 
@@ -79,6 +83,18 @@ class Report:
     text: str
 
 
+@dataclass(frozen=True)
+class Brief:
+    """The prompt of the main thread's Agent call at event `index`, which started agent type `agent`.
+
+    A SendMessage follow-up to the agent is not one, nor an Agent call that ended in error.
+    """
+
+    index: int
+    agent: str
+    text: str
+
+
 @dataclass
 class Trace:
     """What the runner reads from one session."""
@@ -88,6 +104,7 @@ class Trace:
     writes: list[Write] = field(default_factory=list[Write])
     deliveries: list[Delivery] = field(default_factory=list[Delivery])
     reports: list[Report] = field(default_factory=list[Report])
+    briefs: list[Brief] = field(default_factory=list[Brief])
     compacts: list[int] = field(default_factory=list[int])
     hook_contexts: list[tuple[int, str]] = field(default_factory=list[tuple[int, str]])
     tool_inputs: list[str] = field(default_factory=list[str])
@@ -229,10 +246,21 @@ def _preload(
             trace.deliveries.append(Delivery(calls[count], f"{plugin}:{skill}", path, agent))
 
 
+def _failed_calls(events: list[Event]) -> set[str]:
+    """The id of every tool call whose result is an error."""
+    return {
+        str(block.get("tool_use_id"))
+        for event in events
+        if event.get("type") == "user"
+        for block in _content(event)
+        if block.get("type") == "tool_result" and block.get("is_error") is True
+    }
+
+
 def parse(
     events: list[Event], plugin_dirs: dict[str, str], preloads: Sequence[tuple[str, str]] = ()
 ) -> Trace:
-    """Read init, result, writes, skill deliveries, reports, compactions and hook context from `events`.
+    """Read init, result, writes, skill deliveries, briefs, reports, compactions and hook context from `events`.
 
     `preloads` are the (agent, skill) pairs Claude Code's debug log names, in its order.
     """
@@ -240,6 +268,7 @@ def parse(
     calls: dict[str, Call] = {}
     agents: dict[str, str] = {}  # each main-thread Agent call's id -> the agent it started
     spawns: dict[str, list[int]] = {}
+    briefs: dict[str, Brief] = {}  # each main-thread Agent call's id -> its brief
     for index, event in enumerate(events):
         kind = event.get("type")
         if kind == "system":
@@ -267,6 +296,7 @@ def parse(
                     started = str(inputs.get("subagent_type") or DEFAULT_AGENT)
                     agents[call_id] = started
                     spawns.setdefault(started, []).append(index)
+                    briefs[call_id] = Brief(index, started, str(inputs.get("prompt", "")))
             elif kind == "user" and block_type == "tool_result":
                 if (call := calls.get(str(block.get("tool_use_id")))) is not None:
                     _result(trace, index, block, call, plugin_dirs)
@@ -275,6 +305,8 @@ def parse(
                         trace.reports.append(_report(index, event, started))
             elif kind == "user" and block_type == "text":
                 _skill_text(trace, index, str(block.get("text", "")), plugin_dirs, agent)
+    failed = _failed_calls(events)
+    trace.briefs = [brief for call_id, brief in briefs.items() if call_id not in failed]
     _preload(trace, spawns, preloads, plugin_dirs)
     trace.writes.sort(key=lambda w: w.index)
     trace.deliveries.sort(key=lambda d: d.index)
@@ -284,15 +316,41 @@ def parse(
 SPOILING_RESULTS = ("error_max_turns", "error_max_budget_usd")
 
 
-def classify(
-    trace: Trace, plugin_dirs: dict[str, str], model: str, timed_out: bool, private: list[str]
+def _strings(value: object) -> Iterator[str]:
+    """Every string in a decoded JSON value, so a path is read as the tool got it, not escaped."""
+    if isinstance(value, str):
+        yield value
+    elif isinstance(value, dict):
+        for item in cast("dict[str, object]", value).values():
+            yield from _strings(item)
+    elif isinstance(value, list):
+        for item in cast("list[object]", value):
+            yield from _strings(item)
+
+
+def _normalised(text: str) -> str:
+    """`text` with each absolute path normalised: no `.` or `..` step, no doubled slash."""
+    return _PATH.sub(lambda m: posixpath.normpath(m[0]), text)
+
+
+def classify(  # noqa: PLR0913 -- `arms` is apart from `private`: paths under it may be read
+    trace: Trace,
+    plugin_dirs: dict[str, str],
+    model: str,
+    timed_out: bool,
+    private: list[str],
+    *,
+    arms: str,
 ) -> tuple[list[str], str]:
     """Why a sample must be excluded, and how the arm spoiled it; both empty for a clean sample.
 
     Excluded (the infrastructure failed, so the sample says nothing about the arm):
     plugins other than the arm's at the arm's paths, an MCP server, an auto-memory
     path, another model, an error result, a crash before the result, or a tool call
-    naming one of the `private` paths, which hold the suite and its answers.
+    naming one of the `private` paths, which hold the suite and its answers. A path under
+    `arms`, the directory holding every arm, does not count: the store that holds it is
+    in the clone's git directory, inside the main checkout. Quotes are dropped and each
+    absolute path normalised first, so `"<arms>"/../samples` names the samples.
     Spoiled (the arm's own doing, so the sample counts and fails every check): a
     timeout, or a result cut off by the turn or budget cap.
     """
@@ -312,7 +370,15 @@ def classify(
         reasons.append(f"memory loaded: {trace.init.get('memory_paths')}")
     if trace.init.get("model") != model:
         reasons.append(f"model {trace.init.get('model')!r} is not {model!r}")
-    if touched := sorted({p for p in private for text in trace.tool_inputs if p in text}):
+    outside = [
+        _normalised(text.replace('"', "").replace("'", "")).replace(arms, "")
+        for tool_input in trace.tool_inputs
+        for text in _strings(json.loads(tool_input))
+    ]
+    # A private path counts only whole, not followed by a character that continues a file
+    # name: a worktree at /tmp/grimoire is not named by the sandbox /tmp/grimoire-eval-x.
+    bounded = {p: re.compile(re.escape(p) + r"(?![\w.~-])") for p in private}
+    if touched := sorted({p for p, at in bounded.items() for text in outside if at.search(text)}):
         reasons.append(f"the session reached {', '.join(touched)}")
     spoiled = ""
     result = trace.result

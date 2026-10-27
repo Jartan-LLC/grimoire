@@ -166,6 +166,24 @@ def test_parse_names_an_agent_call_without_a_type_general_purpose_and_skips_a_fa
     assert parsed.reports == []
 
 
+def test_parse_keeps_each_brief_the_main_thread_sent_in_order_and_no_subagents_or_failed_calls() -> (
+    None
+):
+    events = [
+        call("a1", "Agent", prompt="Review the diff.", subagent_type=REVIEWER),
+        *inside("a1", [call("n1", "Agent", prompt="Nested.", subagent_type="x")]),
+        call("g1", "Agent", prompt="Find the tests."),
+        call("a2", "Agent", prompt="Review again.", subagent_type=REVIEWER),
+        call("a3", "Agent", prompt="No such agent.", subagent_type="praxis:missing"),
+        result_of("a3", error=True),
+    ]
+    assert trace.parse(events, PLUGINS).briefs == [
+        trace.Brief(0, REVIEWER, "Review the diff."),
+        trace.Brief(2, "general-purpose", "Find the tests."),
+        trace.Brief(3, REVIEWER, "Review again."),
+    ]
+
+
 def test_parse_places_each_preload_at_its_agents_call_in_order() -> None:
     events = [spawn("a1"), *commit("c1"), spawn("a2"), spawn("t1", "praxis:test-reviewer")]
     preloads = [
@@ -202,7 +220,9 @@ def test_parse_reads_hook_context_and_compactions() -> None:
 
 
 def classify(events: list[trace.Event], timed_out: bool = False) -> tuple[list[str], str]:
-    return trace.classify(trace.parse(events, PLUGINS), PLUGINS, MODEL, timed_out, ["/checkout"])
+    return trace.classify(
+        trace.parse(events, PLUGINS), PLUGINS, MODEL, timed_out, ["/checkout"], arms="/store/arms"
+    )
 
 
 def test_classify_passes_a_clean_session() -> None:
@@ -232,6 +252,109 @@ def test_classify_excludes_a_session_that_reached_the_suite() -> None:
         RESULT,
     ]
     assert classify(events) == (["the session reached /checkout"], "")
+
+
+def test_classify_lets_a_session_read_any_arm_inside_the_checkout() -> None:
+    arms = "/checkout/.git/grimoire-evals/arms"
+    plugins = {"gitwise": f"{arms}/old-1/plugins/gitwise"}
+    skill_file = plugins["gitwise"] + "/skills/commit-pr-writing/SKILL.md"
+    events = [
+        init(plugins=[{"name": "gitwise", "path": plugins["gitwise"]}]),
+        call("r1", "Read", file_path=skill_file),
+        result_of("r1"),
+        RESULT,
+    ]
+
+    def reasons(command: str | None = None) -> list[str]:
+        if command is not None:
+            events[1] = call("r1", "Bash", command=command)
+        parsed = trace.parse(events, plugins)
+        return trace.classify(parsed, plugins, MODEL, False, ["/checkout"], arms=arms)[0]
+
+    assert reasons() == []
+    assert reasons(f"ls {arms}/old-1/plugins {arms}/old-1 {arms}/new-2/plugins/gitwise") == []
+    assert reasons(f"cat {skill_file} /checkout/tests/evals/x/key.toml") == [
+        "the session reached /checkout"
+    ]
+
+
+def test_classify_from_a_worktree_catches_the_main_checkout_and_a_path_back_out_of_the_arms() -> (
+    None
+):
+    main = "/main"
+    arms = f"{main}/.git/grimoire-evals/arms"
+    samples = f"{main}/.git/grimoire-evals/samples"
+    private = [
+        f"{main}/.claude/worktrees/w",
+        main,
+        f"{main}/.claude/worktrees/w/tests/evals/x",
+        samples,
+    ]
+    plugins = {"gitwise": f"{arms}/old-1/plugins/gitwise"}
+
+    def reasons(command: str) -> list[str]:
+        events = [
+            init(plugins=[{"name": "gitwise", "path": plugins["gitwise"]}]),
+            call("r1", "Bash", command=command),
+            result_of("r1"),
+            RESULT,
+        ]
+        parsed = trace.parse(events, plugins)
+        return trace.classify(parsed, plugins, MODEL, False, private, arms=arms)[0]
+
+    assert reasons(f"cat {plugins['gitwise']}/skills/s/SKILL.md {arms}/new-2/plugins") == []
+    assert reasons(f"cat {main}/tests/evals/x/cases/c1/reference/pass.toml") == [
+        "the session reached /main"
+    ]
+    assert reasons(f'ls "{arms}/../samples"') == [f"the session reached /main, {samples}"]
+    assert reasons(f'ls "{arms}"/../samples') == [f"the session reached /main, {samples}"]
+    assert reasons(f"ls '{arms}'/../samples") == [f"the session reached /main, {samples}"]
+    assert reasons(f"ls {arms}/./old-1/../../samples/k.json.gz") == [
+        f"the session reached /main, {samples}"
+    ]
+    assert reasons(f"true\n{arms}/../samples") == [f"the session reached /main, {samples}"]
+
+
+def test_classify_catches_a_private_path_written_with_a_doubled_slash() -> None:
+    command = "cat /workspaces//grimoire/key.toml"
+    events = [init(), call("r1", "Bash", command=command), result_of("r1")]
+    parsed = trace.parse([*events, RESULT], PLUGINS)
+    private = ["/workspaces/grimoire"]
+    assert trace.classify(parsed, PLUGINS, MODEL, False, private, arms="/store/arms")[0] == [
+        "the session reached /workspaces/grimoire"
+    ]
+
+
+def test_classify_matches_a_private_path_only_whole() -> None:
+    def reasons(command: str, private: list[str]) -> list[str]:
+        events = [init(), call("r1", "Bash", command=command), result_of("r1"), RESULT]
+        parsed = trace.parse(events, PLUGINS)
+        return trace.classify(parsed, PLUGINS, MODEL, False, private, arms="/store/arms")[0]
+
+    worktree, sandbox = "/t/grimoire", "/t/grimoire-eval-x"
+    assert reasons(f"cat {sandbox}/repo/a.md {worktree}.bak", [worktree]) == []
+    assert reasons(f"cat {worktree}/a.md", [f"{sandbox}/gh-stub"]) == []
+    for named in (worktree, f"{worktree}/key.toml", f"cd {worktree};ls", f"PATH={worktree}:/bin"):
+        assert reasons(named, [worktree]) == [f"the session reached {worktree}"]
+    stub = f"{sandbox}/gh-stub"
+    assert reasons(f"cat {stub}-x {stub}s", [stub]) == []
+    assert reasons(f"ls {stub}", [stub]) == [f"the session reached {stub}"]
+
+
+def test_classify_excludes_a_session_that_reached_the_gh_stubs_replies() -> None:
+    private = ["/checkout", "/sandbox/gh", "gh-stub-replies.json"]
+
+    def reasons(command: str) -> list[str]:
+        events = [init(), call("r1", "Bash", command=command), result_of("r1"), RESULT]
+        parsed = trace.parse(events, PLUGINS)
+        return trace.classify(parsed, PLUGINS, MODEL, False, private, arms="/store/arms")[0]
+
+    assert reasons("cat ../gh-stub/gh-stub-replies.json") == [
+        "the session reached gh-stub-replies.json"
+    ]
+    assert reasons("cat fixture/replies.json") == []
+    assert reasons("ls /sandbox/gh") == ["the session reached /sandbox/gh"]
+    assert reasons("gh pr create --draft --fill") == []
 
 
 def test_classify_excludes_an_error_result_and_marks_caps_and_timeouts_as_spoiled() -> None:

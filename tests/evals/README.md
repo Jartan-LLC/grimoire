@@ -43,7 +43,7 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
 - `cases/<id>/prompt.md`: the task, as the user would type it.
 - `cases/<id>/fixture/` and an optional `build.py`: the repository the session starts in.
 - `cases/<id>/key.toml`: the split, the kind, the checks, and the facts, plants and baseline counts
-  the checks rely on.
+  the checks rely on; for a task that pushes or calls `gh`, its remote and `gh` replies.
 - `cases/<id>/fix/`: the files that fix the case's planted problems, laid over the fixture by the lint.
 - `cases/<id>/reference/`: outputs that pass every check, and outputs that fail the case's target check.
 
@@ -107,6 +107,38 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   false behaves differently. Say it so the fixture cannot contradict it, as a decision or an issue
   tracked elsewhere, rather than build it in. A fixture's earlier history may be as untidy as a real
   one: a past commit's message need not match its diff unless the task depends on it.
+- **A task that pushes or calls GitHub** sets `remote = true` in the key. The session's repository then
+  has an `origin`: a local bare repository holding every branch and tag the fixture and `build.py` made,
+  each branch tracking it, so `git push` works, and `origin/HEAD` names `main`, as in a clone, when the
+  fixture keeps the `main` branch it starts on. To start with a branch ahead of, behind or missing from
+  `origin`, `build.py` makes `origin` itself:
+  `git init --bare -b <the fixture's default branch> ../origin.git`,
+  `git remote add origin ../origin.git`, then `git push -u origin <that branch>`, so `origin/HEAD` can
+  name it, and pushes what else it wants there. Without a remote named `origin`, the runner fills that
+  same `../origin.git` with every branch. It keeps an `origin` that `build.py` made as `build.py` left
+  it, adding only `origin/HEAD` when the repository lacks it and origin's HEAD names a branch origin
+  holds. That `origin` is a local path, or a URL `url.<path>.insteadOf` rewrites to one:
+  git refuses any other. The session's `gh` is a stub that records every call and answers from the key's
+  `[[gh]]` tables: the first whose `match` regex finds the call's arguments joined with spaces, each
+  newline in them written as `\n` (`pr create --draft --title ...`), prints its `stdout` and exits with
+  its `exit` (default 0). A call no reply matches fails with `gh stub: no reply for: <arguments>`, so
+  script every call the task needs, reads (`gh pr view`, `gh api`) included. A `[[gh]]` table implies
+  `remote = true`, and the replies count in the case hash, like the fixture.
+
+  Write each `match` to accept every call the task could make at that step, keyed on the subcommand
+  wherever it falls, as gh takes flags before it (`gh -R o/r pr create`): `(^|\s)pr create\b`. Grade the
+  behaviour under test with a check, never with a `match`: a narrow match (`--draft`) fails the other
+  calls, and the failure invites the agent to retry until it hits the scripted one. The session could
+  read the answer too: the replies sit in its sandbox, so a sample whose tool calls name the stub's
+  directory or `gh-stub-replies.json` is excluded. A reply prints only to stdout, while gh writes its
+  errors to stderr, which a reply cannot script: leave `stdout` empty in a reply with a non-zero `exit`.
+
+  ```toml
+  [[gh]]
+  match = '(^|\s)pr create\b'
+  stdout = "https://github.com/acme/app/pull/7\n"
+  ```
+
 - **Keep tool configuration out of a fixture.** A fixture whose `pyproject.toml` has a `[tool.ruff]`
   table gets a `.ruff_cache/` written into it by the commit hooks, and the case hash counts every file in
   the fixture, so each hook run would redraw the case's samples.
@@ -129,13 +161,39 @@ the PR how many versions you screened.
 
 ## Graders
 
-- **Grade what the agent produced:** a regex over the commit messages, the final reply or a file. An
-  `absent` check fails when the agent produced nothing to check.
+- **Grade what the agent produced:** a regex over the commit messages, the final reply, a file, what
+  the agent sent to GitHub or a subagent, or a subagent's report (below). An `absent` check fails when
+  the agent produced nothing to check.
 - **Whether a skill was in context when the agent wrote** is a guard or a diagnostic, not a primary
   metric, except in trigger cases, where loading the skill is the behaviour under test.
-- **A subagent's work:** `report:<agent>` is every report that agent handed back, and a delivery check
-  with `agent = "<plugin>:<agent>"` reads that subagent's skill loads and writes instead of the main
-  thread's. A reference gives a report under `[reports]`, as `"<plugin>:<agent>" = "text"`.
+- **A subagent's work:** `report:<agent>` is every report that agent handed back, `brief:<agent>` every
+  Agent-call prompt the main thread sent that agent type (a call that ended in error aside), and a
+  delivery check with `agent = "<plugin>:<agent>"` reads that subagent's skill loads and writes instead
+  of the main thread's. A reference gives reports under `[reports]` and briefs under `[briefs]`, as
+  `"<plugin>:<agent>" = "text"`.
+- **What the agent sent to GitHub:** `gh` is every call the stub recorded but Claude Code's own (below),
+  one `gh <arguments>` line each with newlines written as `\n`, then a blank line, then every text the
+  calls passed, newlines kept: each argument and its tails (past each leading letter of a short flag or a
+  group of them, `-bText` or `-dFbody.md`; past a key's `=`, `--body=Text` or `body=@b.md`; past a
+  leading `@`), stdin, and every existing regular file one of those names. It holds more than the
+  bodies, titles and `--jq` strings included, so a `present` check on a body can be met by a title or by
+  another call's text. A check about one flag or command reads only the call lines, up to the first
+  blank line, with the form `present = '\A(?:.+\n)*gh (?:.* )?pr create\b.*--draft'`: in a check, `^`
+  matches at the start of every line, so `^` alone also reaches the texts after the blank line, a body
+  that quotes `gh pr create --draft` included, and `(?:.* )?` lets gh flags come before the subcommand,
+  as in `gh -R o/r pr create`. An inline body stays on its own call line, so a body passed as
+  `--body "... --draft ..."` can still meet that form. The stub reads a file only inside the sandbox, the
+  eval runner's temp directory or `/tmp`, where an agent may write `/tmp/pr-body.md`: a body file
+  elsewhere reads as absent, as does a body piped to `/dev/stdin` or passed as `/dev/fd/N` by process
+  substitution `<(...)`. It reads stdin whenever an argument or a tail of one is exactly `-`, even where
+  gh would not, as a key's value (`-f q=-`), so such a call waits while stdin stays open. It reads no
+  file or stdin of a call with an argument equal to `secret`, `variable` or `auth` anywhere, a label
+  included (`--label auth`): such a call is recorded with no file or stdin text. A call of the shape
+  Claude Code makes on its own (`gh pr view --json url` and `gh pr view <branch> --json url` on
+  2.1.311) is left out even when the agent makes it, so no check grades one. A reference gives its `gh`
+  text as `gh = "text"`; the lint drops such calls from its call lines too, but not from its texts. The
+  lint fails a `gh` check on a case without a remote. For "made no such call", which holds when the
+  agent made no call at all, negate the same form: `present = '\A(?!(?:.+\n)*gh (?:.* )?pr ready\b)'`.
 - **Judges are not built yet.** When a check cannot decide, a judge will answer one yes/no question about
   one output, with the reference answer, outputs stripped of skill and arm names, and "unknown" counted
   as a fail; and it will be calibrated first, against outputs the maintainer labelled.
@@ -165,7 +223,9 @@ the PR how many versions you screened.
    lists, one at a time (`MODEL=...`), as `make eval-plan` prints. Each arm draws the suite's
    `min_samples` per case unless `SAMPLES=` says otherwise.
 4. **Rerun rather than reuse** when anything a session sees changes: the fixture, the runner's setup
-   (bump `RUNNER` in `scripts/evals/session.py`, after which the lint demands fresh baselines), the model
+   (bump `RUNNER` in `scripts/evals/session.py`, after which the lint demands fresh baselines; for the
+   `gh` stub or the remote setup, `REMOTE_RUNNER` beside it, which redraws remote cases only and makes
+   the lint demand fresh baselines of those, recorded with their `remote_runner`), the model
    or Claude Code. A screen reuses drawn samples only to resume or to regrade after a fix to a key;
    `make eval-run` keeps a case's samples per arm, model and Claude Code version, so a rerun regrades
    them and a larger `SAMPLES=` draws only the extra ones. Run `make check` on an edited case before
@@ -220,9 +280,23 @@ the PR how many versions you screened.
   `SPLIT`, since new results on held-out cases burn them.
 - `make eval-screen SUITE=<path>`: run `old` and `new` on the `screen` split and print the result.
   `SPLIT=confirm` runs the confirm split, `NEW_PLAN=1` fixes a new plan. The result and the samples to
-  read are also written to `$XDG_CACHE_HOME/grimoire-evals/evidence/` (default `~/.cache/...`).
+  read are also written to `evidence/` in the store.
+- The store holds every sample, plan and evidence file: `grimoire-evals/` in the clone's git directory
+  (`.git/grimoire-evals/` in the main checkout), shared by every worktree and never committed.
+  `GRIMOIRE_EVALS_STORE=<dir>` puts it elsewhere. It used to be `~/.cache/grimoire-evals/`: copy that
+  directory's contents in once, without overwriting what the new store already holds:
+
+  ```bash
+  cp -an ~/.cache/grimoire-evals/. \
+    "$(git rev-parse --path-format=absolute --git-common-dir)/grimoire-evals/"
+  ```
+
+  Baseline (`run`) samples carry over. A screen begun before the store's default moved here, its samples
+  copied or not, draws its samples again and needs `--new-plan` (`NEW_PLAN=1`) once: its plan named each
+  arm's plugins by their path in the store.
 - `python3 scripts/eval.py show <key>`: one sample's commits, final reply, the files its checks read,
-  skill deliveries and writes with the agent that made each, subagents' reports and hook context.
+  every `gh` call the stub logged (Claude Code's own included) and the `gh` text its checks read, skill
+  deliveries and writes with the agent that made each, subagents' briefs and reports, and hook context.
 - `python3 scripts/eval.py lint`: the mechanical checks from "Writing a case"; `make verify` runs it.
 
 ## Calibrating the runner
@@ -248,13 +322,29 @@ After changing the runner or the verdict rule:
 
 - Sessions load only this repository's plugins, with no user skills or settings, so a case cannot show how
   a skill competes with others a user has installed.
-- Each session is one `claude -p` call: a case cannot test behaviour that should stop and ask the user.
+- Each session is one `claude -p` call: a case cannot test behaviour that should stop and ask the user,
+  nor a workflow that spans sessions, such as a PR reviewed in one and its review addressed in the next.
+- GitHub is a stub: `gh` answers only from the case's replies, the same for every call that matches, so
+  a case shows what the agent sent, not what GitHub would do with it.
+- The session's environment controls (GH_TOKEN, GH_CONFIG_DIR, GIT_ALLOW_PROTOCOL) hold only while it
+  keeps the environment it is given: one that unsets GH_TOKEN and GH_CONFIG_DIR and runs the real `gh`
+  by its path reaches the user's own `gh` login, and one that unsets GIT_ALLOW_PROTOCOL can reach the
+  network with a key under HOME, since HOME stays the user's, which Claude Code needs.
+- Sessions drawn in parallel share `/tmp`: a body or message file an agent writes at a fixed path
+  there, such as `/tmp/pr-body.md`, can be overwritten by another session drawn at the same time, so a
+  sample can record the other session's text.
+- `origin` is a local path, not a github.com URL, and `git remote -v` prints that path: an agent that
+  reads the owner or repository name from it finds none. When `build.py` names origin by a GitHub URL
+  rewritten with `url.<path>.insteadOf`, `git remote -v` prints the rewritten local path, but
+  `git config remote.origin.url` still gives the URL `build.py` set.
 - The lint knows when a baseline predates the runner, not when the model or Claude Code changed; rerun
   baselines after either.
-- A subagent's own subagents are not followed, nor is an Agent call run in the background. A delivery
-  check with an `agent` reads every spawn of that agent as one. The skills an agent's frontmatter
-  preloads are read from a line of Claude Code's debug log, which it does not promise to keep: if that
-  line changes, every preload reads as absent.
+- A subagent's own subagents are not followed, nor a SendMessage follow-up, nor the report and skill
+  loads of an Agent call run in the background: `brief:<agent>` holds the prompts of the Agent calls
+  that started that agent, background ones included, and no follow-up. A delivery check with an `agent`
+  reads every spawn of that agent as one. The skills an agent's frontmatter preloads are read from a
+  line of Claude Code's debug log, which it does not promise to keep: if that line changes, every
+  preload reads as absent.
 - A sample's venv uses the base Python's packages, the interpreter uv builds venvs on, not this
   checkout's `.venv`: that Python needs pytest, which the runner checks before the first session. The
   venv has no pip of its own, so a session's bare `pip install` reaches the base Python, where later
@@ -264,6 +354,12 @@ After changing the runner or the verdict rule:
 - A key fix regrades drawn samples once the screen is rerun with `NEW_PLAN=1` (the plan pins every file
   of the suite), except a fix that makes a check read a file the samples did not collect: grading
   refuses, and the screen needs fresh samples (a new `--trial`).
+- The check that a session stayed out of the suite reads the absolute paths in its tool calls, and the
+  stub's `gh-stub-replies.json` by name: a relative path gets past it, such as `cd` into an arm then
+  `ls ../../samples`, or `cat ../gh-stub/*` from the repository, and so does a path built from an
+  environment variable that holds the store's path, such as `ls $GIT_CEILING_DIRECTORIES/samples`, and
+  an absolute path that names a directory above one the check guards, such as `grep -r` over the
+  sandbox or `/tmp`, which reaches the stub's `gh-stub/`.
 - A run reads each case from the checkout as it was when the run began. A sample whose case changed on
   disk since (a branch switch, an edit) is excluded and retried, so keep the checkout still while a run
   draws.

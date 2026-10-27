@@ -1,6 +1,7 @@
 import argparse
 import pathlib
 import shutil
+from typing import cast
 
 import eval as cli
 import pytest
@@ -22,6 +23,19 @@ def test_record_baseline_replaces_only_its_own_model_and_arm(tmp_path: pathlib.P
     assert 'model = "claude-opus-5-5"\narm = "none"\nfailures = 2\n' in text
     assert 'model = "claude-haiku-5-5"\narm = "none"\nfailures = 1\n' in text
     assert text.startswith('split = "dev"\n\n[[check]]')
+
+
+def test_a_remote_cases_baseline_records_the_remote_runner(tmp_path: pathlib.Path) -> None:
+    root = write_suite(tmp_path, key="remote = true\n" + KEY)
+    key = root / "cases" / "c1" / "key.toml"
+    cli.record_baseline(key, "claude-opus-5-5", "old", 1, 3, remote=True)
+    assert (
+        f"runner = {session.RUNNER}\nremote_runner = {session.REMOTE_RUNNER}\n" in key.read_text()
+    )
+    (baseline,) = load_suite(root).cases[0].baselines
+    assert (baseline.failures, baseline.remote_runner) == (1, session.REMOTE_RUNNER)
+    cli.record_baseline(key, "claude-opus-5-5", "old", 2, 3)
+    assert "remote_runner" not in key.read_text()
 
 
 def test_a_watch_model_reports_harm_without_failing_a_bar(tmp_path: pathlib.Path) -> None:
@@ -113,6 +127,17 @@ def test_the_read_list_names_a_must_hold_failure_the_primary_passes(
     lines = cli.to_read(suite, {"new": [leak, clean]}, {"new": {}, "old": {}}, verdicts, tmp_path)
     assert "- new c1 #0 fails no_exploit: k1" in lines
     assert not any("k2" in line and "fails" in line for line in lines)
+
+
+def test_a_plan_names_the_arms_plugins_alike_wherever_the_store_is(tmp_path: pathlib.Path) -> None:
+    suite = load_suite(write_suite(tmp_path / "suite"))
+    plans: list[dict[str, object]] = []
+    for store in (tmp_path / "a", tmp_path / "b"):
+        old = Arm("old", "h", {"gitwise": str(store / "arms" / "old-1" / "plugins" / "gitwise")})
+        spec = session.Spec("claude-opus-5-5", "2.1.310", 1.0, tmp_path, store)
+        plans.append(cli.pinned(suite, "dev", 3, spec, old))
+    assert plans[0] == plans[1]
+    assert "<arm>/plugins/gitwise" in cast("list[str]", plans[0]["flags"])
 
 
 def test_a_screens_identity_holds_the_trial_the_new_arm_and_each_cases_hash(

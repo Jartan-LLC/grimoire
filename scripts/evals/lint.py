@@ -4,9 +4,10 @@ tests/evals/README.md holds the rules; this enforces the mechanical ones: the pr
 uses none of the case's hint words, the facts a check needs are where the writer can
 find them, every planted problem fails its `verify` command and passes once fixed, the
 passing references pass every check and each failing reference fails one, each target
-case records a baseline failure, and no baseline was drawn under an older runner. It
-cannot tell that every check can fail, only that some check fails on each failing
-reference.
+case records a baseline failure, no baseline was drawn under another RUNNER or, for a
+remote case, another REMOTE_RUNNER, no baseline of a case without a remote records a
+remote_runner, and a `gh` check reads a case whose session records its gh calls. It cannot
+tell that every check can fail, only that some check fails on each failing reference.
 """
 
 import fnmatch
@@ -19,7 +20,7 @@ import tempfile
 
 from .grade import reference_scores
 from .proc import run
-from .session import RUNNER, build_fixture, git_env
+from .session import REMOTE_RUNNER, RUNNER, build_fixture, git_env
 from .suite import Case, Suite, SuiteError, load_suite
 
 VERIFY_TIMEOUT_S = 60
@@ -29,7 +30,9 @@ def _verify(case: Case, command: str, fixed: bool) -> int | None:
     """The exit code of a plant's `verify` command in the fixture as a session gets it, or None on a timeout.
 
     The fixture is built the way a session's is, `build.py` included, so a problem the
-    build plants is verified too; `fix/` is then laid over it when `fixed`.
+    build plants is verified too; `fix/` is then laid over it when `fixed`. The origin
+    the runner makes for a remote case is not made here: `verify` sees an origin only when
+    `build.py` makes one.
     """
     with tempfile.TemporaryDirectory(prefix="grimoire-lint-") as scratch:
         work = pathlib.Path(scratch) / "repo"
@@ -99,12 +102,29 @@ def case_problems(case: Case) -> list[str]:
     prompt = case.prompt.lower()
     found = [f"{case.path}: prompt.md gives away {h!r}" for h in case.hints if h.lower() in prompt]
     found += _fact_problems(case) + _plant_problems(case) + _reference_problems(case)
+    if not case.remote and any(c.artifact == "gh" for c in case.checks):
+        found.append(
+            f"{case.path}: a gh check needs remote = true or a [[gh]] reply, "
+            "or the session's gh calls are not recorded"
+        )
     if case.kind == "target" and not any(b.failures for b in case.baselines):
         found.append(f"{case.path}: a target case needs a [[baseline]] that failed at least once")
     found += [
         f"{case.path}: the {b.model} {b.arm} baseline was drawn under runner {b.runner}, not {RUNNER}; redraw it"
         for b in case.baselines
         if b.runner != RUNNER
+    ]
+    found += [
+        f"{case.path}: the {b.model} {b.arm} baseline was drawn under remote_runner "
+        f"{b.remote_runner}, not {REMOTE_RUNNER}; redraw it"
+        for b in case.baselines
+        if case.remote and b.remote_runner != REMOTE_RUNNER
+    ]
+    found += [
+        f"{case.path}: the {b.model} {b.arm} baseline was drawn under remote_runner "
+        f"{b.remote_runner}, while the case had a remote; redraw it"
+        for b in case.baselines
+        if not case.remote and b.remote_runner
     ]
     return found
 

@@ -7,6 +7,7 @@ outputs the lint grades. `tests/evals/README.md` says how to write them.
 
 import dataclasses
 import hashlib
+import json
 import pathlib
 import re
 import tomllib
@@ -15,13 +16,15 @@ from typing import cast
 
 SPLITS = ("dev", "screen", "confirm")
 KINDS = ("target", "regression", "cost", "trigger")
-TEXT_ARTIFACTS = ("commits", "final")
+TEXT_ARTIFACTS = ("commits", "final", "gh")
 REPORT = "report:"
+BRIEF = "brief:"
 DIRECTIONS = ("higher",)  # every check scores 1 when it holds
 RULES = ("better", "no-regression")
 STATES = ("in-context", "late", "evicted", "absent", "loaded", "not-loaded")
 WRITE_KINDS = ("commit", "push", "pr", "issue", "file")
 ARMS = ("none", "old")
+MAX_EXIT = 255
 
 type Table = dict[str, object]
 
@@ -34,10 +37,12 @@ class SuiteError(ValueError):
 class Check:
     """One graded condition on a sample, scored 0 or 1, counted toward `metric`.
 
-    A text check names an artifact (`commits`, `final`, `file:<path>`, or
-    `report:<agent>`, every report that agent handed back) and a `present` or `absent`
-    regex. A delivery check names a `skill` and a `state`: with a `write` kind, the
-    state the skill must be in at every such write; without one, `loaded` or
+    A text check names an artifact (`commits`, `final`, `file:<path>`, `gh` (the calls
+    the sandbox's `gh` recorded, Claude Code's own aside), `report:<agent>` (every report
+    that agent handed back) or `brief:<agent>` (every Agent-call prompt the main thread
+    sent that agent type, but for a call that ended in error)) and a `present` or
+    `absent` regex. A delivery check names a `skill` and a `state`: with a `write` kind,
+    the state the skill must be in at every such write; without one, `loaded` or
     `not-loaded` over the whole session (trigger cases). It reads the main thread's
     deliveries and writes, or with an `agent`, that subagent's.
     """
@@ -69,11 +74,23 @@ class Plant:
 
 
 @dataclass(frozen=True)
+class Reply:
+    """A scripted answer of the sandbox's `gh`, to a call whose one-line argv (`gh_stub.call_line`) `match` finds."""
+
+    match: str
+    stdout: str = ""
+    exit: int = 0
+
+
+@dataclass(frozen=True)
 class Baseline:
-    """How often one arm failed the case on one model, and under which runner revision.
+    """How often one arm failed the case on one model, and under which runner revisions.
 
     The counts choose cases and let the planner estimate power; a verdict never uses
-    them. A count drawn under an older runner, model or Claude Code is stale.
+    them. A count drawn under an older runner, model or Claude Code is stale, and for a
+    remote case one drawn under another `remote_runner` (0 when the entry has none: drawn
+    before the case had a remote); for a case without a remote, one with a `remote_runner`,
+    drawn while it had one.
     """
 
     model: str
@@ -81,13 +98,15 @@ class Baseline:
     failures: int
     runs: int
     runner: int
+    remote_runner: int = 0
 
 
 @dataclass(frozen=True)
 class Reference:
     """An output the lint grades, from a session or by hand; `passes`: every check must hold.
 
-    `reports` maps an agent to the report text a `report:<agent>` check reads.
+    `reports` and `briefs` map an agent to the text a `report:<agent>` or `brief:<agent>`
+    check reads; `gh` is the text a `gh` check reads.
     """
 
     name: str
@@ -96,11 +115,19 @@ class Reference:
     final: str
     files: dict[str, str]
     reports: dict[str, str] = dataclasses.field(default_factory=dict[str, str])
+    gh: str = ""
+    briefs: dict[str, str] = dataclasses.field(default_factory=dict[str, str])
 
 
 @dataclass(frozen=True)
 class Case:
-    """One case of a suite."""
+    """One case of a suite.
+
+    A `remote` case's session gets a local `origin` and a `gh` that records each call
+    and answers from the `gh` replies, first match first. The `origin` holds every
+    fixture branch when the runner makes it; a `build.py` may make its own (see
+    `session.add_origin`).
+    """
 
     id: str
     path: pathlib.Path
@@ -112,6 +139,8 @@ class Case:
     facts: tuple[Fact, ...] = ()
     plants: tuple[Plant, ...] = ()
     baselines: tuple[Baseline, ...] = ()
+    remote: bool = False
+    gh: tuple[Reply, ...] = ()
     # The hash when the suite was loaded; a run keys and checks its samples against it.
     loaded: str = ""
 
@@ -133,7 +162,10 @@ class Case:
         return self.loaded or self.hash()
 
     def hash(self) -> str:
-        """What a session depends on, as on disk now: prompt, fixture, build script, not the key."""
+        """What a session depends on, as on disk now: prompt, fixture, build script; of the key, only a remote case's `gh` replies.
+
+        Those count as loaded, not as on disk now: the session reads them.
+        """
         inputs = [self.path / "prompt.md", self.path / "build.py"]
         fixture = self.path / "fixture"
         files = [p for p in inputs if p.is_file()]
@@ -142,7 +174,11 @@ class Case:
             if fixture.is_dir()
             else []
         )
-        return tree_hash(self.path, files)
+        digest = tree_hash(self.path, files)
+        if not self.remote:
+            return digest
+        replies = json.dumps([dataclasses.asdict(r) for r in self.gh])
+        return hashlib.sha256(f"{digest}\0{replies}".encode()).hexdigest()
 
 
 @dataclass(frozen=True)
@@ -254,9 +290,11 @@ def _tables(table: Table, key: str, where: pathlib.Path) -> list[Table]:
     return cast("list[Table]", value)
 
 
-def _regex(pattern: object, where: pathlib.Path) -> str:
+def _regex(
+    pattern: object, where: pathlib.Path, wanted: str = "'present' and 'absent' must be strings"
+) -> str:
     if not isinstance(pattern, str):
-        raise SuiteError(f"{where}: 'present' and 'absent' must be strings")
+        raise SuiteError(f"{where}: {wanted}")
     try:
         re.compile(pattern)
     except re.error as error:
@@ -291,16 +329,17 @@ def _check(table: Table, where: pathlib.Path, metrics: dict[str, Metric]) -> Che
         )
     if "agent" in table:
         raise SuiteError(
-            f"{where}: 'agent' is for delivery checks; a report check names it as report:<agent>"
+            f"{where}: 'agent' is for delivery checks; a text check names it as report:<agent> "
+            "or brief:<agent>"
         )
     if not (
         artifact in TEXT_ARTIFACTS
         or artifact.startswith("file:")
-        or (artifact.startswith(REPORT) and artifact != REPORT)
+        or any(artifact.startswith(p) and artifact != p for p in (REPORT, BRIEF))
     ):
         raise SuiteError(
-            f"{where}: artifact {artifact!r} is not commits, final, file:<path>, report:<agent> "
-            "or delivery"
+            f"{where}: artifact {artifact!r} is not commits, final, gh, file:<path>, "
+            "report:<agent>, brief:<agent> or delivery"
         )
     present, absent = table.get("present"), table.get("absent")
     if (present is None) == (absent is None):
@@ -317,38 +356,78 @@ def _reference(path: pathlib.Path) -> Reference:
         isinstance(v, str) for v in cast("Table", files).values()
     ):
         raise SuiteError(f"{path}: 'files' must be a table of path = text")
-    final = data.get("final", "")
-    if not isinstance(final, str):
-        raise SuiteError(f"{path}: 'final' must be a string")
-    reports = data.get("reports", {})
-    if not isinstance(reports, dict) or not all(
-        isinstance(v, str) for v in cast("Table", reports).values()
-    ):
-        raise SuiteError(f"{path}: 'reports' must be a table of agent = text")
+    final, gh = data.get("final", ""), data.get("gh", "")
+    if not isinstance(final, str) or not isinstance(gh, str):
+        raise SuiteError(f"{path}: 'final' and 'gh' must be strings")
     return Reference(
         name=path.stem,
         passes=path.stem.startswith("pass"),
         commits=_strs(data, "commits", path),
         final=final,
         files=cast("dict[str, str]", files),
-        reports=cast("dict[str, str]", reports),
+        reports=_agent_texts(data, "reports", path),
+        gh=gh,
+        briefs=_agent_texts(data, "briefs", path),
     )
+
+
+def _agent_texts(data: Table, key: str, path: pathlib.Path) -> dict[str, str]:
+    value = data.get(key, {})
+    if not isinstance(value, dict) or not all(
+        isinstance(v, str) for v in cast("Table", value).values()
+    ):
+        raise SuiteError(f"{path}: {key!r} must be a table of agent = text")
+    return cast("dict[str, str]", value)
+
+
+def _replies(key: Table, where: pathlib.Path) -> tuple[Reply, ...]:
+    found: list[Reply] = []
+    for table in _tables(key, "gh", where):
+        if set(table) - {"match", "stdout", "exit"}:
+            raise SuiteError(f"{where}: a [[gh]] takes only match, stdout and exit")
+        stdout, code = table.get("stdout", ""), table.get("exit", 0)
+        if not isinstance(stdout, str):
+            raise SuiteError(f"{where}: a [[gh]]'s 'stdout' must be a string")
+        if isinstance(code, bool) or not isinstance(code, int) or not 0 <= code <= MAX_EXIT:
+            raise SuiteError(f"{where}: a [[gh]]'s 'exit' must be an integer from 0 to {MAX_EXIT}")
+        found.append(
+            Reply(
+                _regex(table.get("match"), where, "a [[gh]] needs a 'match' string"), stdout, code
+            )
+        )
+    return tuple(found)
+
+
+def _remote(key: Table, where: pathlib.Path, replies: tuple[Reply, ...]) -> bool:
+    remote = key.get("remote", bool(replies))
+    if not isinstance(remote, bool):
+        raise SuiteError(f"{where}: 'remote' must be true or false")
+    if replies and not remote:
+        raise SuiteError(f"{where}: [[gh]] replies need the remote; drop 'remote = false'")
+    return remote
 
 
 def _baselines(key: Table, where: pathlib.Path) -> tuple[Baseline, ...]:
     found: list[Baseline] = []
     for table in _tables(key, "baseline", where):
         failures, runs, runner = table.get("failures"), table.get("runs"), table.get("runner")
-        if not all(isinstance(v, int) for v in (failures, runs, runner)):
+        remote_runner = table.get("remote_runner", 0)
+        if not all(isinstance(v, int) for v in (failures, runs, runner, remote_runner)):
             raise SuiteError(
-                f"{where}: a [[baseline]]'s 'failures', 'runs' and 'runner' must be integers"
+                f"{where}: a [[baseline]]'s 'failures', 'runs', 'runner' and 'remote_runner' "
+                "must be integers"
             )
         failures, runs, runner = cast("int", failures), cast("int", runs), cast("int", runner)
         if not 0 <= failures <= runs:
             raise SuiteError(f"{where}: a [[baseline]] needs 0 <= failures <= runs")
         found.append(
             Baseline(
-                _str(table, "model", where), _str(table, "arm", where, ARMS), failures, runs, runner
+                _str(table, "model", where),
+                _str(table, "arm", where, ARMS),
+                failures,
+                runs,
+                runner,
+                cast("int", remote_runner),
             )
         )
     return tuple(found)
@@ -373,6 +452,7 @@ def load_case(path: pathlib.Path, metrics: dict[str, Metric]) -> Case:
         for t in _tables(key, "plant", key_path)
     )
     references = path / "reference"
+    replies = _replies(key, key_path)
     case = Case(
         id=path.name,
         path=path,
@@ -384,6 +464,8 @@ def load_case(path: pathlib.Path, metrics: dict[str, Metric]) -> Case:
         facts=facts,
         plants=plants,
         baselines=_baselines(key, key_path),
+        remote=_remote(key, key_path, replies),
+        gh=replies,
         references=tuple(_reference(p) for p in sorted(references.glob("*.toml")))
         if references.is_dir()
         else (),

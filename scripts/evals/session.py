@@ -23,12 +23,13 @@ import sys
 import tempfile
 import threading
 import time
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 from . import cache, trace
 from .arms import Arm
+from .gh_stub import REPLIES, TEMP_ROOTS
 from .proc import CLAUDE, GIT, UV, run
-from .suite import Case
+from .suite import Case, Reply
 
 BUILTINS_OFF = {
     "enabledPlugins": {
@@ -45,7 +46,20 @@ LIMITED = re.compile(r"(?i)limiting requests|usage limit|rate limit|overloaded|\
 # Part of every sample's key: bump it when a change to the session setup changes what a
 # session can do, so no sample drawn under the old setup is reused.
 RUNNER = 2
+# Part of a remote case's sample key only: bump it when a change to the gh stub or to the
+# remote setup changes what a remote session can do, so only remote cases draw again.
+REMOTE_RUNNER = 3
 PRELOADED = re.compile(r"\[Agent: ([^\]]+)\] Preloaded skill '([^']+)'")
+GH_STUB = pathlib.Path(__file__).with_name("gh_stub.py")
+# The stub's replies and log, private: no path the session is given (repo, venv, bin, gh-config,
+# tmp) may lie under it, or using that path would exclude the sample.
+GH_STATE = "gh-stub"
+GH_LOGIN = ("GH_TOKEN", "GITHUB_TOKEN", "GH_ENTERPRISE_TOKEN", "GITHUB_ENTERPRISE_TOKEN", "GH_HOST")
+SSH_AGENT = ("SSH_AUTH_SOCK", "SSH_AGENT_PID")
+# Set as GH_TOKEN, so the real `gh` uses no token of the user's; the stub reads no token.
+STUB_TOKEN = "grimoire-eval-stub"  # noqa: S105 -- a dummy that authenticates nothing
+# A temp directory the stub reads besides the runner's, which TMPDIR can move elsewhere.
+SHARED_TMP = pathlib.Path("/tmp")  # noqa: S108 -- read for a body file, never written
 
 
 @dataclass(frozen=True)
@@ -75,13 +89,32 @@ def git_env(base: dict[str, str]) -> dict[str, str]:
 
 
 def sample_env(
-    base: dict[str, str], checkout: pathlib.Path, sandbox: pathlib.Path
+    base: dict[str, str],
+    checkout: pathlib.Path,
+    sandbox: pathlib.Path,
+    store: pathlib.Path,
+    gh_stub: bool = False,
 ) -> dict[str, str]:
     """The session's environment: git isolated, this checkout off PATH, the sample's own venv and TMPDIR.
+
+    Git run inside an arm stops at `store`, so it does not find the clone whose git
+    directory holds the store. GRIMOIRE_EVALS_STORE goes, but GIT_CEILING_DIRECTORIES
+    holds the store's path, so a path built from it gets past the check on each tool
+    call's paths.
 
     CLAUDE* variables go too: the calling session's own (CLAUDECODE and the like)
     would tell the child it runs nested, and others (CLAUDE_EFFORT) would change it.
     The login ones stay, so a token, config-dir, Bedrock or Vertex login still works.
+    With `gh_stub`, the sandbox's `bin/` comes first, so its `gh` answers every call. For
+    the real `gh` run by its path: gh's token and host variables are dropped, GH_TOKEN is
+    set to a dummy, which gh sends to github.com in place of a token from the OS keyring,
+    and GH_CONFIG_DIR is an empty `gh-config/`. The stub's TEMP_ROOTS are this process's
+    temp directory and `/tmp` when it exists, where an agent may write a body file by its
+    path. For git: GIT_ALLOW_PROTOCOL=file refuses every transport but a local path, so git
+    reaches no https, ssh or git URL, and the SSH agent's variables are dropped. These
+    controls hold only while the session keeps this environment: one that unsets
+    GIT_ALLOW_PROTOCOL can reach the network with a key under HOME, as one that unsets
+    the gh variables reaches the user's gh login.
     """
     env = {
         k: v
@@ -90,15 +123,26 @@ def sample_env(
         or k in ("CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CONFIG_DIR")
         or k.startswith("CLAUDE_CODE_USE_")
     }
-    for name in ("VIRTUAL_ENV", "PYTHONPATH", "PYTHONHOME"):
+    for name in ("VIRTUAL_ENV", "PYTHONPATH", "PYTHONHOME", cache.STORE):
         env.pop(name, None)
     inside = str(checkout.resolve())
     path = [p for p in env.get("PATH", "").split(os.pathsep) if p and not p.startswith(inside)]
-    env["PATH"] = os.pathsep.join([str(sandbox / "venv" / "bin"), *path])
+    first = [str(sandbox / "bin")] if gh_stub else []
+    env["PATH"] = os.pathsep.join([*first, str(sandbox / "venv" / "bin"), *path])
     env["VIRTUAL_ENV"] = str(sandbox / "venv")
     env["TMPDIR"] = str(sandbox / "tmp")
     env["ENABLE_CLAUDEAI_MCP_SERVERS"] = "false"
     env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] = "1"
+    env["GIT_CEILING_DIRECTORIES"] = str(store)
+    if gh_stub:
+        for name in (*GH_LOGIN, *SSH_AGENT):
+            env.pop(name, None)
+        env["GH_TOKEN"] = STUB_TOKEN
+        env["GH_CONFIG_DIR"] = str(sandbox / "gh-config")
+        temps = (pathlib.Path(tempfile.gettempdir()), SHARED_TMP)
+        resolved = (str(t.resolve()) for t in temps if t.is_dir())
+        env[TEMP_ROOTS] = os.pathsep.join(dict.fromkeys(resolved))
+        env["GIT_ALLOW_PROTOCOL"] = "file"
     return env
 
 
@@ -152,16 +196,93 @@ def build_fixture(case: Case, repo: pathlib.Path, env: dict[str, str]) -> list[s
     return _git(repo, env, "rev-parse", "--all").split()
 
 
+def add_origin(repo: pathlib.Path, origin: pathlib.Path, env: dict[str, str]) -> list[str]:
+    """Make `origin` a bare repository holding every branch and tag of `repo`, each branch tracking it.
+
+    An `origin` the case's `build.py` made is kept as it left it, so a case can start
+    with a branch ahead of, behind or missing from it. Either way `origin/HEAD` names
+    origin's default branch, as in a clone, unless `repo` has one already or origin's
+    HEAD names no branch it holds. Returns the commit of each of origin's refs: one
+    `repo` has not fetched is the fixture's, not the session's, once pulled. An origin
+    at a network URL fails at once, reaching no network and waiting on no prompt. The
+    pushes that fill a new origin skip the fixture's pre-push hook, which is there for
+    the session's pushes.
+    """
+    env = {**env, "GIT_ALLOW_PROTOCOL": "file", "GIT_TERMINAL_PROMPT": "0"}
+    if "origin" not in _git(repo, env, "remote").split():
+        run([GIT, "init", "-q", "--bare", "-b", "main", str(origin)], env=env, check=True)
+        _git(repo, env, "remote", "add", "origin", str(origin))
+        _git(repo, env, "push", "-q", "--no-verify", "-u", "origin", "--all")
+        _git(repo, env, "push", "-q", "--no-verify", "origin", "--tags")
+    head = [GIT, "symbolic-ref", "-q", "refs/remotes/origin/HEAD"]
+    if run(head, cwd=repo, env=env, capture_output=True, check=False).returncode != 0:
+        # Fails, leaving none, when origin's HEAD names no branch it holds.
+        set_head = [GIT, "remote", "set-head", "origin", "-a"]
+        run(set_head, cwd=repo, env=env, capture_output=True, check=False)
+    return [line.split()[0] for line in _git(repo, env, "ls-remote", "origin").splitlines()]
+
+
+def install_gh(sandbox: pathlib.Path, replies: tuple[Reply, ...]) -> None:
+    """Put the recording `gh` stub in `sandbox/bin`, with `replies` and its log in `sandbox/gh-stub`.
+
+    `sandbox/gh-config` is made empty, for the session's GH_CONFIG_DIR.
+    """
+    (sandbox / "bin").mkdir()
+    (sandbox / "gh-config").mkdir()
+    (sandbox / GH_STATE).mkdir()
+    stub = sandbox / "bin" / "gh"
+    stub.write_text("#!/usr/bin/env -S python3 -I\n" + GH_STUB.read_text())
+    stub.chmod(0o755)
+    replies_json = json.dumps([asdict(r) for r in replies])
+    (sandbox / GH_STATE / REPLIES).write_text(replies_json)
+    (sandbox / GH_STATE / "calls.jsonl").touch()
+
+
+def gh_calls(sandbox: pathlib.Path) -> list[dict[str, object]]:
+    """The calls the sandbox's `gh` stub recorded, in order; a line that is not JSON is skipped."""
+    log = sandbox / GH_STATE / "calls.jsonl"
+    return trace.load_text(log.read_text()) if log.is_file() else []
+
+
 def new_commits(repo: pathlib.Path, env: dict[str, str], fixture_heads: list[str]) -> list[str]:
     """The full message of every commit the session added, on any branch, oldest first.
 
     A stash it left behind is not one: its "WIP on" commits are git's text, not the agent's.
+    A head `repo` does not hold, on an origin it never fetched from, is skipped.
     """
     out = _git(
-        repo, env, "log", "--exclude=refs/stash", "--all", "--reverse", "--format=%B%x1e",
-        "--not", *fixture_heads,
+        repo, env, "log", "--ignore-missing", "--exclude=refs/stash", "--all", "--reverse",
+        "--format=%B%x1e", "--not", *fixture_heads,
     )  # fmt: skip
     return [m.strip() for m in out.split("\x1e") if m.strip()]
+
+
+def private_paths(case: Case, spec: Spec, sandbox: pathlib.Path) -> list[str]:
+    """The paths a session must not name: the checkout, every working tree of its clone, suite and samples.
+
+    The clone's other working trees, the main one and each sibling worktree, hold the
+    same suite and its answers. A remote case's session must not name the `gh` stub's
+    directory in `sandbox`, nor its REPLIES file by any path: a reply's `match` can show
+    what the case wants the agent to send.
+    """
+    listed = run(
+        [GIT, "worktree", "list", "--porcelain"],
+        cwd=spec.checkout, capture_output=True, text=True, check=True,
+    ).stdout  # fmt: skip
+    trees = [
+        line.removeprefix("worktree ")
+        for line in listed.splitlines()
+        if line.startswith("worktree ")
+    ]
+    stub = [str(sandbox / GH_STATE), REPLIES] if case.remote else []
+    return list(
+        dict.fromkeys(
+            [
+                str(spec.checkout), *trees, str(case.path.parent.parent),
+                str(spec.store / "samples"), *stub,
+            ]
+        )
+    )  # fmt: skip
 
 
 def _session(
@@ -180,17 +301,23 @@ def _session(
                 sample_key, case.id, arm.name, index, arm.plugins, False, [reason], [], "", {}, {}
             )
             return sample, ""
+        if case.remote:
+            heads += add_origin(repo, sandbox / "origin.git", env)
+            install_gh(sandbox, case.gh)
         run(
             [UV, "venv", "-q", "--system-site-packages", str(sandbox / "venv")], env=env, check=True
         )
         out = sandbox / "trace.jsonl"
         debug_log = sandbox / "debug.log"
         timed_out = False
+        session_env = sample_env(
+            dict(os.environ), spec.checkout, sandbox, spec.store, gh_stub=case.remote
+        )
         with out.open("w") as handle:
             try:
                 run(
                     claude_args(case.prompt, arm, spec.model, spec.budget_usd, debug_log),
-                    cwd=repo, env=sample_env(dict(os.environ), spec.checkout, sandbox),
+                    cwd=repo, env=session_env,
                     stdout=handle, stderr=subprocess.STDOUT, timeout=TIMEOUT_S, check=False,
                 )  # fmt: skip
             except subprocess.TimeoutExpired:
@@ -198,8 +325,10 @@ def _session(
         text = out.read_text()
         loaded = preloads(debug_log.read_text(errors="replace")) if debug_log.is_file() else []
         parsed = trace.parse(trace.load(out), arm.plugins, loaded)
-        private = [str(spec.checkout), str(case.path.parent.parent), str(spec.store / "samples")]
-        reasons, spoiled = trace.classify(parsed, arm.plugins, spec.model, timed_out, private)
+        private = private_paths(case, spec, sandbox)
+        reasons, spoiled = trace.classify(
+            parsed, arm.plugins, spec.model, timed_out, private, arms=str(cache.arms(spec.store))
+        )
         result = parsed.result or {}
         files = {p: (repo / p).read_text() for p in case.files() if (repo / p).is_file()}
         sample = cache.Sample(
@@ -221,6 +350,7 @@ def _session(
             spoiled=spoiled,
             collected=case.files(),
             preloads=[list(p) for p in loaded],
+            gh=gh_calls(sandbox) if case.remote else None,
         )
         return sample, text
     finally:
@@ -277,7 +407,7 @@ def preflight() -> None:
 def run_sample(
     case: Case, arm: Arm, index: int, spec: Spec, breaker: Breaker | None = None
 ) -> cache.Sample:
-    """The cached sample for (case, arm, model, version, index), running the session if missing.
+    """The stored sample for (case, arm, model, version, index), running the session if missing.
 
     An excluded sample (the infrastructure failed: a usage limit, a leaked setting, a
     session that reached the suite's files) is retried up to RETRIES times and kept
@@ -287,11 +417,13 @@ def run_sample(
     saved. A sample the arm spoiled is valid and counts. The arm's name is part of the
     key, so `new` never reuses `old`'s sessions even when their plugins are identical,
     and `spec.screen` is too, so each screen draws fresh samples for both arms while a
-    rerun of the same screen resumes it.
+    rerun of the same screen resumes it. RUNNER is in every key, REMOTE_RUNNER in a
+    remote case's only.
     """
+    runner = f"r{RUNNER}" + (f":g{REMOTE_RUNNER}" if case.remote else "")
     sample_key = cache.key(
         case.pinned(),
-        f"{arm.name}:{arm.hash}:{spec.screen}:r{RUNNER}",
+        f"{arm.name}:{arm.hash}:{spec.screen}:{runner}",
         spec.model,
         spec.version,
         index,

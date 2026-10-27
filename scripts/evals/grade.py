@@ -2,50 +2,137 @@
 
 import dataclasses
 import re
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
+from typing import cast
 
-from . import trace
+from . import gh_stub, trace
 from .cache import Sample
-from .suite import REPORT, Case, Check, Reference
+from .suite import BRIEF, REPORT, Case, Check, Reference
 
 
 class Uncollected(Exception):  # noqa: N818 -- reads as the condition, like StopIteration
     """A check reads a file the sample was drawn without collecting."""
 
 
-def text_of(
-    commits: Sequence[str], final: str, files: dict[str, str], artifact: str,
-    reports: dict[str, str] | None = None,
-) -> str:  # fmt: skip
-    """The text a check reads: every commit message, the final reply, one collected file, or an agent's reports."""
+@dataclasses.dataclass(frozen=True)
+class Outputs:
+    """What text checks read, from a session or a reference.
+
+    `reports` and `briefs` map an agent to its joined texts; `gh` is the `gh_text` of the
+    recorded calls, or a reference's `gh` without Claude Code's own call lines.
+    """
+
+    commits: Sequence[str] = ()
+    final: str = ""
+    files: dict[str, str] = dataclasses.field(default_factory=dict[str, str])
+    reports: dict[str, str] = dataclasses.field(default_factory=dict[str, str])
+    gh: str = ""
+    briefs: dict[str, str] = dataclasses.field(default_factory=dict[str, str])
+
+
+def text_of(outputs: Outputs, artifact: str) -> str:
+    """The text a check reads: the commit messages, the final reply, a collected file, the gh calls, or an agent's reports or briefs."""
     if artifact == "commits":
-        return "\n\n".join(commits)
+        return "\n\n".join(outputs.commits)
     if artifact == "final":
-        return final
+        return outputs.final
+    if artifact == "gh":
+        return outputs.gh
     if artifact.startswith(REPORT):
-        return (reports or {}).get(artifact.removeprefix(REPORT), "")
-    return files.get(artifact.removeprefix("file:"), "")
+        return outputs.reports.get(artifact.removeprefix(REPORT), "")
+    if artifact.startswith(BRIEF):
+        return outputs.briefs.get(artifact.removeprefix(BRIEF), "")
+    return outputs.files.get(artifact.removeprefix("file:"), "")
+
+
+def gh_text(calls: Sequence[dict[str, object]]) -> str:
+    """The agent's calls the sandbox's `gh` recorded, one `gh <call_line>` line each, then their texts.
+
+    The calls Claude Code makes on its own (`_claude_codes_call`) are dropped first; with
+    none left the text is empty. After the call lines and a blank line come every
+    non-blank text an argument could pass (`gh_stub.candidates`, titles and `--jq`
+    strings included), each call's stdin and the files it named, newlines kept, each
+    text once.
+    """
+    texts: dict[str, None] = {}
+    lines: list[str] = []
+    for call in calls:  # the stub's own log entries: argv, stdin, files
+        argv = cast("list[str]", call.get("argv", []))
+        line = f"gh {gh_stub.call_line(argv)}"
+        if _claude_codes_call(line):
+            continue
+        lines.append(line)
+        files = cast("dict[str, str]", call.get("files", {}))
+        named = [c for arg in argv for c in gh_stub.candidates(arg)]
+        texts.update(
+            dict.fromkeys(
+                t for t in (*named, str(call.get("stdin", "")), *files.values()) if t.strip()
+            )
+        )
+    return "\n\n".join(["\n".join(lines), *texts]) if lines else ""
+
+
+def _claude_codes_call(line: str) -> bool:
+    """Whether a `gh` text line is a call Claude Code makes on its own, not the agent.
+
+    On 2.1.311 it runs `gh pr view --json url`, and `gh pr view <branch> --json url` naming
+    the branch; in the samples no agent ran either, while agents pass PR numbers.
+    """
+    words = line.split(" ")
+    if words[:3] != ["gh", "pr", "view"] or words[-2:] != ["--json", "url"]:
+        return False
+    branch = words[3:-2]
+    return not branch or (
+        len(branch) == 1 and not branch[0].startswith("-") and not branch[0].isdigit()
+    )
+
+
+def agents_gh(text: str) -> str:
+    r"""A reference's `gh` text without the lines of the calls Claude Code makes on its own.
+
+    Only the call lines, before the first blank line, are filtered: a body text that
+    quotes such a call keeps it. With no call line left the text is empty, as in
+    `gh_text`. It splits on newlines alone, as `call_line` escapes only those: a body's
+    `\r` stays inside its call's line.
+    """
+    calls, blank, texts = text.partition("\n\n")
+    kept = [line for line in calls.split("\n") if not _claude_codes_call(line)]
+    return "\n".join(kept) + blank + texts if kept else ""
+
+
+def _by_agent(pairs: Iterable[tuple[str, str]]) -> dict[str, str]:
+    joined: dict[str, list[str]] = {}
+    for agent, text in pairs:
+        joined.setdefault(agent, []).append(text)
+    return {agent: "\n\n".join(texts) for agent, texts in joined.items()}
 
 
 def reports_of(parsed: trace.Trace) -> dict[str, str]:
     """Each agent's reports in the session, joined in the order they were handed back."""
-    joined: dict[str, list[str]] = {}
-    for report in parsed.reports:
-        joined.setdefault(report.agent, []).append(report.text)
-    return {agent: "\n\n".join(texts) for agent, texts in joined.items()}
+    return _by_agent((r.agent, r.text) for r in parsed.reports)
+
+
+def briefs_of(parsed: trace.Trace) -> dict[str, str]:
+    """Every Agent-call prompt the main thread sent each agent type, joined in the order sent; a call that ended in error aside."""
+    return _by_agent((b.agent, b.text) for b in parsed.briefs)
 
 
 def text_score(check: Check, text: str) -> float:
     """1.0 when a text check holds.
 
-    An `absent` check fails on empty text: an agent that produced nothing did not
-    keep the thing out, it skipped the task.
+    An `absent` check fails when the agent produced nothing: it did not keep the thing
+    out, it skipped the task.
     """
     if check.present is not None:
         return 1.0 if re.search(check.present, text, re.MULTILINE) else 0.0
     if not text.strip():
         return 0.0
     return 0.0 if re.search(str(check.absent), text, re.MULTILINE) else 1.0
+
+
+def check_score(check: Check, outputs: Outputs) -> float:
+    """A text check's score on `outputs`."""
+    return text_score(check, text_of(outputs, check.artifact))
 
 
 def delivery_score(check: Check, parsed: trace.Trace) -> float:
@@ -84,23 +171,24 @@ def scores(case: Case, sample: Sample, parsed: trace.Trace) -> dict[str, float]:
     draw, cannot be graded from it: the sample would read as an empty file.
     """
     pairs: list[tuple[str, float]] = []
-    reports = reports_of(parsed)
+    outputs = Outputs(
+        sample.commits, sample.final, sample.files,
+        reports_of(parsed), gh_text(sample.gh or []), briefs_of(parsed),
+    )  # fmt: skip
     for check in case.checks:
         path = check.artifact.removeprefix("file:")
         if check.artifact != path and sample.collected is not None and path not in sample.collected:
             raise Uncollected(
                 f"sample {sample.key} did not collect {path}, which its key now reads: "
                 "draw fresh samples (a new --trial for a screen; for a baseline run, delete the "
-                "case's samples from the cache)"
+                "case's samples from the store)"
             )
         if sample.spoiled:
             score = 0.0
         elif check.artifact == "delivery":
             score = delivery_score(check, parsed)
         else:
-            score = text_score(
-                check, text_of(sample.commits, sample.final, sample.files, check.artifact, reports)
-            )
+            score = check_score(check, outputs)
         pairs.append((check.metric, score))
     return _mean_by_metric(pairs)
 
@@ -112,9 +200,12 @@ def case_failed(scores: dict[str, float], guards: tuple[str, ...]) -> bool:
 
 def reference_scores(case: Case, reference: Reference) -> list[tuple[Check, float]]:
     """Each text check's score on a reference; delivery checks need a session."""
-    outputs = (reference.commits, reference.final, reference.files)
+    outputs = Outputs(
+        reference.commits, reference.final, reference.files,
+        reference.reports, agents_gh(reference.gh), reference.briefs,
+    )  # fmt: skip
     return [
-        (check, text_score(check, text_of(*outputs, check.artifact, reference.reports)))
+        (check, check_score(check, outputs))
         for check in case.checks
         if check.artifact != "delivery"
     ]

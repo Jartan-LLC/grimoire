@@ -1,9 +1,11 @@
-"""Completed samples, kept outside the repository so every worktree shares them.
+"""Completed samples, kept in the clone's git directory so every worktree shares them.
 
-`$XDG_CACHE_HOME/grimoire-evals/` (default `~/.cache/grimoire-evals/`) holds what
-reruns would recreate, and under `plans/` each branch's fixed plans: deleting those
-drops the pin, so the next screen fixes whatever plan it runs. Rerunning after a
-usage-limit stop skips every valid sample already here; excluded ones are retried.
+The store is `grimoire-evals/` in the git common directory, or `$GRIMOIRE_EVALS_STORE`.
+The recorded baselines and verdicts rest on its samples, so it is data, not a cache: it
+lives as long as the clone, out of reach of a container restart that clears `~/.cache`,
+and git neither tracks nor cleans it. Under `plans/` are each branch's fixed plans:
+deleting those drops the pin, so the next screen fixes whatever plan it runs. Rerunning
+after a usage-limit stop skips every valid sample already here; excluded ones are retried.
 """
 
 import gzip
@@ -14,11 +16,33 @@ import pathlib
 from dataclasses import asdict, dataclass
 from typing import Any
 
+from .proc import GIT, run
 
-def root() -> pathlib.Path:
-    """The cache directory."""
-    base = os.environ.get("XDG_CACHE_HOME") or str(pathlib.Path.home() / ".cache")
-    return pathlib.Path(base) / "grimoire-evals"
+STORE = "GRIMOIRE_EVALS_STORE"
+
+
+def common_dir(checkout: pathlib.Path) -> pathlib.Path:
+    """The git directory every worktree of `checkout`'s clone shares, absolute."""
+    common = run(
+        [GIT, "rev-parse", "--path-format=absolute", "--git-common-dir"],
+        cwd=checkout, capture_output=True, text=True, check=True,
+    ).stdout.strip()  # fmt: skip
+    return pathlib.Path(common)
+
+
+def root(checkout: pathlib.Path) -> pathlib.Path:
+    """The store: `$GRIMOIRE_EVALS_STORE`, else `grimoire-evals/` in `checkout`'s git common directory.
+
+    The override is made absolute, `~` expanded, as plugin paths in it must be.
+    """
+    if override := os.environ.get(STORE):
+        return pathlib.Path(override).expanduser().resolve()
+    return common_dir(checkout) / "grimoire-evals"
+
+
+def arms(store: pathlib.Path) -> pathlib.Path:
+    """The directory in `store` holding every arm's copy of the plugins."""
+    return store / "arms"
 
 
 def key(case_hash: str, arm_hash: str, model: str, version: str, index: int) -> str:
@@ -51,6 +75,9 @@ class Sample:
     collected: list[str] | None = None
     # The (agent, skill) pairs the debug log named as preloaded; None before they were kept.
     preloads: list[list[str]] | None = None
+    # Each call the sandbox's `gh` recorded (argv, stdin, the files it named); None for a case
+    # without a remote, and in samples drawn before it was kept.
+    gh: list[dict[str, object]] | None = None
 
 
 def _paths(store: pathlib.Path, sample_key: str) -> tuple[pathlib.Path, pathlib.Path]:
@@ -59,7 +86,7 @@ def _paths(store: pathlib.Path, sample_key: str) -> tuple[pathlib.Path, pathlib.
 
 
 def load(store: pathlib.Path, sample_key: str) -> Sample | None:
-    """The cached sample, or None."""
+    """The stored sample, or None."""
     path, _ = _paths(store, sample_key)
     if not path.is_file():
         return None
@@ -83,5 +110,5 @@ def save(store: pathlib.Path, sample: Sample, trace_text: str) -> None:
 
 
 def read_events(store: pathlib.Path, sample_key: str) -> str:
-    """The raw trace text of a cached sample."""
+    """The raw trace text of a stored sample."""
     return gzip.decompress(events_path(store, sample_key).read_bytes()).decode()
