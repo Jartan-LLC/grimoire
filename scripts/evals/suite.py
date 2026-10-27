@@ -88,7 +88,8 @@ class Baseline:
 
     The counts choose cases and let the planner estimate power; a verdict never uses
     them. A count drawn under an older runner, model or Claude Code is stale, and for a
-    remote case one drawn under an older `remote_runner` (1 when the entry has none).
+    remote case one drawn under another `remote_runner` (0 when the entry has none: drawn
+    before the case had a remote).
     """
 
     model: str
@@ -96,7 +97,7 @@ class Baseline:
     failures: int
     runs: int
     runner: int
-    remote_runner: int = 1
+    remote_runner: int = 0
 
 
 @dataclass(frozen=True)
@@ -405,7 +406,7 @@ def _baselines(key: Table, where: pathlib.Path) -> tuple[Baseline, ...]:
     found: list[Baseline] = []
     for table in _tables(key, "baseline", where):
         failures, runs, runner = table.get("failures"), table.get("runs"), table.get("runner")
-        remote_runner = table.get("remote_runner", 1)
+        remote_runner = table.get("remote_runner", 0)
         if not all(isinstance(v, int) for v in (failures, runs, runner, remote_runner)):
             raise SuiteError(
                 f"{where}: a [[baseline]]'s 'failures', 'runs', 'runner' and 'remote_runner' "

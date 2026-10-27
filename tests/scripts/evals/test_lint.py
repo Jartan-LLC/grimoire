@@ -80,7 +80,8 @@ def test_lint_grades_gh_and_brief_checks_and_wants_a_remote_for_gh(root: pathlib
         '[briefs]\n"praxis:general-reviewer" = "Review the fix."\n'
     )
     assert any("a gh check needs remote = true" in f for f in lint(root, TRACKED))
-    (case / "key.toml").write_text("remote = true\n" + key)
+    remote = f"remote = true\n{key}remote_runner = {lint_module.REMOTE_RUNNER}\n"
+    (case / "key.toml").write_text(remote)
     assert lint(root, TRACKED) == []
     (case / "reference" / "pass-1.toml").write_text('gh = "gh pr create --draft"\n')
     found = lint(root, TRACKED)
@@ -100,11 +101,10 @@ def test_lint_names_a_baseline_drawn_under_an_older_runner(root: pathlib.Path) -
 def test_lint_names_a_remote_baseline_drawn_under_another_remote_runner(
     root: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    case = suite_at(root, key="remote = true\n" + KEY)
-    assert lint(root, TRACKED) == []
     monkeypatch.setattr(lint_module, "REMOTE_RUNNER", 2)
+    case = suite_at(root, key="remote = true\n" + KEY)
     found = lint(root, TRACKED)
-    assert any("drawn under remote_runner 1, not 2; redraw it" in f for f in found)
+    assert any("drawn under remote_runner 0, not 2; redraw it" in f for f in found)
     (case / "key.toml").write_text("remote = true\n" + KEY + "remote_runner = 3\n")
     found = lint(root, TRACKED)
     assert any("drawn under remote_runner 3, not 2; redraw it" in f for f in found)
