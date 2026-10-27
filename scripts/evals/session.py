@@ -55,6 +55,8 @@ REPLIES = "replies.json"
 GH_STATE = "gh-stub"
 GH_LOGIN = ("GH_TOKEN", "GITHUB_TOKEN", "GH_ENTERPRISE_TOKEN", "GITHUB_ENTERPRISE_TOKEN", "GH_HOST")
 SSH_AGENT = ("SSH_AUTH_SOCK", "SSH_AGENT_PID")
+# Set as GH_TOKEN, so the real `gh` uses no token of the user's; the stub reads no token.
+STUB_TOKEN = "grimoire-eval-stub"  # noqa: S105 -- a dummy that authenticates nothing
 
 
 @dataclass(frozen=True)
@@ -98,10 +100,12 @@ def sample_env(
     CLAUDE* variables go too: the calling session's own (CLAUDECODE and the like)
     would tell the child it runs nested, and others (CLAUDE_EFFORT) would change it.
     The login ones stay, so a token, config-dir, Bedrock or Vertex login still works.
-    With `gh_stub`, the sandbox's `bin/` comes first, so its `gh` answers every call, and
-    the user's gh login and SSH agent are gone (gh's token variables and the SSH agent's
-    dropped, GH_CONFIG_DIR an empty `gh-config/`), so neither the real `gh` run by its
-    path nor a push to a remote the session adds reaches the user's account.
+    With `gh_stub`, the sandbox's `bin/` comes first, so its `gh` answers every call. For
+    the real `gh` run by its path: gh's token and host variables are dropped, GH_TOKEN is
+    set to a dummy, which gh sends to github.com in place of a token from the OS keyring,
+    and GH_CONFIG_DIR is an empty `gh-config/`. For git: GIT_ALLOW_PROTOCOL=file refuses
+    every transport but a local path, so git reaches no https, ssh or git URL, with a key
+    under HOME or any other, and the SSH agent's variables are dropped.
     """
     env = {
         k: v
@@ -124,7 +128,9 @@ def sample_env(
     if gh_stub:
         for name in (*GH_LOGIN, *SSH_AGENT):
             env.pop(name, None)
+        env["GH_TOKEN"] = STUB_TOKEN
         env["GH_CONFIG_DIR"] = str(sandbox / "gh-config")
+        env["GIT_ALLOW_PROTOCOL"] = "file"
     return env
 
 
