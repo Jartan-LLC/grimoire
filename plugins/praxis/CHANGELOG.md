@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.9.0
+
+- Needs gitwise 1.4.0 or later.
+- `create-pr` opens a draft pull request, and it stays a draft until it is marked ready. Your agent is told to mark it ready when it is ready for someone else to review or merge, but does not always: some models often leave it a draft when you say the work is done without asking for the PR to be marked ready. If it leaves the PR a draft, run `gh pr ready` yourself.
+
 ## 1.8.0
 
 - Needs gitwise 1.3.0 or later.

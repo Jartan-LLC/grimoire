@@ -47,6 +47,7 @@ Templates in `.github/ISSUE_TEMPLATE/` -- read them for section structure. Write
 
 PR template at `.github/PULL_REQUEST_TEMPLATE.md` -- read it for section structure.
 Use `Closes #<number>` to link PRs to issues.
+Open a PR as a draft, and mark it ready (`gh pr ready`) when it is ready for someone else to review or merge.
 
 ## Code Reviews
 
