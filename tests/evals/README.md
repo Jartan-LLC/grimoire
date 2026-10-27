@@ -305,6 +305,9 @@ After changing the runner or the verdict rule:
   nor a workflow that spans sessions, such as a PR reviewed in one and its review addressed in the next.
 - GitHub is a stub: `gh` answers only from the case's replies, the same for every call that matches, so
   a case shows what the agent sent, not what GitHub would do with it.
+- Sessions drawn in parallel share `/tmp`: a body or message file an agent writes at a fixed path
+  there, such as `/tmp/pr-body.md`, can be overwritten by another session drawn at the same time, so a
+  sample can record the other session's text.
 - `origin` is a local path, not a github.com URL, and `git remote -v` prints that path, even when
   `build.py` names origin by a GitHub URL rewritten with `url.<path>.insteadOf`: an agent that reads
   the owner or repository name from the remote finds none.
