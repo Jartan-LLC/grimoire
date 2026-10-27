@@ -131,7 +131,7 @@ def reports_of(parsed: trace.Trace) -> dict[str, str]:
 
 
 def briefs_of(parsed: trace.Trace) -> dict[str, str]:
-    """Every Agent-call prompt the main thread sent each agent type, joined in the order sent."""
+    """Every Agent-call prompt the main thread sent each agent type, joined in the order sent; a call that ended in error aside."""
     return _by_agent((b.agent, b.text) for b in parsed.briefs)
 
 

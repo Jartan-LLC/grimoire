@@ -166,12 +166,16 @@ def test_parse_names_an_agent_call_without_a_type_general_purpose_and_skips_a_fa
     assert parsed.reports == []
 
 
-def test_parse_keeps_each_brief_the_main_thread_sent_in_order_and_no_subagents() -> None:
+def test_parse_keeps_each_brief_the_main_thread_sent_in_order_and_no_subagents_or_failed_calls() -> (
+    None
+):
     events = [
         call("a1", "Agent", prompt="Review the diff.", subagent_type=REVIEWER),
         *inside("a1", [call("n1", "Agent", prompt="Nested.", subagent_type="x")]),
         call("g1", "Agent", prompt="Find the tests."),
         call("a2", "Agent", prompt="Review again.", subagent_type=REVIEWER),
+        call("a3", "Agent", prompt="No such agent.", subagent_type="praxis:missing"),
+        result_of("a3", error=True),
     ]
     assert trace.parse(events, PLUGINS).briefs == [
         trace.Brief(0, REVIEWER, "Review the diff."),

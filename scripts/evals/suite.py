@@ -39,7 +39,8 @@ class Check:
 
     A text check names an artifact (`commits`, `final`, `file:<path>`, `gh` (the calls
     the sandbox's `gh` recorded), `report:<agent>` (every report that agent handed back)
-    or `brief:<agent>` (every Agent-call prompt the main thread sent that agent type))
+    or `brief:<agent>` (every Agent-call prompt the main thread sent that agent type, but
+    for a call that ended in error))
     and a `present` or `absent` regex. A delivery check names a `skill` and a `state`:
     with a `write` kind, the state the skill must be in at every such write; without
     one, `loaded` or `not-loaded` over the whole session (trigger cases). It reads the

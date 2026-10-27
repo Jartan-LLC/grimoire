@@ -159,7 +159,7 @@ the PR how many versions you screened.
 - **Whether a skill was in context when the agent wrote** is a guard or a diagnostic, not a primary
   metric, except in trigger cases, where loading the skill is the behaviour under test.
 - **A subagent's work:** `report:<agent>` is every report that agent handed back, `brief:<agent>` every
-  Agent-call prompt the main thread sent that agent type, and a delivery check with
+  Agent-call prompt the main thread sent that agent type (a call that ended in error aside), and a delivery check with
   `agent = "<plugin>:<agent>"` reads that subagent's skill loads and writes instead of the main
   thread's. A reference gives reports under `[reports]` and briefs under `[briefs]`, as
   `"<plugin>:<agent>" = "text"`.

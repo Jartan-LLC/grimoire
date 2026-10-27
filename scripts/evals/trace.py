@@ -87,7 +87,7 @@ class Report:
 class Brief:
     """The prompt of the main thread's Agent call at event `index`, which started agent type `agent`.
 
-    A SendMessage follow-up to the agent is not one.
+    A SendMessage follow-up to the agent is not one, nor an Agent call that ended in error.
     """
 
     index: int
@@ -246,6 +246,17 @@ def _preload(
             trace.deliveries.append(Delivery(calls[count], f"{plugin}:{skill}", path, agent))
 
 
+def _failed_calls(events: list[Event]) -> set[str]:
+    """The id of every tool call whose result is an error."""
+    return {
+        str(block.get("tool_use_id"))
+        for event in events
+        if event.get("type") == "user"
+        for block in _content(event)
+        if block.get("type") == "tool_result" and block.get("is_error") is True
+    }
+
+
 def parse(
     events: list[Event], plugin_dirs: dict[str, str], preloads: Sequence[tuple[str, str]] = ()
 ) -> Trace:
@@ -257,6 +268,7 @@ def parse(
     calls: dict[str, Call] = {}
     agents: dict[str, str] = {}  # each main-thread Agent call's id -> the agent it started
     spawns: dict[str, list[int]] = {}
+    briefs: dict[str, Brief] = {}  # each main-thread Agent call's id -> its brief
     for index, event in enumerate(events):
         kind = event.get("type")
         if kind == "system":
@@ -284,7 +296,7 @@ def parse(
                     started = str(inputs.get("subagent_type") or DEFAULT_AGENT)
                     agents[call_id] = started
                     spawns.setdefault(started, []).append(index)
-                    trace.briefs.append(Brief(index, started, str(inputs.get("prompt", ""))))
+                    briefs[call_id] = Brief(index, started, str(inputs.get("prompt", "")))
             elif kind == "user" and block_type == "tool_result":
                 if (call := calls.get(str(block.get("tool_use_id")))) is not None:
                     _result(trace, index, block, call, plugin_dirs)
@@ -293,6 +305,8 @@ def parse(
                         trace.reports.append(_report(index, event, started))
             elif kind == "user" and block_type == "text":
                 _skill_text(trace, index, str(block.get("text", "")), plugin_dirs, agent)
+    failed = _failed_calls(events)
+    trace.briefs = [brief for call_id, brief in briefs.items() if call_id not in failed]
     _preload(trace, spawns, preloads, plugin_dirs)
     trace.writes.sort(key=lambda w: w.index)
     trace.deliveries.sort(key=lambda d: d.index)
