@@ -307,6 +307,8 @@ def test_classify_from_a_worktree_catches_the_main_checkout_and_a_path_back_out_
         "the session reached /main"
     ]
     assert reasons(f'ls "{arms}/../samples"') == [f"the session reached /main, {samples}"]
+    assert reasons(f'ls "{arms}"/../samples') == [f"the session reached /main, {samples}"]
+    assert reasons(f"ls '{arms}'/../samples") == [f"the session reached /main, {samples}"]
     assert reasons(f"ls {arms}/./old-1/../../samples/k.json.gz") == [
         f"the session reached /main, {samples}"
     ]

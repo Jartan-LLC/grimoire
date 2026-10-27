@@ -375,8 +375,8 @@ def classify(  # noqa: PLR0913 -- `arms` is apart from `private`: paths under it
     path, another model, an error result, a crash before the result, or a tool call
     naming one of the `private` paths, which hold the suite and its answers. A path under
     `arms`, the directory holding every arm, does not count: the store that holds it is
-    in the clone's git directory, inside the main checkout. A path's `..` steps are
-    resolved first, so `<arms>/../samples` names the samples.
+    in the clone's git directory, inside the main checkout. Quotes are dropped and a
+    path's `..` steps resolved first, so `"<arms>"/../samples` names the samples.
     Spoiled (the arm's own doing, so the sample counts and fails every check): a
     timeout, or a result cut off by the turn or budget cap.
     """
@@ -397,7 +397,7 @@ def classify(  # noqa: PLR0913 -- `arms` is apart from `private`: paths under it
     if trace.init.get("model") != model:
         reasons.append(f"model {trace.init.get('model')!r} is not {model!r}")
     outside = [
-        _normalised(text).replace(arms, "")
+        _normalised(text.replace('"', "").replace("'", "")).replace(arms, "")
         for tool_input in trace.tool_inputs
         for text in _strings(json.loads(tool_input))
     ]
