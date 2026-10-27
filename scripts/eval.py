@@ -230,8 +230,13 @@ def to_read(
 def pinned(
     suite: Suite, split: str, samples: int, spec: session.Spec, old: Arm
 ) -> dict[str, object]:
-    """What the plan fixes before the first run: a verdict is refused if any of it changes."""
+    """What the plan fixes before the first run: a verdict is refused if any of it changes.
+
+    The flags name the arm's plugin directories and the debug log by placeholder, so the
+    plan, and with it the screen's samples, do not depend on where the store is.
+    """
     files = [p for p in suite.path.rglob("*") if p.is_file() and not python_cache(p)]
+    placed = dataclasses.replace(old, plugins={n: f"<arm>/plugins/{n}" for n in old.plugins})
     return {
         "suite": tree_hash(suite.path, files),
         "split": split,
@@ -240,7 +245,7 @@ def pinned(
         "model": spec.model,
         "claude_code": spec.version,
         "flags": session.claude_args(
-            "", old, spec.model, spec.budget_usd, pathlib.Path("<sandbox>/debug.log")
+            "", placed, spec.model, spec.budget_usd, pathlib.Path("<sandbox>/debug.log")
         )[3:],
         "old": old.hash,
     }

@@ -1,6 +1,7 @@
 import argparse
 import pathlib
 import shutil
+from typing import cast
 
 import eval as cli
 import pytest
@@ -113,6 +114,17 @@ def test_the_read_list_names_a_must_hold_failure_the_primary_passes(
     lines = cli.to_read(suite, {"new": [leak, clean]}, {"new": {}, "old": {}}, verdicts, tmp_path)
     assert "- new c1 #0 fails no_exploit: k1" in lines
     assert not any("k2" in line and "fails" in line for line in lines)
+
+
+def test_a_plan_names_the_arms_plugins_alike_wherever_the_store_is(tmp_path: pathlib.Path) -> None:
+    suite = load_suite(write_suite(tmp_path / "suite"))
+    plans: list[dict[str, object]] = []
+    for store in (tmp_path / "a", tmp_path / "b"):
+        old = Arm("old", "h", {"gitwise": str(store / "arms" / "old-1" / "plugins" / "gitwise")})
+        spec = session.Spec("claude-opus-5-5", "2.1.310", 1.0, tmp_path, store)
+        plans.append(cli.pinned(suite, "dev", 3, spec, old))
+    assert plans[0] == plans[1]
+    assert "<arm>/plugins/gitwise" in cast("list[str]", plans[0]["flags"])
 
 
 def test_a_screens_identity_holds_the_trial_the_new_arm_and_each_cases_hash(
