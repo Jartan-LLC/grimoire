@@ -133,7 +133,7 @@ def scores(case: Case, sample: Sample, parsed: trace.Trace) -> dict[str, float]:
             raise Uncollected(
                 f"sample {sample.key} did not collect {path}, which its key now reads: "
                 "draw fresh samples (a new --trial for a screen; for a baseline run, delete the "
-                "case's samples from the cache)"
+                "case's samples from the store)"
             )
         if sample.spoiled:
             score = 0.0

@@ -1,6 +1,25 @@
+import os
 import pathlib
 
-from evals import cache
+import pytest
+from evals import cache, session
+from evals.proc import GIT, run
+
+
+def test_root_is_the_clones_git_common_dir_from_any_worktree_unless_overridden(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv(cache.STORE, raising=False)
+    env = session.git_env(dict(os.environ))
+    clone, worktree = tmp_path / "clone", tmp_path / "worktree"
+    run([GIT, "init", "-q", "-b", "main", str(clone)], env=env, check=True)
+    run([GIT, "commit", "-q", "--allow-empty", "-m", "start"], cwd=clone, env=env, check=True)
+    run([GIT, "worktree", "add", "-q", str(worktree)], cwd=clone, env=env, check=True)
+    store = clone.resolve() / ".git" / "grimoire-evals"
+    assert cache.root(clone) == store
+    assert cache.root(worktree) == store
+    monkeypatch.setenv(cache.STORE, str(tmp_path / "elsewhere"))
+    assert cache.root(worktree) == tmp_path / "elsewhere"
 
 
 def test_cache_key_changes_with_every_input() -> None:

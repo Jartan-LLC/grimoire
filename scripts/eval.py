@@ -6,11 +6,11 @@
   lint                check every suite before any session runs (free; part of make verify)
   run SUITE --arm A   run SUITE's cases on arm none, old or new (spends inference)
   screen SUITE        run old and new side by side, then print the verdict (spends inference)
-  show KEY            print one cached sample: its commits, final reply, gh calls, deliveries
+  show KEY            print one stored sample: its commits, final reply, gh calls, deliveries
                       and writes by agent, and subagents' reports
   size SUITE          what each split can see per model, from the recorded baselines (free)
 
-Sessions use the caller's own `claude` login; nothing here runs in CI. Samples are cached
+Sessions use the caller's own `claude` login; nothing here runs in CI. Samples are kept
 (see scripts/evals/cache.py), so a rerun after a usage-limit stop resumes.
 """
 
@@ -659,7 +659,7 @@ def _parser() -> argparse.ArgumentParser:
 def main() -> int:
     """Parse the command line and run one subcommand."""
     args = _parser().parse_args()
-    store = cache.root()
+    store = cache.root(ROOT)
 
     if args.command == "plan":
         return plan_command(args.base)

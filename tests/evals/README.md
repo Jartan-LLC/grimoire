@@ -240,7 +240,10 @@ the PR how many versions you screened.
   `SPLIT`, since new results on held-out cases burn them.
 - `make eval-screen SUITE=<path>`: run `old` and `new` on the `screen` split and print the result.
   `SPLIT=confirm` runs the confirm split, `NEW_PLAN=1` fixes a new plan. The result and the samples to
-  read are also written to `$XDG_CACHE_HOME/grimoire-evals/evidence/` (default `~/.cache/...`).
+  read are also written to `evidence/` in the store.
+- The store holds every sample, plan and evidence file: `grimoire-evals/` in the clone's git directory
+  (`.git/grimoire-evals/` in the main checkout), shared by every worktree and never committed.
+  `GRIMOIRE_EVALS_STORE=<dir>` puts it elsewhere.
 - `python3 scripts/eval.py show <key>`: one sample's commits, final reply, the files its checks read,
   `gh` calls, skill deliveries and writes with the agent that made each, subagents' reports and hook
   context.

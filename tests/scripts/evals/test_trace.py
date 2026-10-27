@@ -248,6 +248,25 @@ def test_classify_excludes_a_session_that_reached_the_suite() -> None:
     assert classify(events) == (["the session reached /checkout"], "")
 
 
+def test_classify_lets_a_session_read_its_arms_plugins_inside_the_checkout() -> None:
+    plugins = {"gitwise": "/checkout/.git/grimoire-evals/arms/old-1/plugins/gitwise"}
+    skill_file = plugins["gitwise"] + "/skills/commit-pr-writing/SKILL.md"
+    events = [
+        init(plugins=[{"name": "gitwise", "path": plugins["gitwise"]}]),
+        call("r1", "Read", file_path=skill_file),
+        result_of("r1"),
+        RESULT,
+    ]
+    parsed = trace.parse(events, plugins)
+    assert trace.classify(parsed, plugins, MODEL, False, ["/checkout"]) == ([], "")
+    events[1] = call("r1", "Bash", command=f"cat {skill_file} /checkout/tests/evals/x/key.toml")
+    parsed = trace.parse(events, plugins)
+    assert trace.classify(parsed, plugins, MODEL, False, ["/checkout"]) == (
+        ["the session reached /checkout"],
+        "",
+    )
+
+
 def test_classify_excludes_an_error_result_and_marks_caps_and_timeouts_as_spoiled() -> None:
     limit = RESULT | {
         "is_error": True,
