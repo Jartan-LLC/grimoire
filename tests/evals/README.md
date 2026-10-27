@@ -110,17 +110,17 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
 - **A task that pushes or calls GitHub** sets `remote = true` in the key. The session's repository then
   has an `origin`: a local bare repository holding every branch and tag the fixture and `build.py` made,
   each branch tracking it, so `git push` works, and `origin/HEAD` names `main`, as in a clone. To start
-  with a branch ahead of, behind or missing from `origin`, `build.py` makes `origin` itself, a bare
-  repository at `../origin.git`, and pushes what it wants there (commit-pr-writing's `branch-only-fix`
-  case makes one): the runner keeps an `origin` that `build.py` made as `build.py` left it, adding only
-  `origin/HEAD` when the repository lacks it and origin's HEAD names a branch origin holds. That
-  `origin` is a local path, or a URL `url.<path>.insteadOf` rewrites to one: git refuses any other. The
-  session's `gh` is a stub that records every call and answers from the key's `[[gh]]` tables: the
-  first whose `match` regex finds the call's arguments joined with spaces, each newline in them written
-  as `\n` (`pr create --draft --title ...`), prints its `stdout` and exits with its `exit` (default 0).
-  A call no reply matches fails with `gh stub: no reply for: <arguments>`, so script every call the
-  task needs, reads (`gh pr view`, `gh api`) included. A `[[gh]]` table implies `remote = true`, and
-  the replies count in the case hash, like the fixture.
+  with a branch ahead of, behind or missing from `origin`, `build.py` makes `origin` itself with
+  `git init --bare -b <the fixture's default branch> ../origin.git`, pushes that branch, so `origin/HEAD`
+  can name it, and pushes what else it wants there: the runner keeps an `origin` that `build.py` made as
+  `build.py` left it, adding only `origin/HEAD` when the repository lacks it and origin's HEAD names a
+  branch origin holds. That `origin` is a local path, or a URL `url.<path>.insteadOf` rewrites to one:
+  git refuses any other. The session's `gh` is a stub that records every call and answers from the key's
+  `[[gh]]` tables: the first whose `match` regex finds the call's arguments joined with spaces, each
+  newline in them written as `\n` (`pr create --draft --title ...`), prints its `stdout` and exits with
+  its `exit` (default 0). A call no reply matches fails with `gh stub: no reply for: <arguments>`, so
+  script every call the task needs, reads (`gh pr view`, `gh api`) included. A `[[gh]]` table implies
+  `remote = true`, and the replies count in the case hash, like the fixture.
 
   Write each `match` to accept every call the task could make at that step, anchored on the subcommand
   (`^pr create`), and grade the behaviour under test with a check, never with a `match`: a narrow match
