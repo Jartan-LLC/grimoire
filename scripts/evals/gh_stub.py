@@ -27,8 +27,17 @@ STDIN = "-"
 
 
 def flag_values(argv: Sequence[str], flags: Sequence[str]) -> Iterator[tuple[str, str]]:
-    """Each (flag, value) in `argv` for one of `flags`, given as `--flag value` or `--flag=value`."""
+    """Each (flag, value) in `argv` for one of `flags`, as `--flag value`, `--flag=value` or `-fvalue`.
+
+    The last is the attached form gh's flag parser takes for a short flag, `-b"text"` in
+    a shell. An argument with a space after the flag (`-F b.md`) is not read as one: a
+    shell splits that in two unless it is quoted, and quoted it is text, a body's value.
+    """
     for i, arg in enumerate(argv):
+        short, attached = arg[:2], arg[2:]
+        if short in flags and attached and attached[0] != "=" and not attached[0].isspace():
+            yield short, attached
+            continue
         flag, eq, inline = arg.partition("=")
         if flag in flags:
             yield flag, inline if eq else (argv[i + 1] if i + 1 < len(argv) else "")

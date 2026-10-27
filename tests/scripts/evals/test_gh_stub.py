@@ -42,6 +42,8 @@ def test_answer_matches_a_call_with_a_multi_line_argument_as_one_line() -> None:
         (["api", "x", "--input=-"], ["-"]),
         (["release", "create", "v1", "--notes-file", "n.md"], ["n.md"]),
         (["release", "create", "v1", "-F", "n.md"], ["n.md"]),
+        (["release", "create", "v1", "-Fn.md"], ["n.md"]),
+        (["api", "x", "-Fbody=@b.md", "-Fevent=COMMENT"], ["b.md"]),
         (["pr", "create", "--body", "-F b.md"], []),
         (["pr", "create", "-F"], []),
     ],
