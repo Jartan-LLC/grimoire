@@ -21,7 +21,7 @@ import json
 import pathlib
 import posixpath
 import re
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass, field
 from typing import cast
 
@@ -302,6 +302,18 @@ def parse(
 SPOILING_RESULTS = ("error_max_turns", "error_max_budget_usd")
 
 
+def _strings(value: object) -> Iterator[str]:
+    """Every string in a decoded JSON value, so a path is read as the tool got it, not escaped."""
+    if isinstance(value, str):
+        yield value
+    elif isinstance(value, dict):
+        for item in cast("dict[str, object]", value).values():
+            yield from _strings(item)
+    elif isinstance(value, list):
+        for item in cast("list[object]", value):
+            yield from _strings(item)
+
+
 def _normalised(text: str) -> str:
     """`text` with each absolute path holding a `.` or `..` step written without it."""
     return _PATH.sub(lambda m: posixpath.normpath(m[0]) if "/." in m[0] else m[0], text)
@@ -344,7 +356,11 @@ def classify(  # noqa: PLR0913 -- `arms` is apart from `private`: paths under it
         reasons.append(f"memory loaded: {trace.init.get('memory_paths')}")
     if trace.init.get("model") != model:
         reasons.append(f"model {trace.init.get('model')!r} is not {model!r}")
-    outside = [_normalised(text).replace(arms, "") for text in trace.tool_inputs]
+    outside = [
+        _normalised(text).replace(arms, "")
+        for tool_input in trace.tool_inputs
+        for text in _strings(json.loads(tool_input))
+    ]
     if touched := sorted({p for p in private for text in outside if p in text}):
         reasons.append(f"the session reached {', '.join(touched)}")
     spoiled = ""

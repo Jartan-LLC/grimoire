@@ -306,6 +306,7 @@ def test_classify_from_a_worktree_catches_the_main_checkout_and_a_path_back_out_
     assert reasons(f"ls {arms}/./old-1/../../samples/k.json.gz") == [
         f"the session reached /main, {samples}"
     ]
+    assert reasons(f"true\n{arms}/../samples") == [f"the session reached /main, {samples}"]
 
 
 def test_classify_excludes_an_error_result_and_marks_caps_and_timeouts_as_spoiled() -> None:
