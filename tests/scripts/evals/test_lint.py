@@ -97,14 +97,17 @@ def test_lint_names_a_baseline_drawn_under_an_older_runner(root: pathlib.Path) -
     assert any("drawn under runner 1, not 2; redraw it" in f for f in lint(root, TRACKED))
 
 
-def test_lint_names_a_remote_baseline_drawn_under_an_older_remote_runner(
+def test_lint_names_a_remote_baseline_drawn_under_another_remote_runner(
     root: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     case = suite_at(root, key="remote = true\n" + KEY)
     assert lint(root, TRACKED) == []
     monkeypatch.setattr(lint_module, "REMOTE_RUNNER", 2)
     found = lint(root, TRACKED)
-    assert any("drawn under remote_runner 1, older than 2; redraw it" in f for f in found)
+    assert any("drawn under remote_runner 1, not 2; redraw it" in f for f in found)
+    (case / "key.toml").write_text("remote = true\n" + KEY + "remote_runner = 3\n")
+    found = lint(root, TRACKED)
+    assert any("drawn under remote_runner 3, not 2; redraw it" in f for f in found)
     (case / "key.toml").write_text("remote = true\n" + KEY + "remote_runner = 2\n")
     assert lint(root, TRACKED) == []
     (case / "key.toml").write_text(KEY)
