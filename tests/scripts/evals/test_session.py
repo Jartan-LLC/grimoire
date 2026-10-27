@@ -149,6 +149,31 @@ def test_add_origin_pushes_every_fixture_branch_and_tag_so_a_plain_push_works(
     assert session.new_commits(repo, env, heads) == ["fix: the thing"]
 
 
+def test_add_origin_skips_the_fixtures_pre_push_hook_on_its_own_pushes(
+    tmp_path: pathlib.Path,
+) -> None:
+    case_dir = write_suite(tmp_path / "suite")
+    (case_dir / "cases" / "c1" / "build.py").write_text(
+        "import pathlib\n"
+        "hook = pathlib.Path('.git/hooks/pre-push')\n"
+        "hook.write_text('#!/bin/sh\\nexit 1\\n')\n"
+        "hook.chmod(0o755)\n"
+    )
+    case = load_suite(case_dir).cases[0]
+    env = session.git_env(dict(os.environ))
+    repo = tmp_path / "repo"
+    session.build_fixture(case, repo, env)
+    session.add_origin(repo, tmp_path / "origin.git", env)
+    listed = run(
+        [GIT, "ls-remote", "--heads", "origin"],
+        cwd=repo, env=env, capture_output=True, text=True, check=True,
+    )  # fmt: skip
+    assert listed.stdout.split()[1::2] == ["refs/heads/main"]
+    # The hook still holds for the session's own pushes.
+    push = [GIT, "push", "-q", "origin", "main:other"]
+    assert run(push, cwd=repo, env=env, capture_output=True, check=False).returncode != 0
+
+
 def test_add_origin_keeps_the_origin_build_made_with_a_branch_ahead_and_one_never_pushed(
     tmp_path: pathlib.Path,
 ) -> None:

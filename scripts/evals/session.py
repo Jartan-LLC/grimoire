@@ -203,14 +203,16 @@ def add_origin(repo: pathlib.Path, origin: pathlib.Path, env: dict[str, str]) ->
     origin's default branch, as in a clone, unless `repo` has one already or origin's
     HEAD names no branch it holds. Returns the commit of each of origin's refs: one
     `repo` has not fetched is the fixture's, not the session's, once pulled. An origin
-    at a network URL fails at once, reaching no network and waiting on no prompt.
+    at a network URL fails at once, reaching no network and waiting on no prompt. The
+    pushes that fill a new origin skip the fixture's pre-push hook, which is there for
+    the session's pushes.
     """
     env = {**env, "GIT_ALLOW_PROTOCOL": "file", "GIT_TERMINAL_PROMPT": "0"}
     if "origin" not in _git(repo, env, "remote").split():
         run([GIT, "init", "-q", "--bare", "-b", "main", str(origin)], env=env, check=True)
         _git(repo, env, "remote", "add", "origin", str(origin))
-        _git(repo, env, "push", "-q", "-u", "origin", "--all")
-        _git(repo, env, "push", "-q", "origin", "--tags")
+        _git(repo, env, "push", "-q", "--no-verify", "-u", "origin", "--all")
+        _git(repo, env, "push", "-q", "--no-verify", "origin", "--tags")
     head = [GIT, "symbolic-ref", "-q", "refs/remotes/origin/HEAD"]
     if run(head, cwd=repo, env=env, capture_output=True, check=False).returncode != 0:
         # Fails, leaving none, when origin's HEAD names no branch it holds.
