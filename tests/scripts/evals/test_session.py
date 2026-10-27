@@ -162,6 +162,31 @@ def test_add_origin_keeps_the_origin_build_made_with_a_branch_ahead_and_one_neve
     assert listed == ["refs/heads/feature/issue-42", "refs/heads/main"]
 
 
+def test_a_commit_build_put_only_on_origin_is_not_the_sessions_once_pulled(
+    tmp_path: pathlib.Path,
+) -> None:
+    case_dir = write_suite(tmp_path / "suite")
+    (case_dir / "cases" / "c1" / "build.py").write_text(
+        "import subprocess\n"
+        "def git(*args, cwd=None):\n"
+        "    subprocess.run(['git', *args], cwd=cwd, check=True)\n"
+        "git('init', '-q', '--bare', '-b', 'main', '../origin.git')\n"
+        "git('remote', 'add', 'origin', '../origin.git')\n"
+        "git('push', '-q', '-u', 'origin', 'main')\n"
+        "git('clone', '-q', '../origin.git', '../teammate')\n"
+        "git('commit', '-q', '--allow-empty', '-m', 'teammate', cwd='../teammate')\n"
+        "git('push', '-q', cwd='../teammate')\n"
+    )
+    case = load_suite(case_dir).cases[0]
+    env = session.git_env(dict(os.environ))
+    repo = tmp_path / "repo"
+    heads = session.build_fixture(case, repo, env)
+    heads += session.add_origin(repo, tmp_path / "origin.git", env)
+    run([GIT, "pull", "-q", "--ff-only"], cwd=repo, env=env, check=True)
+    run([GIT, "commit", "-q", "--allow-empty", "-m", "fix: mine"], cwd=repo, env=env, check=True)
+    assert session.new_commits(repo, env, heads) == ["fix: mine"]
+
+
 def test_sample_env_puts_the_gh_stub_first_and_drops_the_gh_login_only_for_a_case_that_asks(
     tmp_path: pathlib.Path,
 ) -> None:

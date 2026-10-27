@@ -165,17 +165,19 @@ def build_fixture(case: Case, repo: pathlib.Path, env: dict[str, str]) -> list[s
     return _git(repo, env, "rev-parse", "--all").split()
 
 
-def add_origin(repo: pathlib.Path, origin: pathlib.Path, env: dict[str, str]) -> None:
+def add_origin(repo: pathlib.Path, origin: pathlib.Path, env: dict[str, str]) -> list[str]:
     """Make `origin` a bare repository holding every branch of `repo`, each tracking `origin/<branch>`.
 
     An `origin` the case's `build.py` made is kept as it left it, so a case can start
-    with a branch ahead of, behind or missing from it.
+    with a branch ahead of, behind or missing from it. Returns the commit of each of
+    origin's refs: one `repo` has not fetched is the fixture's, not the session's, once
+    pulled.
     """
-    if "origin" in _git(repo, env, "remote").split():
-        return
-    run([GIT, "init", "-q", "--bare", "-b", "main", str(origin)], env=env, check=True)
-    _git(repo, env, "remote", "add", "origin", str(origin))
-    _git(repo, env, "push", "-q", "-u", "origin", "--all")
+    if "origin" not in _git(repo, env, "remote").split():
+        run([GIT, "init", "-q", "--bare", "-b", "main", str(origin)], env=env, check=True)
+        _git(repo, env, "remote", "add", "origin", str(origin))
+        _git(repo, env, "push", "-q", "-u", "origin", "--all")
+    return [line.split()[0] for line in _git(repo, env, "ls-remote", "origin").splitlines()]
 
 
 def install_gh(sandbox: pathlib.Path, replies: tuple[Reply, ...]) -> None:
@@ -204,10 +206,11 @@ def new_commits(repo: pathlib.Path, env: dict[str, str], fixture_heads: list[str
     """The full message of every commit the session added, on any branch, oldest first.
 
     A stash it left behind is not one: its "WIP on" commits are git's text, not the agent's.
+    A head `repo` does not hold, on an origin it never fetched from, is skipped.
     """
     out = _git(
-        repo, env, "log", "--exclude=refs/stash", "--all", "--reverse", "--format=%B%x1e",
-        "--not", *fixture_heads,
+        repo, env, "log", "--ignore-missing", "--exclude=refs/stash", "--all", "--reverse",
+        "--format=%B%x1e", "--not", *fixture_heads,
     )  # fmt: skip
     return [m.strip() for m in out.split("\x1e") if m.strip()]
 
@@ -243,7 +246,7 @@ def _session(
             )
             return sample, ""
         if case.remote:
-            add_origin(repo, sandbox / "origin.git", env)
+            heads += add_origin(repo, sandbox / "origin.git", env)
             install_gh(sandbox, case.gh)
         run(
             [UV, "venv", "-q", "--system-site-packages", str(sandbox / "venv")], env=env, check=True
