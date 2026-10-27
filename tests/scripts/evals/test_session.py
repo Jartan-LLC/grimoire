@@ -7,7 +7,7 @@ import pathlib
 import subprocess
 
 import pytest
-from evals import cache, session
+from evals import cache, session, trace
 from evals.arms import Arm
 from evals.proc import GIT, run
 from evals.suite import Case, load_suite
@@ -255,6 +255,27 @@ def test_a_remote_sessions_git_pushes_to_origin_and_refuses_https_and_ssh(
         refused = git("ls-remote", url)
         assert refused.returncode != 0
         assert f"transport '{transport}' not allowed" in refused.stderr
+
+
+def test_a_remote_session_that_ran_gh_while_the_stub_logged_none_of_its_calls_bypassed_it() -> None:
+    def bash(command: str) -> trace.Trace:
+        event: trace.Event = {
+            "type": "assistant",
+            "message": {"content": [{"type": "tool_use", "id": "b1", "name": "Bash",
+                                     "input": {"command": command}}]},
+        }  # fmt: skip
+        return trace.parse([event], {})
+
+    def logged(*argv: str) -> dict[str, object]:
+        return {"argv": list(argv), "stdin": "", "files": {}}
+
+    claude_codes = logged("pr", "view", "--json", "url")
+    ran = bash("/usr/bin/gh pr create --draft --fill")
+    assert session.stub_bypassed(ran, [])
+    assert session.stub_bypassed(ran, [claude_codes])
+    assert not session.stub_bypassed(ran, [claude_codes, logged("pr", "create", "--fill")])
+    assert not session.stub_bypassed(ran, None)
+    assert not session.stub_bypassed(bash("git push -u origin gh-pages"), [claude_codes])
 
 
 def limited_sample(reason: str) -> cache.Sample:

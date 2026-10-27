@@ -326,6 +326,22 @@ def test_classify_excludes_a_session_that_reached_the_gh_stubs_replies() -> None
     assert reasons("gh pr create --draft --fill") == []
 
 
+def test_runs_gh_reads_each_agents_bash_calls_for_gh_by_name_or_path_and_nothing_else() -> None:
+    def runs(*commands: str, agent: bool = False) -> bool:
+        events = [call(f"b{i}", "Bash", command=c) for i, c in enumerate(commands)]
+        if agent:
+            events = [spawn("a1"), *inside("a1", events)]
+        return trace.runs_gh(trace.parse(events, PLUGINS))
+
+    assert runs("gh pr create --draft --fill")
+    assert runs("git push -u origin b 2>&1 | tail -3 && /usr/bin/gh pr view 7")
+    assert runs("x=$(command gh api user)")
+    assert runs("env -i GH_TOKEN=t /usr/local/bin/gh auth status", agent=True)
+    assert not runs("git push origin gh-pages", 'git commit -m "fix: do gh calls"', "cat gh.txt")
+    events = [call("r1", "Read", file_path="/usr/bin/gh"), call("g1", "Grep", pattern="gh pr")]
+    assert not trace.runs_gh(trace.parse(events, PLUGINS))
+
+
 def test_classify_excludes_an_error_result_and_marks_caps_and_timeouts_as_spoiled() -> None:
     limit = RESULT | {
         "is_error": True,

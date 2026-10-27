@@ -40,6 +40,15 @@ WRITES = (
     ("issue", re.compile(r"\bgh\s+issue\s+(create|comment)\b")),
 )
 
+# `gh` run as a command, by name or by path: first in a line or after a shell separator,
+# past any assignment, option or word that runs the next one; not `gh-pages`, nor a
+# word in a message.
+_RUNNER_WORD = r"(?:if|then|else|do|while|until|time|command|exec|env|sudo|nohup|xargs)"
+GH_RUN = re.compile(
+    rf"(?:^|[;&|(`{{!])\s*(?:{_RUNNER_WORD}\s+|-\S*\s+|\w+=\S*\s+)*(?:[\w.~/-]*/)?gh(?![\w./-])",
+    re.MULTILINE,
+)
+
 # An absolute path in a tool call's input, so `..` in it can be resolved away.
 _PATH = re.compile(r"""(?<![\w.~-])/[^\s"'`;|&<>()]+""")
 
@@ -108,6 +117,7 @@ class Trace:
     compacts: list[int] = field(default_factory=list[int])
     hook_contexts: list[tuple[int, str]] = field(default_factory=list[tuple[int, str]])
     tool_inputs: list[str] = field(default_factory=list[str])
+    commands: list[str] = field(default_factory=list[str])  # every Bash call's, any agent's
 
 
 def load(path: pathlib.Path) -> list[Event]:
@@ -257,6 +267,19 @@ def _failed_calls(events: list[Event]) -> set[str]:
     }
 
 
+def _tool_inputs(trace: Trace, event: Event) -> None:
+    """Record each tool call's input in `event`, any agent's, and each Bash call's command."""
+    for block in _content(event):
+        if block.get("type") != "tool_use":
+            continue
+        tool_input = block.get("input")
+        trace.tool_inputs.append(json.dumps(tool_input))
+        inputs = cast("dict[str, object]", tool_input) if isinstance(tool_input, dict) else {}
+        command = inputs.get("command")
+        if block.get("name") == "Bash" and isinstance(command, str):
+            trace.commands.append(command)
+
+
 def parse(
     events: list[Event], plugin_dirs: dict[str, str], preloads: Sequence[tuple[str, str]] = ()
 ) -> Trace:
@@ -276,9 +299,7 @@ def parse(
         elif kind == "result":
             trace.result = event
         if kind == "assistant":
-            trace.tool_inputs += [
-                json.dumps(b.get("input")) for b in _content(event) if b.get("type") == "tool_use"
-            ]
+            _tool_inputs(trace, event)
         parent = event.get("parent_tool_use_id")
         agent = "" if parent is None else agents.get(str(parent))
         if agent is None:
@@ -311,6 +332,11 @@ def parse(
     trace.writes.sort(key=lambda w: w.index)
     trace.deliveries.sort(key=lambda d: d.index)
     return trace
+
+
+def runs_gh(trace: Trace) -> bool:
+    """Whether a Bash call of the main thread or a subagent runs `gh`, by name or by path."""
+    return any(GH_RUN.search(command) for command in trace.commands)
 
 
 SPOILING_RESULTS = ("error_max_turns", "error_max_budget_usd")
