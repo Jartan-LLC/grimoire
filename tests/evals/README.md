@@ -250,6 +250,7 @@ reference = """
 The branch adds `_median` to tally/stats.py beside `statistics.median`. Only a finding whose subject is
 that reimplementation counts.
 """
+# yes_ratings = ["Critical"]  # when this case's silver labels need other ratings than the judge's
 ```
 
 - The judge is `claude -p` on its model and effort, with no tools and no customizations, asked for

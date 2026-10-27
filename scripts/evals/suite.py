@@ -49,7 +49,8 @@ class Check:
     that agent handed back) or `brief:<agent>` (every Agent-call prompt the main thread
     sent that agent type, but for a call that ended in error)) and a `present` or
     `absent` regex, or a `judge` (a suite `[[judge]]` id) and the `reference` that judge
-    reads beside the artifact. A delivery check names a `skill` and a `state`: with a `write` kind,
+    reads beside the artifact, with `yes_ratings` when this case's silver labels accept
+    other ratings than the judge's. A delivery check names a `skill` and a `state`: with a `write` kind,
     the state the skill must be in at every such write; without one, `loaded` or
     `not-loaded` over the whole session (trigger cases). It reads the main thread's
     deliveries and writes, or with an `agent`, that subagent's.
@@ -65,6 +66,7 @@ class Check:
     agent: str = ""
     judge: str | None = None
     reference: str = ""
+    yes_ratings: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -386,8 +388,8 @@ def _check(
         )
     if "judge" in table:
         return _judged(table, where, metrics[metric], judges)
-    if "reference" in table:
-        raise SuiteError(f"{where}: 'reference' is for a judged check")
+    if "reference" in table or "yes_ratings" in table:
+        raise SuiteError(f"{where}: 'reference' and 'yes_ratings' are for a judged check")
     if present is not None:
         return Check(metric, artifact, present=_regex(present, where))
     return Check(metric, artifact, absent=_regex(absent, where))
@@ -405,7 +407,13 @@ def _judged(table: Table, where: pathlib.Path, metric: Metric, judges: dict[str,
     reference = table.get("reference")
     if not isinstance(reference, str) or not reference.strip():
         raise SuiteError(f"{where}: a judged check needs a 'reference' string")
-    return Check(metric.id, _str(table, "artifact", where), judge=judge, reference=reference)
+    return Check(
+        metric.id,
+        _str(table, "artifact", where),
+        judge=judge,
+        reference=reference,
+        yes_ratings=_strs(table, "yes_ratings", where),
+    )
 
 
 def _reference(path: pathlib.Path) -> Reference:

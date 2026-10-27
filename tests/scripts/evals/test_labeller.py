@@ -1,9 +1,11 @@
 import json
+import pathlib
 
 import pytest
 from evals import labeller
 from evals.labeller import Finding, Labelled
-from evals.suite import Judge
+from evals.suite import Judge, load_suite
+from helpers import JUDGED, KEY, SUITE, write_suite
 
 TEXT = "**Important**\n\n1. `stats.py`: `_median` reimplements statistics.median.\n\n**Minor**\n\n1. A name."
 FOUND = (
@@ -151,6 +153,20 @@ def test_only_the_adjudicator_sees_the_labellers_work() -> None:
     )
     assert judged.count("<labeller>") == 3
     assert judged.startswith(plain.rstrip("\n"))
+
+
+def test_a_cases_own_ratings_override_the_judges(tmp_path: pathlib.Path) -> None:
+    judge = '\n[[judge]]\nid = "flags"\nquestion = "Q?"\nyes_ratings = ["Critical", "Important"]\n'
+    plain = load_suite(write_suite(tmp_path / "plain", SUITE + judge, KEY + JUDGED))
+    assert labeller.ratings(plain.cases[0], plain.judges["flags"]) == ("Critical", "Important")
+    strict = JUDGED + 'yes_ratings = ["Critical"]\n'
+    own = load_suite(write_suite(tmp_path / "own", SUITE + judge, KEY + strict))
+    assert labeller.ratings(own.cases[0], own.judges["flags"]) == ("Critical",)
+    important = Labelled((Finding("`_median` reimplements", "Important", "s"),), 0, "yes", "")
+    assert (
+        labeller.label_of(important, TEXT, labeller.ratings(own.cases[0], own.judges["flags"]))
+        == "no"
+    )
 
 
 def test_args_give_the_labeller_read_only_tools() -> None:

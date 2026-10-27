@@ -5,7 +5,8 @@ built for a session, with the task, the branch's diff, the stripped artifact, th
 question and the reference. It does not answer the question outright: it lists every
 finding the artifact makes (its opening words, the rating it gives, its subject), names
 the one that is about what the reference describes, then answers. The label follows by
-rule from the matched finding when the judge sets `yes_ratings`, else it is the answer,
+rule from the matched finding when the judge or the case's check sets `yes_ratings`,
+else it is the answer,
 and a "yes" needs a matched finding found in the artifact. Three labellers per item: a
 unanimous label stands; anything else goes to one adjudicator, given their three
 outputs. tests/evals/README.md ("Judges") says when the panel itself may be trusted.
@@ -175,6 +176,12 @@ def label_of(labelled: Labelled, text: str, yes_ratings: Sequence[str]) -> str:
     if labelled.answer == "yes" and matched is None:
         return "unsure"
     return labelled.answer
+
+
+def ratings(case: Case, judge: Judge) -> tuple[str, ...]:
+    """The ratings a "yes" label needs on the case: its judged check's, else the judge's."""
+    check = next((c for c in case.checks if c.judge == judge.id), None)
+    return (check.yes_ratings if check else ()) or judge.yes_ratings
 
 
 def unanimous(votes: Sequence[str]) -> str | None:

@@ -1115,6 +1115,7 @@ def panel_label(  # noqa: PLR0913 -- the call's inputs, and whether it may call
 ) -> tuple[tuple[str, ...], str] | None:
     """The labelling panel on one item: the three labellers' labels and the final one; None if one is missing."""
     _, text = item
+    accepted = labeller.ratings(case, judge_)
     outs = [
         _labelled(store, panel, case, judge_, item, index=i, call=call)
         for i in range(labeller.LABELLERS)
@@ -1122,7 +1123,7 @@ def panel_label(  # noqa: PLR0913 -- the call's inputs, and whether it may call
     if any(o is None for o in outs):
         return None
     done = [o for o in outs if o is not None]
-    votes = tuple(labeller.label_of(o, text, judge_.yes_ratings) for o in done)
+    votes = tuple(labeller.label_of(o, text, accepted) for o in done)
     if (final := labeller.unanimous(votes)) is not None:
         return votes, final
     others = tuple(json.dumps(dataclasses.asdict(o)) for o in done)
@@ -1131,7 +1132,7 @@ def panel_label(  # noqa: PLR0913 -- the call's inputs, and whether it may call
     )
     if adjudicated is None:
         return None
-    return votes, labeller.label_of(adjudicated, text, judge_.yes_ratings)
+    return votes, labeller.label_of(adjudicated, text, accepted)
 
 
 def sources(suite: Suite, judge_: Judge) -> calibrate.Sources:
@@ -1218,7 +1219,7 @@ def probe(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.
                 r.case.prompt, diff, judge_.question, r.check.reference, t
             ),
         )
-        label = labeller.label_of(out, text, judge_.yes_ratings) if out else "-"
+        label = labeller.label_of(out, text, labeller.ratings(real.case, judge_)) if out else "-"
         print(f"\n== labeller on {real.sample.key} ({real.case.id}): label {label}")
         print(raw.strip()[:3000])
     return 0

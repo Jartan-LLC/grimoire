@@ -62,7 +62,12 @@ def test_case_hash_covers_prompt_and_fixture_but_not_the_key(tmp_path: pathlib.P
         (
             SUITE + JUDGE,
             KEY.replace("present = '#42'", "present = '#42'\nreference = 'x'"),
-            "'reference' is for",
+            "'reference' and 'yes_ratings' are for",
+        ),
+        (
+            SUITE + JUDGE,
+            KEY.replace("present = '#42'", "present = '#42'\nyes_ratings = ['Minor']"),
+            "'reference' and 'yes_ratings' are for",
         ),
         (SUITE + JUDGE, KEY + JUDGED + JUDGED, "two checks name one judge"),
         (
