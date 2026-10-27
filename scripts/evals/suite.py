@@ -38,13 +38,13 @@ class Check:
     """One graded condition on a sample, scored 0 or 1, counted toward `metric`.
 
     A text check names an artifact (`commits`, `final`, `file:<path>`, `gh` (the calls
-    the sandbox's `gh` recorded), `report:<agent>` (every report that agent handed back)
-    or `brief:<agent>` (every Agent-call prompt the main thread sent that agent type, but
-    for a call that ended in error))
-    and a `present` or `absent` regex. A delivery check names a `skill` and a `state`:
-    with a `write` kind, the state the skill must be in at every such write; without
-    one, `loaded` or `not-loaded` over the whole session (trigger cases). It reads the
-    main thread's deliveries and writes, or with an `agent`, that subagent's.
+    the sandbox's `gh` recorded, Claude Code's own aside), `report:<agent>` (every report
+    that agent handed back) or `brief:<agent>` (every Agent-call prompt the main thread
+    sent that agent type, but for a call that ended in error)) and a `present` or
+    `absent` regex. A delivery check names a `skill` and a `state`: with a `write` kind,
+    the state the skill must be in at every such write; without one, `loaded` or
+    `not-loaded` over the whole session (trigger cases). It reads the main thread's
+    deliveries and writes, or with an `agent`, that subagent's.
     """
 
     metric: str
