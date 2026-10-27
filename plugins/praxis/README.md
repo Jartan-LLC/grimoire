@@ -99,9 +99,8 @@ session you may want a higher `COMPACT_CONTEXT_THRESHOLD`.
 ```
 
 The PR stays a draft until it is marked ready. Your agent is told to mark it ready once it is ready
-for someone else, but some models often leave it a draft when you say the work is done
-without asking for the PR to be marked ready. If it
-leaves the PR a draft, run `gh pr ready` yourself.
+for someone else, but some models often leave it a draft when you say the work is done without asking
+for the PR to be marked ready. If it leaves the PR a draft, run `gh pr ready` yourself.
 
 ## Credits
 
