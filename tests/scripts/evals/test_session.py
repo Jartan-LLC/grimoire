@@ -391,7 +391,7 @@ def test_private_paths_from_a_worktree_hold_every_working_tree_of_the_clone(
     remote = dataclasses.replace(case, remote=True)
     assert session.private_paths(remote, spec, tmp_path / "sandbox")[-2:] == [
         str(tmp_path / "sandbox" / "gh-stub"),
-        "replies.json",
+        "gh-stub-replies.json",
     ]
 
 

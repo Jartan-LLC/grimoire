@@ -209,7 +209,7 @@ def test_the_installed_stub_logs_every_call_and_fails_one_it_has_no_reply_for(
         ["pr", "view", "7"],
     ]
     assert calls[0]["files"] == {"b.md": "Closes #42\n"}
-    assert json.loads((sandbox / "gh-stub" / "replies.json").read_text())[1]["exit"] == 1
+    assert json.loads((sandbox / "gh-stub" / "gh-stub-replies.json").read_text())[1]["exit"] == 1
     assert list((sandbox / "gh-config").iterdir()) == []
 
 

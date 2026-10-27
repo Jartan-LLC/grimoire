@@ -326,14 +326,17 @@ def test_classify_catches_a_private_path_written_with_a_doubled_slash() -> None:
 
 
 def test_classify_excludes_a_session_that_reached_the_gh_stubs_replies() -> None:
-    private = ["/checkout", "/sandbox/gh", "replies.json"]
+    private = ["/checkout", "/sandbox/gh", "gh-stub-replies.json"]
 
     def reasons(command: str) -> list[str]:
         events = [init(), call("r1", "Bash", command=command), result_of("r1"), RESULT]
         parsed = trace.parse(events, PLUGINS)
         return trace.classify(parsed, PLUGINS, MODEL, False, private, arms="/store/arms")[0]
 
-    assert reasons("cat ../gh-stub/replies.json") == ["the session reached replies.json"]
+    assert reasons("cat ../gh-stub/gh-stub-replies.json") == [
+        "the session reached gh-stub-replies.json"
+    ]
+    assert reasons("cat fixture/replies.json") == []
     assert reasons("ls /sandbox/gh") == ["the session reached /sandbox/gh"]
     assert reasons("gh pr create --draft --fill") == []
 

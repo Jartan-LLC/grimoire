@@ -1,9 +1,9 @@
 """A stand-in for the GitHub CLI in an eval session: it records each call and answers from the case's replies.
 
 The runner installs this file as `bin/gh` in a sample's sandbox, beside
-`gh-stub/replies.json` (the case's `[[gh]]` tables) and `gh-stub/calls.jsonl` (the log it
-appends to). It reaches no network and uses only the standard library. A call no reply
-matches fails, so a session never reads a success the case did not script.
+`gh-stub/gh-stub-replies.json` (the case's `[[gh]]` tables) and `gh-stub/calls.jsonl`
+(the log it appends to). It reaches no network and uses only the standard library. A
+call no reply matches fails, so a session never reads a success the case did not script.
 
 It does not parse gh's flags, whose arity varies by command (`pr create -f` takes no
 value, `api -f` does). It logs the argv as given, then the text of every regular file an
@@ -40,6 +40,8 @@ PRIVATE = ("secret", "variable", "auth")
 # The runner's temp directory and `/tmp`: an agent writes a body file to `/tmp/pr-body.md`
 # with the Write tool, which the session's TMPDIR (the sandbox's `tmp`) does not redirect.
 TEMP_ROOTS = "GRIMOIRE_GH_STUB_TEMP"
+# A name no fixture would use: a tool call that names it excludes a remote sample.
+REPLIES = "gh-stub-replies.json"
 
 
 def candidates(arg: str) -> list[str]:
@@ -150,7 +152,7 @@ def main(argv: list[str], state: pathlib.Path) -> int:
         os.write(log, (json.dumps(entry) + "\n").encode())
     finally:
         os.close(log)
-    replies = json.loads((state / "replies.json").read_text())
+    replies = json.loads((state / REPLIES).read_text())
     reply = answer(replies, argv)
     if reply is None:
         print(f"gh stub: no reply for: {call_line(argv)}", file=sys.stderr)

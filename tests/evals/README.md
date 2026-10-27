@@ -127,7 +127,7 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   (`^pr create`), and grade the behaviour under test with a check, never with a `match`: a narrow match
   (`--draft`) fails the other calls, and the failure invites the agent to retry until it hits the
   scripted one. The session could read the answer too: the replies sit in its sandbox, so a sample
-  whose tool calls name the stub's directory or `replies.json` is excluded.
+  whose tool calls name the stub's directory or `gh-stub-replies.json` is excluded.
 
   ```toml
   [[gh]]
@@ -337,7 +337,7 @@ After changing the runner or the verdict rule:
   of the suite), except a fix that makes a check read a file the samples did not collect: grading
   refuses, and the screen needs fresh samples (a new `--trial`).
 - The check that a session stayed out of the suite reads the absolute paths in its tool calls, and the
-  stub's `replies.json` by name: a relative path gets past it, such as `cd` into an arm then
+  stub's `gh-stub-replies.json` by name: a relative path gets past it, such as `cd` into an arm then
   `ls ../../samples`, or `cat ../gh-stub/*` from the repository, and so does a path built from an
   environment variable that holds the store's path, such as `ls $GIT_CEILING_DIRECTORIES/samples`, and
   an absolute path that names a directory above one the check guards, such as `grep -r` over the

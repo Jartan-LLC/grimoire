@@ -27,7 +27,7 @@ from dataclasses import asdict, dataclass
 
 from . import cache, trace
 from .arms import Arm
-from .gh_stub import TEMP_ROOTS
+from .gh_stub import REPLIES, TEMP_ROOTS
 from .proc import CLAUDE, GIT, UV, run
 from .suite import Case, Reply
 
@@ -51,7 +51,6 @@ RUNNER = 2
 REMOTE_RUNNER = 3
 PRELOADED = re.compile(r"\[Agent: ([^\]]+)\] Preloaded skill '([^']+)'")
 GH_STUB = pathlib.Path(__file__).with_name("gh_stub.py")
-REPLIES = "replies.json"
 # The stub's replies and log; no other sandbox path may contain this one's, which is private.
 GH_STATE = "gh-stub"
 GH_LOGIN = ("GH_TOKEN", "GITHUB_TOKEN", "GH_ENTERPRISE_TOKEN", "GITHUB_ENTERPRISE_TOKEN", "GH_HOST")
@@ -258,7 +257,7 @@ def private_paths(case: Case, spec: Spec, sandbox: pathlib.Path) -> list[str]:
 
     The clone's other working trees, the main one and each sibling worktree, hold the
     same suite and its answers. A remote case's session must not name the `gh` stub's
-    directory in `sandbox`, nor its `replies.json` by any path: a reply's `match` can show
+    directory in `sandbox`, nor its REPLIES file by any path: a reply's `match` can show
     what the case wants the agent to send.
     """
     listed = run(
