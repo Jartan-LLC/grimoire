@@ -141,6 +141,9 @@ def test_the_gh_artifact_keeps_a_multi_line_body_off_the_call_lines() -> None:
         (["release", "create", "v1", "--notes", "Long", "-n=Short"], ["Long", "Short"]),
         (["release", "edit", "v1", "-n", "Short"], ["Short"]),
         (["pr", "create", "-n", "x"], []),
+        (["pr", "close", "7", "--comment", "Long", "-c=Short"], ["Long", "Short"]),
+        (["issue", "close", "7", "-c", "Short"], ["Short"]),
+        (["issue", "list", "-c", "x"], []),
     ],
 )
 def test_the_gh_artifact_takes_a_body_only_where_the_flag_means_one(
