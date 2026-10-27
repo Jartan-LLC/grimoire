@@ -9,8 +9,11 @@ It does not parse gh's flags, whose arity varies by command (`pr create -f` take
 value, `api -f` does). It logs the argv as given, then the text of every regular file an
 argument or a part of one names (`candidates`) inside its roots, and stdin when one of
 those is `-`. The roots are the sandbox and the temp directories the runner names in the
-TEMP_ROOTS variable, an `os.pathsep` list; without that variable, the sandbox alone. That
-can include a file no gh command would read, and misses only one outside the roots.
+GRIMOIRE_GH_STUB_TEMP variable (TEMP_ROOTS holds the name), an `os.pathsep` list; without
+that variable, the sandbox alone. That can include a file no gh command would read. It
+misses a file outside the roots, any file or stdin of a call with a PRIVATE argument
+(`auth`, `secret` or `variable`), and the text of a file over MAX_BYTES, which it lists
+under `over_cap` unread.
 
 A change to what this stub answers, how it matches a call or what it logs, or to the
 remote setup in `session.py`, changes what a remote session can do: bump REMOTE_RUNNER
