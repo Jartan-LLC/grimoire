@@ -180,7 +180,8 @@ the PR how many versions you screened.
   `(?:.* )?` lets gh flags come before the subcommand, as in `gh -R o/r pr create`. An inline body
   stays on its own call line, so a body passed as `--body "... --draft ..."` can still meet that form.
   The stub reads a file only inside the sandbox, the eval runner's temp directory or `/tmp`, where an
-  agent may write `/tmp/pr-body.md`: a body file elsewhere reads as absent. It reads stdin whenever an
+  agent may write `/tmp/pr-body.md`: a body file elsewhere reads as absent, as does a body piped to
+  `/dev/stdin` or passed as `/dev/fd/N` by process substitution `<(...)`. It reads stdin whenever an
   argument or a tail of one is exactly `-`, a key's value included (`-f q=-`), where gh would not, so
   such a call waits while stdin stays open. It reads no file or stdin of a call with an argument equal to
   `secret`, `variable` or `auth` anywhere, a label included (`--label auth`): such a call is recorded
