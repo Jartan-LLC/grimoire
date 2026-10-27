@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Run local skill evals. tests/evals/README.md says how to write and read them.
 
-  plan                the suites the working tree's change needs, what no suite covers,
-                      and per split the smallest effect each suite can see (free)
+  plan [--tier N]     the suites the working tree's change reaches, each DIRECT or INDIRECT,
+                      and what no suite covers; with a testing tier, the steps that tier
+                      takes. It exits 1 when a suite fails to load, and at tier 4 when a
+                      direct suite's split is too weak or a changed file has no suite (free)
   lint                check every suite before any session runs (free; part of make verify)
   run SUITE --arm A   run SUITE's cases on arm none, old or new (spends inference)
   screen SUITE        run old and new side by side, then print the verdict (spends inference)
@@ -28,7 +30,7 @@ from typing import cast
 from evals import cache, gh_stub, grade, session, trace
 from evals.arms import Arm, merge_base, new_arm, none_arm, old_arm
 from evals.lint import lint
-from evals.plan import make_plan
+from evals.plan import Listed, first_gate, make_plan
 from evals.proc import CLAUDE, GIT, run
 from evals.suite import Case, Suite, SuiteError, load_suite, python_cache, tree_hash
 from evals.verdict import (
@@ -125,7 +127,7 @@ def run_samples(work: list[Work], jobs: int) -> list[cache.Sample]:
         sample = session.run_sample(case, arm, index, spec, breaker)
         state = "ok" if sample.valid else "EXCLUDED " + "; ".join(sample.reasons)
         state += f" (spoiled: {sample.spoiled})" if sample.spoiled else ""
-        print(f"  {arm.name} {case.id} #{index}: {state}", flush=True)
+        print(f"  {arm.name} {case.id} #{index}: {state}: {sample.key}", flush=True)
         return sample
 
     with ThreadPoolExecutor(max_workers=jobs) as pool:
@@ -427,8 +429,13 @@ def decide(run: Screen, trial: str, done: list[cache.Sample]) -> None:
     print(f"\nevidence: {evidence}\n")
 
 
-def split_report(suite: Suite, old_holds_target: bool = True) -> tuple[list[str], bool]:
-    """What each held-out split can see, per model; and whether any split is too weak.
+def split_report(
+    suite: Suite,
+    old_holds_target: bool = True,
+    advise: bool = True,
+    splits: tuple[str, ...] = ("screen", "confirm"),
+) -> tuple[list[str], bool]:
+    """What each of the held-out `splits` can see, per model; and whether any is too weak.
 
     Too weak: too few units for any verdict, or less than an 80% chance that a positive
     control (the target removed) comes out WORSE, estimated from the recorded baselines.
@@ -437,12 +444,13 @@ def split_report(suite: Suite, old_holds_target: bool = True) -> tuple[list[str]
     and baselines count each case's own non-guard checks, so a target case whose checks the
     pass rule does not read adds to it though the verdict cannot see that case. A target the merge base lacks
     gets no control at all, and a gate model missing either arm's baselines is too weak.
+    With `advise`, a weak split's lines also say what fixes it: add cases, record baselines.
     """
     rule = suite.pass_rule
     alpha = worse_alpha(rule)
     lines: list[str] = []
     weak = False
-    for split in ("screen", "confirm"):
+    for split in splits:
         cases = suite.split(split)
         units = sorted({suite.unit(c.id) for c in cases})
         if not units:
@@ -464,7 +472,9 @@ def split_report(suite: Suite, old_holds_target: bool = True) -> tuple[list[str]
                 weak = True
         lines.append(line)
         if smallest_p(scored) >= alpha:
-            lines.append(f"  {split}: too few units for any verdict; add cases")
+            lines.append(
+                f"  {split}: too few units for any verdict" + ("; add cases" if advise else "")
+            )
             weak = True
         for model in suite.models:
             if not old_holds_target:
@@ -477,7 +487,10 @@ def split_report(suite: Suite, old_holds_target: bool = True) -> tuple[list[str]
                 any(c.failure_rate(model, arm) is not None for c in cases)
                 for arm in ("old", "none")
             ):
-                lines.append(f"    {model}: no old or no none baselines on this split; record them")
+                lines.append(
+                    f"    {model}: no old or no none baselines on this split"
+                    + ("; record them" if advise else "")
+                )
                 weak = weak or model not in suite.watch
                 continue
             rates = [[_case_rates(c, model) for c in cases if suite.unit(c.id) == u] for u in units]
@@ -489,7 +502,8 @@ def split_report(suite: Suite, old_holds_target: bool = True) -> tuple[list[str]
             advice = (
                 f"{needed} samples per case reach 80%"
                 if needed
-                else "no sample count up to 10 reaches 80%: add cases the target changes"
+                else "no sample count up to 10 reaches 80%"
+                + (": add cases the target changes" if advise else "")
             )
             if model in suite.watch:
                 advice += " (watch model: does not gate)"
@@ -509,28 +523,100 @@ def _case_rates(case: Case, model: str) -> tuple[float, float]:
     return old, none
 
 
-def plan_command(base: str) -> int:
-    """Print the suites the change needs, what no suite covers, and what each split can see."""
+# Which screens each testing tier runs lives here and in plan_command alone; "When a change
+# needs evals" in tests/evals/README.md defines the tiers, the smoke test and when a change goes
+# ahead.
+SMOKE, FULL = 3, 4  # the tiers that write a smoke test and a full suite
+UNCOVERED_STEP = {
+    2: "name it in the PR as covered by no suite",
+    SMOKE: "cover it in the smoke test",
+    FULL: "write or extend a suite to cover it",
+}
+
+
+def next_steps(entry: Listed, path: str, tier: int) -> list[str]:
+    """The steps tier `tier` (2 to 4) takes on one suite.
+
+    A direct suite is screened on every model, and at tier 4 first gains cases the changed text
+    affects (and confirm cases, if it has none) and is confirmed. An indirect one is screened
+    once, from tier 3, on its first gate model, or its first model when all are watch models.
+    """
+    suite = entry.suite
+    if not entry.direct and tier < SMOKE:
+        return ["  nothing to run"]
+    models = suite.models if entry.direct else (first_gate(suite),)
+    lines: list[str] = []
+    if entry.direct and tier == FULL:
+        lines.append(
+            '  first: add cases the changed text affects ("Choosing cases" in tests/evals/README.md)'
+        )
+        if not suite.split("confirm"):
+            lines.append('  first: write confirm cases ("Splits" in tests/evals/README.md)')
+    lines += [
+        f"  next: make eval-screen SUITE={path} MODEL={model}"
+        + (" (watch model: advisory)" if model in suite.watch else "")
+        for model in models
+    ]
+    if entry.direct:
+        if tier == FULL:
+            lines.append("  then, before the PR: each of those again with SPLIT=confirm")
+    elif models[0] in suite.watch:
+        lines.append("  indirect: screen only, on its first model (all are watch models: advisory)")
+    else:
+        lines.append("  indirect: screen only, on one gate model")
+    return lines
+
+
+def plan_command(base: str, tier: int | None = None) -> int:
+    """Print the suites the change reaches and what no suite covers; with `tier`, that tier's steps.
+
+    Without a tier, the plan only lists what the change reaches and asks for one; at tier 1 it
+    lists it with no steps, so a wrong tier-1 call shows what it waves through. It exits 1 when
+    a suite does not load, and at tier 4, where a weak split binds, when a direct suite's split
+    is too weak or a changed file has no suite; at tiers 2 and 3 the screen split's power report
+    is printed for the PR to say what it shows, without its advice.
+    """
     plan = make_plan(ROOT, base)
     for error in plan.broken:
         print(f"BROKEN SUITE: {error}")
-    weak = False
-    for suite, hits in plan.suites:
-        print(f"{shown(suite.path)}: covers {len(hits)} file(s) changed or loading a change")
-        lines, suite_weak = split_report(suite, old_holds(suite.target, base))
-        print("\n".join(lines))
-        weak = weak or suite_weak
-        for model in suite.models:
-            role = " (watch model: advisory)" if model in suite.watch else ""
-            print(f"  next: make eval-screen SUITE={shown(suite.path)} MODEL={model}{role}")
-        print("  then, before the PR: each of those again with SPLIT=confirm")
-    for path in plan.uncovered:
-        print(
-            f"UNCOVERED: {path} -- if the edit targets a behaviour you have seen go wrong, write cases first"
-        )
+    failed = bool(plan.broken)
     if not plan.suites and not plan.uncovered:
         print("no plugin behaviour changed: nothing to evaluate")
-    return 1 if plan.broken or weak else 0
+        return int(failed)
+    for entry in plan.suites:
+        suite = entry.suite
+        kind = "DIRECT" if entry.direct else "INDIRECT"
+        print(f"{shown(suite.path)}: {kind}, covers {', '.join(entry.hits)}")
+        if tier is None or tier == 1:
+            continue
+        if entry.direct:
+            binds = tier == FULL
+            # The confirm split runs only at tier 4.
+            splits = ("screen", "confirm") if binds else ("screen",)
+            lines, weak = split_report(suite, old_holds(suite.target, base), binds, splits)
+            print(
+                "  what its splits can see:"
+                if binds
+                else "  what its screen split can see (say in the PR what it shows):"
+            )
+            print("\n".join(lines))
+            failed = failed or (weak and binds)
+        print("\n".join(next_steps(entry, shown(suite.path), tier)))
+    failed = failed or (tier == FULL and bool(plan.uncovered))
+    if tier == SMOKE:
+        print('smoke test: write one ("Smoke tests" in tests/evals/README.md)')
+    for path in plan.uncovered:
+        print(
+            f"UNCOVERED: {path}" + (f" -- {UNCOVERED_STEP[tier]}" if tier in UNCOVERED_STEP else "")
+        )
+    if tier == 1:
+        print("no eval is due if nothing this change alters reaches the model")
+    if tier is None:
+        print(
+            'pick the change\'s testing tier ("When a change needs evals" in tests/evals/README.md),'
+            " then run make eval-plan TIER=<n>"
+        )
+    return int(failed)
 
 
 def _effect(effect: float) -> str:
@@ -632,7 +718,15 @@ def _parser() -> argparse.ArgumentParser:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     sub = parser.add_subparsers(dest="command", required=True)
-    sub.add_parser("plan").add_argument("--base", default="main")
+    plan = sub.add_parser("plan")
+    plan.add_argument("--base", default="main")
+    plan.add_argument(
+        "--tier",
+        type=int,
+        choices=(1, 2, 3, 4),
+        default=None,
+        help='the change\'s testing tier ("When a change needs evals" in tests/evals/README.md)',
+    )
     sub.add_parser("lint")
     sub.add_parser("show").add_argument("key")
     size = sub.add_parser("size")
@@ -682,7 +776,7 @@ def main() -> int:
     args = _parser().parse_args()
 
     if args.command == "plan":
-        return plan_command(args.base)
+        return plan_command(args.base, args.tier)
     if args.command == "lint":
         found = lint(ROOT, git("ls-files").split())
         print("\n".join(found) if found else "every eval suite passes its lint")

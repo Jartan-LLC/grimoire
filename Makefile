@@ -99,8 +99,8 @@ check: lint typecheck test verify  ## Run CI's lint, typecheck, test and verify 
 # The eval targets run locally on your own `claude` login and are never part of check:
 # CI holds no inference token. eval-plan is free; eval-run and eval-screen start sessions.
 BASE ?= main
-eval-plan:  ## List the eval suites this change needs, against BASE (default main)
-	python3 scripts/eval.py plan --base $(BASE)
+eval-plan:  ## List the eval suites this change reaches against BASE (default main); TIER=<n> prints that testing tier's steps
+	python3 scripts/eval.py plan --base $(BASE) $(if $(TIER),--tier $(TIER))
 
 eval-size:  ## Show what SUITE's splits can see on each model, from its recorded baselines
 	python3 scripts/eval.py size $(or $(SUITE),$(error set SUITE=tests/evals/...)) --base $(BASE)

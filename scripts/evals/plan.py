@@ -3,7 +3,9 @@
 A changed skill also changes every agent that preloads it and every skill, agent,
 command or hook that tells the agent to load it, so those are covered too, and so
 on until nothing new is reached. The pointers come from `scripts/check-wiring.py`,
-so the planner and `make verify` read the wiring alike.
+so the planner and `make verify` read the wiring alike. A suite that covers a changed
+file is direct; one reached only through a file that loads a changed skill, agent or
+command is indirect.
 """
 
 import fnmatch
@@ -24,10 +26,23 @@ FILE_DEPTH = 4  # plugins/<plugin>/agents/<agent>.md
 
 
 @dataclass(frozen=True)
-class Plan:
-    """The suites a change needs, the changed plugin files none covers, and suites that fail to load."""
+class Listed:
+    """A suite the change reaches, with `hits`, the reached files it covers.
 
-    suites: list[tuple[Suite, list[str]]]
+    `direct` when one of the hits is a changed file; otherwise the suite is reached only
+    through a file that loads a changed skill, agent or command.
+    """
+
+    suite: Suite
+    hits: list[str]
+    direct: bool
+
+
+@dataclass(frozen=True)
+class Plan:
+    """The suites a change reaches, the changed plugin files none covers, and suites that fail to load."""
+
+    suites: list[Listed]
     uncovered: list[str]
     broken: list[str]
 
@@ -82,6 +97,23 @@ def covered_by(suite: Suite, files: list[str]) -> list[str]:
     return [f for f in files if any(fnmatch.fnmatch(f, glob) for glob in suite.covers)]
 
 
+def listed(
+    suites: list[Suite], changed: list[str], references: dict[str, set[tuple[str, str]]]
+) -> list[Listed]:
+    """The suites covering a changed file or a file that loads a changed target, each marked direct or not."""
+    reached = expand(changed, references)
+    return [
+        Listed(suite, hits, direct=bool(covered_by(suite, changed)))
+        for suite in suites
+        if (hits := covered_by(suite, reached))
+    ]
+
+
+def first_gate(suite: Suite) -> str:
+    """The suite's first gate model, or its first model when every one is a watch model."""
+    return next((m for m in suite.models if m not in suite.watch), suite.models[0])
+
+
 def make_plan(root: pathlib.Path, base: str) -> Plan:
     """The plan for the working tree against `base`."""
     plugin_files = [
@@ -89,16 +121,13 @@ def make_plan(root: pathlib.Path, base: str) -> Plan:
         if f.startswith("plugins/") and not f.endswith(UNTESTED) and GENERATED not in f
     ]  # fmt: skip
     references = {str(p.relative_to(root)): t for p, t in _references(root).items()}
-    reached = expand(plugin_files, references)
-    suites: list[tuple[Suite, list[str]]] = []
+    suites: list[Suite] = []
     broken: list[str] = []
     for config in sorted((root / "tests" / "evals").glob("**/suite.toml")):
         try:
-            suite = load_suite(config.parent)
+            suites.append(load_suite(config.parent))
         except SuiteError as error:
             broken.append(str(error))
-            continue
-        if hits := covered_by(suite, reached):
-            suites.append((suite, hits))
-    covered = {f for _, hits in suites for f in hits}
-    return Plan(suites, [f for f in plugin_files if f not in covered], broken)
+    needed = listed(suites, plugin_files, references)
+    covered = {f for entry in needed for f in entry.hits}
+    return Plan(needed, [f for f in plugin_files if f not in covered], broken)
