@@ -30,7 +30,9 @@ def _verify(case: Case, command: str, fixed: bool) -> int | None:
     """The exit code of a plant's `verify` command in the fixture as a session gets it, or None on a timeout.
 
     The fixture is built the way a session's is, `build.py` included, so a problem the
-    build plants is verified too; `fix/` is then laid over it when `fixed`.
+    build plants is verified too; `fix/` is then laid over it when `fixed`. The origin
+    the runner makes for a remote case is not made here: `verify` sees an origin only when
+    `build.py` makes one.
     """
     with tempfile.TemporaryDirectory(prefix="grimoire-lint-") as scratch:
         work = pathlib.Path(scratch) / "repo"
