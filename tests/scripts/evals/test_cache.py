@@ -19,7 +19,13 @@ def test_root_is_the_clones_git_common_dir_from_any_worktree_unless_overridden(
     assert cache.root(clone) == store
     assert cache.root(worktree) == store
     monkeypatch.setenv(cache.STORE, str(tmp_path / "elsewhere"))
-    assert cache.root(worktree) == tmp_path / "elsewhere"
+    assert cache.root(worktree) == tmp_path.resolve() / "elsewhere"
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv(cache.STORE, "relative/../store")
+    assert cache.root(worktree) == tmp_path.resolve() / "store"
+    monkeypatch.setenv("HOME", str(tmp_path / "home"))
+    monkeypatch.setenv(cache.STORE, "~/store")
+    assert cache.root(worktree) == tmp_path.resolve() / "home" / "store"
 
 
 def test_cache_key_changes_with_every_input() -> None:

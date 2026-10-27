@@ -31,9 +31,12 @@ def common_dir(checkout: pathlib.Path) -> pathlib.Path:
 
 
 def root(checkout: pathlib.Path) -> pathlib.Path:
-    """The store: `$GRIMOIRE_EVALS_STORE`, else `grimoire-evals/` in `checkout`'s git common directory."""
+    """The store: `$GRIMOIRE_EVALS_STORE`, else `grimoire-evals/` in `checkout`'s git common directory.
+
+    The override is made absolute, `~` expanded, as plugin paths in it must be.
+    """
     if override := os.environ.get(STORE):
-        return pathlib.Path(override)
+        return pathlib.Path(override).expanduser().resolve()
     return common_dir(checkout) / "grimoire-evals"
 
 
