@@ -114,6 +114,16 @@ def test_the_gh_artifact_lists_each_call_then_the_bodies_it_sent() -> None:
     assert grade.text_of(grade.Outputs(gh=gh), "gh") == gh
 
 
+def test_the_gh_artifact_keeps_a_multi_line_body_off_the_call_lines() -> None:
+    body = "Fixes it.\n\nCloses #42"
+    argv = ["pr", "create", "--body", body, "--draft", "-b=Second"]
+    gh = grade.gh_text([{"argv": argv, "stdin": "", "files": {}}])
+    lines = Check("m", "gh", r"^gh pr create.*--draft", None)
+    assert grade.text_score(lines, gh) == 1.0
+    assert grade.text_score(Check("m", "gh", r"^Closes #42$", None), gh) == 1.0
+    assert gh.endswith(f"\n\n{body}\n\nSecond")
+
+
 def test_a_brief_check_reads_every_prompt_the_main_thread_sent_its_agent() -> None:
     parsed = trace.parse(
         [

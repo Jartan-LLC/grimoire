@@ -7,28 +7,32 @@ never reads a success the case did not script.
 """
 
 import json
+import os
 import pathlib
 import re
 import sys
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
 
-# gh reads a file for these: `pr create --body-file`, its short `-F`, and `api -F key=@path`.
-FILE_FLAGS = ("--body-file", "-F", "--field")
+# gh reads a file for these: `pr create --body-file`, `api --input`, each naming a path.
+PATH_FLAGS = ("--body-file", "--input")
+# `-F` is `pr create`'s short `--body-file`, and `api`'s `--field`, a file only as `key=@path`.
+FIELD_FLAGS = ("-F", "--field")
 STDIN = "-"
 
 
-def file_refs(argv: list[str]) -> list[str]:
-    """The files a call tells gh to read, in order; `-` stands for stdin.
-
-    A `--field key=value` names a file only as `key=@path`; any other value is text.
-    """
-    found: list[str] = []
+def flag_values(argv: Sequence[str], flags: Sequence[str]) -> Iterator[tuple[str, str]]:
+    """Each (flag, value) in `argv` for one of `flags`, given as `--flag value` or `--flag=value`."""
     for i, arg in enumerate(argv):
         flag, eq, inline = arg.partition("=")
-        if flag not in FILE_FLAGS:
-            continue
-        value = inline if eq else (argv[i + 1] if i + 1 < len(argv) else "")
-        if "=" in value:
+        if flag in flags:
+            yield flag, inline if eq else (argv[i + 1] if i + 1 < len(argv) else "")
+
+
+def file_refs(argv: list[str]) -> list[str]:
+    """The files a call tells gh to read, in order; `-` stands for stdin."""
+    found: list[str] = []
+    for flag, value in flag_values(argv, (*PATH_FLAGS, *FIELD_FLAGS)):
+        if flag in FIELD_FLAGS and "=" in value:
             key_value = value.partition("=")[2]
             if key_value.startswith("@"):
                 found.append(key_value[1:])
@@ -37,11 +41,16 @@ def file_refs(argv: list[str]) -> list[str]:
     return found
 
 
+def call_line(argv: Sequence[str]) -> str:
+    r"""The argv joined with spaces, each newline written as `\n`, so a call is one line."""
+    return " ".join(arg.replace("\n", "\\n") for arg in argv)
+
+
 def answer(replies: Sequence[Mapping[str, object]], argv: list[str]) -> tuple[str, int] | None:
-    """The stdout and exit code of the first reply whose `match` finds the argv joined with spaces."""
-    joined = " ".join(argv)
+    """The stdout and exit code of the first reply whose `match` finds the call's `call_line`."""
+    line = call_line(argv)
     for reply in replies:
-        if re.search(str(reply["match"]), joined):
+        if re.search(str(reply["match"]), line):
             code = reply.get("exit", 0)
             return str(reply.get("stdout", "")), code if isinstance(code, int) else 0
     return None
@@ -72,15 +81,19 @@ def record(
 def main(argv: list[str], state: pathlib.Path) -> int:
     """Log the call to `state/calls.jsonl`, then print the scripted reply or fail."""
     entry, missing = record(argv, sys.stdin.read, pathlib.Path.cwd())
-    with (state / "calls.jsonl").open("a") as log:
-        log.write(json.dumps(entry) + "\n")
+    # One write to an O_APPEND file, so the log lines of calls made in parallel cannot interleave.
+    log = os.open(state / "calls.jsonl", os.O_WRONLY | os.O_APPEND | os.O_CREAT)
+    try:
+        os.write(log, (json.dumps(entry) + "\n").encode())
+    finally:
+        os.close(log)
     if missing:
         print(f"gh stub: cannot read {', '.join(missing)}", file=sys.stderr)
         return 1
     replies = json.loads((state / "replies.json").read_text())
     reply = answer(replies, argv)
     if reply is None:
-        print(f"gh stub: no reply for: {' '.join(argv)}", file=sys.stderr)
+        print(f"gh stub: no reply for: {call_line(argv)}", file=sys.stderr)
         return 1
     sys.stdout.write(reply[0])
     return reply[1]

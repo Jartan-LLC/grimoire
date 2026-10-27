@@ -5,9 +5,11 @@ import re
 from collections.abc import Iterable, Sequence
 from typing import cast
 
-from . import trace
+from . import gh_stub, trace
 from .cache import Sample
 from .suite import BRIEF, REPORT, Case, Check, Reference
+
+BODY_FLAGS = ("--body", "-b")
 
 
 class Uncollected(Exception):  # noqa: N818 -- reads as the condition, like StopIteration
@@ -46,14 +48,18 @@ def text_of(outputs: Outputs, artifact: str) -> str:
 
 
 def gh_text(calls: Sequence[dict[str, object]]) -> str:
-    """The calls the sandbox's `gh` recorded, one `gh <argv>` line each, then their bodies."""
+    """The calls the sandbox's `gh` recorded, one `gh <call_line>` line each, then their bodies.
+
+    The bodies are each call's `--body` or `-b` text, stdin and body files, newlines kept.
+    """
     lines: list[str] = []
     bodies: list[str] = []
     for call in calls:  # the stub's own log entries: argv, stdin, files
         argv = cast("list[str]", call.get("argv", []))
         files = cast("dict[str, str]", call.get("files", {}))
-        lines.append(" ".join(["gh", *argv]))
-        bodies += [t for t in (str(call.get("stdin", "")), *files.values()) if t.strip()]
+        lines.append(f"gh {gh_stub.call_line(argv)}")
+        inline = [value for _, value in gh_stub.flag_values(argv, BODY_FLAGS)]
+        bodies += [t for t in (*inline, str(call.get("stdin", "")), *files.values()) if t.strip()]
     return "\n\n".join(["\n".join(lines), *bodies]) if calls else ""
 
 

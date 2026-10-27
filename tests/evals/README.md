@@ -107,14 +107,14 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   false behaves differently. Say it so the fixture cannot contradict it, as a decision or an issue
   tracked elsewhere, rather than build it in. A fixture's earlier history may be as untidy as a real
   one: a past commit's message need not match its diff unless the task depends on it.
-- **A task that pushes or calls GitHub** sets `remote = true` in the key. The session's repository
-  then has an `origin`: a local bare repository holding every branch the fixture and `build.py` made,
-  each branch tracking it, so `git push` works. Its `gh` is a stub that records every call and answers
-  from the key's `[[gh]]` tables: the first whose `match` regex finds the call's arguments joined with
-  spaces (`pr create --draft --title ...`) prints its `stdout` and exits with its `exit` (default 0). A
-  call no reply matches fails with `gh stub: no reply for: <arguments>`, so script every call the task
-  needs, reads (`gh pr view`, `gh api`) included. A `[[gh]]` table implies `remote = true`, and the
-  replies count in the case hash, like the fixture.
+- **A task that pushes or calls GitHub** sets `remote = true` in the key. The session's repository then
+  has an `origin`: a local bare repository holding every branch the fixture and `build.py` made, each
+  branch tracking it, so `git push` works. Its `gh` is a stub that records every call and answers from
+  the key's `[[gh]]` tables: the first whose `match` regex finds the call's arguments joined with spaces,
+  each newline in them written as `\n` (`pr create --draft --title ...`), prints its `stdout` and exits
+  with its `exit` (default 0). A call no reply matches fails with `gh stub: no reply for: <arguments>`,
+  so script every call the task needs, reads (`gh pr view`, `gh api`) included. A `[[gh]]` table implies
+  `remote = true`, and the replies count in the case hash, like the fixture.
 
   ```toml
   [[gh]]
@@ -152,10 +152,12 @@ the PR how many versions you screened.
   prompt the main thread sent it, and a delivery check with `agent = "<plugin>:<agent>"` reads that
   subagent's skill loads and writes instead of the main thread's. A reference gives reports under
   `[reports]` and briefs under `[briefs]`, as `"<plugin>:<agent>" = "text"`.
-- **What the agent sent to GitHub:** `gh` is every call the stub recorded, one `gh <arguments>` line
-  each, then the text of each body file or stdin they passed. It holds calls Claude Code makes on its
-  own too (`gh pr view --json url` on 2.1.311), so an `absent` check must not match those. A reference
-  gives it as `gh = "text"`. The lint fails a `gh` check on a case without a remote.
+- **What the agent sent to GitHub:** `gh` is every call the stub recorded, one `gh <arguments>` line each
+  with newlines written as `\n`, then the text of each `--body`, body file or stdin they passed. It holds
+  calls Claude Code makes on its own too (`gh pr view --json url` on 2.1.311), so no check, `present` or
+  `absent`, may match those: anchor the regex on the agent's own arguments
+  (`^gh pr view \d+ --comments`), not on the subcommand alone. A reference gives it as `gh = "text"`.
+  The lint fails a `gh` check on a case without a remote.
 - **Judges are not built yet.** When a check cannot decide, a judge will answer one yes/no question about
   one output, with the reference answer, outputs stripped of skill and arm names, and "unknown" counted
   as a fail; and it will be calibrated first, against outputs the maintainer labelled.

@@ -74,7 +74,7 @@ class Plant:
 
 @dataclass(frozen=True)
 class Reply:
-    """A scripted answer of the sandbox's `gh`, to a call whose argv, joined with spaces, `match` finds."""
+    """A scripted answer of the sandbox's `gh`, to a call whose one-line argv (`gh_stub.call_line`) `match` finds."""
 
     match: str
     stdout: str = ""

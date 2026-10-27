@@ -23,6 +23,12 @@ def test_answer_takes_the_first_reply_whose_match_finds_the_joined_argv() -> Non
     assert gh_stub.answer(failing, ["pr", "ready", "12"]) == ("", 1)
 
 
+def test_answer_matches_a_call_with_a_multi_line_argument_as_one_line() -> None:
+    argv = ["pr", "create", "--body", "Fixes it.\n\nCloses #42", "--draft"]
+    assert gh_stub.call_line(argv) == "pr create --body Fixes it.\\n\\nCloses #42 --draft"
+    assert gh_stub.answer(replies(("^pr create.*--draft$", "made")), argv) == ("made", 0)
+
+
 @pytest.mark.parametrize(
     ("argv", "refs"),
     [
@@ -32,6 +38,8 @@ def test_answer_takes_the_first_reply_whose_match_finds_the_joined_argv() -> Non
         (["pr", "create", "-F", "-"], ["-"]),
         (["api", "x", "-F", "body=@b.md", "-F", "event=COMMENT"], ["b.md"]),
         (["api", "x", "--field", "body=@-"], ["-"]),
+        (["api", "x", "--input", "q=1.json"], ["q=1.json"]),
+        (["api", "x", "--input=-"], ["-"]),
         (["pr", "create", "--body", "-F b.md"], []),
         (["pr", "create", "-F"], []),
     ],
