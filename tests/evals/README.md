@@ -127,7 +127,9 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   (`^pr create`), and grade the behaviour under test with a check, never with a `match`: a narrow match
   (`--draft`) fails the other calls, and the failure invites the agent to retry until it hits the
   scripted one. The session could read the answer too: the replies sit in its sandbox, so a sample
-  whose tool calls name the stub's directory or `gh-stub-replies.json` is excluded.
+  whose tool calls name the stub's directory or `gh-stub-replies.json` is excluded. A reply prints only
+  to stdout, while gh writes its errors to stderr, which a reply cannot script: leave `stdout` empty in
+  a reply with a non-zero `exit`.
 
   ```toml
   [[gh]]
