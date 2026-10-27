@@ -45,6 +45,9 @@ def test_answer_matches_a_call_with_a_multi_line_argument_as_one_line() -> None:
         (["release", "create", "v1", "-Fn.md"], ["n.md"]),
         (["api", "x", "-Fbody=@b.md", "-Fevent=COMMENT"], ["b.md"]),
         (["pr", "create", "--body", "-F b.md"], []),
+        (["pr", "create", "--title", "-Fix typo", "-F", "b.md"], ["b.md"]),
+        (["pr", "create", "-f", "-F", "b.md"], ["b.md"]),
+        (["issue", "close", "7", "-c", "-Fixed"], []),
         (["pr", "create", "-F"], []),
     ],
 )

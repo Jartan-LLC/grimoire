@@ -24,6 +24,14 @@ PATH_FLAGS = ("--body-file", "--notes-file", "--input")
 # `key=@path`.
 FIELD_FLAGS = ("-F", "--field")
 STDIN = "-"
+# Flags whose value gh takes from the next argument when it is not attached. Some short
+# ones take none in other commands (`pr create -f` is `--fill`, `pr review -c` is
+# `--comment`), so a bare flag after one is read as a flag, not as its value.
+VALUE_FLAGS = (
+    *("--title", "-t", "--body", "-b", "--notes", "-n", "--comment", "-c"),
+    *("-f", "--raw-field", "-F", "--field", *PATH_FLAGS),
+)
+BARE_FLAG = re.compile(r"-[A-Za-z]|--[A-Za-z][\w-]*")
 
 
 def flag_values(argv: Sequence[str], flags: Sequence[str]) -> Iterator[tuple[str, str]]:
@@ -32,8 +40,17 @@ def flag_values(argv: Sequence[str], flags: Sequence[str]) -> Iterator[tuple[str
     The last is the attached form gh's flag parser takes for a short flag, `-b"text"` in
     a shell. An argument with a space after the flag (`-F b.md`) is not read as one: a
     shell splits that in two unless it is quoted, and quoted it is text, a body's value.
+    Nor is the argument after a flag of `flags` or VALUE_FLAGS given alone, unless it is
+    a bare flag: gh reads it as that flag's value, so `--title "-Fix typo"` is a title,
+    not `-F`. A value that is itself a bare flag, a title of `-F`, is misread.
     """
+    takes_value = {*VALUE_FLAGS, *flags}
+    is_value = False
     for i, arg in enumerate(argv):
+        if is_value and not BARE_FLAG.fullmatch(arg):
+            is_value = False
+            continue
+        is_value = arg in takes_value
         short, attached = arg[:2], arg[2:]
         if short in flags and attached and attached[0] != "=" and not attached[0].isspace():
             yield short, attached
