@@ -111,11 +111,13 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   has an `origin`: a local bare repository holding every branch and tag the fixture and `build.py` made,
   each branch tracking it, so `git push` works, and `origin/HEAD` names `main`, as in a clone, when the
   fixture keeps the `main` branch it starts on. To start with a branch ahead of, behind or missing from
-  `origin`, `build.py` makes `origin` itself with
-  `git init --bare -b <the fixture's default branch> ../origin.git`, pushes that branch, so `origin/HEAD`
-  can name it, and pushes what else it wants there: the runner keeps an `origin` that `build.py` made as
-  `build.py` left it, adding only `origin/HEAD` when the repository lacks it and origin's HEAD names a
-  branch origin holds. That `origin` is a local path, or a URL `url.<path>.insteadOf` rewrites to one:
+  `origin`, `build.py` makes `origin` itself:
+  `git init --bare -b <the fixture's default branch> ../origin.git`,
+  `git remote add origin ../origin.git`, then `git push -u origin <that branch>`, so `origin/HEAD` can
+  name it, and pushes what else it wants there. Without a remote named `origin`, the runner fills that
+  same `../origin.git` with every branch. It keeps an `origin` that `build.py` made as `build.py` left
+  it, adding only `origin/HEAD` when the repository lacks it and origin's HEAD names a branch origin
+  holds. That `origin` is a local path, or a URL `url.<path>.insteadOf` rewrites to one:
   git refuses any other. The session's `gh` is a stub that records every call and answers from the key's
   `[[gh]]` tables: the first whose `match` regex finds the call's arguments joined with spaces, each
   newline in them written as `\n` (`pr create --draft --title ...`), prints its `stdout` and exits with
@@ -159,8 +161,9 @@ the PR how many versions you screened.
 
 ## Graders
 
-- **Grade what the agent produced:** a regex over the commit messages, the final reply or a file. An
-  `absent` check fails when the agent produced nothing to check.
+- **Grade what the agent produced:** a regex over the commit messages, the final reply, a file, what
+  the agent sent to GitHub or a subagent, or a subagent's report (below). An `absent` check fails when
+  the agent produced nothing to check.
 - **Whether a skill was in context when the agent wrote** is a guard or a diagnostic, not a primary
   metric, except in trigger cases, where loading the skill is the behaviour under test.
 - **A subagent's work:** `report:<agent>` is every report that agent handed back, `brief:<agent>` every
@@ -168,29 +171,29 @@ the PR how many versions you screened.
   delivery check with `agent = "<plugin>:<agent>"` reads that subagent's skill loads and writes instead
   of the main thread's. A reference gives reports under `[reports]` and briefs under `[briefs]`, as
   `"<plugin>:<agent>" = "text"`.
-- **What the agent sent to GitHub:** `gh` is every call the stub recorded, one `gh <arguments>` line each
-  with newlines written as `\n`, then a blank line, then every text the calls passed, newlines kept: each
-  argument and its tails (past each leading letter of a short flag or a group of them, `-bText` or
-  `-dFbody.md`; past a key's `=`, `--body=Text` or `body=@b.md`; past a leading `@`), stdin, and every
-  existing regular file one of those names. It holds more than the bodies, titles and `--jq` strings
-  included, so a `present` check on a body can be met by a title or by another call's text. A check about
-  one flag or command reads only the call lines, up to the first blank line, with the form
-  `present = '\A(?:.+\n)*gh (?:.* )?pr create\b.*--draft'`: checks match line by line, so `^` alone also
-  reaches the texts after the blank line, a body that quotes `gh pr create --draft` included, and
-  `(?:.* )?` lets gh flags come before the subcommand, as in `gh -R o/r pr create`. An inline body
-  stays on its own call line, so a body passed as `--body "... --draft ..."` can still meet that form.
-  The stub reads a file only inside the sandbox, the eval runner's temp directory or `/tmp`, where an
-  agent may write `/tmp/pr-body.md`: a body file elsewhere reads as absent, as does a body piped to
-  `/dev/stdin` or passed as `/dev/fd/N` by process substitution `<(...)`. It reads stdin whenever an
-  argument or a tail of one is exactly `-`, a key's value included (`-f q=-`), where gh would not, so
-  such a call waits while stdin stays open. It reads no file or stdin of a call with an argument equal to
-  `secret`, `variable` or `auth` anywhere, a label included (`--label auth`): such a call is recorded
-  with no file or stdin text. A call of the shape Claude Code makes on its own (`gh pr view --json url`
-  and `gh pr view <branch> --json url` on 2.1.311) is left out even when the agent makes it, so no check
-  grades one. A reference gives it as `gh = "text"`, and its call lines lose such calls too, but not its
-  texts. The lint fails a `gh` check on a case without a remote. For "made no such call", which holds
-  when the agent made no call at all, negate the same form:
-  `present = '\A(?!(?:.+\n)*gh (?:.* )?pr ready\b)'`.
+- **What the agent sent to GitHub:** `gh` is every call the stub recorded but Claude Code's own (below),
+  one `gh <arguments>` line each with newlines written as `\n`, then a blank line, then every text the
+  calls passed, newlines kept: each argument and its tails (past each leading letter of a short flag or a
+  group of them, `-bText` or `-dFbody.md`; past a key's `=`, `--body=Text` or `body=@b.md`; past a
+  leading `@`), stdin, and every existing regular file one of those names. It holds more than the
+  bodies, titles and `--jq` strings included, so a `present` check on a body can be met by a title or by
+  another call's text. A check about one flag or command reads only the call lines, up to the first
+  blank line, with the form `present = '\A(?:.+\n)*gh (?:.* )?pr create\b.*--draft'`: in a check, `^`
+  matches at the start of every line, so `^` alone also reaches the texts after the blank line, a body
+  that quotes `gh pr create --draft` included, and `(?:.* )?` lets gh flags come before the subcommand,
+  as in `gh -R o/r pr create`. An inline body stays on its own call line, so a body passed as
+  `--body "... --draft ..."` can still meet that form. The stub reads a file only inside the sandbox, the
+  eval runner's temp directory or `/tmp`, where an agent may write `/tmp/pr-body.md`: a body file
+  elsewhere reads as absent, as does a body piped to `/dev/stdin` or passed as `/dev/fd/N` by process
+  substitution `<(...)`. It reads stdin whenever an argument or a tail of one is exactly `-`, even where
+  gh would not, as a key's value (`-f q=-`), so such a call waits while stdin stays open. It reads no
+  file or stdin of a call with an argument equal to `secret`, `variable` or `auth` anywhere, a label
+  included (`--label auth`): such a call is recorded with no file or stdin text. A call of the shape
+  Claude Code makes on its own (`gh pr view --json url` and `gh pr view <branch> --json url` on
+  2.1.311) is left out even when the agent makes it, so no check grades one. A reference gives its `gh`
+  text as `gh = "text"`; the lint drops such calls from its call lines too, but not from its texts. The
+  lint fails a `gh` check on a case without a remote. For "made no such call", which holds when the
+  agent made no call at all, negate the same form: `present = '\A(?!(?:.+\n)*gh (?:.* )?pr ready\b)'`.
 - **Judges are not built yet.** When a check cannot decide, a judge will answer one yes/no question about
   one output, with the reference answer, outputs stripped of skill and arm names, and "unknown" counted
   as a fail; and it will be calibrated first, against outputs the maintainer labelled.
@@ -282,7 +285,12 @@ the PR how many versions you screened.
   (`.git/grimoire-evals/` in the main checkout), shared by every worktree and never committed.
   `GRIMOIRE_EVALS_STORE=<dir>` puts it elsewhere. It used to be `~/.cache/grimoire-evals/`: copy that
   directory's contents in once, without overwriting what the new store already holds:
-  `cp -an ~/.cache/grimoire-evals/. "$(git rev-parse --path-format=absolute --git-common-dir)/grimoire-evals/"`.
+
+  ```bash
+  cp -an ~/.cache/grimoire-evals/. \
+    "$(git rev-parse --path-format=absolute --git-common-dir)/grimoire-evals/"
+  ```
+
   Baseline (`run`) samples carry over. A screen begun before the store's default moved here, its samples
   copied or not, draws its samples again and needs `--new-plan` (`NEW_PLAN=1`) once: its plan named each
   arm's plugins by their path in the store.
