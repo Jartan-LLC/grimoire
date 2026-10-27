@@ -232,9 +232,10 @@ def test_sample_env_puts_the_gh_stub_first_and_drops_the_logins_only_for_a_case_
 ) -> None:
     ssh = {"SSH_AUTH_SOCK": "/home/u/.ssh/agent.sock", "SSH_AGENT_PID": "1"}
     login = dict.fromkeys(session.GH_LOGIN, "x") | {"GH_CONFIG_DIR": "/home/u/.config/gh"} | ssh
-    base = {"PATH": "/usr/bin"} | login
+    base = {"PATH": "/usr/bin", cache.STORE: str(tmp_path / "store")} | login
     sandbox = tmp_path / "sandbox"
     plain = session.sample_env(base, tmp_path, sandbox, tmp_path / "store")
+    assert cache.STORE not in plain
     assert plain["PATH"] == f"{sandbox}/venv/bin:/usr/bin"
     assert {k: plain[k] for k in login} == login
     assert "GIT_ALLOW_PROTOCOL" not in plain
@@ -245,6 +246,7 @@ def test_sample_env_puts_the_gh_stub_first_and_drops_the_logins_only_for_a_case_
     dropped = (*session.GH_LOGIN, *ssh)
     assert not any(name in stubbed for name in dropped if name != "GH_TOKEN")
     assert stubbed["GIT_ALLOW_PROTOCOL"] == "file"
+    assert cache.STORE not in stubbed
 
 
 def test_a_remote_sessions_git_pushes_to_origin_and_refuses_https_and_ssh(
