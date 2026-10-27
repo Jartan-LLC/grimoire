@@ -2,7 +2,7 @@ import pathlib
 
 import pytest
 from evals.suite import Reply, SuiteError, load_suite
-from helpers import KEY, SUITE, write_suite
+from helpers import JUDGE, JUDGED, KEY, SUITE, write_suite
 
 
 def test_load_suite_reads_metrics_rule_and_cases(tmp_path: pathlib.Path) -> None:
@@ -46,7 +46,59 @@ def test_case_hash_covers_prompt_and_fixture_but_not_the_key(tmp_path: pathlib.P
         (
             SUITE,
             KEY.replace("present = '#42'", "present = '#42'\nabsent = 'x'"),
-            "exactly one of 'present' and 'absent'",
+            "exactly one of 'present', 'absent' and 'judge'",
+        ),
+        (
+            SUITE + JUDGE,
+            KEY + JUDGED.replace('judge = "flags"', 'judge = "other"'),
+            "judge 'other' is not",
+        ),
+        (SUITE + JUDGE, KEY + JUDGED.replace('reference = "Issue 42."', ""), "needs a 'reference'"),
+        (
+            SUITE + JUDGE,
+            KEY + JUDGED.replace("judge = ", "present = 'x'\njudge = "),
+            "exactly one of",
+        ),
+        (
+            SUITE + JUDGE,
+            KEY.replace("present = '#42'", "present = '#42'\nreference = 'x'"),
+            "'reference' is for",
+        ),
+        (SUITE + JUDGE, KEY + JUDGED + JUDGED, "two checks name one judge"),
+        (
+            SUITE + JUDGE.replace("question", "panel = 2\nquestion"),
+            KEY + JUDGED,
+            "'panel' must be an odd",
+        ),
+        (
+            SUITE + JUDGE.replace("question", "rubric = 1\nquestion"),
+            KEY + JUDGED,
+            "takes no rubric",
+        ),
+        (
+            SUITE + JUDGE.replace("question", 'effort = "huge"\nquestion'),
+            KEY + JUDGED,
+            "'effort' must be one",
+        ),
+        (
+            SUITE + JUDGE.replace("question", 'compare = "lost"\nquestion'),
+            KEY + JUDGED,
+            "'compare' names 'lost'",
+        ),
+        (
+            SUITE + JUDGE.replace("question", 'held_out = ["c2"]\nquestion'),
+            KEY + JUDGED,
+            "names c2, which no",
+        ),
+        (SUITE + JUDGE + JUDGE, KEY + JUDGED, "tables have id 'flags'"),
+        (
+            SUITE.replace(
+                'id = "kept"\ndirection = "higher"',
+                'id = "held"\ndirection = "higher"\nmust_hold = true\n\n[[metric]]\nid = "kept"\ndirection = "higher"',
+            )
+            + JUDGE,
+            KEY + JUDGED.replace('metric = "kept"', 'metric = "held"'),
+            "must-hold metric 'held' cannot be judged",
         ),
         (SUITE, KEY.replace("present = '#42'", "present = '(['"), "bad regex"),
         (SUITE, KEY.replace('artifact = "commits"', 'artifact = "diff"'), "is not commits, final"),
@@ -92,6 +144,27 @@ def test_load_suite_names_the_file_and_the_problem(
 ) -> None:
     with pytest.raises(SuiteError, match=message.replace("[", r"\[").replace("(", r"\(")):
         load_suite(write_suite(tmp_path, suite, key))
+
+
+def test_a_judge_and_its_check_load_with_the_defaults(tmp_path: pathlib.Path) -> None:
+    siblings = '[[judge]]\nheld_out = ["c1"]\nsiblings = [["c1"]]\nyes_ratings = ["Important"]\n'
+    suite = load_suite(
+        write_suite(tmp_path, SUITE + JUDGE.replace("[[judge]]\n", siblings), KEY + JUDGED)
+    )
+    judge = suite.judges["flags"]
+    assert (judge.model, judge.effort, judge.panel) == ("claude-opus-5-5", "high", 3)
+    assert (judge.held_out, judge.siblings, judge.yes_ratings) == (
+        ("c1",),
+        (("c1",),),
+        ("Important",),
+    )
+    check = suite.cases[0].checks[-1]
+    assert (check.metric, check.judge, check.reference, check.present) == (
+        "kept",
+        "flags",
+        "Issue 42.",
+        None,
+    )
 
 
 def test_load_suite_fails_a_suite_without_cases(tmp_path: pathlib.Path) -> None:

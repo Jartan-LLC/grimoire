@@ -27,6 +27,11 @@ STATES = ("in-context", "late", "evicted", "absent", "loaded", "not-loaded")
 WRITE_KINDS = ("commit", "push", "pr", "issue", "file")
 ARMS = ("none", "old")
 MAX_EXIT = 255
+EFFORTS = ("low", "medium", "high", "xhigh", "max")
+JUDGE_MODEL = "claude-opus-5-5"
+JUDGE_KEYS = frozenset(
+    ("id", "question", "model", "effort", "panel", "held_out", "siblings", "yes_ratings", "compare")
+)
 
 type Table = dict[str, object]
 
@@ -43,7 +48,8 @@ class Check:
     the sandbox's `gh` recorded, Claude Code's own aside), `report:<agent>` (every report
     that agent handed back) or `brief:<agent>` (every Agent-call prompt the main thread
     sent that agent type, but for a call that ended in error)) and a `present` or
-    `absent` regex. A delivery check names a `skill` and a `state`: with a `write` kind,
+    `absent` regex, or a `judge` (a suite `[[judge]]` id) and the `reference` that judge
+    reads beside the artifact. A delivery check names a `skill` and a `state`: with a `write` kind,
     the state the skill must be in at every such write; without one, `loaded` or
     `not-loaded` over the whole session (trigger cases). It reads the main thread's
     deliveries and writes, or with an `agent`, that subagent's.
@@ -57,6 +63,32 @@ class Check:
     write: str | None = None
     state: str | None = None
     agent: str = ""
+    judge: str | None = None
+    reference: str = ""
+
+
+@dataclass(frozen=True)
+class Judge:
+    """A yes/no question a model answers about one artifact, for the judged checks naming its id.
+
+    `model` at `effort` answers each sample `panel` times, the majority deciding. The
+    rest serves calibration only (tests/evals/README.md, "Judges"): the `held_out`
+    cases' items are scored once per judge version, the other cases' are dev; each
+    `siblings` group holds cases whose plants are of one kind, so a report of one judged
+    against another's reference is a hard "no"; `yes_ratings`, when set, derives a
+    silver label from the rating the labeller reads on the matched finding; `compare`
+    names the metric whose checks the judge would replace, scored on the same labels.
+    """
+
+    id: str
+    question: str
+    model: str = JUDGE_MODEL
+    effort: str = "high"
+    panel: int = 3
+    held_out: tuple[str, ...] = ()
+    siblings: tuple[tuple[str, ...], ...] = ()
+    yes_ratings: tuple[str, ...] = ()
+    compare: str = ""
 
 
 @dataclass(frozen=True)
@@ -229,6 +261,7 @@ class Suite:
     clusters: dict[str, str]
     burned: tuple[str, ...]
     cases: tuple[Case, ...]
+    judges: dict[str, Judge] = dataclasses.field(default_factory=dict[str, Judge])
 
     def split(self, name: str | None) -> list[Case]:
         """The cases of one split, or all of them."""
@@ -305,7 +338,9 @@ def _regex(
     return pattern
 
 
-def _check(table: Table, where: pathlib.Path, metrics: dict[str, Metric]) -> Check:
+def _check(
+    table: Table, where: pathlib.Path, metrics: dict[str, Metric], judges: dict[str, Judge]
+) -> Check:
     metric = _str(table, "metric", where)
     if metric not in metrics:
         raise SuiteError(f"{where}: check metric {metric!r} is not a metric of the suite")
@@ -345,11 +380,32 @@ def _check(table: Table, where: pathlib.Path, metrics: dict[str, Metric]) -> Che
             "report:<agent>, brief:<agent> or delivery"
         )
     present, absent = table.get("present"), table.get("absent")
-    if (present is None) == (absent is None):
-        raise SuiteError(f"{where}: a text check needs exactly one of 'present' and 'absent'")
+    if sum(table.get(k) is not None for k in ("present", "absent", "judge")) != 1:
+        raise SuiteError(
+            f"{where}: a text check needs exactly one of 'present', 'absent' and 'judge'"
+        )
+    if "judge" in table:
+        return _judged(table, where, metrics[metric], judges)
+    if "reference" in table:
+        raise SuiteError(f"{where}: 'reference' is for a judged check")
     if present is not None:
         return Check(metric, artifact, present=_regex(present, where))
     return Check(metric, artifact, absent=_regex(absent, where))
+
+
+def _judged(table: Table, where: pathlib.Path, metric: Metric, judges: dict[str, Judge]) -> Check:
+    """A judged check; on a must-hold metric one judge error in a screen would read as HURT."""
+    judge = _str(table, "judge", where)
+    if judge not in judges:
+        raise SuiteError(f"{where}: judge {judge!r} is not a [[judge]] of the suite")
+    if metric.must_hold:
+        raise SuiteError(
+            f"{where}: must-hold metric {metric.id!r} cannot be judged: any judge error fails it"
+        )
+    reference = table.get("reference")
+    if not isinstance(reference, str) or not reference.strip():
+        raise SuiteError(f"{where}: a judged check needs a 'reference' string")
+    return Check(metric.id, _str(table, "artifact", where), judge=judge, reference=reference)
 
 
 def _reference(path: pathlib.Path) -> Reference:
@@ -436,16 +492,23 @@ def _baselines(key: Table, where: pathlib.Path) -> tuple[Baseline, ...]:
     return tuple(found)
 
 
-def load_case(path: pathlib.Path, metrics: dict[str, Metric]) -> Case:
-    """Load `cases/<id>/`, checking its key against the suite's metrics."""
+def load_case(
+    path: pathlib.Path, metrics: dict[str, Metric], judges: dict[str, Judge] | None = None
+) -> Case:
+    """Load `cases/<id>/`, checking its key against the suite's metrics and judges."""
     key_path = path / "key.toml"
     key = _toml(key_path)
     prompt = path / "prompt.md"
     if not prompt.is_file():
         raise SuiteError(f"{path}: no prompt.md")
-    checks = tuple(_check(t, key_path, metrics) for t in _tables(key, "check", key_path))
+    checks = tuple(
+        _check(t, key_path, metrics, judges or {}) for t in _tables(key, "check", key_path)
+    )
     if not checks:
         raise SuiteError(f"{key_path}: no [[check]]")
+    named = [c.judge for c in checks if c.judge is not None]
+    if len(named) != len(set(named)):
+        raise SuiteError(f"{key_path}: two checks name one judge; ask it one question per case")
     facts = tuple(
         Fact(_str(t, "text", key_path), _str(t, "where", key_path))
         for t in _tables(key, "fact", key_path)
@@ -474,6 +537,59 @@ def load_case(path: pathlib.Path, metrics: dict[str, Metric]) -> Case:
         else (),
     )
     return dataclasses.replace(case, loaded=case.hash())
+
+
+def _judge(table: Table, where: pathlib.Path, metrics: dict[str, Metric]) -> Judge:
+    if stray := sorted(set(table) - JUDGE_KEYS):
+        raise SuiteError(f"{where}: a [[judge]] takes no {', '.join(stray)}")
+    panel = table.get("panel", 3)
+    if isinstance(panel, bool) or not isinstance(panel, int) or panel < 1 or panel % 2 == 0:
+        raise SuiteError(f"{where}: a [[judge]]'s 'panel' must be an odd number from 1")
+    siblings = table.get("siblings", [])
+    if not isinstance(siblings, list) or not all(
+        isinstance(g, list) and all(isinstance(c, str) for c in cast("list[object]", g))
+        for g in cast("list[object]", siblings)
+    ):
+        raise SuiteError(f"{where}: a [[judge]]'s 'siblings' must be a list of lists of cases")
+    compare = table.get("compare", "")
+    if compare and compare not in metrics:
+        raise SuiteError(f"{where}: a [[judge]]'s 'compare' names {compare!r}, not a metric")
+    judge = Judge(
+        id=_str(table, "id", where),
+        question=_str(table, "question", where),
+        model=_str(table, "model", where) if "model" in table else JUDGE_MODEL,
+        effort=_str(table, "effort", where, EFFORTS) if "effort" in table else "high",
+        panel=panel,
+        held_out=_strs(table, "held_out", where),
+        siblings=tuple(tuple(cast("list[str]", g)) for g in cast("list[object]", siblings)),
+        yes_ratings=_strs(table, "yes_ratings", where),
+        compare=str(compare),
+    )
+    if not judge.question.strip():
+        raise SuiteError(f"{where}: judge {judge.id!r} has an empty 'question'")
+    return judge
+
+
+def _judges(data: Table, where: pathlib.Path, metrics: dict[str, Metric]) -> dict[str, Judge]:
+    judges: dict[str, Judge] = {}
+    for table in _tables(data, "judge", where):
+        judge = _judge(table, where, metrics)
+        if judge.id in judges:
+            raise SuiteError(f"{where}: two [[judge]] tables have id {judge.id!r}")
+        judges[judge.id] = judge
+    return judges
+
+
+def _judge_cases(where: pathlib.Path, judges: dict[str, Judge], cases: tuple[Case, ...]) -> None:
+    """Every case a judge's calibration names asks that judge."""
+    for judge in judges.values():
+        asking = {c.id for c in cases if any(k.judge == judge.id for k in c.checks)}
+        named = [*judge.held_out, *(c for group in judge.siblings for c in group)]
+        if stray := sorted({c for c in named if c not in asking}):
+            raise SuiteError(
+                f"{where}: judge {judge.id!r} names {', '.join(stray)}, "
+                "which no check of theirs asks it"
+            )
 
 
 def _metrics(data: Table, where: pathlib.Path) -> dict[str, Metric]:
@@ -528,14 +644,16 @@ def load_suite(path: pathlib.Path) -> Suite:
     data = _toml(where)
     metrics = _metrics(data, where)
     pass_rule = _pass_rule(data, where, metrics)
+    judges = _judges(data, where, metrics)
     cases_dir = path / "cases"
     cases = (
-        tuple(load_case(p, metrics) for p in sorted(cases_dir.iterdir()) if p.is_dir())
+        tuple(load_case(p, metrics, judges) for p in sorted(cases_dir.iterdir()) if p.is_dir())
         if cases_dir.is_dir()
         else ()
     )
     if not cases:
         raise SuiteError(f"{path}: no cases/<id>/ directories")
+    _judge_cases(where, judges, cases)
     ids = {c.id for c in cases}
     clusters: dict[str, str] = {}
     for table in _tables(data, "cluster", where):
@@ -568,4 +686,5 @@ def load_suite(path: pathlib.Path) -> Suite:
         clusters=clusters,
         burned=_strs(data, "BURNED", where),
         cases=cases,
+        judges=judges,
     )

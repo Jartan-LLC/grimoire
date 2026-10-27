@@ -88,6 +88,17 @@ def git_env(base: dict[str, str]) -> dict[str, str]:
     return env
 
 
+def claude_env(base: dict[str, str]) -> dict[str, str]:
+    """`base` without CLAUDE* variables but the login ones (`sample_env` says why)."""
+    return {
+        k: v
+        for k, v in base.items()
+        if not k.startswith("CLAUDE")
+        or k in ("CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CONFIG_DIR")
+        or k.startswith("CLAUDE_CODE_USE_")
+    }
+
+
 def sample_env(
     base: dict[str, str],
     checkout: pathlib.Path,
@@ -116,13 +127,7 @@ def sample_env(
     GIT_ALLOW_PROTOCOL can reach the network with a key under HOME, as one that unsets
     the gh variables reaches the user's gh login.
     """
-    env = {
-        k: v
-        for k, v in git_env(base).items()
-        if not k.startswith("CLAUDE")
-        or k in ("CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CONFIG_DIR")
-        or k.startswith("CLAUDE_CODE_USE_")
-    }
+    env = claude_env(git_env(base))
     for name in ("VIRTUAL_ENV", "PYTHONPATH", "PYTHONHOME", cache.STORE):
         env.pop(name, None)
     inside = str(checkout.resolve())

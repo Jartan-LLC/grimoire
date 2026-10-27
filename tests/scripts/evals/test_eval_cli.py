@@ -1,4 +1,6 @@
 import argparse
+import dataclasses
+import json
 import pathlib
 import shutil
 import sys
@@ -6,12 +8,12 @@ from typing import cast
 
 import eval as cli
 import pytest
-from evals import cache, session
+from evals import cache, calibrate, jury, session
 from evals.arms import Arm
 from evals.plan import Listed, Plan
 from evals.suite import Suite, load_suite
 from evals.verdict import MetricVerdict
-from helpers import KEY, SUITE, write_suite
+from helpers import JUDGE, JUDGED, KEY, SUITE, write_suite
 
 
 def test_record_baseline_replaces_only_its_own_model_and_arm(tmp_path: pathlib.Path) -> None:
@@ -479,3 +481,95 @@ def test_eval_size_still_advises_on_a_weak_split_and_fails(
     out = capsys.readouterr().out
     assert "too few units for any verdict; add cases" in out
     assert "no old or no none baselines on this split; record them" in out
+
+
+def test_a_plan_pins_the_judges_without_redrawing_sessions_when_they_change(
+    tmp_path: pathlib.Path,
+) -> None:
+    plain = load_suite(write_suite(tmp_path / "plain"))
+    judged = load_suite(write_suite(tmp_path / "judged", SUITE + JUDGE, KEY + JUDGED))
+    old = Arm("old", "h", {})
+    spec = session.Spec("claude-opus-5-5", "2.1.310", 1.0, tmp_path, tmp_path / "store")
+    assert "judges" not in cli.pinned(plain, "dev", 3, spec, old)
+    plan = cli.pinned(judged, "dev", 3, spec, old)
+    assert plan["judges"] == {"flags": jury.instrument(judged.judges["flags"])}
+    arms = {"old": old, "new": Arm("new", "n", {})}
+    base = cli.drawn(list(judged.cases), plan, arms, "t1")
+    assert cli.drawn(list(judged.cases), plan | {"judges": {"flags": "other"}}, arms, "t1") == base
+
+
+def test_a_judge_without_a_cleared_stamp_gates_nothing(tmp_path: pathlib.Path) -> None:
+    suite = load_suite(write_suite(tmp_path, SUITE + JUDGE, KEY + JUDGED))
+    assert cli.advisory(suite) == {"flags": "no calibration stamp"}
+    assert [m.id for m in cli.judged_metrics(suite)] == ["kept", "delivered", "kept@flags"]
+    judge = suite.judges["flags"]
+    folder = calibrate.judge_dir(suite.path, "flags")
+    missed = calibrate.Stamp(
+        judge="flags",
+        instrument=jury.instrument(judge),
+        versions=(jury.instrument(judge),),
+        labels=calibrate.labels_hash(folder / "labels"),
+        labeller="claude-opus-5-5 xhigh",
+        date="2026-10-27",
+        cells=(),
+        references={"c1": calibrate.text_hash("Issue 42.")},
+    )
+    calibrate.write_stamp(folder / "stamp.toml", missed)
+    assert "bar missed" in cli.advisory(suite)["flags"]
+    cells = (
+        calibrate.Cell("natural", "old", tp=38, fn=2, tn=40),
+        calibrate.Cell("sibling", tn=40),
+        calibrate.Cell("reference", tp=1),
+        *(calibrate.Cell(k, tn=10) for k in calibrate.CONTROL_KINDS),
+        *(calibrate.Cell(k, tp=60) for k in calibrate.INVARIANCE_KINDS),
+    )
+    cleared = dataclasses.replace(
+        missed, cells=cells, gold_right=10, gold_n=10, labelled=10, fleiss=0.9
+    )
+    calibrate.write_stamp(folder / "stamp.toml", cleared)
+    assert cli.advisory(suite) == {}
+    assert [m.id for m in cli.judged_metrics(suite)] == ["kept", "delivered"]
+    # J = 0.95 + 1.0 - 1: a harm the split sees at 0.38 is 0.40 on the true scale
+    (line,) = cli._judged_scale(suite, 0.38)  # pyright: ignore[reportPrivateUsage]
+    assert "J = 0.95; that harm is 0.40 on the true scale" in line
+
+
+def test_align_scores_held_out_once_per_version_and_burns_a_missed_one(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    held = JUDGE.replace("question", 'held_out = ["c1"]\nquestion')
+    suite = load_suite(write_suite(tmp_path / "suite", SUITE + held, KEY + JUDGED))
+    judge = suite.judges["flags"]
+    labels = calibrate.judge_dir(suite.path, "flags") / "labels" / "c1.toml"
+    calibrate.write_labels(
+        labels,
+        [
+            calibrate.Label("k1", "c1", "old", "", "m e", ("yes",) * 3, "yes", "fix: Closes #42"),
+            calibrate.Label("k2", "c1", "none", "", "m e", ("no",) * 3, "no", "fix: y"),
+        ],
+    )
+    calls: list[str] = []
+
+    def says_no(j: object, reference: str, text: str) -> tuple[jury.Answer, str]:
+        calls.append(text)
+        usage: dict[str, object] = {judge.model: {}}
+        return jury.Answer("no", ""), json.dumps({"modelUsage": usage, "structured_output": {}})
+
+    monkeypatch.setattr(jury, "call", says_no)
+    args = argparse.Namespace(set="held-out", jobs=1, labeller_model="m", labeller_effort="e")
+    store = tmp_path / "store"
+    assert cli.align(args, suite, judge, store) == 1  # an always-no judge misses the bar
+    stamp = calibrate.read_stamp(labels.parent.parent / "stamp.toml")
+    assert stamp is not None
+    assert stamp.versions == (jury.instrument(judge),)
+    assert stamp.burned == ("k1", "k2")
+    assert stamp.cell("natural") == calibrate.Cell("natural", tp=0, fn=1, tn=1, fp=0)
+    assert "MISSED" in capsys.readouterr().out
+    with pytest.raises(SystemExit, match="scored on held-out already"):
+        cli.align(args, suite, judge, store)
+    before = len(calls)
+    args.set = "dev"
+    assert cli.align(args, suite, judge, store) == 0
+    assert len(calls) == before  # every answer was kept
+    assert "disagrees: natural c1 old True (no, no, no): k1" in capsys.readouterr().out
+    assert calibrate.read_stamp(labels.parent.parent / "stamp.toml") == stamp

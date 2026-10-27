@@ -1,9 +1,11 @@
 import pathlib
 
 import pytest
+from evals import calibrate, jury
 from evals import lint as lint_module
 from evals.lint import lint
-from helpers import KEY, SUITE, write_suite
+from evals.suite import load_suite
+from helpers import JUDGE, JUDGED, KEY, SUITE, write_suite
 
 TRACKED = ["plugins/gitwise/skills/commit-pr-writing/SKILL.md"]
 VERIFY = """
@@ -162,3 +164,37 @@ def test_lint_names_suite_level_problems(root: pathlib.Path) -> None:
 def test_lint_reports_a_suite_that_does_not_load(root: pathlib.Path) -> None:
     suite_at(root, suite=SUITE.replace("[pass_rule]", "[rule]"))
     assert any("no [pass_rule]" in f for f in lint(root, TRACKED))
+
+
+def test_lint_names_a_stamp_the_judge_or_its_reference_moved_away_from(root: pathlib.Path) -> None:
+    case = suite_at(root, SUITE + JUDGE, KEY + JUDGED)
+    suite = load_suite(case.parent.parent)
+    judge = suite.judges["flags"]
+    folder = calibrate.judge_dir(suite.path, "flags")
+    stamp = calibrate.Stamp(
+        judge="flags",
+        instrument=jury.instrument(judge),
+        versions=(jury.instrument(judge),),
+        labels=calibrate.labels_hash(folder / "labels"),
+        labeller="claude-opus-5-5 xhigh",
+        date="2026-10-27",
+        cells=(),
+        references={"c1": calibrate.text_hash("Issue 42.")},
+    )
+    calibrate.write_stamp(folder / "stamp.toml", stamp)
+    assert lint(root, TRACKED) == []  # a stamp that missed the bar is current, not a problem
+    (case / "key.toml").write_text(KEY + JUDGED.replace("Issue 42.", "Issue 42, named."))
+    assert any("reference of c1 changed" in f for f in lint(root, TRACKED))
+    (case / "key.toml").write_text(KEY + JUDGED)
+    (case.parent.parent / "suite.toml").write_text(SUITE + JUDGE.replace("name the", "cite the"))
+    assert any("another version of the judge" in f for f in lint(root, TRACKED))
+    (folder / "stamp.toml").write_text("judge = [\n")
+    assert any("not a stamp" in f for f in lint(root, TRACKED))
+
+
+def test_lint_names_labels_that_do_not_parse(root: pathlib.Path) -> None:
+    case = suite_at(root, SUITE + JUDGE, KEY + JUDGED)
+    labels = calibrate.judge_dir(case.parent.parent, "flags") / "labels"
+    labels.mkdir(parents=True)
+    (labels / "c1.toml").write_text('[[item]]\nid = "k"\n')
+    assert any("labels do not parse" in f for f in lint(root, TRACKED))

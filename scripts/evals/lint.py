@@ -6,8 +6,10 @@ find them, every planted problem fails its `verify` command and passes once fixe
 passing references pass every check and each failing reference fails one, each target
 case records a baseline failure, no baseline was drawn under another RUNNER or, for a
 remote case, another REMOTE_RUNNER, no baseline of a case without a remote records a
-remote_runner, and a `gh` check reads a case whose session records its gh calls. It cannot
-tell that every check can fail, only that some check fails on each failing reference.
+remote_runner, a `gh` check reads a case whose session records its gh calls, and a
+judge's tracked stamp and labels parse and the stamp still describes the judge (its
+version, labels and references). It cannot tell that every check can fail, only that
+some check fails on each failing reference; judged checks are not run on references.
 """
 
 import fnmatch
@@ -17,7 +19,9 @@ import shlex
 import shutil
 import subprocess
 import tempfile
+import tomllib
 
+from . import calibrate, jury
 from .grade import reference_scores
 from .proc import run
 from .session import REMOTE_RUNNER, RUNNER, build_fixture, git_env
@@ -156,6 +160,25 @@ def suite_problems(suite: Suite, root: pathlib.Path, tracked: list[str]) -> list
             found.append(f"{where}: burned case {burned!r} is still in {by_id[burned].split}")
     for case in suite.cases:
         found += case_problems(case)
+    return found + judge_problems(suite)
+
+
+def judge_problems(suite: Suite) -> list[str]:
+    """A judge's stamp or labels that do not parse, or a stamp that no longer describes the judge."""
+    found: list[str] = []
+    for judge in suite.judges.values():
+        folder = calibrate.judge_dir(suite.path, judge.id)
+        try:
+            calibrate.all_labels(folder / "labels")
+        except (tomllib.TOMLDecodeError, KeyError, TypeError) as error:
+            found.append(f"{folder / 'labels'}: labels do not parse: {error}")
+            continue
+        standing = calibrate.standing(suite.path, suite.cases, judge, jury.instrument(judge))
+        if standing.stale:
+            found.append(
+                f"{folder / 'stamp.toml'}: {standing.stale}: run judge-align again, "
+                "or restore what changed"
+            )
     return found
 
 

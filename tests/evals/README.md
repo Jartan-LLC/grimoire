@@ -222,9 +222,97 @@ the PR how many versions you screened.
   text as `gh = "text"`; the lint drops such calls from its call lines too, but not from its texts. The
   lint fails a `gh` check on a case without a remote. For "made no such call", which holds when the
   agent made no call at all, negate the same form: `present = '\A(?!(?:.+\n)*gh (?:.* )?pr ready\b)'`.
-- **Judges are not built yet.** When a check cannot decide, a judge will answer one yes/no question about
-  one output, with the reference answer, outputs stripped of skill and arm names, and "unknown" counted
-  as a fail; and it will be calibrated first, against outputs the maintainer labelled.
+- **A judge** answers one yes/no question about one artifact, for what a regex cannot check: see Judges.
+
+## Judges
+
+A judged check names a question declared once in `suite.toml`. Each case gives the reference that says
+what a "yes" means for it:
+
+```toml
+# suite.toml
+[[judge]]
+id = "flags-plant"
+question = "Does the report raise, as a finding of its own rated Important or Critical, the problem the reference describes?"
+# model = "claude-opus-5-5", effort = "high" and panel = 3 are the defaults.
+# Calibration only:
+held_out = ["nonlocal-parse", "retold-utc"]        # cases scored once per judge version; the rest are dev
+siblings = [["nonlocal-parse", "nonlocal-stamp"]]  # cases whose plants are of one kind
+yes_ratings = ["Critical", "Important"]            # a silver label is yes when the plant's finding is rated so
+compare = "found_regex"                            # the metric the judge would replace
+
+# cases/<id>/key.toml
+[[check]]
+metric = "found"
+artifact = "report:praxis:general-reviewer"
+judge = "flags-plant"
+reference = """
+The branch adds `_median` to tally/stats.py beside `statistics.median`. Only a finding whose subject is
+that reimplementation counts.
+"""
+```
+
+- The judge is `claude -p` on its model and effort, with no tools and no customizations, asked for
+  `{answer, quote}`. It sees the question, the reference and the artifact, with plugin, skill, agent and
+  command names and sandbox and store paths replaced by neutral tokens. It runs `panel` times per sample
+  and the majority decides. "unknown" counts as no, and so does a "yes" whose quote is not in the artifact.
+  An output that does not parse is no answer: the next run calls again, nothing is guessed.
+- A spoiled sample or an empty artifact fails the check with no call. A sample whose panel is incomplete
+  (an API error, a usage limit) is left out like an excluded sample: the screen cannot SHIP until a rerun
+  fills it.
+- Answers are kept in the store's `judgments/`, keyed by the model, effort, question, prompt texts,
+  reference, stripped artifact and panel member, so a regrade calls nothing. The Claude Code version is
+  not part of the key, and an update of it does not call for calibrating again.
+- A judge gates nothing until its stamp shows it cleared the bar below. Until then its checks score into
+  a reported metric of their own, `<metric>@<judge>`, and the screen says why. A judged check on a
+  must-hold metric is refused: one judge error in a screen would read as HURT.
+- Judge error shrinks a true effect by J = TPR + TNR - 1 and, being the same in both arms, makes no false
+  HURT. Guard margins on a judged metric are on the scale the judge observes. `make eval-size` prints J
+  for a judged primary metric. The screen warns when J differs between arms by more than 0.1, and when the
+  judge's model wrote the artifact it judges.
+- The plan pins each judge's version: a changed judge refuses a verdict until `NEW_PLAN=1`, and regrades
+  the drawn samples without new sessions.
+
+### Calibrating a judge
+
+The bar, on held-out items the judge was never tuned on:
+
+| # | Items | Bar |
+|---|---|---|
+| 1, 2 | natural positives, natural negatives (silver labels) | 40 or more each; TPR, TNR >= 0.9 and their Wilson 95% lower bound >= 0.80 |
+| 3 | natural items | Cohen's kappa >= 0.80 over 80 or more |
+| 4 | sibling swaps: a report judged against the reference of a case whose plant is of the same kind | as rows 1 and 2 |
+| 5 | the cases' references | at most 2 wrong |
+| 6 | controls: empty, "I don't know", another case's plant, an injection appended to a "no" | 10 each, none answered yes |
+| 7 | invariance pairs: format lines removed, two unrelated Minor findings appended | 60 or more each, 95% unchanged |
+| 8 | rows 1 and 2 per arm | each >= 0.85 |
+| - | the labelling panel | >= 0.98 right on gold items, Fleiss kappa >= 0.80, at most 10% unsure |
+
+Rows 4 to 7 are gold: true by construction. Natural items carry silver labels from a labelling panel
+that works differently from the judge: three read-only sessions in the case's fixture, given its diff,
+each lists every finding and names the one about the reference before answering; a split goes to an
+adjudicator. No human label gates; the stamp records `human_audited = 0` until the maintainer audits a
+sample of held-out labels and edits that count.
+
+1. Add the `[[judge]]` and a reference on every case that asks it. Freeze the references: editing a
+   held-out case's reference after the judge has run on it is tuning.
+2. `python3 scripts/eval.py judge-probe <suite> --judge <id>`: 5 judge and 2 labeller calls on stored
+   samples, printed raw. Check that the answer parses, the response names the judge's model, and the cost.
+3. `python3 scripts/eval.py judge-label <suite> --judge <id>`: the panel labels every stored artifact the
+   judge reads (arms `old` and `none`) that has no label yet, into `judges/<id>/labels/<case>.toml`. A
+   label once written is never changed. It prints each set's count per class: until each reaches 40, draw
+   more sessions (`make eval-run ... SAMPLES=` above the count drawn) and label again. `--gold` then runs
+   the panel on the gold items. If it is below 0.98 right, or the printed Fleiss kappa is below 0.80, the
+   question or a reference is underspecified: stop and report it to the maintainer. `--labeller-model`
+   picks the panel's model (Opus 5.5 by default).
+4. Tune on dev: `python3 scripts/eval.py judge-align <suite> --judge <id> --set dev` prints each row and
+   each disagreement. Read them, revise the question (or the prompt texts in `scripts/evals/jury.py`),
+   repeat.
+5. Freeze the version and run `--set held-out` once. It writes `judges/<id>/stamp.toml` with every
+   row's counts. A version that misses the bar moves its held-out items to dev: draw and label fresh
+   held-out sessions and try again, at most 3 versions per question; then report the missed bar.
+6. Commit the labels and the stamp. The lint fails a stamp whose judge, labels or a stamped case's
+   reference changed since it was written.
 
 ## Running and deciding
 
@@ -237,8 +325,8 @@ text a session reads voids every earlier screen of it, so screening between roun
 for nothing; between rounds, `make check` is enough.
 
 1. **Fix the test before the first run.** The plan holds every file of the suite (cases, keys, baselines,
-   references), the samples per case, the model ID, the Claude Code version, the runner's flags and
-   `old`'s plugins (`new` changes as you iterate). Your branch's first screen of a split on a model fixes
+   references), the samples per case, the model ID, the Claude Code version, the runner's flags,
+   `old`'s plugins (`new` changes as you iterate) and each judge's version. Your branch's first screen of a split on a model fixes
    it, each model keeping its own; a later screen with a different plan runs nothing and says what
    changed. `NEW_PLAN=1` (`--new-plan`) fixes a new one, and the PR says why. Never add samples after
    seeing a result.
@@ -321,7 +409,8 @@ for nothing; between rounds, `make check` is enough.
 - `make eval-screen SUITE=<path>`: run `old` and `new` on the `screen` split and print the result.
   `SPLIT=confirm` runs the confirm split, `NEW_PLAN=1` fixes a new plan. The result and the samples to
   read are also written to `evidence/` in the store.
-- The store holds every sample, plan and evidence file: `grimoire-evals/` in the clone's git directory
+- The store holds every sample, plan and evidence file, and the judges' and labellers' answers:
+  `grimoire-evals/` in the clone's git directory
   (`.git/grimoire-evals/` in the main checkout), shared by every worktree and never committed.
   `GRIMOIRE_EVALS_STORE=<dir>` puts it elsewhere. It used to be `~/.cache/grimoire-evals/`: copy that
   directory's contents in once, without overwriting what the new store already holds:
@@ -337,7 +426,10 @@ for nothing; between rounds, `make check` is enough.
 - `python3 scripts/eval.py show <key>`: one sample's commits, final reply, the files its checks read,
   every `gh` call the stub logged (Claude Code's own included) and the `gh` text its checks read, skill
   deliveries and writes with the agent that made each, subagents' briefs and reports, and hook context.
-- `python3 scripts/eval.py lint`: the mechanical checks from "Writing a case"; `make verify` runs it.
+- `python3 scripts/eval.py lint`: the mechanical checks from "Writing a case", and that each judge's
+  stamp is current; `make verify` runs it.
+- `python3 scripts/eval.py judge-probe`, `judge-label` and `judge-align`: calibrate a judge (see
+  "Calibrating a judge"). Each takes the suite and `--judge <id>`, and spends inference.
 
 ## Calibrating the runner
 

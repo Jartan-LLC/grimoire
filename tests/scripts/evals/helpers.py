@@ -59,6 +59,21 @@ runner = 2
 """
 
 
+JUDGE = """
+[[judge]]
+id = "flags"
+question = "Does the commit message name the issue it fixes?"
+"""
+
+JUDGED = """
+[[check]]
+metric = "kept"
+artifact = "commits"
+judge = "flags"
+reference = "Issue 42."
+"""
+
+
 def write_suite(root: pathlib.Path, suite: str = SUITE, key: str = KEY) -> pathlib.Path:
     (root / "cases" / "c1" / "fixture").mkdir(parents=True)
     (root / "suite.toml").write_text(suite)
