@@ -167,8 +167,8 @@ the PR how many versions you screened.
   `"<plugin>:<agent>" = "text"`.
 - **What the agent sent to GitHub:** `gh` is every call the stub recorded, one `gh <arguments>` line each
   with newlines written as `\n`, then the text of each `--body` (and `-b` where it means `--body`),
-  `gh release` `--notes` or `-n`, `gh pr close` and `gh issue close` `--comment` or `-c`, `gh api`
-  `body=` field, body file or stdin they passed. The calls Claude Code makes on its own
+  `gh release` `--notes` or `-n`, `gh pr` and `gh issue` `close` and `reopen` `--comment` or `-c`,
+  `gh api` `body=` field, body file or stdin they passed. The calls Claude Code makes on its own
   (`gh pr view --json url` and `gh pr view <branch> --json url` on 2.1.311) are left out, so no check
   grades them. A reference gives it as `gh = "text"`. The lint fails a `gh` check on a case without a
   remote.

@@ -15,8 +15,8 @@ SHORT_BODY = {("pr", c) for c in ("create", "edit", "comment", "review", "merge"
 }
 # A release's body is its notes: `--notes`, or `-n`.
 NOTES = {("release", "create"), ("release", "edit")}
-# A closing comment's body is `--comment`, or `-c`.
-CLOSE = {("pr", "close"), ("issue", "close")}
+# A closing or reopening comment's body is `--comment`, or `-c`.
+CLOSE = {(k, c) for k in ("pr", "issue") for c in ("close", "reopen")}
 # `api`'s fields; a `-F`/`--field` value `@path` is a file, which the stub reads.
 API_FIELDS = ("-f", "--raw-field", "-F", "--field")
 
@@ -69,7 +69,7 @@ def _command(argv: Sequence[str]) -> tuple[str, ...]:
 
 
 def _inline_bodies(argv: Sequence[str]) -> list[str]:
-    """The bodies a call passes as arguments: `--body`, `-b` where it means that, a release's notes, a closing comment, `api`'s `body=`."""
+    """The bodies a call passes as arguments: `--body`, `-b` where it means that, a release's notes, a closing or reopening comment, `api`'s `body=`."""
     command = _command(argv)
     flags = ("--body", "-b") if command in SHORT_BODY else ("--body",)
     if command in NOTES:
@@ -89,8 +89,8 @@ def gh_text(calls: Sequence[dict[str, object]]) -> str:
     """The calls the sandbox's `gh` recorded, one `gh <call_line>` line each, then their bodies.
 
     The bodies are each call's `--body`, `-b` where it means that, a release's `--notes` or
-    `-n`, a closing comment's `--comment` or `-c` and `api` `body=` field texts, then its
-    stdin and body files, newlines kept.
+    `-n`, a closing or reopening comment's `--comment` or `-c` and `api` `body=` field
+    texts, then its stdin and body files, newlines kept.
     """
     lines: list[str] = []
     bodies: list[str] = []

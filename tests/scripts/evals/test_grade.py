@@ -143,6 +143,8 @@ def test_the_gh_artifact_keeps_a_multi_line_body_off_the_call_lines() -> None:
         (["pr", "create", "-n", "x"], []),
         (["pr", "close", "7", "--comment", "Long", "-c=Short"], ["Long", "Short"]),
         (["issue", "close", "7", "-c", "Short"], ["Short"]),
+        (["pr", "reopen", "7", "--comment", "Long", "-c=Short"], ["Long", "Short"]),
+        (["issue", "reopen", "7", "-c", "Short"], ["Short"]),
         (["issue", "list", "-c", "x"], []),
     ],
 )
