@@ -191,8 +191,10 @@ def add_origin(repo: pathlib.Path, origin: pathlib.Path, env: dict[str, str]) ->
     with a branch ahead of, behind or missing from it. Either way `origin/HEAD` names
     origin's default branch, as in a clone, unless `repo` has one already or origin's
     HEAD names no branch it holds. Returns the commit of each of origin's refs: one
-    `repo` has not fetched is the fixture's, not the session's, once pulled.
+    `repo` has not fetched is the fixture's, not the session's, once pulled. An origin
+    at a network URL fails at once, reaching no network and waiting on no prompt.
     """
+    env = {**env, "GIT_ALLOW_PROTOCOL": "file", "GIT_TERMINAL_PROMPT": "0"}
     if "origin" not in _git(repo, env, "remote").split():
         run([GIT, "init", "-q", "--bare", "-b", "main", str(origin)], env=env, check=True)
         _git(repo, env, "remote", "add", "origin", str(origin))

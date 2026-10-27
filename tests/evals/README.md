@@ -113,7 +113,8 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   with a branch ahead of, behind or missing from `origin`, `build.py` makes `origin` itself, a bare
   repository at `../origin.git`, and pushes what it wants there (commit-pr-writing's `branch-only-fix`
   case makes one): the runner keeps an `origin` that `build.py` made as `build.py` left it, adding only
-  `origin/HEAD` when the repository lacks it and origin's HEAD names a branch origin holds. The
+  `origin/HEAD` when the repository lacks it and origin's HEAD names a branch origin holds. That
+  `origin` is a local path, or a URL `url.<path>.insteadOf` rewrites to one: git refuses any other. The
   session's `gh` is a stub that records every call and answers from the key's `[[gh]]` tables: the
   first whose `match` regex finds the call's arguments joined with spaces, each newline in them written
   as `\n` (`pr create --draft --title ...`), prints its `stdout` and exits with its `exit` (default 0).

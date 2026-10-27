@@ -212,6 +212,21 @@ def test_a_commit_build_put_only_on_origin_is_not_the_sessions_once_pulled(
     assert session.new_commits(repo, env, heads) == ["fix: mine"]
 
 
+def test_add_origin_refuses_an_origin_at_a_network_url_before_reaching_it(
+    tmp_path: pathlib.Path,
+) -> None:
+    case = load_suite(write_suite(tmp_path / "suite")).cases[0]
+    env = session.git_env(dict(os.environ))
+    repo = tmp_path / "repo"
+    session.build_fixture(case, repo, env)
+    # .invalid never resolves: a refusal is git's protocol check, not a failed lookup.
+    url = "https://github.invalid/acme/app"
+    run([GIT, "remote", "add", "origin", url], cwd=repo, env=env, check=True)
+    with pytest.raises(subprocess.CalledProcessError) as refused:
+        session.add_origin(repo, tmp_path / "origin.git", env)
+    assert "transport 'https' not allowed" in refused.value.stderr
+
+
 def test_sample_env_puts_the_gh_stub_first_and_drops_the_logins_only_for_a_case_that_asks(
     tmp_path: pathlib.Path,
 ) -> None:
