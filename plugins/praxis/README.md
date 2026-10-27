@@ -36,7 +36,7 @@ codex plugin add gitwise@grimoire
 - `/praxis:plan-issue` -- analyze a GitHub issue and create an implementation plan
 - `/praxis:implement-issue` -- implement a GitHub issue, optionally from an existing plan
 - `/praxis:create-issue` -- create a GitHub issue using the appropriate template
-- `/praxis:create-pr` -- create a pull request for implemented changes
+- `/praxis:create-pr` -- create a draft pull request for implemented changes
 - `/praxis:review-pr` -- review a pull request using specialized reviewer agents
 - `/praxis:address-review` -- work through review findings on a PR one at a time
 
@@ -93,10 +93,14 @@ session you may want a higher `COMPACT_CONTEXT_THRESHOLD`.
 ```text
 /praxis:plan-issue 42          -> analyze and plan
 /praxis:implement-issue 42     -> implement the plan
-/praxis:create-pr 42           -> open a pull request
+/praxis:create-pr 42           -> open a draft pull request
 /praxis:review-pr 43           -> multi-agent code review
 /praxis:address-review 43      -> work through findings
 ```
+
+The PR stays a draft until it is marked ready. Your agent is told to mark it ready once it is ready
+for someone else, but some models often leave it a draft when you only describe the hand-over. If it
+leaves the PR a draft, run `gh pr ready` yourself.
 
 ## Credits
 
