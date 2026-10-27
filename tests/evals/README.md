@@ -332,7 +332,9 @@ After changing the runner or the verdict rule:
 - The check that a session stayed out of the suite reads the absolute paths in its tool calls, and the
   stub's `replies.json` by name: a relative path gets past it, such as `cd` into an arm then
   `ls ../../samples`, or `cat ../gh-stub/*` from the repository, and so does a path built from an
-  environment variable that holds the store's path, such as `ls $GIT_CEILING_DIRECTORIES/samples`.
+  environment variable that holds the store's path, such as `ls $GIT_CEILING_DIRECTORIES/samples`, and
+  an absolute path that names a directory above one the check guards, such as `grep -r` over the
+  sandbox or `/tmp`, which reaches the stub's `gh-stub/`.
 - A run reads each case from the checkout as it was when the run began. A sample whose case changed on
   disk since (a branch switch, an edit) is excluded and retried, so keep the checkout still while a run
   draws.
