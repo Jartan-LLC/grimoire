@@ -90,10 +90,14 @@ def _claude_codes_call(line: str) -> bool:
 def agents_gh(text: str) -> str:
     r"""A reference's `gh` text without the lines of the calls Claude Code makes on its own.
 
-    It splits on newlines alone, as `call_line` escapes only those: a body's `\r` stays
-    inside its call's line.
+    Only the call lines, before the first blank line, are filtered: a body text that
+    quotes such a call keeps it. With no call line left the text is empty, as in
+    `gh_text`. It splits on newlines alone, as `call_line` escapes only those: a body's
+    `\r` stays inside its call's line.
     """
-    return "\n".join(line for line in text.split("\n") if not _claude_codes_call(line))
+    calls, blank, texts = text.partition("\n\n")
+    kept = [line for line in calls.split("\n") if not _claude_codes_call(line)]
+    return "\n".join(kept) + blank + texts if kept else ""
 
 
 def _by_agent(pairs: Iterable[tuple[str, str]]) -> dict[str, str]:

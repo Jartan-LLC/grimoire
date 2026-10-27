@@ -272,6 +272,13 @@ def test_agents_gh_keeps_a_crlf_body_inside_its_calls_line() -> None:
     assert grade.check_score(present, grade.Outputs(gh=text)) == 1.0
 
 
+def test_agents_gh_drops_claude_codes_call_lines_but_not_a_body_quoting_one() -> None:
+    body = "Run\ngh pr view --json url\nto see it."
+    text = f"gh pr view --json url\ngh pr create --body-file b.md\n\n{body}"
+    assert grade.agents_gh(text) == f"gh pr create --body-file b.md\n\n{body}"
+    assert grade.agents_gh("gh pr view --json url") == ""
+
+
 def test_case_failed_counts_the_cases_own_metrics_not_the_guards() -> None:
     guards = ("format", "delivered")
     assert grade.case_failed({"rule": 0.0, "format": 1.0}, guards)
