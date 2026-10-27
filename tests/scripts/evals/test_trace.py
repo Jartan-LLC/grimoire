@@ -166,6 +166,20 @@ def test_parse_names_an_agent_call_without_a_type_general_purpose_and_skips_a_fa
     assert parsed.reports == []
 
 
+def test_parse_keeps_each_brief_the_main_thread_sent_in_order_and_no_subagents() -> None:
+    events = [
+        call("a1", "Agent", prompt="Review the diff.", subagent_type=REVIEWER),
+        *inside("a1", [call("n1", "Agent", prompt="Nested.", subagent_type="x")]),
+        call("g1", "Agent", prompt="Find the tests."),
+        call("a2", "Agent", prompt="Review again.", subagent_type=REVIEWER),
+    ]
+    assert trace.parse(events, PLUGINS).briefs == [
+        trace.Brief(0, REVIEWER, "Review the diff."),
+        trace.Brief(2, "general-purpose", "Find the tests."),
+        trace.Brief(3, REVIEWER, "Review again."),
+    ]
+
+
 def test_parse_places_each_preload_at_its_agents_call_in_order() -> None:
     events = [spawn("a1"), *commit("c1"), spawn("a2"), spawn("t1", "praxis:test-reviewer")]
     preloads = [

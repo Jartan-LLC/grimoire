@@ -6,8 +6,8 @@
   lint                check every suite before any session runs (free; part of make verify)
   run SUITE --arm A   run SUITE's cases on arm none, old or new (spends inference)
   screen SUITE        run old and new side by side, then print the verdict (spends inference)
-  show KEY            print one cached sample: its commits, final reply, deliveries and writes
-                      by agent, and subagents' reports
+  show KEY            print one cached sample: its commits, final reply, gh calls, deliveries
+                      and writes by agent, and subagents' reports
   size SUITE          what each split can see per model, from the recorded baselines (free)
 
 Sessions use the caller's own `claude` login; nothing here runs in CI. Samples are cached
@@ -530,7 +530,7 @@ def _effect(effect: float) -> str:
 
 
 def show(key: str, store: pathlib.Path) -> int:
-    """Print one sample: its commits, final reply, graded files, deliveries, writes and hooks."""
+    """Print one sample: its commits, final reply, graded files, gh calls, deliveries, writes and hooks."""
     sample = cache.load(store, key)
     if sample is None:
         raise SystemExit(f"no cached sample {key}")
@@ -542,6 +542,8 @@ def show(key: str, store: pathlib.Path) -> int:
     print(f"\n--- final reply\n{sample.final}")
     for path, text in sorted(sample.files.items()):
         print(f"\n--- file {path}\n{text}")
+    if sample.gh is not None:
+        print(f"\n--- gh calls\n{grade.gh_text(sample.gh)}")
     parsed = parsed_trace(store, sample)
     print("\n--- skills delivered (event index, agent)")
     for d in parsed.deliveries:

@@ -43,7 +43,7 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
 - `cases/<id>/prompt.md`: the task, as the user would type it.
 - `cases/<id>/fixture/` and an optional `build.py`: the repository the session starts in.
 - `cases/<id>/key.toml`: the split, the kind, the checks, and the facts, plants and baseline counts
-  the checks rely on.
+  the checks rely on; for a task that pushes or calls `gh`, its remote and `gh` replies.
 - `cases/<id>/fix/`: the files that fix the case's planted problems, laid over the fixture by the lint.
 - `cases/<id>/reference/`: outputs that pass every check, and outputs that fail the case's target check.
 
@@ -107,6 +107,21 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   false behaves differently. Say it so the fixture cannot contradict it, as a decision or an issue
   tracked elsewhere, rather than build it in. A fixture's earlier history may be as untidy as a real
   one: a past commit's message need not match its diff unless the task depends on it.
+- **A task that pushes or calls GitHub** sets `remote = true` in the key. The session's repository
+  then has an `origin`: a local bare repository holding every branch the fixture and `build.py` made,
+  each branch tracking it, so `git push` works. Its `gh` is a stub that records every call and answers
+  from the key's `[[gh]]` tables: the first whose `match` regex finds the call's arguments joined with
+  spaces (`pr create --draft --title ...`) prints its `stdout` and exits with its `exit` (default 0). A
+  call no reply matches fails with `gh stub: no reply for: <arguments>`, so script every call the task
+  needs, reads (`gh pr view`, `gh api`) included. A `[[gh]]` table implies `remote = true`, and the
+  replies count in the case hash, like the fixture.
+
+  ```toml
+  [[gh]]
+  match = '^pr create'
+  stdout = "https://github.com/acme/app/pull/7\n"
+  ```
+
 - **Keep tool configuration out of a fixture.** A fixture whose `pyproject.toml` has a `[tool.ruff]`
   table gets a `.ruff_cache/` written into it by the commit hooks, and the case hash counts every file in
   the fixture, so each hook run would redraw the case's samples.
@@ -133,9 +148,14 @@ the PR how many versions you screened.
   `absent` check fails when the agent produced nothing to check.
 - **Whether a skill was in context when the agent wrote** is a guard or a diagnostic, not a primary
   metric, except in trigger cases, where loading the skill is the behaviour under test.
-- **A subagent's work:** `report:<agent>` is every report that agent handed back, and a delivery check
-  with `agent = "<plugin>:<agent>"` reads that subagent's skill loads and writes instead of the main
-  thread's. A reference gives a report under `[reports]`, as `"<plugin>:<agent>" = "text"`.
+- **A subagent's work:** `report:<agent>` is every report that agent handed back, `brief:<agent>` every
+  prompt the main thread sent it, and a delivery check with `agent = "<plugin>:<agent>"` reads that
+  subagent's skill loads and writes instead of the main thread's. A reference gives reports under
+  `[reports]` and briefs under `[briefs]`, as `"<plugin>:<agent>" = "text"`.
+- **What the agent sent to GitHub:** `gh` is every call the stub recorded, one `gh <arguments>` line
+  each, then the text of each body file or stdin they passed. It holds calls Claude Code makes on its
+  own too (`gh pr view --json url` on 2.1.311), so an `absent` check must not match those. A reference
+  gives it as `gh = "text"`. The lint fails a `gh` check on a case without a remote.
 - **Judges are not built yet.** When a check cannot decide, a judge will answer one yes/no question about
   one output, with the reference answer, outputs stripped of skill and arm names, and "unknown" counted
   as a fail; and it will be calibrated first, against outputs the maintainer labelled.
@@ -222,7 +242,8 @@ the PR how many versions you screened.
   `SPLIT=confirm` runs the confirm split, `NEW_PLAN=1` fixes a new plan. The result and the samples to
   read are also written to `$XDG_CACHE_HOME/grimoire-evals/evidence/` (default `~/.cache/...`).
 - `python3 scripts/eval.py show <key>`: one sample's commits, final reply, the files its checks read,
-  skill deliveries and writes with the agent that made each, subagents' reports and hook context.
+  `gh` calls, skill deliveries and writes with the agent that made each, subagents' reports and hook
+  context.
 - `python3 scripts/eval.py lint`: the mechanical checks from "Writing a case"; `make verify` runs it.
 
 ## Calibrating the runner
@@ -248,7 +269,10 @@ After changing the runner or the verdict rule:
 
 - Sessions load only this repository's plugins, with no user skills or settings, so a case cannot show how
   a skill competes with others a user has installed.
-- Each session is one `claude -p` call: a case cannot test behaviour that should stop and ask the user.
+- Each session is one `claude -p` call: a case cannot test behaviour that should stop and ask the user,
+  nor a workflow that spans sessions, such as a PR reviewed in one and its review addressed in the next.
+- GitHub is a stub: `gh` answers only from the case's replies, the same for every call that matches, so
+  a case shows what the agent sent, not what GitHub would do with it.
 - The lint knows when a baseline predates the runner, not when the model or Claude Code changed; rerun
   baselines after either.
 - A subagent's own subagents are not followed, nor is an Agent call run in the background. A delivery

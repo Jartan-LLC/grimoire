@@ -23,12 +23,12 @@ import sys
 import tempfile
 import threading
 import time
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 from . import cache, trace
 from .arms import Arm
 from .proc import CLAUDE, GIT, UV, run
-from .suite import Case
+from .suite import Case, Reply
 
 BUILTINS_OFF = {
     "enabledPlugins": {
@@ -46,6 +46,7 @@ LIMITED = re.compile(r"(?i)limiting requests|usage limit|rate limit|overloaded|\
 # session can do, so no sample drawn under the old setup is reused.
 RUNNER = 2
 PRELOADED = re.compile(r"\[Agent: ([^\]]+)\] Preloaded skill '([^']+)'")
+GH_STUB = pathlib.Path(__file__).with_name("gh_stub.py")
 
 
 @dataclass(frozen=True)
@@ -75,13 +76,14 @@ def git_env(base: dict[str, str]) -> dict[str, str]:
 
 
 def sample_env(
-    base: dict[str, str], checkout: pathlib.Path, sandbox: pathlib.Path
+    base: dict[str, str], checkout: pathlib.Path, sandbox: pathlib.Path, gh_stub: bool = False
 ) -> dict[str, str]:
     """The session's environment: git isolated, this checkout off PATH, the sample's own venv and TMPDIR.
 
     CLAUDE* variables go too: the calling session's own (CLAUDECODE and the like)
     would tell the child it runs nested, and others (CLAUDE_EFFORT) would change it.
     The login ones stay, so a token, config-dir, Bedrock or Vertex login still works.
+    With `gh_stub`, the sandbox's `bin/` comes first, so its `gh` answers every call.
     """
     env = {
         k: v
@@ -94,7 +96,8 @@ def sample_env(
         env.pop(name, None)
     inside = str(checkout.resolve())
     path = [p for p in env.get("PATH", "").split(os.pathsep) if p and not p.startswith(inside)]
-    env["PATH"] = os.pathsep.join([str(sandbox / "venv" / "bin"), *path])
+    first = [str(sandbox / "bin")] if gh_stub else []
+    env["PATH"] = os.pathsep.join([*first, str(sandbox / "venv" / "bin"), *path])
     env["VIRTUAL_ENV"] = str(sandbox / "venv")
     env["TMPDIR"] = str(sandbox / "tmp")
     env["ENABLE_CLAUDEAI_MCP_SERVERS"] = "false"
@@ -152,6 +155,31 @@ def build_fixture(case: Case, repo: pathlib.Path, env: dict[str, str]) -> list[s
     return _git(repo, env, "rev-parse", "--all").split()
 
 
+def add_origin(repo: pathlib.Path, origin: pathlib.Path, env: dict[str, str]) -> None:
+    """Make `origin` a bare repository holding every branch of `repo`, each tracking `origin/<branch>`."""
+    run([GIT, "init", "-q", "--bare", "-b", "main", str(origin)], env=env, check=True)
+    _git(repo, env, "remote", "add", "origin", str(origin))
+    _git(repo, env, "push", "-q", "-u", "origin", "--all")
+
+
+def install_gh(sandbox: pathlib.Path, replies: tuple[Reply, ...]) -> None:
+    """Put the recording `gh` stub in `sandbox/bin`, answering with `replies`, its log in `sandbox/gh`."""
+    (sandbox / "bin").mkdir()
+    (sandbox / "gh").mkdir()
+    stub = sandbox / "bin" / "gh"
+    stub.write_text("#!/usr/bin/env -S python3 -I\n" + GH_STUB.read_text())
+    stub.chmod(0o755)
+    replies_json = json.dumps([asdict(r) for r in replies])
+    (sandbox / "gh" / "replies.json").write_text(replies_json)
+    (sandbox / "gh" / "calls.jsonl").touch()
+
+
+def gh_calls(sandbox: pathlib.Path) -> list[dict[str, object]]:
+    """The calls the sandbox's `gh` stub recorded, in order; a line that is not JSON is skipped."""
+    log = sandbox / "gh" / "calls.jsonl"
+    return trace.load_text(log.read_text()) if log.is_file() else []
+
+
 def new_commits(repo: pathlib.Path, env: dict[str, str], fixture_heads: list[str]) -> list[str]:
     """The full message of every commit the session added, on any branch, oldest first.
 
@@ -180,17 +208,21 @@ def _session(
                 sample_key, case.id, arm.name, index, arm.plugins, False, [reason], [], "", {}, {}
             )
             return sample, ""
+        if case.remote:
+            add_origin(repo, sandbox / "origin.git", env)
+            install_gh(sandbox, case.gh)
         run(
             [UV, "venv", "-q", "--system-site-packages", str(sandbox / "venv")], env=env, check=True
         )
         out = sandbox / "trace.jsonl"
         debug_log = sandbox / "debug.log"
         timed_out = False
+        session_env = sample_env(dict(os.environ), spec.checkout, sandbox, gh_stub=case.remote)
         with out.open("w") as handle:
             try:
                 run(
                     claude_args(case.prompt, arm, spec.model, spec.budget_usd, debug_log),
-                    cwd=repo, env=sample_env(dict(os.environ), spec.checkout, sandbox),
+                    cwd=repo, env=session_env,
                     stdout=handle, stderr=subprocess.STDOUT, timeout=TIMEOUT_S, check=False,
                 )  # fmt: skip
             except subprocess.TimeoutExpired:
@@ -221,6 +253,7 @@ def _session(
             spoiled=spoiled,
             collected=case.files(),
             preloads=[list(p) for p in loaded],
+            gh=gh_calls(sandbox) if case.remote else None,
         )
         return sample, text
     finally:

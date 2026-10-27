@@ -2,37 +2,76 @@
 
 import dataclasses
 import re
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
+from typing import cast
 
 from . import trace
 from .cache import Sample
-from .suite import REPORT, Case, Check, Reference
+from .suite import BRIEF, REPORT, Case, Check, Reference
 
 
 class Uncollected(Exception):  # noqa: N818 -- reads as the condition, like StopIteration
     """A check reads a file the sample was drawn without collecting."""
 
 
-def text_of(
-    commits: Sequence[str], final: str, files: dict[str, str], artifact: str,
-    reports: dict[str, str] | None = None,
-) -> str:  # fmt: skip
-    """The text a check reads: every commit message, the final reply, one collected file, or an agent's reports."""
+@dataclasses.dataclass(frozen=True)
+class Outputs:
+    """What text checks read, from a session or a reference.
+
+    `reports` and `briefs` map an agent to its joined texts; `gh` is the `gh_text` of the
+    recorded calls.
+    """
+
+    commits: Sequence[str] = ()
+    final: str = ""
+    files: dict[str, str] = dataclasses.field(default_factory=dict[str, str])
+    reports: dict[str, str] = dataclasses.field(default_factory=dict[str, str])
+    gh: str = ""
+    briefs: dict[str, str] = dataclasses.field(default_factory=dict[str, str])
+
+
+def text_of(outputs: Outputs, artifact: str) -> str:
+    """The text a check reads: the commit messages, the final reply, a collected file, the gh calls, or an agent's reports or briefs."""
     if artifact == "commits":
-        return "\n\n".join(commits)
+        return "\n\n".join(outputs.commits)
     if artifact == "final":
-        return final
+        return outputs.final
+    if artifact == "gh":
+        return outputs.gh
     if artifact.startswith(REPORT):
-        return (reports or {}).get(artifact.removeprefix(REPORT), "")
-    return files.get(artifact.removeprefix("file:"), "")
+        return outputs.reports.get(artifact.removeprefix(REPORT), "")
+    if artifact.startswith(BRIEF):
+        return outputs.briefs.get(artifact.removeprefix(BRIEF), "")
+    return outputs.files.get(artifact.removeprefix("file:"), "")
+
+
+def gh_text(calls: Sequence[dict[str, object]]) -> str:
+    """The calls the sandbox's `gh` recorded, one `gh <argv>` line each, then their bodies."""
+    lines: list[str] = []
+    bodies: list[str] = []
+    for call in calls:  # the stub's own log entries: argv, stdin, files
+        argv = cast("list[str]", call.get("argv", []))
+        files = cast("dict[str, str]", call.get("files", {}))
+        lines.append(" ".join(["gh", *argv]))
+        bodies += [t for t in (str(call.get("stdin", "")), *files.values()) if t.strip()]
+    return "\n\n".join(["\n".join(lines), *bodies]) if calls else ""
+
+
+def _by_agent(pairs: Iterable[tuple[str, str]]) -> dict[str, str]:
+    joined: dict[str, list[str]] = {}
+    for agent, text in pairs:
+        joined.setdefault(agent, []).append(text)
+    return {agent: "\n\n".join(texts) for agent, texts in joined.items()}
 
 
 def reports_of(parsed: trace.Trace) -> dict[str, str]:
     """Each agent's reports in the session, joined in the order they were handed back."""
-    joined: dict[str, list[str]] = {}
-    for report in parsed.reports:
-        joined.setdefault(report.agent, []).append(report.text)
-    return {agent: "\n\n".join(texts) for agent, texts in joined.items()}
+    return _by_agent((r.agent, r.text) for r in parsed.reports)
+
+
+def briefs_of(parsed: trace.Trace) -> dict[str, str]:
+    """Each agent's briefs from the main thread, joined in the order they were sent."""
+    return _by_agent((b.agent, b.text) for b in parsed.briefs)
 
 
 def text_score(check: Check, text: str) -> float:
@@ -84,7 +123,10 @@ def scores(case: Case, sample: Sample, parsed: trace.Trace) -> dict[str, float]:
     draw, cannot be graded from it: the sample would read as an empty file.
     """
     pairs: list[tuple[str, float]] = []
-    reports = reports_of(parsed)
+    outputs = Outputs(
+        sample.commits, sample.final, sample.files,
+        reports_of(parsed), gh_text(sample.gh or []), briefs_of(parsed),
+    )  # fmt: skip
     for check in case.checks:
         path = check.artifact.removeprefix("file:")
         if check.artifact != path and sample.collected is not None and path not in sample.collected:
@@ -98,9 +140,7 @@ def scores(case: Case, sample: Sample, parsed: trace.Trace) -> dict[str, float]:
         elif check.artifact == "delivery":
             score = delivery_score(check, parsed)
         else:
-            score = text_score(
-                check, text_of(sample.commits, sample.final, sample.files, check.artifact, reports)
-            )
+            score = text_score(check, text_of(outputs, check.artifact))
         pairs.append((check.metric, score))
     return _mean_by_metric(pairs)
 
@@ -112,9 +152,12 @@ def case_failed(scores: dict[str, float], guards: tuple[str, ...]) -> bool:
 
 def reference_scores(case: Case, reference: Reference) -> list[tuple[Check, float]]:
     """Each text check's score on a reference; delivery checks need a session."""
-    outputs = (reference.commits, reference.final, reference.files)
+    outputs = Outputs(
+        reference.commits, reference.final, reference.files,
+        reference.reports, reference.gh, reference.briefs,
+    )  # fmt: skip
     return [
-        (check, text_score(check, text_of(*outputs, check.artifact, reference.reports)))
+        (check, text_score(check, text_of(outputs, check.artifact)))
         for check in case.checks
         if check.artifact != "delivery"
     ]

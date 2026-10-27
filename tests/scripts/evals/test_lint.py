@@ -70,6 +70,22 @@ def test_lint_grades_a_report_check_on_a_references_reports(root: pathlib.Path) 
     assert any("reference pass-1 fails kept" in f for f in lint(root, TRACKED))
 
 
+def test_lint_grades_gh_and_brief_checks_and_wants_a_remote_for_gh(root: pathlib.Path) -> None:
+    key = KEY.replace('artifact = "commits"', 'artifact = "gh"')
+    key = key.replace('artifact = "final"', 'artifact = "brief:praxis:general-reviewer"')
+    case = suite_at(root, key=key)
+    (case / "reference" / "pass-1.toml").write_text(
+        'gh = "gh pr create --draft\\n\\nCloses #42"\n'
+        '[briefs]\n"praxis:general-reviewer" = "Review the fix."\n'
+    )
+    assert any("a gh check needs remote = true" in f for f in lint(root, TRACKED))
+    (case / "key.toml").write_text("remote = true\n" + key)
+    assert lint(root, TRACKED) == []
+    (case / "reference" / "pass-1.toml").write_text('gh = "gh pr create --draft"\n')
+    found = lint(root, TRACKED)
+    assert any("reference pass-1 fails kept" in f for f in found)
+
+
 def test_lint_requires_a_recorded_baseline_failure_on_a_target_case(root: pathlib.Path) -> None:
     suite_at(root, key=KEY.replace("failures = 2", "failures = 0"))
     assert any("needs a [[baseline]] that failed at least once" in f for f in lint(root, TRACKED))

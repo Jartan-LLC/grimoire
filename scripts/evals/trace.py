@@ -79,6 +79,15 @@ class Report:
     text: str
 
 
+@dataclass(frozen=True)
+class Brief:
+    """The prompt of the main thread's Agent call at event `index`, which started `agent`."""
+
+    index: int
+    agent: str
+    text: str
+
+
 @dataclass
 class Trace:
     """What the runner reads from one session."""
@@ -88,6 +97,7 @@ class Trace:
     writes: list[Write] = field(default_factory=list[Write])
     deliveries: list[Delivery] = field(default_factory=list[Delivery])
     reports: list[Report] = field(default_factory=list[Report])
+    briefs: list[Brief] = field(default_factory=list[Brief])
     compacts: list[int] = field(default_factory=list[int])
     hook_contexts: list[tuple[int, str]] = field(default_factory=list[tuple[int, str]])
     tool_inputs: list[str] = field(default_factory=list[str])
@@ -232,7 +242,7 @@ def _preload(
 def parse(
     events: list[Event], plugin_dirs: dict[str, str], preloads: Sequence[tuple[str, str]] = ()
 ) -> Trace:
-    """Read init, result, writes, skill deliveries, reports, compactions and hook context from `events`.
+    """Read init, result, writes, skill deliveries, briefs, reports, compactions and hook context from `events`.
 
     `preloads` are the (agent, skill) pairs Claude Code's debug log names, in its order.
     """
@@ -267,6 +277,7 @@ def parse(
                     started = str(inputs.get("subagent_type") or DEFAULT_AGENT)
                     agents[call_id] = started
                     spawns.setdefault(started, []).append(index)
+                    trace.briefs.append(Brief(index, started, str(inputs.get("prompt", ""))))
             elif kind == "user" and block_type == "tool_result":
                 if (call := calls.get(str(block.get("tool_use_id")))) is not None:
                     _result(trace, index, block, call, plugin_dirs)

@@ -4,7 +4,8 @@ tests/evals/README.md holds the rules; this enforces the mechanical ones: the pr
 uses none of the case's hint words, the facts a check needs are where the writer can
 find them, every planted problem fails its `verify` command and passes once fixed, the
 passing references pass every check and each failing reference fails one, each target
-case records a baseline failure, and no baseline was drawn under an older runner. It
+case records a baseline failure, no baseline was drawn under an older runner, and a `gh`
+check reads a case whose session records its gh calls. It
 cannot tell that every check can fail, only that some check fails on each failing
 reference.
 """
@@ -99,6 +100,11 @@ def case_problems(case: Case) -> list[str]:
     prompt = case.prompt.lower()
     found = [f"{case.path}: prompt.md gives away {h!r}" for h in case.hints if h.lower() in prompt]
     found += _fact_problems(case) + _plant_problems(case) + _reference_problems(case)
+    if not case.remote and any(c.artifact == "gh" for c in case.checks):
+        found.append(
+            f"{case.path}: a gh check needs remote = true or a [[gh]] reply, "
+            "or the session's gh calls are not recorded"
+        )
     if case.kind == "target" and not any(b.failures for b in case.baselines):
         found.append(f"{case.path}: a target case needs a [[baseline]] that failed at least once")
     found += [

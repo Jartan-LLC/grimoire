@@ -64,11 +64,11 @@ def test_a_trigger_check_asks_only_whether_the_skill_ever_loaded() -> None:
 
 
 def test_text_of_reads_commits_final_and_collected_files() -> None:
-    files = {"notes.md": "kept #42"}
-    assert grade.text_of(["a", "b"], "end", files, "commits") == "a\n\nb"
-    assert grade.text_of(["a"], "end", files, "final") == "end"
-    assert grade.text_of(["a"], "end", files, "file:notes.md") == "kept #42"
-    assert grade.text_of(["a"], "end", files, "file:missing.md") == ""
+    outputs = grade.Outputs(["a", "b"], "end", {"notes.md": "kept #42"})
+    assert grade.text_of(outputs, "commits") == "a\n\nb"
+    assert grade.text_of(outputs, "final") == "end"
+    assert grade.text_of(outputs, "file:notes.md") == "kept #42"
+    assert grade.text_of(outputs, "file:missing.md") == ""
 
 
 def test_a_delivery_check_reads_only_its_own_agents_loads_and_writes() -> None:
@@ -95,9 +95,50 @@ def test_a_report_check_reads_every_report_its_agent_handed_back() -> None:
     parsed = trace.parse(
         [spawn("a1"), handed_back("a1", "first"), spawn("a2"), handed_back("a2", "second")], PLUGINS
     )
-    reports = grade.reports_of(parsed)
-    assert grade.text_of([], "", {}, f"report:{REVIEWER}", reports) == "first\n\nsecond"
-    assert grade.text_of([], "", {}, "report:praxis:test-reviewer", reports) == ""
+    outputs = grade.Outputs(reports=grade.reports_of(parsed))
+    assert grade.text_of(outputs, f"report:{REVIEWER}") == "first\n\nsecond"
+    assert grade.text_of(outputs, "report:praxis:test-reviewer") == ""
+
+
+def test_the_gh_artifact_lists_each_call_then_the_bodies_it_sent() -> None:
+    calls: list[dict[str, object]] = [
+        {"argv": ["pr", "create", "--draft", "-F", "b.md"], "stdin": "", "files": {"b.md": "Body"}},
+        {"argv": ["pr", "view", "7"], "stdin": "", "files": {}},
+        {"argv": ["api", "x", "-F", "body=@-"], "stdin": "Piped", "files": {}},
+    ]
+    gh = grade.gh_text(calls)
+    assert gh == (
+        "gh pr create --draft -F b.md\ngh pr view 7\ngh api x -F body=@-\n\nBody\n\nPiped"
+    )
+    assert grade.gh_text([]) == ""
+    assert grade.text_of(grade.Outputs(gh=gh), "gh") == gh
+
+
+def test_a_brief_check_reads_every_prompt_the_main_thread_sent_its_agent() -> None:
+    parsed = trace.parse(
+        [
+            spawn("a1"),
+            *inside("a1", [spawn("n1")]),
+            spawn("a2"),
+            spawn("t1", "praxis:test-reviewer"),
+        ],
+        PLUGINS,
+    )
+    outputs = grade.Outputs(briefs=grade.briefs_of(parsed))
+    assert grade.text_of(outputs, f"brief:{REVIEWER}") == "Review it.\n\nReview it."
+    assert grade.text_of(outputs, "brief:praxis:test-reviewer") == "Review it."
+    assert grade.text_of(outputs, "brief:praxis:other") == ""
+
+
+def test_scores_grade_a_gh_check_on_the_samples_recorded_calls(tmp_path: pathlib.Path) -> None:
+    key = "remote = true\n" + KEY.replace('artifact = "commits"', 'artifact = "gh"')
+    case = load_suite(write_suite(tmp_path, key=key)).cases[0]
+    parsed = trace.parse([*load_skill("s1", "x", CPW), *commit("c1")], PLUGINS)
+    drawn = sample([], "Done.")
+    drawn.gh = [{"argv": ["pr", "create", "--body", "Closes #42"], "stdin": "", "files": {}}]
+    assert grade.scores(case, drawn, parsed)["kept"] == 1.0
+    drawn.gh = []
+    assert grade.scores(case, drawn, parsed)["kept"] == 0.5
 
 
 def test_case_failed_counts_the_cases_own_metrics_not_the_guards() -> None:

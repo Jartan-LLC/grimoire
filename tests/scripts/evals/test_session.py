@@ -99,6 +99,48 @@ def test_build_fixture_commits_the_fixture_runs_build_and_new_commits_sees_only_
     assert session.new_commits(repo, env, heads) == ["fix: the thing\n\nCloses #42"]
 
 
+def test_add_origin_pushes_every_fixture_branch_so_a_plain_push_works(
+    tmp_path: pathlib.Path,
+) -> None:
+    case_dir = write_suite(tmp_path / "suite")
+    (case_dir / "cases" / "c1" / "build.py").write_text(
+        "import subprocess\n"
+        "subprocess.run(['git', 'branch', 'release'], check=True)\n"
+        "subprocess.run(['git', 'checkout', '-q', '-b', 'feature/issue-42'], check=True)\n"
+        "subprocess.run(['git', 'commit', '-q', '--allow-empty', '-m', 'wip'], check=True)\n"
+    )
+    case = load_suite(case_dir).cases[0]
+    env = session.git_env(dict(os.environ))
+    repo = tmp_path / "repo"
+    heads = session.build_fixture(case, repo, env)
+    session.add_origin(repo, tmp_path / "origin.git", env)
+
+    def git(*args: str) -> str:
+        return run(
+            [GIT, *args], cwd=repo, env=env, capture_output=True, text=True, check=True
+        ).stdout
+
+    branches = ["feature/issue-42", "main", "release"]
+    for branch in branches:
+        assert git("rev-parse", f"origin/{branch}") == git("rev-parse", branch)
+    listed = git("ls-remote", "--heads", "origin").split()[1::2]
+    assert listed == [f"refs/heads/{b}" for b in branches]
+    git("commit", "-q", "--allow-empty", "-m", "fix: the thing")
+    git("push", "-q")
+    assert git("rev-parse", "origin/feature/issue-42") == git("rev-parse", "HEAD")
+    assert session.new_commits(repo, env, heads) == ["fix: the thing"]
+
+
+def test_sample_env_puts_the_gh_stub_first_only_for_a_case_that_asks(
+    tmp_path: pathlib.Path,
+) -> None:
+    base = {"PATH": "/usr/bin"}
+    sandbox = tmp_path / "sandbox"
+    assert session.sample_env(base, tmp_path, sandbox)["PATH"] == f"{sandbox}/venv/bin:/usr/bin"
+    stubbed = session.sample_env(base, tmp_path, sandbox, gh_stub=True)
+    assert stubbed["PATH"] == f"{sandbox}/bin:{sandbox}/venv/bin:/usr/bin"
+
+
 def limited_sample(reason: str) -> cache.Sample:
     return cache.Sample("k", "c1", "new", 0, {}, False, [reason], [], "", {}, {})
 
