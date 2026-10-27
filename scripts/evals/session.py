@@ -95,8 +95,9 @@ def sample_env(
     """The session's environment: git isolated, this checkout off PATH, the sample's own venv and TMPDIR.
 
     Git run inside an arm stops at `store`, so it does not find the clone whose git
-    directory holds the store, and GRIMOIRE_EVALS_STORE goes, so a command that names it
-    as a variable does not reach the store past the check on each tool call's paths.
+    directory holds the store. GRIMOIRE_EVALS_STORE goes, but GIT_CEILING_DIRECTORIES
+    holds the store's path, so a path built from it gets past the check on each tool
+    call's paths.
 
     CLAUDE* variables go too: the calling session's own (CLAUDECODE and the like)
     would tell the child it runs nested, and others (CLAUDE_EFFORT) would change it.
