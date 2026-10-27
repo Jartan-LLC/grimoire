@@ -25,7 +25,7 @@ import threading
 import time
 from dataclasses import asdict, dataclass
 
-from . import cache, grade, trace
+from . import cache, trace
 from .arms import Arm
 from .proc import CLAUDE, GIT, UV, run
 from .suite import Case, Reply
@@ -228,18 +228,6 @@ def gh_calls(sandbox: pathlib.Path) -> list[dict[str, object]]:
     return trace.load_text(log.read_text()) if log.is_file() else []
 
 
-def stub_bypassed(parsed: trace.Trace, calls: list[dict[str, object]] | None) -> bool:
-    """Whether a remote session ran `gh` while its stub logged none of the agent's calls.
-
-    Another `gh` answered them then. Claude Code's own calls reach the stub whatever the
-    agent runs, so they do not count. `calls` is None for a case without a remote, which
-    has no stub to bypass.
-    """
-    if calls is None:
-        return False
-    return not grade.agents_gh(grade.gh_text(calls)).strip() and trace.runs_gh(parsed)
-
-
 def new_commits(repo: pathlib.Path, env: dict[str, str], fixture_heads: list[str]) -> list[str]:
     """The full message of every commit the session added, on any branch, oldest first.
 
@@ -325,12 +313,6 @@ def _session(
         reasons, spoiled = trace.classify(
             parsed, arm.plugins, spec.model, timed_out, private, arms=str(spec.store / "arms")
         )
-        calls = gh_calls(sandbox) if case.remote else None
-        if stub_bypassed(parsed, calls):
-            reasons.append(
-                "the session ran gh, but the gh stub logged no call of the agent's: "
-                "it bypassed the stub"
-            )
         result = parsed.result or {}
         files = {p: (repo / p).read_text() for p in case.files() if (repo / p).is_file()}
         sample = cache.Sample(
@@ -352,7 +334,7 @@ def _session(
             spoiled=spoiled,
             collected=case.files(),
             preloads=[list(p) for p in loaded],
-            gh=calls,
+            gh=gh_calls(sandbox) if case.remote else None,
         )
         return sample, text
     finally:

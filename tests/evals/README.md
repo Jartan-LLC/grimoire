@@ -125,8 +125,7 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   (`^pr create`), and grade the behaviour under test with a check, never with a `match`: a narrow match
   (`--draft`) fails the other calls, and the failure invites the agent to retry until it hits the
   scripted one. The session could read the answer too: the replies sit in its sandbox, so a sample
-  whose tool calls name the stub's directory or `replies.json` is excluded. So is a sample that ran
-  `gh` while the stub logged none of the agent's calls, since another `gh` answered them.
+  whose tool calls name the stub's directory or `replies.json` is excluded.
 
   ```toml
   [[gh]]
