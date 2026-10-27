@@ -596,3 +596,17 @@ def test_stored_samples_are_found_by_the_key_the_case_has_now(tmp_path: pathlib.
     assert cli.drawn_samples(store, lambda i: session.key_of(changed, arm, i, spec)) == []
     other = dataclasses.replace(spec, version="2.1.312")
     assert cli.drawn_samples(store, lambda i: session.key_of(case, arm, i, other)) == []
+
+
+def test_a_probe_takes_its_items_a_case_at_a_time(tmp_path: pathlib.Path) -> None:
+    suite = load_suite(write_suite(tmp_path))
+    check = suite.cases[0].checks[0]
+
+    def real(case_id: str, key: str) -> cli.Real:
+        case = dataclasses.replace(suite.cases[0], id=case_id)
+        sample = cache.Sample(key, case_id, "old", 0, {}, True, [], [], "", {}, {})
+        return cli.Real(sample, case, check, "text", "")
+
+    reals = [real("a", "a1"), real("a", "a2"), real("a", "a3"), real("b", "b1"), real("c", "c1")]
+    assert [r.sample.key for r in cli.spread(reals, 4)] == ["a1", "b1", "c1", "a2"]
+    assert cli.spread(reals, 0) == []

@@ -1190,6 +1190,16 @@ def gold_panel(
     return right, n, wrong
 
 
+def spread[T: Real](reals: Sequence[T], count: int) -> list[T]:
+    """`count` items taken a case at a time, round robin in the order given, so a probe sees many cases."""
+    by_case: dict[str, list[T]] = {}
+    for real in reals:
+        by_case.setdefault(real.case.id, []).append(real)
+    rounds = max((len(v) for v in by_case.values()), default=0)
+    ordered = [v[i] for i in range(rounds) for v in by_case.values() if i < len(v)]
+    return ordered[:count]
+
+
 def _judge_of(suite: Suite, judge_id: str) -> Judge:
     if judge_id not in suite.judges:
         raise SystemExit(f"{shown(suite.path)} has no [[judge]] {judge_id!r}")
@@ -1201,7 +1211,7 @@ def probe(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.
     reals = real_items(suite, judge_, baseline_specs(args, suite, store), store)
     if not reals:
         raise SystemExit("no stored sample of a case that asks this judge: draw some with run")
-    for real in reals[: args.calls]:
+    for real in spread(reals, args.calls):
         text = _stripped(real.text)
         answer, raw = jury.call(judge_, real.check.reference, text)
         counted = jury.vote(answer, text) if answer else "-"
@@ -1210,7 +1220,7 @@ def probe(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.
         )
         print(raw.strip()[:3000])
     panel = labeller.Labeller(args.labeller_model, args.labeller_effort)
-    for real in reals[: args.labellers]:
+    for real in spread(reals, args.labellers):
         text = _stripped(real.text)
         out, raw = labeller.call(
             real.case,
