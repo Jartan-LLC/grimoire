@@ -321,7 +321,7 @@ def test_classify_excludes_a_session_that_reached_the_gh_stubs_replies() -> None
         parsed = trace.parse(events, PLUGINS)
         return trace.classify(parsed, PLUGINS, MODEL, False, private, arms="/store/arms")[0]
 
-    assert reasons("cat ../gh/replies.json") == ["the session reached replies.json"]
+    assert reasons("cat ../gh-stub/replies.json") == ["the session reached replies.json"]
     assert reasons("ls /sandbox/gh") == ["the session reached /sandbox/gh"]
     assert reasons("gh pr create --draft --fill") == []
 

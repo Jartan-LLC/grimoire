@@ -51,6 +51,8 @@ REMOTE_RUNNER = 2
 PRELOADED = re.compile(r"\[Agent: ([^\]]+)\] Preloaded skill '([^']+)'")
 GH_STUB = pathlib.Path(__file__).with_name("gh_stub.py")
 REPLIES = "replies.json"
+# The stub's replies and log; no other sandbox path may contain this one's, which is private.
+GH_STATE = "gh-stub"
 GH_LOGIN = ("GH_TOKEN", "GITHUB_TOKEN", "GH_ENTERPRISE_TOKEN", "GITHUB_ENTERPRISE_TOKEN", "GH_HOST")
 SSH_AGENT = ("SSH_AUTH_SOCK", "SSH_AGENT_PID")
 
@@ -199,24 +201,24 @@ def add_origin(repo: pathlib.Path, origin: pathlib.Path, env: dict[str, str]) ->
 
 
 def install_gh(sandbox: pathlib.Path, replies: tuple[Reply, ...]) -> None:
-    """Put the recording `gh` stub in `sandbox/bin`, answering with `replies`, its log in `sandbox/gh`.
+    """Put the recording `gh` stub in `sandbox/bin`, with `replies` and its log in `sandbox/gh-stub`.
 
     `sandbox/gh-config` is made empty, for the session's GH_CONFIG_DIR.
     """
     (sandbox / "bin").mkdir()
     (sandbox / "gh-config").mkdir()
-    (sandbox / "gh").mkdir()
+    (sandbox / GH_STATE).mkdir()
     stub = sandbox / "bin" / "gh"
     stub.write_text("#!/usr/bin/env -S python3 -I\n" + GH_STUB.read_text())
     stub.chmod(0o755)
     replies_json = json.dumps([asdict(r) for r in replies])
-    (sandbox / "gh" / REPLIES).write_text(replies_json)
-    (sandbox / "gh" / "calls.jsonl").touch()
+    (sandbox / GH_STATE / REPLIES).write_text(replies_json)
+    (sandbox / GH_STATE / "calls.jsonl").touch()
 
 
 def gh_calls(sandbox: pathlib.Path) -> list[dict[str, object]]:
     """The calls the sandbox's `gh` stub recorded, in order; a line that is not JSON is skipped."""
-    log = sandbox / "gh" / "calls.jsonl"
+    log = sandbox / GH_STATE / "calls.jsonl"
     return trace.load_text(log.read_text()) if log.is_file() else []
 
 
@@ -250,7 +252,7 @@ def private_paths(case: Case, spec: Spec, sandbox: pathlib.Path) -> list[str]:
         for line in listed.splitlines()
         if line.startswith("worktree ")
     ]
-    stub = [str(sandbox / "gh"), REPLIES] if case.remote else []
+    stub = [str(sandbox / GH_STATE), REPLIES] if case.remote else []
     return list(
         dict.fromkeys(
             [

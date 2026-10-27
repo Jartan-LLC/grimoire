@@ -1,9 +1,9 @@
 """A stand-in for the GitHub CLI in an eval session: it records each call and answers from the case's replies.
 
-The runner installs this file as `bin/gh` in a sample's sandbox, beside `gh/replies.json`
-(the case's `[[gh]]` tables) and `gh/calls.jsonl` (the log it appends to). It reaches no
-network and uses only the standard library. A call no reply matches fails, so a session
-never reads a success the case did not script.
+The runner installs this file as `bin/gh` in a sample's sandbox, beside
+`gh-stub/replies.json` (the case's `[[gh]]` tables) and `gh-stub/calls.jsonl` (the log it
+appends to). It reaches no network and uses only the standard library. A call no reply
+matches fails, so a session never reads a success the case did not script.
 
 A change to what this stub answers, how it matches a call or what it logs, or to the
 remote setup in `session.py`, changes what a remote session can do: bump REMOTE_RUNNER
@@ -109,4 +109,4 @@ def main(argv: list[str], state: pathlib.Path) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:], pathlib.Path(__file__).resolve().parent.parent / "gh"))
+    sys.exit(main(sys.argv[1:], pathlib.Path(__file__).resolve().parent.parent / "gh-stub"))

@@ -325,9 +325,27 @@ def test_private_paths_from_a_worktree_hold_every_working_tree_of_the_clone(
     ]
     remote = dataclasses.replace(case, remote=True)
     assert session.private_paths(remote, spec, tmp_path / "sandbox")[-2:] == [
-        str(tmp_path / "sandbox" / "gh"),
+        str(tmp_path / "sandbox" / "gh-stub"),
         "replies.json",
     ]
+
+
+def test_no_path_a_remote_session_is_given_holds_a_private_sandbox_path(
+    tmp_path: pathlib.Path,
+) -> None:
+    checkout = tmp_path / "checkout"
+    run([GIT, "init", "-q", str(checkout)], env=session.git_env(dict(os.environ)), check=True)
+    case = load_suite(write_suite(checkout / "suite", key="remote = true\n" + KEY)).cases[0]
+    sandbox = tmp_path / "sandbox"
+    for made in ("tmp", "repo", "venv", "origin.git"):
+        (sandbox / made).mkdir(parents=True)
+    session.install_gh(sandbox, ())
+    env = session.sample_env({"PATH": "/usr/bin"}, checkout, sandbox, tmp_path / "store", True)
+    given = [str(p) for p in sandbox.rglob("*")]
+    given += [part for value in env.values() for part in value.split(os.pathsep)]
+    spec = session.Spec("m", "v", 1.0, checkout, tmp_path / "store")
+    (stub,) = [p for p in session.private_paths(case, spec, sandbox) if p.startswith(str(sandbox))]
+    assert [p for p in given if stub in p and not p.startswith(f"{stub}/")] == [stub]
 
 
 def test_the_remote_runner_is_in_a_remote_cases_key_only(
