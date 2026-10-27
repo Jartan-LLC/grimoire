@@ -119,8 +119,12 @@ def _claude_codes_call(line: str) -> bool:
 
 
 def agents_gh(text: str) -> str:
-    """The `gh` text without the lines of the calls Claude Code makes on its own."""
-    return "\n".join(line for line in text.splitlines() if not _claude_codes_call(line))
+    r"""The `gh` text without the lines of the calls Claude Code makes on its own.
+
+    It splits on newlines alone, as `call_line` escapes only those: a body's `\r` stays
+    inside its call's line.
+    """
+    return "\n".join(line for line in text.split("\n") if not _claude_codes_call(line))
 
 
 def _by_agent(pairs: Iterable[tuple[str, str]]) -> dict[str, str]:

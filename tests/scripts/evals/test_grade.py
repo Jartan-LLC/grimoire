@@ -226,6 +226,14 @@ def test_a_call_that_only_resembles_claude_codes_own_counts_as_the_agents(line: 
     assert grade.agents_gh(line) == line
 
 
+def test_agents_gh_keeps_a_crlf_body_inside_its_calls_line() -> None:
+    call: dict[str, object] = {"argv": ["pr", "create", "--body", "Fix\r\nCloses #42"]}
+    text = grade.gh_text([{**call, "stdin": "", "files": {}}])
+    assert grade.agents_gh(text) == text
+    present = Check("m", "gh", r"^gh pr create .*Closes #42$", None)
+    assert grade.check_score(present, grade.Outputs(gh=text)) == 1.0
+
+
 def test_case_failed_counts_the_cases_own_metrics_not_the_guards() -> None:
     guards = ("format", "delivered")
     assert grade.case_failed({"rule": 0.0, "format": 1.0}, guards)
