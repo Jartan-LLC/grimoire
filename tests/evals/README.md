@@ -256,8 +256,8 @@ the PR how many versions you screened.
   draws its samples again and needs `--new-plan` (`NEW_PLAN=1`), since its plan named the old store's
   paths.
 - `python3 scripts/eval.py show <key>`: one sample's commits, final reply, the files its checks read,
-  `gh` calls, skill deliveries and writes with the agent that made each, subagents' reports and hook
-  context.
+  `gh` calls, skill deliveries and writes with the agent that made each, subagents' briefs and reports,
+  and hook context.
 - `python3 scripts/eval.py lint`: the mechanical checks from "Writing a case"; `make verify` runs it.
 
 ## Calibrating the runner

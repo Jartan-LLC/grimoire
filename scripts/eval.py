@@ -7,7 +7,7 @@
   run SUITE --arm A   run SUITE's cases on arm none, old or new (spends inference)
   screen SUITE        run old and new side by side, then print the verdict (spends inference)
   show KEY            print one stored sample: its commits, final reply, gh calls, deliveries
-                      and writes by agent, and subagents' reports
+                      and writes by agent, and subagents' briefs and reports
   size SUITE          what each split can see per model, from the recorded baselines (free)
 
 Sessions use the caller's own `claude` login; nothing here runs in CI. Samples are kept
@@ -537,7 +537,7 @@ def _effect(effect: float) -> str:
 
 
 def show(key: str, store: pathlib.Path) -> int:
-    """Print one sample: its commits, final reply, graded files, gh calls, deliveries, writes and hooks."""
+    """Print one sample: commits, final reply, graded files, gh calls, deliveries, writes, briefs, reports, hooks."""
     sample = cache.load(store, key)
     if sample is None:
         raise SystemExit(f"no cached sample {key}")
@@ -558,6 +558,8 @@ def show(key: str, store: pathlib.Path) -> int:
     print("\n--- writes (event index, agent)")
     for w in parsed.writes:
         print(f"  {w.index} {w.kind} ok={w.ok} {w.agent or 'main'} {w.text[:120]!r}")
+    for b in parsed.briefs:
+        print(f"\n--- brief to {b.agent} (event index {b.index})\n{b.text}")
     for r in parsed.reports:
         print(f"\n--- report of {r.agent} on {r.model} (event index {r.index})\n{r.text}")
     print("\n--- hook context (event index)")
