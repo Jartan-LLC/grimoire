@@ -221,6 +221,10 @@ def test_gh_replies_give_a_case_its_remote_and_count_in_its_hash(tmp_path: pathl
         (KEY + GH.replace("exit = 1", "exit = true"), "'exit' must be an integer from 0 to 255"),
         (KEY + GH.replace("exit = 1", "exit = 256"), "'exit' must be an integer from 0 to 255"),
         (KEY + GH.replace('stdout = "', 'stdout = 3 #"'), "'stdout' must be a string"),
+        (
+            KEY + GH.replace("exit = 1", "exit_code = 1"),
+            "a [[gh]] takes only match, stdout and exit",
+        ),
         (KEY.replace('artifact = "commits"', 'artifact = "brief:"'), "is not commits"),
     ],
 )

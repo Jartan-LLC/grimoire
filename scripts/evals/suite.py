@@ -382,6 +382,8 @@ def _agent_texts(data: Table, key: str, path: pathlib.Path) -> dict[str, str]:
 def _replies(key: Table, where: pathlib.Path) -> tuple[Reply, ...]:
     found: list[Reply] = []
     for table in _tables(key, "gh", where):
+        if set(table) - {"match", "stdout", "exit"}:
+            raise SuiteError(f"{where}: a [[gh]] takes only match, stdout and exit")
         stdout, code = table.get("stdout", ""), table.get("exit", 0)
         if not isinstance(stdout, str):
             raise SuiteError(f"{where}: a [[gh]]'s 'stdout' must be a string")
