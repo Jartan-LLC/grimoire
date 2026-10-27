@@ -76,7 +76,7 @@ def reports_of(parsed: trace.Trace) -> dict[str, str]:
 
 
 def briefs_of(parsed: trace.Trace) -> dict[str, str]:
-    """Each agent's briefs from the main thread, joined in the order they were sent."""
+    """Every Agent-call prompt the main thread sent each agent type, joined in the order sent."""
     return _by_agent((b.agent, b.text) for b in parsed.briefs)
 
 

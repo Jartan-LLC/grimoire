@@ -5,9 +5,8 @@ uses none of the case's hint words, the facts a check needs are where the writer
 find them, every planted problem fails its `verify` command and passes once fixed, the
 passing references pass every check and each failing reference fails one, each target
 case records a baseline failure, no baseline was drawn under an older runner, and a `gh`
-check reads a case whose session records its gh calls. It
-cannot tell that every check can fail, only that some check fails on each failing
-reference.
+check reads a case whose session records its gh calls. It cannot tell that every check
+can fail, only that some check fails on each failing reference.
 """
 
 import fnmatch

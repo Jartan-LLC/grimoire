@@ -39,11 +39,11 @@ class Check:
 
     A text check names an artifact (`commits`, `final`, `file:<path>`, `gh` (the calls
     the sandbox's `gh` recorded), `report:<agent>` (every report that agent handed back)
-    or `brief:<agent>` (every prompt the main thread sent that agent)) and a `present` or
-    `absent` regex. A delivery check names a `skill` and a `state`: with a `write` kind, the
-    state the skill must be in at every such write; without one, `loaded` or
-    `not-loaded` over the whole session (trigger cases). It reads the main thread's
-    deliveries and writes, or with an `agent`, that subagent's.
+    or `brief:<agent>` (every Agent-call prompt the main thread sent that agent type))
+    and a `present` or `absent` regex. A delivery check names a `skill` and a `state`:
+    with a `write` kind, the state the skill must be in at every such write; without
+    one, `loaded` or `not-loaded` over the whole session (trigger cases). It reads the
+    main thread's deliveries and writes, or with an `agent`, that subagent's.
     """
 
     metric: str
@@ -322,7 +322,8 @@ def _check(table: Table, where: pathlib.Path, metrics: dict[str, Metric]) -> Che
         )
     if "agent" in table:
         raise SuiteError(
-            f"{where}: 'agent' is for delivery checks; a report check names it as report:<agent>"
+            f"{where}: 'agent' is for delivery checks; a text check names it as report:<agent> "
+            "or brief:<agent>"
         )
     if not (
         artifact in TEXT_ARTIFACTS

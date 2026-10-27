@@ -81,7 +81,10 @@ class Report:
 
 @dataclass(frozen=True)
 class Brief:
-    """The prompt of the main thread's Agent call at event `index`, which started `agent`."""
+    """The prompt of the main thread's Agent call at event `index`, which started agent type `agent`.
+
+    A SendMessage follow-up to the agent is not one.
+    """
 
     index: int
     agent: str

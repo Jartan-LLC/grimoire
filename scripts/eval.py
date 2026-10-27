@@ -257,7 +257,9 @@ def drawn(
     """What a screen's sessions depend on: its samples' identity, without the grading.
 
     A fix to a key or a metric regrades the samples already drawn instead of drawing
-    new ones; the plan pin still refuses a verdict until the change is acknowledged.
+    new ones; the plan pin still refuses a verdict until the change is acknowledged. A
+    remote case's `[[gh]]` replies, though in its key, are part of its hash: editing
+    them draws new samples.
     """
     session_inputs = {k: v for k, v in plan.items() if k != "suite"}
     return [{c.id: c.pinned() for c in cases}, session_inputs, arms["new"].hash, trial]

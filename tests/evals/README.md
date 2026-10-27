@@ -149,9 +149,10 @@ the PR how many versions you screened.
 - **Whether a skill was in context when the agent wrote** is a guard or a diagnostic, not a primary
   metric, except in trigger cases, where loading the skill is the behaviour under test.
 - **A subagent's work:** `report:<agent>` is every report that agent handed back, `brief:<agent>` every
-  prompt the main thread sent it, and a delivery check with `agent = "<plugin>:<agent>"` reads that
-  subagent's skill loads and writes instead of the main thread's. A reference gives reports under
-  `[reports]` and briefs under `[briefs]`, as `"<plugin>:<agent>" = "text"`.
+  Agent-call prompt the main thread sent that agent type, and a delivery check with
+  `agent = "<plugin>:<agent>"` reads that subagent's skill loads and writes instead of the main
+  thread's. A reference gives reports under `[reports]` and briefs under `[briefs]`, as
+  `"<plugin>:<agent>" = "text"`.
 - **What the agent sent to GitHub:** `gh` is every call the stub recorded, one `gh <arguments>` line each
   with newlines written as `\n`, then the text of each `--body`, body file or stdin they passed. It holds
   calls Claude Code makes on its own too (`gh pr view --json url` on 2.1.311), so no check, `present` or
@@ -281,12 +282,15 @@ After changing the runner or the verdict rule:
   nor a workflow that spans sessions, such as a PR reviewed in one and its review addressed in the next.
 - GitHub is a stub: `gh` answers only from the case's replies, the same for every call that matches, so
   a case shows what the agent sent, not what GitHub would do with it.
+- A remote case cannot start with a branch ahead of, behind or missing from `origin`: the remote is made
+  after `build.py`, with every branch pushed at its tip (#146).
 - The lint knows when a baseline predates the runner, not when the model or Claude Code changed; rerun
   baselines after either.
-- A subagent's own subagents are not followed, nor is an Agent call run in the background. A delivery
-  check with an `agent` reads every spawn of that agent as one. The skills an agent's frontmatter
-  preloads are read from a line of Claude Code's debug log, which it does not promise to keep: if that
-  line changes, every preload reads as absent.
+- A subagent's own subagents are not followed, nor is an Agent call run in the background, nor a
+  SendMessage follow-up: `brief:<agent>` holds only the prompts of the Agent calls that started it. A
+  delivery check with an `agent` reads every spawn of that agent as one. The skills an agent's
+  frontmatter preloads are read from a line of Claude Code's debug log, which it does not promise to
+  keep: if that line changes, every preload reads as absent.
 - A sample's venv uses the base Python's packages, the interpreter uv builds venvs on, not this
   checkout's `.venv`: that Python needs pytest, which the runner checks before the first session. The
   venv has no pip of its own, so a session's bare `pip install` reaches the base Python, where later
