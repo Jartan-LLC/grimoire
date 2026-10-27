@@ -109,12 +109,16 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   one: a past commit's message need not match its diff unless the task depends on it.
 - **A task that pushes or calls GitHub** sets `remote = true` in the key. The session's repository then
   has an `origin`: a local bare repository holding every branch the fixture and `build.py` made, each
-  branch tracking it, so `git push` works. Its `gh` is a stub that records every call and answers from
-  the key's `[[gh]]` tables: the first whose `match` regex finds the call's arguments joined with spaces,
-  each newline in them written as `\n` (`pr create --draft --title ...`), prints its `stdout` and exits
-  with its `exit` (default 0). A call no reply matches fails with `gh stub: no reply for: <arguments>`,
-  so script every call the task needs, reads (`gh pr view`, `gh api`) included. A `[[gh]]` table implies
-  `remote = true`, and the replies count in the case hash, like the fixture.
+  branch tracking it, so `git push` works. To start with a branch ahead of, behind or missing from
+  `origin`, `build.py` makes `origin` itself, a bare repository at `../origin.git`, and pushes what it
+  wants there (commit-pr-writing's `branch-only-fix` case makes one): the runner keeps an `origin` that
+  `build.py` made as `build.py` left it. The session's `gh` is a stub that records every call and
+  answers from the key's `[[gh]]` tables: the first whose `match` regex finds the call's arguments
+  joined with spaces, each newline in them written as `\n` (`pr create --draft --title ...`), prints its
+  `stdout` and exits with its `exit` (default 0). A call no reply matches fails with
+  `gh stub: no reply for: <arguments>`, so script every call the task needs, reads (`gh pr view`,
+  `gh api`) included. A `[[gh]]` table implies `remote = true`, and the replies count in the case hash,
+  like the fixture.
 
   ```toml
   [[gh]]
@@ -282,8 +286,6 @@ After changing the runner or the verdict rule:
   nor a workflow that spans sessions, such as a PR reviewed in one and its review addressed in the next.
 - GitHub is a stub: `gh` answers only from the case's replies, the same for every call that matches, so
   a case shows what the agent sent, not what GitHub would do with it.
-- A remote case cannot start with a branch ahead of, behind or missing from `origin`: the remote is made
-  after `build.py`, with every branch pushed at its tip (#146).
 - The lint knows when a baseline predates the runner, not when the model or Claude Code changed; rerun
   baselines after either.
 - A subagent's own subagents are not followed, nor is an Agent call run in the background, nor a

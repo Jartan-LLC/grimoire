@@ -159,7 +159,13 @@ def build_fixture(case: Case, repo: pathlib.Path, env: dict[str, str]) -> list[s
 
 
 def add_origin(repo: pathlib.Path, origin: pathlib.Path, env: dict[str, str]) -> None:
-    """Make `origin` a bare repository holding every branch of `repo`, each tracking `origin/<branch>`."""
+    """Make `origin` a bare repository holding every branch of `repo`, each tracking `origin/<branch>`.
+
+    An `origin` the case's `build.py` made is kept as it left it, so a case can start
+    with a branch ahead of, behind or missing from it.
+    """
+    if "origin" in _git(repo, env, "remote").split():
+        return
     run([GIT, "init", "-q", "--bare", "-b", "main", str(origin)], env=env, check=True)
     _git(repo, env, "remote", "add", "origin", str(origin))
     _git(repo, env, "push", "-q", "-u", "origin", "--all")

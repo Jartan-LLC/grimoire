@@ -131,6 +131,37 @@ def test_add_origin_pushes_every_fixture_branch_so_a_plain_push_works(
     assert session.new_commits(repo, env, heads) == ["fix: the thing"]
 
 
+def test_add_origin_keeps_the_origin_build_made_with_a_branch_ahead_and_one_never_pushed(
+    tmp_path: pathlib.Path,
+) -> None:
+    case_dir = write_suite(tmp_path / "suite")
+    (case_dir / "cases" / "c1" / "build.py").write_text(
+        "import subprocess\n"
+        "def git(*args):\n"
+        "    subprocess.run(['git', *args], check=True)\n"
+        "git('init', '-q', '--bare', '../origin.git')\n"
+        "git('remote', 'add', 'origin', '../origin.git')\n"
+        "git('checkout', '-q', '-b', 'feature/issue-42')\n"
+        "git('push', '-q', '-u', 'origin', 'main', 'feature/issue-42')\n"
+        "git('commit', '-q', '--allow-empty', '-m', 'unpushed')\n"
+        "git('branch', 'local-only')\n"
+    )
+    case = load_suite(case_dir).cases[0]
+    env = session.git_env(dict(os.environ))
+    repo = tmp_path / "repo"
+    session.build_fixture(case, repo, env)
+    session.add_origin(repo, tmp_path / "origin.git", env)
+
+    def git(*args: str) -> str:
+        return run(
+            [GIT, *args], cwd=repo, env=env, capture_output=True, text=True, check=True
+        ).stdout.strip()
+
+    assert git("rev-list", "--count", "origin/feature/issue-42..feature/issue-42") == "1"
+    listed = git("ls-remote", "--heads", "origin").split()[1::2]
+    assert listed == ["refs/heads/feature/issue-42", "refs/heads/main"]
+
+
 def test_sample_env_puts_the_gh_stub_first_only_for_a_case_that_asks(
     tmp_path: pathlib.Path,
 ) -> None:
