@@ -174,7 +174,8 @@ the PR how many versions you screened.
   by a title or by another call's text, and a check about one flag or command anchors on the call line
   (`^gh pr create .*--draft`). The stub reads a file only inside the sandbox, the eval runner's temp
   directory or `/tmp`, where an agent may write `/tmp/pr-body.md`: a body file elsewhere reads as
-  absent. It reads no file or stdin of a call with a `secret`, `variable` or `auth` argument. The
+  absent. It reads no file or stdin of a call with an argument equal to `secret`, `variable` or `auth`
+  anywhere, a label included (`--label auth`): such a call is recorded with no file or stdin text. The
   calls Claude Code makes on its own (`gh pr view --json url` and `gh pr view <branch> --json url` on
   2.1.311) are left out, so no check grades them. A reference gives it as `gh = "text"`. The lint fails
   a `gh` check on a case without a remote. For "made no such call", which holds when the agent made no
