@@ -10,10 +10,11 @@ value, `api -f` does). It logs the argv as given, then the text of every regular
 argument or a part of one names (`candidates`) inside its roots, and stdin when one of
 those is `-`. The roots are the sandbox and the temp directories the runner names in the
 GRIMOIRE_GH_STUB_TEMP variable (TEMP_ROOTS holds the name), an `os.pathsep` list; without
-that variable, the sandbox alone. That can include a file no gh command would read. It
-misses a file outside the roots, any file or stdin of a call with a PRIVATE argument
-(`auth`, `secret` or `variable`), and the text of a file over MAX_BYTES, which it lists
-under `over_cap` unread.
+that variable, the sandbox alone. That can include a file no gh command would read, and
+stdin whenever any candidate is exactly `-`, a key's value included (`-f q=-`), which
+waits while stdin stays open. It misses a file outside the roots, any file or stdin of a
+call with a PRIVATE argument (`auth`, `secret` or `variable`), and the text of a file
+over MAX_BYTES, which it lists under `over_cap` unread.
 
 A change to what this stub answers, how it matches a call or what it logs, or to the
 remote setup in `session.py`, changes what a remote session can do: bump REMOTE_RUNNER

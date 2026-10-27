@@ -176,8 +176,10 @@ the PR how many versions you screened.
   `present = '\A(?:.+\n)*gh pr create .*--draft'`: checks match line by line, so `^` alone also
   reaches the texts after the blank line, a body that quotes `gh pr create --draft` included. The stub
   reads a file only inside the sandbox, the eval runner's temp directory or `/tmp`, where an agent may
-  write `/tmp/pr-body.md`: a body file elsewhere reads as absent. It reads no file or stdin of a call
-  with an argument equal to `secret`, `variable` or `auth` anywhere, a label included (`--label auth`):
+  write `/tmp/pr-body.md`: a body file elsewhere reads as absent. It reads stdin whenever an argument
+  or a tail of one is exactly `-`, a key's value included (`-f q=-`), where gh would not, so such a
+  call waits while stdin stays open. It reads no file or stdin of a call with an argument equal to
+  `secret`, `variable` or `auth` anywhere, a label included (`--label auth`):
   such a call is recorded with no file or stdin text. The calls Claude Code makes on its own
   (`gh pr view --json url` and `gh pr view <branch> --json url` on 2.1.311) are left out, so no check
   grades them. A reference gives it as `gh = "text"`. The lint fails a `gh` check on a case without a
