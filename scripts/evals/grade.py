@@ -94,6 +94,26 @@ def gh_text(calls: Sequence[dict[str, object]]) -> str:
     return "\n\n".join(["\n".join(lines), *bodies]) if calls else ""
 
 
+def _claude_codes_call(line: str) -> bool:
+    """Whether a `gh` text line is a call Claude Code makes on its own, not the agent.
+
+    On 2.1.311 it runs `gh pr view --json url`, and `gh pr view <branch> --json url` naming
+    the branch; in the samples no agent ran either, while agents pass PR numbers.
+    """
+    words = line.split(" ")
+    if words[:3] != ["gh", "pr", "view"] or words[-2:] != ["--json", "url"]:
+        return False
+    branch = words[3:-2]
+    return not branch or (
+        len(branch) == 1 and not branch[0].startswith("-") and not branch[0].isdigit()
+    )
+
+
+def agents_gh(text: str) -> str:
+    """The `gh` text without the lines of the calls Claude Code makes on its own."""
+    return "\n".join(line for line in text.splitlines() if not _claude_codes_call(line))
+
+
 def _by_agent(pairs: Iterable[tuple[str, str]]) -> dict[str, str]:
     joined: dict[str, list[str]] = {}
     for agent, text in pairs:
@@ -111,17 +131,23 @@ def briefs_of(parsed: trace.Trace) -> dict[str, str]:
     return _by_agent((b.agent, b.text) for b in parsed.briefs)
 
 
-def text_score(check: Check, text: str) -> float:
+def text_score(check: Check, text: str, produced: str | None = None) -> float:
     """1.0 when a text check holds.
 
-    An `absent` check fails on empty text: an agent that produced nothing did not
-    keep the thing out, it skipped the task.
+    An `absent` check fails when the agent produced nothing: it did not keep the thing
+    out, it skipped the task. `produced` is the agent's part of `text`, when not all of it.
     """
     if check.present is not None:
         return 1.0 if re.search(check.present, text, re.MULTILINE) else 0.0
-    if not text.strip():
+    if not (text if produced is None else produced).strip():
         return 0.0
     return 0.0 if re.search(str(check.absent), text, re.MULTILINE) else 1.0
+
+
+def check_score(check: Check, outputs: Outputs) -> float:
+    """A text check's score on `outputs`; for `gh`, only the agent's calls count as produced."""
+    text = text_of(outputs, check.artifact)
+    return text_score(check, text, agents_gh(text) if check.artifact == "gh" else None)
 
 
 def delivery_score(check: Check, parsed: trace.Trace) -> float:
@@ -177,7 +203,7 @@ def scores(case: Case, sample: Sample, parsed: trace.Trace) -> dict[str, float]:
         elif check.artifact == "delivery":
             score = delivery_score(check, parsed)
         else:
-            score = text_score(check, text_of(outputs, check.artifact))
+            score = check_score(check, outputs)
         pairs.append((check.metric, score))
     return _mean_by_metric(pairs)
 
@@ -194,7 +220,7 @@ def reference_scores(case: Case, reference: Reference) -> list[tuple[Check, floa
         reference.reports, reference.gh, reference.briefs,
     )  # fmt: skip
     return [
-        (check, text_score(check, text_of(outputs, check.artifact)))
+        (check, check_score(check, outputs))
         for check in case.checks
         if check.artifact != "delivery"
     ]

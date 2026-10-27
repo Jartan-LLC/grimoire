@@ -174,6 +174,31 @@ def test_scores_grade_a_gh_check_on_the_samples_recorded_calls(tmp_path: pathlib
     assert grade.scores(case, drawn, parsed)["kept"] == 0.5
 
 
+def test_an_absent_gh_check_fails_when_only_claude_code_called_gh(tmp_path: pathlib.Path) -> None:
+    key = "remote = true\n" + KEY.replace(
+        "artifact = \"commits\"\npresent = '#42'", "artifact = \"gh\"\nabsent = '--draft'"
+    )
+    case = load_suite(write_suite(tmp_path, key=key)).cases[0]
+    parsed = trace.parse([*load_skill("s1", "x", CPW), *commit("c1")], PLUGINS)
+    drawn = sample([], "Done.")
+    own: list[dict[str, object]] = [
+        {"argv": ["pr", "view", "--json", "url"], "stdin": "", "files": {}},
+        {"argv": ["pr", "view", "fix/quotes", "--json", "url"], "stdin": "", "files": {}},
+    ]
+    drawn.gh = own
+    assert grade.scores(case, drawn, parsed)["kept"] == 0.5
+    drawn.gh = [*own, {"argv": ["pr", "create", "--body", "Closes #42"], "stdin": "", "files": {}}]
+    assert grade.scores(case, drawn, parsed)["kept"] == 1.0
+
+
+@pytest.mark.parametrize(
+    "line",
+    ["gh pr view 7 --json url", "gh pr view --json url,title", "gh pr view -R o/r b --json url"],
+)
+def test_a_call_that_only_resembles_claude_codes_own_counts_as_the_agents(line: str) -> None:
+    assert grade.agents_gh(line) == line
+
+
 def test_case_failed_counts_the_cases_own_metrics_not_the_guards() -> None:
     guards = ("format", "delivered")
     assert grade.case_failed({"rule": 0.0, "format": 1.0}, guards)
