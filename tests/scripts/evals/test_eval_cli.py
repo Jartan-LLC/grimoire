@@ -1,12 +1,14 @@
 import argparse
 import pathlib
 import shutil
+import sys
 from typing import cast
 
 import eval as cli
 import pytest
 from evals import cache, session
 from evals.arms import Arm
+from evals.plan import Listed, Plan
 from evals.suite import Suite, load_suite
 from evals.verdict import MetricVerdict
 from helpers import KEY, SUITE, write_suite
@@ -155,6 +157,26 @@ def test_a_screens_identity_holds_the_trial_the_new_arm_and_each_cases_hash(
     assert cli.drawn(list(load_suite(root).cases), plan, arms, "t1") != base
 
 
+def test_each_drawn_sample_prints_its_key(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    (case,) = load_suite(write_suite(tmp_path)).cases
+
+    def drawn_sample(case: cli.Case, arm: Arm, index: int, *_: object) -> cache.Sample:
+        return cache.Sample(
+            "k" + str(index), case.id, arm.name, index, {}, True, [], [], "", {}, {}
+        )
+
+    def nothing() -> None:
+        return None
+
+    monkeypatch.setattr(session, "preflight", nothing)
+    monkeypatch.setattr(session, "run_sample", drawn_sample)
+    spec = session.Spec("claude-opus-5-5", "2.1.310", 1.0, tmp_path, tmp_path / "store")
+    cli.run_samples([(case, Arm("old", "h", {}), 3, spec)], 1)
+    assert capsys.readouterr().out == "  old c1 #3: ok: k3\n"
+
+
 def test_a_screen_under_a_changed_plan_runs_nothing_until_a_new_plan(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -280,3 +302,180 @@ def test_the_planner_sizes_a_split_by_the_units_its_ruled_metrics_score(
     assert weak
     assert any("2 scored by every metric" in line for line in lines)
     assert any("too few units" in line for line in lines)
+
+
+UNCOVERED = "plugins/gitwise/skills/github-conventions/SKILL.md"
+STEPS = ("  first", "  next", "  then", "  indirect", "  nothing", "smoke test", "UNCOVERED")
+
+
+def reach(root: pathlib.Path, rates: tuple[int, int] = (0, 3)) -> tuple[Plan, str, str]:
+    """A plan reaching a direct and an indirect suite and one uncovered file; and the suites' paths.
+
+    Each suite runs on opus and on haiku, a watch model, and has confirm cases.
+    """
+    both: dict[str, tuple[int | None, int | None]] = {
+        "claude-haiku-5-5": rates,
+        "claude-opus-5-5": rates,
+    }
+    direct = power_suite(root / "direct", 8, both, watch="claude-haiku-5-5")
+    indirect = power_suite(root / "indirect", 8, both, watch="claude-haiku-5-5")
+    plan = Plan(
+        [Listed(direct, ["d.md"], direct=True), Listed(indirect, ["i.md"], direct=False)],
+        [UNCOVERED],
+        [],
+    )
+    return plan, str(direct.path), str(indirect.path)
+
+
+def planned(
+    plan: Plan,
+    tier: int | None,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> tuple[int, list[str]]:
+    """`plan_command`'s exit code and output lines for `plan` at `tier`."""
+
+    def make_plan(root: pathlib.Path, base: str) -> Plan:
+        return plan
+
+    def holds(target: str, base: str) -> bool:
+        return True
+
+    monkeypatch.setattr(cli, "make_plan", make_plan)
+    monkeypatch.setattr(cli, "old_holds", holds)
+    code = cli.plan_command("main", tier)
+    return code, capsys.readouterr().out.splitlines()
+
+
+def test_the_plan_without_a_tier_lists_what_the_change_reaches_and_asks_for_one(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    plan, direct, indirect = reach(tmp_path)
+    code, lines = planned(plan, None, monkeypatch, capsys)
+    assert code == 0
+    assert lines[:3] == [
+        f"{direct}: DIRECT, covers d.md",
+        f"{indirect}: INDIRECT, covers i.md",
+        f"UNCOVERED: {UNCOVERED}",
+    ]
+    assert len(lines) == 4
+    assert "TIER=<n>" in lines[3]
+
+
+def test_the_plan_at_tier_1_lists_what_the_change_reaches_with_no_steps(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    plan, direct, indirect = reach(tmp_path)
+    assert planned(plan, 1, monkeypatch, capsys) == (
+        0,
+        [
+            f"{direct}: DIRECT, covers d.md",
+            f"{indirect}: INDIRECT, covers i.md",
+            f"UNCOVERED: {UNCOVERED}",
+            "no eval is due if nothing this change alters reaches the model",
+        ],
+    )
+
+
+def test_the_plan_at_tier_2_screens_direct_suites_and_reports_their_screen_split_unadvised(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    plan, direct, _ = reach(tmp_path, rates=(0, 0))
+    code, lines = planned(plan, 2, monkeypatch, capsys)
+    assert code == 0
+    assert "  what its screen split can see (say in the PR what it shows):" in lines
+    assert any(line.startswith("  screen: ") for line in lines)
+    assert not any(line.startswith("  confirm: ") for line in lines)
+    assert sum(line.startswith("  screen: ") for line in lines) == 1
+    assert any("no sample count up to 10 reaches 80%" in line for line in lines)
+    assert not any("add cases" in line for line in lines)
+    assert [line for line in lines if line.startswith(STEPS)] == [
+        f"  next: make eval-screen SUITE={direct} MODEL=claude-haiku-5-5 (watch model: advisory)",
+        f"  next: make eval-screen SUITE={direct} MODEL=claude-opus-5-5",
+        "  nothing to run",
+        f"UNCOVERED: {UNCOVERED} -- name it in the PR as covered by no suite",
+    ]
+
+
+def test_the_plan_at_tier_3_also_screens_each_indirect_suite_once_and_asks_for_a_smoke_test(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    plan, direct, indirect = reach(tmp_path)
+    code, lines = planned(plan, 3, monkeypatch, capsys)
+    assert code == 0
+    assert "  what its screen split can see (say in the PR what it shows):" in lines
+    assert [line for line in lines if line.startswith(STEPS)] == [
+        f"  next: make eval-screen SUITE={direct} MODEL=claude-haiku-5-5 (watch model: advisory)",
+        f"  next: make eval-screen SUITE={direct} MODEL=claude-opus-5-5",
+        f"  next: make eval-screen SUITE={indirect} MODEL=claude-opus-5-5",
+        "  indirect: screen only, on one gate model",
+        'smoke test: write one ("Smoke tests" in tests/evals/README.md)',
+        f"UNCOVERED: {UNCOVERED} -- cover it in the smoke test",
+    ]
+    haiku: dict[str, tuple[int | None, int | None]] = {"claude-haiku-5-5": (0, 3)}
+    all_watch = power_suite(tmp_path / "w", 8, haiku, watch="claude-haiku-5-5")
+    assert cli.next_steps(Listed(all_watch, ["x"], direct=False), "s", 3) == [
+        "  next: make eval-screen SUITE=s MODEL=claude-haiku-5-5 (watch model: advisory)",
+        "  indirect: screen only, on its first model (all are watch models: advisory)",
+    ]
+
+
+def test_the_plan_at_tier_4_advises_on_the_report_confirms_and_asks_for_a_suite(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    plan, direct, indirect = reach(tmp_path, rates=(0, 0))
+    _, lines = planned(plan, 4, monkeypatch, capsys)
+    assert "  what its splits can see:" in lines
+    assert any(line.startswith("  confirm: ") for line in lines)
+    assert any("reaches 80%: add cases the target changes" in line for line in lines)
+    assert [line for line in lines if line.startswith(STEPS)] == [
+        '  first: add cases the changed text affects ("Choosing cases" in tests/evals/README.md)',
+        f"  next: make eval-screen SUITE={direct} MODEL=claude-haiku-5-5 (watch model: advisory)",
+        f"  next: make eval-screen SUITE={direct} MODEL=claude-opus-5-5",
+        "  then, before the PR: each of those again with SPLIT=confirm",
+        f"  next: make eval-screen SUITE={indirect} MODEL=claude-opus-5-5",
+        "  indirect: screen only, on one gate model",
+        f"UNCOVERED: {UNCOVERED} -- write or extend a suite to cover it",
+    ]
+    for case in (tmp_path / "direct" / "cases").glob("confirm-*"):
+        shutil.rmtree(case)
+    no_confirm = Listed(load_suite(tmp_path / "direct"), ["x"], direct=True)
+    assert cli.next_steps(no_confirm, "s", 4)[1] == (
+        '  first: write confirm cases ("Splits" in tests/evals/README.md)'
+    )
+    code, lines = planned(Plan([no_confirm], [], []), 4, monkeypatch, capsys)
+    assert code == 1
+    assert "  confirm: no cases" in lines
+
+
+def test_the_plan_fails_on_a_broken_suite_at_any_tier_and_on_a_weak_or_missing_one_at_tier_4(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    weak = power_suite(tmp_path, 8, {"claude-opus-5-5": (0, 0)})
+    assert cli.split_report(weak)[1]
+    broken = Plan([], [UNCOVERED], ["bad: no suite.toml"])
+    for tier in (None, 1, 2, 3, 4):
+        code, lines = planned(broken, tier, monkeypatch, capsys)
+        assert (code, lines[0]) == (1, "BROKEN SUITE: bad: no suite.toml")
+    for direct, tier, code in [(True, 2, 0), (True, 3, 0), (True, 4, 1), (False, 4, 0)]:
+        plan = Plan([Listed(weak, ["x"], direct=direct)], [], [])
+        assert planned(plan, tier, monkeypatch, capsys)[0] == code
+    for tier, code in [(2, 0), (3, 0), (4, 1)]:
+        assert planned(Plan([], [UNCOVERED], []), tier, monkeypatch, capsys)[0] == code
+
+
+def test_eval_size_still_advises_on_a_weak_split_and_fails(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    unrecorded: dict[str, tuple[int | None, int | None]] = {"claude-opus-5-5": (None, None)}
+    power_suite(tmp_path, 2, unrecorded)
+
+    def holds(target: str, base: str) -> bool:
+        return True
+
+    monkeypatch.setattr(cli, "old_holds", holds)
+    monkeypatch.setattr(sys, "argv", ["eval.py", "size", str(tmp_path)])
+    assert cli.main() == 1
+    out = capsys.readouterr().out
+    assert "too few units for any verdict; add cases" in out
+    assert "no old or no none baselines on this split; record them" in out

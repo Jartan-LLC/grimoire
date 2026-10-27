@@ -6,12 +6,13 @@
 # What it can see: on its baselines, cutting the agent's body breaks the report's format but
 # changes few findings, which come from the preloaded skills, so a change that weakens
 # detection shows on only a few cases (#144). Not calibrated yet: no A/A screens or positive
-# control have run on it, and it has no confirm split, so a change it covers stops after the
-# screen. Read a screen as a sign, not a gate.
+# control have run on it, and it has no confirm split, so at tier 4 a change it covers needs
+# confirm cases first. Read a screen as a sign, not a gate.
 target = "praxis:general-reviewer"
 # Cases moved off a held-out split, each with its reason in a comment.
 BURNED = []
-# The planner adds changes to the skills the agent preloads through its wiring.
+# A change to a skill the agent preloads reaches the suite only as an indirect check: its `none`
+# arm removes the agent, not the skill, so its power report does not measure a skill change.
 covers = ["plugins/praxis/agents/general-reviewer.md"]
 # The agent runs on the model its frontmatter pins (Sonnet); `models` sets the main thread that
 # dispatches it and relays its report.

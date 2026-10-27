@@ -24,15 +24,43 @@ not as a failed bar. A watch model becomes a gate model once its A/A screens SHI
 
 ## When a change needs evals
 
-Run `make eval-plan`. It lists the suites that cover your change and the changed files no suite covers.
+Test a change in proportion to the harm it is likely to do before someone notices and reverts it: what
+the changed text could plausibly make the agent get wrong or leave unfixed, how many users it reaches,
+how long a wrong turn could go unseen, and how cheaply it is undone once seen (a PR left a draft: one
+command; a wrong commit message on main: never, though it rarely costs much). The kind and size of a
+change are clues to that, not rules. Pick the tier before writing a case, and say in the PR which tier
+and why.
 
-- If it lists a suite, screen the change with it, then confirm it before opening the PR.
-- If a changed file is uncovered and the edit targets a behaviour you have seen go wrong, write cases
-  first, then edit. If you judge an uncovered change not worth a suite, say why in the PR description.
-- Only text the model never reads needs no eval: a README, a changelog. A fix inside a skill, agent,
-  command or hook file, even a link or a heading, reaches the model; screen it when a suite covers it.
-  Such a screen can show only large breakage: the fix goes ahead when nothing comes out WORSE, and the PR
-  says what the screen showed.
+1. **No eval.** Nothing the change alters reaches the model, such as a code comment in a hook script; a
+   link or heading in a skill, agent or command still reaches it.
+2. **Regression only.** Little harm before it is noticed: typically a few lines refining an existing
+   rule, a pointer or a wording fix. Write no new suite.
+3. **Smoke.** Some harm before it is noticed and reverted: typically a new rule or step in an existing
+   skill, agent or command. Write a handful of cases on one model in a scratch suite outside the repo
+   ("Smoke tests" says how).
+4. **Full suite.** Serious harm before it is noticed and reverted: typically a new skill, agent or
+   command, a change to how a reviewer rates, a changed `description` or `when_to_use` (a skill that
+   stops loading goes unseen), or a fix for something seen going wrong more than once. Write or extend a
+   suite so committed cases exercise the changed text ("Choosing cases").
+
+A direct suite's `covers` names a changed file; an indirect suite covers only files that load, directly
+or through other files, a changed skill, agent or command. Run `make eval-plan TIER=<n>` and do what it
+prints. In the PR, also say what each test showed, name at tier 2 each file the plan lists as UNCOVERED,
+and, at tiers 2 and 3, what the plan's report shows each direct suite's screen split can see. At tier 4
+a change goes ahead when a direct suite covers each changed file and each direct suite's screen and
+confirm SHIP on every gate model. Below tier 4, and for any indirect suite, it goes ahead unless a
+screen or smoke test it calls for shows harm: a screen on a gate model comes out HURT, or a smoke test's
+samples show the new text doing worse than the old.
+
+### Smoke tests
+
+A smoke test's cases all sit on `dev`, in a scratch suite outside the repo and outside `/tmp`; pick them
+by steps 3 and 4 of "Choosing cases" (the new text, and tasks the agent already does right where it
+could get in the way), and write its `suite.toml` and cases by "Layout", "Writing a case" and "Graders".
+Run `make eval-run SUITE=<dir> ARM=old`, then `ARM=new SPLIT=dev`, and read each sample with
+`python3 scripts/eval.py show <key>`, for the keys `make eval-run` prints. The lint does not reach a
+scratch suite, so check by hand that its prompts give nothing away and its checks grade those samples
+right. Never commit the scratch suite; say in the PR what its cases showed.
 
 ## Layout
 
@@ -86,7 +114,7 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
    independent evidence that the rule holds in another context. The verdict speaks for the suite's
    tasks; more independent tasks per rule is what makes it speak for the rule. A split needs at least 5
    units before any verdict can be reached, and more when the pass rule reads several metrics;
-   `make eval-plan` says when a split has too few.
+   `make eval-size` says when a split has too few.
 9. **Make tasks realistic.** For a skill the agent loads itself, one-step prompts often get done without
    loading it.
 
@@ -200,27 +228,31 @@ the PR how many versions you screened.
 
 ## Running and deciding
 
+Every screen follows these steps; `make eval-plan TIER=<n>` prints the screens a tier takes. A scratch
+suite is not screened: run and read it as "Smoke tests" says.
+
 1. **Fix the test before the first run.** The plan holds every file of the suite (cases, keys, baselines,
    references), the samples per case, the model ID, the Claude Code version, the runner's flags and
    `old`'s plugins (`new` changes as you iterate). Your branch's first screen of a split on a model fixes
    it, each model keeping its own; a later screen with a different plan runs nothing and says what
    changed. `NEW_PLAN=1` (`--new-plan`) fixes a new one, and the PR says why. Never add samples after
    seeing a result.
-2. **Check the suite can see the effect.** `make eval-plan` and `make eval-size` simulate the verdict
-   rule at each split's size: the smallest harm it would catch 80% of the time, under a `better` rule the
-   smallest gain (both assuming independent units at a 0.5 pass rate, the noisiest case), and per model
-   the chance a positive control comes out WORSE, from the recorded baselines, with the samples per case
-   that would reach 80%. The chance runs high. It reads each case's few baseline runs as its exact
-   failure rate, so a case that failed 3 of 3 counts as one that always fails, and the baselines count
-   each case's own checks, guards aside, so a target case whose checks the pass rule does not read adds
-   to it though the verdict cannot see that case. Trust it only as far as the calibration's positive
-   controls bear it out. A new skill has no positive control until it is on main, since removing it from
-   `old` changes nothing. A split below 80% is too weak: add cases the text changes on that model. So is
-   one missing `old` or `none` baselines on a gate model: record them (`make eval-run ... RECORD=1`). Do
-   not shrink the suite or the samples to save cost.
+2. **Check the suite can see the effect.** `make eval-size`, and `make eval-plan TIER=<n>` for the
+   splits it reports, simulate the verdict rule at each split's size: the smallest harm it would catch
+   80% of the time, under a `better` rule the smallest gain (both assuming independent units at a 0.5
+   pass rate, the noisiest case), and per model the chance a positive control comes out WORSE, from the
+   recorded baselines, with the samples per case that would reach 80%. The chance runs high. It reads
+   each case's few baseline runs as its exact failure rate, so a case that failed 3 of 3 counts as one
+   that always fails, and the baselines count each case's own checks, guards aside, so a target case
+   whose checks the pass rule does not read adds to it though the verdict cannot see that case. Trust it
+   only as far as the calibration's positive controls bear it out. A new skill has no positive control
+   until it is on main, since removing it from `old` changes nothing. A split below 80% is too weak, and
+   so is one missing `old` or `none` baselines on a gate model. At tier 4, for a direct suite, add cases
+   the text changes on that model to a split below 80%, and record any missing baselines
+   (`make eval-run ... RECORD=1`). Do not shrink the suite or the samples to save cost.
 3. **Both arms run in the same screen,** interleaved, because the model changes over time and an older
-   baseline mixes that in; which arm of a pair starts first alternates. Screen on every model the suite
-   lists, one at a time (`MODEL=...`), as `make eval-plan` prints. Each arm draws the suite's
+   baseline mixes that in; which arm of a pair starts first alternates. Screen on the models
+   `make eval-plan TIER=<n>` prints, one at a time (`MODEL=...`). Each arm draws the suite's
    `min_samples` per case unless `SAMPLES=` says otherwise.
 4. **Rerun rather than reuse** when anything a session sees changes: the fixture, the runner's setup
    (bump `RUNNER` in `scripts/evals/session.py`, after which the lint demands fresh baselines; for the
@@ -270,14 +302,15 @@ the PR how many versions you screened.
 
 ## Commands
 
-- `make eval-plan`: the suites your change needs, the files no suite covers, and what each split can see.
-  Free.
+- `make eval-plan [TIER=<n>]`: the suites your change reaches, each marked DIRECT or INDIRECT, and the
+  files no suite covers; with `TIER=<n>`, the steps that tier takes: the screens to run and what each
+  direct suite's screened splits can see. Free.
 - `make eval-size SUITE=<path>`: what each split can see on each model, from the recorded baselines.
   Free.
-- `make eval-run SUITE=<path> ARM=none` (or `ARM=old`): run the cases on one arm and print how often each
-  failed its own checks, guards aside; `RECORD=1` writes the counts into the keys (one such run at a
-  time: two at once can each drop the other's entry), `MODEL=` picks the model. `ARM=new` needs a
-  `SPLIT`, since new results on held-out cases burn them.
+- `make eval-run SUITE=<path> ARM=none` (or `ARM=old`): run the cases on one arm, print each sample's key
+  (for `show`), then how often each case failed its own checks, guards aside; `RECORD=1` writes the
+  counts into the keys (one such run at a time: two at once can each drop the other's entry), `MODEL=`
+  picks the model. `ARM=new` needs a `SPLIT`, since new results on held-out cases burn them.
 - `make eval-screen SUITE=<path>`: run `old` and `new` on the `screen` split and print the result.
   `SPLIT=confirm` runs the confirm split, `NEW_PLAN=1` fixes a new plan. The result and the samples to
   read are also written to `evidence/` in the store.
