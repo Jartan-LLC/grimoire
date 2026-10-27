@@ -1,6 +1,7 @@
 import pathlib
 
 import pytest
+from evals import lint as lint_module
 from evals.lint import lint
 from helpers import KEY, SUITE, write_suite
 
@@ -94,6 +95,20 @@ def test_lint_requires_a_recorded_baseline_failure_on_a_target_case(root: pathli
 def test_lint_names_a_baseline_drawn_under_an_older_runner(root: pathlib.Path) -> None:
     suite_at(root, key=KEY.replace("runner = 2", "runner = 1"))
     assert any("drawn under runner 1, not 2; redraw it" in f for f in lint(root, TRACKED))
+
+
+def test_lint_names_a_remote_baseline_drawn_under_an_older_remote_runner(
+    root: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case = suite_at(root, key="remote = true\n" + KEY)
+    assert lint(root, TRACKED) == []
+    monkeypatch.setattr(lint_module, "REMOTE_RUNNER", 2)
+    found = lint(root, TRACKED)
+    assert any("drawn under remote_runner 1, older than 2; redraw it" in f for f in found)
+    (case / "key.toml").write_text("remote = true\n" + KEY + "remote_runner = 2\n")
+    assert lint(root, TRACKED) == []
+    (case / "key.toml").write_text(KEY)
+    assert lint(root, TRACKED) == []
 
 
 def test_lint_runs_a_plant_both_ways(root: pathlib.Path) -> None:

@@ -4,8 +4,9 @@ tests/evals/README.md holds the rules; this enforces the mechanical ones: the pr
 uses none of the case's hint words, the facts a check needs are where the writer can
 find them, every planted problem fails its `verify` command and passes once fixed, the
 passing references pass every check and each failing reference fails one, each target
-case records a baseline failure, no baseline was drawn under an older runner, and a `gh`
-check reads a case whose session records its gh calls. It cannot tell that every check
+case records a baseline failure, no baseline was drawn under another runner or, for a
+remote case, an older REMOTE_RUNNER, and a `gh` check reads a case whose session records
+its gh calls. It cannot tell that every check
 can fail, only that some check fails on each failing reference.
 """
 
@@ -19,7 +20,7 @@ import tempfile
 
 from .grade import reference_scores
 from .proc import run
-from .session import RUNNER, build_fixture, git_env
+from .session import REMOTE_RUNNER, RUNNER, build_fixture, git_env
 from .suite import Case, Suite, SuiteError, load_suite
 
 VERIFY_TIMEOUT_S = 60
@@ -110,6 +111,12 @@ def case_problems(case: Case) -> list[str]:
         f"{case.path}: the {b.model} {b.arm} baseline was drawn under runner {b.runner}, not {RUNNER}; redraw it"
         for b in case.baselines
         if b.runner != RUNNER
+    ]
+    found += [
+        f"{case.path}: the {b.model} {b.arm} baseline was drawn under remote_runner "
+        f"{b.remote_runner}, older than {REMOTE_RUNNER}; redraw it"
+        for b in case.baselines
+        if case.remote and b.remote_runner < REMOTE_RUNNER
     ]
     return found
 

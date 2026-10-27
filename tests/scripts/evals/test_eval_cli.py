@@ -25,6 +25,19 @@ def test_record_baseline_replaces_only_its_own_model_and_arm(tmp_path: pathlib.P
     assert text.startswith('split = "dev"\n\n[[check]]')
 
 
+def test_a_remote_cases_baseline_records_the_remote_runner(tmp_path: pathlib.Path) -> None:
+    root = write_suite(tmp_path, key="remote = true\n" + KEY)
+    key = root / "cases" / "c1" / "key.toml"
+    cli.record_baseline(key, "claude-opus-5-5", "old", 1, 3, remote=True)
+    assert (
+        f"runner = {session.RUNNER}\nremote_runner = {session.REMOTE_RUNNER}\n" in key.read_text()
+    )
+    (baseline,) = load_suite(root).cases[0].baselines
+    assert (baseline.failures, baseline.remote_runner) == (1, session.REMOTE_RUNNER)
+    cli.record_baseline(key, "claude-opus-5-5", "old", 2, 3)
+    assert "remote_runner" not in key.read_text()
+
+
 def test_a_watch_model_reports_harm_without_failing_a_bar(tmp_path: pathlib.Path) -> None:
     suite = load_suite(
         write_suite(

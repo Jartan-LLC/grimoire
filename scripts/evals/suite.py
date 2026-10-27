@@ -83,10 +83,11 @@ class Reply:
 
 @dataclass(frozen=True)
 class Baseline:
-    """How often one arm failed the case on one model, and under which runner revision.
+    """How often one arm failed the case on one model, and under which runner revisions.
 
     The counts choose cases and let the planner estimate power; a verdict never uses
-    them. A count drawn under an older runner, model or Claude Code is stale.
+    them. A count drawn under an older runner, model or Claude Code is stale, and for a
+    remote case one drawn under an older `remote_runner` (1 when the entry has none).
     """
 
     model: str
@@ -94,6 +95,7 @@ class Baseline:
     failures: int
     runs: int
     runner: int
+    remote_runner: int = 1
 
 
 @dataclass(frozen=True)
@@ -402,16 +404,23 @@ def _baselines(key: Table, where: pathlib.Path) -> tuple[Baseline, ...]:
     found: list[Baseline] = []
     for table in _tables(key, "baseline", where):
         failures, runs, runner = table.get("failures"), table.get("runs"), table.get("runner")
-        if not all(isinstance(v, int) for v in (failures, runs, runner)):
+        remote_runner = table.get("remote_runner", 1)
+        if not all(isinstance(v, int) for v in (failures, runs, runner, remote_runner)):
             raise SuiteError(
-                f"{where}: a [[baseline]]'s 'failures', 'runs' and 'runner' must be integers"
+                f"{where}: a [[baseline]]'s 'failures', 'runs', 'runner' and 'remote_runner' "
+                "must be integers"
             )
         failures, runs, runner = cast("int", failures), cast("int", runs), cast("int", runner)
         if not 0 <= failures <= runs:
             raise SuiteError(f"{where}: a [[baseline]] needs 0 <= failures <= runs")
         found.append(
             Baseline(
-                _str(table, "model", where), _str(table, "arm", where, ARMS), failures, runs, runner
+                _str(table, "model", where),
+                _str(table, "arm", where, ARMS),
+                failures,
+                runs,
+                runner,
+                cast("int", remote_runner),
             )
         )
     return tuple(found)

@@ -595,19 +595,23 @@ def baseline_counts(
                 f"  {case.id}: not recorded, {len(drawn_here) - len(valid)} sample(s) excluded; rerun"
             )
         elif args.record and valid:
-            record_baseline(case.path / "key.toml", spec.model, args.arm, failed, len(valid))
+            record_baseline(
+                case.path / "key.toml", spec.model, args.arm, failed, len(valid), remote=case.remote
+            )
 
 
-def record_baseline(key: pathlib.Path, model: str, arm: str, failures: int, runs: int) -> None:
+def record_baseline(  # noqa: PLR0913 -- `remote` adds a line to the entry the others make
+    key: pathlib.Path, model: str, arm: str, failures: int, runs: int, *, remote: bool = False
+) -> None:
     """Replace the key's [[baseline]] entry for (model, arm) with these counts.
 
     Entries are written in one fixed form, at the end of the key, so a later record
-    finds and replaces them.
+    finds and replaces them. A `remote` case's entry records REMOTE_RUNNER too.
     """
     entry = (
         f'[[baseline]]\nmodel = "{model}"\narm = "{arm}"\nfailures = {failures}\n'
         f"runs = {runs}\nrunner = {session.RUNNER}"
-    )
+    ) + (f"\nremote_runner = {session.REMOTE_RUNNER}" if remote else "")
     head = f'[[baseline]]\nmodel = "{model}"\narm = "{arm}"\n'
     blocks = key.read_text().rstrip("\n").split("\n\n")
     kept = [b for b in blocks if not b.startswith(head)]
