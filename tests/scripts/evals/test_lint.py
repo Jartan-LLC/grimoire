@@ -59,6 +59,17 @@ def test_lint_requires_references_that_pass_and_fail(root: pathlib.Path) -> None
     assert any("reference fail-1 passes every check" in f for f in found)
 
 
+def test_lint_grades_a_report_check_on_a_references_reports(root: pathlib.Path) -> None:
+    key = KEY.replace('artifact = "commits"', 'artifact = "report:praxis:general-reviewer"')
+    case = suite_at(root, key=key)
+    (case / "reference" / "pass-1.toml").write_text(
+        'final = "Done."\n[reports]\n"praxis:general-reviewer" = "Closes #42"\n'
+    )
+    assert lint(root, TRACKED) == []
+    (case / "reference" / "pass-1.toml").write_text('commits = ["Closes #42"]\nfinal = "Done."\n')
+    assert any("reference pass-1 fails kept" in f for f in lint(root, TRACKED))
+
+
 def test_lint_requires_a_recorded_baseline_failure_on_a_target_case(root: pathlib.Path) -> None:
     suite_at(root, key=KEY.replace("failures = 2", "failures = 0"))
     assert any("needs a [[baseline]] that failed at least once" in f for f in lint(root, TRACKED))

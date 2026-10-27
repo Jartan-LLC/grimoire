@@ -7,6 +7,7 @@
   run SUITE --arm A   run SUITE's cases on arm none, old or new (spends inference)
   screen SUITE        run old and new side by side, then print the verdict (spends inference)
   show KEY            print one cached sample: its commits, final reply, deliveries and writes
+                      by agent, and subagents' reports
   size SUITE          what each split can see per model, from the recorded baselines (free)
 
 Sessions use the caller's own `claude` login; nothing here runs in CI. Samples are cached
@@ -130,11 +131,18 @@ def run_samples(work: list[Work], jobs: int) -> list[cache.Sample]:
         return list(pool.map(one, work))
 
 
+def parsed_trace(store: pathlib.Path, sample: cache.Sample) -> trace.Trace:
+    """The cached sample's trace, read with the skills its agents preloaded."""
+    preloads = [(agent, skill) for agent, skill in sample.preloads or []]
+    return trace.parse(
+        trace.load_text(cache.read_events(store, sample.key)), sample.plugins, preloads
+    )
+
+
 def sample_scores(suite: Suite, sample: cache.Sample, store: pathlib.Path) -> dict[str, float]:
     """Each metric's score on one valid sample."""
     case = next(c for c in suite.cases if c.id == sample.case)
-    parsed = trace.parse(trace.load_text(cache.read_events(store, sample.key)), sample.plugins)
-    return grade.scores(case, sample, parsed)
+    return grade.scores(case, sample, parsed_trace(store, sample))
 
 
 def arm_scores(suite: Suite, samples: list[cache.Sample], store: pathlib.Path) -> Scores:
@@ -231,7 +239,9 @@ def pinned(
         "samples": samples,
         "model": spec.model,
         "claude_code": spec.version,
-        "flags": session.claude_args("", old, spec.model, spec.budget_usd)[3:],
+        "flags": session.claude_args(
+            "", old, spec.model, spec.budget_usd, pathlib.Path("<sandbox>/debug.log")
+        )[3:],
         "old": old.hash,
     }
 
@@ -532,13 +542,15 @@ def show(key: str, store: pathlib.Path) -> int:
     print(f"\n--- final reply\n{sample.final}")
     for path, text in sorted(sample.files.items()):
         print(f"\n--- file {path}\n{text}")
-    parsed = trace.parse(trace.load_text(cache.read_events(store, key)), sample.plugins)
-    print("\n--- skills delivered (event index)")
+    parsed = parsed_trace(store, sample)
+    print("\n--- skills delivered (event index, agent)")
     for d in parsed.deliveries:
-        print(f"  {d.index} {d.skill}")
-    print("\n--- writes (event index)")
+        print(f"  {d.index} {d.skill} {d.agent or 'main'}")
+    print("\n--- writes (event index, agent)")
     for w in parsed.writes:
-        print(f"  {w.index} {w.kind} ok={w.ok} {w.text[:120]!r}")
+        print(f"  {w.index} {w.kind} ok={w.ok} {w.agent or 'main'} {w.text[:120]!r}")
+    for r in parsed.reports:
+        print(f"\n--- report of {r.agent} on {r.model} (event index {r.index})\n{r.text}")
     print("\n--- hook context (event index)")
     for index, context in parsed.hook_contexts:
         print(f"  {index} {context[:120]!r}")

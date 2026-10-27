@@ -7,6 +7,10 @@ memory directory; the built-in `cc-plugin-*` plugins load unless disabled. A per
 venv sees the base interpreter's packages, so the tools a fixture's tests need (pytest)
 come from there, and `python3 -m pip install` stays in the sample. The venv has no pip of
 its own: a bare `pip install` reaches the base interpreter, which later samples see.
+
+From probe runs on 2.1.311: `--forward-subagent-text` sends a subagent's skill text, which
+the stream holds back by default, and the debug log names each skill an agent's
+frontmatter preloads; only those lines are kept, as the sample's `preloads`.
 """
 
 import json
@@ -41,6 +45,7 @@ LIMITED = re.compile(r"(?i)limiting requests|usage limit|rate limit|overloaded|\
 # Part of every sample's key: bump it when a change to the session setup changes what a
 # session can do, so no sample drawn under the old setup is reused.
 RUNNER = 2
+PRELOADED = re.compile(r"\[Agent: ([^\]]+)\] Preloaded skill '([^']+)'")
 
 
 @dataclass(frozen=True)
@@ -97,12 +102,15 @@ def sample_env(
     return env
 
 
-def claude_args(prompt: str, arm: Arm, model: str, budget_usd: float) -> list[str]:
-    """The `claude` command line for one sample."""
+def claude_args(
+    prompt: str, arm: Arm, model: str, budget_usd: float, debug_log: pathlib.Path
+) -> list[str]:
+    """The `claude` command line for one sample, writing its debug log to `debug_log`."""
     args = [
         CLAUDE, "-p", prompt,
         "--model", model,
         "--output-format", "stream-json", "--verbose", "--include-hook-events",
+        "--forward-subagent-text", "--debug-file", str(debug_log),
         "--setting-sources", "project",
         "--settings", json.dumps(BUILTINS_OFF),
         "--strict-mcp-config",
@@ -113,6 +121,11 @@ def claude_args(prompt: str, arm: Arm, model: str, budget_usd: float) -> list[st
     for directory in arm.plugins.values():
         args += ["--plugin-dir", directory, "--add-dir", directory]
     return args
+
+
+def preloads(debug_log: str) -> list[tuple[str, str]]:
+    """The (agent, skill) pairs a session's debug log says were preloaded, in its order."""
+    return [(m[1], m[2]) for m in PRELOADED.finditer(debug_log)]
 
 
 def _git(repo: pathlib.Path, env: dict[str, str], *args: str) -> str:
@@ -171,18 +184,20 @@ def _session(
             [UV, "venv", "-q", "--system-site-packages", str(sandbox / "venv")], env=env, check=True
         )
         out = sandbox / "trace.jsonl"
+        debug_log = sandbox / "debug.log"
         timed_out = False
         with out.open("w") as handle:
             try:
                 run(
-                    claude_args(case.prompt, arm, spec.model, spec.budget_usd),
+                    claude_args(case.prompt, arm, spec.model, spec.budget_usd, debug_log),
                     cwd=repo, env=sample_env(dict(os.environ), spec.checkout, sandbox),
                     stdout=handle, stderr=subprocess.STDOUT, timeout=TIMEOUT_S, check=False,
                 )  # fmt: skip
             except subprocess.TimeoutExpired:
                 timed_out = True
         text = out.read_text()
-        parsed = trace.parse(trace.load(out), arm.plugins)
+        loaded = preloads(debug_log.read_text(errors="replace")) if debug_log.is_file() else []
+        parsed = trace.parse(trace.load(out), arm.plugins, loaded)
         private = [str(spec.checkout), str(case.path.parent.parent), str(spec.store / "samples")]
         reasons, spoiled = trace.classify(parsed, arm.plugins, spec.model, timed_out, private)
         result = parsed.result or {}
@@ -198,9 +213,14 @@ def _session(
             commits=new_commits(repo, env, heads),
             final=str(result.get("result", "")),
             files=files,
-            usage=trace.usage(parsed) | {"tool_calls": len(parsed.tool_inputs)},
+            usage=trace.usage(parsed)
+            | {
+                "tool_calls": len(parsed.tool_inputs),
+                "agents": [[r.agent, r.model] for r in parsed.reports],
+            },
             spoiled=spoiled,
             collected=case.files(),
+            preloads=[list(p) for p in loaded],
         )
         return sample, text
     finally:

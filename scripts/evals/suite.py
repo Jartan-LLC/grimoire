@@ -16,6 +16,7 @@ from typing import cast
 SPLITS = ("dev", "screen", "confirm")
 KINDS = ("target", "regression", "cost", "trigger")
 TEXT_ARTIFACTS = ("commits", "final")
+REPORT = "report:"
 DIRECTIONS = ("higher",)  # every check scores 1 when it holds
 RULES = ("better", "no-regression")
 STATES = ("in-context", "late", "evicted", "absent", "loaded", "not-loaded")
@@ -33,10 +34,12 @@ class SuiteError(ValueError):
 class Check:
     """One graded condition on a sample, scored 0 or 1, counted toward `metric`.
 
-    A text check names an artifact (`commits`, `final` or `file:<path>`) and a
-    `present` or `absent` regex. A delivery check names a `skill` and a `state`: with
-    a `write` kind, the state the skill must be in at every such write; without one,
-    `loaded` or `not-loaded` over the whole session (trigger cases).
+    A text check names an artifact (`commits`, `final`, `file:<path>`, or
+    `report:<agent>`, every report that agent handed back) and a `present` or `absent`
+    regex. A delivery check names a `skill` and a `state`: with a `write` kind, the
+    state the skill must be in at every such write; without one, `loaded` or
+    `not-loaded` over the whole session (trigger cases). It reads the main thread's
+    deliveries and writes, or with an `agent`, that subagent's.
     """
 
     metric: str
@@ -46,6 +49,7 @@ class Check:
     skill: str | None = None
     write: str | None = None
     state: str | None = None
+    agent: str = ""
 
 
 @dataclass(frozen=True)
@@ -81,13 +85,17 @@ class Baseline:
 
 @dataclass(frozen=True)
 class Reference:
-    """An output the lint grades, from a session or by hand; `passes`: every check must hold."""
+    """An output the lint grades, from a session or by hand; `passes`: every check must hold.
+
+    `reports` maps an agent to the report text a `report:<agent>` check reads.
+    """
 
     name: str
     passes: bool
     commits: tuple[str, ...]
     final: str
     files: dict[str, str]
+    reports: dict[str, str] = dataclasses.field(default_factory=dict[str, str])
 
 
 @dataclass(frozen=True)
@@ -263,12 +271,14 @@ def _check(table: Table, where: pathlib.Path, metrics: dict[str, Metric]) -> Che
     artifact = _str(table, "artifact", where)
     if artifact == "delivery":
         skill = _str(table, "skill", where)
+        agent = _str(table, "agent", where) if "agent" in table else ""
         if "write" not in table:
             return Check(
                 metric,
                 artifact,
                 skill=skill,
                 state=_str(table, "state", where, ("loaded", "not-loaded")),
+                agent=agent,
             )
         write = _str(table, "write", where, WRITE_KINDS)
         return Check(
@@ -277,10 +287,20 @@ def _check(table: Table, where: pathlib.Path, metrics: dict[str, Metric]) -> Che
             skill=skill,
             write=write,
             state=_str(table, "state", where, STATES[:4]),
+            agent=agent,
         )
-    if artifact not in TEXT_ARTIFACTS and not artifact.startswith("file:"):
+    if "agent" in table:
         raise SuiteError(
-            f"{where}: artifact {artifact!r} is not commits, final, file:<path> or delivery"
+            f"{where}: 'agent' is for delivery checks; a report check names it as report:<agent>"
+        )
+    if not (
+        artifact in TEXT_ARTIFACTS
+        or artifact.startswith("file:")
+        or (artifact.startswith(REPORT) and artifact != REPORT)
+    ):
+        raise SuiteError(
+            f"{where}: artifact {artifact!r} is not commits, final, file:<path>, report:<agent> "
+            "or delivery"
         )
     present, absent = table.get("present"), table.get("absent")
     if (present is None) == (absent is None):
@@ -300,12 +320,18 @@ def _reference(path: pathlib.Path) -> Reference:
     final = data.get("final", "")
     if not isinstance(final, str):
         raise SuiteError(f"{path}: 'final' must be a string")
+    reports = data.get("reports", {})
+    if not isinstance(reports, dict) or not all(
+        isinstance(v, str) for v in cast("Table", reports).values()
+    ):
+        raise SuiteError(f"{path}: 'reports' must be a table of agent = text")
     return Reference(
         name=path.stem,
         passes=path.stem.startswith("pass"),
         commits=_strs(data, "commits", path),
         final=final,
         files=cast("dict[str, str]", files),
+        reports=cast("dict[str, str]", reports),
     )
 
 
