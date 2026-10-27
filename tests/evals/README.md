@@ -319,9 +319,10 @@ After changing the runner or the verdict rule:
 - Sessions drawn in parallel share `/tmp`: a body or message file an agent writes at a fixed path
   there, such as `/tmp/pr-body.md`, can be overwritten by another session drawn at the same time, so a
   sample can record the other session's text.
-- `origin` is a local path, not a github.com URL, and `git remote -v` prints that path, even when
-  `build.py` names origin by a GitHub URL rewritten with `url.<path>.insteadOf`: an agent that reads
-  the owner or repository name from the remote finds none.
+- `origin` is a local path, not a github.com URL, and `git remote -v` prints that path: an agent that
+  reads the owner or repository name from it finds none. When `build.py` names origin by a GitHub URL
+  rewritten with `url.<path>.insteadOf`, `git remote -v` prints the rewritten local path, but
+  `git config remote.origin.url` still gives the URL `build.py` set.
 - The lint knows when a baseline predates the runner, not when the model or Claude Code changed; rerun
   baselines after either.
 - A subagent's own subagents are not followed, nor a SendMessage follow-up, nor the report and skill
