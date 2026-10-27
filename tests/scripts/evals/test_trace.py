@@ -309,6 +309,19 @@ def test_classify_from_a_worktree_catches_the_main_checkout_and_a_path_back_out_
     assert reasons(f"true\n{arms}/../samples") == [f"the session reached /main, {samples}"]
 
 
+def test_classify_excludes_a_session_that_reached_the_gh_stubs_replies() -> None:
+    private = ["/checkout", "/sandbox/gh", "replies.json"]
+
+    def reasons(command: str) -> list[str]:
+        events = [init(), call("r1", "Bash", command=command), result_of("r1"), RESULT]
+        parsed = trace.parse(events, PLUGINS)
+        return trace.classify(parsed, PLUGINS, MODEL, False, private, arms="/store/arms")[0]
+
+    assert reasons("cat ../gh/replies.json") == ["the session reached replies.json"]
+    assert reasons("ls /sandbox/gh") == ["the session reached /sandbox/gh"]
+    assert reasons("gh pr create --draft --fill") == []
+
+
 def test_classify_excludes_an_error_result_and_marks_caps_and_timeouts_as_spoiled() -> None:
     limit = RESULT | {
         "is_error": True,

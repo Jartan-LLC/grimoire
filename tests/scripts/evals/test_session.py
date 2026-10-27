@@ -1,5 +1,6 @@
 """Session setup: the parts that run no `claude` session."""
 
+import dataclasses
 import json
 import os
 import pathlib
@@ -303,12 +304,17 @@ def test_private_paths_from_a_worktree_hold_every_working_tree_of_the_clone(
     case = load_suite(write_suite(worktree / "tests" / "evals" / "x")).cases[0]
     store = clone.resolve() / ".git" / "grimoire-evals"
     spec = session.Spec("m", "v", 1.0, worktree.resolve(), store)
-    assert session.private_paths(case, spec) == [
+    assert session.private_paths(case, spec, tmp_path / "sandbox") == [
         str(worktree.resolve()),
         str(clone.resolve()),
         str(sibling.resolve()),
         str(worktree / "tests" / "evals" / "x"),
         str(store / "samples"),
+    ]
+    remote = dataclasses.replace(case, remote=True)
+    assert session.private_paths(remote, spec, tmp_path / "sandbox")[-2:] == [
+        str(tmp_path / "sandbox" / "gh"),
+        "replies.json",
     ]
 
 

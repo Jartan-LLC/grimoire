@@ -50,6 +50,7 @@ RUNNER = 2
 REMOTE_RUNNER = 1
 PRELOADED = re.compile(r"\[Agent: ([^\]]+)\] Preloaded skill '([^']+)'")
 GH_STUB = pathlib.Path(__file__).with_name("gh_stub.py")
+REPLIES = "replies.json"
 GH_LOGIN = ("GH_TOKEN", "GITHUB_TOKEN", "GH_ENTERPRISE_TOKEN", "GITHUB_ENTERPRISE_TOKEN", "GH_HOST")
 
 
@@ -200,7 +201,7 @@ def install_gh(sandbox: pathlib.Path, replies: tuple[Reply, ...]) -> None:
     stub.write_text("#!/usr/bin/env -S python3 -I\n" + GH_STUB.read_text())
     stub.chmod(0o755)
     replies_json = json.dumps([asdict(r) for r in replies])
-    (sandbox / "gh" / "replies.json").write_text(replies_json)
+    (sandbox / "gh" / REPLIES).write_text(replies_json)
     (sandbox / "gh" / "calls.jsonl").touch()
 
 
@@ -223,11 +224,13 @@ def new_commits(repo: pathlib.Path, env: dict[str, str], fixture_heads: list[str
     return [m.strip() for m in out.split("\x1e") if m.strip()]
 
 
-def private_paths(case: Case, spec: Spec) -> list[str]:
+def private_paths(case: Case, spec: Spec, sandbox: pathlib.Path) -> list[str]:
     """The paths a session must not name: the checkout, every working tree of its clone, suite and samples.
 
     The clone's other working trees, the main one and each sibling worktree, hold the
-    same suite and its answers.
+    same suite and its answers. A remote case's session must not name the `gh` stub's
+    directory in `sandbox`, nor its `replies.json` by any path: a reply's `match` can show
+    what the case wants the agent to send.
     """
     listed = run(
         [GIT, "worktree", "list", "--porcelain"],
@@ -238,11 +241,15 @@ def private_paths(case: Case, spec: Spec) -> list[str]:
         for line in listed.splitlines()
         if line.startswith("worktree ")
     ]
+    stub = [str(sandbox / "gh"), REPLIES] if case.remote else []
     return list(
         dict.fromkeys(
-            [str(spec.checkout), *trees, str(case.path.parent.parent), str(spec.store / "samples")]
+            [
+                str(spec.checkout), *trees, str(case.path.parent.parent),
+                str(spec.store / "samples"), *stub,
+            ]
         )
-    )
+    )  # fmt: skip
 
 
 def _session(
@@ -285,7 +292,7 @@ def _session(
         text = out.read_text()
         loaded = preloads(debug_log.read_text(errors="replace")) if debug_log.is_file() else []
         parsed = trace.parse(trace.load(out), arm.plugins, loaded)
-        private = private_paths(case, spec)
+        private = private_paths(case, spec, sandbox)
         reasons, spoiled = trace.classify(
             parsed, arm.plugins, spec.model, timed_out, private, arms=str(spec.store / "arms")
         )

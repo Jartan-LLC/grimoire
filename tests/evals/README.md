@@ -120,6 +120,12 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   `gh api`) included. A `[[gh]]` table implies `remote = true`, and the replies count in the case hash,
   like the fixture.
 
+  Write each `match` to accept every call the task could make at that step, anchored on the subcommand
+  (`^pr create`), and grade the behaviour under test with a check, never with a `match`: a narrow match
+  (`--draft`) fails the other calls, and the failure invites the agent to retry until it hits the
+  scripted one. The session could read the answer too: the replies sit in its sandbox, so a sample
+  whose tool calls name the stub's directory or `replies.json` is excluded.
+
   ```toml
   [[gh]]
   match = '^pr create'
