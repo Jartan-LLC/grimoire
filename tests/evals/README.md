@@ -309,11 +309,12 @@ After changing the runner or the verdict rule:
   the owner or repository name from the remote finds none.
 - The lint knows when a baseline predates the runner, not when the model or Claude Code changed; rerun
   baselines after either.
-- A subagent's own subagents are not followed, nor is an Agent call run in the background, nor a
-  SendMessage follow-up: `brief:<agent>` holds only the prompts of the Agent calls that started it. A
-  delivery check with an `agent` reads every spawn of that agent as one. The skills an agent's
-  frontmatter preloads are read from a line of Claude Code's debug log, which it does not promise to
-  keep: if that line changes, every preload reads as absent.
+- A subagent's own subagents are not followed, nor a SendMessage follow-up, nor the report and skill
+  loads of an Agent call run in the background: `brief:<agent>` holds the prompts of the Agent calls
+  that started that agent, background ones included, and no follow-up. A delivery check with an `agent`
+  reads every spawn of that agent as one. The skills an agent's frontmatter preloads are read from a
+  line of Claude Code's debug log, which it does not promise to keep: if that line changes, every
+  preload reads as absent.
 - A sample's venv uses the base Python's packages, the interpreter uv builds venvs on, not this
   checkout's `.venv`: that Python needs pytest, which the runner checks before the first session. The
   venv has no pip of its own, so a session's bare `pip install` reaches the base Python, where later
