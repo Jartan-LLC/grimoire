@@ -185,10 +185,11 @@ the PR how many versions you screened.
   argument or a tail of one is exactly `-`, a key's value included (`-f q=-`), where gh would not, so
   such a call waits while stdin stays open. It reads no file or stdin of a call with an argument equal to
   `secret`, `variable` or `auth` anywhere, a label included (`--label auth`): such a call is recorded
-  with no file or stdin text. The calls Claude Code makes on its own (`gh pr view --json url` and
-  `gh pr view <branch> --json url` on 2.1.311) are left out, so no check grades them. A reference gives
-  it as `gh = "text"`. The lint fails a `gh` check on a case without a remote. For "made no such call",
-  which holds when the agent made no call at all, negate the same form:
+  with no file or stdin text. A call of the shape Claude Code makes on its own (`gh pr view --json url`
+  and `gh pr view <branch> --json url` on 2.1.311) is left out even when the agent makes it, so no check
+  grades one. A reference gives it as `gh = "text"`, and its call lines lose such calls too, but not its
+  texts. The lint fails a `gh` check on a case without a remote. For "made no such call", which holds
+  when the agent made no call at all, negate the same form:
   `present = '\A(?!(?:.+\n)*gh (?:.* )?pr ready\b)'`.
 - **Judges are not built yet.** When a check cannot decide, a judge will answer one yes/no question about
   one output, with the reference answer, outputs stripped of skill and arm names, and "unknown" counted
