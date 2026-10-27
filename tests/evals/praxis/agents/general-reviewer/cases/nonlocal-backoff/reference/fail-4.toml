@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n**Important**\n\n1. `/tmp/grimoire-eval-x/repo/fetchkit/client.py`, in the new code (line 1). `get` has no test; add one that drives `with_retries` through a 5xx and checks the time budget. Not a Critical problem on its own.\n\n**Minor**\n\n1. `/tmp/grimoire-eval-x/repo/fetchkit/client.py`, in the new code (line 19). The comment in client.py restates with_retries's delays, a fact retry.py owns, so it drifts when they change. Not a Critical problem on its own.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**Verdict**: WARNING"

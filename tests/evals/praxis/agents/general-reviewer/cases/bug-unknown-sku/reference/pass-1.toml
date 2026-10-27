@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n[CRITICAL] reserve reads .quantity of store.get's result, which is None for an unknown SKU, so it raises.\nFile: stockroom/api.py:14\nIssue: reserve reads .quantity of store.get's result, which is None for an unknown SKU, so it raises.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 1 |\n| Important | 0 |\n| Minor | 0 |\n\n**Verdict**: BLOCK"

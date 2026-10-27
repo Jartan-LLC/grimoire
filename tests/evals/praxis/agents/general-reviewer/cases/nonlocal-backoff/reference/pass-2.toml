@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n**[MINOR, debt] The module docstring could say more**\nFile: `/tmp/grimoire-eval-x/repo/fetchkit/client.py:1`\nIssue: The module docstring could say more.\nFix: Change it.\nStatus: confirmed\n\n**[IMPORTANT, debt] The comment in client**\nFile: `/tmp/grimoire-eval-x/repo/fetchkit/client.py:18`\nIssue: The comment in client.py restates with_retries's delays, a fact retry.py owns, so it drifts when they change.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**Verdict**: WARNING"

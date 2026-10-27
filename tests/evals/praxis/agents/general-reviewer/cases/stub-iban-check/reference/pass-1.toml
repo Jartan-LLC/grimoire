@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n[CRITICAL] iban_is_valid always returns True, so payout's guard never refuses an account.\nFile: ledger/payouts.py:12\nIssue: iban_is_valid always returns True, so payout's guard never refuses an account.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 1 |\n| Important | 0 |\n| Minor | 0 |\n\n**Verdict**: BLOCK"

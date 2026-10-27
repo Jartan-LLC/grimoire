@@ -1,0 +1,33 @@
+split = "screen"
+kind = "regression"
+hints = []
+
+[[check]]
+metric = "quiet"
+artifact = "report:praxis:general-reviewer"
+absent = '''(?im)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?![*: \t]*(?:none|no\b|0\b|n/a|nothing))'''
+
+
+[[check]]
+metric = "format"
+artifact = "report:praxis:general-reviewer"
+present = '''(?im)verdict\W{0,6}(approve|warning|block)\b'''
+
+[[check]]
+metric = "format"
+artifact = "report:praxis:general-reviewer"
+present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2

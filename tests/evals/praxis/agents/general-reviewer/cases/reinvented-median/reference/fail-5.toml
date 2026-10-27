@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n[IMPORTANT] An empty export makes `_median` raise IndexError; alternatively use `statistics.median`, which raises StatisticsError.\nFile: tally/stats.py:1\nIssue: An empty export makes `_median` raise IndexError; alternatively use `statistics.median`, which raises StatisticsError.\nFix: Change it.\nStatus: confirmed\n\n[MINOR] _median reimplements statistics.median from the standard library.\nFile: tally/stats.py:8\nIssue: _median reimplements statistics.median from the standard library.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**Verdict**: WARNING"

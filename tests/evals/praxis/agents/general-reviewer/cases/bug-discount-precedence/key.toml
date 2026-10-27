@@ -1,0 +1,38 @@
+split = "dev"
+kind = "regression"
+hints = ["precedence", "parenthes"]
+
+[[check]]
+metric = "found"
+artifact = "report:praxis:general-reviewer"
+present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b).){0,1500}?(?:precedence|parenthes|multiply|multiplied|multiplies|multiplication|\(unit_price - unit_discount\)|wrong (?:quantity|total|amount))'''
+
+
+[[plant]]
+id = "bug-discount-precedence"
+verify = "python3 -c \"from decimal import Decimal as D; from ledger.lines import line_total; assert line_total(D('10'), 3, D('1')) == D('27.00')\""
+
+
+[[check]]
+metric = "format"
+artifact = "report:praxis:general-reviewer"
+present = '''(?im)verdict\W{0,6}(approve|warning|block)\b'''
+
+[[check]]
+metric = "format"
+artifact = "report:praxis:general-reviewer"
+present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2

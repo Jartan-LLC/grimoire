@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n**Critical**\n\n1. `/tmp/grimoire-eval-x/repo/tally/pages.py`, in the new code (line 10). The slice ends one row early, so every page drops its last row. Not a Critical problem on its own.\n\n**Minor**\n\n1. `/tmp/grimoire-eval-x/repo/tally/pages.py`, in the new code (line 1). The module docstring could say more. Not a Critical problem on its own.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 1 |\n| Important | 0 |\n| Minor | 1 |\n\n**Verdict**: BLOCK"

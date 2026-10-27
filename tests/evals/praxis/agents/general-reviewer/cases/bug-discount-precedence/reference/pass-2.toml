@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:general-reviewer" = "I reviewed the branch against main. I found no Critical issues in the tests.\n\n**[MINOR, debt] The module docstring could say more**\nFile: `/tmp/grimoire-eval-x/repo/ledger/lines.py:1`\nIssue: The module docstring could say more.\nFix: Change it.\nStatus: confirmed\n\n**[CRITICAL, debt] Precedence: the discount is multiplied by the quantity but the price is not, so the total is wrong**\nFile: `/tmp/grimoire-eval-x/repo/ledger/lines.py:9`\nIssue: Precedence: the discount is multiplied by the quantity but the price is not, so the total is wrong.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 1 |\n| Important | 0 |\n| Minor | 1 |\n\n**Verdict**: BLOCK"
