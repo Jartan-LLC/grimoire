@@ -35,11 +35,12 @@ def test_answer_matches_a_call_with_a_multi_line_argument_as_one_line() -> None:
     ("arg", "found"),
     [
         ("--body=Text", ["--body=Text", "Text"]),
-        ("-bText", ["-bText", "Text"]),
-        ("-Fbody=@b.md", ["-Fbody=@b.md", "body=@b.md", "@b.md", "b.md"]),
+        ("-bText", ["-bText", "Text", "ext", "xt", "t"]),
+        ("-dFb.md", ["-dFb.md", "Fb.md", "b.md", ".md"]),
+        ("-Fb=@b.md", ["-Fb=@b.md", "b=@b.md", "=@b.md", "@b.md", "b.md"]),
         ("--field=body=@b.md", ["--field=body=@b.md", "body=@b.md", "@b.md", "b.md"]),
         ("@-", ["@-", "-"]),
-        ("-Fix typo", ["-Fix typo", "ix typo"]),
+        ("-Fix typo", ["-Fix typo", "ix typo", "x typo", " typo"]),
         ("x = 1 =Closes", ["x = 1 =Closes"]),
         ("cc @alice", ["cc @alice"]),
         ("-F", ["-F"]),
@@ -68,6 +69,8 @@ def test_record_reads_each_file_an_argument_names_and_stdin_only_for_a_dash(
     argv = ["api", "x", "-F", "body=@-", "-F", "x=@gone.md"]
     entry = gh_stub.record(argv, lambda: "piped", tmp_path, (tmp_path,))
     assert (entry["stdin"], entry["files"]) == ("piped", {})
+    grouped = gh_stub.record(["pr", "create", "-dFb.md"], no_stdin, tmp_path, (tmp_path,))
+    assert grouped["files"] == {"b.md": "Closes #42\n"}
 
 
 def test_record_reads_a_body_file_outside_the_working_directory(tmp_path: pathlib.Path) -> None:

@@ -24,8 +24,8 @@ import re
 import sys
 from collections.abc import Callable, Mapping, Sequence
 
-# A two-character short flag with its value attached, `-bText` or `-Fbody=@b.md`.
-SHORT = re.compile(r"-[A-Za-z].+", re.DOTALL)
+# The letters of a short flag with its value attached, `-bText`, or of a group, `-dFbody.md`.
+SHORT = re.compile(r"-([A-Za-z]+)")
 # A key and its value, `--body=Text` or `body=@b.md`; a space before the `=` makes it text.
 KEY = re.compile(r"[^\s=]+=(.*)", re.DOTALL)
 STDIN = "-"
@@ -42,9 +42,12 @@ def candidates(arg: str) -> list[str]:
     """The argument, and every text gh could read from it as a value, in the order found.
 
     Each step looks only at the shape of the text, never at a flag's meaning: the rest
-    after a two-character short flag (`-bText`), the rest after a key's `=` (`--body=Text`,
-    `body=@b.md`), and the text past one leading `@`. They repeat, so `--field=body=@b.md`
-    gives `b.md`; a space before the `=` (`x = 1`) keeps a body whole.
+    after each leading letter of a short flag or a group of them (`-bText`, and `body.md`
+    from `-dFbody.md`, where `-d` takes no value), the rest after a key's `=`
+    (`--body=Text`, `body=@b.md`), and the text past one leading `@`. They repeat, so
+    `--field=body=@b.md` gives `b.md`; a space before the `=` (`x = 1`) keeps a body whole.
+    A value that starts with letters gives more tails (`ext` from `-bText`): extra texts,
+    and names no file has.
     """
     found: list[str] = []
     todo = [arg]
@@ -53,8 +56,8 @@ def candidates(arg: str) -> list[str]:
         if text in found:
             continue
         found.append(text)
-        if SHORT.fullmatch(text):
-            todo.append(text[2:])
+        if short := SHORT.match(text):
+            todo += [text[i:] for i in range(2, short.end() + 1) if text[i:]]
         if key := KEY.match(text):
             todo.append(key.group(1))
         if text.startswith("@"):
