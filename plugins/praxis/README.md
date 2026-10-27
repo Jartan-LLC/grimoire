@@ -98,10 +98,6 @@ session you may want a higher `COMPACT_CONTEXT_THRESHOLD`.
 /praxis:address-review 43      -> work through findings
 ```
 
-The PR stays a draft until it is marked ready. Your agent is told to mark it ready once it is ready
-for someone else, but some models often leave it a draft when you say the work is done without asking
-for the PR to be marked ready. If it leaves the PR a draft, run `gh pr ready` yourself.
-
 ## Credits
 
 - [everything-claude-code](https://github.com/affaan-m/everything-claude-code) by Affaan Mustafa -- `hooks/scripts/lib/utils.js`, `hooks/scripts/lib/transcript-context.js`, `suggest-compact.js`, `check-console-log.js` and the push-reminder and documentation-file hooks in `hooks/hooks.json` (MIT; `hooks/scripts/LICENSE-everything-claude-code`)
