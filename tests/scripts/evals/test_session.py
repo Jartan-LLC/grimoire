@@ -9,8 +9,8 @@ import pytest
 from evals import cache, session
 from evals.arms import Arm
 from evals.proc import GIT, run
-from evals.suite import load_suite
-from helpers import write_suite
+from evals.suite import Case, load_suite
+from helpers import KEY, write_suite
 
 
 def test_sample_env_isolates_git_drops_the_checkout_and_the_parent_session(
@@ -215,6 +215,25 @@ def test_a_samples_key_holds_its_arms_name_screen_and_runner(
     monkeypatch.setattr(session, "RUNNER", session.RUNNER + 1)
     keys.add(key("old", "s1"))
     assert len(keys) == 4
+
+
+def test_the_remote_runner_is_in_a_remote_cases_key_only(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    local = load_suite(write_suite(tmp_path / "local")).cases[0]
+    remote = load_suite(write_suite(tmp_path / "remote", key="remote = true\n" + KEY)).cases[0]
+    breaker = session.Breaker()
+    breaker.tripped.set()
+    spec = session.Spec("m", "v", 1.0, tmp_path, tmp_path / "store", "s1")
+
+    def key(case: Case) -> str:
+        return session.run_sample(case, Arm("old", "h", {}), 0, spec, breaker).key
+
+    before = key(local), key(remote)
+    assert before[0] == cache.key(local.pinned(), f"old:h:s1:r{session.RUNNER}", "m", "v", 0)
+    monkeypatch.setattr(session, "REMOTE_RUNNER", session.REMOTE_RUNNER + 1)
+    assert key(local) == before[0]
+    assert key(remote) != before[1]
 
 
 def test_a_case_changed_on_disk_after_loading_is_excluded_before_its_session(

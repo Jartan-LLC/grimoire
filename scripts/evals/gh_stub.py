@@ -4,6 +4,10 @@ The runner installs this file as `bin/gh` in a sample's sandbox, beside `gh/repl
 (the case's `[[gh]]` tables) and `gh/calls.jsonl` (the log it appends to). It reaches no
 network and uses only the standard library. A call no reply matches fails, so a session
 never reads a success the case did not script.
+
+A change to what this stub answers, how it matches a call or what it logs, or to the
+remote setup in `session.py`, changes what a remote session can do: bump REMOTE_RUNNER
+there, so no remote sample drawn before it is reused.
 """
 
 import json

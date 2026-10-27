@@ -45,6 +45,9 @@ LIMITED = re.compile(r"(?i)limiting requests|usage limit|rate limit|overloaded|\
 # Part of every sample's key: bump it when a change to the session setup changes what a
 # session can do, so no sample drawn under the old setup is reused.
 RUNNER = 2
+# Part of a remote case's sample key only: bump it when a change to the gh stub or to the
+# remote setup changes what a remote session can do, so only remote cases draw again.
+REMOTE_RUNNER = 1
 PRELOADED = re.compile(r"\[Agent: ([^\]]+)\] Preloaded skill '([^']+)'")
 GH_STUB = pathlib.Path(__file__).with_name("gh_stub.py")
 
@@ -322,11 +325,13 @@ def run_sample(
     saved. A sample the arm spoiled is valid and counts. The arm's name is part of the
     key, so `new` never reuses `old`'s sessions even when their plugins are identical,
     and `spec.screen` is too, so each screen draws fresh samples for both arms while a
-    rerun of the same screen resumes it.
+    rerun of the same screen resumes it. RUNNER is in every key, REMOTE_RUNNER in a
+    remote case's only.
     """
+    runner = f"r{RUNNER}" + (f":g{REMOTE_RUNNER}" if case.remote else "")
     sample_key = cache.key(
         case.pinned(),
-        f"{arm.name}:{arm.hash}:{spec.screen}:r{RUNNER}",
+        f"{arm.name}:{arm.hash}:{spec.screen}:{runner}",
         spec.model,
         spec.version,
         index,
