@@ -51,7 +51,8 @@ RUNNER = 2
 REMOTE_RUNNER = 3
 PRELOADED = re.compile(r"\[Agent: ([^\]]+)\] Preloaded skill '([^']+)'")
 GH_STUB = pathlib.Path(__file__).with_name("gh_stub.py")
-# The stub's replies and log; no other sandbox path may contain this one's, which is private.
+# The stub's replies and log, private: no path the session is given (repo, venv, bin, gh-config,
+# tmp) may lie under it, or using that path would exclude the sample.
 GH_STATE = "gh-stub"
 GH_LOGIN = ("GH_TOKEN", "GITHUB_TOKEN", "GH_ENTERPRISE_TOKEN", "GITHUB_ENTERPRISE_TOKEN", "GH_HOST")
 SSH_AGENT = ("SSH_AUTH_SOCK", "SSH_AGENT_PID")

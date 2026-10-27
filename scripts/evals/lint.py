@@ -4,10 +4,10 @@ tests/evals/README.md holds the rules; this enforces the mechanical ones: the pr
 uses none of the case's hint words, the facts a check needs are where the writer can
 find them, every planted problem fails its `verify` command and passes once fixed, the
 passing references pass every check and each failing reference fails one, each target
-case records a baseline failure, no baseline was drawn under another runner or, for a
-remote case, another REMOTE_RUNNER, nor while a case without a remote had one, and a `gh`
-check reads a case whose session records its gh calls. It cannot tell that every check
-can fail, only that some check fails on each failing reference.
+case records a baseline failure, no baseline was drawn under another RUNNER or, for a
+remote case, another REMOTE_RUNNER, no baseline of a case without a remote records a
+remote_runner, and a `gh` check reads a case whose session records its gh calls. It cannot
+tell that every check can fail, only that some check fails on each failing reference.
 """
 
 import fnmatch
