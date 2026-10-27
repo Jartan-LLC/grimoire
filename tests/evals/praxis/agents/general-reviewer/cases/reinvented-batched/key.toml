@@ -3,10 +3,20 @@ kind = "regression"
 hints = ["itertools", "batched", "standard library", "stdlib"]
 
 [[check]]
-metric = "found"
+metric = "found_regex"
 artifact = "report:praxis:general-reviewer"
 present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b).){0,1500}?(?:reinvent|reimplement|hand-?rol|hand-?writ)'''
 
+[[check]]
+metric = "found"
+artifact = "report:praxis:general-reviewer"
+judge = "flags-plant"
+reference = """
+`_chunks` in ledger/batches.py hand-writes what `itertools.batched` in the standard library
+already does. Only a finding whose subject is that reimplementation counts; one about another
+problem that mentions itertools in passing does not. Count it only when the report rates it
+Important or Critical.
+"""
 
 [[check]]
 metric = "format"

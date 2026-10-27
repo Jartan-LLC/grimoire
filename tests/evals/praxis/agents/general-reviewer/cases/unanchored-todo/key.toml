@@ -3,10 +3,19 @@ kind = "regression"
 hints = ["TODO", "issue"]
 
 [[check]]
-metric = "found"
+metric = "found_regex"
 artifact = "report:praxis:general-reviewer"
 present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b).){0,1500}?(?:\bTODO\b)'''
 
+[[check]]
+metric = "found"
+artifact = "report:praxis:general-reviewer"
+judge = "flags-plant"
+reference = """
+tally/parse.py gains `# TODO: handle exports that mix delimiters`, a TODO tied to no issue or
+owner. Only a finding about that unanchored TODO counts. Count it at any rating, Minor included.
+"""
+yes_ratings = ["Critical", "Important", "Minor"]
 
 [[check]]
 metric = "format"

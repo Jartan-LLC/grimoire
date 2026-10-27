@@ -3,10 +3,20 @@ kind = "regression"
 hints = ["comment", "history"]
 
 [[check]]
-metric = "found"
+metric = "found_regex"
 artifact = "report:praxis:general-reviewer"
 present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b).){0,1500}?(?:float|histor|narrat|tombstone|what changed|\breplaced\b)'''
 
+[[check]]
+metric = "found"
+artifact = "report:praxis:general-reviewer"
+judge = "flags-plant"
+reference = """
+`refunded_fee` in ledger/fees.py carries the comment `# Replaced the old float maths with
+Decimal here, as in card_fee.`, which tells the change's history instead of explaining the code.
+Only a finding about that comment counts. Count it at any rating, Minor included.
+"""
+yes_ratings = ["Critical", "Important", "Minor"]
 
 [[check]]
 metric = "format"

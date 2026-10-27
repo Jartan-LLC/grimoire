@@ -3,10 +3,20 @@ kind = "regression"
 hints = ["statistics", "standard library", "stdlib"]
 
 [[check]]
-metric = "found"
+metric = "found_regex"
 artifact = "report:praxis:general-reviewer"
 present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b).){0,1500}?(?:reinvent|reimplement|hand-?rol|hand-?writ)'''
 
+[[check]]
+metric = "found"
+artifact = "report:praxis:general-reviewer"
+judge = "flags-plant"
+reference = """
+`_median` in tally/stats.py hand-writes a median beside `statistics.median` in the standard
+library, which does the same job. Only a finding whose subject is that reimplementation counts;
+one about another bug that suggests statistics.median as its fix does not. Count it only when
+the report rates it Important or Critical.
+"""
 
 [[check]]
 metric = "format"

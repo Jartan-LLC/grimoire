@@ -3,10 +3,20 @@ kind = "regression"
 hints = ["comment", "stale", "cache"]
 
 [[check]]
-metric = "found"
+metric = "found_regex"
 artifact = "report:praxis:general-reviewer"
 present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b).){0,1500}?(?:fallback|last good|no longer|stale|left ?over)'''
 
+[[check]]
+metric = "found"
+artifact = "report:praxis:general-reviewer"
+judge = "flags-plant"
+reference = """
+The branch drops the response cache from fetchkit/client.py but keeps the comment `# When every
+attempt fails, serve the last good response for this URL instead.`, which the code no longer
+does. Only a finding about that stale comment counts. Count it only when the report rates it
+Important or Critical.
+"""
 
 [[check]]
 metric = "format"

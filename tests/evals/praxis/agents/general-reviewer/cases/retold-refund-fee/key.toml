@@ -3,10 +3,20 @@ kind = "regression"
 hints = ["comment", "duplicate"]
 
 [[check]]
-metric = "found"
+metric = "found_regex"
 artifact = "report:praxis:general-reviewer"
 present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b).){0,1500}?(?:retold|retell|duplicate[ds]? (?:comment|fact)|duplication|word for word|already (?:told|state|say)|nonlocal|repeats? (?:the|a|that) (?:same )?(?:comment|fact))'''
 
+[[check]]
+metric = "found"
+artifact = "report:praxis:general-reviewer"
+judge = "flags-plant"
+reference = """
+The comment in `refund_cost` in ledger/refunds.py, `# The processor keeps the fixed part of its
+fee when a charge is refunded.`, repeats word for word a comment in ledger/fees.py. Only a
+finding about that repeated comment counts. Count it only when the report rates it Important or
+Critical.
+"""
 
 [[check]]
 metric = "format"

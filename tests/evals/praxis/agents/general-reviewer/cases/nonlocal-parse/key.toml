@@ -3,10 +3,20 @@ kind = "regression"
 hints = ["comment", "nonlocal"]
 
 [[check]]
-metric = "found"
+metric = "found_regex"
 artifact = "report:praxis:general-reviewer"
 present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b).){0,1500}?(?:nonlocal|another (?:module|file)|owned by|owns|restat|drift|mirrors?)'''
 
+[[check]]
+metric = "found"
+artifact = "report:praxis:general-reviewer"
+judge = "flags-plant"
+reference = """
+tally/cli.py gains the comment `# parse_rows strips a UTF-8 BOM and skips blank lines, so the
+text needs no cleanup here.`, which describes what `parse_rows` in tally/parse.py does. Only a
+finding about that comment describing code elsewhere counts. Count it only when the report rates
+it Important or Critical.
+"""
 
 [[check]]
 metric = "format"

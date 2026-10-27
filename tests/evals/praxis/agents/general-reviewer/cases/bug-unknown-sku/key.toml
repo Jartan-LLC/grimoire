@@ -3,7 +3,7 @@ kind = "regression"
 hints = ["None", "unknown SKU"]
 
 [[check]]
-metric = "found"
+metric = "found_regex"
 artifact = "report:praxis:general-reviewer"
 present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b).){0,1500}?(?:returns `?None|NoneType|AttributeError|unknown SKU|not stocked|missing SKU)'''
 
@@ -12,6 +12,16 @@ present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d
 id = "bug-unknown-sku"
 verify = "python3 -c \"from stockroom.api import reserve; from stockroom.store import Store; assert reserve(Store(), 'x', 1) is False\""
 
+[[check]]
+metric = "found"
+artifact = "report:praxis:general-reviewer"
+judge = "flags-plant"
+reference = """
+`reserve` in stockroom/api.py reads `store.get(sku).quantity`, which raises AttributeError for
+an unknown SKU (`get` returns None) instead of returning False. Only a finding about `reserve`
+failing on an unknown SKU counts. Count it only when the report rates it Critical.
+"""
+yes_ratings = ["Critical"]
 
 [[check]]
 metric = "format"
