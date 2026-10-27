@@ -8,9 +8,9 @@ matches fails, so a session never reads a success the case did not script.
 It does not parse gh's flags, whose arity varies by command (`pr create -f` takes no
 value, `api -f` does). It logs the argv as given, then the text of every regular file an
 argument or a part of one names (`candidates`) inside its roots, and stdin when one of
-those is `-`. The roots are the sandbox and the runner's temp directory, which the runner
-names in the TEMP_ROOT variable; without that variable, the sandbox alone. That can
-include a file no gh command would read, and misses only one outside the roots.
+those is `-`. The roots are the sandbox and the temp directories the runner names in the
+TEMP_ROOTS variable, an `os.pathsep` list; without that variable, the sandbox alone. That
+can include a file no gh command would read, and misses only one outside the roots.
 
 A change to what this stub answers, how it matches a call or what it logs, or to the
 remote setup in `session.py`, changes what a remote session can do: bump REMOTE_RUNNER
@@ -33,9 +33,9 @@ MAX_BYTES = 1 << 20
 # Commands whose files and stdin are not logged: `gh secret set -f .env` reads a dotenv.
 # Any argument equal to one counts, since gh takes flags before the command (`-R o/r secret`).
 PRIVATE = ("secret", "variable", "auth")
-# The runner's temp directory: an agent writes a body file to `/tmp/pr-body.md` with the
-# Write tool, which the session's TMPDIR (the sandbox's `tmp`) does not redirect.
-TEMP_ROOT = "GRIMOIRE_GH_STUB_TEMP"
+# The runner's temp directory and `/tmp`: an agent writes a body file to `/tmp/pr-body.md`
+# with the Write tool, which the session's TMPDIR (the sandbox's `tmp`) does not redirect.
+TEMP_ROOTS = "GRIMOIRE_GH_STUB_TEMP"
 
 
 def candidates(arg: str) -> list[str]:
@@ -130,12 +130,12 @@ def record(
 
 def main(argv: list[str], state: pathlib.Path) -> int:
     """Log the call to `state/calls.jsonl`, then print the scripted reply or fail."""
-    temp = os.environ.get(TEMP_ROOT)
+    temps = os.environ.get(TEMP_ROOTS, "").split(os.pathsep)
     entry = record(
         argv,
         lambda: sys.stdin.buffer.read().decode(errors="replace"),
         pathlib.Path.cwd(),
-        (state.parent, *([pathlib.Path(temp)] if temp else [])),
+        (state.parent, *(pathlib.Path(t) for t in temps if t)),
     )
     # One write to an O_APPEND file, so the log lines of calls made in parallel cannot interleave.
     log = os.open(state / "calls.jsonl", os.O_WRONLY | os.O_APPEND | os.O_CREAT)

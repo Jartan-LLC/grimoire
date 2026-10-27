@@ -221,17 +221,22 @@ def test_the_installed_stub_answers_a_call_whose_arguments_name_no_file(
     assert session.gh_calls(sandbox)[0]["files"] == {}
 
 
-def test_the_installed_stub_reads_a_file_under_the_temp_root_only_when_the_runner_names_it(
+def test_the_installed_stub_reads_a_file_under_each_temp_root_only_when_the_runner_names_it(
     tmp_path: pathlib.Path,
 ) -> None:
     sandbox = tmp_path / "sandbox"
     (sandbox / "repo").mkdir(parents=True)
     session.install_gh(sandbox, (Reply("^pr create", "made"),))
-    body = tmp_path / "tmp" / "pr-body.md"
-    body.parent.mkdir()
-    body.write_text("Closes #42\n")
-    unset = {k: v for k, v in os.environ.items() if k != gh_stub.TEMP_ROOT}
-    for env in (unset | {gh_stub.TEMP_ROOT: str(body.parent)}, unset):
-        made = run_stub(sandbox, sandbox / "repo", "pr", "create", "-F", str(body), env=env)
-        assert made.returncode == 0
-    assert [c["files"] for c in session.gh_calls(sandbox)] == [{str(body): "Closes #42\n"}, {}]
+    bodies = [tmp_path / temp / "pr-body.md" for temp in ("runner-tmp", "tmp")]
+    for body in bodies:
+        body.parent.mkdir()
+        body.write_text(f"Closes #{len(body.parent.name)}\n")
+    unset = {k: v for k, v in os.environ.items() if k != gh_stub.TEMP_ROOTS}
+    named = unset | {gh_stub.TEMP_ROOTS: os.pathsep.join(str(b.parent) for b in bodies)}
+    for env in (named, unset):
+        argv = ("pr", "create", "-F", str(bodies[0]), "--body-file", str(bodies[1]))
+        assert run_stub(sandbox, sandbox / "repo", *argv, env=env).returncode == 0
+    assert [c["files"] for c in session.gh_calls(sandbox)] == [
+        {str(bodies[0]): "Closes #10\n", str(bodies[1]): "Closes #3\n"},
+        {},
+    ]

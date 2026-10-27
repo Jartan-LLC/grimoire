@@ -244,12 +244,28 @@ def test_sample_env_puts_the_gh_stub_first_and_drops_the_logins_only_for_a_case_
     assert stubbed["PATH"] == f"{sandbox}/bin:{sandbox}/venv/bin:/usr/bin"
     assert stubbed["GH_CONFIG_DIR"] == f"{sandbox}/gh-config"
     assert stubbed["GH_TOKEN"] == session.STUB_TOKEN
-    assert stubbed[gh_stub.TEMP_ROOT] == str(pathlib.Path(tempfile.gettempdir()).resolve())
-    assert gh_stub.TEMP_ROOT not in plain
+    assert gh_stub.TEMP_ROOTS in stubbed
+    assert gh_stub.TEMP_ROOTS not in plain
     dropped = (*session.GH_LOGIN, *ssh)
     assert not any(name in stubbed for name in dropped if name != "GH_TOKEN")
     assert stubbed["GIT_ALLOW_PROTOCOL"] == "file"
     assert cache.STORE not in stubbed
+
+
+def test_sample_env_names_the_runners_temp_directory_and_tmp_as_the_stubs_roots(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    runner_tmp = tmp_path / "runner-tmp"
+    runner_tmp.mkdir()
+    tmp = str(session.SHARED_TMP.resolve())
+    args = ({"PATH": "/usr/bin"}, tmp_path, tmp_path / "sandbox", tmp_path / "store")
+    monkeypatch.setattr(tempfile, "tempdir", None)
+    monkeypatch.setenv("TMPDIR", str(runner_tmp))
+    roots = session.sample_env(*args, gh_stub=True)[gh_stub.TEMP_ROOTS]
+    assert roots.split(os.pathsep) == [str(runner_tmp.resolve()), tmp]
+    monkeypatch.setattr(tempfile, "tempdir", None)
+    monkeypatch.setenv("TMPDIR", str(session.SHARED_TMP))
+    assert session.sample_env(*args, gh_stub=True)[gh_stub.TEMP_ROOTS] == tmp
 
 
 def test_a_remote_sessions_git_pushes_to_origin_and_refuses_https_and_ssh(

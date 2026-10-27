@@ -27,7 +27,7 @@ from dataclasses import asdict, dataclass
 
 from . import cache, trace
 from .arms import Arm
-from .gh_stub import TEMP_ROOT
+from .gh_stub import TEMP_ROOTS
 from .proc import CLAUDE, GIT, UV, run
 from .suite import Case, Reply
 
@@ -58,6 +58,8 @@ GH_LOGIN = ("GH_TOKEN", "GITHUB_TOKEN", "GH_ENTERPRISE_TOKEN", "GITHUB_ENTERPRIS
 SSH_AGENT = ("SSH_AUTH_SOCK", "SSH_AGENT_PID")
 # Set as GH_TOKEN, so the real `gh` uses no token of the user's; the stub reads no token.
 STUB_TOKEN = "grimoire-eval-stub"  # noqa: S105 -- a dummy that authenticates nothing
+# A temp directory the stub reads besides the runner's, which TMPDIR can move elsewhere.
+SHARED_TMP = pathlib.Path("/tmp")  # noqa: S108 -- read for a body file, never written
 
 
 @dataclass(frozen=True)
@@ -106,11 +108,11 @@ def sample_env(
     With `gh_stub`, the sandbox's `bin/` comes first, so its `gh` answers every call. For
     the real `gh` run by its path: gh's token and host variables are dropped, GH_TOKEN is
     set to a dummy, which gh sends to github.com in place of a token from the OS keyring,
-    and GH_CONFIG_DIR is an empty `gh-config/`. The stub's TEMP_ROOT is this process's temp
-    directory, where an agent may write a body file by its path. For git:
-    GIT_ALLOW_PROTOCOL=file refuses every transport but a local path, so git reaches no
-    https, ssh or git URL, with a key under HOME or any other, and the SSH agent's
-    variables are dropped.
+    and GH_CONFIG_DIR is an empty `gh-config/`. The stub's TEMP_ROOTS are this process's
+    temp directory and `/tmp` when it exists, where an agent may write a body file by its
+    path. For git: GIT_ALLOW_PROTOCOL=file refuses every transport but a local path, so git
+    reaches no https, ssh or git URL, with a key under HOME or any other, and the SSH
+    agent's variables are dropped.
     """
     env = {
         k: v
@@ -135,7 +137,9 @@ def sample_env(
             env.pop(name, None)
         env["GH_TOKEN"] = STUB_TOKEN
         env["GH_CONFIG_DIR"] = str(sandbox / "gh-config")
-        env[TEMP_ROOT] = str(pathlib.Path(tempfile.gettempdir()).resolve())
+        temps = (pathlib.Path(tempfile.gettempdir()), SHARED_TMP)
+        resolved = (str(t.resolve()) for t in temps if t.is_dir())
+        env[TEMP_ROOTS] = os.pathsep.join(dict.fromkeys(resolved))
         env["GIT_ALLOW_PROTOCOL"] = "file"
     return env
 
