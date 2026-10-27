@@ -276,7 +276,7 @@ def test_held_out_items_follow_their_case_and_leave_burned_ones_to_dev() -> None
         ("a2", False, None),
     ]
     assert {i.id for i in by_kind["dev"]} == {"a4", "b1", "c1"}
-    assert [(i.case, i.reference, i.truth) for i in by_kind["sibling"]] == [("b", "B", False)] * 2
+    assert "sibling" not in by_kind  # a's one sibling, b, is dev: no reference crosses sets
     assert [i.pair for i in by_kind["invariance-format"]] == ["a1", "a2"]
     assert [(i.case, i.truth) for i in by_kind["reference"]] == [("a", True)]
     assert len(by_kind["control-empty"]) == len(by_kind["control-unknown"]) == calibrate.CONTROLS
@@ -297,6 +297,19 @@ def test_dev_items_take_the_other_cases_and_no_dev_kind() -> None:
     assert natural == {"a4", "b1", "c1"}
     assert not [i for i in found if i.kind == "dev"]
     assert [(i.case, i.truth) for i in found if i.kind == "reference"] == [("c", False)]
+
+
+def test_sibling_swaps_stay_within_their_set() -> None:
+    judge = Judge("flags", "Q?", held_out=("a", "b"), siblings=(("a", "b", "c", "d"),))
+    labels = [label("a1", "a", "yes"), label("b1", "b", "no"), label("c1", "c", "yes")]
+    material = calibrate.Sources({k: k.upper() for k in "abcd"}, {}, labels)
+    held = [i for i in calibrate.items(judge, "held-out", material) if i.kind == "sibling"]
+    assert [(i.id, i.case, i.text) for i in held] == [
+        ("sibling:a1", "b", "report a1"),
+        ("sibling:b1", "a", "report b1"),
+    ]
+    dev = [i for i in calibrate.items(judge, "dev", material) if i.kind == "sibling"]
+    assert [(i.id, i.case) for i in dev] == [("sibling:c1", "d")]
 
 
 def test_cells_count_by_arm_and_score_invariance_against_the_pair() -> None:

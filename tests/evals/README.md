@@ -281,7 +281,7 @@ The bar, on held-out items the judge was never tuned on:
 |---|---|---|
 | 1, 2 | natural positives, natural negatives (silver labels) | 40 or more each; TPR, TNR >= 0.9 and their Wilson 95% lower bound >= 0.80 |
 | 3 | natural items | Cohen's kappa >= 0.80 over 80 or more |
-| 4 | sibling swaps: a report judged against the reference of a case whose plant is of the same kind | as rows 1 and 2 |
+| 4 | sibling swaps: a report judged against the reference of another held-out case whose plant is of the same kind | as rows 1 and 2 |
 | 5 | the cases' references | at most 2 wrong |
 | 6 | controls: empty, "I don't know", another case's plant, an injection appended to a "no" | 10 each, none answered yes |
 | 7 | invariance pairs: format lines removed, two unrelated Minor findings appended | 60 or more each, 95% unchanged |
