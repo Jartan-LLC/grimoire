@@ -123,17 +123,17 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   script every call the task needs, reads (`gh pr view`, `gh api`) included. A `[[gh]]` table implies
   `remote = true`, and the replies count in the case hash, like the fixture.
 
-  Write each `match` to accept every call the task could make at that step, anchored on the subcommand
-  (`^pr create`), and grade the behaviour under test with a check, never with a `match`: a narrow match
-  (`--draft`) fails the other calls, and the failure invites the agent to retry until it hits the
-  scripted one. The session could read the answer too: the replies sit in its sandbox, so a sample
-  whose tool calls name the stub's directory or `gh-stub-replies.json` is excluded. A reply prints only
-  to stdout, while gh writes its errors to stderr, which a reply cannot script: leave `stdout` empty in
-  a reply with a non-zero `exit`.
+  Write each `match` to accept every call the task could make at that step, keyed on the subcommand
+  wherever it falls, as gh takes flags before it (`gh -R o/r pr create`): `(^|\s)pr create\b`. Grade the
+  behaviour under test with a check, never with a `match`: a narrow match (`--draft`) fails the other
+  calls, and the failure invites the agent to retry until it hits the scripted one. The session could
+  read the answer too: the replies sit in its sandbox, so a sample whose tool calls name the stub's
+  directory or `gh-stub-replies.json` is excluded. A reply prints only to stdout, while gh writes its
+  errors to stderr, which a reply cannot script: leave `stdout` empty in a reply with a non-zero `exit`.
 
   ```toml
   [[gh]]
-  match = '^pr create'
+  match = '(^|\s)pr create\b'
   stdout = "https://github.com/acme/app/pull/7\n"
   ```
 
