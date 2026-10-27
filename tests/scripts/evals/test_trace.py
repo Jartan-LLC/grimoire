@@ -315,6 +315,16 @@ def test_classify_from_a_worktree_catches_the_main_checkout_and_a_path_back_out_
     assert reasons(f"true\n{arms}/../samples") == [f"the session reached /main, {samples}"]
 
 
+def test_classify_catches_a_private_path_written_with_a_doubled_slash() -> None:
+    command = "cat /workspaces//grimoire/key.toml"
+    events = [init(), call("r1", "Bash", command=command), result_of("r1")]
+    parsed = trace.parse([*events, RESULT], PLUGINS)
+    private = ["/workspaces/grimoire"]
+    assert trace.classify(parsed, PLUGINS, MODEL, False, private, arms="/store/arms")[0] == [
+        "the session reached /workspaces/grimoire"
+    ]
+
+
 def test_classify_excludes_a_session_that_reached_the_gh_stubs_replies() -> None:
     private = ["/checkout", "/sandbox/gh", "replies.json"]
 

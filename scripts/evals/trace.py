@@ -329,8 +329,8 @@ def _strings(value: object) -> Iterator[str]:
 
 
 def _normalised(text: str) -> str:
-    """`text` with each absolute path holding a `.` or `..` step written without it."""
-    return _PATH.sub(lambda m: posixpath.normpath(m[0]) if "/." in m[0] else m[0], text)
+    """`text` with each absolute path normalised: no `.` or `..` step, no doubled slash."""
+    return _PATH.sub(lambda m: posixpath.normpath(m[0]), text)
 
 
 def classify(  # noqa: PLR0913 -- `arms` is apart from `private`: paths under it may be read
@@ -349,8 +349,8 @@ def classify(  # noqa: PLR0913 -- `arms` is apart from `private`: paths under it
     path, another model, an error result, a crash before the result, or a tool call
     naming one of the `private` paths, which hold the suite and its answers. A path under
     `arms`, the directory holding every arm, does not count: the store that holds it is
-    in the clone's git directory, inside the main checkout. Quotes are dropped and a
-    path's `..` steps resolved first, so `"<arms>"/../samples` names the samples.
+    in the clone's git directory, inside the main checkout. Quotes are dropped and each
+    absolute path normalised first, so `"<arms>"/../samples` names the samples.
     Spoiled (the arm's own doing, so the sample counts and fails every check): a
     timeout, or a result cut off by the turn or budget cap.
     """
