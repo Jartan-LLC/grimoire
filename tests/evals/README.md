@@ -297,6 +297,9 @@ After changing the runner or the verdict rule:
   nor a workflow that spans sessions, such as a PR reviewed in one and its review addressed in the next.
 - GitHub is a stub: `gh` answers only from the case's replies, the same for every call that matches, so
   a case shows what the agent sent, not what GitHub would do with it.
+- `origin` is a local path, not a github.com URL, and `git remote -v` prints that path, even when
+  `build.py` names origin by a GitHub URL rewritten with `url.<path>.insteadOf`: an agent that reads
+  the owner or repository name from the remote finds none.
 - The lint knows when a baseline predates the runner, not when the model or Claude Code changed; rerun
   baselines after either.
 - A subagent's own subagents are not followed, nor is an Agent call run in the background, nor a
