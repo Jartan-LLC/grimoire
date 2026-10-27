@@ -17,9 +17,11 @@ import re
 import sys
 from collections.abc import Callable, Iterator, Mapping, Sequence
 
-# gh reads a file for these: `pr create --body-file`, `api --input`, each naming a path.
-PATH_FLAGS = ("--body-file", "--input")
-# `-F` is `pr create`'s short `--body-file`, and `api`'s `--field`, a file only as `key=@path`.
+# gh reads a file for these: `pr create --body-file`, `release create --notes-file`,
+# `api --input`, each naming a path.
+PATH_FLAGS = ("--body-file", "--notes-file", "--input")
+# `-F` is the short `--body-file` or `--notes-file`, and `api`'s `--field`, a file only as
+# `key=@path`.
 FIELD_FLAGS = ("-F", "--field")
 STDIN = "-"
 
@@ -66,7 +68,8 @@ def record(
     """The call's log entry (argv, stdin, each body file's text) and the files it could not read.
 
     Stdin is read only when the call names it, as gh does, so a call that does not
-    cannot hang on an open stdin.
+    cannot hang on an open stdin. A byte that is not UTF-8 is read as U+FFFD, so the call
+    is still logged.
     """
     refs = file_refs(argv)
     stdin = read_stdin() if STDIN in refs else ""
@@ -76,7 +79,7 @@ def record(
         if ref == STDIN:
             continue
         try:
-            files[ref] = (cwd / ref).read_text()
+            files[ref] = (cwd / ref).read_text(errors="replace")
         except OSError:
             missing.append(ref)
     return {"argv": argv, "stdin": stdin, "files": files}, missing
@@ -84,7 +87,9 @@ def record(
 
 def main(argv: list[str], state: pathlib.Path) -> int:
     """Log the call to `state/calls.jsonl`, then print the scripted reply or fail."""
-    entry, missing = record(argv, sys.stdin.read, pathlib.Path.cwd())
+    entry, missing = record(
+        argv, lambda: sys.stdin.buffer.read().decode(errors="replace"), pathlib.Path.cwd()
+    )
     # One write to an O_APPEND file, so the log lines of calls made in parallel cannot interleave.
     log = os.open(state / "calls.jsonl", os.O_WRONLY | os.O_APPEND | os.O_CREAT)
     try:

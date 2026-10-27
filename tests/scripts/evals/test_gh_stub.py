@@ -40,6 +40,8 @@ def test_answer_matches_a_call_with_a_multi_line_argument_as_one_line() -> None:
         (["api", "x", "--field", "body=@-"], ["-"]),
         (["api", "x", "--input", "q=1.json"], ["q=1.json"]),
         (["api", "x", "--input=-"], ["-"]),
+        (["release", "create", "v1", "--notes-file", "n.md"], ["n.md"]),
+        (["release", "create", "v1", "-F", "n.md"], ["n.md"]),
         (["pr", "create", "--body", "-F b.md"], []),
         (["pr", "create", "-F"], []),
     ],
@@ -67,6 +69,22 @@ def test_record_reads_body_files_and_stdin_only_when_the_call_names_it(
         ["api", "x", "-F", "body=@-", "-F", "x=@gone.md"], lambda: "piped", tmp_path
     )
     assert (entry["stdin"], entry["files"], missing) == ("piped", {}, ["gone.md"])
+
+
+def test_the_stub_logs_a_body_that_is_not_utf8(tmp_path: pathlib.Path) -> None:
+    sandbox = tmp_path / "sandbox"
+    sandbox.mkdir()
+    session.install_gh(sandbox, (Reply("^pr create", "made"),))
+    (tmp_path / "b.md").write_bytes(b"Body \xff\n")
+    for argv, stdin in ((["-F", "b.md"], b""), (["-F", "-"], b"Piped \xfe")):
+        made = run(
+            [str(sandbox / "bin" / "gh"), "pr", "create", *argv],
+            cwd=tmp_path, input=stdin, capture_output=True, check=False,
+        )  # fmt: skip
+        assert (made.returncode, made.stdout) == (0, b"made")
+    calls = session.gh_calls(sandbox)
+    assert calls[0]["files"] == {"b.md": "Body \ufffd\n"}
+    assert calls[1]["stdin"] == "Piped \ufffd"
 
 
 def run_stub(
