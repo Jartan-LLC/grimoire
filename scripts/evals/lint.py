@@ -5,9 +5,9 @@ uses none of the case's hint words, the facts a check needs are where the writer
 find them, every planted problem fails its `verify` command and passes once fixed, the
 passing references pass every check and each failing reference fails one, each target
 case records a baseline failure, no baseline was drawn under another runner or, for a
-remote case, another REMOTE_RUNNER, and a `gh` check reads a case whose session records
-its gh calls. It cannot tell that every check can fail, only that some check fails on
-each failing reference.
+remote case, another REMOTE_RUNNER, nor while a case without a remote had one, and a `gh`
+check reads a case whose session records its gh calls. It cannot tell that every check
+can fail, only that some check fails on each failing reference.
 """
 
 import fnmatch
@@ -119,6 +119,12 @@ def case_problems(case: Case) -> list[str]:
         f"{b.remote_runner}, not {REMOTE_RUNNER}; redraw it"
         for b in case.baselines
         if case.remote and b.remote_runner != REMOTE_RUNNER
+    ]
+    found += [
+        f"{case.path}: the {b.model} {b.arm} baseline was drawn under remote_runner "
+        f"{b.remote_runner}, while the case had a remote; redraw it"
+        for b in case.baselines
+        if not case.remote and b.remote_runner
     ]
     return found
 

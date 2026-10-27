@@ -89,7 +89,8 @@ class Baseline:
     The counts choose cases and let the planner estimate power; a verdict never uses
     them. A count drawn under an older runner, model or Claude Code is stale, and for a
     remote case one drawn under another `remote_runner` (0 when the entry has none: drawn
-    before the case had a remote).
+    before the case had a remote); for a case without a remote, one with a `remote_runner`,
+    drawn while it had one.
     """
 
     model: str

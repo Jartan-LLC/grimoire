@@ -114,6 +114,18 @@ def test_lint_names_a_remote_baseline_drawn_under_another_remote_runner(
     assert lint(root, TRACKED) == []
 
 
+def test_lint_names_a_baseline_drawn_while_a_case_without_a_remote_had_one(
+    root: pathlib.Path,
+) -> None:
+    case = suite_at(root, key=KEY + "remote_runner = 3\n")
+    assert lint(root, TRACKED) == [
+        f"{case}: the claude-opus-5-5 old baseline was drawn under remote_runner 3, "
+        "while the case had a remote; redraw it"
+    ]
+    (case / "key.toml").write_text(KEY + "remote_runner = 0\n")
+    assert lint(root, TRACKED) == []
+
+
 def test_lint_runs_a_plant_both_ways(root: pathlib.Path) -> None:
     case = suite_at(root, key=KEY + VERIFY)
     (case / "fixture" / "check.py").write_text("import sys\nsys.exit(0)\n")
