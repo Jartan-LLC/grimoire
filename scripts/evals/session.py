@@ -47,7 +47,7 @@ LIMITED = re.compile(r"(?i)limiting requests|usage limit|rate limit|overloaded|\
 RUNNER = 2
 # Part of a remote case's sample key only: bump it when a change to the gh stub or to the
 # remote setup changes what a remote session can do, so only remote cases draw again.
-REMOTE_RUNNER = 1
+REMOTE_RUNNER = 2
 PRELOADED = re.compile(r"\[Agent: ([^\]]+)\] Preloaded skill '([^']+)'")
 GH_STUB = pathlib.Path(__file__).with_name("gh_stub.py")
 REPLIES = "replies.json"
@@ -175,17 +175,24 @@ def build_fixture(case: Case, repo: pathlib.Path, env: dict[str, str]) -> list[s
 
 
 def add_origin(repo: pathlib.Path, origin: pathlib.Path, env: dict[str, str]) -> list[str]:
-    """Make `origin` a bare repository holding every branch of `repo`, each tracking `origin/<branch>`.
+    """Make `origin` a bare repository holding every branch and tag of `repo`, each branch tracking it.
 
     An `origin` the case's `build.py` made is kept as it left it, so a case can start
-    with a branch ahead of, behind or missing from it. Returns the commit of each of
-    origin's refs: one `repo` has not fetched is the fixture's, not the session's, once
-    pulled.
+    with a branch ahead of, behind or missing from it. Either way `origin/HEAD` names
+    origin's default branch, as in a clone, unless `repo` has one already or origin's
+    HEAD names no branch it holds. Returns the commit of each of origin's refs: one
+    `repo` has not fetched is the fixture's, not the session's, once pulled.
     """
     if "origin" not in _git(repo, env, "remote").split():
         run([GIT, "init", "-q", "--bare", "-b", "main", str(origin)], env=env, check=True)
         _git(repo, env, "remote", "add", "origin", str(origin))
         _git(repo, env, "push", "-q", "-u", "origin", "--all")
+        _git(repo, env, "push", "-q", "origin", "--tags")
+    head = [GIT, "symbolic-ref", "-q", "refs/remotes/origin/HEAD"]
+    if run(head, cwd=repo, env=env, capture_output=True, check=False).returncode != 0:
+        # Fails, leaving none, when origin's HEAD names no branch it holds.
+        set_head = [GIT, "remote", "set-head", "origin", "-a"]
+        run(set_head, cwd=repo, env=env, capture_output=True, check=False)
     return [line.split()[0] for line in _git(repo, env, "ls-remote", "origin").splitlines()]
 
 

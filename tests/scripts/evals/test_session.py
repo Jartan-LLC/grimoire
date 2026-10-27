@@ -113,12 +113,13 @@ def test_build_fixture_commits_the_fixture_runs_build_and_new_commits_sees_only_
     assert session.new_commits(repo, env, heads) == ["fix: the thing\n\nCloses #42"]
 
 
-def test_add_origin_pushes_every_fixture_branch_so_a_plain_push_works(
+def test_add_origin_pushes_every_fixture_branch_and_tag_so_a_plain_push_works(
     tmp_path: pathlib.Path,
 ) -> None:
     case_dir = write_suite(tmp_path / "suite")
     (case_dir / "cases" / "c1" / "build.py").write_text(
         "import subprocess\n"
+        "subprocess.run(['git', 'tag', 'v1.0.0'], check=True)\n"
         "subprocess.run(['git', 'branch', 'release'], check=True)\n"
         "subprocess.run(['git', 'checkout', '-q', '-b', 'feature/issue-42'], check=True)\n"
         "subprocess.run(['git', 'commit', '-q', '--allow-empty', '-m', 'wip'], check=True)\n"
@@ -139,6 +140,8 @@ def test_add_origin_pushes_every_fixture_branch_so_a_plain_push_works(
         assert git("rev-parse", f"origin/{branch}") == git("rev-parse", branch)
     listed = git("ls-remote", "--heads", "origin").split()[1::2]
     assert listed == [f"refs/heads/{b}" for b in branches]
+    assert git("ls-remote", "--tags", "origin").split()[1::2] == ["refs/tags/v1.0.0"]
+    assert git("rev-parse", "--abbrev-ref", "origin/HEAD").strip() == "origin/main"
     git("commit", "-q", "--allow-empty", "-m", "fix: the thing")
     git("push", "-q")
     assert git("rev-parse", "origin/feature/issue-42") == git("rev-parse", "HEAD")
@@ -174,6 +177,9 @@ def test_add_origin_keeps_the_origin_build_made_with_a_branch_ahead_and_one_neve
     assert git("rev-list", "--count", "origin/feature/issue-42..feature/issue-42") == "1"
     listed = git("ls-remote", "--heads", "origin").split()[1::2]
     assert listed == ["refs/heads/feature/issue-42", "refs/heads/main"]
+    # build.py's origin has HEAD at git's default `master`, which it does not hold.
+    head = [GIT, "rev-parse", "-q", "--verify", "origin/HEAD"]
+    assert run(head, cwd=repo, env=env, capture_output=True, check=False).returncode != 0
 
 
 def test_a_commit_build_put_only_on_origin_is_not_the_sessions_once_pulled(
@@ -196,6 +202,11 @@ def test_a_commit_build_put_only_on_origin_is_not_the_sessions_once_pulled(
     repo = tmp_path / "repo"
     heads = session.build_fixture(case, repo, env)
     heads += session.add_origin(repo, tmp_path / "origin.git", env)
+    default = run(
+        [GIT, "rev-parse", "--abbrev-ref", "origin/HEAD"],
+        cwd=repo, env=env, capture_output=True, text=True, check=True,
+    )  # fmt: skip
+    assert default.stdout.strip() == "origin/main"
     run([GIT, "pull", "-q", "--ff-only"], cwd=repo, env=env, check=True)
     run([GIT, "commit", "-q", "--allow-empty", "-m", "fix: mine"], cwd=repo, env=env, check=True)
     assert session.new_commits(repo, env, heads) == ["fix: mine"]
