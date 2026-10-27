@@ -27,8 +27,10 @@ endif
 NO_ENV := No Python environment for this checkout: create one with `uv venv` or activate one (CONTRIBUTING.md, Setup)
 UV_INSTALL = uv pip install $(or $(UV_TARGET),$(error $(NO_ENV)))
 
-# Manifests: git-tracked only, so task worktrees and scratch copies never leak in.
-MANIFEST_EXCLUDES := $(foreach d,.worktrees .adversarial .liza node_modules .venv venv .tox,':(exclude,glob)**/$(d)/**')
+# Manifests: git-tracked only, so task worktrees and scratch copies never leak in. Eval fixtures
+# and their fixes stand in for other projects, whose names can clash.
+MANIFEST_EXCLUDES := $(foreach d,.worktrees .adversarial .liza node_modules .venv venv .tox,':(exclude,glob)**/$(d)/**') \
+	':(exclude,glob)tests/evals/**/fixture/**' ':(exclude,glob)tests/evals/**/fix/**'
 manifests = $(if $(CHECKOUT_GIT_DIR),$(shell git ls-files -- ':(glob)**/$(1)' $(MANIFEST_EXCLUDES)),$(wildcard $(1)))
 PY_PROJECTS = $(patsubst %/pyproject.toml,./%,$(patsubst pyproject.toml,.,$(call manifests,pyproject.toml)))
 NODE_DIRS = $(patsubst %/,%,$(dir $(call manifests,package.json)))
@@ -41,7 +43,7 @@ help:  ## Show available targets
 
 # pre-commit install refuses a checkout without git or with core.hooksPath set, which Liza
 # sets in task worktrees.
-install:  ## Install every tracked Python and Node manifest, then wire the pre-commit hook
+install:  ## Install every tracked Python and Node manifest but eval fixtures', then wire the pre-commit hook
 	$(UV_INSTALL) $(foreach p,$(PY_PROJECTS),-e '$(p)[$(call extras,$(p))]') $(foreach r,$(call manifests,requirements.txt),-r $(r))
 	$(if $(NODE_DIRS),@command -v pnpm >/dev/null || { echo "pnpm not found; it installs: $(NODE_DIRS)" >&2; exit 1; })
 	$(if $(NODE_DIRS),$(foreach d,$(NODE_DIRS),CI=true pnpm --dir $(d) install &&) true)
