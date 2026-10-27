@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.0
+
+- `github-conventions` tells your agent to open a PR as a draft and to mark it ready (`gh pr ready`) when it is ready for someone else to review or merge. Your agent does not always mark a draft PR ready, often not when you only describe the hand-over. If it leaves the PR a draft, run `gh pr ready` yourself.
+
 ## 1.3.0
 
 - `github-conventions` has rules for issue bodies (`issue-format.md`): your agent writes for whoever implements the issue, states the problem before any fix, keeps where the problem shows, the expected result, the scope and the constraints, and leaves out the files to touch, the steps of a fix, effort estimates and the story of the session, and titles it with the component, then the symptom or the need.
