@@ -280,10 +280,12 @@ the PR how many versions you screened.
   read are also written to `evidence/` in the store.
 - The store holds every sample, plan and evidence file: `grimoire-evals/` in the clone's git directory
   (`.git/grimoire-evals/` in the main checkout), shared by every worktree and never committed.
-  `GRIMOIRE_EVALS_STORE=<dir>` puts it elsewhere. It used to be `~/.cache/grimoire-evals/`: move that
-  directory's contents in once. Baseline (`run`) samples carry over. A screen begun before the store's
-  default moved here, its samples moved or not, draws its samples again and needs `--new-plan`
-  (`NEW_PLAN=1`) once: its plan named each arm's plugins by their path in the store.
+  `GRIMOIRE_EVALS_STORE=<dir>` puts it elsewhere. It used to be `~/.cache/grimoire-evals/`: copy that
+  directory's contents in once, without overwriting what the new store already holds:
+  `cp -an ~/.cache/grimoire-evals/. "$(git rev-parse --path-format=absolute --git-common-dir)/grimoire-evals/"`.
+  Baseline (`run`) samples carry over. A screen begun before the store's default moved here, its samples
+  copied or not, draws its samples again and needs `--new-plan` (`NEW_PLAN=1`) once: its plan named each
+  arm's plugins by their path in the store.
 - `python3 scripts/eval.py show <key>`: one sample's commits, final reply, the files its checks read,
   every `gh` call the stub logged (Claude Code's own included) and the `gh` text its checks read, skill
   deliveries and writes with the agent that made each, subagents' briefs and reports, and hook context.
