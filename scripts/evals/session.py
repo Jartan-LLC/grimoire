@@ -110,8 +110,10 @@ def sample_env(
     and GH_CONFIG_DIR is an empty `gh-config/`. The stub's TEMP_ROOTS are this process's
     temp directory and `/tmp` when it exists, where an agent may write a body file by its
     path. For git: GIT_ALLOW_PROTOCOL=file refuses every transport but a local path, so git
-    reaches no https, ssh or git URL, with a key under HOME or any other, and the SSH
-    agent's variables are dropped.
+    reaches no https, ssh or git URL, and the SSH agent's variables are dropped. These
+    controls hold only while the session keeps this environment: one that unsets
+    GIT_ALLOW_PROTOCOL can reach the network with a key under HOME, as one that unsets
+    the gh variables reaches the user's gh login.
     """
     env = {
         k: v
