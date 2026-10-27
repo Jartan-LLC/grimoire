@@ -285,8 +285,8 @@ the PR how many versions you screened.
   default moved here, its samples moved or not, draws its samples again and needs `--new-plan`
   (`NEW_PLAN=1`) once: its plan named each arm's plugins by their path in the store.
 - `python3 scripts/eval.py show <key>`: one sample's commits, final reply, the files its checks read,
-  `gh` calls, skill deliveries and writes with the agent that made each, subagents' briefs and reports,
-  and hook context.
+  every `gh` call the stub logged (Claude Code's own included) and the `gh` text its checks read, skill
+  deliveries and writes with the agent that made each, subagents' briefs and reports, and hook context.
 - `python3 scripts/eval.py lint`: the mechanical checks from "Writing a case"; `make verify` runs it.
 
 ## Calibrating the runner

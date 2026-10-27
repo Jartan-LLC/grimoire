@@ -6,8 +6,9 @@
   lint                check every suite before any session runs (free; part of make verify)
   run SUITE --arm A   run SUITE's cases on arm none, old or new (spends inference)
   screen SUITE        run old and new side by side, then print the verdict (spends inference)
-  show KEY            print one stored sample: its commits, final reply, gh calls, deliveries
-                      and writes by agent, and subagents' briefs and reports
+  show KEY            print one stored sample: its commits, final reply, every gh call logged
+                      and the gh text graded, deliveries and writes by agent, and subagents'
+                      briefs and reports
   size SUITE          what each split can see per model, from the recorded baselines (free)
 
 Sessions use the caller's own `claude` login; nothing here runs in CI. Samples are kept
@@ -24,7 +25,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from typing import cast
 
-from evals import cache, grade, session, trace
+from evals import cache, gh_stub, grade, session, trace
 from evals.arms import Arm, merge_base, new_arm, none_arm, old_arm
 from evals.lint import lint
 from evals.plan import make_plan
@@ -537,7 +538,11 @@ def _effect(effect: float) -> str:
 
 
 def show(key: str, store: pathlib.Path) -> int:
-    """Print one sample: commits, final reply, graded files, gh calls, deliveries, writes, briefs, reports, hooks."""
+    """Print one sample: commits, final reply, graded files, gh calls and gh text, deliveries, writes, briefs, reports, hooks.
+
+    The gh calls are every call the stub logged, Claude Code's own included; the gh text
+    is what a check reads (`grade.gh_text`), without them.
+    """
     sample = cache.load(store, key)
     if sample is None:
         raise SystemExit(f"no stored sample {key}")
@@ -550,7 +555,10 @@ def show(key: str, store: pathlib.Path) -> int:
     for path, text in sorted(sample.files.items()):
         print(f"\n--- file {path}\n{text}")
     if sample.gh is not None:
-        print(f"\n--- gh calls\n{grade.gh_text(sample.gh)}")
+        argvs = [cast("list[str]", call.get("argv", [])) for call in sample.gh]
+        logged = "\n".join(f"gh {gh_stub.call_line(argv)}" for argv in argvs)
+        print(f"\n--- gh calls: every call the stub logged, Claude Code's own included\n{logged}")
+        print(f"\n--- gh text graded: Claude Code's own calls left out\n{grade.gh_text(sample.gh)}")
     parsed = parsed_trace(store, sample)
     print("\n--- skills delivered (event index, agent)")
     for d in parsed.deliveries:
