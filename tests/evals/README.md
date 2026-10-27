@@ -310,6 +310,9 @@ After changing the runner or the verdict rule:
   nor a workflow that spans sessions, such as a PR reviewed in one and its review addressed in the next.
 - GitHub is a stub: `gh` answers only from the case's replies, the same for every call that matches, so
   a case shows what the agent sent, not what GitHub would do with it.
+- The stub and its dummy token hold only while a session keeps the environment it is given: one that
+  unsets GH_TOKEN and GH_CONFIG_DIR and runs the real `gh` by its path reaches the user's own `gh`
+  login, since HOME stays the user's, which Claude Code needs.
 - Sessions drawn in parallel share `/tmp`: a body or message file an agent writes at a fixed path
   there, such as `/tmp/pr-body.md`, can be overwritten by another session drawn at the same time, so a
   sample can record the other session's text.
