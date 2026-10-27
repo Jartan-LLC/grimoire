@@ -9,7 +9,12 @@ from . import gh_stub, trace
 from .cache import Sample
 from .suite import BRIEF, REPORT, Case, Check, Reference
 
-BODY_FLAGS = ("--body", "-b")
+# `-b` is `--body` only for these: `pr checkout -b` and `browse -b` name a branch.
+SHORT_BODY = {("pr", c) for c in ("create", "edit", "comment", "review", "merge")} | {
+    ("issue", c) for c in ("create", "edit", "comment")
+}
+# `api`'s fields; a `-F`/`--field` value `@path` is a file, which the stub reads.
+API_FIELDS = ("-f", "--raw-field", "-F", "--field")
 
 
 class Uncollected(Exception):  # noqa: N818 -- reads as the condition, like StopIteration
@@ -47,10 +52,36 @@ def text_of(outputs: Outputs, artifact: str) -> str:
     return outputs.files.get(artifact.removeprefix("file:"), "")
 
 
+def _command(argv: Sequence[str]) -> tuple[str, ...]:
+    """The call's command and subcommand (`pr`, `create`), past any `-R`/`--repo` and flag."""
+    words: list[str] = []
+    after_repo = False
+    for arg in argv:
+        if after_repo or arg.startswith("-"):
+            after_repo = arg in ("-R", "--repo")
+            continue
+        words.append(arg)
+    return tuple(words[:2])
+
+
+def _inline_bodies(argv: Sequence[str]) -> list[str]:
+    """The bodies a call passes as arguments: `--body`, `-b` where it means that, `api`'s `body=`."""
+    command = _command(argv)
+    flags = ("--body", "-b") if command in SHORT_BODY else ("--body",)
+    found = [value for _, value in gh_stub.flag_values(argv, flags)]
+    if command[:1] == ("api",):
+        for flag, value in gh_stub.flag_values(argv, API_FIELDS):
+            key, eq, text = value.partition("=")
+            if key == "body" and eq and not (flag in gh_stub.FIELD_FLAGS and text.startswith("@")):
+                found.append(text)
+    return found
+
+
 def gh_text(calls: Sequence[dict[str, object]]) -> str:
     """The calls the sandbox's `gh` recorded, one `gh <call_line>` line each, then their bodies.
 
-    The bodies are each call's `--body` or `-b` text, stdin and body files, newlines kept.
+    The bodies are each call's `--body`, `-b` where it means that and `api` `body=` field
+    texts, then its stdin and body files, newlines kept.
     """
     lines: list[str] = []
     bodies: list[str] = []
@@ -58,7 +89,7 @@ def gh_text(calls: Sequence[dict[str, object]]) -> str:
         argv = cast("list[str]", call.get("argv", []))
         files = cast("dict[str, str]", call.get("files", {}))
         lines.append(f"gh {gh_stub.call_line(argv)}")
-        inline = [value for _, value in gh_stub.flag_values(argv, BODY_FLAGS)]
+        inline = _inline_bodies(argv)
         bodies += [t for t in (*inline, str(call.get("stdin", "")), *files.values()) if t.strip()]
     return "\n\n".join(["\n".join(lines), *bodies]) if calls else ""
 

@@ -124,6 +124,29 @@ def test_the_gh_artifact_keeps_a_multi_line_body_off_the_call_lines() -> None:
     assert gh.endswith(f"\n\n{body}\n\nSecond")
 
 
+@pytest.mark.parametrize(
+    ("argv", "bodies"),
+    [
+        (
+            ["api", "x", "-f", "body=Raw", "-F", "body=Typed", "--raw-field=body=Long"],
+            ["Raw", "Typed", "Long"],
+        ),
+        (["api", "x", "-F", "body=@b.md", "-f", "event=COMMENT", "--field", "body"], []),
+        (["api", "x", "-f", "body=@kept"], ["@kept"]),
+        (["pr", "-R", "o/r", "comment", "7", "-b", "Short"], ["Short"]),
+        (["issue", "edit", "7", "--body", "Long", "-b=Short"], ["Long", "Short"]),
+        (["pr", "checkout", "7", "-b", "local"], []),
+        (["browse", "-b", "main"], []),
+        (["pr", "create", "-f", "body=x"], []),
+    ],
+)
+def test_the_gh_artifact_takes_a_body_only_where_the_flag_means_one(
+    argv: list[str], bodies: list[str]
+) -> None:
+    gh = grade.gh_text([{"argv": argv, "stdin": "", "files": {}}])
+    assert gh.split("\n\n")[1:] == bodies
+
+
 def test_a_brief_check_reads_every_prompt_the_main_thread_sent_its_agent() -> None:
     parsed = trace.parse(
         [
