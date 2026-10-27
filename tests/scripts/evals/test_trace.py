@@ -325,6 +325,22 @@ def test_classify_catches_a_private_path_written_with_a_doubled_slash() -> None:
     ]
 
 
+def test_classify_matches_a_private_path_only_whole() -> None:
+    def reasons(command: str, private: list[str]) -> list[str]:
+        events = [init(), call("r1", "Bash", command=command), result_of("r1"), RESULT]
+        parsed = trace.parse(events, PLUGINS)
+        return trace.classify(parsed, PLUGINS, MODEL, False, private, arms="/store/arms")[0]
+
+    worktree, sandbox = "/t/grimoire", "/t/grimoire-eval-x"
+    assert reasons(f"cat {sandbox}/repo/a.md {worktree}.bak", [worktree]) == []
+    assert reasons(f"cat {worktree}/a.md", [f"{sandbox}/gh-stub"]) == []
+    for named in (worktree, f"{worktree}/key.toml", f"cd {worktree};ls", f"PATH={worktree}:/bin"):
+        assert reasons(named, [worktree]) == [f"the session reached {worktree}"]
+    stub = f"{sandbox}/gh-stub"
+    assert reasons(f"cat {stub}-x {stub}s", [stub]) == []
+    assert reasons(f"ls {stub}", [stub]) == [f"the session reached {stub}"]
+
+
 def test_classify_excludes_a_session_that_reached_the_gh_stubs_replies() -> None:
     private = ["/checkout", "/sandbox/gh", "gh-stub-replies.json"]
 

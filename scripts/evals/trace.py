@@ -375,7 +375,10 @@ def classify(  # noqa: PLR0913 -- `arms` is apart from `private`: paths under it
         for tool_input in trace.tool_inputs
         for text in _strings(json.loads(tool_input))
     ]
-    if touched := sorted({p for p in private for text in outside if p in text}):
+    # A private path counts only whole, not followed by a character that continues a file
+    # name: a worktree at /tmp/grimoire is not named by the sandbox /tmp/grimoire-eval-x.
+    bounded = {p: re.compile(re.escape(p) + r"(?![\w.~-])") for p in private}
+    if touched := sorted({p for p, at in bounded.items() for text in outside if at.search(text)}):
         reasons.append(f"the session reached {', '.join(touched)}")
     spoiled = ""
     result = trace.result
