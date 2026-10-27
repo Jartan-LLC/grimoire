@@ -295,23 +295,23 @@ def parse(
 SPOILING_RESULTS = ("error_max_turns", "error_max_budget_usd")
 
 
-def _outside_arms(text: str, plugin_dirs: dict[str, str]) -> str:
-    for directory in plugin_dirs.values():
-        text = text.replace(directory, "")
-    return text
-
-
-def classify(
-    trace: Trace, plugin_dirs: dict[str, str], model: str, timed_out: bool, private: list[str]
+def classify(  # noqa: PLR0913 -- `arms` is apart from `private`: paths under it may be read
+    trace: Trace,
+    plugin_dirs: dict[str, str],
+    model: str,
+    timed_out: bool,
+    private: list[str],
+    *,
+    arms: str,
 ) -> tuple[list[str], str]:
     """Why a sample must be excluded, and how the arm spoiled it; both empty for a clean sample.
 
     Excluded (the infrastructure failed, so the sample says nothing about the arm):
     plugins other than the arm's at the arm's paths, an MCP server, an auto-memory
     path, another model, an error result, a crash before the result, or a tool call
-    naming one of the `private` paths, which hold the suite and its answers. A path in
-    one of the arm's plugin directories does not count: the store that holds the arms
-    is in the clone's git directory, inside the main checkout.
+    naming one of the `private` paths, which hold the suite and its answers. A path under
+    `arms`, the directory holding every arm, does not count: the store that holds it is
+    in the clone's git directory, inside the main checkout.
     Spoiled (the arm's own doing, so the sample counts and fails every check): a
     timeout, or a result cut off by the turn or budget cap.
     """
@@ -331,7 +331,7 @@ def classify(
         reasons.append(f"memory loaded: {trace.init.get('memory_paths')}")
     if trace.init.get("model") != model:
         reasons.append(f"model {trace.init.get('model')!r} is not {model!r}")
-    outside = [_outside_arms(text, plugin_dirs) for text in trace.tool_inputs]
+    outside = [text.replace(arms, "") for text in trace.tool_inputs]
     if touched := sorted({p for p in private for text in outside if p in text}):
         reasons.append(f"the session reached {', '.join(touched)}")
     spoiled = ""

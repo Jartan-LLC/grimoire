@@ -231,7 +231,9 @@ def _session(
         loaded = preloads(debug_log.read_text(errors="replace")) if debug_log.is_file() else []
         parsed = trace.parse(trace.load(out), arm.plugins, loaded)
         private = [str(spec.checkout), str(case.path.parent.parent), str(spec.store / "samples")]
-        reasons, spoiled = trace.classify(parsed, arm.plugins, spec.model, timed_out, private)
+        reasons, spoiled = trace.classify(
+            parsed, arm.plugins, spec.model, timed_out, private, arms=str(spec.store / "arms")
+        )
         result = parsed.result or {}
         files = {p: (repo / p).read_text() for p in case.files() if (repo / p).is_file()}
         sample = cache.Sample(

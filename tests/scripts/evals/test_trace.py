@@ -216,7 +216,9 @@ def test_parse_reads_hook_context_and_compactions() -> None:
 
 
 def classify(events: list[trace.Event], timed_out: bool = False) -> tuple[list[str], str]:
-    return trace.classify(trace.parse(events, PLUGINS), PLUGINS, MODEL, timed_out, ["/checkout"])
+    return trace.classify(
+        trace.parse(events, PLUGINS), PLUGINS, MODEL, timed_out, ["/checkout"], arms="/store/arms"
+    )
 
 
 def test_classify_passes_a_clean_session() -> None:
@@ -248,8 +250,9 @@ def test_classify_excludes_a_session_that_reached_the_suite() -> None:
     assert classify(events) == (["the session reached /checkout"], "")
 
 
-def test_classify_lets_a_session_read_its_arms_plugins_inside_the_checkout() -> None:
-    plugins = {"gitwise": "/checkout/.git/grimoire-evals/arms/old-1/plugins/gitwise"}
+def test_classify_lets_a_session_read_any_arm_inside_the_checkout() -> None:
+    arms = "/checkout/.git/grimoire-evals/arms"
+    plugins = {"gitwise": f"{arms}/old-1/plugins/gitwise"}
     skill_file = plugins["gitwise"] + "/skills/commit-pr-writing/SKILL.md"
     events = [
         init(plugins=[{"name": "gitwise", "path": plugins["gitwise"]}]),
@@ -257,14 +260,18 @@ def test_classify_lets_a_session_read_its_arms_plugins_inside_the_checkout() -> 
         result_of("r1"),
         RESULT,
     ]
-    parsed = trace.parse(events, plugins)
-    assert trace.classify(parsed, plugins, MODEL, False, ["/checkout"]) == ([], "")
-    events[1] = call("r1", "Bash", command=f"cat {skill_file} /checkout/tests/evals/x/key.toml")
-    parsed = trace.parse(events, plugins)
-    assert trace.classify(parsed, plugins, MODEL, False, ["/checkout"]) == (
-        ["the session reached /checkout"],
-        "",
-    )
+
+    def reasons(command: str | None = None) -> list[str]:
+        if command is not None:
+            events[1] = call("r1", "Bash", command=command)
+        parsed = trace.parse(events, plugins)
+        return trace.classify(parsed, plugins, MODEL, False, ["/checkout"], arms=arms)[0]
+
+    assert reasons() == []
+    assert reasons(f"ls {arms}/old-1/plugins {arms}/old-1 {arms}/new-2/plugins/gitwise") == []
+    assert reasons(f"cat {skill_file} /checkout/tests/evals/x/key.toml") == [
+        "the session reached /checkout"
+    ]
 
 
 def test_classify_excludes_an_error_result_and_marks_caps_and_timeouts_as_spoiled() -> None:
