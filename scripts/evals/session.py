@@ -224,17 +224,25 @@ def new_commits(repo: pathlib.Path, env: dict[str, str], fixture_heads: list[str
 
 
 def private_paths(case: Case, spec: Spec) -> list[str]:
-    """The paths a session must not name: the checkout, the main working tree, suite and samples.
+    """The paths a session must not name: the checkout, every working tree of its clone, suite and samples.
 
-    From a worktree, the main working tree holds the same suite and its answers.
+    The clone's other working trees, the main one and each sibling worktree, hold the
+    same suite and its answers.
     """
-    main_tree = cache.common_dir(spec.checkout).parent
-    return [
-        str(spec.checkout),
-        str(main_tree),
-        str(case.path.parent.parent),
-        str(spec.store / "samples"),
+    listed = run(
+        [GIT, "worktree", "list", "--porcelain"],
+        cwd=spec.checkout, capture_output=True, text=True, check=True,
+    ).stdout  # fmt: skip
+    trees = [
+        line.removeprefix("worktree ")
+        for line in listed.splitlines()
+        if line.startswith("worktree ")
     ]
+    return list(
+        dict.fromkeys(
+            [str(spec.checkout), *trees, str(case.path.parent.parent), str(spec.store / "samples")]
+        )
+    )
 
 
 def _session(

@@ -291,18 +291,22 @@ def test_a_samples_key_holds_its_arms_name_screen_and_runner(
     assert len(keys) == 4
 
 
-def test_private_paths_from_a_worktree_hold_the_main_working_tree(tmp_path: pathlib.Path) -> None:
+def test_private_paths_from_a_worktree_hold_every_working_tree_of_the_clone(
+    tmp_path: pathlib.Path,
+) -> None:
     env = session.git_env(dict(os.environ))
-    clone, worktree = tmp_path / "clone", tmp_path / "worktree"
+    clone, worktree, sibling = tmp_path / "clone", tmp_path / "worktree", tmp_path / "sibling"
     run([GIT, "init", "-q", "-b", "main", str(clone)], env=env, check=True)
     run([GIT, "commit", "-q", "--allow-empty", "-m", "start"], cwd=clone, env=env, check=True)
-    run([GIT, "worktree", "add", "-q", str(worktree)], cwd=clone, env=env, check=True)
+    for tree in (worktree, sibling):
+        run([GIT, "worktree", "add", "-q", "--detach", str(tree)], cwd=clone, env=env, check=True)
     case = load_suite(write_suite(worktree / "tests" / "evals" / "x")).cases[0]
     store = clone.resolve() / ".git" / "grimoire-evals"
-    spec = session.Spec("m", "v", 1.0, worktree, store)
+    spec = session.Spec("m", "v", 1.0, worktree.resolve(), store)
     assert session.private_paths(case, spec) == [
-        str(worktree),
+        str(worktree.resolve()),
         str(clone.resolve()),
+        str(sibling.resolve()),
         str(worktree / "tests" / "evals" / "x"),
         str(store / "samples"),
     ]
