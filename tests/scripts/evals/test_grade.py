@@ -128,6 +128,19 @@ def test_the_gh_artifact_keeps_a_multi_line_body_off_the_call_lines() -> None:
     assert gh.split("\n")[0] == "gh pr create --body Fixes it.\\n\\nCloses #42 --draft"
 
 
+def test_a_check_on_a_flag_reads_the_call_lines_only_in_the_call_line_form() -> None:
+    quoting = "Open it as a draft:\ngh pr create --draft --fill\n"
+    call: dict[str, object] = {"argv": ["pr", "create", "-F", "b.md"], "stdin": ""}
+    gh = grade.gh_text([{**call, "files": {"b.md": quoting}}])
+    caret = Check("m", "gh", r"^gh pr create .*--draft", None)
+    call_lines = Check("m", "gh", r"\A(?:.+\n)*gh pr create .*--draft", None)
+    assert grade.text_score(caret, gh) == 1.0
+    assert grade.text_score(call_lines, gh) == 0.0
+    view: dict[str, object] = {"argv": ["pr", "view", "7"], "stdin": "", "files": {}}
+    made = grade.gh_text([view, {**view, "argv": ["pr", "create", "--draft", "--fill"]}])
+    assert grade.text_score(call_lines, made) == 1.0
+
+
 BODY = "Fixes the quoting.\nCloses #42"
 # Each way gh takes a body: inline, from a file `f`, or from stdin.
 FORMS = [

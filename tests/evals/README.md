@@ -171,16 +171,18 @@ the PR how many versions you screened.
   argument and its tails (past each leading letter of a short flag or a group of them, `-bText` or
   `-dFbody.md`; past a key's `=`, `--body=Text` or `body=@b.md`; past a leading `@`), stdin, and every
   existing regular file one of those names. It holds more than the bodies, titles and `--jq` strings
-  included, so a `present` check on a body can be met by a title or by another call's text, and a check
-  about one flag or command anchors on the call line (`^gh pr create .*--draft`). The stub reads a file
-  only inside the sandbox, the eval runner's temp directory or `/tmp`, where an agent may write
-  `/tmp/pr-body.md`: a body file elsewhere reads as absent. It reads no file or stdin of a call with an
-  argument equal to `secret`, `variable` or `auth` anywhere, a label included (`--label auth`): such a
-  call is recorded with no file or stdin text. The calls Claude Code makes on its own
+  included, so a `present` check on a body can be met by a title or by another call's text. A check
+  about one flag or command reads only the call lines, up to the first blank line, with the form
+  `present = '\A(?:.+\n)*gh pr create .*--draft'`: checks match line by line, so `^` alone also
+  reaches the texts after the blank line, a body that quotes `gh pr create --draft` included. The stub
+  reads a file only inside the sandbox, the eval runner's temp directory or `/tmp`, where an agent may
+  write `/tmp/pr-body.md`: a body file elsewhere reads as absent. It reads no file or stdin of a call
+  with an argument equal to `secret`, `variable` or `auth` anywhere, a label included (`--label auth`):
+  such a call is recorded with no file or stdin text. The calls Claude Code makes on its own
   (`gh pr view --json url` and `gh pr view <branch> --json url` on 2.1.311) are left out, so no check
   grades them. A reference gives it as `gh = "text"`. The lint fails a `gh` check on a case without a
-  remote. For "made no such call", which holds when the agent made no call at all, use
-  `present = '\A(?!(?:.+\n)*gh pr ready)'`: it reads the call lines, up to the first blank line.
+  remote. For "made no such call", which holds when the agent made no call at all, negate the same
+  form: `present = '\A(?!(?:.+\n)*gh pr ready)'`.
 - **Judges are not built yet.** When a check cannot decide, a judge will answer one yes/no question about
   one output, with the reference answer, outputs stripped of skill and arm names, and "unknown" counted
   as a fail; and it will be calibrated first, against outputs the maintainer labelled.
