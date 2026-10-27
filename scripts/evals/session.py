@@ -212,6 +212,20 @@ def new_commits(repo: pathlib.Path, env: dict[str, str], fixture_heads: list[str
     return [m.strip() for m in out.split("\x1e") if m.strip()]
 
 
+def private_paths(case: Case, spec: Spec) -> list[str]:
+    """The paths a session must not name: the checkout, the main working tree, suite and samples.
+
+    From a worktree, the main working tree holds the same suite and its answers.
+    """
+    main_tree = cache.common_dir(spec.checkout).parent
+    return [
+        str(spec.checkout),
+        str(main_tree),
+        str(case.path.parent.parent),
+        str(spec.store / "samples"),
+    ]
+
+
 def _session(
     case: Case, arm: Arm, index: int, spec: Spec, sample_key: str
 ) -> tuple[cache.Sample, str]:
@@ -250,7 +264,7 @@ def _session(
         text = out.read_text()
         loaded = preloads(debug_log.read_text(errors="replace")) if debug_log.is_file() else []
         parsed = trace.parse(trace.load(out), arm.plugins, loaded)
-        private = [str(spec.checkout), str(case.path.parent.parent), str(spec.store / "samples")]
+        private = private_paths(case, spec)
         reasons, spoiled = trace.classify(
             parsed, arm.plugins, spec.model, timed_out, private, arms=str(spec.store / "arms")
         )

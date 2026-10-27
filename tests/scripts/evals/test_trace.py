@@ -274,6 +274,40 @@ def test_classify_lets_a_session_read_any_arm_inside_the_checkout() -> None:
     ]
 
 
+def test_classify_from_a_worktree_catches_the_main_checkout_and_a_path_back_out_of_the_arms() -> (
+    None
+):
+    main = "/main"
+    arms = f"{main}/.git/grimoire-evals/arms"
+    samples = f"{main}/.git/grimoire-evals/samples"
+    private = [
+        f"{main}/.claude/worktrees/w",
+        main,
+        f"{main}/.claude/worktrees/w/tests/evals/x",
+        samples,
+    ]
+    plugins = {"gitwise": f"{arms}/old-1/plugins/gitwise"}
+
+    def reasons(command: str) -> list[str]:
+        events = [
+            init(plugins=[{"name": "gitwise", "path": plugins["gitwise"]}]),
+            call("r1", "Bash", command=command),
+            result_of("r1"),
+            RESULT,
+        ]
+        parsed = trace.parse(events, plugins)
+        return trace.classify(parsed, plugins, MODEL, False, private, arms=arms)[0]
+
+    assert reasons(f"cat {plugins['gitwise']}/skills/s/SKILL.md {arms}/new-2/plugins") == []
+    assert reasons(f"cat {main}/tests/evals/x/cases/c1/reference/pass.toml") == [
+        "the session reached /main"
+    ]
+    assert reasons(f'ls "{arms}/../samples"') == [f"the session reached /main, {samples}"]
+    assert reasons(f"ls {arms}/./old-1/../../samples/k.json.gz") == [
+        f"the session reached /main, {samples}"
+    ]
+
+
 def test_classify_excludes_an_error_result_and_marks_caps_and_timeouts_as_spoiled() -> None:
     limit = RESULT | {
         "is_error": True,

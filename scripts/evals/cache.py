@@ -21,15 +21,20 @@ from .proc import GIT, run
 STORE = "GRIMOIRE_EVALS_STORE"
 
 
-def root(checkout: pathlib.Path) -> pathlib.Path:
-    """The store: `$GRIMOIRE_EVALS_STORE`, else `grimoire-evals/` in `checkout`'s git common directory."""
-    if override := os.environ.get(STORE):
-        return pathlib.Path(override)
+def common_dir(checkout: pathlib.Path) -> pathlib.Path:
+    """The git directory every worktree of `checkout`'s clone shares, absolute."""
     common = run(
         [GIT, "rev-parse", "--path-format=absolute", "--git-common-dir"],
         cwd=checkout, capture_output=True, text=True, check=True,
     ).stdout.strip()  # fmt: skip
-    return pathlib.Path(common) / "grimoire-evals"
+    return pathlib.Path(common)
+
+
+def root(checkout: pathlib.Path) -> pathlib.Path:
+    """The store: `$GRIMOIRE_EVALS_STORE`, else `grimoire-evals/` in `checkout`'s git common directory."""
+    if override := os.environ.get(STORE):
+        return pathlib.Path(override)
+    return common_dir(checkout) / "grimoire-evals"
 
 
 def key(case_hash: str, arm_hash: str, model: str, version: str, index: int) -> str:

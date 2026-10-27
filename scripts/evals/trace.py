@@ -19,6 +19,7 @@ agent's frontmatter preloads reach no event: Claude Code's debug log names them,
 
 import json
 import pathlib
+import posixpath
 import re
 from collections.abc import Sequence
 from dataclasses import dataclass, field
@@ -38,6 +39,9 @@ WRITES = (
     ("pr", re.compile(r"\bgh\s+pr\s+(create|edit|review)\b")),
     ("issue", re.compile(r"\bgh\s+issue\s+(create|comment)\b")),
 )
+
+# An absolute path in a tool call's input, so `..` in it can be resolved away.
+_PATH = re.compile(r"""(?<![\w.~-])/[^\s"'`;|&<>()]+""")
 
 type Event = dict[str, object]
 
@@ -298,6 +302,11 @@ def parse(
 SPOILING_RESULTS = ("error_max_turns", "error_max_budget_usd")
 
 
+def _normalised(text: str) -> str:
+    """`text` with each absolute path holding a `.` or `..` step written without it."""
+    return _PATH.sub(lambda m: posixpath.normpath(m[0]) if "/." in m[0] else m[0], text)
+
+
 def classify(  # noqa: PLR0913 -- `arms` is apart from `private`: paths under it may be read
     trace: Trace,
     plugin_dirs: dict[str, str],
@@ -314,7 +323,8 @@ def classify(  # noqa: PLR0913 -- `arms` is apart from `private`: paths under it
     path, another model, an error result, a crash before the result, or a tool call
     naming one of the `private` paths, which hold the suite and its answers. A path under
     `arms`, the directory holding every arm, does not count: the store that holds it is
-    in the clone's git directory, inside the main checkout.
+    in the clone's git directory, inside the main checkout. A path's `..` steps are
+    resolved first, so `<arms>/../samples` names the samples.
     Spoiled (the arm's own doing, so the sample counts and fails every check): a
     timeout, or a result cut off by the turn or budget cap.
     """
@@ -334,7 +344,7 @@ def classify(  # noqa: PLR0913 -- `arms` is apart from `private`: paths under it
         reasons.append(f"memory loaded: {trace.init.get('memory_paths')}")
     if trace.init.get("model") != model:
         reasons.append(f"model {trace.init.get('model')!r} is not {model!r}")
-    outside = [text.replace(arms, "") for text in trace.tool_inputs]
+    outside = [_normalised(text).replace(arms, "") for text in trace.tool_inputs]
     if touched := sorted({p for p in private for text in outside if p in text}):
         reasons.append(f"the session reached {', '.join(touched)}")
     spoiled = ""
