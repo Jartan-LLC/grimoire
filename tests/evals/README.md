@@ -110,8 +110,8 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
 - **A task that pushes or calls GitHub** sets `remote = true` in the key. The session's repository then
   has an `origin`: a local bare repository holding every branch and tag the fixture and `build.py` made,
   each branch tracking it, so `git push` works, and `origin/HEAD` names `main`, as in a clone, when the
-  fixture keeps the `main` branch it starts on. To start
-  with a branch ahead of, behind or missing from `origin`, `build.py` makes `origin` itself with
+  fixture keeps the `main` branch it starts on. To start with a branch ahead of, behind or missing from
+  `origin`, `build.py` makes `origin` itself with
   `git init --bare -b <the fixture's default branch> ../origin.git`, pushes that branch, so `origin/HEAD`
   can name it, and pushes what else it wants there: the runner keeps an `origin` that `build.py` made as
   `build.py` left it, adding only `origin/HEAD` when the repository lacks it and origin's HEAD names a
@@ -164,31 +164,30 @@ the PR how many versions you screened.
 - **Whether a skill was in context when the agent wrote** is a guard or a diagnostic, not a primary
   metric, except in trigger cases, where loading the skill is the behaviour under test.
 - **A subagent's work:** `report:<agent>` is every report that agent handed back, `brief:<agent>` every
-  Agent-call prompt the main thread sent that agent type (a call that ended in error aside), and a delivery check with
-  `agent = "<plugin>:<agent>"` reads that subagent's skill loads and writes instead of the main
-  thread's. A reference gives reports under `[reports]` and briefs under `[briefs]`, as
+  Agent-call prompt the main thread sent that agent type (a call that ended in error aside), and a
+  delivery check with `agent = "<plugin>:<agent>"` reads that subagent's skill loads and writes instead
+  of the main thread's. A reference gives reports under `[reports]` and briefs under `[briefs]`, as
   `"<plugin>:<agent>" = "text"`.
 - **What the agent sent to GitHub:** `gh` is every call the stub recorded, one `gh <arguments>` line each
   with newlines written as `\n`, then a blank line, then every text the calls passed, newlines kept: each
   argument and its tails (past each leading letter of a short flag or a group of them, `-bText` or
   `-dFbody.md`; past a key's `=`, `--body=Text` or `body=@b.md`; past a leading `@`), stdin, and every
   existing regular file one of those names. It holds more than the bodies, titles and `--jq` strings
-  included, so a `present` check on a body can be met by a title or by another call's text. A check
-  about one flag or command reads only the call lines, up to the first blank line, with the form
-  `present = '\A(?:.+\n)*gh pr create .*--draft'`: checks match line by line, so `^` alone also
-  reaches the texts after the blank line, a body that quotes `gh pr create --draft` included. An
-  inline body stays on its own call line, so a body passed as `--body "... --draft ..."` can still
-  meet that form. The stub
-  reads a file only inside the sandbox, the eval runner's temp directory or `/tmp`, where an agent may
-  write `/tmp/pr-body.md`: a body file elsewhere reads as absent. It reads stdin whenever an argument
-  or a tail of one is exactly `-`, a key's value included (`-f q=-`), where gh would not, so such a
-  call waits while stdin stays open. It reads no file or stdin of a call with an argument equal to
-  `secret`, `variable` or `auth` anywhere, a label included (`--label auth`):
-  such a call is recorded with no file or stdin text. The calls Claude Code makes on its own
-  (`gh pr view --json url` and `gh pr view <branch> --json url` on 2.1.311) are left out, so no check
-  grades them. A reference gives it as `gh = "text"`. The lint fails a `gh` check on a case without a
-  remote. For "made no such call", which holds when the agent made no call at all, negate the same
-  form: `present = '\A(?!(?:.+\n)*gh pr ready)'`.
+  included, so a `present` check on a body can be met by a title or by another call's text. A check about
+  one flag or command reads only the call lines, up to the first blank line, with the form
+  `present = '\A(?:.+\n)*gh pr create .*--draft'`: checks match line by line, so `^` alone also reaches
+  the texts after the blank line, a body that quotes `gh pr create --draft` included. An inline body
+  stays on its own call line, so a body passed as `--body "... --draft ..."` can still meet that form.
+  The stub reads a file only inside the sandbox, the eval runner's temp directory or `/tmp`, where an
+  agent may write `/tmp/pr-body.md`: a body file elsewhere reads as absent. It reads stdin whenever an
+  argument or a tail of one is exactly `-`, a key's value included (`-f q=-`), where gh would not, so
+  such a call waits while stdin stays open. It reads no file or stdin of a call with an argument equal to
+  `secret`, `variable` or `auth` anywhere, a label included (`--label auth`): such a call is recorded
+  with no file or stdin text. The calls Claude Code makes on its own (`gh pr view --json url` and
+  `gh pr view <branch> --json url` on 2.1.311) are left out, so no check grades them. A reference gives
+  it as `gh = "text"`. The lint fails a `gh` check on a case without a remote. For "made no such call",
+  which holds when the agent made no call at all, negate the same form:
+  `present = '\A(?!(?:.+\n)*gh pr ready)'`.
 - **Judges are not built yet.** When a check cannot decide, a judge will answer one yes/no question about
   one output, with the reference answer, outputs stripped of skill and arm names, and "unknown" counted
   as a fail; and it will be calibrated first, against outputs the maintainer labelled.
