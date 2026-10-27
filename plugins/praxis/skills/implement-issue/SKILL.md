@@ -20,7 +20,7 @@ Determine the issue number from the user's request, which may carry context beyo
 gh issue view <issue-number> --comments
 ```
 
-Also read `.claude/workspace/issue-<issue-number>-plan.md`, or any other plan file in `.claude/workspace/` for this issue. If no plan exists for a complex issue, suggest running `/praxis:plan-issue` first.
+Also load the `praxis:workspace-patterns` skill and read the issue's plan, `.claude/workspace/issue-<issue-number>/plan.md`, or any other plan file in the workspace for this issue. If no plan exists for a complex issue, suggest running `/praxis:plan-issue` first.
 
 ### 2. Setup Branch
 

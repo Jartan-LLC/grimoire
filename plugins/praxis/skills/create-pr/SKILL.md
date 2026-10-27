@@ -24,7 +24,7 @@ Determine the issue number from the user's request and fetch the issue with its 
 gh issue view <issue-number> --comments
 ```
 
-Also read `.claude/workspace/issue-<issue-number>-plan.md`, or any other plan file in `.claude/workspace/` for this issue.
+Also load the `praxis:workspace-patterns` skill and read the issue's plan, `.claude/workspace/issue-<issue-number>/plan.md`, or any other plan file in the workspace for this issue.
 
 ### 3. Review All Changes
 

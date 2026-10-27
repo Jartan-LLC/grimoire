@@ -46,4 +46,4 @@ Before creating the plan, think through:
 
 ### 6. Create Plan
 
-Write the plan to `.claude/workspace/issue-<issue-number>-plan.md` following the format in the `gitwise:github-conventions` skill (see `plan-format.md`), and tell the user its path.
+Load the `praxis:workspace-patterns` skill. Write the plan to the issue's folder in the workspace, `.claude/workspace/issue-<issue-number>/plan.md`, following the format in the `gitwise:github-conventions` skill (see `plan-format.md`), and tell the user its path.

@@ -65,6 +65,7 @@ codex plugin add gitwise@grimoire
 - **review-severity** -- Critical/Important/Minor by consequence-if-shipped
 - **testing-patterns** -- integration tests, fixture composition, canary markers
 - **voiced-writing** -- writing in a person's or a project's voice: blog posts, essays, site copy, personal writing
+- **workspace-patterns** -- where working files go: one folder per effort in the main checkout's `.claude/workspace/`, a subfolder per branch, numbered reviews; worktrees
 
 ### Hooks
 

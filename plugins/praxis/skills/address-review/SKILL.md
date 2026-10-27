@@ -16,7 +16,7 @@ Where the project's own rules say otherwise, follow them.
 
 ### 1. Load Review
 
-Determine the PR number from the user's request. Read the review in `.claude/workspace/pr-<pr-number>-review.md`, and what people have posted on the PR: its comments and reviews, and the comments on its lines, which `gh pr view` does not show:
+Determine the PR number from the user's request, and its branch (`gh pr view <pr-number> --json headRefName`). Load the `praxis:workspace-patterns` skill and read the latest review in that branch's folder in the workspace (the highest-numbered `<n>.md`), and what people have posted on the PR: its comments and reviews, and the comments on its lines, which `gh pr view` does not show:
 
 ```bash
 gh pr view <pr-number> --comments
