@@ -161,7 +161,8 @@ class Case:
     def hash(self) -> str:
         """What a session depends on, as on disk now: prompt, fixture, build script, not the key.
 
-        A `remote` case's `gh` replies count too: the session reads them.
+        A `remote` case's `gh` replies count too, as loaded from the key, not as on disk now:
+        the session reads them.
         """
         inputs = [self.path / "prompt.md", self.path / "build.py"]
         fixture = self.path / "fixture"
