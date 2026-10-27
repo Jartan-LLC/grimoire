@@ -194,6 +194,20 @@ def test_an_absent_gh_check_fails_when_only_claude_code_called_gh(tmp_path: path
     assert grade.scores(case, drawn, parsed)["kept"] == 1.0
 
 
+def test_a_present_or_absent_gh_check_reads_none_of_claude_codes_own_calls() -> None:
+    own: list[dict[str, object]] = [
+        {"argv": ["pr", "view", "--json", "url"], "stdin": "", "files": {}}
+    ]
+    agent: list[dict[str, object]] = [
+        *own,
+        {"argv": ["pr", "create", "--body", "Closes #42"], "stdin": "", "files": {}},
+    ]
+    present = Check("m", "gh", r"^gh pr view", None)
+    assert grade.check_score(present, grade.Outputs(gh=grade.gh_text(own))) == 0.0
+    absent = Check("m", "gh", None, r"--json url")
+    assert grade.check_score(absent, grade.Outputs(gh=grade.gh_text(agent))) == 1.0
+
+
 @pytest.mark.parametrize(
     "line",
     ["gh pr view 7 --json url", "gh pr view --json url,title", "gh pr view -R o/r b --json url"],

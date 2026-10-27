@@ -135,23 +135,23 @@ def briefs_of(parsed: trace.Trace) -> dict[str, str]:
     return _by_agent((b.agent, b.text) for b in parsed.briefs)
 
 
-def text_score(check: Check, text: str, produced: str | None = None) -> float:
+def text_score(check: Check, text: str) -> float:
     """1.0 when a text check holds.
 
     An `absent` check fails when the agent produced nothing: it did not keep the thing
-    out, it skipped the task. `produced` is the agent's part of `text`, when not all of it.
+    out, it skipped the task.
     """
     if check.present is not None:
         return 1.0 if re.search(check.present, text, re.MULTILINE) else 0.0
-    if not (text if produced is None else produced).strip():
+    if not text.strip():
         return 0.0
     return 0.0 if re.search(str(check.absent), text, re.MULTILINE) else 1.0
 
 
 def check_score(check: Check, outputs: Outputs) -> float:
-    """A text check's score on `outputs`; for `gh`, only the agent's calls count as produced."""
+    """A text check's score on `outputs`; a `gh` check reads only the agent's calls (`agents_gh`)."""
     text = text_of(outputs, check.artifact)
-    return text_score(check, text, agents_gh(text) if check.artifact == "gh" else None)
+    return text_score(check, agents_gh(text) if check.artifact == "gh" else text)
 
 
 def delivery_score(check: Check, parsed: trace.Trace) -> float:

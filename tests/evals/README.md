@@ -166,13 +166,10 @@ the PR how many versions you screened.
   `"<plugin>:<agent>" = "text"`.
 - **What the agent sent to GitHub:** `gh` is every call the stub recorded, one `gh <arguments>` line each
   with newlines written as `\n`, then the text of each `--body` (and `-b` where it means `--body`),
-  `gh release` `--notes` or `-n`, `gh api` `body=` field, body file or stdin they passed. It holds calls Claude Code makes on its own
-  too (`gh pr view --json url` and `gh pr view <branch> --json url` on 2.1.311), so no check, `present`
-  or `absent`, may match those: anchor the regex on the agent's own arguments
-  (`^gh pr view \d+ --comments`), not on the subcommand alone. Whether the agent produced anything,
-  which an `absent` check needs, is judged on the text without those two calls. A reference gives it
-  as `gh = "text"`.
-  The lint fails a `gh` check on a case without a remote.
+  `gh release` `--notes` or `-n`, `gh api` `body=` field, body file or stdin they passed. The calls
+  Claude Code makes on its own (`gh pr view --json url` and `gh pr view <branch> --json url` on
+  2.1.311) are left out, so no check grades them. A reference gives it as `gh = "text"`. The lint fails
+  a `gh` check on a case without a remote.
 - **Judges are not built yet.** When a check cannot decide, a judge will answer one yes/no question about
   one output, with the reference answer, outputs stripped of skill and arm names, and "unknown" counted
   as a fail; and it will be calibrated first, against outputs the maintainer labelled.
