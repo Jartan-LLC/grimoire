@@ -409,7 +409,7 @@ def preflight() -> None:
 def run_sample(
     case: Case, arm: Arm, index: int, spec: Spec, breaker: Breaker | None = None
 ) -> cache.Sample:
-    """The cached sample for (case, arm, model, version, index), running the session if missing.
+    """The stored sample for (case, arm, model, version, index), running the session if missing.
 
     An excluded sample (the infrastructure failed: a usage limit, a leaked setting, a
     session that reached the suite's files) is retried up to RETRIES times and kept

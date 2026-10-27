@@ -81,7 +81,7 @@ def _paths(store: pathlib.Path, sample_key: str) -> tuple[pathlib.Path, pathlib.
 
 
 def load(store: pathlib.Path, sample_key: str) -> Sample | None:
-    """The cached sample, or None."""
+    """The stored sample, or None."""
     path, _ = _paths(store, sample_key)
     if not path.is_file():
         return None
@@ -105,5 +105,5 @@ def save(store: pathlib.Path, sample: Sample, trace_text: str) -> None:
 
 
 def read_events(store: pathlib.Path, sample_key: str) -> str:
-    """The raw trace text of a cached sample."""
+    """The raw trace text of a stored sample."""
     return gzip.decompress(events_path(store, sample_key).read_bytes()).decode()

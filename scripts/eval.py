@@ -132,7 +132,7 @@ def run_samples(work: list[Work], jobs: int) -> list[cache.Sample]:
 
 
 def parsed_trace(store: pathlib.Path, sample: cache.Sample) -> trace.Trace:
-    """The cached sample's trace, read with the skills its agents preloaded."""
+    """The stored sample's trace, read with the skills its agents preloaded."""
     preloads = [(agent, skill) for agent, skill in sample.preloads or []]
     return trace.parse(
         trace.load_text(cache.read_events(store, sample.key)), sample.plugins, preloads
@@ -540,7 +540,7 @@ def show(key: str, store: pathlib.Path) -> int:
     """Print one sample: commits, final reply, graded files, gh calls, deliveries, writes, briefs, reports, hooks."""
     sample = cache.load(store, key)
     if sample is None:
-        raise SystemExit(f"no cached sample {key}")
+        raise SystemExit(f"no stored sample {key}")
     print(
         f"{sample.arm} {sample.case} #{sample.index} valid={sample.valid} spoiled={sample.spoiled or '-'} {sample.reasons}"
     )
