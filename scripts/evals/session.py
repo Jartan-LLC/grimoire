@@ -50,6 +50,7 @@ RUNNER = 2
 REMOTE_RUNNER = 1
 PRELOADED = re.compile(r"\[Agent: ([^\]]+)\] Preloaded skill '([^']+)'")
 GH_STUB = pathlib.Path(__file__).with_name("gh_stub.py")
+GH_LOGIN = ("GH_TOKEN", "GITHUB_TOKEN", "GH_ENTERPRISE_TOKEN", "GITHUB_ENTERPRISE_TOKEN", "GH_HOST")
 
 
 @dataclass(frozen=True)
@@ -86,7 +87,9 @@ def sample_env(
     CLAUDE* variables go too: the calling session's own (CLAUDECODE and the like)
     would tell the child it runs nested, and others (CLAUDE_EFFORT) would change it.
     The login ones stay, so a token, config-dir, Bedrock or Vertex login still works.
-    With `gh_stub`, the sandbox's `bin/` comes first, so its `gh` answers every call.
+    With `gh_stub`, the sandbox's `bin/` comes first, so its `gh` answers every call, and
+    the user's gh login is gone (its token variables dropped, GH_CONFIG_DIR an empty
+    `gh-config/`), so a session that runs the real `gh` by its path reaches no account.
     """
     env = {
         k: v
@@ -105,6 +108,10 @@ def sample_env(
     env["TMPDIR"] = str(sandbox / "tmp")
     env["ENABLE_CLAUDEAI_MCP_SERVERS"] = "false"
     env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] = "1"
+    if gh_stub:
+        for name in GH_LOGIN:
+            env.pop(name, None)
+        env["GH_CONFIG_DIR"] = str(sandbox / "gh-config")
     return env
 
 
@@ -172,8 +179,12 @@ def add_origin(repo: pathlib.Path, origin: pathlib.Path, env: dict[str, str]) ->
 
 
 def install_gh(sandbox: pathlib.Path, replies: tuple[Reply, ...]) -> None:
-    """Put the recording `gh` stub in `sandbox/bin`, answering with `replies`, its log in `sandbox/gh`."""
+    """Put the recording `gh` stub in `sandbox/bin`, answering with `replies`, its log in `sandbox/gh`.
+
+    `sandbox/gh-config` is made empty, for the session's GH_CONFIG_DIR.
+    """
     (sandbox / "bin").mkdir()
+    (sandbox / "gh-config").mkdir()
     (sandbox / "gh").mkdir()
     stub = sandbox / "bin" / "gh"
     stub.write_text("#!/usr/bin/env -S python3 -I\n" + GH_STUB.read_text())

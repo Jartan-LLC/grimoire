@@ -162,14 +162,19 @@ def test_add_origin_keeps_the_origin_build_made_with_a_branch_ahead_and_one_neve
     assert listed == ["refs/heads/feature/issue-42", "refs/heads/main"]
 
 
-def test_sample_env_puts_the_gh_stub_first_only_for_a_case_that_asks(
+def test_sample_env_puts_the_gh_stub_first_and_drops_the_gh_login_only_for_a_case_that_asks(
     tmp_path: pathlib.Path,
 ) -> None:
-    base = {"PATH": "/usr/bin"}
+    login = dict.fromkeys(session.GH_LOGIN, "x") | {"GH_CONFIG_DIR": "/home/u/.config/gh"}
+    base = {"PATH": "/usr/bin"} | login
     sandbox = tmp_path / "sandbox"
-    assert session.sample_env(base, tmp_path, sandbox)["PATH"] == f"{sandbox}/venv/bin:/usr/bin"
+    plain = session.sample_env(base, tmp_path, sandbox)
+    assert plain["PATH"] == f"{sandbox}/venv/bin:/usr/bin"
+    assert {k: plain[k] for k in login} == login
     stubbed = session.sample_env(base, tmp_path, sandbox, gh_stub=True)
     assert stubbed["PATH"] == f"{sandbox}/bin:{sandbox}/venv/bin:/usr/bin"
+    assert stubbed["GH_CONFIG_DIR"] == f"{sandbox}/gh-config"
+    assert not any(name in stubbed for name in session.GH_LOGIN)
 
 
 def limited_sample(reason: str) -> cache.Sample:
