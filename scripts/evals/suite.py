@@ -123,8 +123,10 @@ class Reference:
 class Case:
     """One case of a suite.
 
-    A `remote` case's session gets a local `origin` holding every fixture branch and a
-    `gh` that records each call and answers from the `gh` replies, first match first.
+    A `remote` case's session gets a local `origin` and a `gh` that records each call
+    and answers from the `gh` replies, first match first. The `origin` holds every
+    fixture branch when the runner makes it; a `build.py` may make its own (see
+    `session.add_origin`).
     """
 
     id: str
