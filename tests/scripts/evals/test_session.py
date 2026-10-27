@@ -27,7 +27,7 @@ def test_sample_env_isolates_git_drops_the_checkout_and_the_parent_session(
         "CLAUDE_CODE_USE_BEDROCK": "1",
         "HOME": "/home/u",
     }
-    env = session.sample_env(base, checkout, tmp_path / "sandbox")
+    env = session.sample_env(base, checkout, tmp_path / "sandbox", tmp_path / "store")
     assert "GIT_DIR" not in env
     assert "CLAUDECODE" not in env
     assert "CLAUDE_EFFORT" not in env
@@ -40,6 +40,19 @@ def test_sample_env_isolates_git_drops_the_checkout_and_the_parent_session(
     assert env["ENABLE_CLAUDEAI_MCP_SERVERS"] == "false"
     assert env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] == "1"
     assert env["HOME"] == "/home/u"
+
+
+def test_git_run_inside_an_arm_does_not_find_the_clone_holding_the_store(
+    tmp_path: pathlib.Path,
+) -> None:
+    clone = tmp_path / "clone"
+    run([GIT, "init", "-q", str(clone)], env=session.git_env(dict(os.environ)), check=True)
+    store = clone / ".git" / "grimoire-evals"
+    arm = store / "arms" / "old" / "plugins" / "gitwise"
+    arm.mkdir(parents=True)
+    env = session.sample_env(dict(os.environ), tmp_path / "checkout", tmp_path / "sandbox", store)
+    found = run([GIT, "rev-parse", "--git-dir"], cwd=arm, env=env, capture_output=True, check=False)
+    assert found.returncode != 0
 
 
 def test_claude_args_load_every_arm_plugin_and_switch_off_the_builtins() -> None:
@@ -193,10 +206,10 @@ def test_sample_env_puts_the_gh_stub_first_and_drops_the_gh_login_only_for_a_cas
     login = dict.fromkeys(session.GH_LOGIN, "x") | {"GH_CONFIG_DIR": "/home/u/.config/gh"}
     base = {"PATH": "/usr/bin"} | login
     sandbox = tmp_path / "sandbox"
-    plain = session.sample_env(base, tmp_path, sandbox)
+    plain = session.sample_env(base, tmp_path, sandbox, tmp_path / "store")
     assert plain["PATH"] == f"{sandbox}/venv/bin:/usr/bin"
     assert {k: plain[k] for k in login} == login
-    stubbed = session.sample_env(base, tmp_path, sandbox, gh_stub=True)
+    stubbed = session.sample_env(base, tmp_path, sandbox, tmp_path / "store", gh_stub=True)
     assert stubbed["PATH"] == f"{sandbox}/bin:{sandbox}/venv/bin:/usr/bin"
     assert stubbed["GH_CONFIG_DIR"] == f"{sandbox}/gh-config"
     assert not any(name in stubbed for name in session.GH_LOGIN)

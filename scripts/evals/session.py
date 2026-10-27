@@ -80,9 +80,16 @@ def git_env(base: dict[str, str]) -> dict[str, str]:
 
 
 def sample_env(
-    base: dict[str, str], checkout: pathlib.Path, sandbox: pathlib.Path, gh_stub: bool = False
+    base: dict[str, str],
+    checkout: pathlib.Path,
+    sandbox: pathlib.Path,
+    store: pathlib.Path,
+    gh_stub: bool = False,
 ) -> dict[str, str]:
     """The session's environment: git isolated, this checkout off PATH, the sample's own venv and TMPDIR.
+
+    Git run inside an arm stops at `store`, so it does not find the clone whose git
+    directory holds the store.
 
     CLAUDE* variables go too: the calling session's own (CLAUDECODE and the like)
     would tell the child it runs nested, and others (CLAUDE_EFFORT) would change it.
@@ -108,6 +115,7 @@ def sample_env(
     env["TMPDIR"] = str(sandbox / "tmp")
     env["ENABLE_CLAUDEAI_MCP_SERVERS"] = "false"
     env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] = "1"
+    env["GIT_CEILING_DIRECTORIES"] = str(store)
     if gh_stub:
         for name in GH_LOGIN:
             env.pop(name, None)
@@ -254,7 +262,9 @@ def _session(
         out = sandbox / "trace.jsonl"
         debug_log = sandbox / "debug.log"
         timed_out = False
-        session_env = sample_env(dict(os.environ), spec.checkout, sandbox, gh_stub=case.remote)
+        session_env = sample_env(
+            dict(os.environ), spec.checkout, sandbox, spec.store, gh_stub=case.remote
+        )
         with out.open("w") as handle:
             try:
                 run(
