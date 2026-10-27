@@ -299,7 +299,9 @@ sample of held-out labels and edits that count.
 2. `python3 scripts/eval.py judge-probe <suite> --judge <id>`: 5 judge and 2 labeller calls on stored
    samples, printed raw. Check that the answer parses, the response names the judge's model, and the cost.
 3. `python3 scripts/eval.py judge-label <suite> --judge <id>`: the panel labels every stored artifact the
-   judge reads (arms `old` and `none`) that has no label yet, into `judges/<id>/labels/<case>.toml`. A
+   judge reads that has no label yet, into `judges/<id>/labels/<case>.toml`. It reads the samples `make
+   eval-run` draws on arms `old` and `none` (`--arms`, `--base`), found by each case's key as it is now,
+   so a sample drawn on an older fixture, runner or Claude Code is never labelled. A
    label once written is never changed. It prints each set's count per class: until each reaches 40, draw
    more sessions (`make eval-run ... SAMPLES=` above the count drawn) and label again. `--gold` then runs
    the panel on the gold items. If it is below 0.98 right, or the printed Fleiss kappa is below 0.80, the

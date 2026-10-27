@@ -409,6 +409,24 @@ def preflight() -> None:
         )
 
 
+def key_of(case: Case, arm: Arm, index: int, spec: Spec) -> str:
+    """The key of the sample (case, arm, index) under `spec`.
+
+    RUNNER is in every key, REMOTE_RUNNER in a remote case's only, and a timeout other
+    than TIMEOUT_S in its suite's only.
+    """
+    runner = f"r{RUNNER}" + (f":g{REMOTE_RUNNER}" if case.remote else "")
+    if spec.timeout_s != TIMEOUT_S:
+        runner += f":t{spec.timeout_s:g}"
+    return cache.key(
+        case.pinned(),
+        f"{arm.name}:{arm.hash}:{spec.screen}:{runner}",
+        spec.model,
+        spec.version,
+        index,
+    )
+
+
 def run_sample(
     case: Case, arm: Arm, index: int, spec: Spec, breaker: Breaker | None = None
 ) -> cache.Sample:
@@ -426,16 +444,7 @@ def run_sample(
     remote case's only, and a timeout other than TIMEOUT_S in its suite's only, so a
     changed timeout draws new samples instead of reusing the ones it cut off.
     """
-    runner = f"r{RUNNER}" + (f":g{REMOTE_RUNNER}" if case.remote else "")
-    if spec.timeout_s != TIMEOUT_S:
-        runner += f":t{spec.timeout_s:g}"
-    sample_key = cache.key(
-        case.pinned(),
-        f"{arm.name}:{arm.hash}:{spec.screen}:{runner}",
-        spec.model,
-        spec.version,
-        index,
-    )
+    sample_key = key_of(case, arm, index, spec)
     if (cached := cache.load(spec.store, sample_key)) is not None and cached.valid:
         return cached
     if breaker is not None and breaker.tripped.is_set():

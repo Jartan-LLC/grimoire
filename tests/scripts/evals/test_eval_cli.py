@@ -573,3 +573,26 @@ def test_align_scores_held_out_once_per_version_and_burns_a_missed_one(
     assert len(calls) == before  # every answer was kept
     assert "disagrees: natural c1 old True (no, no, no): k1" in capsys.readouterr().out
     assert calibrate.read_stamp(labels.parent.parent / "stamp.toml") == stamp
+
+
+def test_stored_samples_are_found_by_the_key_the_case_has_now(tmp_path: pathlib.Path) -> None:
+    root = write_suite(tmp_path / "suite")
+    case = load_suite(root).cases[0]
+    arm = Arm("old", "h", {})
+    store = tmp_path / "store"
+    spec = session.Spec("claude-opus-5-5", "2.1.311", 1.0, tmp_path, store)
+
+    def keep(index: int, key: str) -> None:
+        sample = cache.Sample(key, "c1", "old", index, {}, True, [], [], "", {}, {})
+        cache.save(store, sample, "")
+
+    for index in (0, 1, 3, 4 + cli.MISSES):  # a gap at 2; the last lies past MISSES empty indices
+        keep(index, session.key_of(case, arm, index, spec))
+    found = cli.drawn_samples(store, lambda i: session.key_of(case, arm, i, spec))
+    assert [s.index for s in found] == [0, 1, 3]
+    # the same case drawn on its earlier fixture is not picked up once the fixture changes
+    (root / "cases" / "c1" / "fixture" / "app.py").write_text("x = 2\n")
+    changed = load_suite(root).cases[0]
+    assert cli.drawn_samples(store, lambda i: session.key_of(changed, arm, i, spec)) == []
+    other = dataclasses.replace(spec, version="2.1.312")
+    assert cli.drawn_samples(store, lambda i: session.key_of(case, arm, i, other)) == []

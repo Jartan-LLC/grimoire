@@ -26,6 +26,7 @@ Sessions use the caller's own `claude` login; nothing here runs in CI. Samples a
 import argparse
 import dataclasses
 import datetime
+import functools
 import hashlib
 import json
 import pathlib
@@ -1000,29 +1001,73 @@ class Real:
     model: str
 
 
-def real_items(suite: Suite, judge_: Judge, store: pathlib.Path, arms: list[str]) -> list[Real]:
-    """Every valid, unspoiled stored sample of a case that asks the judge, in `arms`, whose artifact is not empty.
+MISSES = 10  # indices in a row with no stored sample that end the search for more
 
-    Samples are found by case id: ids are unique across the suites sharing the store.
+
+def drawn_samples(store: pathlib.Path, key: Callable[[int], str]) -> list[cache.Sample]:
+    """The stored samples at `key(0)`, `key(1)` and on, until MISSES indices in a row hold none.
+
+    A gap (a sample a usage-limit stop never ran) does not end the search early.
     """
-    asking = {
-        c.id: (c, check) for c in suite.cases for check in c.checks if check.judge == judge_.id
-    }
-    found: list[Real] = []
-    for path in sorted((store / "samples").glob("*/*.json")):
-        sample = cache.load(store, path.stem)
-        if sample is None or not sample.valid or sample.spoiled or sample.case not in asking:
-            continue
-        if sample.arm not in arms:
-            continue
-        case, check = asking[sample.case]
-        parsed = parsed_trace(store, sample)
-        text = grade.text_of(grade.outputs_of(sample, parsed), check.artifact)
-        if text.strip():
-            agent = check.artifact.removeprefix("report:")
-            model = next((r.model for r in parsed.reports if r.agent == agent), "")
-            found.append(Real(sample, case, check, text, model))
+    found: list[cache.Sample] = []
+    index, missed = 0, 0
+    while missed < MISSES:
+        sample = cache.load(store, key(index))
+        missed = 0 if sample is not None else missed + 1
+        found += [sample] if sample is not None else []
+        index += 1
     return found
+
+
+def real_items(
+    suite: Suite, judge_: Judge, specs: list[tuple[Arm, session.Spec]], store: pathlib.Path
+) -> list[Real]:
+    """Every valid, unspoiled baseline sample of a case that asks the judge whose artifact is not empty.
+
+    Samples are found by the key each (case, arm, model) has now, as `run` draws them:
+    one drawn on an older fixture, arm, runner, model or Claude Code is never picked up.
+    """
+    found: list[Real] = []
+    for case in suite.cases:
+        check = next((c for c in case.checks if c.judge == judge_.id), None)
+        if check is None:
+            continue
+        for arm, spec in specs:
+            for sample in drawn_samples(
+                store, functools.partial(session.key_of, case, arm, spec=spec)
+            ):
+                if sample.valid and not sample.spoiled:
+                    found += _real(store, sample, case, check)
+    return found
+
+
+def _real(store: pathlib.Path, sample: cache.Sample, case: Case, check: Check) -> list[Real]:
+    """The sample as a real item, or nothing when its artifact is empty."""
+    parsed = parsed_trace(store, sample)
+    text = grade.text_of(grade.outputs_of(sample, parsed), check.artifact)
+    if not text.strip():
+        return []
+    agent = check.artifact.removeprefix("report:")
+    model = next((r.model for r in parsed.reports if r.agent == agent), "")
+    return [Real(sample, case, check, text, model)]
+
+
+def baseline_specs(
+    args: argparse.Namespace, suite: Suite, store: pathlib.Path
+) -> list[tuple[Arm, session.Spec]]:
+    """Each arm of `--arms` against `--base`, on each of the suite's models, as `run` draws them."""
+    names = args.arms.split(",")
+    if stray := [n for n in names if n not in ("old", "none")]:
+        raise SystemExit(f"--arms takes old and none, not {', '.join(stray)}")
+    version = claude_version()
+    return [
+        (
+            build_arm(name, suite, args.base, None, store),
+            session.Spec(model, version, suite.budget_usd, ROOT, store, timeout_s=suite.timeout_s),
+        )
+        for name in names
+        for model in suite.models
+    ]
 
 
 def _stripped(text: str) -> str:
@@ -1152,7 +1197,7 @@ def _judge_of(suite: Suite, judge_id: str) -> Judge:
 
 def probe(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.Path) -> int:
     """A few judge and labeller calls on stored samples, printed raw; nothing is kept."""
-    reals = real_items(suite, judge_, store, args.arms.split(","))
+    reals = real_items(suite, judge_, baseline_specs(args, suite, store), store)
     if not reals:
         raise SystemExit("no stored sample of a case that asks this judge: draw some with run")
     for real in reals[: args.calls]:
@@ -1195,7 +1240,7 @@ def label(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.
     have = {lb.id for lb in kept}
     todo = [
         r
-        for r in real_items(suite, judge_, store, args.arms.split(","))
+        for r in real_items(suite, judge_, baseline_specs(args, suite, store), store)
         if r.sample.key not in have
     ]
     print(f"{len(todo)} artifacts to label, {len(have)} labelled before", flush=True)
@@ -1316,6 +1361,7 @@ def _judge_parsers(add: Callable[[str], argparse.ArgumentParser]) -> None:
         cmd.add_argument("--judge", required=True, help="the [[judge]] id")
         cmd.add_argument("--jobs", type=int, default=8, help="calls at a time")
         cmd.add_argument("--arms", default="old,none", help="stored samples of these arms")
+        cmd.add_argument("--base", default="main", help="the arms' merge base, as for run")
         cmd.add_argument("--labeller-model", default=JUDGE_MODEL)
         cmd.add_argument("--labeller-effort", default="xhigh", choices=EFFORTS)
         if name == "judge-probe":
