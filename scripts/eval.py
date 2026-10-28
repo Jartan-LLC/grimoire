@@ -796,7 +796,9 @@ def main() -> int:
     if model not in suite.models:
         raise SystemExit(f"{model} is not one of the suite's models {list(suite.models)}")
     store = cache.root(ROOT)
-    spec = session.Spec(model, claude_version(), suite.budget_usd, ROOT, store)
+    spec = session.Spec(
+        model, claude_version(), suite.budget_usd, ROOT, store, timeout_s=suite.timeout_s
+    )
     if args.command == "screen":
         return screen(args, suite, spec, store)
     if args.arm == "new" and args.split is None:
