@@ -4,18 +4,18 @@ A stack is a chain of PRs, each based on the branch of the PR below it, linked o
 
 ## When to Stack
 
-Stack a change on an open PR when it builds on that PR's unmerged work and waiting for the merge would stall it. Keep each PR small enough to review alone, and put what a change depends on in its own branch or one below it. Changes that do not depend on each other go in separate PRs off the base branch. A stack stays within one repository: it cannot span forks.
+Stack a change on an open PR when it builds on that PR's unmerged work and waiting for the merge would stall it. Keep each PR small enough to review alone, and put what a change depends on in its own branch or one below it. Changes that do not depend on each other go in separate PRs off the base branch. A sub-issue branch is not a stack, even when its parent feature branch has an open PR: its PR merges into the parent branch and joins no stack, because linking it would make its merge also merge the parent PR. A stack stays within one repository: it cannot span forks.
 
 Every PR in a stack is held to the rules and required checks of the bottom PR's base, and workflows that run on pull requests into that branch run on every PR in the stack. A stack rooted on a branch those workflows skip, such as an integration branch, gets no CI.
 
 ## Building a Stack
 
-- Branch from the lower PR's branch and base the PR on it. Start the upper branch once the PR below has finished review: a change to the lower PR after the upper branch exists means rebasing every branch above it ([Updating a Stack](#updating-a-stack)). While the PR below is still in review, stack on it only when waiting would stall the work, and tell the user that each change to it then means a restack.
+- Branch from the lower PR's branch and base the PR on it. Start the upper branch once the PR below has finished review: a change to the lower PR after the upper branch exists means rebasing every branch above it ([Updating a Stack](#updating-a-stack)). While the PR below is still in review, stack on it only when waiting would stall the work, and tell the user that each change to it then means a restack. Before you branch, read the lower PR's stack with the `--jq .stack` call below: when the lower PR sits below its stack's top, the new PR cannot join that stack, so tell the user before building on it.
 - Root a stack on the branch it merges into, never on another stack's branch, and do not delete the branch a stack is based on while the stack is open. When that branch is deleted, GitHub moves the stack onto the default branch without rebasing it, and the bottom PR then carries every commit of the deleted branch.
-- A chain of PRs is not a stack until it is linked, and until then the stack base's workflows do not run on the upper PRs. `gh api repos/{owner}/{repo}/pulls/<lower PR> --jq .stack` prints the lower PR's stack, with its `number` `<n>`, its `size` and the lower PR's `position`, or nothing for a PR in no stack. When the lower PR is its stack's top PR (`position` equals `size`), add the new PR to the stack:
+- A chain of PRs is not a stack until it is linked, and until then the stack base's workflows do not run on the upper PRs. `gh api repos/{owner}/{repo}/pulls/<lower PR> --jq .stack` prints the lower PR's stack, with its `number` `<stack>`, its `size` and the lower PR's `position`, or nothing for a PR in no stack. When the lower PR is its stack's top PR (`position` equals `size`), add the new PR to the stack:
 
   ```bash
-  gh api -X POST repos/{owner}/{repo}/stacks/<n>/add --input - <<<'{"pull_requests": [<new PR>]}'
+  gh api -X POST repos/{owner}/{repo}/stacks/<stack>/add --input - <<<'{"pull_requests": [<new PR>]}'
   ```
 
   GitHub adds PRs only above a stack's top PR, so when the lower PR sits below its stack's top, the new PR cannot join that stack: tell the user instead of linking it.
@@ -26,7 +26,7 @@ Every PR in a stack is held to the rules and required checks of the bottom PR's 
   gh api -X POST repos/{owner}/{repo}/stacks --input - <<<'{"pull_requests": [<bottom PR>, ..., <top PR>]}'
   ```
 
-- The base of a PR in a stack cannot be edited. To change it, unstack first (`gh api -X POST repos/{owner}/{repo}/stacks/<n>/unstack`), which takes the open PRs out of the stack with their bases kept, then edit the base and link the stack again.
+- The base of a PR in a stack cannot be edited. To change it, unstack first (`gh api -X POST repos/{owner}/{repo}/stacks/<stack>/unstack`), which takes the open PRs out of the stack with their bases kept, then edit the base and link the stack again.
 
 ## Updating a Stack
 
