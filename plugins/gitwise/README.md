@@ -23,7 +23,7 @@ codex plugin add gitwise@grimoire
 ### Skills
 
 - **commit-pr-writing** -- what a commit message, a PR title and a PR description say, and which of them lands on the default branch under GitHub's default squash merge
-- **github-conventions** -- branch naming (`feature/<desc>`), commit format (the project's convention, Conventional Commits where none is stated), numbered list formatting (avoids `#N` auto-linking), issue bodies, draft PRs, plan format for implementation plans
+- **github-conventions** -- branch naming (`feature/<desc>`), commit format (the project's convention, Conventional Commits where none is stated), numbered list formatting (avoids `#N` auto-linking), issue bodies, draft PRs
 
 ### Hooks
 

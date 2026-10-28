@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.0
+
+- Breaking: `github-conventions` no longer has an implementation plan format (`plan-format.md`). praxis's `plan-issue` carries its own from praxis 1.12.0; if you use praxis, update it to 1.12.0 or later along with gitwise, since earlier versions read the format from here.
+
 ## 1.4.1
 
 - `github-conventions`' review format no longer opens with a count of the files reviewed.

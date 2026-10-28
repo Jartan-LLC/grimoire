@@ -53,7 +53,3 @@ Open a PR as a draft, and mark it ready (`gh pr ready`) when it is ready for som
 
 See [review-format.md](review-format.md) for the recommended structure of a code review --
 severity buckets and the `#N` footgun to avoid in the summary.
-
-## Implementation Plans
-
-Plans are saved to `.claude/workspace/`. See [plan-format.md](plan-format.md) for the recommended structure.

@@ -3,6 +3,7 @@
 ## 1.12.0
 
 - Breaking: the `issue-planner` agent is removed. Run `/praxis:plan-issue` instead, which explores the codebase and writes the plan itself. In Codex, the installed `issue-planner` role is removed at the next session start.
+- `plan-issue` writes plans in a new format, which praxis now carries itself instead of reading it from gitwise: Approach, with each alternative a reader would raise and why it was rejected; Decisions for the user (open questions, actions to ask about first, and assumptions, each with the default the plan takes); Out of scope; Steps, in order, each naming the file to change and the existing code to follow, the docs, changelog entry and version bump included; and Verification, the checks beyond your project's Verify commands and what passing shows. Plans no longer restate the issue or rate its complexity, and the separate patterns, files, documentation and phase checklist sections are folded into Steps.
 
 ## 1.11.0
 
