@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.12.0
+
+- Breaking: the `issue-planner` agent is removed. Run `/praxis:plan-issue` instead, which explores the codebase and writes the plan itself. In Codex, the installed `issue-planner` role is removed at the next session start.
+
 ## 1.11.0
 
 - `review-pr` reviews a branch that has no PR yet (`/praxis:review-pr <branch>`, or the current branch): it diffs the branch against the base you name, or the branch it was cut from, names that base in the review, and takes the PR title and description from the branch's `pr.md` in the workspace when there is one. Its reviewers read the branch's files from a checkout of it: when the branch is checked out elsewhere, your agent uses that checkout or adds a worktree, and never switches another checkout's branch, and the review says when it left out uncommitted changes.

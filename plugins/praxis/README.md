@@ -42,7 +42,6 @@ codex plugin add gitwise@grimoire
 
 ### Agents
 
-- **issue-planner** (opus) -- analyzes issues and designs implementation approaches
 - **backend-reviewer** -- reviews backend code for patterns, async correctness, security
 - **frontend-reviewer** -- reviews frontend code for design system compliance, accessibility
 - **general-reviewer** -- reviews code for general quality, naming, organization, and comment hygiene
