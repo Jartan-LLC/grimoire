@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.12.0
+
+- New `/praxis:review-cycle` command: takes a branch through review rounds until two in a row find nothing Critical or Important, runs a closing round on the change's docs, comments, commit messages and PR description, then opens its PR as a draft and stops for you to mark it ready. Each round, a reviewer runs `review-pr` over the whole branch, knowing nothing of earlier rounds, and an addresser runs `address-review` with the authority you grant by invoking the command: it fixes what has one clear fix and raises real judgment calls to you, recording them in the branch folder's `cycle.md`, from which a later session resumes. Tell it you won't be around, or to decide, and the addresser decides those calls itself instead, each in a commit of its own that one revert undoes, and lists them for you when the PR opens; tell it again to switch back. Your agent pushes the branch after every round, in one new commit per round, and never force-pushes. Several branches run side by side, each round starting when that branch's last one is addressed; in a stack, the lower branch finishes first.
+- `review-pr` tells its reviewers nothing about what to look for or what earlier reviews found, and a review you limit to part of a change runs only the reviewers for that part.
+
 ## 1.11.0
 
 - `review-pr` reviews a branch that has no PR yet (`/praxis:review-pr <branch>`, or the current branch): it diffs the branch against the base you name, or the branch it was cut from, names that base in the review, and takes the PR title and description from the branch's `pr.md` in the workspace when there is one. Its reviewers read the branch's files from a checkout of it: when the branch is checked out elsewhere, your agent uses that checkout or adds a worktree, and never switches another checkout's branch, and the review says when it left out uncommitted changes.

@@ -39,6 +39,7 @@ codex plugin add gitwise@grimoire
 - `/praxis:create-pr` -- create a draft pull request for implemented changes
 - `/praxis:review-pr` -- review a pull request, or a branch before it has one, using specialized reviewer agents
 - `/praxis:address-review` -- work through review findings on a PR, or on a branch before it has one, one at a time
+- `/praxis:review-cycle` -- take a branch through review rounds until two come back clean, then open its draft PR
 
 ### Agents
 
@@ -94,6 +95,12 @@ session you may want a higher `COMPACT_CONTEXT_THRESHOLD`.
 ```text
 /praxis:plan-issue 42          -> analyze and plan
 /praxis:implement-issue 42     -> implement the plan
+/praxis:review-cycle           -> review rounds until clean, then a draft pull request
+```
+
+By hand, or for a human's review, the steps are separate:
+
+```text
 /praxis:create-pr 42           -> open a draft pull request
 /praxis:review-pr 43           -> multi-agent code review
 /praxis:address-review 43      -> work through findings
