@@ -37,20 +37,21 @@ metric = "grounded"
 artifact = "file:.claude/workspace/issue-17/plan.md"
 absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?::\d+)?(?:[-,][ \t]*(?:2|1)(?::\d+)?)*|AGENTS\.md:(?:8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1)(?::\d+)?)*|CLAUDE\.md:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|README\.md:(?:8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1)(?::\d+)?)*|pyproject\.toml:(?:7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:7|6|5|4|3|2|1)(?::\d+)?)*|(?:shelf/)?__init__\.py:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|(?:shelf/)?catalog\.py:(?:35|34|33|32|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:35|34|33|32|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:shelf/)?cli\.py:(?:30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:tests/)?test_cli\.py:(?:19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*)`)(?:[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock)|(?:[\w./-]*/)?(?:Makefile|Dockerfile|LICENSE|\.gitignore|\.npmignore|\.dockerignore|\.editorconfig)):\d+(?::\d+)?(?:[-,][ \t]*\d+(?::\d+)?)*`'''
 
-# No section but Decisions that holds only None / N/A (a padded section).
+# No section but Decisions that holds only None / N/A, a reason after it or not (a padded section).
 [[check]]
 metric = "lean"
 artifact = "file:.claude/workspace/issue-17/plan.md"
-absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned|else))?|nothing to (?:add|note|report)|no changes?(?: needed)?|no (?:[\w-]+[ \t]+){1,2}items?)\)?(?:[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?|[.;](?:\*\*|_)?[ \t]+[^\n]*)[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
 
-# Target: a Decisions section (or Open questions...) raises the clash: one item names both
-# `shelf search` and what it already does (the search of your own catalog): a phrase of
-# that meaning, or a word of its topic beside one saying the name is taken or must move (already,
-# taken, keep, rename...), so a decision about the new name alone fails, a topic word in it or not.
+# Target: a Decisions section (or Open questions...) names `shelf search` on one of its lines, a
+# sub-bullet or a line under a `###` sub-heading included; a plan that names it only elsewhere
+# fails. The check is structural: whether that item raises the clash with what `shelf search`
+# already means (the search of your own catalog) is graded by a blind panel of three agents, two
+# of three deciding.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-17/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:shelf[ \t]+search\b|`search`|\bsearch[ \t]+(?:sub)?command|(?:sub)?command[ \t]+`?search\b))(?:(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:\blocal[ \t]+(?:catalog[ \t]+)?(?:search|lookup)\b|\boffline[ \t]+(?:search|lookup)\b|(?:catalog|collection|library)[ \t]+search|\bsearch(?:es|ing)?[ \t]+(?:in[ \t]+|through[ \t]+)?(?:the|your|my|our)[ \t]+(?:own[ \t]+)?(?:catalog|collection|books|shelf|library)\b|\bfind(?:s|ing)?[ \t]+(?:a[ \t]+)?books?[ \t]+in[ \t]+(?:the|your|my|our)[ \t]+(?:own[ \t]+)?(?:catalog|collection|shelf|library)\b|\bby[ \t]+(?:title|author)[ \t]+(?:or|and|/)[ \t]+(?:title|author)\b|\bown[ \t]+(?:catalog|books|collection)\b))|(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:\blocal\b|\boffline\b|\bcatalog\b))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:already|taken|in[ \t]+use|clash\w*|collid\w*|collision\w*|conflict\w*|belongs?[ \t]+to|occupied|reserved|exist(?:s|ing)|current(?:ly)?|mean(?:s|ing)?|keep(?:s|ing)?|stays|mov(?:e|es|ed|ing)|renam\w*|reassign\w*|break(?:s|ing)?)\b))'''
+present = '''(?im)^(?:\#{1,2}(?!\#)[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#{1,2}(?!\#))[^\n]*)*?\n(?!\#{1,2}(?!\#))|\#{3,4}(?!\#)[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#))[^\n]*?(?:shelf[ \t]+search\b|`search`|\bsearch[ \t]+(?:sub)?command|(?:sub)?command[ \t]+`?search\b)'''
 
 [[fact]]
 text = "sub.add_parser(\"search\""

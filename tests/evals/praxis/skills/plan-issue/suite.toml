@@ -39,7 +39,9 @@ id = "reader"
 direction = "higher"
 # Every case: a Verification section with a command (a docs case: any check). Bug-fix, refactor and
 # clash cases also: the bug's test run under Verification, the adjacent refactor under Out of scope,
-# or the clash with an existing public name under Decisions for the user.
+# or an item under Decisions for the user that names the requested command or flag. The clash check
+# is structural: whether that item raises the clash with what the name already means is graded like
+# the abstraction questions below, by a blind panel of three agents, two of three deciding.
 
 [[metric]]
 id = "grounded"
@@ -51,7 +53,8 @@ margin = 0.2
 id = "lean"
 direction = "higher"
 margin = 0.2
-# Every case: no section but Decisions padded with only None or N/A; docs cases also a word ceiling.
+# Every case: no section but Decisions padded with only None or N/A, a reason after it or not; docs
+# cases also a word ceiling.
 
 [[metric]]
 id = "cut"

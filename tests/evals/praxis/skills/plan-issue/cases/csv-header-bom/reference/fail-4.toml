@@ -1,0 +1,28 @@
+final = "Plan written to .claude/workspace/issue-9/plan.md."
+
+[files]
+".claude/workspace/issue-9/plan.md" = '''# Plan: Import fails on statements exported from Excel (issue 9)
+
+## Approach
+
+Excel writes a UTF-8 byte order mark first, so the first header reads as "date" with the BOM in front and
+`row["date"]` raises `KeyError`. Open the file with `encoding="utf-8-sig"`, which drops a BOM
+when present and reads plain UTF-8 the same.
+
+## Decisions for the user
+
+None.
+
+## Out of scope
+
+- No out-of-scope items.
+
+## Steps
+
+1. In `ledger/bank_csv.py:10`, open with `encoding="utf-8-sig"`.
+2. Add a BOM test to `tests/test_bank_csv.py`, following its first test.
+
+## Verification
+
+- `python3 -m pytest -q tests/test_bank_csv.py` -- the BOM test passes and fails without step 1.
+'''

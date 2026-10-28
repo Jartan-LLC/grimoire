@@ -37,20 +37,21 @@ metric = "grounded"
 artifact = "file:.claude/workspace/issue-22/plan.md"
 absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?::\d+)?(?:[-,][ \t]*(?:2|1)(?::\d+)?)*|AGENTS\.md:(?:8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1)(?::\d+)?)*|CLAUDE\.md:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|README\.md:(?:10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:docs/)?server\.md:(?:7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:7|6|5|4|3|2|1)(?::\d+)?)*|(?:notes/)?__init__\.py:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|(?:notes/)?backup\.py:(?:23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:notes/)?cli\.py:(?:29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:notes/)?store\.py:(?:32|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:32|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|pyproject\.toml:(?:7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:7|6|5|4|3|2|1)(?::\d+)?)*|(?:tests/)?test_cli\.py:(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*)`)(?:[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock)|(?:[\w./-]*/)?(?:Makefile|Dockerfile|LICENSE|\.gitignore|\.npmignore|\.dockerignore|\.editorconfig)):\d+(?::\d+)?(?:[-,][ \t]*\d+(?::\d+)?)*`'''
 
-# No section but Decisions that holds only None / N/A (a padded section).
+# No section but Decisions that holds only None / N/A, a reason after it or not (a padded section).
 [[check]]
 metric = "lean"
 artifact = "file:.claude/workspace/issue-22/plan.md"
-absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned|else))?|nothing to (?:add|note|report)|no changes?(?: needed)?|no (?:[\w-]+[ \t]+){1,2}items?)\)?(?:[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?|[.;](?:\*\*|_)?[ \t]+[^\n]*)[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
 
-# Target: a Decisions section (or Open questions...) raises the clash: one item names both
-# `notes sync` and what it already does (the backup copy cron runs): a phrase of
-# that meaning, or a word of its topic beside one saying the name is taken or must move (already,
-# taken, keep, rename...), so a decision about the new name alone fails, a topic word in it or not.
+# Target: a Decisions section (or Open questions...) names `notes sync` on one of its lines, a
+# sub-bullet or a line under a `###` sub-heading included; a plan that names it only elsewhere
+# fails. The check is structural: whether that item raises the clash with what `notes sync`
+# already means (the backup copy cron runs) is graded by a blind panel of three agents, two of
+# three deciding.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-22/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:notes[ \t]+sync\b|`sync`|\bsync[ \t]+(?:sub)?command|(?:sub)?command[ \t]+`?sync\b))(?:(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:\bbacks[ \t]+up\b|\bbackup[ \t]+(?:command|subcommand|job)\b|\b(?:local|nightly)[ \t]+(?:backup|cop(?:y|ies))\b|\bcron[ \t]+jobs?[ \t]+(?:that[ \t]+)?(?:call|run|use)\w*))|(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:backup\w*|\bback(?:ed|ing)?[ \t]+up\b|\bcron\b|\blocal\b|\bcop(?:y|ies)\b))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:already|taken|in[ \t]+use|clash\w*|collid\w*|collision\w*|conflict\w*|belongs?[ \t]+to|occupied|reserved|exist(?:s|ing)|current(?:ly)?|mean(?:s|ing)?|keep(?:s|ing)?|stays|mov(?:e|es|ed|ing)|renam\w*|reassign\w*|break(?:s|ing)?)\b))'''
+present = '''(?im)^(?:\#{1,2}(?!\#)[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#{1,2}(?!\#))[^\n]*)*?\n(?!\#{1,2}(?!\#))|\#{3,4}(?!\#)[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#))[^\n]*?(?:notes[ \t]+sync\b|`sync`|\bsync[ \t]+(?:sub)?command|(?:sub)?command[ \t]+`?sync\b)'''
 
 [[fact]]
 text = "sub.add_parser(\"sync\""

@@ -37,21 +37,21 @@ metric = "grounded"
 artifact = "file:.claude/workspace/issue-33/plan.md"
 absent = '''`(?:\./)?(?!(?:\.gitignore:(?:3|2|1)(?::\d+)?(?:[-,][ \t]*(?:3|2|1)(?::\d+)?)*|AGENTS\.md:(?:8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1)(?::\d+)?)*|CLAUDE\.md:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|README\.md:(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:bin/)?sizecheck\.js:(?:19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|package\.json:(?:6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:6|5|4|3|2|1)(?::\d+)?)*|(?:src/)?measure\.js:(?:25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:src/)?report\.js:(?:22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:test/)?measure\.test\.js:(?:18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:test/)?report\.test\.js:(?:9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:9|8|7|6|5|4|3|2|1)(?::\d+)?)*)`)(?:[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock)|(?:[\w./-]*/)?(?:Makefile|Dockerfile|LICENSE|\.gitignore|\.npmignore|\.dockerignore|\.editorconfig)):\d+(?::\d+)?(?:[-,][ \t]*\d+(?::\d+)?)*`'''
 
-# No section but Decisions that holds only None / N/A (a padded section).
+# No section but Decisions that holds only None / N/A, a reason after it or not (a padded section).
 [[check]]
 metric = "lean"
 artifact = "file:.claude/workspace/issue-33/plan.md"
-absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned|else))?|nothing to (?:add|note|report)|no changes?(?: needed)?|no (?:[\w-]+[ \t]+){1,2}items?)\)?(?:[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?|[.;](?:\*\*|_)?[ \t]+[^\n]*)[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
 
-# Target: a Decisions section (or Open questions...) raises the clash: one item names both
-# `-o` and what it already means (`--open`, the HTML report opened in the browser): a phrase of
-# that meaning, or a word of its topic beside one saying the name is taken or must move (already,
-# taken, keep, rename...), so a decision about the new name alone fails, a topic word in it or not.
-# The flag's case counts, since `-O` is another flag.
+# Target: a Decisions section (or Open questions...) names `-o` on one of its lines, a sub-bullet
+# or a line under a `###` sub-heading included; a plan that names it only elsewhere fails. The
+# check is structural: whether that item raises the clash with what `-o` already means (`--open`,
+# the HTML report opened in the browser) is graded by a blind panel of three agents, two of three
+# deciding.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-33/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:(?<![\w-])(?-i:-o)\b))(?:(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:--open\b|`open`|\bopen(?:s|ing)?[ \t]+(?:flag|option|it|the[ \t]+(?:html[ \t]+)?report)\b|\bopen(?:s|ing)?[ \t]+(?:it[ \t]+)?in[ \t]+the[ \t]+browser\b))|(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:\bbrowser\b|sizecheck-report|\bhtml\b))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:already|taken|in[ \t]+use|clash\w*|collid\w*|collision\w*|conflict\w*|belongs?[ \t]+to|occupied|reserved|exist(?:s|ing)|current(?:ly)?|mean(?:s|ing)?|keep(?:s|ing)?|stays|mov(?:e|es|ed|ing)|renam\w*|reassign\w*|break(?:s|ing)?)\b))'''
+present = '''(?im)^(?:\#{1,2}(?!\#)[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#{1,2}(?!\#))[^\n]*)*?\n(?!\#{1,2}(?!\#))|\#{3,4}(?!\#)[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#))[^\n]*?(?:(?<![\w-])(?-i:-o)\b)'''
 
 [[fact]]
 text = "open: { type: \"boolean\", short: \"o\" }"

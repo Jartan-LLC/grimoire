@@ -7,13 +7,13 @@ hints = ["short", "brief", "padding", "trivial"]
 
 # A Verification section (or Testing, Validation...) with a check of at least three words that
 # holds a backticked command or a check verb (read, compare, render...), or a fenced block with a
-# line in it, not None or Not applicable. A line starting with `#` inside a fenced block, such as a
-# shell comment, does not end the section, and a heading inside Steps is not the Verification
-# section.
+# line in it, not None, Not applicable, "nothing to verify" or "Only README.md changes". A line
+# starting with `#` inside a fenced block, such as a shell comment, does not end the section, and a
+# heading inside Steps is not the Verification section.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-8/plan.md"
-present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?![ \t]*```)(?!\#)[^\n]*|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*\n[ \t]*```[^\n]*)*?(?:\n(?![ \t]*```)(?!\#)(?![ \t]*(?:[-*+]|\d+[.)])?[ \t]*(?:\*\*|_)?\(?(?:none\b|n/?a\b|not (?:applicable|needed|required)\b|no (?:tests?|verification|checks?|commands?)\b|nothing to (?:test|verify|check|run)\b))(?=[^\n]*(?:`[^`\n]+`|\b(?:re-?read\w*|read\w*|compar\w*|confirm\w*|render\w*|preview\w*|check\w*|run\w*|open\w*|follow\w*|cop(?:y|ies|ied|ying)|past(?:e|es|ed|ing)|view\w*|visit\w*|start\w*|grep\w*|diff\w*|load\w*|click\w*|look\w*|see|verif\w*|ensur\w*|search\w*|try|tries|tried|execute\w*|execution|match\w*|launch\w*|brows\w*|navigat\w*|print\w*|show\w*|agree\w*|equal\w*)\b))[ \t]*(?:[-*+]|\d+[.)])?[ \t]*\S+[ \t]+\S+[ \t]+\S|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*?\n(?![ \t]*```)(?![ \t]*(?:[-*+]|\d+[.)])?[ \t]*(?:\*\*|_)?\(?(?:none\b|n/?a\b|not (?:applicable|needed|required)\b|no (?:tests?|verification|checks?|commands?)\b|nothing to (?:test|verify|check|run)\b))[ \t]*\S)'''
+present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?![ \t]*```)(?!\#)[^\n]*|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*\n[ \t]*```[^\n]*)*?(?:\n(?![ \t]*```)(?!\#)(?![ \t]*(?:[-*+]|\d+[.)])?[ \t]*(?:\*\*|_)?\(?(?:none\b|n/?a\b|not (?:applicable|needed|required)\b|no (?:tests?|verification|checks?|commands?)\b|nothing to (?:test|verify|check|run)\b))(?![^\n]*\bnothing (?:else )?to (?:test|verify|check|run)\b)(?![ \t]*(?:[-*+]|\d+[.)])?[ \t]*(?:\*\*|_)?only[ \t]+\S+(?:[ \t]*(?:,|and)[ \t]+\S+)*[ \t]+(?:is[ \t]+|are[ \t]+)?chang(?:e|es|ed)\b[.!]?[ \t]*(?:\n|\Z))(?=[^\n]*(?:`[^`\n]+`|\b(?:re-?read\w*|read(?!me\b)\w*|compar\w*|confirm\w*|render\w*|preview\w*|check\w*|run\w*|open\w*|follow\w*|cop(?:y|ies|ied|ying)|past(?:e|es|ed|ing)|view\w*|visit\w*|start\w*|grep\w*|diff\w*|load\w*|click\w*|look\w*|see|verif\w*|ensur\w*|search\w*|try|tries|tried|execute\w*|execution|match\w*|launch\w*|brows\w*|navigat\w*|print\w*|show\w*|agree\w*|equal\w*)\b))[ \t]*(?:[-*+]|\d+[.)])?[ \t]*\S+[ \t]+\S+[ \t]+\S|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*?\n(?![ \t]*```)(?![ \t]*(?:[-*+]|\d+[.)])?[ \t]*(?:\*\*|_)?\(?(?:none\b|n/?a\b|not (?:applicable|needed|required)\b|no (?:tests?|verification|checks?|commands?)\b|nothing to (?:test|verify|check|run)\b))[ \t]*\S)'''
 
 # No Complexity line or heading.
 [[check]]
@@ -41,11 +41,11 @@ metric = "grounded"
 artifact = "file:.claude/workspace/issue-8/plan.md"
 absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?::\d+)?(?:[-,][ \t]*(?:2|1)(?::\d+)?)*|AGENTS\.md:(?:6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:6|5|4|3|2|1)(?::\d+)?)*|CHANGELOG\.md:(?:9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:9|8|7|6|5|4|3|2|1)(?::\d+)?)*|CLAUDE\.md:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|README\.md:(?:11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:bin/)?mockapi\.js:(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|package\.json:(?:6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:6|5|4|3|2|1)(?::\d+)?)*|(?:src/)?config\.js:(?:7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:7|6|5|4|3|2|1)(?::\d+)?)*|(?:src/)?routes\.js:(?:12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:test/)?config\.test\.js:(?:8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:test/)?routes\.test\.js:(?:13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*)`)(?:[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock)|(?:[\w./-]*/)?(?:Makefile|Dockerfile|LICENSE|\.gitignore|\.npmignore|\.dockerignore|\.editorconfig)):\d+(?::\d+)?(?:[-,][ \t]*\d+(?::\d+)?)*`'''
 
-# No section but Decisions that holds only None / N/A (a padded section).
+# No section but Decisions that holds only None / N/A, a reason after it or not (a padded section).
 [[check]]
 metric = "lean"
 artifact = "file:.claude/workspace/issue-8/plan.md"
-absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned|else))?|nothing to (?:add|note|report)|no changes?(?: needed)?|no (?:[\w-]+[ \t]+){1,2}items?)\)?(?:[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?|[.;](?:\*\*|_)?[ \t]+[^\n]*)[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
 
 # The plan is at most 300 words.
 [[check]]
