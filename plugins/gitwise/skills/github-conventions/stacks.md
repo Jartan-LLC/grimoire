@@ -10,15 +10,15 @@ Every PR in a stack is held to the rules and required checks of the bottom PR's 
 
 ## Building a Stack
 
-- Branch from the lower PR's branch and base the PR on it. Start the upper branch once the PR below has finished review: a change to the lower PR after the upper branch exists means rebasing every branch above it ([Updating a Stack](#updating-a-stack)). While the PR below is still in review, stack on it only when waiting would stall the work, and tell the user that each change to it then means a restack. Before you branch, read the lower PR's stack with the `--jq .stack` call below: when the lower PR sits below its stack's top, the new PR cannot join that stack, so tell the user before building on it.
+- Branch from the lower PR's branch and base the PR on it. Start the upper branch once the PR below has finished review: a change to the lower PR after the upper branch exists means rebasing every branch above it ([Updating a Stack](#updating-a-stack)). While the PR below is still in review, stack on it only when waiting would stall the work, and tell the user that each change to it then means a restack. Before you branch, read the lower PR's stack: `gh api repos/{owner}/{repo}/pulls/<lower PR> --jq .stack` prints it, with its `number` `<stack>`, its `size` and the lower PR's `position`, or nothing for a PR in no stack. GitHub adds PRs only above a stack's top PR, so when the lower PR sits below its stack's top (`position` less than `size`), the new PR cannot join that stack: tell the user before building on it.
 - Root a stack on the branch it merges into, never on another stack's branch, and do not delete the branch a stack is based on while the stack is open. When that branch is deleted, GitHub moves the stack onto the default branch without rebasing it, and the bottom PR then carries every commit of the deleted branch.
-- A chain of PRs is not a stack until it is linked, and until then the stack base's workflows do not run on the upper PRs. `gh api repos/{owner}/{repo}/pulls/<lower PR> --jq .stack` prints the lower PR's stack, with its `number` `<stack>`, its `size` and the lower PR's `position`, or nothing for a PR in no stack. When the lower PR is its stack's top PR (`position` equals `size`), add the new PR to the stack:
+- A chain of PRs is not a stack until it is linked, and until then the stack base's workflows do not run on the upper PRs. Once the new PR is open, read the lower PR's stack again with the same call, since a PR may have joined above it after you branched. When the lower PR is still its stack's top PR (`position` equals `size`), add the new PR to the stack:
 
   ```bash
   gh api -X POST repos/{owner}/{repo}/stacks/<stack>/add --input - <<<'{"pull_requests": [<new PR>]}'
   ```
 
-  GitHub adds PRs only above a stack's top PR, so when the lower PR sits below its stack's top, the new PR cannot join that stack: tell the user instead of linking it.
+  If the lower PR is no longer the top, tell the user instead of linking.
 
   When the lower PR is in no stack, create a stack from the chain, bottom first. Each PR's base must be the branch of the PR before it, or GitHub refuses with 422:
 
@@ -51,5 +51,5 @@ Restacking, here or after a merge ([Merging a Stack](#merging-a-stack)), is the 
   gh api -X PUT repos/{owner}/{repo}/pulls/<n>/merge-async -f merge_method=<squash|merge|rebase> -f sha=<head sha> --jq .details.uuid
   ```
 
-  Then poll `gh api repos/{owner}/{repo}/pulls/<n>/merge-async/<uuid>` until its `status` is `merged`; `enqueued`, when the base branch's merge queue took the PR and will merge it later (`gh pr view <n> --json state` shows when it has); or `failed`, with the reason in `details.message`.
+  Leave out `merge_method` where the base branch requires a merge queue: the endpoint takes it only for a direct merge, and the queue merges by its own method. Then poll `gh api repos/{owner}/{repo}/pulls/<n>/merge-async/<uuid>` until its `status` is `merged`; `enqueued`, when the base branch's merge queue took the PR and will merge it later (`gh pr view <n> --json state` shows when it has); or `failed`, with the reason in `details.message`.
 - After a merge that leaves PRs above it open, GitHub retargets the next PR onto the stack's base and rebases the PRs above. Before merging the next one, check that it holds only its own commits (`gh pr view <n> --json commits`): one that was not rebased still carries the merged PR's commits, and under a squash merge their messages land a second time. If it carries them, restack it and the branches above it as [Updating a Stack](#updating-a-stack) says, onto the stack's base, with the merged PR's last head commit (`gh pr view <merged PR> --json headRefOid -q .headRefOid`) as `<old tip of branch below>`.

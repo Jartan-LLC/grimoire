@@ -26,7 +26,7 @@ Always check if a branch already exists for an issue before creating a new one.
 
 For sub-issues of a larger feature, branch from the parent feature branch rather than main. Sub-issue work merges back into the parent feature branch, which eventually merges to main.
 
-When a change other than a sub-issue builds on another open PR's unmerged work, stack it on that PR: [stacks.md](stacks.md) says when to stack and how to build, update and merge a stack.
+When a change other than a sub-issue builds on another open PR's unmerged work, [stacks.md](stacks.md) says whether to stack it on that PR and how to build, update and merge a stack. When you push to a PR that has PRs stacked on it, restack them as [stacks.md](stacks.md) says.
 
 ## Commits
 
