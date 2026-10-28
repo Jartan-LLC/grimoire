@@ -7,11 +7,13 @@ hints = ["short", "brief", "padding", "trivial"]
 
 # A Verification section (or Testing, Validation...) with a check of at least three words that
 # holds a backticked command or a check verb (read, compare, render...), or a fenced block with a
-# line in it, not None, Not applicable or "Only README.md changes". The verb in "nothing (else) to
-# verify", "nothing needs verifying" or "no checks needed" is not a check verb, so such a line
-# counts only with a backticked command or another check verb in it. A line starting with `#`
-# inside a fenced block, such as a shell comment, does not end the section, and a heading inside
-# Steps is not the Verification section.
+# line in it. "Only README.md changes" never counts, nor does a line starting with None, N/A, "Not
+# needed", "No tests/verification/checks" or "Nothing to verify", even one holding a command.
+# Otherwise, the verb in "nothing (else) to verify", "nothing needs verifying" or "no checks
+# needed" is not a check verb, so that line counts only with a backticked command or another check
+# verb; other wording, such as "verification is not needed", can still count. A line starting with
+# `#` inside a fenced block, such as a shell comment, does not end the section, and a heading
+# inside Steps is not the Verification section.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-8/plan.md"
