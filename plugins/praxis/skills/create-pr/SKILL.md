@@ -30,7 +30,7 @@ Also load the `praxis:workspace-patterns` skill and read the issue's plan, `.cla
 
 Load the `gitwise:commit-pr-writing` and `gitwise:github-conventions` skills. Determine the correct base branch, the branch this one was cut from -- `main` for regular branches, the parent feature branch for sub-issue branches, or the lower PR's branch for a branch cut from another open PR's branch. When you cannot tell, ask the user. Read `git diff <base>...HEAD` and the branch's commit messages (`git log <base>..HEAD`). Note what this session changed outside the diff (settings, tags, secrets) or did not run, and ask the user about changes outside the diff that this session did not make.
 
-When the base is another open PR's branch, other than a sub-issue's parent feature branch, read `stacks.md` in the `gitwise:github-conventions` skill before you create the PR, and create it only when its rules say; until then, tell the user instead.
+When the base is another open PR's branch, other than a sub-issue's parent feature branch, read `stacks.md` in the `gitwise:github-conventions` skill before you create the PR, and create it only when its rules say, asking the user when you cannot tell whether the lower PR's review is done; until then, tell the user instead.
 
 ### 4. Create Pull Request
 
