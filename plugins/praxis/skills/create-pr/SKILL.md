@@ -40,4 +40,4 @@ gh pr create --draft --title "<title>" --body "<description>" --base <base-branc
 
 Include `Closes #<issue-number>` in the body.
 
-When the base is a lower PR's branch, read `stacks.md` in the `gitwise:github-conventions` skill and link the new PR into that PR's stack as it says.
+When the base is another open PR's branch, other than a sub-issue's parent feature branch, read `stacks.md` in the `gitwise:github-conventions` skill and link the new PR into that PR's stack as it says.
