@@ -34,7 +34,7 @@ Where the project's own rules say otherwise, follow them.
 - Reviews of a branch are numbered by round in its subfolder: `1.md`, `2.md`, ... A new review takes the
   number after the highest (compare numbers, not names: `10.md` follows `9.md`) and leaves the earlier
   ones as they are.
-- `pr.md` in a branch folder is the PR title and description while the branch has no PR: the title on
+- `pr.md` in a branch folder is the PR title and description while the branch has no open PR: the title on
   its first line, the description after a blank line. Once the PR exists, the PR holds them.
 - To find a branch's folder, look for one first: `.claude/workspace/*/<branch folder>/`. Failing
   that, make it in the folder of the issue the PR closes (`gh pr view <n> --json

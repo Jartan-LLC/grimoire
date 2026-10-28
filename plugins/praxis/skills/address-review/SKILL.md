@@ -16,7 +16,7 @@ Where the project's own rules say otherwise, follow them.
 
 ### 1. Load Review
 
-Determine the PR number or branch from the user's request; with neither, the current branch, and its PR if it has one. For a PR, get its branch (`gh pr view <pr-number> --json headRefName,isCrossRepository`). Load the `praxis:workspace-patterns` skill and read the latest review in the branch's folder in the workspace (the `<n>.md` with the highest number). For a PR, also read what people have posted on it: its comments and reviews, and the comments on its lines, which `gh pr view` does not show:
+Determine the PR number or branch from the user's request; with neither, the current branch. A branch with an open PR (`gh pr view <branch> --json number,state`) is handled as that PR. For a PR, get its branch (`gh pr view <pr-number> --json headRefName,isCrossRepository`). Load the `praxis:workspace-patterns` skill and read the latest review in the branch's folder in the workspace (the `<n>.md` with the highest number). For a PR, also read what people have posted on it: its comments and reviews, and the comments on its lines, which `gh pr view` does not show:
 
 ```bash
 gh pr view <pr-number> --comments
@@ -53,4 +53,4 @@ Update the PR title and description, or `pr.md`, as in step 2. A declined findin
 
 Where a person posted a finding that the round declined, fixed differently or found already the case, reply to it with what was done and why: in its thread when it was posted on a line (`gh api repos/{owner}/{repo}/pulls/<pr-number>/comments/<comment-id>/replies -f body=...`, with the id of the thread's first comment: the finding's `in_reply_to_id` when it has one), otherwise in one PR comment for each review or comment that holds such findings. Answer nothing else on the PR.
 
-If the round's commits are not pushed yet, tell the user the update and any reply are ready for after the push.
+For a PR whose round's commits are not pushed yet, tell the user the update and any reply are ready for after the push.
