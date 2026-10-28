@@ -3,7 +3,7 @@
 ## 2.0.0
 
 - Needs gitwise 2.0.0 or later.
-- Breaking: the `issue-planner` agent is removed. Run `/praxis:plan-issue` instead, which explores the codebase and writes the plan itself. In Codex, the installed `issue-planner` role is removed at the next session start.
+- Breaking: the `issue-planner` agent is removed. Run `/praxis:plan-issue` instead, which explores the codebase and writes the plan itself. In Codex, the installed `issue-planner` role stays until you delete it: remove `issue-planner.toml` from `~/.codex/agents/grimoire/<version>/` (`$CODEX_HOME/agents/grimoire/<version>/` if you set `CODEX_HOME`), where `<version>` is the praxis version you upgraded from, such as `1.11.0`, and from any other version directory there that holds one.
 - `plan-issue` writes plans in a new format, which praxis now carries itself instead of reading it from gitwise: Approach, with each alternative a reader would raise and why it was rejected; Decisions for the user (open questions, actions to ask about first, and assumptions, each with the default the plan takes); Out of scope; Steps, in order, each naming the file to change and the existing code to follow, the docs, changelog entry and version bump included; and Verification, the checks beyond your project's Verify commands and what passing shows. Plans no longer restate the issue or rate its complexity, and the separate patterns, files, documentation and phase checklist sections are folded into Steps.
 
 ## 1.11.0
