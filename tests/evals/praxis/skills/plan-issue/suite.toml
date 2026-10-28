@@ -2,9 +2,9 @@
 # implementing it later, and create-pr checking the diff against it. Each case is a small repository
 # and a GitHub issue the gh stub serves; the plan file is graded by regex. The six kinds of fixture
 # come from the research of the template rebuild (#120): a bug fix with an obvious test command, a
-# feature with a tempting adjacent refactor, a feature that needs a public command renamed, a feature
-# where an abstraction is tempting but has one use, one where a second caller already exists, and a
-# docs-only change. tests/evals/README.md says how the suite is run.
+# feature with a tempting adjacent refactor, a feature whose name clashes with an existing public
+# command, a feature where an abstraction is tempting but has one use, one where a second caller
+# already exists, and a docs-only change. tests/evals/README.md says how the suite is run.
 target = "praxis:plan-issue"
 # Cases moved off a held-out split, each with its reason in a comment.
 BURNED = [

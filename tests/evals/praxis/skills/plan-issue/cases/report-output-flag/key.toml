@@ -3,11 +3,13 @@ kind = "target"
 hints = ["--open", "decision", "clash", "already", "taken"]
 
 
-# A Verification section (or Testing, Validation...) with a backticked command or a fenced block.
+# A Verification section (or Testing, Validation...) with a backticked command or a fenced block. A
+# command holds a space, `::` or a known tool's name (`ruff`), or is a script path (`./check.sh`); a
+# heading inside Steps is not the Verification section.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-33/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:[^`\n]*`[^`\n]*`)*?[^`\n]*`(?:[^`\n]*?\S[ \t]+\S[^`\n]*?|[^`\n]*::[^`\n]*|pytest|tox|make|jest|vitest)`|[ \t]*```)'''
+present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:[^`\n]*`[^`\n]*`)*?[^`\n]*`(?:[^`\n]*?[^`\s][ \t]+[^`\s][^`\n]*?|[^`\n]*::[^`\n]*|pytest|tox|make|jest|vitest|ruff|mypy|pyright|eslint|prettier|black|flake8|pylint|shellcheck|tsc|\.{1,2}/[^`\s]+|[\w./-]+\.(?:sh|bash))`|[ \t]*```)'''
 
 # No Complexity line or heading.
 [[check]]
@@ -42,12 +44,14 @@ artifact = "file:.claude/workspace/issue-33/plan.md"
 absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
 
 # Target: a Decisions section (or Open questions...) raises the clash: one item names both
-# `-o` and what it already means (`--open`, the HTML report opened in the browser),
-# so a decision about the new name alone fails. The flag's case counts, since `-O` is another flag.
+# `-o` and what it already means (`--open`, the HTML report opened in the browser): a phrase of
+# that meaning, or a word of its topic beside one saying the name is taken or must move (already,
+# taken, keep, rename...), so a decision about the new name alone fails, a topic word in it or not.
+# The flag's case counts, since `-O` is another flag.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-33/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:(?<![\w-])(?-i:-o)\b))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:--open\b|`open`|\bbrowser\b|sizecheck-report|\bopen(?:s|ing)?[ \t]+(?:flag|option|it|the[ \t]+(?:html[ \t]+)?report)\b))'''
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:(?<![\w-])(?-i:-o)\b))(?:(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:--open\b|`open`|\bopen(?:s|ing)?[ \t]+(?:flag|option|it|the[ \t]+(?:html[ \t]+)?report)\b|\bopen(?:s|ing)?[ \t]+(?:it[ \t]+)?in[ \t]+the[ \t]+browser\b))|(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:\bbrowser\b|sizecheck-report|\bhtml\b))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:already|taken|in[ \t]+use|clash\w*|collid\w*|collision\w*|conflict\w*|belongs?[ \t]+to|occupied|reserved|exist(?:s|ing)|current(?:ly)?|mean(?:s|ing)?|keep(?:s|ing)?|stays|mov(?:e|es|ed|ing)|renam\w*|reassign\w*|break(?:s|ing)?)\b))'''
 
 [[fact]]
 text = "open: { type: \"boolean\", short: \"o\" }"

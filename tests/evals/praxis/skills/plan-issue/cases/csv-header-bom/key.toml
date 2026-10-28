@@ -3,11 +3,13 @@ kind = "target"
 hints = ["verification", "pytest", "test command"]
 
 
-# A Verification section (or Testing, Validation...) with a backticked command or a fenced block.
+# A Verification section (or Testing, Validation...) with a backticked command or a fenced block. A
+# command holds a space, `::` or a known tool's name (`ruff`), or is a script path (`./check.sh`); a
+# heading inside Steps is not the Verification section.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-9/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:[^`\n]*`[^`\n]*`)*?[^`\n]*`(?:[^`\n]*?\S[ \t]+\S[^`\n]*?|[^`\n]*::[^`\n]*|pytest|tox|make|jest|vitest)`|[ \t]*```)'''
+present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:[^`\n]*`[^`\n]*`)*?[^`\n]*`(?:[^`\n]*?[^`\s][ \t]+[^`\s][^`\n]*?|[^`\n]*::[^`\n]*|pytest|tox|make|jest|vitest|ruff|mypy|pyright|eslint|prettier|black|flake8|pylint|shellcheck|tsc|\.{1,2}/[^`\s]+|[\w./-]+\.(?:sh|bash))`|[ \t]*```)'''
 
 # No Complexity line or heading.
 [[check]]
@@ -42,11 +44,13 @@ artifact = "file:.claude/workspace/issue-9/plan.md"
 absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
 
 # Target: the Verification section names the project's test run or the test file of the bug; a
-# line starting with `#` inside a fenced block, such as a shell comment, does not end the section.
+# line starting with `#` inside a fenced block, such as a shell comment, does not end the section,
+# and a heading inside Steps is not the Verification section. A command that only reproduces the
+# bug fails: a test that fails without the fix is the strongest evidence these fixtures allow.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-9/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?![ \t]*```)(?!\#)[^\n]*|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*\n[ \t]*```[^\n]*)*?(?:\n(?![ \t]*```)(?!\#)[^\n]*(?:\bpytest\b|test_bank_csv)|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*?\n(?![ \t]*```)[^\n]*(?:\bpytest\b|test_bank_csv))'''
+present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?![ \t]*```)(?!\#)[^\n]*|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*\n[ \t]*```[^\n]*)*?(?:\n(?![ \t]*```)(?!\#)[^\n]*(?:\bpytest\b|test_bank_csv)|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*?\n(?![ \t]*```)[^\n]*(?:\bpytest\b|test_bank_csv))'''
 
 [[fact]]
 text = "python3 -m pytest -q"

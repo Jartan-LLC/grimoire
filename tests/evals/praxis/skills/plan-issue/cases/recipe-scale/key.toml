@@ -3,11 +3,13 @@ kind = "target"
 hints = ["out of scope", "Fraction", "refactor", "quantity.py", "rewrite"]
 
 
-# A Verification section (or Testing, Validation...) with a backticked command or a fenced block.
+# A Verification section (or Testing, Validation...) with a backticked command or a fenced block. A
+# command holds a space, `::` or a known tool's name (`ruff`), or is a script path (`./check.sh`); a
+# heading inside Steps is not the Verification section.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-40/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:[^`\n]*`[^`\n]*`)*?[^`\n]*`(?:[^`\n]*?\S[ \t]+\S[^`\n]*?|[^`\n]*::[^`\n]*|pytest|tox|make|jest|vitest)`|[ \t]*```)'''
+present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:[^`\n]*`[^`\n]*`)*?[^`\n]*`(?:[^`\n]*?[^`\s][ \t]+[^`\s][^`\n]*?|[^`\n]*::[^`\n]*|pytest|tox|make|jest|vitest|ruff|mypy|pyright|eslint|prettier|black|flake8|pylint|shellcheck|tsc|\.{1,2}/[^`\s]+|[\w./-]+\.(?:sh|bash))`|[ \t]*```)'''
 
 # No Complexity line or heading.
 [[check]]
@@ -41,14 +43,15 @@ metric = "lean"
 artifact = "file:.claude/workspace/issue-40/plan.md"
 absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
 
-# Target: an Out of scope section (or Non-goals...) names the tempting adjacent refactor: what it
-# changes together with a change or deferral word in one item (a bullet or paragraph), or its file
-# together with a change word on one line, so a line on another bug in that file, or one that
-# only mentions the topic, fails.
+# Target: an Out of scope section (or Non-goals...) names the tempting adjacent refactor in one item
+# (a bullet or paragraph): its topic with a change word, what it moves to with a deferral word, or
+# its topic leading the item with a deferral word; or its file with a change word on one line. A
+# line on another bug in that file, one that only mentions the topic, or one that names it in
+# passing with a deferral word, fails. `TODO` counts only in capitals.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-40/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:out[ -]of[ -]scope|not in scope|non-goals?|not (?:doing|planned|changing|included)|left out|deferred|scope boundar\w*)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:\bfractions?\b))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:TODO|rewrit\w*|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them )?(?:to|onto)|hand-?rolled|rework\w*|port(?:s|ed|ing)?\b|convert\w*|separate|own (?:issue|change|pr|ticket)|follow-?up|later|defer\w*|future|not planned|not (?:in|part of) this|instead))|[^\n]*(?:(?:quantity\.py|parse_quantity|format_quantity)[^\n]*\b(?:TODO|rewrit\w*|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them )?(?:to|onto)|hand-?rolled|rework\w*|port(?:s|ed|ing)?\b|convert\w*)|\b(?:TODO|rewrit\w*|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them )?(?:to|onto)|hand-?rolled|rework\w*|port(?:s|ed|ing)?\b|convert\w*)\b[^\n]*(?:quantity\.py|parse_quantity|format_quantity)))'''
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:out[ -]of[ -]scope|not in scope|non-goals?|not (?:doing|planned|changing|included)|left out|deferred|scope boundar\w*)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:\bfractions?\b|fractions\.fraction|(?-i:\bFraction\b)))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:(?-i:TODO)|rewrit\w*|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them )?(?:to|onto)|hand-?rolled|rework\w*|port(?:s|ed|ing)?\b|convert\w*))|(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:fractions\.fraction|(?-i:\bFraction\b)))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:separate|own (?:issue|change|pr|ticket)|follow-?up|later|defer\w*|future|not planned|not (?:in|part of) this|instead))|[ \t]*(?:(?:[-*+]|\d+[.)])[ \t]+)?(?:\*\*|_)?`?(?:(?:the|its|our|a|any)[ \t]+)?(?:(?:hand-?(?:rolled|written)|custom|existing|current|own|json)[ \t]+)?`?(?:\bfractions?\b|fractions\.fraction|(?-i:\bFraction\b))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:separate|own (?:issue|change|pr|ticket)|follow-?up|later|defer\w*|future|not planned|not (?:in|part of) this|instead)))|[^\n]*(?:(?:quantity\.py|parse_quantity|format_quantity)[^\n]*\b(?:(?-i:TODO)|rewrit\w*|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them )?(?:to|onto)|hand-?rolled|rework\w*|port(?:s|ed|ing)?\b|convert\w*)|\b(?:(?-i:TODO)|rewrit\w*|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them )?(?:to|onto)|hand-?rolled|rework\w*|port(?:s|ed|ing)?\b|convert\w*)\b[^\n]*(?:quantity\.py|parse_quantity|format_quantity)))'''
 
 [[fact]]
 text = "rebuilt on fractions.Fraction"
