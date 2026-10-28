@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.0
+
+- `github-conventions` covers stacked pull requests (`stacks.md`). When a change builds on an open PR's unmerged work, your agent branches from that PR's branch once that PR has finished review, bases the new PR on it and links the two into a stack with `gh api`. It roots a stack on the branch the stack merges into, and merges a stack bottom up through the web UI, `gh stack merge` where installed, or GitHub's asynchronous merge endpoint, since `gh pr merge` refuses a stacked PR. After a partial merge it checks that the next PR holds only its own commits.
+- When a PR in a stack changes under branches above it, your agent rebases those branches and pushes them with `--force-with-lease`, with the approval your project requires for a force-push, or yours where it states none. This is the one exception to never rewriting a pushed commit.
+
 ## 1.4.1
 
 - `github-conventions`' review format no longer opens with a count of the files reviewed.
