@@ -1,0 +1,9 @@
+commits = []
+final = ""
+
+[files]
+".claude/workspace/issue-52/feature--issue-52/3.md" = "## Code Review\n\n### Critical Issues\nNone found\n\n### Important Issues\nNone found\n\n### Minor Issues\n1. **y** -- `README.md:3`. Add a sentence.\n\n### Summary\nOne Minor finding.\n"
+".claude/workspace/issue-52/feature--issue-52/1.md" = "## Code Review\n\n### Critical Issues\nNone found\n\n### Important Issues\n1. **A network error is no longer retried** -- `src/retry.js:8`. An error thrown by `fetch` itself has no `status`, and `undefined >= 500` is false, so a dropped connection now fails on the first attempt.\n\nAnswer: fixed in the round-1 commit.\n\n### Minor Issues\n1. **The README does not say client errors are not retried** -- `README.md:3`. Add a sentence.\n\nAnswer: fixed in the round-1 commit.\n\n### Summary\nOne Important and one Minor finding.\n"
+
+[briefs]
+"general-purpose" = "Run the praxis:review-pr skill on the branch. Review the whole branch."

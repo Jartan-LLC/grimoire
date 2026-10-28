@@ -7,7 +7,12 @@
 # suite is run. Not calibrated: a new command has no positive control until it is on main.
 target = "praxis:review-cycle"
 # Cases moved off a held-out split, each with its reason in a comment.
-BURNED = []
+BURNED = [
+  # Screened, then found broken: their fixtures claimed fixes no commit held, and their brief
+  # checks read the addresser's briefs and the command's own whole-branch line.
+  "resume-confload",
+  "resume-slugkit",
+]
 covers = [
   "plugins/praxis/skills/review-cycle/**",
   "plugins/praxis/skills/review-pr/SKILL.md",

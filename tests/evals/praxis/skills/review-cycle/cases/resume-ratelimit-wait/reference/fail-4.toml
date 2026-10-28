@@ -1,0 +1,9 @@
+commits = []
+final = ""
+
+[files]
+".claude/workspace/issue-31/feature--issue-31/3.md" = "## Code Review\n\n### Critical Issues\nNone found\n\n### Important Issues\nNone found\n\n### Minor Issues\n1. **y** -- `README.md:3`. Add a sentence.\n\n### Summary\nOne Minor finding.\n"
+".claude/workspace/issue-31/feature--issue-31/1.md" = "## Code Review\n\n### Critical Issues\nNone found\n\n### Important Issues\n1. **wait() asks callers to wait even when a call is allowed** -- `src/ratelimit/window.py:40`. It returns a remaining time whenever the window holds a call, below the limit too, and raises `IndexError` when it holds none.\n\nAnswer: fixed in the round-1 commit.\n\n### Minor Issues\n1. **The README does not mention wait()** -- `README.md:3`. Add a sentence.\n\nAnswer: fixed in the round-1 commit.\n\n### Summary\nOne Important and one Minor finding.\n"
+
+[briefs]
+"general-purpose" = "Run the praxis:review-pr skill on the branch. Review the whole branch."

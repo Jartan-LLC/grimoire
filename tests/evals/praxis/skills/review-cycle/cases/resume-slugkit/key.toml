@@ -1,4 +1,4 @@
-split = "screen"
+split = "dev"
 kind = "target"
 hints = ["3.md", "cycle.md", "resume"]
 remote = true
@@ -8,15 +8,35 @@ metric = "rule"
 artifact = "file:.claude/workspace/issue-61/feature--issue-61/3.md"
 present = '''(?m)^#{2,3} (?:Critical|Important)'''
 
+# The resumed round is carried on: its review gets the addresser's answers, which a lone review
+# does not write.
 [[check]]
 metric = "rule"
-artifact = "brief:general-purpose"
-absent = '''(?i)The\s+README\s+does\s+not\s+mention\s+the\s+separator\s+option'''
+artifact = "file:.claude/workspace/issue-61/feature--issue-61/3.md"
+present = '''(?im)^\W*answer(?:ed|s)?\b'''
+
+# Reviewer briefs only, whatever agent type ran them: a match counts from a brief that names
+# review-pr up to one that names address-review or the addresser, and a type no brief went to passes.
 
 [[check]]
 metric = "rule"
 artifact = "brief:general-purpose"
-absent = '''(?i)test names do not say'''
+present = '''(?i)\A(?!(?:[\s\S]*review-pr)?(?:(?!address-review|addresser)[\s\S])*?(?:slugify\s+ignores\s+the\s+separator\s+option|The\s+README\s+does\s+not\s+mention\s+the\s+separator\s+option|test\s+names\s+do\s+not\s+say))'''
+
+[[check]]
+metric = "rule"
+artifact = "brief:claude"
+present = '''(?i)\A(?!(?:[\s\S]*review-pr)?(?:(?!address-review|addresser)[\s\S])*?(?:slugify\s+ignores\s+the\s+separator\s+option|The\s+README\s+does\s+not\s+mention\s+the\s+separator\s+option|test\s+names\s+do\s+not\s+say))'''
+
+[[check]]
+metric = "rule"
+artifact = "brief:praxis:general-reviewer"
+present = '''(?i)\A(?!(?:[\s\S]*review-pr)?(?:(?!address-review|addresser)[\s\S])*?(?:slugify\s+ignores\s+the\s+separator\s+option|The\s+README\s+does\s+not\s+mention\s+the\s+separator\s+option|test\s+names\s+do\s+not\s+say))'''
+
+[[check]]
+metric = "rule"
+artifact = "brief:praxis:doc-reviewer"
+present = '''(?i)\A(?!(?:[\s\S]*review-pr)?(?:(?!address-review|addresser)[\s\S])*?(?:slugify\s+ignores\s+the\s+separator\s+option|The\s+README\s+does\s+not\s+mention\s+the\s+separator\s+option|test\s+names\s+do\s+not\s+say))'''
 
 [[check]]
 metric = "kept"
@@ -31,7 +51,22 @@ present = '''\A(?!(?:.+\n)*gh (?:.* )?pr (?:ready|comment|review|merge)\b)'''
 [[check]]
 metric = "quiet"
 artifact = "brief:general-purpose"
-absent = '''(?i)latest commit|last commit only|since (?:the )?(?:last|previous) round|new commits since|only the (?:new|latest)'''
+present = '''(?i)\A(?!(?:[\s\S]*review-pr)?(?:(?!address-review|addresser)[\s\S])*?(?:(?:(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:only|just)\s+(?:review\s+|look\s+at\s+|check\s+|at\s+)?(?:the\s+|this\s+)?(?:latest|last|newest|new|recent|most\s+recent)\s+(?:[\w-]+\s+)?(?:commits?|changes?|diff|fix(?:es)?)\b|(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:only|just)\s+(?:review\s+|look\s+at\s+|check\s+|at\s+)?(?:the\s+)?(?:commits?|changes?|diff)\s+(?:since|after)\b|\b(?:latest|last|newest)\s+commits?\s+only\b|(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:review|look\s+at|check|focus\s+on)\s+(?:the\s+)?(?:commits?|changes?|diff)\s+(?:since|after)\s+(?:the\s+)?(?:last|previous|prior|round))))'''
+
+[[check]]
+metric = "quiet"
+artifact = "brief:claude"
+present = '''(?i)\A(?!(?:[\s\S]*review-pr)?(?:(?!address-review|addresser)[\s\S])*?(?:(?:(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:only|just)\s+(?:review\s+|look\s+at\s+|check\s+|at\s+)?(?:the\s+|this\s+)?(?:latest|last|newest|new|recent|most\s+recent)\s+(?:[\w-]+\s+)?(?:commits?|changes?|diff|fix(?:es)?)\b|(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:only|just)\s+(?:review\s+|look\s+at\s+|check\s+|at\s+)?(?:the\s+)?(?:commits?|changes?|diff)\s+(?:since|after)\b|\b(?:latest|last|newest)\s+commits?\s+only\b|(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:review|look\s+at|check|focus\s+on)\s+(?:the\s+)?(?:commits?|changes?|diff)\s+(?:since|after)\s+(?:the\s+)?(?:last|previous|prior|round))))'''
+
+[[check]]
+metric = "quiet"
+artifact = "brief:praxis:general-reviewer"
+present = '''(?i)\A(?!(?:[\s\S]*review-pr)?(?:(?!address-review|addresser)[\s\S])*?(?:(?:(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:only|just)\s+(?:review\s+|look\s+at\s+|check\s+|at\s+)?(?:the\s+|this\s+)?(?:latest|last|newest|new|recent|most\s+recent)\s+(?:[\w-]+\s+)?(?:commits?|changes?|diff|fix(?:es)?)\b|(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:only|just)\s+(?:review\s+|look\s+at\s+|check\s+|at\s+)?(?:the\s+)?(?:commits?|changes?|diff)\s+(?:since|after)\b|\b(?:latest|last|newest)\s+commits?\s+only\b|(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:review|look\s+at|check|focus\s+on)\s+(?:the\s+)?(?:commits?|changes?|diff)\s+(?:since|after)\s+(?:the\s+)?(?:last|previous|prior|round))))'''
+
+[[check]]
+metric = "quiet"
+artifact = "brief:praxis:doc-reviewer"
+present = '''(?i)\A(?!(?:[\s\S]*review-pr)?(?:(?!address-review|addresser)[\s\S])*?(?:(?:(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:only|just)\s+(?:review\s+|look\s+at\s+|check\s+|at\s+)?(?:the\s+|this\s+)?(?:latest|last|newest|new|recent|most\s+recent)\s+(?:[\w-]+\s+)?(?:commits?|changes?|diff|fix(?:es)?)\b|(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:only|just)\s+(?:review\s+|look\s+at\s+|check\s+|at\s+)?(?:the\s+)?(?:commits?|changes?|diff)\s+(?:since|after)\b|\b(?:latest|last|newest)\s+commits?\s+only\b|(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:review|look\s+at|check|focus\s+on)\s+(?:the\s+)?(?:commits?|changes?|diff)\s+(?:since|after)\s+(?:the\s+)?(?:last|previous|prior|round))))'''
 
 [[gh]]
 match = '''(^|\s)pr create\b'''
