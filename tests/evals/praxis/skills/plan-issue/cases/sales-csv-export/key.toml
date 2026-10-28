@@ -125,3 +125,11 @@ failures = 3
 runs = 3
 runner = 2
 remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 2
+runs = 3
+runner = 2
+remote_runner = 3
