@@ -1,8 +1,12 @@
 # Implementation Plan Format
 
-Three readers use the plan: the user deciding whether to approve it, the agent implementing it, often
-in a later session with only the issue, the plan and the repo, and `create-pr` checking the diff
-against it. Write nothing the issue already says.
+Three readers use the plan:
+
+- the user, deciding whether to approve it;
+- the agent implementing it, often in a later session with only the issue, the plan and the repo;
+- `create-pr`, checking the diff against it.
+
+Write nothing the issue already says.
 
 ## Template
 
@@ -11,7 +15,7 @@ against it. Write nothing the issue already says.
 
 ## Approach
 What changes and why this way, in a few sentences, and the trade-off it accepts.
-Rejected: <alternative> -- <why not>.
+Rejected: <alternative> -- <why not>. (omit when none)
 
 ## Decisions for the user
 - <open question or ask-first item> -- default if unanswered: <...>
