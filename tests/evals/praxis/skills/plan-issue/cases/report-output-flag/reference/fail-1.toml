@@ -1,0 +1,35 @@
+final = "Plan written to .claude/workspace/issue-33/plan.md."
+
+[files]
+".claude/workspace/issue-33/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Add `--output <file>` / `-o` to save the JSON report.
+
+### Patterns & Conventions Found
+- Pattern: `bin/sizecheck.js:8` -- options are declared for `node:util` parseArgs.
+- Pattern: `src/report.js:10` -- `json()` builds the report.
+
+### Chosen Approach
+- **What**: A string option `output` with short `o`; move `--open` to `-O`.
+- **Why**: The issue asks for `-o`.
+- **How**: Declare the option, write the file.
+
+### Alternatives Considered
+1. Pipe stdout to a file in CI -- loses the table.
+
+### Files to Create/Modify
+- `bin/sizecheck.js` -- the option
+- `README.md` -- flag table
+
+### Documentation Plan
+- README flag table.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- option
+- [ ] Phase 2: Core implementation -- write the file
+- [ ] Phase 3: Integration/cleanup -- README
+
+### Complexity
+Simple
+'''

@@ -1,0 +1,24 @@
+final = "Plan written to .claude/workspace/issue-29/plan.md."
+
+[files]
+".claude/workspace/issue-29/plan.md" = '''# Plan: --html for relnotes (issue 29)
+
+## Approach
+
+A second render function for HTML next to the text one; the flag picks which runs. No
+general output-format layer: there are two outputs and the issue says that is all.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. `src/text.js`: add `renderHtml`.
+2. `bin/relnotes.js`: `--html` flag.
+3. Tests.
+
+## Verification
+
+- `npm test` passes.
+'''

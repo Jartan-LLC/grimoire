@@ -1,0 +1,35 @@
+final = "Plan written to .claude/workspace/issue-61/plan.md."
+
+[files]
+".claude/workspace/issue-61/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Show cart prices as dollars, like the receipt.
+
+### Patterns & Conventions Found
+- Pattern: `src/receipt.js:3` -- `money` formats cents.
+- Pattern: `src/cart.js:10` -- the cart divides by 100.
+
+### Chosen Approach
+- **What**: Share `money` between receipt and cart.
+- **Why**: One format.
+- **How**: Move it to its own module.
+
+### Alternatives Considered
+1. `Intl.NumberFormat` in the cart -- a second definition.
+
+### Files to Create/Modify
+- `src/money.js` -- new
+- `src/receipt.js`, `src/cart.js` -- use it
+
+### Documentation Plan
+- None.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- module
+- [ ] Phase 2: Core implementation -- cart
+- [ ] Phase 3: Integration/cleanup -- tests
+
+### Complexity
+Simple
+'''

@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-73/plan.md."
+
+[files]
+".claude/workspace/issue-73/plan.md" = '''# Plan: /authors returns every author at once (issue 73)
+
+## Approach
+
+Add `page` and `per_page` handling to `list_authors` in `bookapi/authors.py`, written the same
+way as the books endpoint.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. In `list_authors`, read `page` and `per_page`, cap `per_page` at 100 and slice the list.
+2. Author paging tests.
+
+## Verification
+
+- `python3 -m pytest -q` -- passes.
+'''

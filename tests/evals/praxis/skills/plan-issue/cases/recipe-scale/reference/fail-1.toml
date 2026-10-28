@@ -1,0 +1,35 @@
+final = "Plan written to .claude/workspace/issue-40/plan.md."
+
+[files]
+".claude/workspace/issue-40/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Let `pantry show` print amounts for a given number of servings.
+
+### Patterns & Conventions Found
+- Pattern: `pantry/cli.py:20` -- subcommand options on the subparser.
+- Pattern: `pantry/quantity.py:9` -- amounts are floats.
+
+### Chosen Approach
+- **What**: A `--servings` option and a scale function.
+- **Why**: Smallest change.
+- **How**: Multiply before render.
+
+### Alternatives Considered
+1. Store scaled copies of recipes -- duplicates data.
+
+### Files to Create/Modify
+- `pantry/cli.py` -- the option
+- `pantry/recipe.py` -- scaling
+
+### Documentation Plan
+- None.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- scale function
+- [ ] Phase 2: Core implementation -- option
+- [ ] Phase 3: Integration/cleanup -- tests
+
+### Complexity
+Simple
+'''

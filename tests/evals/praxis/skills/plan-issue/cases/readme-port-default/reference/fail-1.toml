@@ -1,0 +1,33 @@
+final = "Plan written to .claude/workspace/issue-8/plan.md."
+
+[files]
+".claude/workspace/issue-8/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+The README names port 8080; the server listens on 3000.
+
+### Patterns & Conventions Found
+- Pattern: `src/config.js:1` -- the default port.
+
+### Chosen Approach
+- **What**: Correct the README.
+- **Why**: 3000 has been the default since 2.0.0.
+- **How**: One-line edit.
+
+### Alternatives Considered
+1. Change the default back to 8080 -- it clashed with the dev proxy.
+
+### Files to Create/Modify
+- `README.md` -- the port
+
+### Documentation Plan
+- This is a documentation fix.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- edit
+- [ ] Phase 2: Core implementation -- none
+- [ ] Phase 3: Integration/cleanup -- none
+
+### Complexity
+Simple
+'''

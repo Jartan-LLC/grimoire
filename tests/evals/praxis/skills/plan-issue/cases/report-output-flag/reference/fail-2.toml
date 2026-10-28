@@ -1,0 +1,22 @@
+final = "Plan written to .claude/workspace/issue-33/plan.md."
+
+[files]
+".claude/workspace/issue-33/plan.md" = '''# Plan: Write the JSON report to a file (issue 33)
+
+## Approach
+
+Add `--output <file>` with `-o` as its short form, and move `--open` to `-O`.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. In `bin/sizecheck.js:11`, change `open`'s short flag to `O`, and add `output` with short `o`.
+2. Write `report.json(files, budget)` to the file.
+
+## Verification
+
+- `npm test` -- passes.
+'''

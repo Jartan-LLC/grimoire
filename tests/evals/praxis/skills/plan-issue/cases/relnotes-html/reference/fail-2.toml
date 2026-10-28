@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-29/plan.md."
+
+[files]
+".claude/workspace/issue-29/plan.md" = '''# Plan: HTML release notes for the website (issue 29)
+
+## Approach
+
+Introduce a `Renderer` base with `TextRenderer` and `HtmlRenderer`, chosen by a `--format` option,
+so later formats plug in.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Create `src/renderers.js` with the base class and the two renderers.
+2. Switch `bin/relnotes.js` to `--format text|html`, keeping `--html` as a shortcut.
+
+## Verification
+
+- `npm test` -- passes.
+'''

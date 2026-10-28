@@ -1,0 +1,29 @@
+final = "Plan written to .claude/workspace/issue-26/plan.md."
+
+[files]
+".claude/workspace/issue-26/plan.md" = '''# Plan: 7:30 counts as 7.3 hours (issue 26)
+
+## Approach
+
+`parse_hours` turns "7:30" into "7.30" and reads it as a decimal (`timesheet/hours.py:6`), so
+minutes count as hundredths. Split on the colon and add minutes / 60; decimal entries keep their
+current path.
+
+## Decisions for the user
+
+- Assumption: an "H:MM" entry always has two minute digits under 60 -- if "7:5" or "7:75" can
+  occur, they should be rejected with the row's date; the plan rejects minutes outside 0-59.
+
+## Steps
+
+1. In `timesheet/hours.py:4-6`, parse "H:MM" as hours + minutes / 60; raise `ValueError` for
+   minutes outside 0-59.
+2. Add `tests/test_hours.py`: "7:30" is 7.5, "0:45" is 0.75, "7.5" is 7.5, "7:75" raises.
+3. Add a week of five 7:30 rows totalling 37.5 to `tests/test_week.py`, following
+   `tests/test_week.py:4-10`.
+
+## Verification
+
+- `make test` -- the new tests pass, and the 7:30 ones fail without step 1.
+- `python3 -m timesheet sheet.csv` on a sheet of five 7:30 days -- prints 37.5 h.
+'''

@@ -1,0 +1,26 @@
+final = "Plan written to .claude/workspace/issue-61/plan.md."
+
+[files]
+".claude/workspace/issue-61/plan.md" = '''# Plan: Cart shows prices as bare numbers (issue 61)
+
+## Approach
+
+The receipt already formats cents as dollars with a thousands separator in `money`
+(`src/receipt.js:3-6`), but keeps it private. Move `money` into `src/money.js`, use it from both
+`receiptText` and `cartSummary`, so the cart and the receipt print the same amounts.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Create `src/money.js` exporting `money`, moved unchanged from `src/receipt.js:3-6`; the receipt
+   requires it. `test/receipt.test.js` passes unchanged.
+2. In `src/cart.js:10-11`, format each line amount and the total with `money`.
+3. Add a cart test with a $1,234.50 item to `test/cart.test.js`, following `test/cart.test.js:11-13`.
+
+## Verification
+
+- `npm test` -- the new cart test sees `$1,234.50`, and the receipt test still passes.
+'''

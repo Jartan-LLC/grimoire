@@ -1,0 +1,34 @@
+final = "Plan written to .claude/workspace/issue-29/plan.md."
+
+[files]
+".claude/workspace/issue-29/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Print release notes as an HTML fragment with `--html`.
+
+### Patterns & Conventions Found
+- Pattern: `src/text.js:2` -- one function renders the text.
+
+### Chosen Approach
+- **What**: A renderer registry keyed by format, with text and HTML renderers.
+- **Why**: Markdown or RSS can be added later without touching the CLI.
+- **How**: `src/renderers/` with one file per format.
+
+### Alternatives Considered
+1. An if in the CLI -- grows with each format.
+
+### Files to Create/Modify
+- `src/renderers/index.js`, `src/renderers/html.js` -- new
+- `bin/relnotes.js` -- `--format`
+
+### Documentation Plan
+- None.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- registry
+- [ ] Phase 2: Core implementation -- HTML
+- [ ] Phase 3: Integration/cleanup -- tests
+
+### Complexity
+Moderate
+'''

@@ -1,0 +1,6 @@
+{
+  "name": "mockapi",
+  "version": "2.1.0",
+  "bin": { "mockapi": "bin/mockapi.js" },
+  "scripts": { "test": "node --test" }
+}

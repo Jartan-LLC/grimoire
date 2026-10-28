@@ -1,0 +1,21 @@
+final = "Plan written to .claude/workspace/issue-26/plan.md."
+
+[files]
+".claude/workspace/issue-26/plan.md" = '''# Plan: 7:30 counts as 7.3 hours (issue 26)
+
+## Approach
+
+Read "H:MM" as hours plus minutes / 60 in `timesheet/hours.py`.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Split on the colon in `parse_hours`.
+
+## Verification
+
+- Enter 7:30 for five days in a sheet and check the weekly total reads 37.5.
+'''

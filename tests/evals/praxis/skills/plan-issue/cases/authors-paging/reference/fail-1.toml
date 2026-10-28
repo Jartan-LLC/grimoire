@@ -1,0 +1,34 @@
+final = "Plan written to .claude/workspace/issue-73/plan.md."
+
+[files]
+".claude/workspace/issue-73/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Page `/authors` like `/books`.
+
+### Patterns & Conventions Found
+- Pattern: `bookapi/books.py:9` -- paging parameters.
+
+### Chosen Approach
+- **What**: Extract the paging from `list_books` into a helper both endpoints call.
+- **Why**: Same rules for both.
+- **How**: New module.
+
+### Alternatives Considered
+1. Copy the code -- two copies drift.
+
+### Files to Create/Modify
+- `bookapi/paging.py` -- new
+- `bookapi/books.py`, `bookapi/authors.py` -- use it
+
+### Documentation Plan
+- None.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- helper
+- [ ] Phase 2: Core implementation -- authors
+- [ ] Phase 3: Integration/cleanup -- tests
+
+### Complexity
+Simple
+'''

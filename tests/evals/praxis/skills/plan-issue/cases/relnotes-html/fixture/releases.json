@@ -1,0 +1,11 @@
+[
+  {
+    "version": "2.3.0",
+    "date": "2026-10-14",
+    "changes": [
+      { "type": "added", "text": "Export a board as PDF" },
+      { "type": "fixed", "text": "Cards dragged to an empty column disappeared" },
+      { "type": "fixed", "text": "Due dates showed in UTC" }
+    ]
+  }
+]

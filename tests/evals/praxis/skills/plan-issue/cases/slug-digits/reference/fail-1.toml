@@ -1,0 +1,35 @@
+final = "Plan written to .claude/workspace/issue-14/plan.md."
+
+[files]
+".claude/workspace/issue-14/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Digits are stripped from slugs, so "Week 1 recap" and "Week 2 recap" collide.
+
+### Patterns & Conventions Found
+- Pattern: `src/slug.js:7` -- one regex decides which characters survive.
+- Pattern: `test/slug.test.js:5` -- one test per rule.
+
+### Chosen Approach
+- **What**: Allow `0-9` in the character class.
+- **Why**: The class was written for words only.
+- **How**: Edit the regex, add a test.
+
+### Alternatives Considered
+1. Append a counter to colliding slugs -- hides the bug.
+
+### Files to Create/Modify
+- `src/slug.js` -- the regex
+- `test/slug.test.js` -- a digits test
+
+### Documentation Plan
+- None.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- failing test
+- [ ] Phase 2: Core implementation -- regex
+- [ ] Phase 3: Integration/cleanup -- run the suite
+
+### Complexity
+Simple
+'''
