@@ -1,0 +1,6 @@
+commits = []
+final = "PR opened."
+gh = "gh pr create --draft --title t\n\nb\n"
+
+[files]
+"src/confload/config.py" = "fixed\n"

@@ -1,0 +1,7 @@
+commits = []
+final = "One decision needs you: X. Keep it?"
+
+[files]
+"AGENTS.md" = "# Agent notes\n\n## Windows\n\nThe call store keeps only the last 60 seconds of calls, so a window can be at most one minute.\n"
+".claude/workspace/issue-23/feature--issue-23/cycle.md" = "Raised: X. Recommendation: keep.\n"
+"src/ratelimit/window.py" = "fixed\n"

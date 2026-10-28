@@ -1,0 +1,7 @@
+commits = []
+final = "One decision needs you: X. Keep it?"
+
+[files]
+"AGENTS.md" = "# Agent notes\n\n## Slugs\n\nSlugs contain only lowercase letters, digits and dashes: the router that serves them rejects any other character.\n"
+".claude/workspace/issue-61/feature--issue-61/cycle.md" = "Raised: X. Recommendation: keep.\n"
+"src/slug.js" = "fixed\n"

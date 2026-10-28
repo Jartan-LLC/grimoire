@@ -1,0 +1,8 @@
+commits = []
+final = ""
+
+[files]
+".claude/workspace/issue-17/feature--issue-17/1.md" = "## Code Review\n\n### Critical Issues\nNone found\n\n### Important Issues\nNone found\n\n### Minor Issues\n1. **The README does not mention millisecond windows** -- `README.md:3`. Add a sentence.\n\n### Summary\nOne Minor finding.\n\nAnswer: fixed in the round-1 commit.\n"
+
+[briefs]
+"general-purpose" = "Review it. Earlier: The README does not mention millisecond windows"
