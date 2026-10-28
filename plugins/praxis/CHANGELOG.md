@@ -2,7 +2,7 @@
 
 ## 1.10.0
 
-- New `workspace-patterns` skill: where your agent keeps its working files. Each effort gets a folder in the main checkout's `.claude/workspace/` (`issue-<n>/`, or a name chosen when the work starts), also when your agent works in a worktree, with a subfolder per branch (`feature/x` -> `feature--x`); worktrees go in `.claude/worktrees/`. Where git does not ignore these, your agent asks before changing your `.gitignore`.
+- New `workspace-patterns` skill: where your agent keeps its working files. Each effort gets a folder in the main checkout's `.claude/workspace/` (`issue-<n>/`, or a name chosen when the work starts), also when your agent works in a worktree, with a subfolder per branch (`feature/x` -> `feature--x`, or `pr-<n>` for a PR from a fork); worktrees go in `.claude/worktrees/`. Where git does not ignore these, your agent asks before changing your `.gitignore`.
 - `plan-issue` saves the plan as `.claude/workspace/issue-<n>/plan.md` (was `issue-<n>-plan.md`), and `implement-issue` and `create-pr` read it there. `review-pr` saves each review as the next numbered file in the PR branch's folder (`1.md`, `2.md`, ...) instead of replacing `pr-<n>-review.md`, and `address-review` reads the latest. Plans and reviews at the old paths are still read.
 
 ## 1.9.0

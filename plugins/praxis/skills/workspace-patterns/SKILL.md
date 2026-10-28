@@ -51,6 +51,6 @@ as `--`. First check `git worktree list`: a checkout that already has the branch
 ## When git does not ignore them
 
 Before the first write to the workspace or a worktree, check that git ignores the path you write
-(`git check-ignore -q <path>`). If it does not, ask the user before changing `.gitignore`, and offer
-`.git/info/exclude`, which changes no tracked file. Until they answer, stage files by name, never with
-`git add -A` or `git add .`.
+(`git -C <main checkout> check-ignore -q <path>`). If it does not, ask the user before changing
+`.gitignore`, and offer `.git/info/exclude`, which changes no tracked file. Until they answer, stage
+files by name, never with `git add -A` or `git add .`.
