@@ -3,7 +3,8 @@
 ## 1.12.0
 
 - Needs gitwise 1.5.0 or later.
-- `implement-issue` branches from an open PR's branch when an issue builds on that PR's unmerged work, other than the PR of a sub-issue's parent feature branch, and `gitwise:github-conventions`' new `stacks.md` says to stack, and `create-pr` recognises such a branch by its history, or asks you, then bases the PR on that branch and links it into that PR's stack as `stacks.md` says. A sub-issue PR into its parent feature branch joins no stack; sub-issues that build on each other may stack within the parent branch.
+- `implement-issue` branches from an open PR's branch when an issue builds on that PR's unmerged work and `gitwise:github-conventions`' new `stacks.md` says to stack, other than the PR of a sub-issue's parent feature branch.
+- `create-pr` bases the PR on the branch it was cut from, or asks you when it cannot tell. When that is another open PR's branch, it links the new PR into that PR's stack as `stacks.md` says. A sub-issue PR into its parent feature branch joins no stack; sub-issues that build on each other may stack within the parent branch.
 - `information-placement`'s example of a stacked PR stated as a fact now reads "merging this PR also merges the PRs below it in its stack", which is how GitHub merges a stack.
 
 ## 1.11.0

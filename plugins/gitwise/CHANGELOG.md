@@ -3,8 +3,8 @@
 ## 1.5.0
 
 - `github-conventions` covers stacked pull requests (`stacks.md`). When a change builds on an open PR's unmerged work, your agent branches from that PR's branch once that PR has finished review, or earlier when waiting would stall the work, telling you that each change to it then means a restack. It bases the new PR on that branch and links the two into a stack with `gh api`, and tells you before branching when that PR sits below its stack's top, where GitHub cannot add a PR. It roots a stack on the branch the stack merges into, and never stacks a sub-issue branch on its parent feature branch's PR; sub-issues that build on each other may stack within the parent branch.
-- Your agent merges a stack bottom up with your project's merge method, through `gh stack merge` where installed or GitHub's asynchronous merge endpoint, since `gh pr merge` refuses a stacked PR; a person can use the web UI. After a partial merge it checks that the next PR holds only its own commits.
-- Before pushing to a PR, your agent checks for PRs based on its branch. When a PR in a stack changes under branches above it, or the next PR still carries a merged PR's commits, your agent rebases those branches and pushes them with `--force-with-lease`, with the approval your project requires for a force-push, or yours where it states none. This is the one exception to never rewriting a pushed commit.
+- Your agent merges a stack bottom up with your project's merge method, through GitHub's asynchronous merge endpoint, since `gh pr merge` refuses a stacked PR; a person can use the web UI. After a partial merge it checks that the next PR holds only its own commits.
+- Before pushing to a PR, your agent reads its stack. When a PR in a stack changes under PRs stacked above it, or the next PR still carries a merged PR's commits, your agent rebases those PRs' branches with git and pushes them with `--force-with-lease`, with the approval your project requires for a force-push, or yours where it states none. This is the one exception to never rewriting a pushed commit.
 
 ## 1.4.1
 
