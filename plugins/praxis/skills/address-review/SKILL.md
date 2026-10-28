@@ -1,12 +1,12 @@
 ---
 name: address-review
-description: Work through review findings on a PR one at a time
-argument-hint: PR number
+description: Work through review findings on a PR, or on a branch before it has one, one at a time
+argument-hint: PR number or branch
 ---
 
 # Address Review
 
-Work through code review findings on a pull request, investigating each one and applying fixes where warranted.
+Work through code review findings on a pull request, or on a branch before it has one, investigating each one and applying fixes where warranted.
 
 **Always pause for the user's decision on each finding** -- even in auto mode, even if the reviewer or your own assessment recommends skipping. Auto mode grants tool access, not decision authority; the user decides what to fix, skip, or adjust.
 
@@ -16,7 +16,7 @@ Where the project's own rules say otherwise, follow them.
 
 ### 1. Load Review
 
-Determine the PR number from the user's request, and its branch (`gh pr view <pr-number> --json headRefName,isCrossRepository`). Load the `praxis:workspace-patterns` skill and read the latest review in that branch's folder in the workspace (the `<n>.md` with the highest number), and what people have posted on the PR: its comments and reviews, and the comments on its lines, which `gh pr view` does not show:
+Determine the PR number or branch from the user's request; with neither, the current branch. A branch with an open PR (`gh pr view <branch> --json number,state`) is handled as that PR. For a PR, get its branch (`gh pr view <pr-number> --json headRefName,isCrossRepository`). Load the `praxis:workspace-patterns` skill and read the latest review in the branch's folder in the workspace (the `<n>.md` with the highest number). For a PR, also read what people have posted on it: its comments and reviews, and the comments on its lines, which `gh pr view` does not show:
 
 ```bash
 gh pr view <pr-number> --comments
@@ -27,7 +27,7 @@ If the saved review is missing, tell the user and ask where it is, or offer to r
 
 ### 2. Check Out Branch
 
-Ensure the PR's branch is checked out locally so fixes can be applied. Load the `gitwise:commit-pr-writing` and `gitwise:github-conventions` skills. Check the PR title and description (`gh pr view <pr-number> --json title,body,baseRefName`) against `git diff <baseRefName>...HEAD`, update what no longer holds as `gitwise:commit-pr-writing` says (`gh pr edit <pr-number>`), and tell the user what you changed.
+Ensure the branch is checked out locally so fixes can be applied. Load the `gitwise:commit-pr-writing` and `gitwise:github-conventions` skills. Check the PR title and description (`gh pr view <pr-number> --json title,body,baseRefName`; with no PR, the branch's `pr.md` and the base the review names) against `git diff <base>...HEAD`, update what no longer holds as `gitwise:commit-pr-writing` says (`gh pr edit <pr-number>`, or in `pr.md`, writing it if missing), and tell the user what you changed.
 
 ### 3. Walk Through Findings
 
@@ -49,8 +49,8 @@ The user may ask to commit at any point during the review -- commit what's been 
 
 ### 5. Close the Round
 
-Update the PR title and description as in step 2. A declined finding, or a fix made differently than asked, is a decision a reviewer might question: give it its line there as `gitwise:commit-pr-writing` says.
+Update the PR title and description, or `pr.md`, as in step 2. A declined finding, or a fix made differently than asked, is a decision a reviewer might question: give it its line there as `gitwise:commit-pr-writing` says.
 
 Where a person posted a finding that the round declined, fixed differently or found already the case, reply to it with what was done and why: in its thread when it was posted on a line (`gh api repos/{owner}/{repo}/pulls/<pr-number>/comments/<comment-id>/replies -f body=...`, with the id of the thread's first comment: the finding's `in_reply_to_id` when it has one), otherwise in one PR comment for each review or comment that holds such findings. Answer nothing else on the PR.
 
-If the round's commits are not pushed yet, tell the user the update and any reply are ready for after the push.
+For a PR whose round's commits are not pushed yet, tell the user the update and any reply are ready for after the push.

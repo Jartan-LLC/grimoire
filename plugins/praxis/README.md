@@ -37,8 +37,8 @@ codex plugin add gitwise@grimoire
 - `/praxis:implement-issue` -- implement a GitHub issue, optionally from an existing plan
 - `/praxis:create-issue` -- create a GitHub issue using the appropriate template
 - `/praxis:create-pr` -- create a draft pull request for implemented changes
-- `/praxis:review-pr` -- review a pull request using specialized reviewer agents
-- `/praxis:address-review` -- work through review findings on a PR one at a time
+- `/praxis:review-pr` -- review a pull request, or a branch before it has one, using specialized reviewer agents
+- `/praxis:address-review` -- work through review findings on a PR, or on a branch before it has one, one at a time
 
 ### Agents
 
