@@ -2,55 +2,59 @@
 
 A stack is a chain of PRs, each based on the branch of the PR below it, linked on GitHub so they merge bottom up as one series. The project's own rules win where they speak.
 
-## When to Stack
+## Rules
 
-Stack a change on an open PR when it builds on that PR's unmerged work and waiting for the merge would stall it. Keep each PR small enough to review alone, and put what a change depends on in its own branch or one below it. Changes that do not depend on each other go in separate PRs off the base branch. A sub-issue PR merges into its parent feature branch and is never stacked on that branch's PR, even while that PR is open, because linking it would make its merge also merge the parent PR. Sub-issues that build on each other may stack within the parent branch like any other dependent changes, with the bottom PR based on the parent branch. A stack stays within one repository: it cannot span forks.
+1. Stack only a change that needs the open PR below it. Changes that do not depend on each other go in separate PRs off the base branch.
+2. Cut and push the upper branch early, so its work and notes (its plan and `pr.md` in the workspace) are not held in a session's context, but open and link its PR only once the lower PR's review is done. Then sync the upper branch onto the final lower branch once ([Updating a Stack](#updating-a-stack)), instead of carrying each lower-PR review fix up into it.
+3. Test what lands. Merge a stack only after CI has passed on the PR you merge it by, against the stack's base as it is now: that PR's head holds everything the merge lands, and a base that moved after the run needs a fresh run. Merge a linked stack by its top PR: one operation, one squash commit per PR. When the project's CI does not test that PR, as when CI runs only on the bottom of a stack or the chain is unlinked, fold the stack into its bottom PR, so that PR holds every layer and its CI run tests what lands, or ask the user to change CI. Where the project has no convention for folding, the user decides how. Never merge layers CI has not tested. A partial merge applies the same rule to the PR it merges by.
 
-Every PR in a stack is held to the rules and required checks of the bottom PR's base, and workflows that run on pull requests into that branch run on every PR in the stack. A stack rooted on a branch those workflows skip, such as an integration branch, gets no CI.
+## Linked Stacks and Unlinked Chains
+
+A chain of PRs is not a stack until it is linked. Merging a PR in a linked stack also merges every unmerged PR below it, in one operation, and leaves the PRs above open; `gh pr merge` refuses it. Every PR in a linked stack is held to the rules and required checks of the stack's base, and the workflows that run on pull requests into that base run on every PR in it. In an unlinked chain each PR merges alone and `gh pr merge` works, but the base's workflows skip each PR above the bottom one until it is retargeted onto the base, and after a merge the next PR is retargeted and updated by hand. A stack rooted on a branch those workflows skip, such as an integration branch, gets no CI.
 
 ## Building a Stack
 
-- Before you branch, read the lower PR's stack: `gh api repos/{owner}/{repo}/pulls/<lower PR> --jq .stack` prints the stack's `number` (the `<stack>` in the calls below), its `size` and the lower PR's `position`, or an empty line for a PR in no stack. GitHub adds PRs only above a stack's top PR, so when the lower PR sits below its stack's top (`position` less than `size`), the new PR cannot join that stack: stop and ask the user before branching.
-- Branch from the lower PR's branch and base the PR on it. Start the upper branch once the PR below has finished review: a change to the lower PR after the upper branch exists means rebasing every branch above it ([Updating a Stack](#updating-a-stack)). While the PR below is still in review, stack on it only when waiting would stall the work, and tell the user that each change to it then means a restack.
-- Root a stack on the branch it merges into, never on another stack's branch, and do not delete the branch a stack is based on while the stack is open. When that branch is deleted, GitHub moves the stack onto the default branch without rebasing it, and the bottom PR then carries every commit of the deleted branch.
-- Once the new PR is open, link it into a stack with the lower PR: a chain of PRs is not a stack until it is linked, and until then the stack base's workflows do not run on the upper PRs. Read the lower PR's stack again with the same call first, since a PR may have joined above it after you branched. When the lower PR is still its stack's top PR (`position` equals `size`), add the new PR to the stack:
+- Branch from the lower PR's branch and push it. Root the stack on the branch it merges into, never on another stack's branch, and do not delete a stack's base branch while the stack is open: GitHub then moves the stack onto the default branch without rebasing it, and the bottom PR carries every commit of the deleted branch.
+- Never stack a sub-issue PR on its parent feature branch's PR: linking it would make its merge also merge the parent PR. Sub-issues that build on each other may stack within the parent branch, with the bottom PR based on it. A stack cannot span forks.
+- Open the PR based on the lower PR's branch, then link it. `gh api repos/{owner}/{repo}/pulls/<lower PR> --jq .stack` prints the lower PR's stack `number`, `size` and `position`, or an empty line when it is in no stack. When `position` equals `size`, add the new PR:
 
   ```bash
-  gh api -X POST repos/{owner}/{repo}/stacks/<stack>/add --input - <<<'{"pull_requests": [<new PR>]}'
+  gh api -X POST repos/{owner}/{repo}/stacks/<number>/add --input - <<<'{"pull_requests": [<new PR>]}'
   ```
 
-  If the lower PR is no longer the top, tell the user instead of linking.
-
-  When the lower PR is in no stack, create a stack from the chain, bottom first. Each PR's base must be the branch of the PR before it, or GitHub refuses with 422:
+  When the lower PR is below its stack's top, GitHub cannot add the new PR: tell the user. When the lower PR is in no stack, create one, bottom first. Each PR's base must be the branch of the PR before it, or GitHub refuses with 422:
 
   ```bash
   gh api -X POST repos/{owner}/{repo}/stacks --input - <<<'{"pull_requests": [<bottom PR>, ..., <top PR>]}'
   ```
 
-- The base of a PR in a stack cannot be edited. To change it, unstack first (`gh api -X POST repos/{owner}/{repo}/stacks/<stack>/unstack`), which takes the open PRs out of the stack with their bases kept, then edit the base and link the stack again.
+- A stacked PR's base cannot be edited. Unstack first (`gh api -X POST repos/{owner}/{repo}/stacks/<number>/unstack`; the open PRs keep their bases), edit the base, and link again.
 
 ## Updating a Stack
 
-A PR has PRs stacked above it when its stack (`gh api repos/{owner}/{repo}/pulls/<n> --jq .stack`) shows a `position` less than its `size`; `gh api repos/{owner}/{repo}/stacks/<stack> --jq '.pull_requests[].head.ref'` lists the stack's branches, bottom first. To change such a PR, run `git fetch origin` and check that each branch above it matches its remote tip (`origin/<branch>`): reset one that is missing locally or behind its remote to that tip (`git switch -C <branch> origin/<branch>`), and where one has commits its remote lacks, stop and tell the user. Then note where the PR's branch and each branch above it point (`git rev-parse <branch>`) before you change any of them, commit the change on its branch and push it, then, bottom up, rebase each branch above onto the branch below it and push it:
+Rebase the branches above a PR when it changes under them, when you sync an upper branch, and when a merge fails because the stack needs rebasing. This rewrites pushed commits: do it only with the approval the project requires for a force-push, or the user's where it states none. **Rebase stack** in the web UI needs the same approval.
 
-```bash
-git rebase --onto <branch below> <old tip of branch below> <branch>
-git push --force-with-lease origin <branch>
-```
+`gh api repos/{owner}/{repo}/stacks/<number> --jq '.pull_requests[].head.ref'` lists a stack's branches, bottom first.
 
-`<old tip of branch below>` is the tip you noted for that branch. After a merge that failed because the stack needs rebasing, there is no change to commit or push: run the fetch and check for every branch in the stack. Where a branch below was rewritten rather than added to, the PR above it lists commits that are not its own (`gh pr view <n> --json commits`): stop and tell the user. Otherwise restack each branch above the bottom one, bottom up, with the current tip of the branch below it as its `<old tip of branch below>`. A stack that is not linear does not merge, even while each PR reports itself mergeable.
+1. Run `git fetch origin`. Reset each branch you will rebase that is missing locally or behind its remote (`git switch -C <branch> origin/<branch>`). Where one has commits its remote lacks, stop and tell the user.
+2. Note each branch's tip (`git rev-parse <branch>`) before you change any of them. If there is a change to make, commit it on its branch and push it.
+3. Bottom up, rebase each branch above onto the branch below it and push it:
 
-Restacking, here or after a merge ([Merging a Stack](#merging-a-stack)), is the one case where a pushed commit is rewritten: do it only with the approval the project requires for a force-push, or the user's where it states none. **Rebase stack** in the web UI does the same, under the same approval.
+   ```bash
+   git rebase --onto <branch below> <old tip of branch below> <branch>
+   git push --force-with-lease origin <branch>
+   ```
+
+`<old tip of branch below>` is the tip you noted; for a sync, the lower branch's tip when you cut the upper branch; after a failed merge, the current tip of the branch below. Where a branch below was rewritten rather than added to, the PR above lists commits that are not its own (`gh pr view <n> --json commits`): stop and tell the user. A stack that is not linear does not merge, even while each PR reports itself mergeable.
 
 ## Merging a Stack
 
-- Merging a PR in a stack also merges every unmerged PR below it, in one operation, and the PRs above stay open; under a squash merge each PR lands as its own commit. To merge a stack whose PRs are all ready, merge its top PR.
-- None of the PRs being merged may be a draft: mark each ready first (`gh pr ready`).
-- `gh pr merge` and the `pulls/<n>/merge` endpoint refuse a PR in a stack. Merge it with the asynchronous merge endpoint, the PR's head commit (`gh pr view <n> --json headRefOid -q .headRefOid`) and the method the project merges with. A person can also merge it in the web UI.
+- Mark every PR being merged ready first (`gh pr ready`): a draft among them fails the merge.
+- `gh pr merge` and the `pulls/<n>/merge` endpoint refuse a stacked PR. Use the asynchronous merge endpoint with the PR's head commit (`gh pr view <n> --json headRefOid -q .headRefOid`) and the project's merge method, or let a person merge in the web UI:
 
   ```bash
   gh api -X PUT repos/{owner}/{repo}/pulls/<n>/merge-async -f merge_method=<squash|merge|rebase> -f sha=<head sha> --jq .details.uuid
   ```
 
-  Leave out `merge_method` where the stack's base requires a merge queue: the endpoint takes it only for a direct merge, and the queue merges by its own method. Then poll `gh api repos/{owner}/{repo}/pulls/<n>/merge-async/<uuid>` until its `status` is `merged`; `enqueued`, when the stack base's merge queue took the PR and will merge it later (`gh pr view <n> --json state` shows when it has); or `failed`, with the reason in `details.message`. On `failed`, act on that reason: restack a stack that needs rebasing ([Updating a Stack](#updating-a-stack)); otherwise tell the user.
-- After a merge that leaves PRs above it open, GitHub retargets the next PR onto the stack's base and rebases the PRs above. Before merging the next one, check that it holds only its own commits (`gh pr view <n> --json commits`): one that was not rebased still carries the merged PR's commits, and under a squash merge their messages land a second time. If it carries them, run `git fetch origin`, check it and each branch above it against its remote tip, note each branch's tip from `origin/<branch>`, and restack them as [Updating a Stack](#updating-a-stack) says: the next PR's branch onto `origin/<stack base>`, with the merged PR's last head commit (`gh pr view <merged PR> --json headRefOid -q .headRefOid`) as its `<old tip of branch below>`, and each branch above with the tip you noted for the branch below it.
+  Poll `gh api repos/{owner}/{repo}/pulls/<n>/merge-async/<uuid>` until `status` is `merged` or `failed`. On `failed`, read `details.message`: restack a stack that needs rebasing ([Updating a Stack](#updating-a-stack)); otherwise tell the user.
+- After a partial merge, GitHub retargets the next PR onto the stack's base and rebases the PRs above. Wait for that (`gh pr view <n> --json baseRefName,headRefOid` shows the new base and head), then check the next PR before you restack by hand: it must hold only its own commits (`gh pr view <n> --json commits`). One that still carries the merged PR's commits would land their messages a second time under a squash merge. Restack it as [Updating a Stack](#updating-a-stack) says, onto `origin/<stack base>` with the merged PR's last head commit (`gh pr view <merged PR> --json headRefOid -q .headRefOid`) as `<old tip of branch below>`.
