@@ -40,7 +40,8 @@ Rejected: <alternative> -- <why not>. (omit when none)
 - Decisions for the user: open questions, actions the project's rules say to ask about first, and
   assumptions, each with the default the plan takes. Write "None." when there are none.
 - Out of scope: only changes a reader would expect or an implementer be tempted to make, each with
-  where it goes. Leave out the section when there are none.
+  where it goes, and not work the change itself needs, such as sharing code with a caller that
+  already exists. Leave out the section when there are none.
 - Steps: concrete and in order, each ending in a state that can be checked, with the file to change
   and the existing code to follow (`file:line`). The docs, changelog entry and version bump the
   change owes are steps too. Put a hazard in the step it affects.
