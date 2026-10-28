@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.11.0
+
+- `review-pr` reviews a branch that has no PR yet (`/praxis:review-pr <branch>`, or the current branch): it diffs the branch against the base you name, or the branch it was cut from, names that base in the review, and takes the PR title and description from the branch's `pr.md` in the workspace when there is one. Its reviewers read files from a checkout of the branch: when the branch is checked out elsewhere, your agent uses that checkout or adds a worktree, and never switches another checkout's branch.
+- `address-review` works from such a review, keeping the title and description in `pr.md` until the PR exists, and `create-pr` takes them from `pr.md` when the branch has one.
+
 ## 1.10.0
 
 - New `workspace-patterns` skill: where your agent keeps its working files. Each effort gets a folder in the main checkout's `.claude/workspace/` (`issue-<n>/`, or a name chosen when the work starts), also when your agent works in a worktree, with a subfolder per branch (`feature/x` -> `feature--x`, or `pr-<n>` for a PR from a fork); worktrees go in `.claude/worktrees/`. Where git does not ignore these, your agent asks before changing your `.gitignore`.

@@ -32,7 +32,7 @@ Load the `gitwise:commit-pr-writing` and `gitwise:github-conventions` skills. De
 
 ### 4. Create Pull Request
 
-Read `.github/PULL_REQUEST_TEMPLATE.md` if the project has one, and write the PR title and description as `gitwise:commit-pr-writing` says, flagging where the change departs from the plan. Then create the PR as a draft, as `gitwise:github-conventions` says:
+If the branch's folder in the workspace has a `pr.md`, take the title and description from it, updating only what no longer holds against the diff. Read `.github/PULL_REQUEST_TEMPLATE.md` if the project has one, and write the PR title and description as `gitwise:commit-pr-writing` says, flagging where the change departs from the plan. Then create the PR as a draft, as `gitwise:github-conventions` says:
 
 ```bash
 gh pr create --draft --title "<title>" --body "<description>" --base <base-branch>
