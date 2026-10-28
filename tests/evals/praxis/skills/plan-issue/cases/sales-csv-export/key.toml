@@ -30,12 +30,13 @@ metric = "grounded"
 artifact = "file:.claude/workspace/issue-64/plan.md"
 present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|bin/salesreport\.js|data/sample\-orders\.json|package\.json|src/report\.js|src/table\.js|test/report\.test\.js|bin/?|data/?|src/?|test/?)(?:[:#][^`\n]*)?`'''
 
-# No backticked `path:line` whose path is not a fixture file or whose line is past its end; the path
-# must end in a source or text extension, so a `host:port` is not read as one.
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; a list
+# or range of lines and a `:col` are read too. The path must end in a source or text extension or
+# be a known extensionless file such as `Makefile`, so a `host:port` is not read as one.
 [[check]]
 metric = "grounded"
 artifact = "file:.claude/workspace/issue-64/plan.md"
-absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|(?:bin/)?salesreport\.js:(?:12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:12|11|10|9|8|7|6|5|4|3|2|1))?|(?:data/)?sample\-orders\.json:(?:5|4|3|2|1)(?:[-,][ \t]*(?:5|4|3|2|1))?|package\.json:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|(?:src/)?report\.js:(?:18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:src/)?table\.js:(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?report\.test\.js:(?:19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock):\d+(?:[-,][ \t]*\d+)?`'''
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?::\d+)?(?:[-,][ \t]*(?:2|1)(?::\d+)?)*|AGENTS\.md:(?:6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:6|5|4|3|2|1)(?::\d+)?)*|CLAUDE\.md:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|(?:bin/)?salesreport\.js:(?:12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:data/)?sample\-orders\.json:(?:5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:5|4|3|2|1)(?::\d+)?)*|package\.json:(?:7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:7|6|5|4|3|2|1)(?::\d+)?)*|(?:src/)?report\.js:(?:18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:src/)?table\.js:(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:test/)?report\.test\.js:(?:19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*)`)(?:[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock)|(?:[\w./-]*/)?(?:Makefile|Dockerfile|LICENSE|\.gitignore|\.npmignore|\.dockerignore|\.editorconfig)):\d+(?::\d+)?(?:[-,][ \t]*\d+(?::\d+)?)*`'''
 
 # No section but Decisions that holds only None / N/A (a padded section).
 [[check]]

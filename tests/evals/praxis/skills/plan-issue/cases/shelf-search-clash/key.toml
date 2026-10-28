@@ -27,12 +27,13 @@ metric = "grounded"
 artifact = "file:.claude/workspace/issue-17/plan.md"
 present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|README\.md|pyproject\.toml|shelf/__init__\.py|shelf/catalog\.py|shelf/cli\.py|tests/test_cli\.py|shelf/?|tests/?)(?:[:#][^`\n]*)?`'''
 
-# No backticked `path:line` whose path is not a fixture file or whose line is past its end; the path
-# must end in a source or text extension, so a `host:port` is not read as one.
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; a list
+# or range of lines and a `:col` are read too. The path must end in a source or text extension or
+# be a known extensionless file such as `Makefile`, so a `host:port` is not read as one.
 [[check]]
 metric = "grounded"
 artifact = "file:.claude/workspace/issue-17/plan.md"
-absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|README\.md:(?:8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1))?|pyproject\.toml:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|(?:shelf/)?__init__\.py:(?:1)(?:[-,][ \t]*(?:1))?|(?:shelf/)?catalog\.py:(?:35|34|33|32|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:35|34|33|32|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:shelf/)?cli\.py:(?:30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:tests/)?test_cli\.py:(?:19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock):\d+(?:[-,][ \t]*\d+)?`'''
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?::\d+)?(?:[-,][ \t]*(?:2|1)(?::\d+)?)*|AGENTS\.md:(?:8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1)(?::\d+)?)*|CLAUDE\.md:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|README\.md:(?:8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1)(?::\d+)?)*|pyproject\.toml:(?:7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:7|6|5|4|3|2|1)(?::\d+)?)*|(?:shelf/)?__init__\.py:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|(?:shelf/)?catalog\.py:(?:35|34|33|32|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:35|34|33|32|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:shelf/)?cli\.py:(?:30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:tests/)?test_cli\.py:(?:19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*)`)(?:[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock)|(?:[\w./-]*/)?(?:Makefile|Dockerfile|LICENSE|\.gitignore|\.npmignore|\.dockerignore|\.editorconfig)):\d+(?::\d+)?(?:[-,][ \t]*\d+(?::\d+)?)*`'''
 
 # No section but Decisions that holds only None / N/A (a padded section).
 [[check]]
@@ -40,12 +41,13 @@ metric = "lean"
 artifact = "file:.claude/workspace/issue-17/plan.md"
 absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
 
-# Target: a Decisions section (or Open questions...) raises the clash with the existing public name,
-# on a line that names it as a command or flag, not only as a plain word.
+# Target: a Decisions section (or Open questions...) raises the clash: one item names both
+# `shelf search` and what it already does (the search of your own catalog),
+# so a decision about the new name alone fails.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-17/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?=[^\n]*(?:shelf[ \t]+search\b|`search`|\bsearch[ \t]+(?:sub)?command|(?:sub)?command[ \t]+`?search\b|(?:local|catalog)[ \t]+search\b))(?=[^\n]*(?:renam\w*|existing|exists|already|conflict\w*|clash\w*|collid\w*|collision|taken|shadow\w*|replac\w*|overload\w*|break\w*|local|catalog|alias\w*|scripts?))'''
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:shelf[ \t]+search\b|`search`|\bsearch[ \t]+(?:sub)?command|(?:sub)?command[ \t]+`?search\b))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:\blocal\b|\boffline\b|(?:catalog|collection|library)[ \t]+search|\bsearch(?:es|ing)?[ \t]+(?:in[ \t]+|through[ \t]+)?(?:the|your|my|our)[ \t]+(?:own[ \t]+)?(?:catalog|collection|books|shelf|library)\b|\bfind(?:s|ing)?[ \t]+books[ \t]+in\b|\bown[ \t]+(?:catalog|books|collection)\b))'''
 
 [[fact]]
 text = "sub.add_parser(\"search\""

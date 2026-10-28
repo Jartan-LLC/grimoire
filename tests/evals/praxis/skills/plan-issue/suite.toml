@@ -65,7 +65,10 @@ id = "abstraction"
 direction = "higher"
 # Reported only, per model, as the maintainer asked: on a one-use case the plan adds no abstraction,
 # on a second-caller case it shares the existing code. Only those cases carry it, too few for a guard
-# to pass, and plan-issue's design step that drives it is not what the rebuild changed.
+# to pass, and plan-issue's design step that drives it is not what the rebuild changed. Its regexes
+# are only a coarse signal: they can read a plan that copies the code as one that shares it, and a
+# negation earlier on the line as no abstraction. Until judges exist (#137), these two questions are
+# graded for the PR by a blind panel of three agents reading the plans, two of three deciding.
 
 [pass_rule]
 primary = "reader"

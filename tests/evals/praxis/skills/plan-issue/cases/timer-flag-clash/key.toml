@@ -27,12 +27,13 @@ metric = "grounded"
 artifact = "file:.claude/workspace/issue-48/plan.md"
 present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|bin/pomo\.js|package\.json|src/session\.js|test/session\.test\.js|bin/?|src/?|test/?)(?:[:#][^`\n]*)?`'''
 
-# No backticked `path:line` whose path is not a fixture file or whose line is past its end; the path
-# must end in a source or text extension, so a `host:port` is not read as one.
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; a list
+# or range of lines and a `:col` are read too. The path must end in a source or text extension or
+# be a known extensionless file such as `Makefile`, so a `host:port` is not read as one.
 [[check]]
 metric = "grounded"
 artifact = "file:.claude/workspace/issue-48/plan.md"
-absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|(?:bin/)?pomo\.js:(?:11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:11|10|9|8|7|6|5|4|3|2|1))?|package\.json:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|(?:src/)?session\.js:(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?session\.test\.js:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?)`)[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock):\d+(?:[-,][ \t]*\d+)?`'''
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?::\d+)?(?:[-,][ \t]*(?:2|1)(?::\d+)?)*|AGENTS\.md:(?:7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:7|6|5|4|3|2|1)(?::\d+)?)*|CLAUDE\.md:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|(?:bin/)?pomo\.js:(?:11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|package\.json:(?:7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:7|6|5|4|3|2|1)(?::\d+)?)*|(?:src/)?session\.js:(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:test/)?session\.test\.js:(?:7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:7|6|5|4|3|2|1)(?::\d+)?)*)`)(?:[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock)|(?:[\w./-]*/)?(?:Makefile|Dockerfile|LICENSE|\.gitignore|\.npmignore|\.dockerignore|\.editorconfig)):\d+(?::\d+)?(?:[-,][ \t]*\d+(?::\d+)?)*`'''
 
 # No section but Decisions that holds only None / N/A (a padded section).
 [[check]]
@@ -40,12 +41,13 @@ metric = "lean"
 artifact = "file:.claude/workspace/issue-48/plan.md"
 absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
 
-# Target: a Decisions section (or Open questions...) raises the clash with the existing public name,
-# on a line that names it as a command or flag, not only as a plain word.
+# Target: a Decisions section (or Open questions...) raises the clash: one item names both
+# `-q` and what it already means (`--quiet`, no bell),
+# so a decision about the new name alone fails.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-48/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?=[^\n]*(?:(?<![\w-])-q\b|--quiet\b|`quiet`|\bquiet[ \t]+(?:flag|option|mode)\b))(?=[^\n]*(?:renam\w*|existing|exists|already|conflict\w*|clash\w*|collid\w*|collision|taken|shadow\w*|replac\w*|overload\w*|break\w*|means|used|belongs))'''
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:(?<![\w-])-q\b))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:\bquiet\w*|\bsilen\w*|\bmut(?:e|es|ed|ing)\b|\bno[ \t]+bell\b|\bwithout[ \t]+(?:the[ \t]+|a[ \t]+)?bell\b))'''
 
 [[fact]]
 text = "short: \"q\""

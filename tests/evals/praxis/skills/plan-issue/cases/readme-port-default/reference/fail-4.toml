@@ -1,0 +1,41 @@
+final = "Plan written to .claude/workspace/issue-8/plan.md."
+
+[files]
+".claude/workspace/issue-8/plan.md" = '''# Plan: README gives the wrong port (issue 8)
+
+## Approach
+
+The README tells people the server listens on `http://localhost:8080`, but the default port has
+been 3000 since 2.0.0: `src/config.js` sets `DEFAULT_PORT = 3000`, `test/config.test.js` asserts
+it, and `CHANGELOG.md` explains that 8080 clashed with the dev proxy most of the team runs. Anyone
+who follows the README today opens a page that does not answer, and may assume the server failed
+to start. The fix is to bring the README in line with the code, not the other way round, because
+the changelog records the move to 3000 as deliberate and the tests pin it.
+
+Before editing, it is worth reading the whole README once more, since a port can hide in more
+than one place: the quick-start command, the sentence about `PORT`, and any example request. In
+this README only the sentence after the `npx mockapi mocks/` block names a port, so the change is
+a single line. The `PORT` override stays as it is: it still works the same way and the README
+already describes it correctly.
+
+It would also be possible to print the port at startup so that a stale README matters less, or
+to add a test that reads the README and compares it with `DEFAULT_PORT`. Both are larger than the
+issue asks for, and the first changes the server's output, which scripts may parse, so neither is
+part of this plan. If the README drifts again, a docs check like that can be its own issue, with
+its own discussion of whether tests should read prose files at all.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. In `README.md`, change `http://localhost:8080` to `http://localhost:3000`, keeping the rest of
+   the sentence about `PORT` as it is.
+2. Read the README top to bottom once more to make sure no other line names 8080, and check that
+   the example command still matches what `bin/mockapi.js` accepts.
+
+## Verification
+
+- `npm test` passes, and `node bin/mockapi.js mocks/` prints the port the README now names.
+'''
