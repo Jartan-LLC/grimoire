@@ -31,14 +31,14 @@ Every PR in a stack is held to the rules and required checks of the bottom PR's 
 
 ## Updating a Stack
 
-A PR has PRs stacked above it when its stack (`gh api repos/{owner}/{repo}/pulls/<n> --jq .stack`) shows a `position` less than its `size`; `gh api repos/{owner}/{repo}/stacks/<stack> --jq '.pull_requests[].head.ref'` lists the stack's branches, bottom first. To change such a PR, run `git fetch origin` and check that each branch above it matches its remote tip (`origin/<branch>`): reset one that is missing locally or behind its remote to that tip (`git switch -C <branch> origin/<branch>`), and where one has commits its remote lacks, stop and tell the user. Then note where the PR's branch and each branch above it point (`git rev-parse <branch>`) before you change any of them, commit the change on its branch, then, bottom up, rebase each branch above onto the branch below it and push it:
+A PR has PRs stacked above it when its stack (`gh api repos/{owner}/{repo}/pulls/<n> --jq .stack`) shows a `position` less than its `size`; `gh api repos/{owner}/{repo}/stacks/<stack> --jq '.pull_requests[].head.ref'` lists the stack's branches, bottom first. To change such a PR, run `git fetch origin` and check that each branch above it matches its remote tip (`origin/<branch>`): reset one that is missing locally or behind its remote to that tip (`git switch -C <branch> origin/<branch>`), and where one has commits its remote lacks, stop and tell the user. Then note where the PR's branch and each branch above it point (`git rev-parse <branch>`) before you change any of them, commit the change on its branch and push it, then, bottom up, rebase each branch above onto the branch below it and push it:
 
 ```bash
 git rebase --onto <branch below> <old tip of branch below> <branch>
 git push --force-with-lease origin <branch>
 ```
 
-`<old tip of branch below>` is the tip you noted for that branch. A stack that is not linear does not merge, even while each PR reports itself mergeable.
+`<old tip of branch below>` is the tip you noted for that branch. After a merge that failed because the stack needs rebasing, there is no change to commit or push: run the fetch and check for every branch in the stack. Where a branch below was rewritten rather than added to, the PR above it lists commits that are not its own (`gh pr view <n> --json commits`): stop and tell the user. Otherwise restack each branch above the bottom one, bottom up, with the current tip of the branch below it as its `<old tip of branch below>`. A stack that is not linear does not merge, even while each PR reports itself mergeable.
 
 Restacking, here or after a merge ([Merging a Stack](#merging-a-stack)), is the one case where a pushed commit is rewritten: do it only with the approval the project requires for a force-push, or the user's where it states none. **Rebase stack** in the web UI does the same, under the same approval.
 
