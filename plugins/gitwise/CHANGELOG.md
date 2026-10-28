@@ -8,7 +8,13 @@
 - Your agent roots a stack on the branch the stack merges into, and never stacks a sub-issue branch on its parent feature branch's PR; sub-issues that build on each other may stack within the parent branch.
 - After a partial merge, your agent waits up to two minutes for GitHub to retarget and rebase the next PR before it checks that the PR holds only its own commits.
 - Before pushing to a PR, your agent reads its stack.
-- When an upper branch is synced or its lower PR merged before its PR opened, a PR in a stack changes under PRs stacked above it, the next PR still carries a merged PR's commits, or a stack's merge fails because it needs a rebase, your agent pushes its own commits, then rebases each branch above, from its remote copy, onto the branch below as pushed, with git, and pushes it with `--force-with-lease`, with the approval your project requires for a force-push, or yours where it states none. It tells you instead where a branch has commits its remote lacks, a branch below was rewritten, or a rebase conflict needs more than keeping both sides' changes. This is the one exception to never rewriting a pushed commit.
+- Your agent restacks the branches above a branch, with git, when:
+  - it syncs an upper branch, or the lower PR merged before the upper PR opened;
+  - a PR in a stack changes under PRs stacked above it;
+  - after a merge, the next PR still carries the merged PR's commits, or is the next PR of an unlinked chain;
+  - a stack's merge fails because it needs a rebase.
+
+  It pushes its own commits, then rebases each branch above, from its remote copy, onto the branch below as pushed, and pushes it with `--force-with-lease`, with the approval your project requires for a force-push, or yours where it states none. This is the one exception to never rewriting a pushed commit. It stops and tells you instead where a branch has commits its remote lacks, a worktree it would switch has uncommitted changes, a branch below was rewritten, or a rebase conflict needs more than keeping both sides' changes.
 
 ## 1.4.1
 

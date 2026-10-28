@@ -28,7 +28,7 @@ Also load the `praxis:workspace-patterns` skill and read the issue's plan, `.cla
 
 ### 3. Review All Changes
 
-Load the `gitwise:commit-pr-writing` and `gitwise:github-conventions` skills. Determine the correct base branch, the branch this one was cut from -- `main` for regular branches, the parent feature branch for sub-issue branches, or the lower PR's branch for a branch cut from another open PR's branch (once that PR has merged, the branch rule 2 of `stacks.md` in the `gitwise:github-conventions` skill names). When you cannot tell, ask the user.
+Load the `gitwise:commit-pr-writing` and `gitwise:github-conventions` skills. Determine the correct base branch, the branch this one was cut from -- `main` for regular branches, the parent feature branch for sub-issue branches, or the lower PR's branch for a branch cut from another open PR's branch (once that PR has merged, the branch it merged into, as rule 2 of `stacks.md` in the `gitwise:github-conventions` skill says). When you cannot tell, ask the user.
 
 When the branch was cut from another PR's branch, other than a sub-issue's parent feature branch, read `stacks.md` before you create the PR, and create it only when its rules say, asking the user when you cannot tell whether the lower PR's review is done; until then, tell the user instead. Once you may create it, and before you read the diff, sync the branch as its rule 2 says, or, when that PR has merged, restack the branch and base the PR as that rule says.
 
