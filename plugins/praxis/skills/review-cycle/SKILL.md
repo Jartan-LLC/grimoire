@@ -30,7 +30,7 @@ The branch folder's `cycle.md` holds the cycle's state: the mode, the round, how
 
 ### 3. Decide Whether to Stop
 
-A round is clean when its review has nothing Critical or Important, at the reviewer's tier or a higher one the addresser gives by `praxis:review-severity`. Dismissing a finding does not make its round clean.
+A round is clean when its review has nothing Critical or Important, at the reviewer's tier or a higher one the addresser gives by `praxis:review-severity`. Dismissing a finding does not make its round clean. A finding already decided, with its decision line in `pr.md`, that a later round raises again without new evidence against that decision counts as answered: it does not break the clean streak.
 
 - In raise mode, tell the user each raised finding with its recommendation, and keep running rounds while it waits. An answer that changes code after the clean streak has started resets the streak.
 - On a switch to decide mode, have the addresser decide the open raised findings; on a switch to raise mode, decided findings stay and remain listed for the user. Record the mode in `cycle.md`.
