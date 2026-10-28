@@ -1,0 +1,5 @@
+[
+  { "date": "2026-09-03", "lines": [{ "product": "Mug, blue", "qty": 2, "unitCents": 1200 }] },
+  { "date": "2026-09-14", "lines": [{ "product": "Tea towel", "qty": 1, "unitCents": 800 }] },
+  { "date": "2026-10-01", "lines": [{ "product": "Mug, blue", "qty": 1, "unitCents": 1200 }] }
+]

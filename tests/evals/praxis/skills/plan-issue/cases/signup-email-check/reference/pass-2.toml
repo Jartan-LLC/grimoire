@@ -1,0 +1,24 @@
+final = "Plan written to .claude/workspace/issue-52/plan.md."
+
+[files]
+".claude/workspace/issue-52/plan.md" = '''# Plan: Validate the email at signup (issue 52)
+
+## Approach
+
+Move the profile page's email pattern into a shared helper both handlers call. One pattern means
+one definition of a valid email for the site.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. New `src/validate.js` exporting `isValidEmail` and the message.
+2. `src/profile.js` and `src/signup.js` both call it.
+3. Tests for signup.
+
+## Verification
+
+- `npm test` passes.
+'''

@@ -1,0 +1,7 @@
+{
+  "name": "salesreport",
+  "version": "1.2.0",
+  "private": true,
+  "bin": { "salesreport": "bin/salesreport.js" },
+  "scripts": { "test": "node --test" }
+}

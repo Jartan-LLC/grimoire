@@ -1,0 +1,34 @@
+final = "Plan written to .claude/workspace/issue-71/plan.md."
+
+[files]
+".claude/workspace/issue-71/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Add `pkgdoc check` to report broken links between pages.
+
+### Patterns & Conventions Found
+- Pattern: `src/spell.js:20` -- a check prints findings and returns an exit code.
+
+### Chosen Approach
+- **What**: A link checker registered as `check`; the spell check moves to `spell`.
+- **Why**: The issue names `check`.
+- **How**: New module, update the command table.
+
+### Alternatives Considered
+1. A separate name -- the issue asks for `check`.
+
+### Files to Create/Modify
+- `src/links.js` -- new
+- `bin/pkgdoc.js` -- command table
+
+### Documentation Plan
+- `docs/commands.md`.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- link finder
+- [ ] Phase 2: Core implementation -- command
+- [ ] Phase 3: Integration/cleanup -- docs
+
+### Complexity
+Moderate
+'''

@@ -1,0 +1,90 @@
+split = "dev"
+kind = "target"
+hints = ["verification", "pytest", "test command"]
+
+
+# A Verification section (or Testing, Validation...) with a backticked command or a fenced block.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-9/plan.md"
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:[^`\n]*`[^`\n]*`)*?[^`\n]*`(?:[^`\n]*?\S[ \t]+\S[^`\n]*?|[^`\n]*::[^`\n]*|pytest|tox|make|jest|vitest)`|[ \t]*```)'''
+
+# No Complexity line or heading.
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-9/plan.md"
+absent = '''(?im)^(?:\#{1,6}[ \t]*complexity\b|[ \t>*_-]*complexity[ \t*_]*:)'''
+
+# No placeholder phases (Foundation / Core implementation / Integration).
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-9/plan.md"
+absent = '''(?i)phase[ \t]*\d+\W{0,4}(?:foundation|core\b|integration)|\b(?:core implementation|integration[ \t]*(?:/|and|&)[ \t]*cleanup)\b'''
+
+# At least one backticked path that exists in the fixture.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-9/plan.md"
+present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|ledger/__init__\.py|ledger/bank_csv\.py|pyproject\.toml|tests/test_bank_csv\.py|ledger/?|tests/?)(?:[:#][^`\n]*)?`'''
+
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-9/plan.md"
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|(?:ledger/)?__init__\.py:(?:1)(?:[-,][ \t]*(?:1))?|(?:ledger/)?bank_csv\.py:(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|pyproject\.toml:(?:4|3|2|1)(?:[-,][ \t]*(?:4|3|2|1))?|(?:tests/)?test_bank_csv\.py:(?:11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.[A-Za-z]{1,5}:\d+(?:[-,][ \t]*\d+)?`'''
+
+# No section but Decisions that holds only None / N/A (a padded section).
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-9/plan.md"
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+
+# Target: the Verification section names the project's test run or the test file of the bug.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-9/plan.md"
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)[^\n]*(?:\bpytest\b|test_bank_csv)'''
+
+[[fact]]
+text = "python3 -m pytest -q"
+where = "fixture:AGENTS.md"
+
+[[plant]]
+id = "excel-bom"
+verify = '''python3 -c "import pathlib, tempfile; from ledger.bank_csv import read_statement; p = pathlib.Path(tempfile.mkdtemp()) / 's.csv'; p.write_bytes(b'\xef\xbb\xbfdate,payee,amount\n2026-10-01,Grocer,-1\n'); read_statement(p)"'''
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 9, \"title\": \"Import fails on statements exported from Excel\", \"body\": \"Statements I save from Excel fail to import with `KeyError: 'date'`, though the file looks right and the header is `date,payee,amount`. The bank's own download imports fine.\", \"state\": \"OPEN\", \"author\": {\"login\": \"jo\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/ledger/issues/9\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tImport fails on statements exported from Excel\nstate:\tOPEN\nauthor:\tjo\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t9\n--\nStatements I save from Excel fail to import with `KeyError: 'date'`, though the file looks right and the header is `date,payee,amount`. The bank's own download imports fine.\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "{\"name\": \"ledger\", \"nameWithOwner\": \"acme/ledger\", \"url\": \"https://github.com/acme/ledger\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PRIVATE\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/9/comments\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/9\b'''
+stdout = "{\"number\": 9, \"title\": \"Import fails on statements exported from Excel\", \"body\": \"Statements I save from Excel fail to import with `KeyError: 'date'`, though the file looks right and the header is `date,payee,amount`. The bank's own download imports fine.\", \"state\": \"OPEN\", \"author\": {\"login\": \"jo\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/ledger/issues/9\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"

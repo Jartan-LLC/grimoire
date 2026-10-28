@@ -1,0 +1,29 @@
+final = "Plan written to .claude/workspace/issue-36/plan.md."
+
+[files]
+".claude/workspace/issue-36/plan.md" = '''# Plan: CSV import (issue 36)
+
+## Approach
+
+A new `import` subcommand that reuses `make_contact` and `same_person`, so imported contacts are
+normalised the same way as added ones.
+
+## Decisions for the user
+
+None.
+
+## Non-goals
+
+- Keeping the dict-based contacts; the dataclass refactor noted in `rolodex/models.py` is its
+  own change.
+
+## Steps
+
+1. `rolodex/importer.py`: parse rows, skip and count.
+2. `rolodex/cli.py`: the `import` subcommand.
+3. `tests/test_import.py`.
+
+## Verification
+
+- `python3 -m pytest -q` passes.
+'''

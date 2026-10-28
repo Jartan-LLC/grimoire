@@ -1,0 +1,22 @@
+final = "Plan written to .claude/workspace/issue-43/plan.md."
+
+[files]
+".claude/workspace/issue-43/plan.md" = '''# Plan: Fix the README config example (issue 43)
+
+## Approach
+
+Rename `timeout` to `timeout_s` in the example, matching `pingmon/config.py` and the 2.0.0
+changelog entry.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Edit the TOML block in `README.md`.
+
+## Verification
+
+- The README example loads with `pingmon.config.parse` without an error.
+'''

@@ -1,0 +1,90 @@
+split = "dev"
+kind = "target"
+hints = ["quiet", "decision", "clash", "already", "taken"]
+
+
+# A Verification section (or Testing, Validation...) with a backticked command or a fenced block.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-48/plan.md"
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:[^`\n]*`[^`\n]*`)*?[^`\n]*`(?:[^`\n]*?\S[ \t]+\S[^`\n]*?|[^`\n]*::[^`\n]*|pytest|tox|make|jest|vitest)`|[ \t]*```)'''
+
+# No Complexity line or heading.
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-48/plan.md"
+absent = '''(?im)^(?:\#{1,6}[ \t]*complexity\b|[ \t>*_-]*complexity[ \t*_]*:)'''
+
+# No placeholder phases (Foundation / Core implementation / Integration).
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-48/plan.md"
+absent = '''(?i)phase[ \t]*\d+\W{0,4}(?:foundation|core\b|integration)|\b(?:core implementation|integration[ \t]*(?:/|and|&)[ \t]*cleanup)\b'''
+
+# At least one backticked path that exists in the fixture.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-48/plan.md"
+present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|bin/pomo\.js|package\.json|src/session\.js|test/session\.test\.js|bin/?|src/?|test/?)(?:[:#][^`\n]*)?`'''
+
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-48/plan.md"
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|(?:bin/)?pomo\.js:(?:11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:11|10|9|8|7|6|5|4|3|2|1))?|package\.json:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|(?:src/)?session\.js:(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?session\.test\.js:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?)`)[\w./-]+\.[A-Za-z]{1,5}:\d+(?:[-,][ \t]*\d+)?`'''
+
+# No section but Decisions that holds only None / N/A (a padded section).
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-48/plan.md"
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+
+# Target: a Decisions section (or Open questions...) raises the clash with the existing public name.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-48/plan.md"
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?=[^\n]*(?:(?<![\w-])-q\b|--quiet|\bquiet\b))(?=[^\n]*(?:renam\w*|existing|exists|already|conflict\w*|clash\w*|collid\w*|collision|taken|shadow\w*|replac\w*|overload\w*|break\w*|means|used|belongs))'''
+
+[[fact]]
+text = "short: \"q\""
+where = "fixture:bin/pomo.js"
+
+[[fact]]
+text = "Ask before changing what a flag means"
+where = "fixture:AGENTS.md"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 48, \"title\": \"Add a quick 15-minute session\", \"body\": \"Add `pomo --quick` (`-q` for short) to start a 15-minute session without typing `-m 15`.\", \"state\": \"OPEN\", \"author\": {\"login\": \"ana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/pomo/issues/48\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tAdd a quick 15-minute session\nstate:\tOPEN\nauthor:\tana\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t48\n--\nAdd `pomo --quick` (`-q` for short) to start a 15-minute session without typing `-m 15`.\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "{\"name\": \"pomo\", \"nameWithOwner\": \"acme/pomo\", \"url\": \"https://github.com/acme/pomo\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PRIVATE\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/48/comments\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/48\b'''
+stdout = "{\"number\": 48, \"title\": \"Add a quick 15-minute session\", \"body\": \"Add `pomo --quick` (`-q` for short) to start a 15-minute session without typing `-m 15`.\", \"state\": \"OPEN\", \"author\": {\"login\": \"ana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/pomo/issues/48\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"

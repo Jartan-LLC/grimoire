@@ -1,0 +1,88 @@
+# Fixture 6's kind: a docs-only change. The new sections must not pad a trivial plan.
+
+split = "confirm"
+kind = "regression"
+hints = ["short", "brief", "padding", "trivial"]
+
+
+# A Verification section (or Testing, Validation...) with a check of at least three words.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-15/plan.md"
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)[ \t]*(?:[-*+]|\d+[.)])?[ \t]*\S+[ \t]+\S+[ \t]+\S'''
+
+# No Complexity line or heading.
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-15/plan.md"
+absent = '''(?im)^(?:\#{1,6}[ \t]*complexity\b|[ \t>*_-]*complexity[ \t*_]*:)'''
+
+# No placeholder phases (Foundation / Core implementation / Integration).
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-15/plan.md"
+absent = '''(?i)phase[ \t]*\d+\W{0,4}(?:foundation|core\b|integration)|\b(?:core implementation|integration[ \t]*(?:/|and|&)[ \t]*cleanup)\b'''
+
+# At least one backticked path that exists in the fixture.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-15/plan.md"
+present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|CONTRIBUTING\.md|README\.md|package\.json|scripts/style\.js|src/index\.js|test/index\.test\.js|scripts/?|src/?|test/?)(?:[:#][^`\n]*)?`'''
+
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-15/plan.md"
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|CONTRIBUTING\.md:(?:9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:9|8|7|6|5|4|3|2|1))?|README\.md:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|package\.json:(?:10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:10|9|8|7|6|5|4|3|2|1))?|(?:scripts/)?style\.js:(?:18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:src/)?index\.js:(?:12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:12|11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?index\.test\.js:(?:11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.[A-Za-z]{1,5}:\d+(?:[-,][ \t]*\d+)?`'''
+
+# No section but Decisions that holds only None / N/A (a padded section).
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-15/plan.md"
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+
+# The plan is at most 300 words.
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-15/plan.md"
+present = '''\A\s*(?:\S+\s+){0,299}\S*\s*\Z'''
+
+[[plant]]
+id = "contributing-names-missing-script"
+verify = '''node -e "const fs=require('fs'); const s=JSON.parse(fs.readFileSync('package.json','utf8')).scripts; const m=[...fs.readFileSync('CONTRIBUTING.md','utf8').matchAll(/npm run ([\w:-]+)/g)]; process.exit(m.length && m.every(x=>x[1] in s) ? 0 : 1)"'''
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 15, \"title\": \"CONTRIBUTING.md asks for a script that doesn't exist\", \"body\": \"Step 2 of CONTRIBUTING.md says to run `npm run lint`, which fails with `Missing script: \\\"lint\\\"`.\", \"state\": \"OPEN\", \"author\": {\"login\": \"eli\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/colorpick/issues/15\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tCONTRIBUTING.md asks for a script that doesn't exist\nstate:\tOPEN\nauthor:\teli\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t15\n--\nStep 2 of CONTRIBUTING.md says to run `npm run lint`, which fails with `Missing script: \"lint\"`.\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "{\"name\": \"colorpick\", \"nameWithOwner\": \"acme/colorpick\", \"url\": \"https://github.com/acme/colorpick\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PRIVATE\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/15/comments\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/15\b'''
+stdout = "{\"number\": 15, \"title\": \"CONTRIBUTING.md asks for a script that doesn't exist\", \"body\": \"Step 2 of CONTRIBUTING.md says to run `npm run lint`, which fails with `Missing script: \\\"lint\\\"`.\", \"state\": \"OPEN\", \"author\": {\"login\": \"eli\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/colorpick/issues/15\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"

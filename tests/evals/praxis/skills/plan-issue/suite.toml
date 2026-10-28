@@ -1,0 +1,65 @@
+# What the plan /praxis:plan-issue writes serves its three readers: the user approving it, the agent
+# implementing it later, and create-pr checking the diff against it. Each case is a small repository
+# and a GitHub issue the gh stub serves; the plan file is graded by regex. The six kinds of fixture
+# come from the research of the template rebuild (#120): a bug fix with an obvious test command, a
+# feature with a tempting adjacent refactor, a feature that needs a public command renamed, a feature
+# where an abstraction is tempting but has one use, one where a second caller already exists, and a
+# docs-only change. tests/evals/README.md says how the suite is run.
+target = "praxis:plan-issue"
+# Cases moved off a held-out split, each with its reason in a comment.
+BURNED = []
+# The plan template moved from gitwise's github-conventions into plan-issue (#120), and the
+# issue-planner agent that also followed it was removed. The lint wants each glob to match a tracked
+# file, so the removed files are covered by globs that also match their successors:
+# plugins/*/skills/*/plan-format.md matches gitwise's old template and praxis's new one, and
+# plugins/praxis/*/*plan*.md matches agents/issue-planner.md and plan-issue's files.
+covers = [
+  "plugins/praxis/skills/plan-issue/**",
+  "plugins/*/skills/*/plan-format.md",
+  "plugins/praxis/*/*plan*.md",
+  "plugins/gitwise/skills/github-conventions/SKILL.md",
+]
+models = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]
+# A plan session only reads the repository and writes one file.
+budget_usd = 2.0
+
+[[metric]]
+id = "reader"
+direction = "higher"
+# Every case: a Verification section with a command (a docs case: any check). Target cases also: the
+# bug's test run under Verification, the adjacent refactor under Out of scope, or the clash with an
+# existing public name under Decisions for the user.
+
+[[metric]]
+id = "grounded"
+direction = "higher"
+margin = 0.2
+# Every case: a backticked path that exists, and no backticked path:line that does not.
+
+[[metric]]
+id = "lean"
+direction = "higher"
+margin = 0.2
+# Every case: no section but Decisions padded with only None or N/A; docs cases also a word ceiling.
+
+[[metric]]
+id = "cut"
+direction = "higher"
+# Reported only: no Complexity line and no placeholder phases, the parts the rebuild cut. Old always
+# fails it, so it shows only that new follows the template.
+
+[[metric]]
+id = "abstraction"
+direction = "higher"
+# Reported only, per model, as the maintainer asked: on a one-use case the plan adds no abstraction,
+# on a second-caller case it shares the existing code. It covers two units a split, too few for a
+# guard to pass, and plan-issue's design step that drives it is not what the rebuild changed.
+
+[pass_rule]
+primary = "reader"
+rule = "better"
+guards = ["grounded", "lean"]
+# Old's template has none of the sections `reader` checks, so the gain it claims is near new's
+# pass rate; 0.5 is the smallest gain six units can show at the noisiest base rate.
+min_effect = 0.5
+min_samples = 3

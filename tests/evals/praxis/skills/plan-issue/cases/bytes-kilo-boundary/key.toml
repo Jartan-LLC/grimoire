@@ -1,0 +1,90 @@
+split = "confirm"
+kind = "target"
+hints = ["verification", "npm test", "node --test", "test command"]
+
+
+# A Verification section (or Testing, Validation...) with a backticked command or a fenced block.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-88/plan.md"
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:[^`\n]*`[^`\n]*`)*?[^`\n]*`(?:[^`\n]*?\S[ \t]+\S[^`\n]*?|[^`\n]*::[^`\n]*|pytest|tox|make|jest|vitest)`|[ \t]*```)'''
+
+# No Complexity line or heading.
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-88/plan.md"
+absent = '''(?im)^(?:\#{1,6}[ \t]*complexity\b|[ \t>*_-]*complexity[ \t*_]*:)'''
+
+# No placeholder phases (Foundation / Core implementation / Integration).
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-88/plan.md"
+absent = '''(?i)phase[ \t]*\d+\W{0,4}(?:foundation|core\b|integration)|\b(?:core implementation|integration[ \t]*(?:/|and|&)[ \t]*cleanup)\b'''
+
+# At least one backticked path that exists in the fixture.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-88/plan.md"
+present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CHANGELOG\.md|CLAUDE\.md|package\.json|src/bytes\.js|src/duration\.js|src/index\.js|test/bytes\.test\.js|test/duration\.test\.js|src/?|test/?)(?:[:#][^`\n]*)?`'''
+
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-88/plan.md"
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|CHANGELOG\.md:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|package\.json:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|(?:src/)?bytes\.js:(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:src/)?duration\.js:(?:10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:10|9|8|7|6|5|4|3|2|1))?|(?:src/)?index\.js:(?:1)(?:[-,][ \t]*(?:1))?|(?:test/)?bytes\.test\.js:(?:12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:12|11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?duration\.test\.js:(?:11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.[A-Za-z]{1,5}:\d+(?:[-,][ \t]*\d+)?`'''
+
+# No section but Decisions that holds only None / N/A (a padded section).
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-88/plan.md"
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+
+# Target: the Verification section names the project's test run or the test file of the bug.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-88/plan.md"
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)[^\n]*(?:npm (?:run )?test|node --test|bytes\.test)'''
+
+[[fact]]
+text = "npm test"
+where = "fixture:AGENTS.md"
+
+[[plant]]
+id = "power-of-1024"
+verify = '''node -e "const {formatBytes}=require('./src/bytes'); process.exit(formatBytes(1024)==='1.0 KB' && formatBytes(1048576)==='1.0 MB' ? 0 : 1)"'''
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 88, \"title\": \"formatBytes(1024) prints \\\"1024 B\\\"\", \"body\": \"Exactly 1024 bytes should read \\\"1.0 KB\\\", but `formatBytes(1024)` gives \\\"1024 B\\\". The same happens at each step: `formatBytes(1048576)` gives \\\"1024.0 KB\\\" instead of \\\"1.0 MB\\\". Our upload page shows \\\"1024.0 KB\\\" for 1 MB files.\", \"state\": \"OPEN\", \"author\": {\"login\": \"noor\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/humanize-units/issues/88\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tformatBytes(1024) prints \"1024 B\"\nstate:\tOPEN\nauthor:\tnoor\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t88\n--\nExactly 1024 bytes should read \"1.0 KB\", but `formatBytes(1024)` gives \"1024 B\". The same happens at each step: `formatBytes(1048576)` gives \"1024.0 KB\" instead of \"1.0 MB\". Our upload page shows \"1024.0 KB\" for 1 MB files.\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "{\"name\": \"humanize-units\", \"nameWithOwner\": \"acme/humanize-units\", \"url\": \"https://github.com/acme/humanize-units\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PRIVATE\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/88/comments\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/88\b'''
+stdout = "{\"number\": 88, \"title\": \"formatBytes(1024) prints \\\"1024 B\\\"\", \"body\": \"Exactly 1024 bytes should read \\\"1.0 KB\\\", but `formatBytes(1024)` gives \\\"1024 B\\\". The same happens at each step: `formatBytes(1048576)` gives \\\"1024.0 KB\\\" instead of \\\"1.0 MB\\\". Our upload page shows \\\"1024.0 KB\\\" for 1 MB files.\", \"state\": \"OPEN\", \"author\": {\"login\": \"noor\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/humanize-units/issues/88\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"

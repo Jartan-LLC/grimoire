@@ -1,0 +1,88 @@
+# Fixture 6 of the research: a docs-only change. The new sections must not pad a trivial plan.
+
+split = "screen"
+kind = "regression"
+hints = ["short", "brief", "padding", "trivial"]
+
+
+# A Verification section (or Testing, Validation...) with a check of at least three words.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-43/plan.md"
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)[ \t]*(?:[-*+]|\d+[.)])?[ \t]*\S+[ \t]+\S+[ \t]+\S'''
+
+# No Complexity line or heading.
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-43/plan.md"
+absent = '''(?im)^(?:\#{1,6}[ \t]*complexity\b|[ \t>*_-]*complexity[ \t*_]*:)'''
+
+# No placeholder phases (Foundation / Core implementation / Integration).
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-43/plan.md"
+absent = '''(?i)phase[ \t]*\d+\W{0,4}(?:foundation|core\b|integration)|\b(?:core implementation|integration[ \t]*(?:/|and|&)[ \t]*cleanup)\b'''
+
+# At least one backticked path that exists in the fixture.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-43/plan.md"
+present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CHANGELOG\.md|CLAUDE\.md|README\.md|pingmon/__init__\.py|pingmon/__main__\.py|pingmon/config\.py|pyproject\.toml|tests/test_config\.py|pingmon/?|tests/?)(?:[:#][^`\n]*)?`'''
+
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-43/plan.md"
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|CHANGELOG\.md:(?:10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:10|9|8|7|6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|README\.md:(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:pingmon/)?__init__\.py:(?:1)(?:[-,][ \t]*(?:1))?|(?:pingmon/)?__main__\.py:(?:29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:pingmon/)?config\.py:(?:25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|pyproject\.toml:(?:4|3|2|1)(?:[-,][ \t]*(?:4|3|2|1))?|(?:tests/)?test_config\.py:(?:13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:13|12|11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.[A-Za-z]{1,5}:\d+(?:[-,][ \t]*\d+)?`'''
+
+# No section but Decisions that holds only None / N/A (a padded section).
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-43/plan.md"
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+
+# The plan is at most 300 words.
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-43/plan.md"
+present = '''\A\s*(?:\S+\s+){0,299}\S*\s*\Z'''
+
+[[plant]]
+id = "readme-example-fails"
+verify = '''python3 -c "import re, pathlib; from pingmon.config import parse; parse(re.search(r'[\x60]{3}toml\n(.*?)[\x60]{3}', pathlib.Path('README.md').read_text(), re.S).group(1))"'''
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 43, \"title\": \"README config example fails with unknown key 'timeout'\", \"body\": \"Copying the example from the README and running `python3 -m pingmon pingmon.toml` stops with `ConfigError: unknown key 'timeout'`. The example needs updating.\", \"state\": \"OPEN\", \"author\": {\"login\": \"lee\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/pingmon/issues/43\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tREADME config example fails with unknown key 'timeout'\nstate:\tOPEN\nauthor:\tlee\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t43\n--\nCopying the example from the README and running `python3 -m pingmon pingmon.toml` stops with `ConfigError: unknown key 'timeout'`. The example needs updating.\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "{\"name\": \"pingmon\", \"nameWithOwner\": \"acme/pingmon\", \"url\": \"https://github.com/acme/pingmon\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PRIVATE\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/43/comments\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/43\b'''
+stdout = "{\"number\": 43, \"title\": \"README config example fails with unknown key 'timeout'\", \"body\": \"Copying the example from the README and running `python3 -m pingmon pingmon.toml` stops with `ConfigError: unknown key 'timeout'`. The example needs updating.\", \"state\": \"OPEN\", \"author\": {\"login\": \"lee\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/pingmon/issues/43\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"

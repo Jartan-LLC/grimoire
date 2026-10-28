@@ -1,0 +1,24 @@
+final = "Plan written to .claude/workspace/issue-52/plan.md."
+
+[files]
+".claude/workspace/issue-52/plan.md" = '''# Plan: Signup accepts any text as an email (issue 52)
+
+## Approach
+
+Add the email check to `signup` with the same pattern and message the profile handler uses at
+`src/profile.js:5-7`.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. In `src/signup.js`, test the email against `/^[^@\s]+@[^@\s]+\.[^@\s]+$/` and return a 400
+   with "Enter an email address like name@example.com." when it fails.
+2. Add "bob" and "bob@" cases to `test/signup.test.js`.
+
+## Verification
+
+- `npm test` -- the new cases get a 400.
+'''

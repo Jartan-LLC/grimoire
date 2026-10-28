@@ -1,0 +1,25 @@
+final = "Plan written to .claude/workspace/issue-22/plan.md."
+
+[files]
+".claude/workspace/issue-22/plan.md" = '''# Plan: notes sync to the team server (issue 22)
+
+## Approach
+
+Upload new and changed notes to the server described in `docs/server.md`.
+
+## Open questions
+
+1. The issue asks for `notes sync`, but that name already belongs to the backup command, which
+   cron jobs call. Renaming it needs your OK. Default: leave `sync` alone and name the new
+   command `notes share`.
+
+## Steps
+
+1. New module `notes/server.py` for the two endpoints.
+2. New subcommand in `notes/cli.py`.
+3. Tests with a patched `urlopen`.
+
+## Verification
+
+- `python3 -m pytest -q` passes.
+'''

@@ -1,0 +1,26 @@
+final = "Plan written to .claude/workspace/issue-52/plan.md."
+
+[files]
+".claude/workspace/issue-52/plan.md" = '''# Plan: Signup accepts any text as an email (issue 52)
+
+## Approach
+
+`updateProfile` already checks the email (`src/profile.js:5-7`). Extract that check into
+`src/email.js` as `checkEmail(email)`, returning the error message or null, and call it from both
+`updateProfile` and `signup`, so the two forms accept the same addresses and show the same message.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Create `src/email.js` with the pattern and message moved from `src/profile.js:5-6`.
+2. Use it in `updateProfile`; `test/profile.test.js` passes unchanged.
+3. Use it in `signup` before the duplicate check at `src/signup.js:9`.
+4. Add "bob" and "bob@" cases to `test/signup.test.js`.
+
+## Verification
+
+- `npm test` -- the new signup cases get a 400 with the profile page's message.
+'''

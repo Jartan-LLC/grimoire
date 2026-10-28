@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-31/plan.md."
+
+[files]
+".claude/workspace/issue-31/plan.md" = '''# Plan: Invoices due on a Saturday show Sunday as the due date (issue 31)
+
+## Approach
+
+Make the Saturday branch of `due_date` add two days.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. In `invoicer/dates.py:12-13`, add two days for a Saturday, following the holiday table in
+   `invoicer/holidays.py:4`.
+2. Add a Saturday test to `tests/test_dates.py`.
+
+## Verification
+
+- `python3 -m pytest -q tests/test_dates.py` -- the Saturday test passes.
+'''

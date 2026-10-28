@@ -1,0 +1,91 @@
+# Fixture 5 of the research: a second caller of the retry logic already exists, so the
+# abstraction is right. The metric is reported per model.
+
+split = "screen"
+kind = "regression"
+hints = ["extract", "shared", "reuse", "fetch.py", "fetch_feed", "duplicate"]
+
+
+# A Verification section (or Testing, Validation...) with a backticked command or a fenced block.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-19/plan.md"
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:[^`\n]*`[^`\n]*`)*?[^`\n]*`(?:[^`\n]*?\S[ \t]+\S[^`\n]*?|[^`\n]*::[^`\n]*|pytest|tox|make|jest|vitest)`|[ \t]*```)'''
+
+# No Complexity line or heading.
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-19/plan.md"
+absent = '''(?im)^(?:\#{1,6}[ \t]*complexity\b|[ \t>*_-]*complexity[ \t*_]*:)'''
+
+# No placeholder phases (Foundation / Core implementation / Integration).
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-19/plan.md"
+absent = '''(?i)phase[ \t]*\d+\W{0,4}(?:foundation|core\b|integration)|\b(?:core implementation|integration[ \t]*(?:/|and|&)[ \t]*cleanup)\b'''
+
+# At least one backticked path that exists in the fixture.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-19/plan.md"
+present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|feeds/__init__\.py|feeds/fetch\.py|feeds/parse\.py|feeds/refresh\.py|feeds/thumbs\.py|pyproject\.toml|tests/test_fetch\.py|tests/test_thumbs\.py|feeds/?|tests/?)(?:[:#][^`\n]*)?`'''
+
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-19/plan.md"
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|(?:feeds/)?__init__\.py:(?:1)(?:[-,][ \t]*(?:1))?|(?:feeds/)?fetch\.py:(?:24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:feeds/)?parse\.py:(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:feeds/)?refresh\.py:(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:feeds/)?thumbs\.py:(?:19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|pyproject\.toml:(?:4|3|2|1)(?:[-,][ \t]*(?:4|3|2|1))?|(?:tests/)?test_fetch\.py:(?:33|32|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:33|32|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:tests/)?test_thumbs\.py:(?:27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.[A-Za-z]{1,5}:\d+(?:[-,][ \t]*\d+)?`'''
+
+# No section but Decisions that holds only None / N/A (a padded section).
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-19/plan.md"
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+
+# The abstraction where a second caller exists: a line of Approach, Steps, Files or Checklist, not
+# a rejected alternative, names the existing caller (or both callers) with extract / share / reuse /
+# move / common, not negated before that word.
+[[check]]
+metric = "abstraction"
+artifact = "file:.claude/workspace/issue-19/plan.md"
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:steps|files to (?:create|modify|change|touch)|(?:implementation )?(?:checklist|steps|plan)|(?:chosen |proposed )?approach|implementation|changes)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?![ \t]*(?:[-*+][ \t]+|\d+[.)][ \t]+)?(?:\*\*|_)?(?:rejected|alternatives?|not chosen|considered|why not)\b)(?=[^\n]*(?:fetch\.py|fetch_feed|\bboth\b|each caller|two callers))(?![^\n]*\b(?:no|not|without|don'?t|do not|never|avoid\w*|skip\w*)\b[^\n]*\b(?:extract\w*|shared?|common|reus\w*|mov(?:e|es|ed|ing)|factor\w*|pull\w* (?:it |that |this )?out|lift\w*|generali[sz]\w*)\b)(?=[^\n]*\b(?:extract\w*|shared?|common|reus\w*|mov(?:e|es|ed|ing)|factor\w*|pull\w* (?:it |that |this )?out|lift\w*|generali[sz]\w*)\b)'''
+
+[[fact]]
+text = "def fetch_feed"
+where = "fixture:feeds/fetch.py"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 19, \"title\": \"Thumbnails go missing after a hiccup on the image host\", \"body\": \"When the image host answers 503 or the connection drops, `download_thumb` gives up at once and the item shows no thumbnail until the next refresh ten minutes later. On the reading-room screen that looks broken. Thumbnail downloads should survive a short outage.\", \"state\": \"OPEN\", \"author\": {\"login\": \"tomas\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/feedreader/issues/19\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tThumbnails go missing after a hiccup on the image host\nstate:\tOPEN\nauthor:\ttomas\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t19\n--\nWhen the image host answers 503 or the connection drops, `download_thumb` gives up at once and the item shows no thumbnail until the next refresh ten minutes later. On the reading-room screen that looks broken. Thumbnail downloads should survive a short outage.\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "{\"name\": \"feedreader\", \"nameWithOwner\": \"acme/feedreader\", \"url\": \"https://github.com/acme/feedreader\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PRIVATE\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/19/comments\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/19\b'''
+stdout = "{\"number\": 19, \"title\": \"Thumbnails go missing after a hiccup on the image host\", \"body\": \"When the image host answers 503 or the connection drops, `download_thumb` gives up at once and the item shows no thumbnail until the next refresh ten minutes later. On the reading-room screen that looks broken. Thumbnail downloads should survive a short outage.\", \"state\": \"OPEN\", \"author\": {\"login\": \"tomas\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/feedreader/issues/19\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"

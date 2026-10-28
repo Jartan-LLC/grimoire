@@ -1,0 +1,35 @@
+final = "Plan written to .claude/workspace/issue-31/plan.md."
+
+[files]
+".claude/workspace/issue-31/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Invoices whose due date falls on a Saturday show Sunday; they should show Monday.
+
+### Patterns & Conventions Found
+- Pattern: `invoicer/dates.py:9` -- due dates are computed in one function, `due_date`.
+- Pattern: `tests/test_dates.py:11` -- one test per weekend case.
+
+### Chosen Approach
+- **What**: Add two days for a Saturday instead of one.
+- **Why**: The Saturday branch copies the Sunday branch's `+1`.
+- **How**: Edit the branch, add a test.
+
+### Alternatives Considered
+1. Loop until a weekday -- more code for the same result.
+
+### Files to Create/Modify
+- `invoicer/dates.py` -- fix the Saturday branch
+- `tests/test_dates.py` -- add a Saturday test
+
+### Documentation Plan
+- No docs change: the README already says weekends move to Monday.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- add the failing Saturday test
+- [ ] Phase 2: Core implementation -- fix the branch
+- [ ] Phase 3: Integration/cleanup -- run the full test suite
+
+### Complexity
+Simple
+'''
