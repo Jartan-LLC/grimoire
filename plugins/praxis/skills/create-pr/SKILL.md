@@ -28,7 +28,7 @@ Also load the `praxis:workspace-patterns` skill and read the issue's plan, `.cla
 
 ### 3. Review All Changes
 
-Load the `gitwise:commit-pr-writing` and `gitwise:github-conventions` skills. Determine the correct base branch -- `main` for regular branches, the parent feature branch for sub-issue branches, or the lower PR's branch for a branch stacked on another open PR. Read `git diff <base>...HEAD` and the branch's commit messages (`git log <base>..HEAD`). Note what this session changed outside the diff (settings, tags, secrets) or did not run, and ask the user about changes outside the diff that this session did not make.
+Load the `gitwise:commit-pr-writing` and `gitwise:github-conventions` skills. Determine the correct base branch -- the lower PR's branch for a branch stacked on another open PR, the parent feature branch for other sub-issue branches, or `main` for regular branches. A branch is stacked when its history contains the head commit of another open PR (`gh pr list --json number,headRefName,headRefOid`), other than the PR of a sub-issue's parent feature branch; the lower PR is the nearest such one. When you cannot tell, ask the user. Read `git diff <base>...HEAD` and the branch's commit messages (`git log <base>..HEAD`). Note what this session changed outside the diff (settings, tags, secrets) or did not run, and ask the user about changes outside the diff that this session did not make.
 
 ### 4. Create Pull Request
 
