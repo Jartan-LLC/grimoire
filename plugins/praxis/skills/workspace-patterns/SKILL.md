@@ -19,18 +19,18 @@ Where the project's own rules say otherwise, follow them.
   parent of `git rev-parse --path-format=absolute --git-common-dir`; anywhere else, submodules
   included, it is `git rev-parse --show-toplevel`. A worktree of a bare repository has no main
   checkout: ask the user where the workspace goes. A worktree's own `.claude/workspace/` goes when the
-  worktree does. Outside git, it is `.claude/workspace/` in the
-  project's root directory.
+  worktree does. Outside git, it is `.claude/workspace/` in the project's root directory.
 - Every working file goes in the workspace, never in the project root or beside the code.
 
 ## Layout
 
 - One folder per effort: `issue-<n>` when the work has an issue, otherwise a short name chosen when the
-  work starts, such as a topic or the branch name.
+  work starts, such as a topic or the branch folder name.
 - In it, the effort's `plan.md`, research and notes, and one subfolder per branch for what belongs to
   that branch's change, its branch folder: the branch name with each `/` written as `--`
-  (`feature/retry` -> `feature--retry`). For a PR from a fork, whose branch name another fork can
-  share (`main`, `patch-1`), the branch folder is `pr-<n>`.
+  (`feature/retry` -> `feature--retry`). For a PR from a fork (`isCrossRepository` in
+  `gh pr view --json`), whose branch name another fork can share (`main`, `patch-1`), the branch
+  folder is `pr-<n>`.
 - Reviews of a branch are numbered by round in its subfolder: `1.md`, `2.md`, ... A new review takes the
   number after the highest (compare numbers, not names: `10.md` follows `9.md`) and leaves the earlier
   ones as they are.
