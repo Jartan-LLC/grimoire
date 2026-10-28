@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.1
+
+- `github-conventions`' review format no longer opens with a count of the files reviewed.
+
 ## 1.4.0
 
 - `github-conventions` tells your agent to open a PR as a draft and to mark it ready (`gh pr ready`) when it is ready for someone else to review or merge. Your agent does not always mark a draft PR ready: some models often leave it a draft when you say the work is done without asking for the PR to be marked ready. If it leaves the PR a draft, run `gh pr ready` yourself.

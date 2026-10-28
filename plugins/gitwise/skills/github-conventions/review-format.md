@@ -1,13 +1,11 @@
 # Code Review Format
 
-Recommended structure for a code review of a pull request.
+Recommended structure for a code review of a pull request or a branch.
 
 ## Template
 
 ```markdown
 ## Code Review
-
-**Files reviewed:** [count] files across [categories]
 
 ### Critical Issues
 <!-- 'None found' if empty. Number findings 1., 2., 3. -- never #1/#2 (auto-links to issues/PRs). -->
