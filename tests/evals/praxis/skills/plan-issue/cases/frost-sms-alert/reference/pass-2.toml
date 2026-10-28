@@ -1,0 +1,25 @@
+final = "Plan written to .claude/workspace/issue-66/plan.md."
+
+[files]
+".claude/workspace/issue-66/plan.md" = '''# Plan: Frost text (issue 66)
+
+## Approach
+
+A function that posts the text, called from `main` when the reading is below 4 C, with a marker
+file so a cold spell texts once.
+Rejected: a notifier interface for future channels -- the gateway is the one channel asked for.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. `greenhouse/sms.py`: `send_text(phone, text)`.
+2. `greenhouse/__main__.py`: after logging, text once per cold spell using `~/greenhouse.cold`.
+3. Tests with a fake sender.
+
+## Verification
+
+- `python3 -m pytest -q` passes.
+'''

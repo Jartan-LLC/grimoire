@@ -27,11 +27,12 @@ metric = "grounded"
 artifact = "file:.claude/workspace/issue-26/plan.md"
 present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|Makefile|pyproject\.toml|tests/test_week\.py|timesheet/__init__\.py|timesheet/__main__\.py|timesheet/hours\.py|timesheet/week\.py|tests/?|timesheet/?)(?:[:#][^`\n]*)?`'''
 
-# No backticked `path:line` whose path is not a fixture file or whose line is past its end.
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; the path
+# must end in a source or text extension, so a `host:port` is not read as one.
 [[check]]
 metric = "grounded"
 artifact = "file:.claude/workspace/issue-26/plan.md"
-absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|Makefile:(?:4|3|2|1)(?:[-,][ \t]*(?:4|3|2|1))?|pyproject\.toml:(?:4|3|2|1)(?:[-,][ \t]*(?:4|3|2|1))?|(?:tests/)?test_week\.py:(?:10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:10|9|8|7|6|5|4|3|2|1))?|(?:timesheet/)?__init__\.py:(?:1)(?:[-,][ \t]*(?:1))?|(?:timesheet/)?__main__\.py:(?:9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:9|8|7|6|5|4|3|2|1))?|(?:timesheet/)?hours\.py:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|(?:timesheet/)?week\.py:(?:23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.[A-Za-z]{1,5}:\d+(?:[-,][ \t]*\d+)?`'''
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|Makefile:(?:4|3|2|1)(?:[-,][ \t]*(?:4|3|2|1))?|pyproject\.toml:(?:4|3|2|1)(?:[-,][ \t]*(?:4|3|2|1))?|(?:tests/)?test_week\.py:(?:10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:10|9|8|7|6|5|4|3|2|1))?|(?:timesheet/)?__init__\.py:(?:1)(?:[-,][ \t]*(?:1))?|(?:timesheet/)?__main__\.py:(?:9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:9|8|7|6|5|4|3|2|1))?|(?:timesheet/)?hours\.py:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|(?:timesheet/)?week\.py:(?:23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock):\d+(?:[-,][ \t]*\d+)?`'''
 
 # No section but Decisions that holds only None / N/A (a padded section).
 [[check]]
@@ -39,11 +40,12 @@ metric = "lean"
 artifact = "file:.claude/workspace/issue-26/plan.md"
 absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
 
-# Target: the Verification section names the project's test run or the test file of the bug.
+# Target: the Verification section names the project's test run or the test file of the bug; a
+# line starting with `#` inside a fenced block, such as a shell comment, does not end the section.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-26/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)[^\n]*(?:make test|\bpytest\b|test_hours|test_week)'''
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?![ \t]*```)(?!\#)[^\n]*|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*\n[ \t]*```[^\n]*)*?(?:\n(?![ \t]*```)(?!\#)[^\n]*(?:make test|\bpytest\b|test_hours|test_week)|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*?\n(?![ \t]*```)[^\n]*(?:make test|\bpytest\b|test_hours|test_week))'''
 
 [[fact]]
 text = "`make test` runs the tests"

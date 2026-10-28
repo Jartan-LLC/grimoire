@@ -1,7 +1,7 @@
 # Fixture 4's kind: an abstraction is tempting but has one use. Reported per model.
 
-split = "screen"
-kind = "regression"
+split = "dev"
+kind = "target"
 hints = ["abstraction", "interface", "notifier", "registry", "simple"]
 
 
@@ -29,11 +29,12 @@ metric = "grounded"
 artifact = "file:.claude/workspace/issue-12/plan.md"
 present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|booklend/__init__\.py|booklend/__main__\.py|booklend/loans\.py|booklend/members\.py|pyproject\.toml|tests/test_loans\.py|booklend/?|tests/?)(?:[:#][^`\n]*)?`'''
 
-# No backticked `path:line` whose path is not a fixture file or whose line is past its end.
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; the path
+# must end in a source or text extension, so a `host:port` is not read as one.
 [[check]]
 metric = "grounded"
 artifact = "file:.claude/workspace/issue-12/plan.md"
-absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|(?:booklend/)?__init__\.py:(?:1)(?:[-,][ \t]*(?:1))?|(?:booklend/)?__main__\.py:(?:22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:booklend/)?loans\.py:(?:30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:booklend/)?members\.py:(?:10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:10|9|8|7|6|5|4|3|2|1))?|pyproject\.toml:(?:4|3|2|1)(?:[-,][ \t]*(?:4|3|2|1))?|(?:tests/)?test_loans\.py:(?:12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:12|11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.[A-Za-z]{1,5}:\d+(?:[-,][ \t]*\d+)?`'''
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|(?:booklend/)?__init__\.py:(?:1)(?:[-,][ \t]*(?:1))?|(?:booklend/)?__main__\.py:(?:22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:booklend/)?loans\.py:(?:30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:booklend/)?members\.py:(?:10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:10|9|8|7|6|5|4|3|2|1))?|pyproject\.toml:(?:4|3|2|1)(?:[-,][ \t]*(?:4|3|2|1))?|(?:tests/)?test_loans\.py:(?:12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:12|11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock):\d+(?:[-,][ \t]*\d+)?`'''
 
 # No section but Decisions that holds only None / N/A (a padded section).
 [[check]]
@@ -42,12 +43,13 @@ artifact = "file:.claude/workspace/issue-12/plan.md"
 absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
 
 # No abstraction for a single use: no line of Approach, Steps, Files or Checklist, other than a
-# rejected alternative or a line that negates it before the word, names an interface, base class,
-# registry, strategy, plugin or an Exporter/Notifier-style class.
+# rejected alternative, names an interface, base class, registry, strategy, plugin or an
+# Exporter/Notifier-style class, unless a negation before the word, or "not needed" or the like
+# after it in the same clause, rules it out.
 [[check]]
 metric = "abstraction"
 artifact = "file:.claude/workspace/issue-12/plan.md"
-absent = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:steps|files to (?:create|modify|change|touch)|(?:implementation )?(?:checklist|steps|plan)|(?:chosen |proposed )?approach|implementation|changes)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?![ \t]*(?:[-*+][ \t]+|\d+[.)][ \t]+)?(?:\*\*|_)?(?:rejected|alternatives?|not chosen|considered|why not)\b)(?![^\n]*\b(?:no|not|without|avoid\w*|rather than|instead of|skip\w*|don'?t|do not|never|yagni|premature\w*|speculative\w*|unnecessary|overkill)\b[^\n]*(?:abstract\w*|base class|(?-i:\bABC\b|\bProtocol\b)|(?:an?|common|shared|generic|abstract|notifier|alert|notification) interface|registry|registries|strateg(?:y|ies)|plug-?ins?\b|pluggable|extensib\w*|(?-i:\b(?:[A-Z]\w*)?(?:Notifier|Sender|Backend|Provider|Channel|Registry|Strategy|Factory|Transport)s?\b)))[^\n]*(?:abstract\w*|base class|(?-i:\bABC\b|\bProtocol\b)|(?:an?|common|shared|generic|abstract|notifier|alert|notification) interface|registry|registries|strateg(?:y|ies)|plug-?ins?\b|pluggable|extensib\w*|(?-i:\b(?:[A-Z]\w*)?(?:Notifier|Sender|Backend|Provider|Channel|Registry|Strategy|Factory|Transport)s?\b))'''
+absent = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:steps|files to (?:create|modify|change|touch)|(?:implementation )?(?:checklist|steps|plan)|(?:chosen |proposed )?approach|implementation|changes)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?![ \t]*(?:[-*+][ \t]+|\d+[.)][ \t]+)?(?:\*\*|_)?(?:rejected|alternatives?|not chosen|considered|why not)\b)(?![^\n]*\b(?:no|not|without|avoid\w*|rather than|instead of|skip\w*|don'?t|do not|never|yagni|premature\w*|speculative\w*|unnecessary|overkill)\b[^\n]*(?:abstract\w*|base class|(?-i:\bABC\b|\bProtocol\b)|(?:an?|common|shared|generic|abstract|notifier|alert|notification) interface|registry|registries|strateg(?:y|ies)|plug-?ins?\b|pluggable|extensib\w*|(?-i:\b(?:[A-Z]\w*)?(?:Notifier|Sender|Backend|Provider|Channel|Registry|Strategy|Factory|Transport)s?\b)))[^\n]*(?:abstract\w*|base class|(?-i:\bABC\b|\bProtocol\b)|(?:an?|common|shared|generic|abstract|notifier|alert|notification) interface|registry|registries|strateg(?:y|ies)|plug-?ins?\b|pluggable|extensib\w*|(?-i:\b(?:[A-Z]\w*)?(?:Notifier|Sender|Backend|Provider|Channel|Registry|Strategy|Factory|Transport)s?\b))(?!(?:[^\n.;]|\.(?=\w)|\n(?![ \t]*(?:\n|[-*+][ \t]|\d+[.)][ \t]|\#))){0,60}?(?:(?:\bnot|n't)[ \t]+(?:\w+[ \t]+){0,2}?(?:needed|warranted|required|necessary|justified|worth\w*|wanted|called for)|\b(?:unnecessary|unneeded|overkill|premature\w*|speculative\w*|yagni|out of scope|separate (?:refactor\w*|issue|change|PR)|follow-?up)\b))'''
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''

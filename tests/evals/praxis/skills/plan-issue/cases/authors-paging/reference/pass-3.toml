@@ -1,0 +1,22 @@
+final = "Plan written to .claude/workspace/issue-73/plan.md."
+
+[files]
+".claude/workspace/issue-73/plan.md" = '''# Plan: Page /authors (issue 73)
+
+## Approach
+
+Pull the paging out of the books endpoint into a shared helper and call it from `list_authors`.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. The helper in `bookapi/paging.py`; `list_books` and `list_authors` call it.
+2. Author paging tests in `tests/test_authors.py`.
+
+## Verification
+
+- `python3 -m pytest -q` passes.
+'''

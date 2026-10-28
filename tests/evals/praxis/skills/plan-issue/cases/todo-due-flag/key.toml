@@ -27,11 +27,12 @@ metric = "grounded"
 artifact = "file:.claude/workspace/issue-57/plan.md"
 present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|README\.md|bin/todo\.js|package\.json|src/args\.js|src/commands/add\.js|src/commands/done\.js|src/commands/list\.js|src/store\.js|test/args\.test\.js|test/commands\.test\.js|bin/?|src/?|src/commands/?|test/?)(?:[:#][^`\n]*)?`'''
 
-# No backticked `path:line` whose path is not a fixture file or whose line is past its end.
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; the path
+# must end in a source or text extension, so a `host:port` is not read as one.
 [[check]]
 metric = "grounded"
 artifact = "file:.claude/workspace/issue-57/plan.md"
-absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|README\.md:(?:8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1))?|(?:bin/)?todo\.js:(?:15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|package\.json:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|(?:src/)?args\.js:(?:21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:(?:src/)?commands/)?add\.js:(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:(?:src/)?commands/)?done\.js:(?:9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:9|8|7|6|5|4|3|2|1))?|(?:(?:src/)?commands/)?list\.js:(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:src/)?store\.js:(?:16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?args\.test\.js:(?:13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?commands\.test\.js:(?:13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:13|12|11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.[A-Za-z]{1,5}:\d+(?:[-,][ \t]*\d+)?`'''
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|README\.md:(?:8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1))?|(?:bin/)?todo\.js:(?:15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|package\.json:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|(?:src/)?args\.js:(?:21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:(?:src/)?commands/)?add\.js:(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:(?:src/)?commands/)?done\.js:(?:9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:9|8|7|6|5|4|3|2|1))?|(?:(?:src/)?commands/)?list\.js:(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:src/)?store\.js:(?:16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?args\.test\.js:(?:13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?commands\.test\.js:(?:13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:13|12|11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock):\d+(?:[-,][ \t]*\d+)?`'''
 
 # No section but Decisions that holds only None / N/A (a padded section).
 [[check]]
@@ -39,11 +40,12 @@ metric = "lean"
 artifact = "file:.claude/workspace/issue-57/plan.md"
 absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
 
-# Target: an Out of scope section (or Non-goals...) names the tempting adjacent refactor.
+# Target: an Out of scope section (or Non-goals...) names the tempting adjacent refactor: what it
+# changes, or its file together with a change word, so a line on another bug in that file fails.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-57/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:out[ -]of[ -]scope|not in scope|non-goals?|not (?:doing|planned|changing|included)|left out|deferred|scope boundar\w*)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)[^\n]*(?:args\.js|parseArgs|(?:argument|arg|flag|option)s?[ -]pars\w*|\bparser\b)'''
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:out[ -]of[ -]scope|not in scope|non-goals?|not (?:doing|planned|changing|included)|left out|deferred|scope boundar\w*)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)[^\n]*(?:parseArgs|(?:argument|arg|flag|option)s?[ -]pars\w*|\bparser\b|args\.js[^\n]*\b(?:TODO|rewrit\w*|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them )?(?:to|onto)|hand-?rolled)|\b(?:TODO|rewrit\w*|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them )?(?:to|onto)|hand-?rolled)\b[^\n]*args\.js)'''
 
 [[fact]]
 text = "parseArgs"

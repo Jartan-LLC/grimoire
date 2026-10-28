@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-23/plan.md."
+
+[files]
+".claude/workspace/issue-23/plan.md" = '''# Plan: Keep the rates for an hour (issue 23)
+
+## Approach
+
+`cached_rates(base)` in `fxconv/rates.py` reads `~/.cache/fxconv/<base>.json` while it is fresh; a
+pluggable cache backend would be overkill for one file.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Write `cached_rates`, refetching when the file is an hour old.
+2. Call it from `fxconv/__main__.py`.
+
+## Verification
+
+- `python3 -m pytest -q` -- a second call within the hour does not fetch.
+'''

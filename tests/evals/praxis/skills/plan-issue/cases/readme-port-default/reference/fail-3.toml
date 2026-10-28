@@ -1,0 +1,21 @@
+final = "Plan written to .claude/workspace/issue-8/plan.md."
+
+[files]
+".claude/workspace/issue-8/plan.md" = '''# Plan: Fix the port in the README (issue 8)
+
+## Approach
+
+Replace 8080 with 3000, the default in `src/config.js`.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Edit the "listens on" line of `README.md`.
+
+## Verification
+
+Not applicable for a docs change.
+'''

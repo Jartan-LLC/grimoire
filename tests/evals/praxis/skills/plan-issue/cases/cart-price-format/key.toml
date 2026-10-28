@@ -1,7 +1,7 @@
 # Fixture 5's kind: a second caller of the money format already exists. Reported per model.
 
 split = "screen"
-kind = "regression"
+kind = "target"
 hints = ["extract", "shared", "reuse", "receipt.js", "money", "duplicate"]
 
 
@@ -29,11 +29,12 @@ metric = "grounded"
 artifact = "file:.claude/workspace/issue-61/plan.md"
 present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|package\.json|src/cart\.js|src/receipt\.js|test/cart\.test\.js|test/receipt\.test\.js|src/?|test/?)(?:[:#][^`\n]*)?`'''
 
-# No backticked `path:line` whose path is not a fixture file or whose line is past its end.
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; the path
+# must end in a source or text extension, so a `host:port` is not read as one.
 [[check]]
 metric = "grounded"
 artifact = "file:.claude/workspace/issue-61/plan.md"
-absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|package\.json:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|(?:src/)?cart\.js:(?:15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:src/)?receipt\.js:(?:20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?cart\.test\.js:(?:13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?receipt\.test\.js:(?:8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1))?)`)[\w./-]+\.[A-Za-z]{1,5}:\d+(?:[-,][ \t]*\d+)?`'''
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|package\.json:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|(?:src/)?cart\.js:(?:15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:src/)?receipt\.js:(?:20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?cart\.test\.js:(?:13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?receipt\.test\.js:(?:8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1))?)`)[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock):\d+(?:[-,][ \t]*\d+)?`'''
 
 # No section but Decisions that holds only None / N/A (a padded section).
 [[check]]
@@ -42,12 +43,13 @@ artifact = "file:.claude/workspace/issue-61/plan.md"
 absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
 
 # The abstraction where a second caller exists: a line of Approach, Steps, Files or Checklist, not
-# a rejected alternative, names the existing caller (or both callers) with extract / share / reuse /
-# move / common, not negated before that word.
+# a rejected alternative, names the existing caller, both callers or a shared helper, with extract /
+# share / reuse / move / common, not negated before that word nor put off after it ("not needed",
+# "a separate refactor").
 [[check]]
 metric = "abstraction"
 artifact = "file:.claude/workspace/issue-61/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:steps|files to (?:create|modify|change|touch)|(?:implementation )?(?:checklist|steps|plan)|(?:chosen |proposed )?approach|implementation|changes)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?![ \t]*(?:[-*+][ \t]+|\d+[.)][ \t]+)?(?:\*\*|_)?(?:rejected|alternatives?|not chosen|considered|why not)\b)(?=[^\n]*(?:receipt\.js|receiptText|\bmoney\b|receipt(?:'s)? (?:code|format\w*|helper|function|module)|\bboth\b|each caller|two callers))(?![^\n]*\b(?:no|not|without|don'?t|do not|never|avoid\w*|skip\w*)\b[^\n]*\b(?:extract\w*|shared?|common|reus\w*|mov(?:e|es|ed|ing)|factor\w*|pull\w* (?:it |that |this )?out|lift\w*|generali[sz]\w*)\b)(?=[^\n]*\b(?:extract\w*|shared?|common|reus\w*|mov(?:e|es|ed|ing)|factor\w*|pull\w* (?:it |that |this )?out|lift\w*|generali[sz]\w*)\b)'''
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:steps|files to (?:create|modify|change|touch)|(?:implementation )?(?:checklist|steps|plan)|(?:chosen |proposed )?approach|implementation|changes)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?![ \t]*(?:[-*+][ \t]+|\d+[.)][ \t]+)?(?:\*\*|_)?(?:rejected|alternatives?|not chosen|considered|why not)\b)(?=[^\n]*(?:receipt\.js|receiptText|\bmoney\b|receipt(?:'s)? (?:code|format\w*|helper|function|module)|\bboth\b|each caller|two callers|\b(?:shared|common)[ \t]+(?:[\w`-]+[ \t]+)?(?:helper|function|module|utility|util|routine|code|loop|logic|implementation)\b|\b(?:extract\w*|pull\w*|mov(?:e|es|ed|ing)|lift\w*|factor\w*)\b[^\n]*\binto\b))(?![^\n]*\b(?:no|not|without|don'?t|do not|never|avoid\w*|skip\w*)\b[^\n]*\b(?:extract\w*|shared?|common|reus\w*|mov(?:e|es|ed|ing)|factor\w*|pull\w* (?:it |that |this )?out|lift\w*|generali[sz]\w*)\b)(?=[^\n]*\b(?:extract\w*|shared?|common|reus\w*|mov(?:e|es|ed|ing)|factor\w*|pull\w* (?:it |that |this )?out|lift\w*|generali[sz]\w*)\b)(?![^\n]*\b(?:extract\w*|shared?|common|reus\w*|mov(?:e|es|ed|ing)|factor\w*|pull\w* (?:it |that |this )?out|lift\w*|generali[sz]\w*)\b(?:[^\n.;]|\.(?=\w)|\n(?![ \t]*(?:\n|[-*+][ \t]|\d+[.)][ \t]|\#))){0,60}?(?:(?:\bnot|n't)[ \t]+(?:\w+[ \t]+){0,2}?(?:needed|warranted|required|necessary|justified|worth\w*|wanted|called for)|\b(?:unnecessary|unneeded|overkill|premature\w*|speculative\w*|yagni|out of scope|separate (?:refactor\w*|issue|change|PR)|follow-?up)\b))'''
 
 [[fact]]
 text = "function money"

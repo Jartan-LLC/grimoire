@@ -1,0 +1,24 @@
+final = "Plan written to .claude/workspace/issue-41/plan.md."
+
+[files]
+".claude/workspace/issue-41/plan.md" = '''# Plan: Date range for /invoices (issue 41)
+
+## Approach
+
+Pull the date checks out into a shared helper that `list_invoices` calls as well.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. `clinicdesk/dates.py`: `date_range(query)`, used by the bookings and invoices lists in
+   `clinicdesk/bookings.py` and `clinicdesk/invoices.py`.
+2. Filter invoices by it.
+3. Tests for invoices.
+
+## Verification
+
+- `python3 -m pytest -q` passes.
+'''

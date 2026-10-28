@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-23/plan.md."
+
+[files]
+".claude/workspace/issue-23/plan.md" = '''# Plan: Every conversion waits on the rates API (issue 23)
+
+## Approach
+
+Add a `CacheBackend` abstract base class with `FileBackend` and `MemoryBackend`, chosen by an
+environment variable, so a Redis backend can be added later.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Add `fxconv/cache.py` with the base class and both backends.
+2. Use the configured backend in `fxconv/rates.py`.
+
+## Verification
+
+- `python3 -m pytest -q` -- both backends are tested.
+'''

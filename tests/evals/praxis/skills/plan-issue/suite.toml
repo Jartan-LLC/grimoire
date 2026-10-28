@@ -7,7 +7,19 @@
 # docs-only change. tests/evals/README.md says how the suite is run.
 target = "praxis:plan-issue"
 # Cases moved off a held-out split, each with its reason in a comment.
-BURNED = []
+BURNED = [
+  # Its issue asks for "the same paging code for both", which states the share.
+  "authors-paging",
+  # Its issue says "nobody has asked for email or anything else", which states the single use.
+  "backup-slack-alert",
+  # Its issue says "Email is the only way we want to reach members", which states the single use.
+  "loan-reminder-email",
+  # Its issue says "The email and the website are the only places the notes go", which states the
+  # single use.
+  "relnotes-html",
+  # Its issue says "CSV is all anyone has asked for", which states the single use.
+  "sales-csv-export",
+]
 # The plan template moved from gitwise's github-conventions into plan-issue (#120), and the
 # issue-planner agent that also followed it was removed. The lint wants each glob to match a tracked
 # file, so the removed files are covered by globs that also match their successors:
@@ -26,9 +38,9 @@ budget_usd = 2.0
 [[metric]]
 id = "reader"
 direction = "higher"
-# Every case: a Verification section with a command (a docs case: any check). Target cases also: the
-# bug's test run under Verification, the adjacent refactor under Out of scope, or the clash with an
-# existing public name under Decisions for the user.
+# Every case: a Verification section with a command (a docs case: any check). Bug-fix, refactor and
+# clash cases also: the bug's test run under Verification, the adjacent refactor under Out of scope,
+# or the clash with an existing public name under Decisions for the user.
 
 [[metric]]
 id = "grounded"
@@ -52,14 +64,14 @@ direction = "higher"
 id = "abstraction"
 direction = "higher"
 # Reported only, per model, as the maintainer asked: on a one-use case the plan adds no abstraction,
-# on a second-caller case it shares the existing code. It covers two units a split, too few for a
-# guard to pass, and plan-issue's design step that drives it is not what the rebuild changed.
+# on a second-caller case it shares the existing code. Only those cases carry it, too few for a guard
+# to pass, and plan-issue's design step that drives it is not what the rebuild changed.
 
 [pass_rule]
 primary = "reader"
 rule = "better"
 guards = ["grounded", "lean"]
-# Old's template has none of the sections `reader` checks, so the gain it claims is near new's
-# pass rate; 0.5 is the smallest gain six units can show at the noisiest base rate.
+# Old's template has none of the sections `reader` checks, so the gain it claims is near new's pass
+# rate; a split that cannot see a gain of 0.5, well below that, is too small for this change.
 min_effect = 0.5
 min_samples = 3

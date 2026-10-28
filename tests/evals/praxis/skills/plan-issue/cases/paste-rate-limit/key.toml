@@ -1,0 +1,136 @@
+# Fixture 4's kind: an abstraction is tempting but has one use. Reported per model.
+
+split = "confirm"
+kind = "target"
+hints = ["abstraction", "interface", "strategy", "registry", "simple"]
+
+
+# A Verification section (or Testing, Validation...) with a backticked command or a fenced block.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-54/plan.md"
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:[^`\n]*`[^`\n]*`)*?[^`\n]*`(?:[^`\n]*?\S[ \t]+\S[^`\n]*?|[^`\n]*::[^`\n]*|pytest|tox|make|jest|vitest)`|[ \t]*```)'''
+
+# No Complexity line or heading.
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-54/plan.md"
+absent = '''(?im)^(?:\#{1,6}[ \t]*complexity\b|[ \t>*_-]*complexity[ \t*_]*:)'''
+
+# No placeholder phases (Foundation / Core implementation / Integration).
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-54/plan.md"
+absent = '''(?i)phase[ \t]*\d+\W{0,4}(?:foundation|core\b|integration)|\b(?:core implementation|integration[ \t]*(?:/|and|&)[ \t]*cleanup)\b'''
+
+# At least one backticked path that exists in the fixture.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-54/plan.md"
+present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|package\.json|src/server\.js|src/store\.js|test/server\.test\.js|src/?|test/?)(?:[:#][^`\n]*)?`'''
+
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; the path
+# must end in a source or text extension, so a `host:port` is not read as one.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-54/plan.md"
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|package\.json:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|(?:src/)?server\.js:(?:29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:src/)?store\.js:(?:15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?server\.test\.js:(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock):\d+(?:[-,][ \t]*\d+)?`'''
+
+# No section but Decisions that holds only None / N/A (a padded section).
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-54/plan.md"
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+
+# No abstraction for a single use: no line of Approach, Steps, Files or Checklist, other than a
+# rejected alternative, names an interface, base class, registry, strategy, plugin or an
+# Backend/Policy-style class, unless a negation before the word, or "not needed" or the like
+# after it in the same clause, rules it out.
+[[check]]
+metric = "abstraction"
+artifact = "file:.claude/workspace/issue-54/plan.md"
+absent = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:steps|files to (?:create|modify|change|touch)|(?:implementation )?(?:checklist|steps|plan)|(?:chosen |proposed )?approach|implementation|changes)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?![ \t]*(?:[-*+][ \t]+|\d+[.)][ \t]+)?(?:\*\*|_)?(?:rejected|alternatives?|not chosen|considered|why not)\b)(?![^\n]*\b(?:no|not|without|avoid\w*|rather than|instead of|skip\w*|don'?t|do not|never|yagni|premature\w*|speculative\w*|unnecessary|overkill)\b[^\n]*(?:abstract\w*|base class|(?:an?|common|shared|generic|abstract|limiter|rate[- ]limit\w*|store|storage) interface|(?:store|storage|counter) backends?|registry|registries|strateg(?:y|ies)|plug-?ins?\b|pluggable|extensib\w*|(?-i:\b(?:[A-Z]\w*)?(?:Backend|Provider|Registry|Strategy|Factory|Policy)s?\b)))[^\n]*(?:abstract\w*|base class|(?:an?|common|shared|generic|abstract|limiter|rate[- ]limit\w*|store|storage) interface|(?:store|storage|counter) backends?|registry|registries|strateg(?:y|ies)|plug-?ins?\b|pluggable|extensib\w*|(?-i:\b(?:[A-Z]\w*)?(?:Backend|Provider|Registry|Strategy|Factory|Policy)s?\b))(?!(?:[^\n.;]|\.(?=\w)|\n(?![ \t]*(?:\n|[-*+][ \t]|\d+[.)][ \t]|\#))){0,60}?(?:(?:\bnot|n't)[ \t]+(?:\w+[ \t]+){0,2}?(?:needed|warranted|required|necessary|justified|worth\w*|wanted|called for)|\b(?:unnecessary|unneeded|overkill|premature\w*|speculative\w*|yagni|out of scope|separate (?:refactor\w*|issue|change|PR)|follow-?up)\b))'''
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 54, \"title\": \"One script filled the paste store overnight\", \"body\": \"Someone's script posted 40,000 pastes in one night and the server ran out of memory. Limit each client address to 30 new pastes a minute; past that, answer 429 with a Retry-After header. Reading pastes stays unlimited.\", \"state\": \"OPEN\", \"author\": {\"login\": \"jonas\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/pastebox/issues/54\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tOne script filled the paste store overnight\nstate:\tOPEN\nauthor:\tjonas\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t54\n--\nSomeone's script posted 40,000 pastes in one night and the server ran out of memory. Limit each client address to 30 new pastes a minute; past that, answer 429 with a Retry-After header. Reading pastes stays unlimited.\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "{\"name\": \"pastebox\", \"nameWithOwner\": \"acme/pastebox\", \"url\": \"https://github.com/acme/pastebox\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PRIVATE\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/54/comments\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/54\b'''
+stdout = "{\"number\": 54, \"title\": \"One script filled the paste store overnight\", \"body\": \"Someone's script posted 40,000 pastes in one night and the server ran out of memory. Limit each client address to 30 new pastes a minute; past that, answer 429 with a Retry-After header. Reading pastes stays unlimited.\", \"state\": \"OPEN\", \"author\": {\"login\": \"jonas\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/pastebox/issues/54\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3

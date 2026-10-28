@@ -1,15 +1,16 @@
 # Fixture 6's kind: a docs-only change. The new sections must not pad a trivial plan.
 
 split = "screen"
-kind = "regression"
+kind = "target"
 hints = ["short", "brief", "padding", "trivial"]
 
 
-# A Verification section (or Testing, Validation...) with a check of at least three words.
+# A Verification section (or Testing, Validation...) with a check of at least three words that
+# holds a backticked command or a check verb (read, compare, render...), not None or Not applicable.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-8/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)[ \t]*(?:[-*+]|\d+[.)])?[ \t]*\S+[ \t]+\S+[ \t]+\S'''
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?![ \t]*(?:[-*+]|\d+[.)])?[ \t]*(?:\*\*|_)?\(?(?:none\b|n/?a\b|not (?:applicable|needed|required)\b|no (?:tests?|verification|checks?|commands?)\b|nothing to (?:test|verify|check|run)\b))(?=[^\n]*(?:`[^`\n]+`|\b(?:re-?read\w*|read\w*|compar\w*|confirm\w*|render\w*|preview\w*|check\w*|run\w*|open\w*|follow\w*|cop(?:y|ies|ied|ying)|past(?:e|es|ed|ing)|view\w*|visit\w*|start\w*|grep\w*|diff\w*|load\w*|click\w*|look\w*|see|verif\w*|ensur\w*|search\w*|try|tries|tried|execute\w*|execution|match\w*|launch\w*|brows\w*|navigat\w*|print\w*|show\w*|agree\w*|equal\w*)\b))[ \t]*(?:[-*+]|\d+[.)])?[ \t]*\S+[ \t]+\S+[ \t]+\S'''
 
 # No Complexity line or heading.
 [[check]]
@@ -29,11 +30,12 @@ metric = "grounded"
 artifact = "file:.claude/workspace/issue-8/plan.md"
 present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CHANGELOG\.md|CLAUDE\.md|README\.md|bin/mockapi\.js|package\.json|src/config\.js|src/routes\.js|test/config\.test\.js|test/routes\.test\.js|bin/?|src/?|test/?)(?:[:#][^`\n]*)?`'''
 
-# No backticked `path:line` whose path is not a fixture file or whose line is past its end.
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; the path
+# must end in a source or text extension, so a `host:port` is not read as one.
 [[check]]
 metric = "grounded"
 artifact = "file:.claude/workspace/issue-8/plan.md"
-absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|CHANGELOG\.md:(?:9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:9|8|7|6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|README\.md:(?:11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:11|10|9|8|7|6|5|4|3|2|1))?|(?:bin/)?mockapi\.js:(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|package\.json:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|(?:src/)?config\.js:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|(?:src/)?routes\.js:(?:12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:12|11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?config\.test\.js:(?:8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1))?|(?:test/)?routes\.test\.js:(?:13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:13|12|11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.[A-Za-z]{1,5}:\d+(?:[-,][ \t]*\d+)?`'''
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|CHANGELOG\.md:(?:9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:9|8|7|6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|README\.md:(?:11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:11|10|9|8|7|6|5|4|3|2|1))?|(?:bin/)?mockapi\.js:(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|package\.json:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|(?:src/)?config\.js:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|(?:src/)?routes\.js:(?:12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:12|11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?config\.test\.js:(?:8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1))?|(?:test/)?routes\.test\.js:(?:13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:13|12|11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock):\d+(?:[-,][ \t]*\d+)?`'''
 
 # No section but Decisions that holds only None / N/A (a padded section).
 [[check]]

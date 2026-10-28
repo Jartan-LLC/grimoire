@@ -1,0 +1,24 @@
+final = "Plan written to .claude/workspace/issue-54/plan.md."
+
+[files]
+".claude/workspace/issue-54/plan.md" = '''# Plan: Rate-limit new pastes (issue 54)
+
+## Approach
+
+A per-address counter in memory, checked before a paste is stored.
+Rejected: a pluggable store so counts could live in Redis -- production runs one process.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. `src/limit.js` with `allow(address, now)`.
+2. Check it in `src/server.js` and answer 429 with `Retry-After`.
+3. `test/limit.test.js`.
+
+## Verification
+
+- `npm test` passes.
+'''

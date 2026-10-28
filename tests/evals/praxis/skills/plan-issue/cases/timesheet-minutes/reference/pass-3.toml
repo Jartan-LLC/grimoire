@@ -1,0 +1,25 @@
+final = "Plan written to .claude/workspace/issue-26/plan.md."
+
+[files]
+".claude/workspace/issue-26/plan.md" = '''# Plan: H:MM hours (issue 26)
+
+## Approach
+
+Fix `parse_hours` in `timesheet/hours.py` to read minutes as sixtieths.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Parse "H:MM" properly in `parse_hours`.
+2. Test `parse_hours("7:30") == 7.5`.
+
+## Verification
+
+```bash
+# the whole suite, the new test included
+make test
+```
+'''

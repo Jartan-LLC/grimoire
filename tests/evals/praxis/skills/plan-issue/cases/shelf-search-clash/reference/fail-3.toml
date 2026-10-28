@@ -1,0 +1,29 @@
+final = "Plan written to .claude/workspace/issue-17/plan.md."
+
+[files]
+".claude/workspace/issue-17/plan.md" = '''# Plan: Look books up online instead of typing them in (issue 17)
+
+## Approach
+
+Query `https://openlibrary.org/search.json?q=<text>` with `urllib.request`, print the top five
+matches numbered, read the user's pick from stdin and add it with `catalog.add`. An ISBN goes in
+`q` like a title; Open Library matches both.
+
+## Decisions for the user
+
+- Assumption: search results come from Open Library; the pick joins the existing catalog.
+
+## Steps
+
+1. New `shelf/openlibrary.py` with `find(text)` returning title, author and first year for each
+   match; a network error prints a message and exits 1.
+2. Add the subcommand in `shelf/cli.py`, following the parsers at `shelf/cli.py:12-20`.
+3. Tests in `tests/test_openlibrary.py` with `urlopen` patched, and an add-the-pick test following
+   `tests/test_cli.py:4-10`.
+4. Add the command to `README.md`.
+
+## Verification
+
+- `python3 -m pytest -q` -- the new tests pass, and the existing search test still finds Dune.
+- `SHELF_FILE=/tmp/s.json python3 -m shelf.cli lookup dune`, pick 1 -- the book is in `/tmp/s.json`.
+'''

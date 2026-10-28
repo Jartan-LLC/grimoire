@@ -1,15 +1,16 @@
 # Fixture 6 of the research: a docs-only change. The new sections must not pad a trivial plan.
 
 split = "screen"
-kind = "regression"
+kind = "target"
 hints = ["short", "brief", "padding", "trivial"]
 
 
-# A Verification section (or Testing, Validation...) with a check of at least three words.
+# A Verification section (or Testing, Validation...) with a check of at least three words that
+# holds a backticked command or a check verb (read, compare, render...), not None or Not applicable.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-43/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)[ \t]*(?:[-*+]|\d+[.)])?[ \t]*\S+[ \t]+\S+[ \t]+\S'''
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?![ \t]*(?:[-*+]|\d+[.)])?[ \t]*(?:\*\*|_)?\(?(?:none\b|n/?a\b|not (?:applicable|needed|required)\b|no (?:tests?|verification|checks?|commands?)\b|nothing to (?:test|verify|check|run)\b))(?=[^\n]*(?:`[^`\n]+`|\b(?:re-?read\w*|read\w*|compar\w*|confirm\w*|render\w*|preview\w*|check\w*|run\w*|open\w*|follow\w*|cop(?:y|ies|ied|ying)|past(?:e|es|ed|ing)|view\w*|visit\w*|start\w*|grep\w*|diff\w*|load\w*|click\w*|look\w*|see|verif\w*|ensur\w*|search\w*|try|tries|tried|execute\w*|execution|match\w*|launch\w*|brows\w*|navigat\w*|print\w*|show\w*|agree\w*|equal\w*)\b))[ \t]*(?:[-*+]|\d+[.)])?[ \t]*\S+[ \t]+\S+[ \t]+\S'''
 
 # No Complexity line or heading.
 [[check]]
@@ -29,11 +30,12 @@ metric = "grounded"
 artifact = "file:.claude/workspace/issue-43/plan.md"
 present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CHANGELOG\.md|CLAUDE\.md|README\.md|pingmon/__init__\.py|pingmon/__main__\.py|pingmon/config\.py|pyproject\.toml|tests/test_config\.py|pingmon/?|tests/?)(?:[:#][^`\n]*)?`'''
 
-# No backticked `path:line` whose path is not a fixture file or whose line is past its end.
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; the path
+# must end in a source or text extension, so a `host:port` is not read as one.
 [[check]]
 metric = "grounded"
 artifact = "file:.claude/workspace/issue-43/plan.md"
-absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|CHANGELOG\.md:(?:10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:10|9|8|7|6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|README\.md:(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:pingmon/)?__init__\.py:(?:1)(?:[-,][ \t]*(?:1))?|(?:pingmon/)?__main__\.py:(?:29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:pingmon/)?config\.py:(?:25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|pyproject\.toml:(?:4|3|2|1)(?:[-,][ \t]*(?:4|3|2|1))?|(?:tests/)?test_config\.py:(?:13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:13|12|11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.[A-Za-z]{1,5}:\d+(?:[-,][ \t]*\d+)?`'''
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|CHANGELOG\.md:(?:10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:10|9|8|7|6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|README\.md:(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:pingmon/)?__init__\.py:(?:1)(?:[-,][ \t]*(?:1))?|(?:pingmon/)?__main__\.py:(?:29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:pingmon/)?config\.py:(?:25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|pyproject\.toml:(?:4|3|2|1)(?:[-,][ \t]*(?:4|3|2|1))?|(?:tests/)?test_config\.py:(?:13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:13|12|11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock):\d+(?:[-,][ \t]*\d+)?`'''
 
 # No section but Decisions that holds only None / N/A (a padded section).
 [[check]]
@@ -96,22 +98,6 @@ runner = 2
 remote_runner = 3
 
 [[baseline]]
-model = "claude-sonnet-5-5"
-arm = "old"
-failures = 3
-runs = 3
-runner = 2
-remote_runner = 3
-
-[[baseline]]
-model = "claude-haiku-5-5"
-arm = "old"
-failures = 3
-runs = 3
-runner = 2
-remote_runner = 3
-
-[[baseline]]
 model = "claude-opus-5-5"
 arm = "none"
 failures = 3
@@ -121,7 +107,23 @@ remote_runner = 3
 
 [[baseline]]
 model = "claude-sonnet-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
 arm = "none"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
 failures = 3
 runs = 3
 runner = 2

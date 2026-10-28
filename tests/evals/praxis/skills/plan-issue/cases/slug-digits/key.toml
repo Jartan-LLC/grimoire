@@ -27,11 +27,12 @@ metric = "grounded"
 artifact = "file:.claude/workspace/issue-14/plan.md"
 present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|package\.json|src/index\.js|src/permalink\.js|src/slug\.js|test/permalink\.test\.js|test/slug\.test\.js|src/?|test/?)(?:[:#][^`\n]*)?`'''
 
-# No backticked `path:line` whose path is not a fixture file or whose line is past its end.
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; the path
+# must end in a source or text extension, so a `host:port` is not read as one.
 [[check]]
 metric = "grounded"
 artifact = "file:.claude/workspace/issue-14/plan.md"
-absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|package\.json:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|(?:src/)?index\.js:(?:1)(?:[-,][ \t]*(?:1))?|(?:src/)?permalink\.js:(?:11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:11|10|9|8|7|6|5|4|3|2|1))?|(?:src/)?slug\.js:(?:11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?permalink\.test\.js:(?:8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1))?|(?:test/)?slug\.test\.js:(?:11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.[A-Za-z]{1,5}:\d+(?:[-,][ \t]*\d+)?`'''
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|package\.json:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|(?:src/)?index\.js:(?:1)(?:[-,][ \t]*(?:1))?|(?:src/)?permalink\.js:(?:11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:11|10|9|8|7|6|5|4|3|2|1))?|(?:src/)?slug\.js:(?:11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?permalink\.test\.js:(?:8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1))?|(?:test/)?slug\.test\.js:(?:11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock):\d+(?:[-,][ \t]*\d+)?`'''
 
 # No section but Decisions that holds only None / N/A (a padded section).
 [[check]]
@@ -39,11 +40,12 @@ metric = "lean"
 artifact = "file:.claude/workspace/issue-14/plan.md"
 absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
 
-# Target: the Verification section names the project's test run or the test file of the bug.
+# Target: the Verification section names the project's test run or the test file of the bug; a
+# line starting with `#` inside a fenced block, such as a shell comment, does not end the section.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-14/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)[^\n]*(?:npm (?:run )?test|node --test|slug\.test)'''
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?![ \t]*```)(?!\#)[^\n]*|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*\n[ \t]*```[^\n]*)*?(?:\n(?![ \t]*```)(?!\#)[^\n]*(?:npm (?:run )?test|node --test|slug\.test)|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*?\n(?![ \t]*```)[^\n]*(?:npm (?:run )?test|node --test|slug\.test))'''
 
 [[fact]]
 text = "`npm test` runs the tests"

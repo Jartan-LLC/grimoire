@@ -2,7 +2,7 @@
 # abstraction is right. The metric is reported per model.
 
 split = "screen"
-kind = "regression"
+kind = "target"
 hints = ["extract", "shared", "reuse", "fetch.py", "fetch_feed", "duplicate"]
 
 
@@ -30,11 +30,12 @@ metric = "grounded"
 artifact = "file:.claude/workspace/issue-19/plan.md"
 present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|feeds/__init__\.py|feeds/fetch\.py|feeds/parse\.py|feeds/refresh\.py|feeds/thumbs\.py|pyproject\.toml|tests/test_fetch\.py|tests/test_thumbs\.py|feeds/?|tests/?)(?:[:#][^`\n]*)?`'''
 
-# No backticked `path:line` whose path is not a fixture file or whose line is past its end.
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; the path
+# must end in a source or text extension, so a `host:port` is not read as one.
 [[check]]
 metric = "grounded"
 artifact = "file:.claude/workspace/issue-19/plan.md"
-absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|(?:feeds/)?__init__\.py:(?:1)(?:[-,][ \t]*(?:1))?|(?:feeds/)?fetch\.py:(?:24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:feeds/)?parse\.py:(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:feeds/)?refresh\.py:(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:feeds/)?thumbs\.py:(?:19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|pyproject\.toml:(?:4|3|2|1)(?:[-,][ \t]*(?:4|3|2|1))?|(?:tests/)?test_fetch\.py:(?:33|32|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:33|32|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:tests/)?test_thumbs\.py:(?:27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.[A-Za-z]{1,5}:\d+(?:[-,][ \t]*\d+)?`'''
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?:[-,][ \t]*(?:2|1))?|AGENTS\.md:(?:6|5|4|3|2|1)(?:[-,][ \t]*(?:6|5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|(?:feeds/)?__init__\.py:(?:1)(?:[-,][ \t]*(?:1))?|(?:feeds/)?fetch\.py:(?:24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:feeds/)?parse\.py:(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:feeds/)?refresh\.py:(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:feeds/)?thumbs\.py:(?:19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|pyproject\.toml:(?:4|3|2|1)(?:[-,][ \t]*(?:4|3|2|1))?|(?:tests/)?test_fetch\.py:(?:33|32|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:33|32|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:tests/)?test_thumbs\.py:(?:27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?)`)[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock):\d+(?:[-,][ \t]*\d+)?`'''
 
 # No section but Decisions that holds only None / N/A (a padded section).
 [[check]]
@@ -43,12 +44,13 @@ artifact = "file:.claude/workspace/issue-19/plan.md"
 absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
 
 # The abstraction where a second caller exists: a line of Approach, Steps, Files or Checklist, not
-# a rejected alternative, names the existing caller (or both callers) with extract / share / reuse /
-# move / common, not negated before that word.
+# a rejected alternative, names the existing caller, both callers or a shared helper, with extract /
+# share / reuse / move / common, not negated before that word nor put off after it ("not needed",
+# "a separate refactor").
 [[check]]
 metric = "abstraction"
 artifact = "file:.claude/workspace/issue-19/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:steps|files to (?:create|modify|change|touch)|(?:implementation )?(?:checklist|steps|plan)|(?:chosen |proposed )?approach|implementation|changes)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?![ \t]*(?:[-*+][ \t]+|\d+[.)][ \t]+)?(?:\*\*|_)?(?:rejected|alternatives?|not chosen|considered|why not)\b)(?=[^\n]*(?:fetch\.py|fetch_feed|\bboth\b|each caller|two callers))(?![^\n]*\b(?:no|not|without|don'?t|do not|never|avoid\w*|skip\w*)\b[^\n]*\b(?:extract\w*|shared?|common|reus\w*|mov(?:e|es|ed|ing)|factor\w*|pull\w* (?:it |that |this )?out|lift\w*|generali[sz]\w*)\b)(?=[^\n]*\b(?:extract\w*|shared?|common|reus\w*|mov(?:e|es|ed|ing)|factor\w*|pull\w* (?:it |that |this )?out|lift\w*|generali[sz]\w*)\b)'''
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:steps|files to (?:create|modify|change|touch)|(?:implementation )?(?:checklist|steps|plan)|(?:chosen |proposed )?approach|implementation|changes)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?![ \t]*(?:[-*+][ \t]+|\d+[.)][ \t]+)?(?:\*\*|_)?(?:rejected|alternatives?|not chosen|considered|why not)\b)(?=[^\n]*(?:fetch\.py|fetch_feed|\bboth\b|each caller|two callers|\b(?:shared|common)[ \t]+(?:[\w`-]+[ \t]+)?(?:helper|function|module|utility|util|routine|code|loop|logic|implementation)\b|\b(?:extract\w*|pull\w*|mov(?:e|es|ed|ing)|lift\w*|factor\w*)\b[^\n]*\binto\b))(?![^\n]*\b(?:no|not|without|don'?t|do not|never|avoid\w*|skip\w*)\b[^\n]*\b(?:extract\w*|shared?|common|reus\w*|mov(?:e|es|ed|ing)|factor\w*|pull\w* (?:it |that |this )?out|lift\w*|generali[sz]\w*)\b)(?=[^\n]*\b(?:extract\w*|shared?|common|reus\w*|mov(?:e|es|ed|ing)|factor\w*|pull\w* (?:it |that |this )?out|lift\w*|generali[sz]\w*)\b)(?![^\n]*\b(?:extract\w*|shared?|common|reus\w*|mov(?:e|es|ed|ing)|factor\w*|pull\w* (?:it |that |this )?out|lift\w*|generali[sz]\w*)\b(?:[^\n.;]|\.(?=\w)|\n(?![ \t]*(?:\n|[-*+][ \t]|\d+[.)][ \t]|\#))){0,60}?(?:(?:\bnot|n't)[ \t]+(?:\w+[ \t]+){0,2}?(?:needed|warranted|required|necessary|justified|worth\w*|wanted|called for)|\b(?:unnecessary|unneeded|overkill|premature\w*|speculative\w*|yagni|out of scope|separate (?:refactor\w*|issue|change|PR)|follow-?up)\b))'''
 
 [[fact]]
 text = "def fetch_feed"
@@ -99,22 +101,6 @@ runner = 2
 remote_runner = 3
 
 [[baseline]]
-model = "claude-sonnet-5-5"
-arm = "old"
-failures = 3
-runs = 3
-runner = 2
-remote_runner = 3
-
-[[baseline]]
-model = "claude-haiku-5-5"
-arm = "old"
-failures = 3
-runs = 3
-runner = 2
-remote_runner = 3
-
-[[baseline]]
 model = "claude-opus-5-5"
 arm = "none"
 failures = 3
@@ -124,7 +110,23 @@ remote_runner = 3
 
 [[baseline]]
 model = "claude-sonnet-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
 arm = "none"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
 failures = 3
 runs = 3
 runner = 2

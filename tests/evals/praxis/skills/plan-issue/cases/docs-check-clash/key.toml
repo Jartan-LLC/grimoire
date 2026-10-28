@@ -27,11 +27,12 @@ metric = "grounded"
 artifact = "file:.claude/workspace/issue-71/plan.md"
 present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CHANGELOG\.md|CLAUDE\.md|bin/pkgdoc\.js|docs/commands\.md|docs/index\.md|docs/words\.txt|package\.json|src/build\.js|src/pages\.js|src/serve\.js|src/spell\.js|test/build\.test\.js|test/spell\.test\.js|bin/?|docs/?|src/?|test/?)(?:[:#][^`\n]*)?`'''
 
-# No backticked `path:line` whose path is not a fixture file or whose line is past its end.
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; the path
+# must end in a source or text extension, so a `host:port` is not read as one.
 [[check]]
 metric = "grounded"
 artifact = "file:.claude/workspace/issue-71/plan.md"
-absent = '''`(?:\./)?(?!(?:\.gitignore:(?:3|2|1)(?:[-,][ \t]*(?:3|2|1))?|AGENTS\.md:(?:8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1))?|CHANGELOG\.md:(?:5|4|3|2|1)(?:[-,][ \t]*(?:5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|(?:bin/)?pkgdoc\.js:(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:docs/)?commands\.md:(?:5|4|3|2|1)(?:[-,][ \t]*(?:5|4|3|2|1))?|(?:docs/)?index\.md:(?:4|3|2|1)(?:[-,][ \t]*(?:4|3|2|1))?|(?:docs/)?words\.txt:(?:2|1)(?:[-,][ \t]*(?:2|1))?|package\.json:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|(?:src/)?build\.js:(?:21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:src/)?pages\.js:(?:12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:12|11|10|9|8|7|6|5|4|3|2|1))?|(?:src/)?serve\.js:(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:src/)?spell\.js:(?:25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?build\.test\.js:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|(?:test/)?spell\.test\.js:(?:8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1))?)`)[\w./-]+\.[A-Za-z]{1,5}:\d+(?:[-,][ \t]*\d+)?`'''
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:3|2|1)(?:[-,][ \t]*(?:3|2|1))?|AGENTS\.md:(?:8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1))?|CHANGELOG\.md:(?:5|4|3|2|1)(?:[-,][ \t]*(?:5|4|3|2|1))?|CLAUDE\.md:(?:1)(?:[-,][ \t]*(?:1))?|(?:bin/)?pkgdoc\.js:(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:docs/)?commands\.md:(?:5|4|3|2|1)(?:[-,][ \t]*(?:5|4|3|2|1))?|(?:docs/)?index\.md:(?:4|3|2|1)(?:[-,][ \t]*(?:4|3|2|1))?|(?:docs/)?words\.txt:(?:2|1)(?:[-,][ \t]*(?:2|1))?|package\.json:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|(?:src/)?build\.js:(?:21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:src/)?pages\.js:(?:12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:12|11|10|9|8|7|6|5|4|3|2|1))?|(?:src/)?serve\.js:(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:src/)?spell\.js:(?:25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1))?|(?:test/)?build\.test\.js:(?:7|6|5|4|3|2|1)(?:[-,][ \t]*(?:7|6|5|4|3|2|1))?|(?:test/)?spell\.test\.js:(?:8|7|6|5|4|3|2|1)(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1))?)`)[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock):\d+(?:[-,][ \t]*\d+)?`'''
 
 # No section but Decisions that holds only None / N/A (a padded section).
 [[check]]
@@ -39,11 +40,12 @@ metric = "lean"
 artifact = "file:.claude/workspace/issue-71/plan.md"
 absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned))?|nothing to (?:add|note|report)|no changes?(?: needed)?)\)?[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
 
-# Target: a Decisions section (or Open questions...) raises the clash with the existing public name.
+# Target: a Decisions section (or Open questions...) raises the clash with the existing public name,
+# on a line that names it as a command or flag, not only as a plain word.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-71/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?=[^\n]*(?:\bcheck\b))(?=[^\n]*(?:renam\w*|existing|exists|already|conflict\w*|clash\w*|collid\w*|collision|taken|shadow\w*|replac\w*|overload\w*|break\w*|spell\w*|docs:lint|words))'''
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?=[^\n]*(?:pkgdoc[ \t]+check\b|`check`|\bcheck[ \t]+(?:sub)?command|(?:sub)?command[ \t]+`?check\b))(?=[^\n]*(?:renam\w*|existing|exists|already|conflict\w*|clash\w*|collid\w*|collision|taken|shadow\w*|replac\w*|overload\w*|break\w*|spell\w*|docs:lint|words))'''
 
 [[fact]]
 text = "check: require(\"../src/spell\")"
