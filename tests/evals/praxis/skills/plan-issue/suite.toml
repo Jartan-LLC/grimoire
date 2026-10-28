@@ -20,11 +20,10 @@ BURNED = [
   # Its issue says "CSV is all anyone has asked for", which states the single use.
   "sales-csv-export",
 ]
-# The plan template moved from gitwise's github-conventions into plan-issue (#120), and the
-# issue-planner agent that also followed it was removed. The lint wants each glob to match a tracked
-# file, so the removed files are covered by globs that also match their successors:
-# plugins/*/skills/*/plan-format.md matches gitwise's old template and praxis's new one, and
-# plugins/praxis/*/*plan*.md matches agents/issue-planner.md and plan-issue's files.
+# Beside plan-issue's own files, the suite covers any skill's plan-format.md, any praxis Markdown
+# file with "plan" in its path, and github-conventions, so a change that moves the plan template or
+# removes a file that follows it is covered too. The lint wants each glob to match a
+# tracked file, so a removed file is covered by a glob that also matches a file still there.
 covers = [
   "plugins/praxis/skills/plan-issue/**",
   "plugins/*/skills/*/plan-format.md",
@@ -67,8 +66,9 @@ direction = "higher"
 # on a second-caller case it shares the existing code. Only those cases carry it, too few for a guard
 # to pass, and plan-issue's design step that drives it is not what the rebuild changed. Its regexes
 # are only a coarse signal: they can read a plan that copies the code as one that shares it, and a
-# negation earlier on the line as no abstraction. Until judges exist (#137), these two questions are
-# graded for the PR by a blind panel of three agents reading the plans, two of three deciding.
+# negation earlier on the line as no abstraction. Until judges exist (#137), a change to plan-issue
+# has these two questions graded by a blind panel of three agents reading the plans, two of three
+# deciding, and its PR reports the panel's result.
 
 [pass_rule]
 primary = "reader"

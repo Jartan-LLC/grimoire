@@ -43,11 +43,11 @@ absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:d
 
 # Target: a Decisions section (or Open questions...) raises the clash: one item names both
 # `-q` and what it already means (`--quiet`, no bell),
-# so a decision about the new name alone fails.
+# so a decision about the new name alone fails. The flag's case counts, since `-Q` is another flag.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-48/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:(?<![\w-])-q\b))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:\bquiet\w*|\bsilen\w*|\bmut(?:e|es|ed|ing)\b|\bno[ \t]+bell\b|\bwithout[ \t]+(?:the[ \t]+|a[ \t]+)?bell\b))'''
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:(?<![\w-])(?-i:-q)\b))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:\bquiet\w*|\bsilen\w*|\bmut(?:e|es|ed|ing)\b|\bno[ \t]+bell\b|\bwithout[ \t]+(?:the[ \t]+|a[ \t]+)?bell\b))'''
 
 [[fact]]
 text = "short: \"q\""

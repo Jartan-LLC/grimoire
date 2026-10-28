@@ -43,11 +43,11 @@ absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:d
 
 # Target: a Decisions section (or Open questions...) raises the clash: one item names both
 # `-o` and what it already means (`--open`, the HTML report opened in the browser),
-# so a decision about the new name alone fails.
+# so a decision about the new name alone fails. The flag's case counts, since `-O` is another flag.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-33/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:(?<![\w-])-o\b))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:--open\b|`open`|\bbrowser\b|sizecheck-report|\bopen(?:s|ing)?[ \t]+(?:flag|option|it|the[ \t]+(?:html[ \t]+)?report)\b))'''
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:(?<![\w-])(?-i:-o)\b))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:--open\b|`open`|\bbrowser\b|sizecheck-report|\bopen(?:s|ing)?[ \t]+(?:flag|option|it|the[ \t]+(?:html[ \t]+)?report)\b))'''
 
 [[fact]]
 text = "open: { type: \"boolean\", short: \"o\" }"
