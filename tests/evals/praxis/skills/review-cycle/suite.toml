@@ -22,6 +22,8 @@ covers = [
 models = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]
 # A full cycle runs several review-pr fan-outs: about $3.35 and 9 minutes per sample on Opus.
 budget_usd = 25.0
+# Haiku's full cycles ran past the default 30 minutes.
+timeout_s = 5400
 
 [[metric]]
 id = "rule"
