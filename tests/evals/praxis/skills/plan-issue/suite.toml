@@ -70,8 +70,8 @@ direction = "higher"
 # to pass, and plan-issue's design step that drives it is not what the rebuild changed. Its regexes
 # are only a coarse signal: they can read a plan that copies the code as one that shares it, and a
 # negation earlier on the line as no abstraction. Until judges exist (#137), a change to plan-issue
-# has these two questions graded by a blind panel of three agents reading the plans, two of three
-# deciding, and its PR reports the panel's result.
+# has these two questions, and the clash question under `reader`, graded by a blind panel of three
+# agents reading the plans, two of three deciding, and its PR reports the panel's result.
 
 [pass_rule]
 primary = "reader"
