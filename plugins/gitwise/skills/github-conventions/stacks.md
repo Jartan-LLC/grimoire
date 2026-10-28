@@ -32,20 +32,21 @@ A chain of PRs is not a stack until it is linked. Merging a PR in a linked stack
 
 ## Updating a Stack
 
-Rebase the branches above a PR when it changes under them, when you sync an upper branch, and when a merge fails because the stack needs rebasing. This rewrites pushed commits: do it only with the approval the project requires for a force-push, or the user's where it states none. **Rebase stack** in the web UI needs the same approval.
+When a branch with branches stacked above it changes, from this session or elsewhere, restack them by these steps; a sync and the merge cases below use them too. They rewrite pushed commits: run them only with the approval the project requires for a force-push, or the user's where it states none. **Rebase stack** in the web UI needs the same approval.
 
 `gh api repos/{owner}/{repo}/stacks/<number> --jq '.pull_requests[].head.ref'` lists a stack's branches, bottom first.
 
-1. Run `git fetch origin`. Where a branch you will rebase has commits its remote lacks (`git rev-list origin/<branch>..<branch>` lists any), stop and tell the user. Otherwise reset each one that is missing locally or behind its remote (`git switch -C <branch> origin/<branch>`).
-2. Note each branch's tip (`git rev-parse <branch>`) before you change any of them. If there is a change to make, commit it on its branch and push it.
-3. Bottom up, rebase each branch above onto the branch below it and push it:
+1. Push your own commits, on whichever of the stack's branches they are, then run `git fetch origin`.
+2. Before you move anything, note for each branch above the changed one the old tip of the branch below it: `git merge-base origin/<branch below> origin/<branch>`, or after a partial merge, for the next PR, the head commit you merged. Stop and tell the user where a branch's local copy has commits its remote lacks (`git rev-list origin/<branch>..<branch>` lists any), or where `git log --oneline <old tip>..origin/<branch>` lists commits that are not that branch's own: a branch below it was rewritten, and its old tip is gone.
+3. Bottom up, start each branch above from its remote, rebase it onto the branch below as pushed, and push it:
 
    ```bash
-   git rebase --onto <branch below> <old tip of branch below> <branch>
+   git switch -C <branch> origin/<branch>
+   git rebase --onto origin/<branch below> <old tip of branch below> <branch>
    git push --force-with-lease origin <branch>
    ```
 
-`<old tip of branch below>` is the tip of the branch below that you noted in step 2, or for a sync, `git merge-base <branch below> <branch>`. Where a branch below was rewritten rather than added to, the PR above lists commits that are not its own (`gh pr view <n> --json commits`): stop and tell the user. A stack that is not linear does not merge, even while each PR reports itself mergeable.
+A stack that is not linear does not merge, even while each PR reports itself mergeable.
 
 ## Merging a Stack
 
@@ -57,4 +58,4 @@ Rebase the branches above a PR when it changes under them, when you sync an uppe
   ```
 
   Poll `gh api repos/{owner}/{repo}/pulls/<n>/merge-async/<uuid>` until `status` is `merged` or `failed`. On `failed`, read `details.message`: restack a stack that needs rebasing ([Updating a Stack](#updating-a-stack)); otherwise tell the user.
-- After a partial merge, GitHub retargets the next PR onto the stack's base and rebases the PRs above. Wait for that, until `gh pr view <n> --json baseRefName,headRefOid` shows the new base and head, or for two minutes if the head does not change. Then check the next PR before you restack by hand: it must hold only its own commits (`gh pr view <n> --json commits`). One that still carries the merged PR's commits would land their messages a second time under a squash merge. Restack it as [Updating a Stack](#updating-a-stack) says, onto `origin/<stack base>` with the merged PR's last head commit (`gh pr view <merged PR> --json headRefOid -q .headRefOid`) as `<old tip of branch below>`.
+- Before a partial merge, note the next PR's head (`gh pr view <n> --json headRefOid -q .headRefOid`). After it, GitHub retargets the next PR onto the stack's base and rebases the PRs above: wait until `gh pr view <n> --json baseRefName,headRefOid` shows the new base and a new head, or for two minutes if the head does not change. The next PR must then hold only its own commits (`gh pr view <n> --json commits`): one that still carries the merged PR's commits would land their messages a second time under a squash merge. Restack it ([Updating a Stack](#updating-a-stack)), with the stack's base as the branch below it.
