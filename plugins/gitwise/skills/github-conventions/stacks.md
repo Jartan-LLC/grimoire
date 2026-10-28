@@ -41,13 +41,15 @@ When a branch with branches stacked above it changes, from this session or elsew
 
 1. Push your own commits, on whichever of the stack's branches they are, then run `git fetch origin`.
 2. Before you move anything, note for each branch above the changed one the old tip of the branch below it: `git merge-base origin/<branch below> origin/<branch>`, or, where the PR below it has merged, that PR's last head (`gh pr view <n> --json headRefOid -q .headRefOid`; `git fetch origin pull/<n>/head` fetches it once its branch is gone). Stop and tell the user where a branch's local copy has commits its remote lacks (`git rev-list origin/<branch>..<branch>` lists any), or where `git log --oneline <old tip>..origin/<branch>` lists commits that are not that branch's own: a branch below it was rewritten, and its old tip is gone.
-3. Bottom up, start each branch above from its remote, rebase it onto the branch below as pushed, and push it:
+3. Bottom up, start each branch above from its remote, rebase it onto the branch below as pushed, and push it. Where another worktree has the branch checked out, run its commands in that worktree:
 
    ```bash
    git switch -C <branch> origin/<branch>
    git rebase --onto origin/<branch below> <old tip of branch below> <branch>
    git push --force-with-lease origin <branch>
    ```
+
+   If a rebase stops on a conflict, resolve it only where the resolution keeps both sides' changes as they were, such as two changelog entries; otherwise run `git rebase --abort` and tell the user.
 
 A stack that is not linear does not merge, even while each PR reports itself mergeable.
 
