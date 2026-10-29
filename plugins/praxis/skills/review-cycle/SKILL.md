@@ -8,7 +8,7 @@ argument-hint: Branch or branches (may include additional context)
 
 Take a branch through rounds of review and fixes until two rounds in a row find nothing Critical or Important, then through a closing round on its words, then open its PR as a draft.
 
-By invoking this command the user grants three things for the branches it names: pushing each branch and updating its open PR's title and description after every round, the addresser's authority to decide findings (step 2), and opening each branch's draft PR (step 5). Nothing else: post nothing else to GitHub, and never force-push or rewrite a pushed commit, except to update a stack as `gitwise:github-conventions` says, which this grant covers.
+By invoking this command the user grants three things for the branches it names, or for the current branch when it names none: pushing each branch and updating its open PR's title and description after every round, the addresser's authority to decide findings (step 2), and opening each branch's draft PR (step 5). Nothing else: post nothing else to GitHub, and never force-push or rewrite a pushed commit, except to update a stack as `gitwise:github-conventions` says, which this grant covers.
 
 A raised finding is a judgment call the addresser does not settle by fixing. By default each goes to the user (raise mode). When the user says they will not be around, or asks the cycle to decide, the addresser decides them instead (decide mode). Take the mode from the user's request, raise when it does not say, and switch whenever the user says so.
 
@@ -18,7 +18,7 @@ Where the project's own rules say otherwise, follow them.
 
 ### 1. Set Up
 
-Load the `praxis:workspace-patterns` skill. For each branch, find or make its branch folder and a checkout of the branch: the one that has it, or a worktree, as `praxis:workspace-patterns` says. Never switch another checkout's branch. Take the base as `praxis:review-pr` does.
+Take the branches from the user's request; with none named, the current branch, as `praxis:review-pr` and `praxis:address-review` do. Load the `praxis:workspace-patterns` skill. For each branch, find or make its branch folder and a checkout of the branch: the one that has it, or a worktree, as `praxis:workspace-patterns` says. Never switch another checkout's branch. Take the base as `praxis:review-pr` does.
 
 The branch folder's `cycle.md` holds the cycle's state: the mode, the round, how many clean rounds in a row, each raised finding with its recommendation and the user's answer, each finding left for the user, each reply waiting for the user, and the PR number once the PR opens. The PR text is `pr.md` while the branch has no open PR; once it has one, it is the PR's own title and description, which each round updates with `gh pr edit` instead of `pr.md`. If `cycle.md` records a cycle in progress, resume from it. Otherwise load the `gitwise:commit-pr-writing` skill, write `pr.md` as it says unless the branch has an open PR, and start `cycle.md`.
 
@@ -39,7 +39,7 @@ A round is clean when its review has nothing Critical or Important, at the revie
 
 ### 4. Run the Closing Round
 
-Spawn a reviewer as in step 2, with `praxis:review-pr` limited to the documentation, comments, docstrings and commit messages the change adds, changes or makes false, and the PR description. Address it, verify and push as in step 2. The closing round does not count toward the clean streak. If its fixes change code, the streak starts over: go back to step 2 until two rounds in a row are clean, then run the closing round again.
+Spawn a reviewer as in step 2, with `praxis:review-pr` limited to the documentation, comments, docstrings and commit messages the change adds, changes or makes false, and the PR title and description. Address it, verify and push as in step 2. The closing round does not count toward the clean streak. If its fixes change code, the streak starts over: go back to step 2 until two rounds in a row are clean, then run the closing round again.
 
 ### 5. Open the Draft
 
