@@ -231,6 +231,11 @@ the PR how many versions you screened.
 Every screen follows these steps; `make eval-plan TIER=<n>` prints the screens a tier takes. A scratch
 suite is not screened: run and read it as "Smoke tests" says.
 
+Screen and confirm once the change's text has settled: on a branch going through review rounds, after
+the rounds come back clean, on that head. A review fix that changes text a session reads voids every
+earlier screen of it, so screening between rounds spends the runs for nothing; between rounds,
+`make check` is enough.
+
 1. **Fix the test before the first run.** The plan holds every file of the suite (cases, keys, baselines,
    references), the samples per case, the model ID, the Claude Code version, the runner's flags and
    `old`'s plugins (`new` changes as you iterate). Your branch's first screen of a split on a model fixes
