@@ -43,10 +43,10 @@ Spawn a reviewer as in step 2, with `praxis:review-pr` limited to the documentat
 
 ### 5. Open the Draft
 
-Open the PR with `praxis:create-pr`, run in the branch's checkout with the issue from `pr.md`'s `Closes` line or the effort folder's name; it takes its title and description from `pr.md` and opens it as a draft. If the branch already has an open PR, skip create-pr and leave the PR's draft state as it is. Record the PR number in `cycle.md`, tell the user the PR is open, with each finding left for them first, then each reply waiting for them, then each finding decided in decide mode and its commit, and stop: the user marks it ready.
+Open the PR with `praxis:create-pr`, run in the branch's checkout with the issue from `pr.md`'s `Closes` line or the effort folder's name; it takes its title and description from `pr.md` and opens it as a draft. If the branch already has an open PR, skip create-pr and leave the PR's draft state as it is. Record the PR number in `cycle.md`, tell the user the PR is open, with each finding left for them first, then each reply waiting for them, then each finding decided in decide mode and its commit, then each Important or Critical finding the addresser declined, with its reason, and stop: the user marks it ready.
 
 ## Several Branches
 
 - Run each branch's cycle on its own, and start its next round as soon as its last one is addressed, so rounds across branches stagger instead of running in waves.
 - Each cycle reads and writes only its own branch folder and checkout.
-- For a stack, start the upper branch's cycle after the lower one finishes, once the upper branch is synced onto the lower one as `gitwise:github-conventions` says.
+- For a stack, start the upper branch's cycle after the lower one finishes, once the upper branch is synced onto the lower one as `gitwise:github-conventions` says. The lower branch's finished cycle counts as the lower PR's review being done, which github-conventions waits for before it opens the upper PR.
