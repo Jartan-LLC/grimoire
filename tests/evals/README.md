@@ -232,7 +232,7 @@ Every screen follows these steps; `make eval-plan TIER=<n>` prints the screens a
 suite is not screened: run and read it as "Smoke tests" says.
 
 Screen and confirm once the change's text has settled: on a branch going through review rounds, after
-the rounds come back clean, on that head. A review fix that changes text a session reads voids every
+the last round, a closing round on its words included, on that head. A review fix that changes text a session reads voids every
 earlier screen of it, so screening between rounds spends the runs for nothing; between rounds,
 `make check` is enough.
 
