@@ -1,9 +1,17 @@
 # Changelog
 
-## 1.12.0
+## 1.13.0
 
 - New `/praxis:review-cycle` command: takes a branch through review rounds until two in a row find nothing Critical or Important, runs a closing round on the change's words, then opens its PR as a draft and stops for you to mark it ready. Each round fixes what has one clear fix and brings you each real judgment call; tell it you won't be around, or to decide, and it decides those calls itself, each in a commit of its own, and lists them for you when the PR opens, with anything it left for you, such as repo settings. Your agent pushes the branch after every round, force-pushes only to update a stack as `gitwise:github-conventions` says, and resumes a cycle from the branch folder's `cycle.md`.
 - `review-pr` tells its reviewers nothing about what to look for or what earlier reviews found, and a review you limit to part of a change runs only the reviewers for that part.
+
+## 1.12.0
+
+- Needs gitwise 1.5.0 or later.
+- `implement-issue` branches from an open PR's branch when the issue builds on that PR's unmerged work.
+- `create-pr` bases a PR on the branch it was cut from, or asks you when it cannot tell, and opens and links a stacked PR as `gitwise:github-conventions`' `stacks.md` says.
+- `plan-issue` says that sub-issues that build on each other may branch from each other's branches, as `stacks.md` says, and still merge into the parent feature branch.
+- `information-placement`'s stacked-PR example now says that merging a PR also merges the PRs below it in its stack.
 
 ## 1.11.0
 
