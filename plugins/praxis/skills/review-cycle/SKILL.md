@@ -8,7 +8,7 @@ argument-hint: Branch or branches (may include additional context)
 
 Take a branch through rounds of review and fixes until two rounds in a row find nothing Critical or Important, then through a closing round on its words, then open its PR as a draft.
 
-By invoking this command the user grants two things for the branches it names: pushing each branch and updating its open PR's title and description after every round, and the addresser's authority to decide findings (step 2). Nothing else: post nothing else to GitHub before the PR opens, and never force-push or rewrite a pushed commit.
+By invoking this command the user grants three things for the branches it names: pushing each branch and updating its open PR's title and description after every round, the addresser's authority to decide findings (step 2), and opening each branch's draft PR (step 5). Nothing else: post nothing else to GitHub, and never force-push or rewrite a pushed commit, except to update a stack as `gitwise:github-conventions` says, which this grant covers.
 
 A raised finding is a judgment call the addresser does not settle by fixing. By default each goes to the user (raise mode). When the user says they will not be around, or asks the cycle to decide, the addresser decides them instead (decide mode). Take the mode from the user's request, raise when it does not say, and switch whenever the user says so.
 
