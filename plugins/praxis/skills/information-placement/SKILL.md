@@ -36,10 +36,10 @@ parses (trailers, frontmatter, a tool's marked blocks) are the project's, except
    document may mark behaviour newer than the release its readers install as "unreleased". A "now"
    that says what the change made true is fine, and so is a commit message that names an earlier commit
    by its subject to correct it, and so is a merge condition or a stacked PR stated as a fact
-   ("Requires #52.", "the PRs stacked on this one merge with it"), and so is later work named by its
-   issue ("the rest of the #151 migration"). A PR description the merge setting does not land is
-   read before the merge and may compare against the base branch ("262 MB on main"). Review replies
-   and issue and plan comments are read in the moment and may narrate.
+   ("Requires #52.", "merging this PR also merges the PRs below it in its stack"), and so is later
+   work named by its issue ("the rest of the #151 migration"). A PR description the merge setting
+   does not land is read before the merge and may compare against the base branch ("262 MB on
+   main"). Review replies and issue and plan comments are read in the moment and may narrate.
 2. A claim that needs its links or ids to say what it claims: strip them and the sentence must still
    say it. A line that only relates the change to a reference ("Refs #159.") passes. No shared text
    points its reader to something they cannot open: a path on the author's machine, a file `git

@@ -33,7 +33,7 @@ Evaluate whether the issue should be broken into sub-issues. Not every multi-par
 - **The diff would be very large** -- Thousands of lines in one pass means mistakes get buried. Smaller, focused issues produce better results.
 - **There are genuinely separable concerns** -- A reusable module that happens to be needed by this feature is worth its own issue. A small page that accompanies a backend feature is not.
 
-If sub-issues are warranted, use `/praxis:create-issue` to file them, referencing the parent issue. Sub-issue branches are created from the parent feature branch and merged back into it, not directly to main.
+If sub-issues are warranted, use `/praxis:create-issue` to file them, referencing the parent issue. Sub-issue branches are created from the parent feature branch, or from another sub-issue's branch when they stack (`stacks.md` in `gitwise:github-conventions`), and merge into the parent feature branch, not directly to main.
 
 ### 5. Design Considerations
 

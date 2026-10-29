@@ -24,7 +24,7 @@ Also load the `praxis:workspace-patterns` skill and read the issue's plan, `.cla
 
 ### 2. Setup Branch
 
-Load the `gitwise:github-conventions` skill. Check existing local and remote branches for one related to this issue -- it may be named by issue number (`feature/issue-123`) or by description (`feature/audit-improvements`). If one exists, check it out. If not, create a new branch. For sub-issues of a larger feature, branch from the parent feature branch rather than main.
+Load the `gitwise:github-conventions` skill. Check existing local and remote branches for one related to this issue -- it may be named by issue number (`feature/issue-123`) or by description (`feature/audit-improvements`). If one exists, check it out. If not, create a new branch. For sub-issues of a larger feature, branch from the parent feature branch rather than main. When the issue builds on the unmerged work of another open PR, other than the PR of its parent feature branch, read `stacks.md` in the `gitwise:github-conventions` skill, and when it says to stack, branch from that PR's branch as its Building a Stack section says.
 
 ### 3. Read Relevant Docs
 

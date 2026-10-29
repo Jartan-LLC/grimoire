@@ -28,7 +28,11 @@ Also load the `praxis:workspace-patterns` skill and read the issue's plan, `.cla
 
 ### 3. Review All Changes
 
-Load the `gitwise:commit-pr-writing` and `gitwise:github-conventions` skills. Determine the correct base branch -- `main` for regular branches, or the parent feature branch for sub-issue branches. Read `git diff <base>...HEAD` and the branch's commit messages (`git log <base>..HEAD`). Note what this session changed outside the diff (settings, tags, secrets) or did not run, and ask the user about changes outside the diff that this session did not make.
+Load the `gitwise:commit-pr-writing` and `gitwise:github-conventions` skills. Determine the base branch: the branch this one was cut from, or, when that branch's PR has merged, the branch it merged into, as rule 2 of `stacks.md` in `gitwise:github-conventions` says. When you cannot tell, ask the user.
+
+When the branch was cut from another PR's branch, other than a sub-issue's parent feature branch, follow `stacks.md` before creating the PR: it says when to open it and how to sync or restack the branch first. Until it says to open the PR, tell the user why instead.
+
+Read `git diff <base>...HEAD` and the branch's commit messages (`git log <base>..HEAD`). Note what this session changed outside the diff (settings, tags, secrets) or did not run, and ask the user about changes outside the diff that this session did not make.
 
 ### 4. Create Pull Request
 
@@ -39,3 +43,5 @@ gh pr create --draft --title "<title>" --body "<description>" --base <base-branc
 ```
 
 Include `Closes #<issue-number>` in the body.
+
+When the base is another open PR's branch, other than a sub-issue's parent feature branch, link the new PR into that PR's stack as `stacks.md` says.

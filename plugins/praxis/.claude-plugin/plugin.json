@@ -1,10 +1,10 @@
 {
   "name": "praxis",
-  "version": "1.11.0",
+  "version": "1.12.0",
   "description": "Development workflow -- issue planning, implementation, PR creation, code review with specialized reviewers, and project conventions",
   "author": {
     "name": "Jartan LLC",
     "url": "https://github.com/Jartan-LLC"
   },
-  "dependencies": [{ "name": "gitwise", "version": "^1.4.0" }]
+  "dependencies": [{ "name": "gitwise", "version": "^1.5.0" }]
 }

@@ -26,13 +26,15 @@ Always check if a branch already exists for an issue before creating a new one.
 
 For sub-issues of a larger feature, branch from the parent feature branch rather than main. Sub-issue work merges back into the parent feature branch, which eventually merges to main.
 
+When a change builds on the unmerged work of another open PR, other than the PR of a sub-issue's parent feature branch, [stacks.md](stacks.md) says whether to stack it on that PR and how to build, update and merge a stack. Before you push to a PR's branch, read its stack (`gh api repos/{owner}/{repo}/pulls/<n> --jq .stack`); when its `position` is less than its `size`, PRs are stacked above it: update them as [stacks.md](stacks.md#updating-a-stack) says.
+
 ## Commits
 
 Follow the project's commit convention, as CONTRIBUTING, a commitlint config or the agent instructions state it, or as recent single-commit subjects on the default branch show it. Where none does, use Conventional Commits: `<type>(<scope>): <description>`, with a type from commitlint's config-conventional (`build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`, `test`); the scope is optional.
 
 Mark a change that breaks something for the project's consumers the way the convention and the project's release tool read it: `!` before the colon, a `BREAKING CHANGE:` footer, or both; where you cannot tell, both. A one-time action only contributors owe (rebuild the dev container) takes no breaking mark.
 
-While a commit is not yet pushed, fold a further fix to the same change into it (`git commit --amend` for the last commit) instead of adding a commit. Never rewrite a pushed commit.
+While a commit is not yet pushed, fold a further fix to the same change into it (`git commit --amend` for the last commit) instead of adding a commit. Never rewrite a pushed commit, except to update a stack as [stacks.md](stacks.md) says.
 
 For what a commit message, a PR title and a PR description say, and which of them lands on the default branch, load `gitwise:commit-pr-writing`.
 
