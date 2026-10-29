@@ -1,0 +1,7 @@
+{
+  "name": "todo",
+  "version": "0.6.0",
+  "private": true,
+  "bin": { "todo": "bin/todo.js" },
+  "scripts": { "test": "node --test" }
+}

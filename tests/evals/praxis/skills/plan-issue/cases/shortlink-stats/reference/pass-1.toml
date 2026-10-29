@@ -1,0 +1,34 @@
+final = "Plan written to .claude/workspace/issue-45/plan.md."
+
+[files]
+".claude/workspace/issue-45/plan.md" = '''# Plan: Count clicks on short links (issue 45)
+
+## Approach
+
+Keep a `hits` count on each link record in the store. The redirect branch of `handle`
+(`src/app.js:12-14`) increments it before answering 302, and a new `GET /stats/<code>` branch
+returns `{ url, hits }`, or 404 for an unknown code. Links saved before this change have no `hits`
+and count from 0.
+
+## Decisions for the user
+
+- Assumption: an approximate count is fine for now -- each hit is a read and a rewrite of the
+  JSON file, so two redirects at the same moment can lose one hit.
+
+## Out of scope
+
+- Moving the store to SQLite, as the TODO in `src/store.js` suggests: it would fix lost writes
+  for links and hits alike, but it is its own change -- separate issue.
+
+## Steps
+
+1. Add `hit(code)` to `src/store.js`, following `put` at `src/store.js:15-19`.
+2. In `src/app.js`, match `/stats/<code>` before the redirect, and call `store.hit` on a redirect.
+3. Tests in `test/app.test.js`: two redirects then stats shows 2; stats for an unknown code is 404.
+
+## Verification
+
+- `npm test` -- the new stats tests pass with the existing ones.
+- Start with `npm start`, create a link, `curl -i localhost:3000/<code>` twice, then
+  `curl localhost:3000/stats/<code>` -- shows `"hits":2`.
+'''

@@ -1,0 +1,83 @@
+# What the plan /praxis:plan-issue writes serves its three readers: the user approving it, the agent
+# implementing it later, and create-pr checking the diff against it. Each case is a small repository
+# and a GitHub issue the gh stub serves; the plan file is graded by regex. The six kinds of fixture
+# come from the research of the template rebuild (#120): a bug fix with an obvious test command, a
+# feature with a tempting adjacent refactor, a feature whose name clashes with an existing public
+# command, a feature where an abstraction is tempting but has one use, one where a second caller
+# already exists, and a docs-only change. tests/evals/README.md says how the suite is run.
+target = "praxis:plan-issue"
+# Cases moved off a held-out split, each with its reason in a comment.
+BURNED = [
+  # Its issue asks for "the same paging code for both", which states the share.
+  "authors-paging",
+  # Its issue says "nobody has asked for email or anything else", which states the single use.
+  "backup-slack-alert",
+  # Its issue says "Email is the only way we want to reach members", which states the single use.
+  "loan-reminder-email",
+  # Its issue says "The email and the website are the only places the notes go", which states the
+  # single use.
+  "relnotes-html",
+  # Its issue says "CSV is all anyone has asked for", which states the single use.
+  "sales-csv-export",
+]
+# Beside plan-issue's own files, the suite covers any skill's plan-format.md, any praxis Markdown
+# file with "plan" in its path, and github-conventions, so a change that moves the plan template or
+# removes a file that follows it is covered too. The lint wants each glob to match a
+# tracked file, so a removed file is covered by a glob that also matches a file still there.
+covers = [
+  "plugins/praxis/skills/plan-issue/**",
+  "plugins/*/skills/*/plan-format.md",
+  "plugins/praxis/*/*plan*.md",
+  "plugins/gitwise/skills/github-conventions/SKILL.md",
+]
+models = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]
+# A plan session only reads the repository and writes one file.
+budget_usd = 2.0
+
+[[metric]]
+id = "reader"
+direction = "higher"
+# Every case: a Verification section with a command (a docs case: any check). Bug-fix, refactor and
+# clash cases also: the bug's test run under Verification, the adjacent refactor under Out of scope,
+# or an item under Decisions for the user that names the requested command or flag. The clash check
+# is structural: whether that item raises the clash with what the name already means is graded like
+# the abstraction questions below, by a blind panel of three agents, two of three deciding.
+
+[[metric]]
+id = "grounded"
+direction = "higher"
+margin = 0.2
+# Every case: a backticked path that exists, and no backticked path:line that does not.
+
+[[metric]]
+id = "lean"
+direction = "higher"
+margin = 0.2
+# Every case: no section but Decisions padded with only None or N/A, a reason after it or not; docs
+# cases also a word ceiling.
+
+[[metric]]
+id = "cut"
+direction = "higher"
+# Reported only: no Complexity line and no placeholder phases, the parts the rebuild cut. Old always
+# fails it, so it shows only that new follows the template.
+
+[[metric]]
+id = "abstraction"
+direction = "higher"
+# Reported only, per model, as the maintainer asked: on a one-use case the plan adds no abstraction,
+# on a second-caller case it shares the existing code. Only those cases carry it, too few for a guard
+# to pass, and plan-issue's design step that drives it is not what the rebuild changed. Its regexes
+# are only a coarse signal: they can read a plan that copies the code as one that shares it, and a
+# negation earlier on the line as no abstraction. Until judges exist (#137), a change to plan-issue
+# has these two questions, and the clash question under `reader`, graded by a blind panel of three
+# agents reading the plans, two of three deciding, and its PR reports the panel's result.
+
+[pass_rule]
+primary = "reader"
+rule = "better"
+guards = ["grounded", "lean"]
+# Old's template has none of the sections `reader` checks, so the gain it claims is near new's pass
+# rate; a split that cannot see a gain of 0.5, well below that, is too small for this change.
+min_effect = 0.5
+min_samples = 3

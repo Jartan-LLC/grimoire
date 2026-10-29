@@ -1,0 +1,24 @@
+final = "Plan written to .claude/workspace/issue-17/plan.md."
+
+[files]
+".claude/workspace/issue-17/plan.md" = '''# Plan: Open Library lookup (issue 17)
+
+## Approach
+
+Add a command that searches Open Library and adds the chosen result.
+
+## Open questions
+
+1. `search` is taken by the local catalog search; renaming it would break people's scripts.
+   OK to call the new command `shelf find-online`? Default: that name.
+
+## Steps
+
+1. `shelf/openlibrary.py` for the API call.
+2. A new subparser in `shelf/cli.py`.
+3. Tests with a patched `urlopen`.
+
+## Verification
+
+- `python3 -m pytest -q` passes.
+'''

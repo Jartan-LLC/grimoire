@@ -1,0 +1,30 @@
+final = "Plan written to .claude/workspace/issue-23/plan.md."
+
+[files]
+".claude/workspace/issue-23/plan.md" = '''# Plan: Every conversion waits on the rates API (issue 23)
+
+## Approach
+
+Wrap `fetch_rates` (`fxconv/rates.py:11-15`) with a file cache: `cached_rates(base)` reads
+`~/.cache/fxconv/<base>.json` when it is under an hour old, and otherwise fetches and writes it.
+`main` calls `cached_rates` instead of `fetch_rates` (`fxconv/__main__.py:15`). A fetch that fails
+falls back to a stale file, so the till keeps working through an API outage.
+
+## Decisions for the user
+
+- Use a stale file when the API is down? Default if unanswered: yes, and print a warning to stderr.
+
+## Steps
+
+1. In `fxconv/rates.py`, add `cached_rates(base, cache_dir, now)`; write the file through a temporary
+   file and `os.replace`, since till scripts run in parallel.
+2. Call it from `fxconv/__main__.py:15`.
+3. Tests in `tests/test_rates.py` with `tmp_path` and a patched `urlopen`: a fresh file is used, an
+   hour-old one is refetched, a failed fetch uses the stale file.
+
+## Verification
+
+- `python3 -m pytest -q` -- the cache tests and the existing rate tests pass.
+- Run `python3 -m fxconv 10 EUR USD` twice -- the second run answers at once and leaves the file's
+  time unchanged.
+'''

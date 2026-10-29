@@ -1,0 +1,35 @@
+final = "Plan written to .claude/workspace/issue-12/plan.md."
+
+[files]
+".claude/workspace/issue-12/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Email a reminder when a loan is 7 days overdue.
+
+### Patterns & Conventions Found
+- Pattern: `booklend/__main__.py:17` -- the overdue loop.
+- Pattern: `booklend/members.py:7` -- member rows hold the email.
+
+### Chosen Approach
+- **What**: A `Notifier` base class with an `EmailNotifier`, so SMS can follow.
+- **Why**: Channels change.
+- **How**: New module, called from the loop.
+
+### Alternatives Considered
+1. Inline smtplib in the loop -- hard to test.
+
+### Files to Create/Modify
+- `booklend/notify.py` -- new
+- `booklend/__main__.py` -- call it
+
+### Documentation Plan
+- None.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- notifier
+- [ ] Phase 2: Core implementation -- email
+- [ ] Phase 3: Integration/cleanup -- tests
+
+### Complexity
+Moderate
+'''

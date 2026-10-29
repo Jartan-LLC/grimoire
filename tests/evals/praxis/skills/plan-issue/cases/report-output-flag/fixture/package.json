@@ -1,0 +1,6 @@
+{
+  "name": "sizecheck",
+  "version": "1.3.0",
+  "bin": { "sizecheck": "bin/sizecheck.js" },
+  "scripts": { "test": "node --test" }
+}

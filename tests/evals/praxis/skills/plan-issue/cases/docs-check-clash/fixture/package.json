@@ -1,0 +1,7 @@
+{
+  "name": "pkgdoc",
+  "version": "0.8.0",
+  "private": true,
+  "bin": { "pkgdoc": "bin/pkgdoc.js" },
+  "scripts": { "test": "node --test", "docs:lint": "pkgdoc check --words docs/words.txt" }
+}

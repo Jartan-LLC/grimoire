@@ -1,0 +1,35 @@
+final = "Plan written to .claude/workspace/issue-36/plan.md."
+
+[files]
+".claude/workspace/issue-36/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Add `rolodex import <csv>` that adds contacts and reports skipped rows.
+
+### Patterns & Conventions Found
+- Pattern: `rolodex/cli.py:13` -- subcommands.
+- Pattern: `rolodex/models.py:10` -- `make_contact` normalises fields.
+
+### Chosen Approach
+- **What**: An `import` subcommand on top of `make_contact` and `same_person`.
+- **Why**: Imported and added contacts behave alike.
+- **How**: New module plus a subcommand.
+
+### Alternatives Considered
+1. Accept vCard input -- the front desk has a spreadsheet.
+
+### Files to Create/Modify
+- `rolodex/importer.py` -- new
+- `rolodex/cli.py` -- the subcommand
+
+### Documentation Plan
+- README: the new command.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- the importer
+- [ ] Phase 2: Core implementation -- the subcommand
+- [ ] Phase 3: Integration/cleanup -- tests
+
+### Complexity
+Simple
+'''

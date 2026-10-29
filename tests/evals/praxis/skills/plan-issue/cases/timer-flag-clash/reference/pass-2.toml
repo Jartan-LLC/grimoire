@@ -1,0 +1,22 @@
+final = "Plan written to .claude/workspace/issue-48/plan.md."
+
+[files]
+".claude/workspace/issue-48/plan.md" = '''# Plan: pomo --quick (issue 48)
+
+## Approach
+
+One more option in the `parseArgs` table.
+
+## Open questions
+
+- The issue wants `-q` as the short flag, but `-q` is taken by quiet. Which should win? Default:
+  keep quiet on `-q`.
+
+## Steps
+
+1. Add the option and the 15-minute default in `bin/pomo.js`.
+
+## Verification
+
+- `npm test` passes and `node bin/pomo.js --quick` starts at 15.
+'''

@@ -1,0 +1,24 @@
+final = "Plan written to .claude/workspace/issue-71/plan.md."
+
+[files]
+".claude/workspace/issue-71/plan.md" = '''# Plan: Broken-link check (issue 71)
+
+## Approach
+
+A link checker over the Markdown pages, same shape as the spell checker.
+
+## Questions before starting
+
+1. The name: `check` is taken by the spell check, which CI jobs elsewhere call. Merge both
+   checks under `check`, or pick a new name? I will use `pkgdoc links` unless you say otherwise.
+
+## Steps
+
+1. `src/links.js`, reusing `pages()` from `src/pages.js`.
+2. Wire it into `bin/pkgdoc.js`.
+3. Tests and docs.
+
+## Verification
+
+- `npm test` passes.
+'''

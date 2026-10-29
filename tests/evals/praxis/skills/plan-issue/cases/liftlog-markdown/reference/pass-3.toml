@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-38/plan.md."
+
+[files]
+".claude/workspace/issue-38/plan.md" = '''# Plan: Markdown output for personal bests (issue 38)
+
+## Approach
+
+Add `toMarkdown(rows)` in `src/markdown.js` and a `--markdown` flag in `bin/liftlog.js`; a formatter
+interface is not needed for one extra format.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Write `toMarkdown(rows)`, escaping `|` in lifter names.
+2. Call it from `bin/liftlog.js` when `--markdown` is given.
+
+## Verification
+
+- `npm test` -- a new test checks the header row and one data row.
+'''

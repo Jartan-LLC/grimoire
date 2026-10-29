@@ -1,0 +1,37 @@
+final = "Plan written to .claude/workspace/issue-66/plan.md."
+
+[files]
+".claude/workspace/issue-66/plan.md" = '''# Plan: Text the grower when the greenhouse gets too cold (issue 66)
+
+## Approach
+
+After logging, `main` (`greenhouse/__main__.py:13-17`) checks the reading: below 4 C, and no text
+sent yet for this cold spell, it POSTs to the SMS gateway with `urllib.request`. A marker file
+`~/greenhouse.cold` records that a text went out; the first reading at or above 4 C removes it, so
+the next cold spell texts again. A failed text is logged and does not stop the logging.
+
+## Decisions for the user
+
+- Assumption: 4 C is a fixed threshold -- if growers want to change it, read it from an environment
+  variable with 4 as the default.
+- One text when it warms up again ("back to 6 C")? Default if unanswered: no.
+
+## Out of scope
+
+- Texting about a dead sensor (a failed read) -- not planned; open an issue if wanted.
+
+## Steps
+
+1. Add `greenhouse/sms.py` with `send_text(phone, text)`: JSON body, `Authorization: Bearer`
+   header, 10-second timeout, following the stdlib-only rule in `AGENTS.md`.
+2. Add `check_cold(celsius, marker, send)` in `greenhouse/alert.py`: sends once when below 4 C and
+   no marker, creates the marker; removes it at or above 4 C.
+3. Call `check_cold` from `main` after `append_reading` (`greenhouse/__main__.py:16`).
+4. Tests in `tests/test_alert.py` with a fake `send`: one text over three cold readings, a second
+   text after a warm reading.
+
+## Verification
+
+- `ruff` reports nothing new.
+
+'''

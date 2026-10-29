@@ -1,0 +1,26 @@
+final = "Plan written to .claude/workspace/issue-88/plan.md."
+
+[files]
+".claude/workspace/issue-88/plan.md" = '''# Plan: formatBytes(1024) prints "1024 B" (issue 88)
+
+## Approach
+
+The unit loop steps up only while the value is greater than 1024, so exactly 1024 of a unit
+stays in the smaller one. Step up at 1024 and above.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. In `src/bytes.js:7`, change `value > 1024` to `value >= 1024`.
+2. Add boundary cases to `test/bytes.test.js`: 1023 B, 1024 -> "1.0 KB", 1048576 -> "1.0 MB".
+3. Add a line under "Unreleased" in `CHANGELOG.md`: exact powers of 1024 now print in the
+   larger unit.
+
+## Verification
+
+- `node -e "console.log(require('./src/bytes').formatBytes(1024))"` -- prints `1.0 KB`.
+
+'''

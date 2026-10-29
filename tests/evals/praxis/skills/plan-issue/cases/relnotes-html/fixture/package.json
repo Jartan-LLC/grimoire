@@ -1,0 +1,7 @@
+{
+  "name": "relnotes",
+  "version": "0.8.0",
+  "private": true,
+  "bin": { "relnotes": "bin/relnotes.js" },
+  "scripts": { "test": "node --test" }
+}

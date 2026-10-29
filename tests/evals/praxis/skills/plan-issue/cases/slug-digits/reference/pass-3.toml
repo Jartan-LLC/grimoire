@@ -1,0 +1,25 @@
+final = "Plan written to .claude/workspace/issue-14/plan.md."
+
+[files]
+".claude/workspace/issue-14/plan.md" = '''# Plan: Keep numbers in slugs (issue 14)
+
+## Approach
+
+Let digits through the character class in `slugify` (`src/slug.js`).
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Allow `0-9` in the replace pattern in `src/slug.js`.
+2. Regression test for "Week 1 recap" vs "Week 2 recap".
+
+## Verification
+
+```bash
+# the whole suite, the new test included
+npm test
+```
+'''

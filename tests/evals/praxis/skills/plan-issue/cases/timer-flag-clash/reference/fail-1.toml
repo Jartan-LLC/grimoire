@@ -1,0 +1,33 @@
+final = "Plan written to .claude/workspace/issue-48/plan.md."
+
+[files]
+".claude/workspace/issue-48/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Add `--quick`/`-q` for 15-minute sessions.
+
+### Patterns & Conventions Found
+- Pattern: `bin/pomo.js:5` -- options are a `parseArgs` table.
+
+### Chosen Approach
+- **What**: A `quick` option with short `-q`; quiet moves to `-s` (silent).
+- **Why**: The issue asks for `-q`.
+- **How**: Edit the options table.
+
+### Alternatives Considered
+1. No short flag -- the issue wants `-q`.
+
+### Files to Create/Modify
+- `bin/pomo.js`
+
+### Documentation Plan
+- README: new flag.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- option
+- [ ] Phase 2: Core implementation -- default
+- [ ] Phase 3: Integration/cleanup -- README
+
+### Complexity
+Simple
+'''

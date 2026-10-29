@@ -1,0 +1,35 @@
+final = "Plan written to .claude/workspace/issue-22/plan.md."
+
+[files]
+".claude/workspace/issue-22/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Add `notes sync` to upload new and changed notes to the team server.
+
+### Patterns & Conventions Found
+- Pattern: `notes/cli.py:11` -- subcommands are argparse subparsers.
+- Pattern: `notes/backup.py:15` -- the current sync copies files.
+
+### Chosen Approach
+- **What**: Turn `notes sync` into the server upload, and move the local copy to `notes backup`.
+- **Why**: The issue asks for `notes sync`.
+- **How**: New `notes/server.py`, rewire the subcommands.
+
+### Alternatives Considered
+1. Name the upload `notes push` -- the issue asks for `sync`.
+
+### Files to Create/Modify
+- `notes/server.py` -- new
+- `notes/cli.py` -- rename and add
+
+### Documentation Plan
+- README: new command list.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- server client
+- [ ] Phase 2: Core implementation -- the command
+- [ ] Phase 3: Integration/cleanup -- README
+
+### Complexity
+Moderate
+'''

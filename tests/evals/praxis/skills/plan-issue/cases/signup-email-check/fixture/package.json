@@ -1,0 +1,7 @@
+{
+  "name": "clubhouse",
+  "version": "2.4.1",
+  "private": true,
+  "main": "src/server.js",
+  "scripts": { "start": "node src/server.js", "test": "node --test" }
+}

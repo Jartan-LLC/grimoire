@@ -1,0 +1,27 @@
+final = "Plan written to .claude/workspace/issue-31/plan.md."
+
+[files]
+".claude/workspace/issue-31/plan.md" = '''# Plan: Invoices due on a Saturday show Sunday as the due date (issue 31)
+
+## Approach
+
+`due_date` adds one day for a Saturday as well as for a Sunday, so a Saturday lands on Sunday.
+Make the Saturday branch add two days. No other caller computes due dates, so the fix stays in
+one function.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. In `invoicer/dates.py:12-13`, add two days when the due date is a Saturday.
+2. Add `test_saturday_moves_to_monday` to `tests/test_dates.py`, following
+   `tests/test_dates.py:11-13`: issued Monday 2 March 2026 with 12-day terms is due Monday 16 March.
+
+## Verification
+
+- `python3 -c "from datetime import date; from invoicer.dates import due_date; print(due_date(date(2026, 3, 2), 12))"`
+  -- prints `2026-03-16`, a Monday.
+
+'''

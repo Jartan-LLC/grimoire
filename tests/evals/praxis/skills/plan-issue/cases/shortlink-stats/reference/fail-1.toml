@@ -1,0 +1,35 @@
+final = "Plan written to .claude/workspace/issue-45/plan.md."
+
+[files]
+".claude/workspace/issue-45/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Count redirects per short link and expose them at `/stats/<code>`.
+
+### Patterns & Conventions Found
+- Pattern: `src/app.js:12` -- the redirect branch.
+- Pattern: `src/store.js:15` -- records are rewritten whole.
+
+### Chosen Approach
+- **What**: A `hits` field on each record.
+- **Why**: No new storage needed.
+- **How**: Increment on redirect, new route.
+
+### Alternatives Considered
+1. A separate hits file -- two files to keep in step.
+
+### Files to Create/Modify
+- `src/store.js` -- `hit()`
+- `src/app.js` -- route and counting
+
+### Documentation Plan
+- None.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- store
+- [ ] Phase 2: Core implementation -- route
+- [ ] Phase 3: Integration/cleanup -- tests
+
+### Complexity
+Simple
+'''

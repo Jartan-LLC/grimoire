@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-61/plan.md."
+
+[files]
+".claude/workspace/issue-61/plan.md" = '''# Plan: Dollar amounts in the cart (issue 61)
+
+## Approach
+
+Pull the price formatting out into a shared helper and call it from the cart summary
+as well.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Put the helper in `src/format.js`.
+2. Cart tests for a total over $1,000 in `test/cart.test.js`.
+
+## Verification
+
+- `npm test` passes.
+'''

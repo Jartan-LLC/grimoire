@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-27/plan.md."
+
+[files]
+".claude/workspace/issue-27/plan.md" = '''# Plan: Slack alert for failed backups (issue 27)
+
+## Approach
+
+Send one webhook message from the failure branch of `main`. Plain function, no framework.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. New `nightly/alert.py`: `send_slack(message)` posts to `SLACK_WEBHOOK_URL`.
+2. Call it from `nightly/__main__.py` when a step fails.
+3. Test with a patched `urlopen`.
+
+## Verification
+
+- `python3 -m pytest -q` passes.
+'''

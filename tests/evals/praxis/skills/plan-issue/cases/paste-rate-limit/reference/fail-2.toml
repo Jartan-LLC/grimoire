@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-54/plan.md."
+
+[files]
+".claude/workspace/issue-54/plan.md" = '''# Plan: One script filled the paste store overnight (issue 54)
+
+## Approach
+
+Add a rate-limit strategy interface with a `FixedWindowStrategy`, and a `CounterBackend` with an
+in-memory version, so a token bucket or a Redis store can plug in later.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Add `src/limit/` with the strategy interface, the fixed window and the memory backend.
+2. Wire the configured strategy into `src/server.js`.
+
+## Verification
+
+- `npm test` -- the fixed window is tested through the interface.
+'''

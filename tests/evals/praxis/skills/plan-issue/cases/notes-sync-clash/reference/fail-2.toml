@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-22/plan.md."
+
+[files]
+".claude/workspace/issue-22/plan.md" = '''# Plan: Add `notes sync` to share notes with the team server (issue 22)
+
+## Approach
+
+Rename the existing local backup command to `notes backup` and make `notes sync` upload new and
+changed notes to the server.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Rename the `sync` subparser in `notes/cli.py:18` to `backup`.
+2. Add `notes/server.py` and a new `sync` subcommand.
+
+## Verification
+
+- `python3 -m pytest -q` -- update `tests/test_cli.py` for the renamed command.
+'''

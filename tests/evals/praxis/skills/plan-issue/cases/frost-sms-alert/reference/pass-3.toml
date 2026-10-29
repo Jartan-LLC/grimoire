@@ -1,0 +1,24 @@
+final = "Plan written to .claude/workspace/issue-66/plan.md."
+
+[files]
+".claude/workspace/issue-66/plan.md" = '''# Plan: SMS when the greenhouse is cold (issue 66)
+
+## Approach
+
+Add `send_text` in `greenhouse/sms.py` and call it from `main` once per cold spell; an abstraction
+over alert channels is not needed with one gateway.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Write `send_text(phone, text)` with `urllib.request`.
+2. In `greenhouse/__main__.py`, text when below 4 C and `~/greenhouse.cold` is absent; remove the
+   file when it is warm again.
+
+## Verification
+
+- `python3 -m pytest -q` -- a fake sender gets one text for three cold readings.
+'''

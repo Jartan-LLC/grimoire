@@ -1,0 +1,35 @@
+final = "Plan written to .claude/workspace/issue-40/plan.md."
+
+[files]
+".claude/workspace/issue-40/plan.md" = '''# Plan: Scale a recipe to a number of servings (issue 40)
+
+## Approach
+
+Add `--servings N` to `pantry show`. When given, multiply each ingredient amount by
+`N / recipe.serves` before printing and print "Serves N". Amounts go through the existing
+`format_quantity`, so 1 1/2 cup at 6 servings prints as 2.25 cup.
+
+## Decisions for the user
+
+- Scaled amounts print as decimals (2.25, 0.33) like the unscaled ones do today -- default if
+  unanswered: keep that; printing fractions means the quantity rewrite below.
+
+## Out of scope
+
+- Printing scaled amounts as fractions -- later.
+
+## Steps
+
+1. Add `scale(recipe, servings)` to `pantry/recipe.py`, returning a new `Recipe` with each amount
+   multiplied, next to `load` at `pantry/recipe.py:25-30`; reject 0 or a negative count.
+2. Add `--servings` (type `int`) to the `show` parser at `pantry/cli.py:20-21` and call `scale`
+   before `render` when it is set.
+3. Tests in `tests/test_recipe.py`, following `tests/test_recipe.py:4-8`: pancakes at 6 servings
+   prints "Serves 6" and "  2.25 cup flour".
+
+## Verification
+
+- `python3 -m pytest -q` -- the new scaling tests pass with the existing ones.
+- `PANTRY_DIR=recipes python3 -c "from pantry.cli import main; main(['show', 'pancakes', '--servings', '6'])"`
+  -- prints 2.25 cup flour and 3 egg.
+'''

@@ -1,0 +1,22 @@
+final = "Plan written to .claude/workspace/issue-6/plan.md."
+
+[files]
+".claude/workspace/issue-6/plan.md" = '''# Plan: Fix the option name in docs/usage.md (issue 6)
+
+## Approach
+
+`--column` -> `--col` in the docs example; the code is right.
+Rejected: adding a `--column` alias -- the issue is about the doc.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Edit the second example in `docs/usage.md`.
+
+## Verification
+
+- Every option in docs/usage.md is one `python3 -m csvstats --help` lists.
+'''

@@ -1,0 +1,146 @@
+# Fixture 6 of the research: a docs-only change. The new sections must not pad a trivial plan.
+
+split = "screen"
+kind = "target"
+hints = ["short", "brief", "padding", "trivial"]
+
+
+# A Verification section (or Testing, Validation...) with a check of at least three words that
+# holds a backticked command or a check verb (read, compare, render...), or a fenced block with a
+# line in it. "Only README.md changes" never counts, nor does a line starting with None, N/A, "Not
+# needed", "No tests/verification/checks" or "Nothing to verify", even one holding a command.
+# Otherwise, the verb in "nothing (else) to verify", "nothing needs verifying" or "no checks
+# needed" is not a check verb, so that line counts only with a backticked command or another check
+# verb; other wording, such as "verification is not needed", can still count. A line starting with
+# `#` inside a fenced block, such as a shell comment, does not end the section, and a heading
+# inside Steps is not the Verification section.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-43/plan.md"
+present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?![ \t]*```)(?!\#)[^\n]*|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*\n[ \t]*```[^\n]*)*?(?:\n(?![ \t]*```)(?!\#)(?![ \t]*(?:[-*+]|\d+[.)])?[ \t]*(?:\*\*|_)?\(?(?:none\b|n/?a\b|not (?:applicable|needed|required)\b|no (?:tests?|verification|checks?|commands?)\b|nothing to (?:test|verify|check|run)\b))(?![ \t]*(?:[-*+]|\d+[.)])?[ \t]*(?:\*\*|_)?only[ \t]+\S+(?:[ \t]*(?:,|and)[ \t]+\S+)*[ \t]+(?:is[ \t]+|are[ \t]+)?chang(?:e|es|ed)\b[.!]?[ \t]*(?:\n|\Z))(?=(?:\b(?:nothing(?: else)? (?:to|needs?) (?:test|verify|check|run)\w*|no (?:verification|checks?|tests?|testing)(?: is| are)? (?:needed|required|to run))\b|(?!\b(?:nothing(?: else)? (?:to|needs?) (?:test|verify|check|run)\w*|no (?:verification|checks?|tests?|testing)(?: is| are)? (?:needed|required|to run))\b)[^\n])*?(?:`[^`\n]+`|\b(?:re-?read\w*|read(?!me\b)\w*|compar\w*|confirm\w*|render\w*|preview\w*|check\w*|run\w*|open\w*|follow\w*|cop(?:y|ies|ied|ying)|past(?:e|es|ed|ing)|view\w*|visit\w*|start\w*|grep\w*|diff\w*|load\w*|click\w*|look\w*|see|verif\w*|ensur\w*|search\w*|try|tries|tried|execute\w*|execution|match\w*|launch\w*|brows\w*|navigat\w*|print\w*|show\w*|agree\w*|equal\w*)\b))[ \t]*(?:[-*+]|\d+[.)])?[ \t]*\S+[ \t]+\S+[ \t]+\S|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*?\n(?![ \t]*```)(?![ \t]*(?:[-*+]|\d+[.)])?[ \t]*(?:\*\*|_)?\(?(?:none\b|n/?a\b|not (?:applicable|needed|required)\b|no (?:tests?|verification|checks?|commands?)\b|nothing to (?:test|verify|check|run)\b))[ \t]*\S)'''
+
+# No Complexity line or heading.
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-43/plan.md"
+absent = '''(?im)^(?:\#{1,6}[ \t]*complexity\b|[ \t>*_-]*complexity[ \t*_]*:)'''
+
+# No placeholder phases (Foundation / Core implementation / Integration).
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-43/plan.md"
+absent = '''(?i)phase[ \t]*\d+\W{0,4}(?:foundation|core\b|integration)|\b(?:core implementation|integration[ \t]*(?:/|and|&)[ \t]*cleanup)\b'''
+
+# At least one backticked path that exists in the fixture.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-43/plan.md"
+present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CHANGELOG\.md|CLAUDE\.md|README\.md|pingmon/__init__\.py|pingmon/__main__\.py|pingmon/config\.py|pyproject\.toml|tests/test_config\.py|pingmon/?|tests/?)(?:[:#][^`\n]*)?`'''
+
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; a list
+# or range of lines and a `:col` are read too. The path must end in a source or text extension or
+# be a known extensionless file such as `Makefile`, so a `host:port` is not read as one.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-43/plan.md"
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?::\d+)?(?:[-,][ \t]*(?:2|1)(?::\d+)?)*|AGENTS\.md:(?:6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:6|5|4|3|2|1)(?::\d+)?)*|CHANGELOG\.md:(?:10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|CLAUDE\.md:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|README\.md:(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:pingmon/)?__init__\.py:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|(?:pingmon/)?__main__\.py:(?:29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:pingmon/)?config\.py:(?:25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|pyproject\.toml:(?:4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:4|3|2|1)(?::\d+)?)*|(?:tests/)?test_config\.py:(?:13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*)`)(?:[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock)|(?:[\w./-]*/)?(?:Makefile|Dockerfile|LICENSE|\.gitignore|\.npmignore|\.dockerignore|\.editorconfig)):\d+(?::\d+)?(?:[-,][ \t]*\d+(?::\d+)?)*`'''
+
+# No section but Decisions that holds only None / N/A, a reason after it or not (a padded section).
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-43/plan.md"
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned|else))?|nothing to (?:add|note|report)|no changes?(?: needed)?|no (?:[\w-]+[ \t]+){1,2}items?)\)?(?:[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?|[.;](?:\*\*|_)?[ \t]+[^\n]*)[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+
+# The plan is at most 300 words.
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-43/plan.md"
+present = '''\A\s*(?:\S+\s+){0,299}\S*\s*\Z'''
+
+[[plant]]
+id = "readme-example-fails"
+verify = '''python3 -c "import re, pathlib; from pingmon.config import parse; parse(re.search(r'[\x60]{3}toml\n(.*?)[\x60]{3}', pathlib.Path('README.md').read_text(), re.S).group(1))"'''
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 43, \"title\": \"README config example fails with unknown key 'timeout'\", \"body\": \"Copying the example from the README and running `python3 -m pingmon pingmon.toml` stops with `ConfigError: unknown key 'timeout'`. The example needs updating.\", \"state\": \"OPEN\", \"author\": {\"login\": \"lee\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/pingmon/issues/43\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tREADME config example fails with unknown key 'timeout'\nstate:\tOPEN\nauthor:\tlee\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t43\n--\nCopying the example from the README and running `python3 -m pingmon pingmon.toml` stops with `ConfigError: unknown key 'timeout'`. The example needs updating.\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "{\"name\": \"pingmon\", \"nameWithOwner\": \"acme/pingmon\", \"url\": \"https://github.com/acme/pingmon\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PRIVATE\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/43/comments\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/43\b'''
+stdout = "{\"number\": 43, \"title\": \"README config example fails with unknown key 'timeout'\", \"body\": \"Copying the example from the README and running `python3 -m pingmon pingmon.toml` stops with `ConfigError: unknown key 'timeout'`. The example needs updating.\", \"state\": \"OPEN\", \"author\": {\"login\": \"lee\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/pingmon/issues/43\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 2
+runs = 3
+runner = 2
+remote_runner = 3

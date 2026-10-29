@@ -1,0 +1,24 @@
+final = "Plan written to .claude/workspace/issue-38/plan.md."
+
+[files]
+".claude/workspace/issue-38/plan.md" = '''# Plan: --markdown for liftlog bests (issue 38)
+
+## Approach
+
+One function that writes the rows as a Markdown table, and one flag to call it.
+Rejected: an output-format layer for future formats -- only Markdown is asked for.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. `src/markdown.js` exporting `toMarkdown(rows)`.
+2. `bin/liftlog.js`: read `--markdown` and print `toMarkdown` instead of the table.
+3. `test/markdown.test.js`.
+
+## Verification
+
+- `npm test` passes.
+'''

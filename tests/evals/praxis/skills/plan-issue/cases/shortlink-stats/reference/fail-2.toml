@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-45/plan.md."
+
+[files]
+".claude/workspace/issue-45/plan.md" = '''# Plan: Count clicks on short links (issue 45)
+
+## Approach
+
+Move the links from the JSON file to SQLite first, as the TODO asks, then add a `hits` column and
+a `/stats/<code>` route.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Replace `src/store.js` with a SQLite-backed store.
+2. Count hits on redirect in `src/app.js` and add the stats route.
+
+## Verification
+
+- `npm test` -- passes with the new store.
+'''

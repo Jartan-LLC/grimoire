@@ -1,0 +1,21 @@
+final = "Plan written to .claude/workspace/issue-14/plan.md."
+
+[files]
+".claude/workspace/issue-14/plan.md" = '''# Plan: Numbers vanish from post URLs (issue 14)
+
+## Approach
+
+Allow digits in the slug's character class at `src/slug.js:7`.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Change `[^a-z]+` to `[^a-z0-9]+` in `src/slug.js`.
+
+## Verification
+
+- Publish a draft titled "Week 1 recap" -- its URL keeps the 1.
+'''

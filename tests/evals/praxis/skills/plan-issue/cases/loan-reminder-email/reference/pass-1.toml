@@ -1,0 +1,33 @@
+final = "Plan written to .claude/workspace/issue-12/plan.md."
+
+[files]
+".claude/workspace/issue-12/plan.md" = '''# Plan: Email members when a book is a week overdue (issue 12)
+
+## Approach
+
+In the morning `overdue` run, for each loan exactly 7 days late, send the member one email with
+`smtplib` through `SMTP_HOST` using `SMTP_USER` and `SMTP_PASSWORD`. A plain function in a new
+`booklend/reminders.py` does it; the issue names email as the only channel, so nothing more general.
+Rejected: a notifier interface for other channels -- nobody has asked for one.
+
+## Decisions for the user
+
+- Assumption: the server takes STARTTLS on port 587 -- if it wants port 465, `SMTP_PORT` decides.
+- Assumption: the morning run happens every day, so "exactly 7 days" sends one reminder per loan
+  -- if a run is missed, that loan gets no reminder.
+
+## Steps
+
+1. `booklend/reminders.py`: `reminder_text(loan, member)` and `send(message)`, reading the three
+   variables; `send` raises when `SMTP_HOST` is unset.
+2. In `booklend/__main__.py:17-18`, after printing a loan 7 days late, send its reminder; log and
+   go on when one email fails.
+3. Tests in `tests/test_reminders.py` for the text and for `send` with `smtplib.SMTP` patched,
+   following `tests/test_loans.py:6-12`.
+
+## Verification
+
+- `python3 -m pytest -q` -- the new tests pass.
+- Run `python3 -m booklend overdue` against a test loans.csv with a local debugging SMTP server
+  -- one email for the 7-day loan, none for the others.
+'''

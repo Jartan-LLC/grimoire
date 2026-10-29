@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-54/plan.md."
+
+[files]
+".claude/workspace/issue-54/plan.md" = '''# Plan: Limit pastes per client (issue 54)
+
+## Approach
+
+Keep a count per address and minute in `src/limit.js` and refuse the 31st POST with 429; a
+storage interface is not worth it for one process.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Write `allow(address, now)`.
+2. Call it in the POST branch of `src/server.js`.
+
+## Verification
+
+- `npm test` -- a new test posts 31 times and gets one 429.
+'''

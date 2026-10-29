@@ -1,0 +1,32 @@
+final = "Plan written to .claude/workspace/issue-41/plan.md."
+
+[files]
+".claude/workspace/issue-41/plan.md" = '''# Plan: The invoice list can't be narrowed to a date range (issue 41)
+
+## Approach
+
+`list_bookings` already parses and checks `from` and `to` (`clinicdesk/bookings.py:13-21`).
+Extract that into `date_range(query)` in `clinicdesk/dates.py`, returning the start and end, and
+call it from both `list_bookings` and `list_invoices`, so the two endpoints take the same dates and
+give the same errors.
+Rejected: copying the checks into `list_invoices` -- two copies of the rules drift apart.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Create `clinicdesk/dates.py` with `date_range` and `MAX_DAYS`, moved from
+   `clinicdesk/bookings.py:8-21`; `list_bookings` calls it and `tests/test_bookings.py` passes
+   unchanged.
+2. In `list_invoices` (`clinicdesk/invoices.py:6-8`), call `date_range` and keep the invoices whose
+   `day` falls in it.
+3. Add range, bad-date and reversed-range tests to `tests/test_invoices.py`.
+
+## Verification
+
+- `python3 -m pytest -q` -- the new invoice tests and the booking tests pass.
+- `python3 -m clinicdesk.server`, then `curl 'localhost:8000/invoices?from=2026-10-05&to=2026-10-06'`
+  -- two invoices.
+'''

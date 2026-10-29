@@ -1,0 +1,39 @@
+final = "Plan written to .claude/workspace/issue-15/plan.md."
+
+[files]
+".claude/workspace/issue-15/plan.md" = '''# Plan: CONTRIBUTING.md asks for a script that doesn't exist (issue 15)
+
+## Approach
+
+Step 2 of the guide names `npm run lint`; the project's script is `check`. Replace the name. The
+rest of the guide was read as well and is still accurate, so nothing else in it changes, and the
+README, AGENTS.md and package.json were checked for the same stale name and found clean, which
+means this plan covers one line in one file, which the steps below spell out in full for the
+implementer together with the checks that show it worked.
+
+## Decisions for the user
+
+- Assumption: nobody relies on `npm run lint` in scripts outside this repository -- if someone
+  does, a `lint` alias in package.json would keep them working, but that is a code change.
+- Assumption: the guide is the only place contributors read the command from -- if the wiki also
+  names it, the wiki needs the same edit, which is outside this repository.
+
+## Out of scope
+
+- Adding a `lint` alias to package.json -- not planned; the issue is about the guide.
+- Rewording the rest of CONTRIBUTING.md -- not planned; it is accurate.
+- Adding a link from the README to CONTRIBUTING.md -- not planned.
+
+## Steps
+
+1. In `CONTRIBUTING.md`, step 2, replace `npm run lint` with `npm run check`, keeping the rest of
+   the sentence ("and fix what it reports") as it is.
+2. Re-read the numbered list to make sure the numbering and wording still flow.
+
+## Verification
+
+- `npm run check` -- runs the style check and the tests, and passes on a clean checkout, which
+  shows the command the guide now names exists and works.
+- `grep -n "npm run" CONTRIBUTING.md` -- the only script named is `check`.
+- Open CONTRIBUTING.md in the GitHub preview -- the list renders as before.
+'''

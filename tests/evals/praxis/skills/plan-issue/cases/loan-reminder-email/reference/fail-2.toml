@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-12/plan.md."
+
+[files]
+".claude/workspace/issue-12/plan.md" = '''# Plan: Email members when a book is a week overdue (issue 12)
+
+## Approach
+
+Add a small `ReminderSender` protocol with an SMTP implementation, so a text-message sender can
+be added later without touching the overdue run.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Create `booklend/senders.py` with an abstract `ReminderSender` and `SmtpSender`.
+2. Call it from `booklend/__main__.py` for loans 7 days late.
+
+## Verification
+
+- `python3 -m pytest -q` -- passes.
+'''

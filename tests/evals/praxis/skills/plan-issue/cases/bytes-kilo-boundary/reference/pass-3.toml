@@ -1,0 +1,28 @@
+final = "Plan written to .claude/workspace/issue-88/plan.md."
+
+[files]
+".claude/workspace/issue-88/plan.md" = '''# Plan: formatBytes boundaries (issue 88)
+
+## Approach
+
+Off-by-one in the loop condition of `formatBytes`. Fix the comparison; the output format is
+unchanged otherwise, so callers only see the boundary values change.
+
+## Decisions for the user
+
+- This changes output at every exact power of 1024, which callers may match on. Release it as a
+  fix (3.1.1)? Default: yes, with a changelog line.
+
+## Steps
+
+1. Fix the comparison in `src/bytes.js`.
+2. Tests for 1024 and 1048576 in `test/bytes.test.js`.
+3. Changelog entry.
+
+## Verification
+
+```bash
+# the whole suite, the new test included
+npm test
+```
+'''

@@ -1,0 +1,7 @@
+{
+  "name": "pastebox",
+  "version": "1.6.0",
+  "private": true,
+  "main": "src/server.js",
+  "scripts": { "test": "node --test" }
+}

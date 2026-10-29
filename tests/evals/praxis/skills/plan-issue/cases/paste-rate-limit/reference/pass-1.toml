@@ -1,0 +1,32 @@
+final = "Plan written to .claude/workspace/issue-54/plan.md."
+
+[files]
+".claude/workspace/issue-54/plan.md" = '''# Plan: One script filled the paste store overnight (issue 54)
+
+## Approach
+
+Count new pastes per client address in a `Map` of minute windows in `src/limit.js`, and check it
+in the POST branch of `handle` (`src/server.js:12-19`) before reading the body. Past 30 in the
+current minute, answer 429 with `Retry-After` set to the seconds left in the window. The address
+comes from `X-Real-IP`, which nginx sets (`AGENTS.md`), falling back to the socket address.
+Old windows are dropped on each check, so the map stays small.
+
+## Decisions for the user
+
+- Assumption: a fixed one-minute window is close enough to "30 a minute" -- if bursts across a
+  window edge matter, keep the last 30 timestamps per address instead.
+
+## Steps
+
+1. Add `src/limit.js` with `allow(address, now)` returning `{ ok, retryAfter }`.
+2. In `src/server.js:12`, call it for POST `/pastes` and send 429 with `Retry-After` when not ok,
+   using `send` (`src/server.js:6-9`).
+3. Add `test/limit.test.js` with a fixed clock: the 31st paste in a minute is refused, the next
+   minute is open again, reads are never refused.
+
+## Verification
+
+- `npm test` -- the limit tests and the existing server test pass.
+- Post 31 pastes in a loop with `curl` against a local server -- the last answers 429 with a
+  `Retry-After` header.
+'''

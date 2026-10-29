@@ -1,0 +1,34 @@
+final = "Plan written to .claude/workspace/issue-38/plan.md."
+
+[files]
+".claude/workspace/issue-38/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Print personal bests as Markdown.
+
+### Patterns & Conventions Found
+- Pattern: `bin/liftlog.js:12` -- the table is built inline.
+
+### Chosen Approach
+- **What**: A `toMarkdown` function and a `--markdown` flag.
+- **Why**: Smallest change that does it.
+- **How**: See the checklist.
+
+### Alternatives Considered
+1. Do nothing -- the issue stays open.
+
+### Files to Create/Modify
+- `src/markdown.js` -- new
+- `bin/liftlog.js` -- flag
+
+### Documentation Plan
+- None.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- `toMarkdown`
+- [ ] Phase 2: Core implementation -- the flag
+- [ ] Phase 3: Integration/cleanup -- tests
+
+### Complexity
+Simple
+'''

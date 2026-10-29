@@ -1,0 +1,34 @@
+final = "Plan written to .claude/workspace/issue-52/plan.md."
+
+[files]
+".claude/workspace/issue-52/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Reject invalid emails at signup with the profile page's message.
+
+### Patterns & Conventions Found
+- Pattern: `src/profile.js:5` -- the email check.
+
+### Chosen Approach
+- **What**: Extract the profile's check into a shared helper used by both handlers.
+- **Why**: Same rule, same message.
+- **How**: New module, two call sites.
+
+### Alternatives Considered
+1. Copy the regex -- two copies drift.
+
+### Files to Create/Modify
+- `src/email.js` -- new
+- `src/profile.js`, `src/signup.js` -- call it
+
+### Documentation Plan
+- None needed.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- helper
+- [ ] Phase 2: Core implementation -- call sites
+- [ ] Phase 3: Integration/cleanup -- tests
+
+### Complexity
+Simple
+'''

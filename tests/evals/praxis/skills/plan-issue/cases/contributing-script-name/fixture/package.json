@@ -1,0 +1,10 @@
+{
+  "name": "colorpick",
+  "version": "1.1.0",
+  "main": "src/index.js",
+  "scripts": {
+    "style": "node scripts/style.js",
+    "test": "node --test",
+    "check": "npm run style && npm test"
+  }
+}

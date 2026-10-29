@@ -1,0 +1,27 @@
+final = "Plan written to .claude/workspace/issue-29/plan.md."
+
+[files]
+".claude/workspace/issue-29/plan.md" = '''# Plan: HTML release notes for the website (issue 29)
+
+## Approach
+
+Add `renderHtml(release)` beside `renderText` in `src/text.js`: an `<h2>` with the version and
+date, then per section an `<h3>` and a `<ul>`. `bin/relnotes.js` calls it when `--html` is
+given. Change texts are escaped (`&`, `<`, `>`), since they are free text.
+
+## Decisions for the user
+
+- Assumption: the website wants a bare fragment with no classes -- if it needs classes for its
+  styles, they are one line each to add.
+
+## Steps
+
+1. Add `renderHtml` to `src/text.js`, following `renderText` at `src/text.js:2-8`.
+2. In `bin/relnotes.js:5-10`, read `--html` from the arguments and pick the function.
+3. Tests in `test/text.test.js`: the fragment for a one-section release, and an escaped `<`.
+
+## Verification
+
+- `npm test` -- the new HTML tests pass with the text ones.
+- `node bin/relnotes.js 2.3.0 --html` -- prints the 2.3.0 fragment with Added and Fixed lists.
+'''

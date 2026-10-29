@@ -1,0 +1,27 @@
+final = "Plan written to .claude/workspace/issue-57/plan.md."
+
+[files]
+".claude/workspace/issue-57/plan.md" = '''# Plan: Add due dates to todos (issue 57)
+
+## Approach
+
+Replace the hand-rolled parser in `src/args.js` with `node:util`'s `parseArgs`, then add `--due`
+as one more option, store it on the item and show it in `todo list`.
+
+## Decisions for the user
+
+None.
+
+## Out of scope
+
+- Marking overdue items -- not planned.
+
+## Steps
+
+1. Rewrite `src/args.js` on `parseArgs` with `tag`, `all` and `due` options.
+2. Store `due` in `src/commands/add.js` and print it in `src/commands/list.js`.
+
+## Verification
+
+- `npm test` -- the parser and list tests pass.
+'''

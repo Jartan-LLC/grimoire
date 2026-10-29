@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-19/plan.md."
+
+[files]
+".claude/workspace/issue-19/plan.md" = '''# Plan: Thumbnails go missing after a hiccup on the image host (issue 19)
+
+## Approach
+
+Wrap the `urlopen` call in `download_thumb` in a retry loop: three attempts, sleeping 1 s and
+then 2 s, retrying on `URLError` and 5xx, like the loop in `feeds/fetch.py:13-23`.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Add the loop to `download_thumb` in `feeds/thumbs.py:14-18`.
+2. Add a 503-then-success test to `tests/test_thumbs.py`.
+
+## Verification
+
+- `python3 -m pytest -q` -- the new test passes.
+'''
