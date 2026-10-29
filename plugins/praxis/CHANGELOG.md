@@ -5,6 +5,7 @@
 - Needs gitwise 1.5.0 or later.
 - `implement-issue` branches from an open PR's branch when the issue builds on that PR's unmerged work.
 - `create-pr` bases a PR on the branch it was cut from, or asks you when it cannot tell, and opens and links a stacked PR as `gitwise:github-conventions`' `stacks.md` says.
+- `plan-issue` says that sub-issues that build on each other may branch from each other's branches, as `stacks.md` says, and still merge into the parent feature branch.
 - `information-placement`'s stacked-PR example now says that merging a PR also merges the PRs below it in its stack.
 
 ## 1.11.0
