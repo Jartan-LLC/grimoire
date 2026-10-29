@@ -3,7 +3,7 @@
 ## 1.5.0
 
 - `github-conventions` covers stacked pull requests (`stacks.md`). Your agent stacks a change on an open PR only when the change needs that PR, and opens the upper PR only once the lower PR's review is done, syncing it once instead of carrying each review fix up the stack.
-- Your agent merges a stack by its top PR, in one operation, and only once the checks your project requires before a merge have passed on what that merge lands. When they do not run on it, your agent does not merge and tells you.
+- Your agent merges a stack by its top PR, in one operation, and only once the checks your project requires before a merge have passed on that PR, run on what that merge lands. When they do not run on it, your agent does not merge and tells you.
 - Your agent never stacks a sub-issue PR on its parent feature branch's PR.
 - When a branch under a stack changes, your agent restacks the branches above it with git and pushes them with `--force-with-lease`. This is the one exception to never rewriting a pushed commit; where your project's rules require approval for a force-push, your agent asks first. Your agent stops and tells you when a restack could lose work or hits a conflict it cannot resolve by keeping both sides.
 
