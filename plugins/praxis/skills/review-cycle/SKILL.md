@@ -20,7 +20,7 @@ Where the project's own rules say otherwise, follow them.
 
 Take the branches from the user's request; with none named, the current branch, as `praxis:review-pr` and `praxis:address-review` do. Load the `praxis:workspace-patterns` skill. For each branch, find or make its branch folder and a checkout of the branch: the one that has it, or a worktree, as `praxis:workspace-patterns` says. Never switch another checkout's branch. Take the base as `praxis:review-pr` does.
 
-The branch folder's `cycle.md` holds the cycle's state: the mode, the round, how many clean rounds in a row, each raised finding with its recommendation and the user's answer, each finding left for the user, each reply waiting for the user, and the PR number once the PR opens. The PR text is `pr.md` while the branch has no open PR; once it has one, it is the PR's own title and description, which each round updates with `gh pr edit` instead of `pr.md`. If `cycle.md` records a cycle in progress, resume from it. Otherwise load the `gitwise:commit-pr-writing` skill, write `pr.md` as it says unless the branch has an open PR, and start `cycle.md`.
+The branch folder's `cycle.md` holds the cycle's state: the mode, the round, how many clean rounds in a row, each raised finding with its recommendation and the user's answer, each finding left for the user, each reply waiting for the user, and the PR number once the PR opens. The PR text is `pr.md` while the branch has no open PR; once it has one, it is the PR's own title and description. If `cycle.md` records a cycle in progress, resume from it. Otherwise load the `gitwise:commit-pr-writing` skill, write `pr.md` as it says unless the branch has an open PR, and start `cycle.md`.
 
 ### 2. Run a Round
 
@@ -39,7 +39,7 @@ A round is clean when its review has nothing Critical or Important, at the revie
 
 ### 4. Run the Closing Round
 
-Spawn a reviewer as in step 2, with `praxis:review-pr` limited to the documentation, comments, docstrings and commit messages the change adds, changes or makes false, and the PR title and description. Address it, verify and push as in step 2. The closing round does not count toward the clean streak. If its fixes change code, the streak starts over: go back to step 2 until two rounds in a row are clean, then run the closing round again.
+Spawn a reviewer as in step 2, with `praxis:review-pr` limited to the documentation, comments, docstrings and commit messages the change adds, changes or makes false, and the PR title and description. Address it, verify and push as in step 2. If its fixes change code, the streak starts over: go back to step 2 until two rounds in a row are clean, then run the closing round again.
 
 ### 5. Open the Draft
 
