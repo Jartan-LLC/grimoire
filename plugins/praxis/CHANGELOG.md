@@ -3,8 +3,16 @@
 ## 2.0.0
 
 - Needs gitwise 2.0.0 or later.
-- Breaking: the `issue-planner` agent is removed. Run `/praxis:plan-issue` instead, which explores the codebase and writes the plan itself. In Codex, the installed `issue-planner` role stays until you delete it: remove `issue-planner.toml` from `~/.codex/agents/grimoire/<version>/` (`$CODEX_HOME/agents/grimoire/<version>/` if you set `CODEX_HOME`), where `<version>` is the praxis version you upgraded from, such as `1.11.0`, and from any other version directory there that holds one.
+- Breaking: the `issue-planner` agent is removed. Run `/praxis:plan-issue` instead, which explores the codebase and writes the plan itself. In Codex, the installed `issue-planner` role stays until you delete it: remove `issue-planner.toml` from `~/.codex/agents/grimoire/<version>/` (`$CODEX_HOME/agents/grimoire/<version>/` if you set `CODEX_HOME`), where `<version>` is the praxis version you upgraded from, such as `1.12.0`, and from any other version directory there that holds one.
 - `plan-issue` writes shorter plans in a new format: Approach, Decisions for the user, Out of scope, Steps and Verification. A plan no longer restates the issue or rates its complexity. praxis now carries the format itself instead of reading it from gitwise.
+
+## 1.12.0
+
+- Needs gitwise 1.5.0 or later.
+- `implement-issue` branches from an open PR's branch when the issue builds on that PR's unmerged work.
+- `create-pr` bases a PR on the branch it was cut from, or asks you when it cannot tell, and opens and links a stacked PR as `gitwise:github-conventions`' `stacks.md` says.
+- `plan-issue` says that sub-issues that build on each other may branch from each other's branches, as `stacks.md` says, and still merge into the parent feature branch.
+- `information-placement`'s stacked-PR example now says that merging a PR also merges the PRs below it in its stack.
 
 ## 1.11.0
 
