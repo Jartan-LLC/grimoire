@@ -1,0 +1,9 @@
+commits = []
+final = "Round 3 is addressed. Push and open the PR from pr.md when you're back."
+
+[files]
+".claude/workspace/issue-67/feature--issue-67/1.md" = "## Code Review\n\n### Critical Issues\nNone found\n\n### Important Issues\n1. **A slug with no dash within maxLength is not cut** -- `src/slug.js:14`.\n\nAnswer: fixed in the round-1 commit.\n\n### Summary\nOne Important finding.\n"
+".claude/workspace/issue-67/feature--issue-67/3.md" = "## Code Review\n\n### Critical Issues\nNone found\n\n### Important Issues\nNone found\n\n### Minor Issues\n1. **The README overstates the cut** -- `README.md:3`. A long first word is cut mid-word.\n\nAnswer: fixed in the round-3 commit.\n\n### Summary\nOne Minor finding.\n"
+
+[briefs]
+"general-purpose" = "Run the praxis:review-pr skill on feature/issue-67 against main."

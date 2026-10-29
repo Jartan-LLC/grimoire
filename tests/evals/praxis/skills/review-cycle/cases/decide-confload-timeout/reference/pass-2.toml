@@ -1,0 +1,8 @@
+commits = []
+final = ""
+gh = "gh -R acme/confload pr create --base main --draft --title t --body b\n\nCloses #33.\n\n`timeout` reaches the app as the file wrote it, because the rule in the agent notes keeps every setting but window unconverted for the app's schema.\n"
+
+[files]
+".claude/workspace/issue-33/feature--issue-33/1.md" = "## Code Review\n\n### Critical Issues\nNone found\n\n### Important Issues\nNone found\n\n### Minor Issues\n1. **x** -- `README.md:3`. Add a sentence.\n\nAnswer: fixed in the round-1 commit.\n\n### Summary\nOne Minor finding.\n"
+".claude/workspace/issue-33/feature--issue-33/cycle.md" = "## Decided\n1. timeout -- decided: leave it.\n"
+"src/confload/config.py" = "fixed\n"

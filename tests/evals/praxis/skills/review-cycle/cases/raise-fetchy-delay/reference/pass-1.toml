@@ -1,0 +1,8 @@
+commits = []
+final = "One call is yours: the branch makes the default delay one second. I recommend keeping 100 ms. Keep it?"
+gh = "gh pr view feature/issue-58 --json number,state\n\n"
+
+[files]
+".claude/workspace/issue-58/feature--issue-58/cycle.md" = "Raised: the default delay goes to one second. Recommendation: keep 100 ms.\n"
+"AGENTS.md" = "# Agent notes\n\n## Defaults\n\nAsk before changing a default: the services behind fetchy tuned their own timeouts.\n"
+"src/retry.js" = "const delayMs = options.delayMs ?? DELAY_MS;\n"

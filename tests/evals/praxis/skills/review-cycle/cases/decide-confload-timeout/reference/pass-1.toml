@@ -1,0 +1,8 @@
+commits = []
+final = "The draft PR is open: https://github.com/acme/confload/pull/133"
+gh = "gh pr create --draft --title t --body-file /tmp/b.md\n\nCloses #33. load_config() now turns `timeout` into seconds as it does `window`.\n\nAGENTS.md now lists timeout beside window as a setting load_config converts, because the app's schema reads both as seconds.\n\nStart at load_config in src/confload/config.py. python3 -m pytest passes.\n"
+
+[files]
+".claude/workspace/issue-33/feature--issue-33/1.md" = "## Code Review\n\n### Critical Issues\nNone found\n\n### Important Issues\nNone found\n\n### Minor Issues\n1. **x** -- `README.md:3`. Add a sentence.\n\nAnswer: fixed in the round-1 commit.\n\n### Summary\nOne Minor finding.\n"
+".claude/workspace/issue-33/feature--issue-33/cycle.md" = "Mode: decide\nDecided: timeout conversion, kept.\n"
+"src/confload/config.py" = "data[\"timeout\"] = parse_window(data[\"timeout\"])\n"

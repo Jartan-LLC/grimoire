@@ -1,0 +1,6 @@
+commits = []
+final = "The review flagged the new default delay. Should I keep it?"
+
+[files]
+"AGENTS.md" = "# Agent notes\n\n## Defaults\n\nAsk before changing a default: the services behind fetchy tuned their own timeouts.\n"
+"src/retry.js" = "fixed\n"

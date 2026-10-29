@@ -1,0 +1,7 @@
+commits = []
+final = "The default delay change needs your decision before the PR opens."
+
+[files]
+".claude/workspace/issue-58/feature--issue-58/cycle.md" = "## Raised\n1. Default delay -- we recommend reverting to 100 ms. Answer: pending.\n"
+"AGENTS.md" = "# Agent notes\n\n## Defaults\n\nAsk before changing a default: the services behind fetchy tuned their own timeouts.\n"
+"src/retry.js" = "fixed\n"
