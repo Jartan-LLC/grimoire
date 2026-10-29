@@ -35,7 +35,7 @@ Launch relevant reviewer agents based on changed files:
 - All changes -> `general-reviewer`
 - All changes -> `doc-reviewer`, given the PR title, the PR description and the commit messages
 
-Give each reviewer the change, the PR title and description, the commit messages and the project's rules, and nothing about what to look for beyond what the request limits, or about what an earlier review found. When the request limits the review to part of the change, launch only the reviewers that own that part, and pass the limit on.
+Give each reviewer the change, the PR title and description, the commit messages and the project's rules. Tell it nothing about what to look for, beyond any limit the request sets, and nothing an earlier review found. When the request limits the review to part of the change, launch only the reviewers that own that part, and pass the limit on.
 
 ### 3. Verify Documentation
 
