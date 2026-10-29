@@ -222,7 +222,8 @@ the PR how many versions you screened.
   text as `gh = "text"`; the lint drops such calls from its call lines too, but not from its texts. The
   lint fails a `gh` check on a case without a remote. For "made no such call", which holds when the
   agent made no call at all, negate the same form: `present = '\A(?!(?:.+\n)*gh (?:.* )?pr ready\b)'`.
-- **A judge** answers one yes/no question about one artifact, for what a regex cannot check: see Judges.
+- **A judge** answers one yes/no question about one artifact, for what a regex cannot check, and is called
+  only with `--judge`: see Judges.
 
 ## Judges
 
@@ -258,9 +259,14 @@ that reimplementation counts.
   command names and sandbox and store paths replaced by neutral tokens. It runs `panel` times per sample
   and the majority decides. "unknown" counts as no, and so does a "yes" whose quote is not in the artifact.
   An output that does not parse is no answer: the next run calls again, nothing is guessed.
-- A spoiled sample or an empty artifact fails the check with no call. A sample whose panel is incomplete
-  (an API error, a usage limit) is left out like an excluded sample: the screen cannot SHIP until a rerun
-  fills it.
+- A spoiled sample or an empty artifact fails the check with no call.
+- `run` and `screen` call a judge only with `--judge` (`JUDGE=1` with make), because judge calls weigh
+  heavily on the usage limit. Without it they still read kept answers, but a metric that lacks one on any
+  sample is NOT JUDGED, never a pass or a fail: a screen whose primary or a guard is not judged is
+  INCONCLUSIVE, and `run` neither counts nor records a case whose own behaviour that metric scores.
+  The `judge-*` commands call by design, naming the judge with `--judge <id>`.
+- With `--judge`, a sample whose panel is still incomplete (an API error, a usage limit) is left out like
+  an excluded sample: the screen cannot SHIP until a rerun fills it.
 - Answers are kept in the store's `judgments/`, keyed by the model, effort, question, prompt texts,
   reference, stripped artifact and panel member, so a regrade calls nothing. The Claude Code version is
   not part of the key, and an update of it does not call for calibrating again.
@@ -408,10 +414,11 @@ for nothing; between rounds, `make check` is enough.
 - `make eval-run SUITE=<path> ARM=none` (or `ARM=old`): run the cases on one arm, print each sample's key
   (for `show`), then how often each case failed its own checks, guards aside; `RECORD=1` writes the
   counts into the keys (one such run at a time: two at once can each drop the other's entry), `MODEL=`
-  picks the model. `ARM=new` needs a `SPLIT`, since new results on held-out cases burn them.
+  picks the model, `JUDGE=1` calls the judges (see Judges). `ARM=new` needs a `SPLIT`, since new
+  results on held-out cases burn them.
 - `make eval-screen SUITE=<path>`: run `old` and `new` on the `screen` split and print the result.
-  `SPLIT=confirm` runs the confirm split, `NEW_PLAN=1` fixes a new plan. The result and the samples to
-  read are also written to `evidence/` in the store.
+  `SPLIT=confirm` runs the confirm split, `NEW_PLAN=1` fixes a new plan, `JUDGE=1` calls the judges.
+  The result and the samples to read are also written to `evidence/` in the store.
 - The store holds every sample, plan and evidence file, and the judges' and labellers' answers:
   `grimoire-evals/` in the clone's git directory
   (`.git/grimoire-evals/` in the main checkout), shared by every worktree and never committed.

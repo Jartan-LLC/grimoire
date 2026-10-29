@@ -8,6 +8,8 @@
   lint                check every suite before any session runs (free; part of make verify)
   run SUITE --arm A   run SUITE's cases on arm none, old or new (spends inference)
   screen SUITE        run old and new side by side, then print the verdict (spends inference)
+                      run and screen call no judge without --judge: a judged metric that
+                      lacks a kept answer on any sample is reported as not judged
   show KEY            print one stored sample: its commits, final reply, every gh call logged
                       and the gh text graded, deliveries and writes by agent, and subagents'
                       briefs and reports
@@ -32,7 +34,7 @@ import json
 import pathlib
 import random
 import sys
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Collection, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from typing import cast
 
@@ -67,6 +69,7 @@ from evals.verdict import (
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 READ_PASSING = 2  # passing samples per arm read at random, to catch passes for the wrong reason
+NOT_JUDGED = "NOT JUDGED"  # a judged metric's verdict without --judge while answers are missing
 
 type Scores = dict[str, dict[str, list[float]]]  # metric -> unit -> sample scores
 
@@ -189,9 +192,17 @@ def judged_texts(
 
 
 def panels(
-    suite: Suite, sample: cache.Sample, store: pathlib.Path, parsed: trace.Trace | None = None
+    suite: Suite,
+    sample: cache.Sample,
+    store: pathlib.Path,
+    parsed: trace.Trace | None = None,
+    *,
+    partial: bool = False,
 ) -> dict[int, jury.Panel] | None:
-    """The judge panels of a sample's judged checks, from kept answers; None while any is incomplete."""
+    """The judge panels of a sample's judged checks, from kept answers.
+
+    None while any is incomplete, or with `partial` only the complete ones.
+    """
     case = next(c for c in suite.cases if c.id == sample.case)
     if not any(c.judge for c in case.checks):
         return {}
@@ -199,9 +210,35 @@ def panels(
     found: dict[int, jury.Panel] = {}
     for index, (check, text) in judged_texts(case, sample, parsed).items():
         panel = jury.lookup(store, suite.judges[str(check.judge)], check.reference, text)
-        if panel is None:
+        if panel is None and not partial:
             return None
-        found[index] = panel
+        if panel is not None:
+            found[index] = panel
+    return found
+
+
+def not_judged(suite: Suite, samples: list[cache.Sample], store: pathlib.Path) -> dict[str, int]:
+    """Each metric a judged check scores into, with the valid samples lacking a kept answer for it.
+
+    Without --judge no judge is called, and such a metric is not scored at all: scored on
+    the samples that happen to have answers, part of an arm would read as the whole.
+    """
+    if not suite.judges:
+        return {}
+    held = advisory(suite)
+    found: dict[str, int] = {}
+    for sample in samples:
+        case = next(c for c in suite.cases if c.id == sample.case)
+        if not sample.valid or not any(c.judge for c in case.checks):
+            continue
+        texts = judged_texts(case, sample, parsed_trace(store, sample))
+        missing = {
+            grade.metric_of(check, held)
+            for check, text in texts.values()
+            if jury.lookup(store, suite.judges[str(check.judge)], check.reference, text) is None
+        }
+        for metric in missing:
+            found[metric] = found.get(metric, 0) + 1
     return found
 
 
@@ -224,15 +261,22 @@ def fill_judgments(
             print(f"  {line}")
 
 
-def sample_scores(suite: Suite, sample: cache.Sample, store: pathlib.Path) -> dict[str, float]:
-    """Each metric's score on one valid sample; judged checks read kept judge answers."""
+def sample_scores(
+    suite: Suite, sample: cache.Sample, store: pathlib.Path, *, unjudged_ok: bool = False
+) -> dict[str, float]:
+    """Each metric's score on one valid sample; judged checks read kept judge answers.
+
+    A judged check with no complete panel raises Unjudged, or with `unjudged_ok` leaves
+    its metric out.
+    """
     case = next(c for c in suite.cases if c.id == sample.case)
     parsed = parsed_trace(store, sample)
-    found = panels(suite, sample, store, parsed)
+    found = panels(suite, sample, store, parsed, partial=unjudged_ok)
     if found is None:
         raise grade.Unjudged(f"sample {sample.key}: a judge panel is incomplete; rerun to judge it")
     by_check = {index: panel.score for index, panel in found.items()}
-    return grade.scores(case, sample, parsed, by_check, advisory(suite) if suite.judges else {})
+    held = advisory(suite) if suite.judges else {}
+    return grade.scores(case, sample, parsed, by_check, held, unjudged_ok=unjudged_ok)
 
 
 def judged(suite: Suite, sample: cache.Sample, store: pathlib.Path) -> bool:
@@ -240,13 +284,25 @@ def judged(suite: Suite, sample: cache.Sample, store: pathlib.Path) -> bool:
     return not suite.judges or not sample.valid or panels(suite, sample, store) is not None
 
 
-def arm_scores(suite: Suite, samples: list[cache.Sample], store: pathlib.Path) -> Scores:
-    """Metric -> unit -> every valid sample's score; a cluster's unit pools its cases' samples."""
+def arm_scores(
+    suite: Suite,
+    samples: list[cache.Sample],
+    store: pathlib.Path,
+    unscored: Collection[str] = (),
+) -> Scores:
+    """Metric -> unit -> every valid sample's score; a cluster's unit pools its cases' samples.
+
+    The metrics in `unscored` (`not_judged`'s) are left out of every sample.
+    """
     found: Scores = {}
     for sample in samples:
         if sample.valid:
-            for metric, score in sample_scores(suite, sample, store).items():
-                found.setdefault(metric, {}).setdefault(suite.unit(sample.case), []).append(score)
+            scored = sample_scores(suite, sample, store, unjudged_ok=bool(unscored))
+            for metric, score in scored.items():
+                if metric not in unscored:
+                    found.setdefault(metric, {}).setdefault(suite.unit(sample.case), []).append(
+                        score
+                    )
     return found
 
 
@@ -296,7 +352,9 @@ def to_read(
     for name, arm_samples in samples.items():
         valid = [s for s in arm_samples if s.valid]
         failed = {
-            s.key: [m for m in named if sample_scores(suite, s, store).get(m, 1.0) < 1]
+            s.key: [
+                m for m in named if sample_scores(suite, s, store, unjudged_ok=True).get(m, 1.0) < 1
+            ]
             for s in valid
         }
         failing = [s for s in valid if failed[s.key]]
@@ -469,7 +527,8 @@ def screen(args: argparse.Namespace, suite: Suite, spec: session.Spec, store: pa
         )
         return 1
     done = run_samples(work, args.jobs)
-    fill_judgments(suite, done, store, args.jobs)
+    if args.judge:
+        fill_judgments(suite, done, store, args.jobs)
     for t in trials:
         trial_done = [
             sample for item, sample in zip(work, done, strict=True) if item[3] is specs[t]
@@ -490,17 +549,31 @@ class Screen:
 
 
 def decide(run: Screen, trial: str, done: list[cache.Sample]) -> None:
-    """Grade one trial's samples, print its result and write its evidence file."""
+    """Grade one trial's samples, print its result and write its evidence file.
+
+    With --judge a sample whose judge panels are still incomplete is left out, like an
+    excluded one. Without it nothing is left out: a metric that lacks a kept answer on
+    any sample is NOT JUDGED instead, neither a pass nor a fail.
+    """
     args, suite, arms, plan, store = run.args, run.suite, run.arms, run.plan, run.store
-    unjudged = [s for s in done if not judged(suite, s, store)]
+    unjudged = [s for s in done if not judged(suite, s, store)] if args.judge else []
+    unscored = {} if args.judge else not_judged(suite, done, store)
     graded = [s for s in done if s not in unjudged]
     samples = {name: [s for s in graded if s.arm == name] for name in arms}
-    scores = {name: arm_scores(suite, s, store) for name, s in samples.items()}
+    scores = {name: arm_scores(suite, s, store, unscored) for name, s in samples.items()}
     rule = suite.pass_rule
-    verdicts = judge(judged_metrics(suite), rule, scores["old"], scores["new"])
+    verdicts = {
+        m: dataclasses.replace(v, verdict=NOT_JUDGED) if m in unscored else v
+        for m, v in judge(judged_metrics(suite), rule, scores["old"], scores["new"]).items()
+    }
     complete = all(s.valid for s in done) and not unjudged
     lines = [f"== trial {trial}"] if trial else []
     watch = str(plan["model"]) in suite.watch
+    lines += [
+        f"{NOT_JUDGED}: {m}: {n} sample(s) lack a kept judge answer; rerun with --judge "
+        "(JUDGE=1) to score it"
+        for m, n in sorted(unscored.items())
+    ]
     lines += report(suite, verdicts, overall(verdicts, rule, complete, watch), watch)
     if not complete:
         lines.insert(
@@ -884,23 +957,37 @@ def baseline_counts(
     delivery and the like) and the reported metrics of judges that may not gate, scores
     below 1. Recording replaces the case's
     [[baseline]] entry for this model and arm, and only when every sample was drawn: a
-    count cut short by a usage limit would be recorded as if it were whole.
+    count cut short by a usage limit would be recorded as if it were whole. Without
+    --judge, a case is not counted while a metric it counts lacks a kept judge answer.
     """
     for case in cases:
         drawn_here = [s for s in done if s.case == case.id]
-        valid = [s for s in drawn_here if s.valid and judged(suite, s, spec.store)]
+        valid = [
+            s for s in drawn_here if s.valid and (not args.judge or judged(suite, s, spec.store))
+        ]
+        unscored = {} if args.judge else not_judged(suite, valid, spec.store)
+        counted = [m for m in unscored if m in suite.metrics and m not in suite.pass_rule.guards]
+        if counted:
+            print(
+                f"  {case.id}: not counted, {', '.join(sorted(counted))} not judged; "
+                "rerun with --judge (JUDGE=1)"
+            )
+            continue
         failed = sum(
             grade.case_failed(
                 {
                     m: v
-                    for m, v in sample_scores(suite, s, spec.store).items()
+                    for m, v in sample_scores(
+                        suite, s, spec.store, unjudged_ok=not args.judge
+                    ).items()
                     if m in suite.metrics
                 },
                 suite.pass_rule.guards,
             )
             for s in valid
         )
-        print(f"  {case.id}: failed in {failed} of {len(valid)}")
+        note = f"; not judged: {', '.join(sorted(unscored))}" if unscored else ""
+        print(f"  {case.id}: failed in {failed} of {len(valid)}{note}")
         if args.record and len(valid) < len(drawn_here):
             print(
                 f"  {case.id}: not recorded, {len(drawn_here) - len(valid)} sample(s) excluded "
@@ -965,6 +1052,12 @@ def _parser() -> argparse.ArgumentParser:
         cmd.add_argument("--base", default="main")
         cmd.add_argument("--model", default=None)
         cmd.add_argument("--jobs", type=int, default=12, help="sessions at a time")
+        cmd.add_argument(
+            "--judge",
+            action="store_true",
+            help="call the judges for answers not yet kept (spends inference); without it, "
+            "a judged metric lacking a kept answer is not judged",
+        )
         cmd.add_argument(
             "--new-ref",
             default=None,
@@ -1435,7 +1528,8 @@ def main() -> int:
     arm = build_arm(args.arm, suite, args.base, args.new_ref, store)
     cases = [c for c in suite.split(args.split) if not args.cases or c.id in args.cases.split(",")]
     done = run_samples([(c, arm, i, spec) for i in range(args.samples) for c in cases], args.jobs)
-    fill_judgments(suite, done, store, args.jobs)
+    if args.judge:
+        fill_judgments(suite, done, store, args.jobs)
     print(usage_line(arm.name, done))
     baseline_counts(suite, cases, done, spec, args)
     return 0

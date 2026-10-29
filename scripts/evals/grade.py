@@ -23,6 +23,11 @@ def advisory_metric(check: Check) -> str:
     return f"{check.metric}@{check.judge}"
 
 
+def metric_of(check: Check, advisory: Collection[str]) -> str:
+    """The metric a check scores into: its own, or `advisory_metric` when its judge is in `advisory`."""
+    return advisory_metric(check) if check.judge in advisory else check.metric
+
+
 @dataclasses.dataclass(frozen=True)
 class Outputs:
     """What text checks read, from a session or a reference.
@@ -190,12 +195,14 @@ def judged_text(check: Check, sample: Sample, outputs: Outputs) -> str | None:
     return None if sample.spoiled or not text.strip() else text
 
 
-def scores(
+def scores(  # noqa: PLR0913 -- `unjudged_ok` says what a missing judge answer does
     case: Case,
     sample: Sample,
     parsed: trace.Trace,
     judged: Mapping[int, float] | None = None,
     advisory: Collection[str] = (),
+    *,
+    unjudged_ok: bool = False,
 ) -> dict[str, float]:
     """Each metric the case checks, as the mean of its checks' scores.
 
@@ -203,10 +210,13 @@ def scores(
     A `file:` check on a path the sample did not collect, one a key fix added after the
     draw, cannot be graded from it: the sample would read as an empty file. A judged
     check reads its panel's score from `judged`, by the check's index in the key; a
-    missing one raises Unjudged. One whose judge is in `advisory` (no stamp shows it
-    cleared its bar) scores into `advisory_metric` instead of its own, so it gates nothing.
+    missing one raises Unjudged, or with `unjudged_ok` leaves its metric out of the result,
+    so that no metric is scored on part of its checks. One whose judge is in `advisory`
+    (no stamp shows it cleared its bar) scores into `advisory_metric` instead of its own,
+    so it gates nothing.
     """
     pairs: list[tuple[str, float]] = []
+    unjudged: set[str] = set()
     outputs = outputs_of(sample, parsed)
     for index, check in enumerate(case.checks):
         path = check.artifact.removeprefix("file:")
@@ -216,27 +226,33 @@ def scores(
                 "draw fresh samples (a new --trial for a screen; for a baseline run, delete the "
                 "case's samples from the store)"
             )
-        metric = advisory_metric(check) if check.judge in advisory else check.metric
+        metric = metric_of(check, advisory)
         if sample.spoiled:
             score = 0.0
         elif check.artifact == "delivery":
             score = delivery_score(check, parsed)
         elif check.judge is not None:
-            score = _judged_score(check, index, sample, outputs, judged or {})
+            found = _judged_score(check, index, sample, outputs, judged or {})
+            if found is None and not unjudged_ok:
+                raise Unjudged(
+                    f"sample {sample.key}: judge {check.judge} has not answered check {index}"
+                )
+            if found is None:
+                unjudged.add(metric)
+                continue
+            score = found
         else:
             score = check_score(check, outputs)
         pairs.append((metric, score))
-    return _mean_by_metric(pairs)
+    return {m: s for m, s in _mean_by_metric(pairs).items() if m not in unjudged}
 
 
 def _judged_score(
     check: Check, index: int, sample: Sample, outputs: Outputs, judged: Mapping[int, float]
-) -> float:
+) -> float | None:
     if judged_text(check, sample, outputs) is None:
         return 0.0
-    if index not in judged:
-        raise Unjudged(f"sample {sample.key}: judge {check.judge} has not answered check {index}")
-    return judged[index]
+    return judged.get(index)
 
 
 def case_failed(scores: dict[str, float], guards: tuple[str, ...]) -> bool:

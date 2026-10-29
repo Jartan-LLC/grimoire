@@ -98,7 +98,14 @@ def test_screens_on_two_models_keep_their_own_plans_and_alternate_which_arm_star
     monkeypatch.setattr(cli, "run_samples", run)
     monkeypatch.setattr(cli, "decide", nothing)
     args = argparse.Namespace(
-        split="dev", base="main", new_ref=None, samples=2, trial="", new_plan=False, jobs=1
+        split="dev",
+        base="main",
+        new_ref=None,
+        samples=2,
+        trial="",
+        new_plan=False,
+        jobs=1,
+        judge=False,
     )
     for model in ("claude-opus-5-5", "claude-sonnet-5-5", "claude-opus-5-5"):
         spec = session.Spec(model, "2.1.310", 1.0, tmp_path, store)
@@ -120,7 +127,9 @@ def test_the_read_list_names_a_must_hold_failure_the_primary_passes(
     clean = cache.Sample("k2", "c1", "new", 1, {}, True, [], [], "", {}, {})
     scores = {"k1": {"kept": 1.0, "no_exploit": 0.0}, "k2": {"kept": 1.0, "no_exploit": 1.0}}
 
-    def sample_scores(_: object, sample: cache.Sample, __: object) -> dict[str, float]:
+    def sample_scores(
+        _: object, sample: cache.Sample, __: object, *, unjudged_ok: bool = False
+    ) -> dict[str, float]:
         return scores[sample.key]
 
     monkeypatch.setattr(cli, "sample_scores", sample_scores)
@@ -209,7 +218,7 @@ def test_a_screen_under_a_changed_plan_runs_nothing_until_a_new_plan(
     def screen(samples: int, new_plan: bool = False) -> int:
         args = argparse.Namespace(
             split="dev", base="main", new_ref=None, samples=samples, trial="",
-            new_plan=new_plan, jobs=1,
+            new_plan=new_plan, jobs=1, judge=False,
         )  # fmt: skip
         return cli.screen(args, suite, spec, store)
 
@@ -610,3 +619,111 @@ def test_a_probe_takes_its_items_a_case_at_a_time(tmp_path: pathlib.Path) -> Non
     reals = [real("a", "a1"), real("a", "a2"), real("a", "a3"), real("b", "b1"), real("c", "c1")]
     assert [r.sample.key for r in cli.spread(reals, 4)] == ["a1", "b1", "c1", "a2"]
     assert cli.spread(reals, 0) == []
+
+
+def judged_store(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> tuple[Suite, pathlib.Path, list[str]]:
+    """A suite with a judged check, a store whose sessions are stubbed, and the judge calls made.
+
+    Each stubbed session commits "fix: Closes #42"; the judge says yes, quoting it.
+    """
+    suite = load_suite(write_suite(tmp_path / "suite", SUITE + JUDGE, KEY + JUDGED))
+    store = tmp_path / "store"
+    monkeypatch.setenv(cache.STORE, str(store))
+    calls: list[str] = []
+
+    def says_yes(j: object, reference: str, text: str) -> tuple[jury.Answer, str]:
+        calls.append(text)
+        envelope: dict[str, object] = {"modelUsage": {"claude-opus-5-5": {}}}
+        return jury.Answer("yes", "Closes #42"), json.dumps(envelope)
+
+    def arm(name: str, *_: object) -> Arm:
+        return Arm(name, "h", {})
+
+    def run(work: list[cli.Work], _: int) -> list[cache.Sample]:
+        done: list[cache.Sample] = []
+        for case, a, index, __ in work:
+            sample = cache.Sample(
+                f"{a.name}-{index}", case.id, a.name, index, {}, True, [], ["fix: Closes #42"],
+                "Done.", {}, {},
+            )  # fmt: skip
+            cache.save(store, sample, "")
+            done.append(sample)
+        return done
+
+    def version() -> str:
+        return "2.1.312"
+
+    def branch(*_: str) -> str:
+        return "feature/x\n"
+
+    monkeypatch.setattr(jury, "call", says_yes)
+    monkeypatch.setattr(cli, "build_arm", arm)
+    monkeypatch.setattr(cli, "run_samples", run)
+    monkeypatch.setattr(cli, "claude_version", version)
+    monkeypatch.setattr(cli, "git", branch)
+    return suite, store, calls
+
+
+@pytest.mark.parametrize("command", ["run", "screen"])
+def test_a_run_or_screen_calls_no_judge_unless_asked_to(
+    command: str,
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    suite, _, calls = judged_store(tmp_path, monkeypatch)
+
+    def nothing(*_: object) -> None:
+        return None
+
+    monkeypatch.setattr(cli, "decide", nothing)
+    argv = ["eval.py", command, str(suite.path), "--samples", "1", "--split", "dev"]
+    argv += ["--arm", "old"] if command == "run" else []
+    monkeypatch.setattr(sys, "argv", argv)
+    assert cli.main() == 0
+    assert calls == []
+    if command == "run":
+        assert "c1: failed in 0 of 1; not judged: kept@flags" in capsys.readouterr().out
+    monkeypatch.setattr(sys, "argv", [*argv, "--judge"])
+    assert cli.main() == 0
+    assert len(calls) == suite.judges["flags"].panel  # both arms' artifacts are one text
+    if command == "run":
+        out = capsys.readouterr().out
+        assert "c1: failed in 0 of 1\n" in out
+        assert "not judged" not in out
+
+
+def test_a_gating_judged_metric_with_no_answers_is_not_judged_and_never_ships(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    suite, store, calls = judged_store(tmp_path, monkeypatch)
+
+    def gates(_: Suite) -> dict[str, str]:
+        return {}  # as if the judge's stamp shows it cleared its bar
+
+    def base(*_: object) -> str:
+        return "0" * 40
+
+    monkeypatch.setattr(cli, "advisory", gates)
+    monkeypatch.setattr(cli, "merge_base", base)
+    arms = {"old": Arm("old", "o", {}), "new": Arm("new", "n", {})}
+    done = cli.run_samples(
+        [(suite.cases[0], arms[a], 0, cast("session.Spec", None)) for a in arms], 1
+    )
+    args = argparse.Namespace(judge=False, new_ref="ref", split="dev", samples=1, base="main")
+    plan: dict[str, object] = {"model": "claude-opus-5-5", "claude_code": "2.1.312", "suite": "s"}
+    cli.decide(cli.Screen(args, suite, arms, plan, store), "", done)
+    out = capsys.readouterr().out
+    assert "NOT JUDGED: kept: 2 sample(s) lack a kept judge answer" in out
+    assert "Result: INCONCLUSIVE" in out
+    assert "| kept | primary | 0 | 0.000 | 0.000 | 0 | 0 | 1.000 | 1.000 | NOT JUDGED |" in out
+    spec = session.Spec("claude-opus-5-5", "2.1.312", 1.0, tmp_path, store)
+    record = argparse.Namespace(judge=False, record=True, arm="old")
+    key = suite.cases[0].path / "key.toml"
+    before = key.read_text()
+    cli.baseline_counts(suite, list(suite.cases), done[:1], spec, record)
+    assert "c1: not counted, kept not judged; rerun with --judge" in capsys.readouterr().out
+    assert key.read_text() == before  # no baseline recorded from a count missing the judge
+    assert calls == []

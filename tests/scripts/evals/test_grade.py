@@ -314,6 +314,16 @@ def test_a_judged_check_reads_its_panel_and_averages_with_the_regex_checks(
         grade.scores(case, good, parsed)
 
 
+def test_an_unjudged_check_leaves_its_whole_metric_out_when_allowed(tmp_path: pathlib.Path) -> None:
+    case = judged_case(tmp_path)
+    parsed = trace.parse([*load_skill("s1", "x", CPW), *commit("c1")], PLUGINS)
+    good = sample(["fix: y\n\nCloses #42"], "Done.")
+    # kept's two regex checks pass, but kept is not scored on them alone
+    assert grade.scores(case, good, parsed, unjudged_ok=True) == {"delivered": 1.0}
+    held = grade.scores(case, good, parsed, advisory={"flags"}, unjudged_ok=True)
+    assert held == {"kept": 1.0, "delivered": 1.0}
+
+
 def test_a_spoiled_sample_or_an_empty_artifact_fails_a_judged_check_without_a_judge(
     tmp_path: pathlib.Path,
 ) -> None:
