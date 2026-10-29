@@ -32,7 +32,7 @@ A chain of PRs is not a stack until it is linked. Merging a PR in a linked stack
 
 ## Updating a Stack
 
-When a branch with branches stacked above it changes, from this session or elsewhere, restack them by these steps; a sync and the merge cases below use them too. They rewrite pushed commits: run them only with the approval the project requires for a force-push, or the user's where it states none. **Rebase stack** in the web UI needs the same approval.
+When a branch with branches stacked above it changes, from this session or elsewhere, restack them by these steps; a sync and the merge cases below use them too. They rewrite pushed commits, which updating a stack needs; where the project's rules require approval for a force-push, get it first. **Rebase stack** in the web UI does the same.
 
 `gh api repos/{owner}/{repo}/stacks/<number> --jq '.pull_requests[].head.ref'` lists a stack's branches, bottom first.
 
