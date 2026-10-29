@@ -2,19 +2,10 @@
 
 ## 1.5.0
 
-- `github-conventions` covers stacked pull requests (`stacks.md`). Your agent stacks a change on an open PR only when the change needs that PR; changes that do not depend on each other go in separate PRs off the base branch.
-- Your agent cuts and pushes the upper branch early. Once the lower PR's review is done, it syncs the upper branch onto the lower one, instead of carrying each review fix up the stack, then opens its PR, based on the lower PR's branch, and links it into a stack with `gh api`; when the lower PR is below its stack's top, it tells you instead. If the lower PR has merged by then, your agent restacks the upper branch onto the branch the lower PR merged into and bases the PR there.
-- Your agent merges a stack only after CI passed on the PR it merges by, against the stack's current base (after the base moves, only a new head brings a fresh run; a re-run re-tests the old merge commit), and merges a linked stack by its top PR in one operation. Where your CI does not test that PR, it does not merge until that PR has a passing CI run, and tells you if it gets none. To get one, it links an unlinked chain, folds the stack into its bottom PR so that PR's CI run tests every layer (where your project has no convention for folding, you decide how), or asks you to change CI. It merges through GitHub's asynchronous merge endpoint, with your project's merge method, since `gh pr merge` refuses a stacked PR; a person can use the web UI.
-- Your agent roots a stack on the branch the stack merges into, and never stacks a sub-issue branch on its parent feature branch's PR; sub-issues that build on each other may stack within the parent branch.
-- After a partial merge, your agent waits up to two minutes for GitHub to retarget and rebase the next PR before it checks that the PR holds only its own commits.
-- Before pushing to a PR, your agent reads its stack.
-- Your agent restacks the branches above a branch, with git, when:
-  - it syncs an upper branch, or the lower PR merged before the upper PR opened;
-  - a PR in a stack changes under PRs stacked above it;
-  - after a merge, the next PR still carries the merged PR's commits, or is the next PR of an unlinked chain;
-  - a stack's merge fails because it needs a rebase.
-
-  It pushes its own commits, then rebases each branch above, from its remote copy, onto the branch below as pushed, and pushes it with `--force-with-lease`, with the approval your project requires for a force-push, or yours where it states none. This is the one exception to never rewriting a pushed commit. It stops and tells you instead where a branch has commits its remote lacks, a worktree it would switch has uncommitted changes, a branch below was rewritten, or a rebase conflict needs more than keeping both sides' changes.
+- `github-conventions` covers stacked pull requests (`stacks.md`). Your agent stacks a change on an open PR only when the change needs that PR, and opens the upper PR only once the lower PR's review is done, syncing it once instead of carrying each review fix up the stack.
+- Your agent merges a stack by its top PR, in one operation, and only once the checks your project requires before a merge have passed on what that merge lands. When they do not run on it, your agent does not merge and tells you.
+- Your agent never stacks a sub-issue PR on its parent feature branch's PR.
+- When a branch under a stack changes, your agent restacks the branches above it with git and pushes them with `--force-with-lease`. This is the one exception to never rewriting a pushed commit, and it needs the approval your project requires for a force-push, or yours where it states none. Your agent stops and tells you when a restack could lose work or hits a conflict it cannot resolve by keeping both sides.
 
 ## 1.4.1
 
