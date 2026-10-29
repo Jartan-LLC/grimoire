@@ -1,0 +1,5 @@
+[
+  { "lifter": "Ana", "date": "2026-09-02", "sets": [{ "lift": "Squat", "kg": 80, "reps": 5 }, { "lift": "Bench", "kg": 50, "reps": 5 }] },
+  { "lifter": "Ana", "date": "2026-09-09", "sets": [{ "lift": "Squat", "kg": 85, "reps": 3 }, { "lift": "Bench", "kg": 50, "reps": 6 }] },
+  { "lifter": "Tom", "date": "2026-09-09", "sets": [{ "lift": "Deadlift", "kg": 140, "reps": 2 }] }
+]

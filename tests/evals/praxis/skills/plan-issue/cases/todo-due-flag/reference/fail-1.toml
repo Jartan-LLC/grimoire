@@ -1,0 +1,36 @@
+final = "Plan written to .claude/workspace/issue-57/plan.md."
+
+[files]
+".claude/workspace/issue-57/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Let `todo add` take `--due YYYY-MM-DD` and show it in `todo list`.
+
+### Patterns & Conventions Found
+- Pattern: `src/args.js:7` -- each flag is a branch in `parseArgs`.
+- Pattern: `src/commands/list.js:3` -- `formatItem` builds the list line.
+
+### Chosen Approach
+- **What**: A `due` string on each item.
+- **Why**: ISO dates sort as text; no date library needed.
+- **How**: Parse the flag, store it, print it.
+
+### Alternatives Considered
+1. Store a timestamp -- harder to read in the JSON file.
+
+### Files to Create/Modify
+- `src/args.js` -- parse `--due`
+- `src/commands/add.js` -- store it
+- `src/commands/list.js` -- show it
+
+### Documentation Plan
+- README: add `--due` to the examples.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- parse the flag
+- [ ] Phase 2: Core implementation -- store and show it
+- [ ] Phase 3: Integration/cleanup -- tests and README
+
+### Complexity
+Simple
+'''

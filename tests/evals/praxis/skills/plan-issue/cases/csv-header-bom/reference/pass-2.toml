@@ -1,0 +1,24 @@
+final = "Plan written to .claude/workspace/issue-9/plan.md."
+
+[files]
+".claude/workspace/issue-9/plan.md" = '''# Plan: Excel statements (issue 9)
+
+## Approach
+
+Read the CSV as `utf-8-sig` so a leading BOM does not end up in the first column name.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Change the encoding in `read_statement` (`ledger/bank_csv.py`).
+2. Test with a BOM-prefixed file.
+
+## Verification
+
+```sh
+python3 -m pytest -q
+```
+'''

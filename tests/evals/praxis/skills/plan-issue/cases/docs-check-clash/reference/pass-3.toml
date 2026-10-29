@@ -1,0 +1,29 @@
+final = "Plan written to .claude/workspace/issue-71/plan.md."
+
+[files]
+".claude/workspace/issue-71/plan.md" = '''# Plan: Add `pkgdoc check` for broken links (issue 71)
+
+## Approach
+
+Find `[text](page.md)` links in each page from `pages()` and report those whose target file does
+not exist under `docs/`, exiting 1 when any are found.
+
+## Decisions for the user
+
+- Should `check` report a link whose page exists but whose anchor is missing? -- default if
+  unanswered: no.
+
+## Steps
+
+1. Add `src/links.js` with `brokenLinks(pages)` and `run()`, following `src/spell.js` for output
+   and exit code.
+2. Register the command in `bin/pkgdoc.js:2-6`.
+3. Add `test/links.test.js`.
+4. Document it in `docs/commands.md` and `CHANGELOG.md`.
+
+## Verification
+
+- `npm test` -- the link tests pass.
+- `node bin/pkgdoc.js links` in this repository exits 0; after adding a link to `missing.md` it
+  prints that file and exits 1.
+'''

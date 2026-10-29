@@ -1,0 +1,32 @@
+final = "Plan written to .claude/workspace/issue-38/plan.md."
+
+[files]
+".claude/workspace/issue-38/plan.md" = '''# Plan: Personal bests as a Markdown table (issue 38)
+
+## Approach
+
+The table is built inline in `bin/liftlog.js:12-16`. Pull the header and cell rows out into
+`bestsCells(rows)` in `src/bests.js`, keep the aligned table in the CLI, and add `toMarkdown(headers,
+cells)` that writes a pipe table, escaping `|` in names. `--markdown` picks it.
+Rejected: keeping two copies of the column list -- the wiki table and the terminal one would drift.
+
+## Decisions for the user
+
+- Assumption: the wiki renders GitHub-style pipe tables -- if not, the output needs its syntax.
+
+## Steps
+
+1. In `src/bests.js`, export `bestsCells(rows)` returning the headers and the cell rows now built at
+   `bin/liftlog.js:12-13`.
+2. Add `src/markdown.js` with `toMarkdown(headers, cells)`: a header row, a `---` row, one row per
+   lifter and lift, `|` escaped as `\|`.
+3. In `bin/liftlog.js`, accept `--markdown` after the file and print `toMarkdown` instead of the
+   aligned table; update the usage line at `bin/liftlog.js:7`.
+4. Add `test/markdown.test.js` on `data/sample-log.json`: the header and Ana's squat row.
+
+## Verification
+
+- `npm test` -- the Markdown test and the existing bests tests pass.
+- `node bin/liftlog.js bests data/sample-log.json --markdown` -- paste the output into the wiki's
+  preview; it shows a three-row table.
+'''

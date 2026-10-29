@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-12/plan.md."
+
+[files]
+".claude/workspace/issue-12/plan.md" = '''# Plan: Overdue reminder emails (issue 12)
+
+## Approach
+
+Send an email with smtplib from the existing overdue run when `days == 7`.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Add `send_reminder(loan, member)` in `booklend/reminders.py`.
+2. Call it from `booklend/__main__.py`.
+3. Tests with a patched `smtplib.SMTP`.
+
+## Verification
+
+- `python3 -m pytest -q` passes.
+'''

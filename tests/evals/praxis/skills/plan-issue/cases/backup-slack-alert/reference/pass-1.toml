@@ -1,0 +1,30 @@
+final = "Plan written to .claude/workspace/issue-27/plan.md."
+
+[files]
+".claude/workspace/issue-27/plan.md" = '''# Plan: Alert in Slack when the nightly backup fails (issue 27)
+
+## Approach
+
+On `StepFailed`, post the step name and the end of its error to the webhook in
+`SLACK_WEBHOOK_URL` with `urllib.request`, then exit 1 as now. A function `post_failure(text)` in
+`nightly/slack.py` is all it needs.
+Rejected: a notifier interface for future channels -- Slack is the only one asked for.
+
+## Decisions for the user
+
+- Assumption: a failed Slack post must not hide the backup failure -- the post is wrapped so its
+  own error is logged and the exit code stays 1.
+
+## Steps
+
+1. Add `nightly/slack.py` with `post_failure(text)`: JSON `{"text": ...}` POSTed to the webhook,
+   10-second timeout; it does nothing when the variable is unset.
+2. Call it in the `except StepFailed` branch at `nightly/__main__.py:19-21`.
+3. Add `tests/test_slack.py` with `urlopen` patched: the body names the failed step.
+
+## Verification
+
+- `python3 -m pytest -q` -- the Slack tests and the step tests pass.
+- `SLACK_WEBHOOK_URL=<test webhook> python3 -m nightly` on a host without `pg_dump` -- a message
+  naming the dump step arrives in the test channel.
+'''

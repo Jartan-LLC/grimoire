@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-27/plan.md."
+
+[files]
+".claude/workspace/issue-27/plan.md" = '''# Plan: Alert in Slack when the nightly backup fails (issue 27)
+
+## Approach
+
+Add a `Notifier` protocol with a `SlackNotifier` implementation and a registry keyed by channel
+name, so email or PagerDuty can be added later without touching `main`.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Add `nightly/notify.py` with the `Notifier` protocol, `SlackNotifier` and the registry.
+2. Build the notifiers from the environment in `nightly/__main__.py` and call each on failure.
+
+## Verification
+
+- `python3 -m pytest -q` -- a fake notifier receives the failure.
+'''

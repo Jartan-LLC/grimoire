@@ -1,0 +1,6 @@
+{
+  "name": "permalink",
+  "version": "0.9.2",
+  "main": "src/index.js",
+  "scripts": { "test": "node --test" }
+}

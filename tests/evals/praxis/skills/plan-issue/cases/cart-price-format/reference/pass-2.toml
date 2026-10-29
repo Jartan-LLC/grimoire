@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-61/plan.md."
+
+[files]
+".claude/workspace/issue-61/plan.md" = '''# Plan: Dollar amounts in the cart (issue 61)
+
+## Approach
+
+Reuse the receipt's `money` helper for the cart: export it from `src/receipt.js` and call it in
+`src/cart.js`. One formatter keeps the two views in step.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Export `money` from `src/receipt.js` and use it in both the receipt and `cartSummary`.
+2. Cart tests for a total over $1,000.
+
+## Verification
+
+- `npm test` passes.
+'''

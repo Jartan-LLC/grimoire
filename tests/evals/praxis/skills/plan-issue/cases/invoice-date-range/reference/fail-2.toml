@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-41/plan.md."
+
+[files]
+".claude/workspace/issue-41/plan.md" = '''# Plan: The invoice list can't be narrowed to a date range (issue 41)
+
+## Approach
+
+Add `from` and `to` handling to `list_invoices` in `clinicdesk/invoices.py`, written the same way
+as for bookings. A shared helper would touch `clinicdesk/bookings.py` and is a separate refactor.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. In `list_invoices`, parse `from` and `to`, reject bad or reversed dates and filter by `day`.
+2. Invoice range tests.
+
+## Verification
+
+- `python3 -m pytest -q` -- passes.
+'''

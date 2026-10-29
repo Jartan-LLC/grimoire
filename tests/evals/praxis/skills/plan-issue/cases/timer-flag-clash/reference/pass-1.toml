@@ -1,0 +1,26 @@
+final = "Plan written to .claude/workspace/issue-48/plan.md."
+
+[files]
+".claude/workspace/issue-48/plan.md" = '''# Plan: Add a quick 15-minute session (issue 48)
+
+## Approach
+
+Add a boolean `quick` option that sets the session to 15 minutes unless `-m` is given.
+
+## Decisions for the user
+
+- `-q` already means `--quiet` (`bin/pomo.js:8`), and the project asks before changing what a
+  flag means. Default if unanswered: `--quick` with no short form; alternatives are `-Q` or
+  moving quiet off `-q`, which breaks people's aliases.
+
+## Steps
+
+1. Add `quick` to the options in `bin/pomo.js:6-9`.
+2. Pick 15 minutes when `quick` is set and `minutes` was not passed.
+3. README line for `--quick`.
+
+## Verification
+
+- `npm test` passes.
+- `node bin/pomo.js --quick` prints "15 min left" first.
+'''

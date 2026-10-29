@@ -1,0 +1,33 @@
+final = "Plan written to .claude/workspace/issue-43/plan.md."
+
+[files]
+".claude/workspace/issue-43/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+The README's example config uses `timeout`, which 2.0.0 renamed to `timeout_s`.
+
+### Patterns & Conventions Found
+- Pattern: `pingmon/config.py:5` -- the accepted keys.
+
+### Chosen Approach
+- **What**: Change the key in the README example.
+- **Why**: It is the only stale key.
+- **How**: One-line edit.
+
+### Alternatives Considered
+1. Accept `timeout` as an alias -- 2.0.0 removed it on purpose.
+
+### Files to Create/Modify
+- `README.md` -- the example
+
+### Documentation Plan
+- This is the documentation change.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- edit the example
+- [ ] Phase 2: Core implementation -- check it parses
+- [ ] Phase 3: Integration/cleanup -- none
+
+### Complexity
+Simple
+'''

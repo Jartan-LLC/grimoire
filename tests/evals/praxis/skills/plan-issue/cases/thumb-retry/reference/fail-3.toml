@@ -1,0 +1,24 @@
+final = "Plan written to .claude/workspace/issue-19/plan.md."
+
+[files]
+".claude/workspace/issue-19/plan.md" = '''# Plan: Retry thumbnail downloads (issue 19)
+
+## Approach
+
+Copy the retry loop into `feeds/thumbs.py`, following `feeds/fetch.py`. A shared helper would
+touch `feeds/fetch.py` and is a separate refactor.
+
+## Decisions for the user
+
+- Assumption: thumbnails can wait as long as feeds (1 s, then 2 s) -- if the display needs them
+  faster, give the helper a backoff argument.
+
+## Steps
+
+1. Add the attempts loop to `download_thumb` in `feeds/thumbs.py`.
+2. Test: a thumbnail that fails once with 503 is cached on the second attempt.
+
+## Verification
+
+- `python3 -m pytest -q` passes, with `time.sleep` patched out.
+'''

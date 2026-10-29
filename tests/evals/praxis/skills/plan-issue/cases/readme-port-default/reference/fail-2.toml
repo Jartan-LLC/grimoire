@@ -1,0 +1,25 @@
+final = "Plan written to .claude/workspace/issue-8/plan.md."
+
+[files]
+".claude/workspace/issue-8/plan.md" = '''# Plan: README gives the wrong port (issue 8)
+
+## Approach
+
+Change 8080 to 3000 in `README.md`.
+
+## Decisions for the user
+
+None.
+
+## Out of scope
+
+None.
+
+## Steps
+
+1. Edit the port in `README.md`.
+
+## Verification
+
+- Read the README and confirm the port is 3000.
+'''

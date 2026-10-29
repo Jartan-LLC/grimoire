@@ -1,0 +1,24 @@
+final = "Plan written to .claude/workspace/issue-38/plan.md."
+
+[files]
+".claude/workspace/issue-38/plan.md" = '''# Plan: Personal bests as a Markdown table (issue 38)
+
+## Approach
+
+Introduce a `Formatter` interface with `TableFormatter` and `MarkdownFormatter`, chosen by a
+`--format` option from a registry, so CSV or HTML can plug in later.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Add `src/formatters/index.js` with the registry keyed by format name.
+2. Move the table code from `bin/liftlog.js` into `TableFormatter`; add `MarkdownFormatter`.
+3. Read `--format` in `bin/liftlog.js` and look the formatter up.
+
+## Verification
+
+- `npm test` -- both formatters print the sample log.
+'''

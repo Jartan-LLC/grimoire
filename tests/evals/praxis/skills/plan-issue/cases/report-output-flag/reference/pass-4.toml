@@ -1,0 +1,29 @@
+final = "Plan written to .claude/workspace/issue-33/plan.md."
+
+[files]
+".claude/workspace/issue-33/plan.md" = '''# Plan: Write the JSON report to a file (issue 33)
+
+## Approach
+
+Add an option that takes a file name and writes `report.json(files, budget)` there, while stdout
+keeps the table (or JSON with `--json`). The exit code is unchanged.
+
+## Decisions for the user
+
+- Should `-o` write relative to the browser's cwd? -- default if unanswered: no, the shell's.
+
+## Steps
+
+1. Add `output: { type: "string" }` to the options at `bin/sizecheck.js:8-12`.
+2. After printing, when `values.output` is set, write `report.json(files, budget)` to it with
+   `fs.writeFileSync`; a write error exits 2 with its message.
+3. Add the flag to the table in `README.md`.
+4. Test in `test/report.test.js` that runs `bin/sizecheck.js` on a temp folder with `--output`
+   and reads the file back.
+
+## Verification
+
+- `npm test` -- the new test finds the JSON file with every measured file in it.
+- `node bin/sizecheck.js test --output /tmp/size.json && cat /tmp/size.json` -- the table prints
+  and the file holds the JSON report.
+'''

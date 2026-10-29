@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-33/plan.md."
+
+[files]
+".claude/workspace/issue-33/plan.md" = '''# Plan: --output for the JSON report (issue 33)
+
+## Approach
+
+New string option `--output <file>`; write the JSON report to it.
+
+## Open questions
+
+1. `-o` is taken by `--open`. Reassigning it would break CI configs that use `-o`; may I rename,
+   or should `--output` go without the short flag? Default: no short flag.
+
+## Steps
+
+1. `bin/sizecheck.js`: parse `--output` and write the file.
+2. `README.md`: document it.
+
+## Verification
+
+- `npm test`, plus a manual run with `--output report.json`.
+'''

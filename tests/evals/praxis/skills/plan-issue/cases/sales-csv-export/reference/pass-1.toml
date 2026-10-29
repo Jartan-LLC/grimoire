@@ -1,0 +1,31 @@
+final = "Plan written to .claude/workspace/issue-64/plan.md."
+
+[files]
+".claude/workspace/issue-64/plan.md" = '''# Plan: CSV output for the monthly report (issue 64)
+
+## Approach
+
+Add a `--csv` flag to `bin/salesreport.js` that prints the same rows through a new `toCsv(rows)`
+in `src/csv.js`, quoting fields that hold commas or quotes. Revenue and share are written as
+plain numbers so the spreadsheet can sum them.
+
+## Decisions for the user
+
+- Share as a fraction (`0.75`) or a percent string (`75.0%`)? Default: a fraction, which
+  spreadsheets format.
+
+## Steps
+
+1. Add `toCsv(rows)` in `src/csv.js`, using the column order of `HEADERS` in `src/table.js:1`;
+   quote every field that contains a comma, a quote or a newline ("Mug, blue" in the sample data).
+2. In `bin/salesreport.js:12`, print `toCsv` instead of `renderTable` when `--csv` is given;
+   update the usage line at `bin/salesreport.js:8`.
+3. Add `test/csv.test.js` with the sample orders.
+4. Mention `--csv` in a README section.
+
+## Verification
+
+- `npm test` -- the CSV test checks the header and the quoted "Mug, blue" row.
+- `node bin/salesreport.js data/sample-orders.json 2026-09 --csv > /tmp/sept.csv` -- the file opens in
+  a spreadsheet with four columns.
+'''

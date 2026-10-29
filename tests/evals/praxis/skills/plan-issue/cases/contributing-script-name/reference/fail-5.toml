@@ -1,0 +1,22 @@
+final = "Plan written to .claude/workspace/issue-15/plan.md."
+
+[files]
+".claude/workspace/issue-15/plan.md" = '''# Plan: CONTRIBUTING.md asks for a script that doesn't exist (issue 15)
+
+## Approach
+
+The style check runs as `npm run check` (style plus tests); there is no `lint` script. Point
+step 2 of the contributing guide at `npm run check`.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. In `CONTRIBUTING.md`, step 2: `npm run lint` -> `npm run check`.
+
+## Verification
+
+- Only `CONTRIBUTING.md` changes.
+'''

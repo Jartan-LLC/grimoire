@@ -1,0 +1,4 @@
+[project]
+name = "nightly"
+version = "4.2.0"
+requires-python = ">=3.12"

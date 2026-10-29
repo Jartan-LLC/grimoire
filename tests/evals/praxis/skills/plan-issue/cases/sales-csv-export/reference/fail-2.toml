@@ -1,0 +1,24 @@
+final = "Plan written to .claude/workspace/issue-64/plan.md."
+
+[files]
+".claude/workspace/issue-64/plan.md" = '''# Plan: CSV output for the monthly report (issue 64)
+
+## Approach
+
+Introduce an `Exporter` interface with `TableExporter` and `CsvExporter`, chosen through a
+`--format` option, so JSON or Excel can plug in later without touching the CLI.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Add `src/exporters/index.js` with a registry of exporters keyed by format name.
+2. Move `renderTable` behind a `TableExporter` and add a `CsvExporter`.
+3. Read `--format` in `bin/salesreport.js` and look the exporter up in the registry.
+
+## Verification
+
+- `npm test` -- both exporters produce the sample month.
+'''

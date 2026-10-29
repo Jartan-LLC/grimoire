@@ -1,0 +1,28 @@
+final = "Plan written to .claude/workspace/issue-40/plan.md."
+
+[files]
+".claude/workspace/issue-40/plan.md" = '''# Plan: --servings for pantry show (issue 40)
+
+## Approach
+
+Scale amounts by servings / serves at print time. The float-based quantity code stays as it is.
+
+## Decisions for the user
+
+None.
+
+## Not in scope
+
+- The TODO in `pantry/quantity.py` about switching to Fraction: tempting while we are in there,
+  but it is a rewrite of how quantities parse and print.
+
+## Steps
+
+1. `pantry/cli.py`: `--servings` option on `show`.
+2. `pantry/recipe.py`: a scale helper.
+3. Tests.
+
+## Verification
+
+- `python3 -m pytest -q` passes.
+'''

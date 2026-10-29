@@ -1,0 +1,24 @@
+final = "Plan written to .claude/workspace/issue-64/plan.md."
+
+[files]
+".claude/workspace/issue-64/plan.md" = '''# Plan: --csv for salesreport (issue 64)
+
+## Approach
+
+One CSV function and one flag. A general output-format layer would serve only CSV today.
+Rejected: an exporter interface with a registry of formats -- one format does not need it.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. New `src/csv.js` exporting `toCsv(rows)`.
+2. `bin/salesreport.js`: read `--csv` and pick `toCsv` or `renderTable`.
+3. `test/csv.test.js` for quoting.
+
+## Verification
+
+- `npm test` passes, including a product name with a comma.
+'''

@@ -1,0 +1,31 @@
+final = "Plan written to .claude/workspace/issue-19/plan.md."
+
+[files]
+".claude/workspace/issue-19/plan.md" = '''# Plan: Thumbnails go missing after a hiccup on the image host (issue 19)
+
+## Approach
+
+`fetch_feed` already retries network errors and 5xx answers with a growing pause
+(`feeds/fetch.py:13-23`). Extract that loop into a shared `open_with_retries(url, timeout)` in
+`feeds/http.py` and call it from both `fetch_feed` and `download_thumb`, so the two downloads
+follow one retry policy.
+Rejected: copying the loop into `download_thumb` -- two copies of one policy drift apart.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Create `feeds/http.py` with `open_with_retries`, moving `ATTEMPTS`, `BACKOFF_S` and the loop
+   from `feeds/fetch.py:7-23`; it returns the response bytes.
+2. Make `fetch_feed` call it; `tests/test_fetch.py` must pass unchanged apart from where it
+   patches `time.sleep`.
+3. Make `download_thumb` (`feeds/thumbs.py:14-18`) call it and still return None once the retries
+   are spent.
+4. Add a 503-then-success test to `tests/test_thumbs.py`.
+
+## Verification
+
+- `python3 -m pytest -q` -- the new thumbnail test and the existing fetch tests pass.
+'''

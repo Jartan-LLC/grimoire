@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-61/plan.md."
+
+[files]
+".claude/workspace/issue-61/plan.md" = '''# Plan: Cart shows prices as bare numbers (issue 61)
+
+## Approach
+
+Format the cart's amounts with a new `formatPrice` in `src/cart.js`, using `toFixed(2)` and a
+thousands-separator regex, with a dollar sign.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Add `formatPrice(cents)` to `src/cart.js` and use it for each line and the total.
+2. Cart test with a $1,234.50 item.
+
+## Verification
+
+- `npm test` -- the cart test passes.
+'''

@@ -1,0 +1,29 @@
+final = "Plan written to .claude/workspace/issue-14/plan.md."
+
+[files]
+".claude/workspace/issue-14/plan.md" = '''# Plan: Numbers vanish from post URLs (issue 14)
+
+## Approach
+
+`slugify` replaces every run of characters outside `a-z` with a hyphen, so digits go too
+(`src/slug.js:7`). Keep digits by widening the class to `a-z0-9`. Titles that differ only by a
+number then get different slugs, which fixes the recap posts overwriting each other.
+
+## Decisions for the user
+
+- Existing posts with numbers in their titles will move to a new URL (`/2026/10/top-tips-for/`
+  becomes `/2026/10/top-10-tips-for-2026/`) -- default if unanswered: accept it; the old URLs
+  were wrong and one of each recap pair is already lost. Redirects would be a separate change.
+
+## Steps
+
+1. In `src/slug.js:7`, change `[^a-z]+` to `[^a-z0-9]+`.
+2. Add tests to `test/slug.test.js`, following `test/slug.test.js:5-7`: "Top 10 tips for 2026"
+   gives `top-10-tips-for-2026`, and "Week 1 recap" and "Week 2 recap" give different slugs.
+
+## Verification
+
+- `node -e "console.log(require('./src/slug').slugify('Top 10 tips for 2026'))"` -- prints
+  `top-10-tips-for-2026`.
+
+'''

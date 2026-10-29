@@ -1,0 +1,21 @@
+final = "Plan written to .claude/workspace/issue-43/plan.md."
+
+[files]
+".claude/workspace/issue-43/plan.md" = '''# Plan: README config example fails with unknown key 'timeout' (issue 43)
+
+## Approach
+
+The README example still uses `timeout`, renamed `timeout_s` in 2.0.0. Change that one key.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. In `README.md`, change `timeout = 5` to `timeout_s = 5` in the config example.
+
+## Verification
+
+- Paste the example into `pingmon.toml` and run `python3 -c "from pathlib import Path; from pingmon.config import parse; print(parse(Path('pingmon.toml').read_text()))"` -- it prints the check instead of raising.
+'''

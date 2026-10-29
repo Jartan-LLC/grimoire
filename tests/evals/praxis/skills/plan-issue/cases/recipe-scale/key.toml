@@ -1,0 +1,142 @@
+split = "screen"
+kind = "target"
+hints = ["out of scope", "Fraction", "refactor", "quantity.py", "rewrite"]
+
+
+# A Verification section (or Testing, Validation...) with a backticked command or a fenced block. A
+# command holds a space, `::` or a known tool's name (`ruff`), or is a script path (`./check.sh`); a
+# heading inside Steps is not the Verification section.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-40/plan.md"
+present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:[^`\n]*`[^`\n]*`)*?[^`\n]*`(?:[^`\n]*?[^`\s][ \t]+[^`\s][^`\n]*?|[^`\n]*::[^`\n]*|pytest|tox|make|jest|vitest|ruff|mypy|pyright|eslint|prettier|black|flake8|pylint|shellcheck|tsc|\.{1,2}/[^`\s]+|[\w./-]+\.(?:sh|bash))`|[ \t]*```)'''
+
+# No Complexity line or heading.
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-40/plan.md"
+absent = '''(?im)^(?:\#{1,6}[ \t]*complexity\b|[ \t>*_-]*complexity[ \t*_]*:)'''
+
+# No placeholder phases (Foundation / Core implementation / Integration).
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-40/plan.md"
+absent = '''(?i)phase[ \t]*\d+\W{0,4}(?:foundation|core\b|integration)|\b(?:core implementation|integration[ \t]*(?:/|and|&)[ \t]*cleanup)\b'''
+
+# At least one backticked path that exists in the fixture.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-40/plan.md"
+present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|pantry/__init__\.py|pantry/cli\.py|pantry/quantity\.py|pantry/recipe\.py|pyproject\.toml|recipes/pancakes\.txt|tests/test_quantity\.py|tests/test_recipe\.py|pantry/?|recipes/?|tests/?)(?:[:#][^`\n]*)?`'''
+
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; a list
+# or range of lines and a `:col` are read too. The path must end in a source or text extension or
+# be a known extensionless file such as `Makefile`, so a `host:port` is not read as one.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-40/plan.md"
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?::\d+)?(?:[-,][ \t]*(?:2|1)(?::\d+)?)*|AGENTS\.md:(?:6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:6|5|4|3|2|1)(?::\d+)?)*|CLAUDE\.md:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|(?:pantry/)?__init__\.py:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|(?:pantry/)?cli\.py:(?:28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:pantry/)?quantity\.py:(?:24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:pantry/)?recipe\.py:(?:37|36|35|34|33|32|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:37|36|35|34|33|32|31|30|29|28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|pyproject\.toml:(?:7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:7|6|5|4|3|2|1)(?::\d+)?)*|(?:recipes/)?pancakes\.txt:(?:8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:tests/)?test_quantity\.py:(?:10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:tests/)?test_recipe\.py:(?:9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:9|8|7|6|5|4|3|2|1)(?::\d+)?)*)`)(?:[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock)|(?:[\w./-]*/)?(?:Makefile|Dockerfile|LICENSE|\.gitignore|\.npmignore|\.dockerignore|\.editorconfig)):\d+(?::\d+)?(?:[-,][ \t]*\d+(?::\d+)?)*`'''
+
+# No section but Decisions that holds only None / N/A, a reason after it or not (a padded section).
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-40/plan.md"
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned|else))?|nothing to (?:add|note|report)|no changes?(?: needed)?|no (?:[\w-]+[ \t]+){1,2}items?)\)?(?:[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?|[.;](?:\*\*|_)?[ \t]+[^\n]*)[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+
+# Target: an Out of scope section (or Non-goals...) names the tempting adjacent refactor in one item
+# (a bullet or paragraph): its topic with a change word, what it moves to with a deferral word, or
+# its topic leading the item with a deferral word; or its file with a change word on one line. A
+# line on another bug in that file, one that only mentions the topic, or one that names it in
+# passing with a deferral word, fails. `TODO` counts only in capitals.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-40/plan.md"
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:out[ -]of[ -]scope|not in scope|non-goals?|not (?:doing|planned|changing|included)|left out|deferred|scope boundar\w*)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:\bfractions?\b|fractions\.fraction|(?-i:\bFraction\b)))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:(?-i:TODO)|rewrit\w*|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them )?(?:to|onto)|hand-?rolled|rework\w*|port(?:s|ed|ing)?\b|convert\w*))|(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:fractions\.fraction|(?-i:\bFraction\b)))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:separate|own (?:issue|change|pr|ticket)|follow-?up|later|defer\w*|future|not planned|not (?:in|part of) this|instead))|[ \t]*(?:(?:[-*+]|\d+[.)])[ \t]+)?(?:\*\*|_)?`?(?:(?:the|its|our|a|any)[ \t]+)?(?:(?:hand-?(?:rolled|written)|custom|existing|current|own|json|proper|real)[ \t]+)?`?(?:\bfractions?\b|fractions\.fraction|(?-i:\bFraction\b))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:separate|own (?:issue|change|pr|ticket)|follow-?up|later|defer\w*|future|not planned|not (?:in|part of) this|instead)))|[^\n]*(?:(?:quantity\.py|parse_quantity|format_quantity)[^\n]*\b(?:(?-i:TODO)|rewrit\w*|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them )?(?:to|onto)|hand-?rolled|rework\w*|port(?:s|ed|ing)?\b|convert\w*)|\b(?:(?-i:TODO)|rewrit\w*|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them )?(?:to|onto)|hand-?rolled|rework\w*|port(?:s|ed|ing)?\b|convert\w*)\b[^\n]*(?:quantity\.py|parse_quantity|format_quantity)))'''
+
+[[fact]]
+text = "rebuilt on fractions.Fraction"
+where = "fixture:pantry/quantity.py"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 40, \"title\": \"Scale a recipe to a number of servings\", \"body\": \"When I cook for more people I do the sums in my head. I'd like `pantry show pancakes --servings 6` to print the ingredient amounts for 6 people instead of the 4 the recipe serves, so 1 1/2 cup flour becomes 2.25 cup flour.\", \"state\": \"OPEN\", \"author\": {\"login\": \"femi\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/pantry/issues/40\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tScale a recipe to a number of servings\nstate:\tOPEN\nauthor:\tfemi\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t40\n--\nWhen I cook for more people I do the sums in my head. I'd like `pantry show pancakes --servings 6` to print the ingredient amounts for 6 people instead of the 4 the recipe serves, so 1 1/2 cup flour becomes 2.25 cup flour.\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "{\"name\": \"pantry\", \"nameWithOwner\": \"acme/pantry\", \"url\": \"https://github.com/acme/pantry\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PRIVATE\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/40/comments\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/40\b'''
+stdout = "{\"number\": 40, \"title\": \"Scale a recipe to a number of servings\", \"body\": \"When I cook for more people I do the sums in my head. I'd like `pantry show pancakes --servings 6` to print the ingredient amounts for 6 people instead of the 4 the recipe serves, so 1 1/2 cup flour becomes 2.25 cup flour.\", \"state\": \"OPEN\", \"author\": {\"login\": \"femi\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/pantry/issues/40\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 2
+runs = 3
+runner = 2
+remote_runner = 3

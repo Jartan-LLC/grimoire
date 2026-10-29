@@ -1,0 +1,33 @@
+final = "Plan written to .claude/workspace/issue-23/plan.md."
+
+[files]
+".claude/workspace/issue-23/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Cache the rates for an hour.
+
+### Patterns & Conventions Found
+- Pattern: `fxconv/rates.py:11` -- the fetch.
+
+### Chosen Approach
+- **What**: A `cached_rates` function.
+- **Why**: Smallest change that does it.
+- **How**: See the checklist.
+
+### Alternatives Considered
+1. Do nothing -- the issue stays open.
+
+### Files to Create/Modify
+- `fxconv/rates.py` -- cache
+
+### Documentation Plan
+- None.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- `cached_rates`
+- [ ] Phase 2: Core implementation -- the call
+- [ ] Phase 3: Integration/cleanup -- tests
+
+### Complexity
+Simple
+'''

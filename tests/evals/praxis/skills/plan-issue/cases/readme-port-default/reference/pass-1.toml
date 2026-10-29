@@ -1,0 +1,22 @@
+final = "Plan written to .claude/workspace/issue-8/plan.md."
+
+[files]
+".claude/workspace/issue-8/plan.md" = '''# Plan: README gives the wrong port (issue 8)
+
+## Approach
+
+The default port moved to 3000 in 2.0.0 (`CHANGELOG.md`, `src/config.js`); the README still says
+8080. Change the README.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. In `README.md`, change `http://localhost:8080` to `http://localhost:3000`.
+
+## Verification
+
+- `npm test` passes, and `node bin/mockapi.js mocks/` prints the port the README now names.
+'''

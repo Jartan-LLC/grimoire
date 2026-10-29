@@ -1,0 +1,25 @@
+final = "Plan written to .claude/workspace/issue-6/plan.md."
+
+[files]
+".claude/workspace/issue-6/plan.md" = '''# Plan: Usage docs give an option that doesn't exist (issue 6)
+
+## Approach
+
+Change `--column` to `--col` in `docs/usage.md`.
+
+## Decisions for the user
+
+None.
+
+## Out of scope
+
+N/A
+
+## Steps
+
+1. Edit the example in `docs/usage.md`.
+
+## Verification
+
+- Run the example from the docs again and see it work.
+'''

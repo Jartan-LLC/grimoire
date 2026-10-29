@@ -1,0 +1,33 @@
+final = "Plan written to .claude/workspace/issue-15/plan.md."
+
+[files]
+".claude/workspace/issue-15/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+CONTRIBUTING.md names `npm run lint`, which does not exist.
+
+### Patterns & Conventions Found
+- Pattern: `package.json:6` -- the scripts.
+
+### Chosen Approach
+- **What**: Name `npm run check` in the guide.
+- **Why**: It runs the style check and tests.
+- **How**: One-line edit.
+
+### Alternatives Considered
+1. Add a `lint` script -- duplicates `style`.
+
+### Files to Create/Modify
+- `CONTRIBUTING.md` -- step 2
+
+### Documentation Plan
+- This is a documentation fix.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- edit
+- [ ] Phase 2: Core implementation -- none
+- [ ] Phase 3: Integration/cleanup -- none
+
+### Complexity
+Simple
+'''

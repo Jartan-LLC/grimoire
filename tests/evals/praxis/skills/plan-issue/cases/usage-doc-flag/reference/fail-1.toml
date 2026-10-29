@@ -1,0 +1,33 @@
+final = "Plan written to .claude/workspace/issue-6/plan.md."
+
+[files]
+".claude/workspace/issue-6/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+`docs/usage.md` uses `--column`; the option is `--col`.
+
+### Patterns & Conventions Found
+- Pattern: `csvstats/cli.py:13` -- the option is declared as `--col`.
+
+### Chosen Approach
+- **What**: Correct the example.
+- **Why**: The code is right.
+- **How**: One-line edit.
+
+### Alternatives Considered
+1. Add a `--column` alias -- two names for one option.
+
+### Files to Create/Modify
+- `docs/usage.md` -- the example
+
+### Documentation Plan
+- This is a documentation fix.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- edit
+- [ ] Phase 2: Core implementation -- none
+- [ ] Phase 3: Integration/cleanup -- none
+
+### Complexity
+Simple
+'''

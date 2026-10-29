@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-17/plan.md."
+
+[files]
+".claude/workspace/issue-17/plan.md" = '''# Plan: Look books up online instead of typing them in (issue 17)
+
+## Approach
+
+Rename the local search to `shelf find` and make `shelf search` query Open Library, as the
+issue asks.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Rename the subparser at `shelf/cli.py:17` to `find`.
+2. Add `shelf/openlibrary.py` and the new `search` subcommand.
+
+## Verification
+
+- `python3 -m pytest -q` -- update `tests/test_cli.py` for the rename.
+'''

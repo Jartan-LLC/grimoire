@@ -1,0 +1,28 @@
+final = "Plan written to .claude/workspace/issue-73/plan.md."
+
+[files]
+".claude/workspace/issue-73/plan.md" = '''# Plan: /authors returns every author at once (issue 73)
+
+## Approach
+
+`list_books` already reads and checks `page` and `per_page` and slices the list
+(`bookapi/books.py:9-20`). Extract that into `paginate(items, query)` in `bookapi/paging.py` and
+call it from both `list_books` and `list_authors`, so both endpoints page, cap and report errors
+the same way and the app can share its paging code.
+
+## Decisions for the user
+
+- `/authors` answers 20 authors by default instead of all of them -- default if unanswered: yes,
+  as the issue asks; any client that relies on the full list has to page.
+
+## Steps
+
+1. Create `bookapi/paging.py` with `paginate`, moved from `bookapi/books.py:9-20`;
+   `list_books` calls it and `tests/test_books.py` passes unchanged.
+2. `list_authors` in `bookapi/authors.py:6-8` calls `paginate` on the sorted authors.
+3. Tests in `tests/test_authors.py`: second page, the 100 cap and a bad page, as for books.
+
+## Verification
+
+- `python3 -m pytest -q` -- the new author paging tests and the book tests pass.
+'''

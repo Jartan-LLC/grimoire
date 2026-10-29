@@ -1,0 +1,7 @@
+[project]
+name = "pantry"
+version = "0.6.0"
+requires-python = ">=3.12"
+
+[project.scripts]
+pantry = "pantry.cli:main"

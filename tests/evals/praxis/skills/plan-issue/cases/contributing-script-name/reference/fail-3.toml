@@ -1,0 +1,22 @@
+final = "Plan written to .claude/workspace/issue-15/plan.md."
+
+[files]
+".claude/workspace/issue-15/plan.md" = '''# Plan: Fix the script name in CONTRIBUTING.md (issue 15)
+
+## Approach
+
+Replace `npm run lint` with `npm run check`, the script AGENTS.md also names.
+Rejected: adding a `lint` alias to package.json -- the issue is about the doc.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Edit step 2 of `CONTRIBUTING.md`.
+
+## Verification
+
+Not applicable for a docs change.
+'''

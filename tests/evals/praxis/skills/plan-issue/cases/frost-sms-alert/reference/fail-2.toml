@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-66/plan.md."
+
+[files]
+".claude/workspace/issue-66/plan.md" = '''# Plan: Text the grower when the greenhouse gets too cold (issue 66)
+
+## Approach
+
+Add a `Notifier` protocol with an `SmsNotifier`, and build the notifiers from a registry keyed by
+channel name, so email or a push service can be added without touching `main`.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Add `greenhouse/notify.py` with the `Notifier` protocol, `SmsNotifier` and the registry.
+2. In `greenhouse/__main__.py`, notify every configured channel once per cold spell.
+
+## Verification
+
+- `python3 -m pytest -q` -- a fake notifier receives one alert.
+'''

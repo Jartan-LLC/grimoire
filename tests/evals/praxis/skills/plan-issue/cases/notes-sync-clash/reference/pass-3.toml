@@ -1,0 +1,31 @@
+final = "Plan written to .claude/workspace/issue-22/plan.md."
+
+[files]
+".claude/workspace/issue-22/plan.md" = '''# Plan: Add `notes sync` to share notes with the team server (issue 22)
+
+## Approach
+
+Add an upload command that `GET`s the server's list, then `PUT`s every local note that is
+missing there or newer locally, using `urllib.request` with the bearer token from `NOTES_TOKEN`.
+The command name is the open question: `notes sync` already exists and copies notes to
+`~/notes-backup`, and people run it from cron.
+
+## Decisions for the user
+
+- `notes sync` is taken: it copies every note to ~/notes-backup, and cron runs it nightly.
+  Default if unanswered: name the upload `notes push`.
+
+## Steps
+
+1. Add `notes/server.py` with `list_remote()` and `put_note()`, reading `NOTES_SERVER` and
+   `NOTES_TOKEN`; fail with a clear message when either is unset.
+2. Register the command in `notes/cli.py`, following the subparsers at `notes/cli.py:11-18`.
+3. Tests in `tests/test_server.py` with `urlopen` patched, following `tests/test_cli.py:10-16`.
+4. Document the command and the two variables in `README.md`.
+
+## Verification
+
+- `python3 -m pytest -q` -- new tests cover a new note, a changed note and an unchanged note.
+- `NOTES_SERVER=http://localhost:8080 NOTES_TOKEN=x python3 -m notes.cli push` against a local
+  stub server -- each `PUT` arrives with the bearer header.
+'''

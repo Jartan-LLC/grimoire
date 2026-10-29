@@ -1,0 +1,27 @@
+final = "Plan written to .claude/workspace/issue-40/plan.md."
+
+[files]
+".claude/workspace/issue-40/plan.md" = '''# Plan: Scale a recipe to a number of servings (issue 40)
+
+## Approach
+
+Rebuild `pantry/quantity.py` on `fractions.Fraction` first, then scale amounts exactly, so 1/3 cup
+at double servings prints as 2/3 cup.
+
+## Decisions for the user
+
+None.
+
+## Out of scope
+
+- Unit conversion (cups to grams) -- not planned.
+
+## Steps
+
+1. Rewrite `parse_quantity` and `format_quantity` on `Fraction`.
+2. Add `--servings` to `show` in `pantry/cli.py` and scale before printing.
+
+## Verification
+
+- `python3 -m pytest -q` -- passes with updated expectations.
+'''

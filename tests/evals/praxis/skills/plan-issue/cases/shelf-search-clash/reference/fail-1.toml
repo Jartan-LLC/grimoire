@@ -1,0 +1,35 @@
+final = "Plan written to .claude/workspace/issue-17/plan.md."
+
+[files]
+".claude/workspace/issue-17/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Look books up on Open Library and add the chosen match.
+
+### Patterns & Conventions Found
+- Pattern: `shelf/cli.py:17` -- subcommands are argparse subparsers.
+- Pattern: `shelf/catalog.py:23` -- `add()` saves a book.
+
+### Chosen Approach
+- **What**: Make `shelf search` query Open Library; move the local search to `shelf find`.
+- **Why**: The issue asks for `shelf search`.
+- **How**: New module, rewired subcommands.
+
+### Alternatives Considered
+1. Scrape the Open Library site -- the JSON API is simpler.
+
+### Files to Create/Modify
+- `shelf/openlibrary.py` -- new
+- `shelf/cli.py` -- subcommands
+
+### Documentation Plan
+- README command list.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- API client
+- [ ] Phase 2: Core implementation -- command
+- [ ] Phase 3: Integration/cleanup -- README
+
+### Complexity
+Moderate
+'''

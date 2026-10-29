@@ -1,0 +1,34 @@
+final = "Plan written to .claude/workspace/issue-36/plan.md."
+
+[files]
+".claude/workspace/issue-36/plan.md" = '''# Plan: Import contacts from a CSV file (issue 36)
+
+## Approach
+
+Add `rolodex import <file>`: read the file with `csv.DictReader`, build each contact with
+`make_contact`, skip rows with no email or an email already present (`same_person`), save once,
+and print the two counts.
+
+## Decisions for the user
+
+- Assumption: the CSV has a header row named `name,email,phone` -- if the front desk's export has
+  no header, read the columns by position instead.
+
+## Out of scope
+
+- Reporting the skipped dicts row by row -- later.
+
+## Steps
+
+1. Add `rolodex/importer.py` with `import_rows(rows, contacts)` returning the new list and the
+   skipped count; follow `rolodex/cli.py:24-27` for duplicate handling.
+2. Register `import` in `rolodex/cli.py`, following the subparsers at `rolodex/cli.py:13-19`.
+3. Tests in `tests/test_import.py`: new rows, a row without email, a duplicate (case-insensitive).
+4. Document `rolodex import` in a README.
+
+## Verification
+
+- `python3 -m pytest -q` -- the import tests pass with the existing ones.
+- `ROLODEX_FILE=/tmp/r.json python3 -m rolodex.cli import contacts.csv` on a three-row file with
+  one duplicate prints "added 2, skipped 1".
+'''

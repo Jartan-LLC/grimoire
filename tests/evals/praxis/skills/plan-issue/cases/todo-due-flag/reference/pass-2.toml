@@ -1,0 +1,30 @@
+final = "Plan written to .claude/workspace/issue-57/plan.md."
+
+[files]
+".claude/workspace/issue-57/plan.md" = '''# Plan: Due dates for todos (issue 57)
+
+## Approach
+
+Add a `--due` flag to `add`, keep the date on the item as a `YYYY-MM-DD` string and print it in
+`list`. Items saved before this change have no `due` and print as today.
+
+## Decisions for the user
+
+None.
+
+## Not in scope
+
+- The hand-rolled argument parser stays as it is; moving to `util.parseArgs` would touch every
+  flag. Worth its own issue.
+
+## Steps
+
+1. `src/args.js`: add a `due` field and a `--due` branch like `--tag`'s.
+2. `src/commands/add.js`: store `due` on the new item.
+3. `src/commands/list.js`: print `(due <date>)` when set.
+4. Tests in `test/commands.test.js` and `test/args.test.js`.
+
+## Verification
+
+- `npm test` passes, with a test for an item with and without a due date.
+'''

@@ -1,0 +1,34 @@
+final = "Plan written to .claude/workspace/issue-66/plan.md."
+
+[files]
+".claude/workspace/issue-66/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Text the grower below 4 C.
+
+### Patterns & Conventions Found
+- Pattern: `greenhouse/__main__.py:16` -- where the reading is logged.
+
+### Chosen Approach
+- **What**: A `send_text` function called from `main`.
+- **Why**: Smallest change that does it.
+- **How**: See the checklist.
+
+### Alternatives Considered
+1. Do nothing -- the issue stays open.
+
+### Files to Create/Modify
+- `greenhouse/sms.py` -- new
+- `greenhouse/__main__.py` -- call it
+
+### Documentation Plan
+- None.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- `send_text`
+- [ ] Phase 2: Core implementation -- the call
+- [ ] Phase 3: Integration/cleanup -- tests
+
+### Complexity
+Simple
+'''

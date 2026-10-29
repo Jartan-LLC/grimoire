@@ -1,9 +1,15 @@
 # Changelog
 
-## 1.13.0
+## 2.1.0
 
 - New `/praxis:review-cycle` command: takes a branch through review rounds until two in a row find nothing Critical or Important, runs a closing round on the change's words, then opens its PR as a draft and stops for you to mark it ready. Each round fixes what has one clear fix and brings you each real judgment call; tell it you won't be around, or to decide, and it decides those calls itself, each in a commit of its own, and lists them for you when the PR opens, with anything it left for you, such as repo settings. Your agent pushes the branch after every round, force-pushes only to update a stack as `gitwise:github-conventions` says, and resumes a cycle from the branch folder's `cycle.md`.
 - `review-pr` tells its reviewers nothing about what to look for or what earlier reviews found, and a review you limit to part of a change runs only the reviewers for that part.
+
+## 2.0.0
+
+- Needs gitwise 2.0.0 or later.
+- Breaking: the `issue-planner` agent is removed. Run `/praxis:plan-issue` instead, which explores the codebase and writes the plan itself. In Codex, the installed `issue-planner` role stays until you delete it: remove `issue-planner.toml` from `~/.codex/agents/grimoire/<version>/` (`$CODEX_HOME/agents/grimoire/<version>/` if you set `CODEX_HOME`), where `<version>` is the praxis version you upgraded from, such as `1.12.0`, and from any other version directory there that holds one.
+- `plan-issue` writes shorter plans in a new format: Approach, Decisions for the user, Out of scope, Steps and Verification. A plan no longer restates the issue or rates its complexity. praxis now carries the format itself instead of reading it from gitwise.
 
 ## 1.12.0
 

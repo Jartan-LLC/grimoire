@@ -1,0 +1,22 @@
+final = "Plan written to .claude/workspace/issue-52/plan.md."
+
+[files]
+".claude/workspace/issue-52/plan.md" = '''# Plan: Validate the email at signup (issue 52)
+
+## Approach
+
+Pull the email check out into a shared helper and call it from signup as well.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Put the helper in `src/validate.js`; call it from `src/signup.js`.
+2. Tests for signup.
+
+## Verification
+
+- `npm test` passes.
+'''

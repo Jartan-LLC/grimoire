@@ -1,0 +1,24 @@
+final = "Plan written to .claude/workspace/issue-23/plan.md."
+
+[files]
+".claude/workspace/issue-23/plan.md" = '''# Plan: Cache rates for an hour (issue 23)
+
+## Approach
+
+One function in `fxconv/rates.py` that keeps the last answer in `~/.cache/fxconv` for an hour.
+Rejected: a cache interface with a memory and a file version -- the file is all the till needs.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. `cached_rates(base)` in `fxconv/rates.py`.
+2. `fxconv/__main__.py` calls it.
+3. Tests with `tmp_path`.
+
+## Verification
+
+- `python3 -m pytest -q` passes.
+'''

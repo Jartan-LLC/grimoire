@@ -1,0 +1,27 @@
+final = "Plan written to .claude/workspace/issue-31/plan.md."
+
+[files]
+".claude/workspace/issue-31/plan.md" = '''# Plan: Saturday due dates (issue 31)
+
+## Approach
+
+Fix the off-by-one in the weekend shift: Saturday needs +2 days to reach Monday, Sunday +1.
+Rejected: a loop that adds days until a weekday -- same result, more code to read.
+
+## Decisions for the user
+
+- Assumption: bank holidays are not part of "weekend" -- if they should be, this needs a
+  holiday calendar and is a bigger change.
+
+## Steps
+
+1. Change the Saturday branch of `due_date` in `invoicer/dates.py` to add two days.
+2. Add a regression test beside the Sunday one in `tests/test_dates.py`.
+
+## Verification
+
+```bash
+# the whole suite, the new test included
+python3 -m pytest -q
+```
+'''

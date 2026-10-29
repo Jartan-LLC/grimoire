@@ -1,0 +1,35 @@
+final = "Plan written to .claude/workspace/issue-57/plan.md."
+
+[files]
+".claude/workspace/issue-57/plan.md" = '''# Plan: Add due dates to todos (issue 57)
+
+## Approach
+
+Store an optional `due` (ISO date string) on each item, set by `todo add --due YYYY-MM-DD`, and
+show it in `todo list`. Dates stay strings: ISO dates compare and sort as text.
+Rejected: parsing into `Date` objects -- time zones would shift dates by a day for nothing.
+
+## Decisions for the user
+
+- `todo list` shows the date as ` (due 2026-11-01)` after the text and tag -- default if
+  unanswered: that format, from the issue's example.
+
+## Out of scope
+
+- Rewriting the flag handling -- later.
+
+## Steps
+
+1. Read `--due` and `--due=` in `src/args.js`, following the `--tag` branches at
+   `src/args.js:7-11`; reject a value that is not `YYYY-MM-DD`.
+2. Pass `args.due` through `addItem` in `src/commands/add.js:3-5` and update the usage line.
+3. Append the due date in `formatItem`, `src/commands/list.js:3-7`.
+4. Tests: `test/args.test.js` for both spellings, `test/commands.test.js` for the list line.
+5. Add `--due` to the README example.
+
+## Verification
+
+- `npm test` -- the new parsing and list-format tests pass with the old ones.
+- `TODO_FILE=/tmp/t.json node bin/todo.js add "Pay rent" --due 2026-11-01 && TODO_FILE=/tmp/t.json node bin/todo.js list`
+  -- prints the item with `(due 2026-11-01)`.
+'''

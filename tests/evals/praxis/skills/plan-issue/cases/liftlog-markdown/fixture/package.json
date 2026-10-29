@@ -1,0 +1,7 @@
+{
+  "name": "liftlog",
+  "version": "0.4.1",
+  "private": true,
+  "bin": { "liftlog": "bin/liftlog.js" },
+  "scripts": { "test": "node --test" }
+}

@@ -1,0 +1,22 @@
+final = "Plan written to .claude/workspace/issue-73/plan.md."
+
+[files]
+".claude/workspace/issue-73/plan.md" = '''# Plan: Page /authors (issue 73)
+
+## Approach
+
+Move the paging code out of `bookapi/books.py` into a shared helper and use it for authors too.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Shared `paginate` helper used by `list_books` and `list_authors`.
+2. Author paging tests.
+
+## Verification
+
+- `python3 -m pytest -q` passes.
+'''
