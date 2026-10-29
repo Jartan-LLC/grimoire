@@ -35,7 +35,7 @@ A round is clean when its review has nothing Critical or Important, at the revie
 - In raise mode, tell the user each raised finding with its recommendation, and keep running rounds while it waits. An answer that changes code after the clean streak has started resets the streak.
 - On a switch to decide mode, have the addresser decide the open raised findings; on a switch to raise mode, decided findings stay and remain listed for the user. Record the mode in `cycle.md`.
 - Stop when two rounds in a row are clean and no raised finding is open. Fix the last round's Minors without another round.
-- After a handful of rounds, tell the user how many have run and ask whether to go on.
+- After a handful of rounds, tell the user how many have run. In raise mode, ask whether to go on; in decide mode, go on.
 
 ### 4. Run the Closing Round
 
