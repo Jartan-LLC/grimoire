@@ -49,8 +49,8 @@ RETRIES = 3
 BACKOFF_S = 30  # the first wait after the API limits requests; it doubles per retry
 BREAKER = 3  # samples in a row still limited after every retry stop the run
 LIMITED = re.compile(r"(?i)limiting requests|usage limit|rate limit|overloaded|\b(429|529)\b")
-# Part of every sample's key: bump it when a change to the session setup changes what a
-# session can do, so no sample drawn under the old setup is reused.
+# Part of every sample's key: bump it when a change to the session setup could change how a
+# session does a task under test, so no sample drawn under the old setup is reused.
 RUNNER = 2
 # Part of a remote case's sample key only: bump it when a change to the gh stub or to the
 # remote setup changes what a remote session can do, so only remote cases draw again.
