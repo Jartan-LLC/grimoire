@@ -326,3 +326,23 @@ def test_an_output_that_cannot_be_kept_gives_no_label(
     monkeypatch.setattr(labeller, "call", Panel(["yes"] * labeller.LABELLERS))
     monkeypatch.setattr(labeller, "save", full)
     assert labeller.panel_label(tmp_path / "store", PANEL, case, judge, ITEM) is None
+
+
+def test_a_labeller_session_gets_no_stdin(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case, _ = judged_case(tmp_path)
+    options: list[dict[str, object]] = []
+
+    def built(*_: object) -> None:
+        return None
+
+    def record(line: list[str], **given: object) -> subprocess.CompletedProcess[str]:
+        if line[0] == labeller.CLAUDE:
+            options.append(given)
+        return subprocess.CompletedProcess([], 0, "", "")
+
+    monkeypatch.setattr(labeller, "build_fixture", built)
+    monkeypatch.setattr(labeller, "run", record)
+    labeller.call(case, PANEL, lambda diff: "message")
+    assert [o["stdin"] for o in options] == [subprocess.DEVNULL]

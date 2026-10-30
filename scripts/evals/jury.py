@@ -293,7 +293,7 @@ def args(judge: Judge, reference: str, text: str) -> list[str]:
 
 
 def call(judge: Judge, reference: str, text: str) -> tuple[Answer | None, str]:
-    """One judge call in an empty directory.
+    """One judge call in an empty directory, with no stdin: `claude -p` adds piped input to its prompt.
 
     The parsed answer and the JSON it came from, or None and everything the call printed.
     """
@@ -301,7 +301,8 @@ def call(judge: Judge, reference: str, text: str) -> tuple[Answer | None, str]:
         try:
             done = run(
                 args(judge, reference, text), cwd=scratch, env=claude_env(dict(os.environ)),
-                capture_output=True, text=True, timeout=TIMEOUT_S, check=False,
+                stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=TIMEOUT_S,
+                check=False,
             )  # fmt: skip
         except subprocess.TimeoutExpired:
             return None, "timeout"

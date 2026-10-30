@@ -1,6 +1,7 @@
 import dataclasses
 import json
 import pathlib
+import subprocess
 
 import pytest
 from evals import jury
@@ -236,3 +237,15 @@ def test_an_answer_that_cannot_be_kept_is_a_failed_call(
     failed = jury.fill(tmp_path, [(JUDGE, "ref", "a")], 1, calling)
     assert len(failed) == JUDGE.panel
     assert all("not kept: [Errno 28]" in line for line in failed)
+
+
+def test_a_judge_call_gets_no_stdin(monkeypatch: pytest.MonkeyPatch) -> None:
+    options: list[dict[str, object]] = []
+
+    def record(_: list[str], **given: object) -> subprocess.CompletedProcess[str]:
+        options.append(given)
+        return subprocess.CompletedProcess([], 0, "", "")
+
+    monkeypatch.setattr(jury, "run", record)
+    jury.call(JUDGE, "ref", "text")
+    assert [o["stdin"] for o in options] == [subprocess.DEVNULL]

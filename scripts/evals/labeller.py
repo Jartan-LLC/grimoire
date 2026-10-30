@@ -253,7 +253,10 @@ def args(model: str, effort: str, message: str) -> list[str]:
 def call(
     case: Case, labeller: Labeller, message: Callable[[str], str]
 ) -> tuple[Labelled | None, str]:
-    """One labeller session in a fresh build of the case's fixture: its output, or None, and the raw output."""
+    """One labeller session in a fresh build of the case's fixture: its output, or None, and the raw output.
+
+    It gets no stdin, as a judge call does (`jury.call`).
+    """
     with tempfile.TemporaryDirectory(prefix="grimoire-label-") as scratch:
         repo = pathlib.Path(scratch) / "repo"
         env = git_env(dict(os.environ))
@@ -261,7 +264,8 @@ def call(
             build_fixture(case, repo, env)
             done = run(
                 args(labeller.model, labeller.effort, message(diff_of(repo, env))), cwd=repo, env=claude_env(dict(os.environ)),
-                capture_output=True, text=True, timeout=TIMEOUT_S, check=False,
+                stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=TIMEOUT_S,
+                check=False,
             )  # fmt: skip
         except subprocess.TimeoutExpired:
             return None, "timeout"
