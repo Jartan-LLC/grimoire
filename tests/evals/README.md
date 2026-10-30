@@ -233,8 +233,10 @@ the PR how many versions you screened.
   delivery check with `agent = "<plugin>:<agent>"` reads that subagent's skill loads and writes instead
   of the main thread's. Subagents are followed at every depth, a subagent's own subagents included, and
   so is an Agent call run in the background, which under `-p` is every one the main thread makes: its
-  report is the one Claude Code's notification carries when the agent finishes. A reference gives
-  reports under `[reports]` and briefs under `[briefs]`, as `"<plugin>:<agent>" = "text"`.
+  report is the one Claude Code's notification carries when the agent finishes. A sample whose
+  session ends before a subagent the main thread started has reported or failed is excluded. A
+  reference gives reports under `[reports]` and briefs under `[briefs]`, as
+  `"<plugin>:<agent>" = "text"`.
 - **How the subagents worked:** each Agent call is a spawn, and these checks read every spawn at
   every depth, two spawns of one agent type apart. `artifact = "overlap"` holds when no file was
   written by two spawns (the main thread's writes aside); `artifact = "spawn-writes"` with a `write`

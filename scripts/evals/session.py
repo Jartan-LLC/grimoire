@@ -217,7 +217,8 @@ def converse(  # noqa: PLR0913 -- where it runs, what it writes and how long it 
 
     Each message after the first goes in once the turn before has ended in a `result`
     event: one sent sooner joins the turn in progress. Stdin closes right after the
-    last, as a session still runs the messages it got before the close. A turn that
+    last, as a session still runs the messages it got before the close, and the
+    background tasks they start. A turn that
     starts a background task, such as a subagent the main thread spawns, emits its
     `result` only when the session ends (probe on 2.1.314), so no later turn can follow
     it: the runner then sends no more. A session that ends before it got every message,

@@ -483,6 +483,23 @@ def test_classify_excludes_an_error_result_and_marks_caps_and_timeouts_as_spoile
     assert classify([], timed_out=True) == ([], "timeout")
 
 
+def test_classify_excludes_a_session_that_ended_before_a_main_thread_spawn_did() -> None:
+    nested = inside("a2", [spawn("n1")])  # a subagent's own spawn, never ended
+    ended = [spawn("a2"), launched("a2"), *nested, notification("a2", "x", status="failed")]
+    open_spawn = [spawn("a1"), launched("a1")]
+    assert classify([init(), *ended, RESULT]) == ([], "")
+    assert classify([init(), *open_spawn, *ended, RESULT]) == (
+        [
+            f"the main thread's spawn a1 ({REVIEWER}) never ended: no report and no notice "
+            "that it failed came by the session's end"
+        ],
+        "",
+    )
+    capped = RESULT | {"is_error": True, "subtype": "error_max_budget_usd"}
+    assert classify([init(), *open_spawn, capped]) == ([], "error_max_budget_usd")
+    assert classify([init(), *open_spawn], timed_out=True) == ([], "timeout")
+
+
 def test_state_is_in_context_when_the_skill_arrived_before_the_write() -> None:
     parsed = trace.parse([*load_skill("s1", "x", CPW), *commit("c1")], PLUGINS)
     assert trace.state(parsed, parsed.writes[0], "gitwise:commit-pr-writing") == (

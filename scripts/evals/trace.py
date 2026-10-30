@@ -467,9 +467,9 @@ def classify(  # noqa: PLR0913 -- `own` is apart from `private`: paths under it 
 
     Excluded (the infrastructure failed, so the sample says nothing about the arm):
     plugins other than the arm's at the arm's paths, an MCP server, an auto-memory
-    path, another model, an error result, a crash before the result, or a tool call
-    naming one of the `private` paths, which hold the suite and its answers and the other
-    arms. A path under `own`, the session's own arm, does not count: the store that holds
+    path, another model, an error result, a crash before the result, a main-thread spawn
+    that never ended though the session did, or a tool call naming one of the `private`
+    paths, which hold the suite and its answers and the other arms. A path under `own`, the session's own arm, does not count: the store that holds
     it is in the clone's git directory, inside the main checkout. Quotes are dropped and
     each absolute path normalised first, so `"<own>"/../../samples` names the samples.
     Spoiled (the arm's own doing, so the sample counts and fails every check): a
@@ -516,6 +516,16 @@ def classify(  # noqa: PLR0913 -- `own` is apart from `private`: paths under it 
         reasons.append(
             f"session ended in error: {result.get('subtype')}: {str(result.get('result', ''))[:120]}"
         )
+    if result is not None and not spoiled:
+        # With no report and no failure notice, its checks would read no report and a wave
+        # open to the end: the session closed under it (`-p` stops waiting on the background
+        # after 10 idle minutes unless told otherwise), not by the arm's doing.
+        reasons += [
+            f"the main thread's spawn {s.id} ({s.agent}) never ended: no report and no notice "
+            "that it failed came by the session's end"
+            for s in trace.spawns
+            if not s.by and s.ended is None
+        ]
     return reasons, spoiled
 
 
