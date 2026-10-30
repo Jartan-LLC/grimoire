@@ -3,10 +3,19 @@ kind = "regression"
 hints = ["comment", "three"]
 
 [[check]]
-metric = "found"
+metric = "found_regex"
 artifact = "report:praxis:general-reviewer"
 present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b).){0,1500}?(?:\bthree\b|contradict|stale|out of date)'''
 
+[[check]]
+metric = "found"
+artifact = "report:praxis:general-reviewer"
+judge = "flags-plant"
+reference = """
+fetchkit/retry.py raises MAX_ATTEMPTS to 5 and adds the comment `# Give up after three attempts,
+so a dead host fails fast.`, which the code contradicts. Only a finding about that wrong comment
+counts. Count it only when the report rates it Important or Critical.
+"""
 
 [[check]]
 metric = "format"
@@ -22,12 +31,12 @@ present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
 model = "claude-opus-5-5"
 arm = "old"
 failures = 0
-runs = 3
+runs = 6
 runner = 2
 
 [[baseline]]
 model = "claude-opus-5-5"
 arm = "none"
-failures = 0
-runs = 3
+failures = 1
+runs = 6
 runner = 2

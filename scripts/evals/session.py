@@ -88,6 +88,17 @@ def git_env(base: dict[str, str]) -> dict[str, str]:
     return env
 
 
+def claude_env(base: dict[str, str]) -> dict[str, str]:
+    """`base` without CLAUDE* variables but the login ones (`sample_env` says why)."""
+    return {
+        k: v
+        for k, v in base.items()
+        if not k.startswith("CLAUDE")
+        or k in ("CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CONFIG_DIR")
+        or k.startswith("CLAUDE_CODE_USE_")
+    }
+
+
 def sample_env(
     base: dict[str, str],
     checkout: pathlib.Path,
@@ -116,13 +127,7 @@ def sample_env(
     GIT_ALLOW_PROTOCOL can reach the network with a key under HOME, as one that unsets
     the gh variables reaches the user's gh login.
     """
-    env = {
-        k: v
-        for k, v in git_env(base).items()
-        if not k.startswith("CLAUDE")
-        or k in ("CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CONFIG_DIR")
-        or k.startswith("CLAUDE_CODE_USE_")
-    }
+    env = claude_env(git_env(base))
     for name in ("VIRTUAL_ENV", "PYTHONPATH", "PYTHONHOME", cache.STORE):
         env.pop(name, None)
     inside = str(checkout.resolve())
@@ -404,6 +409,24 @@ def preflight() -> None:
         )
 
 
+def key_of(case: Case, arm: Arm, index: int, spec: Spec) -> str:
+    """The key of the sample (case, arm, index) under `spec`.
+
+    RUNNER is in every key, REMOTE_RUNNER in a remote case's only, and a timeout other
+    than TIMEOUT_S in its suite's only.
+    """
+    runner = f"r{RUNNER}" + (f":g{REMOTE_RUNNER}" if case.remote else "")
+    if spec.timeout_s != TIMEOUT_S:
+        runner += f":t{spec.timeout_s:g}"
+    return cache.key(
+        case.pinned(),
+        f"{arm.name}:{arm.hash}:{spec.screen}:{runner}",
+        spec.model,
+        spec.version,
+        index,
+    )
+
+
 def run_sample(
     case: Case, arm: Arm, index: int, spec: Spec, breaker: Breaker | None = None
 ) -> cache.Sample:
@@ -421,16 +444,7 @@ def run_sample(
     remote case's only, and a timeout other than TIMEOUT_S in its suite's only, so a
     changed timeout draws new samples instead of reusing the ones it cut off.
     """
-    runner = f"r{RUNNER}" + (f":g{REMOTE_RUNNER}" if case.remote else "")
-    if spec.timeout_s != TIMEOUT_S:
-        runner += f":t{spec.timeout_s:g}"
-    sample_key = cache.key(
-        case.pinned(),
-        f"{arm.name}:{arm.hash}:{spec.screen}:{runner}",
-        spec.model,
-        spec.version,
-        index,
-    )
+    sample_key = key_of(case, arm, index, spec)
     if (cached := cache.load(spec.store, sample_key)) is not None and cached.valid:
         return cached
     if breaker is not None and breaker.tripped.is_set():

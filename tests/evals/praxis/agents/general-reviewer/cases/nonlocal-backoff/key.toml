@@ -3,10 +3,20 @@ kind = "regression"
 hints = ["comment", "nonlocal"]
 
 [[check]]
-metric = "found"
+metric = "found_regex"
 artifact = "report:praxis:general-reviewer"
 present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b).){0,1500}?(?:nonlocal|another (?:module|file)|owned by|owns|restat|drift|mirrors?)'''
 
+[[check]]
+metric = "found"
+artifact = "report:praxis:general-reviewer"
+judge = "flags-plant"
+reference = """
+fetchkit/client.py gains the comment `# with_retries sleeps 0.5 s and then 1 s between its three
+attempts, so retrying alone costs 1.5 s.`, which describes how `with_retries` in
+fetchkit/retry.py works and goes stale when that code changes. Only a finding about that comment
+describing code elsewhere counts. Count it only when the report rates it Important or Critical.
+"""
 
 [[check]]
 metric = "format"
@@ -21,13 +31,13 @@ present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
 [[baseline]]
 model = "claude-opus-5-5"
 arm = "old"
-failures = 0
-runs = 3
+failures = 1
+runs = 6
 runner = 2
 
 [[baseline]]
 model = "claude-opus-5-5"
 arm = "none"
-failures = 1
-runs = 3
+failures = 3
+runs = 6
 runner = 2

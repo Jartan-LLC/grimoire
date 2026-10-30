@@ -1,8 +1,8 @@
-"""Deterministic graders: a regex over an artifact, or a skill's delivery state."""
+"""Graders: a regex over an artifact, a skill's delivery state, or a judge's kept answers."""
 
 import dataclasses
 import re
-from collections.abc import Iterable, Sequence
+from collections.abc import Collection, Iterable, Mapping, Sequence
 from typing import cast
 
 from . import gh_stub, trace
@@ -12,6 +12,20 @@ from .suite import BRIEF, REPORT, Case, Check, Reference
 
 class Uncollected(Exception):  # noqa: N818 -- reads as the condition, like StopIteration
     """A check reads a file the sample was drawn without collecting."""
+
+
+class Unjudged(Exception):  # noqa: N818 -- reads as the condition, like StopIteration
+    """A judged check's panel is not complete for the sample: judge it first."""
+
+
+def advisory_metric(check: Check) -> str:
+    """Where a judged check scores while its judge gates nothing: a metric of its own, reported only."""
+    return f"{check.metric}@{check.judge}"
+
+
+def metric_of(check: Check, advisory: Collection[str]) -> str:
+    """The metric a check scores into: its own, or `advisory_metric` when its judge is in `advisory`."""
+    return advisory_metric(check) if check.judge in advisory else check.metric
 
 
 @dataclasses.dataclass(frozen=True)
@@ -163,19 +177,48 @@ def _mean_by_metric(pairs: list[tuple[str, float]]) -> dict[str, float]:
     return {metric: sum(values) / len(values) for metric, values in by_metric.items()}
 
 
-def scores(case: Case, sample: Sample, parsed: trace.Trace) -> dict[str, float]:
+def outputs_of(sample: Sample, parsed: trace.Trace) -> Outputs:
+    """What a sample's text checks read."""
+    return Outputs(
+        sample.commits, sample.final, sample.files,
+        reports_of(parsed), gh_text(sample.gh or []), briefs_of(parsed),
+    )  # fmt: skip
+
+
+def judged_text(check: Check, sample: Sample, outputs: Outputs) -> str | None:
+    """The text a judged check sends the judge, or None when it scores 0 without one.
+
+    A spoiled sample and an empty artifact fail with no call, as an `absent` check fails
+    on empty output.
+    """
+    text = text_of(outputs, check.artifact)
+    return None if sample.spoiled or not text.strip() else text
+
+
+def scores(  # noqa: PLR0913 -- `unjudged_ok` says what a missing judge answer does
+    case: Case,
+    sample: Sample,
+    parsed: trace.Trace,
+    judged: Mapping[int, float] | None = None,
+    advisory: Collection[str] = (),
+    *,
+    unjudged_ok: bool = False,
+) -> dict[str, float]:
     """Each metric the case checks, as the mean of its checks' scores.
 
     A sample the arm spoiled (a timeout, the budget cap, the turn cap) fails every check.
     A `file:` check on a path the sample did not collect, one a key fix added after the
-    draw, cannot be graded from it: the sample would read as an empty file.
+    draw, cannot be graded from it: the sample would read as an empty file. A judged
+    check reads its panel's score from `judged`, by the check's index in the key; a
+    missing one raises Unjudged, or with `unjudged_ok` leaves its metric out of the result,
+    so that no metric is scored on part of its checks. One whose judge is in `advisory`
+    (no stamp shows it cleared its bar) scores into `advisory_metric` instead of its own,
+    so it gates nothing.
     """
     pairs: list[tuple[str, float]] = []
-    outputs = Outputs(
-        sample.commits, sample.final, sample.files,
-        reports_of(parsed), gh_text(sample.gh or []), briefs_of(parsed),
-    )  # fmt: skip
-    for check in case.checks:
+    unjudged: set[str] = set()
+    outputs = outputs_of(sample, parsed)
+    for index, check in enumerate(case.checks):
         path = check.artifact.removeprefix("file:")
         if check.artifact != path and sample.collected is not None and path not in sample.collected:
             raise Uncollected(
@@ -183,14 +226,33 @@ def scores(case: Case, sample: Sample, parsed: trace.Trace) -> dict[str, float]:
                 "draw fresh samples (a new --trial for a screen; for a baseline run, delete the "
                 "case's samples from the store)"
             )
+        metric = metric_of(check, advisory)
         if sample.spoiled:
             score = 0.0
         elif check.artifact == "delivery":
             score = delivery_score(check, parsed)
+        elif check.judge is not None:
+            found = _judged_score(check, index, sample, outputs, judged or {})
+            if found is None and not unjudged_ok:
+                raise Unjudged(
+                    f"sample {sample.key}: judge {check.judge} has not answered check {index}"
+                )
+            if found is None:
+                unjudged.add(metric)
+                continue
+            score = found
         else:
             score = check_score(check, outputs)
-        pairs.append((check.metric, score))
-    return _mean_by_metric(pairs)
+        pairs.append((metric, score))
+    return {m: s for m, s in _mean_by_metric(pairs).items() if m not in unjudged}
+
+
+def _judged_score(
+    check: Check, index: int, sample: Sample, outputs: Outputs, judged: Mapping[int, float]
+) -> float | None:
+    if judged_text(check, sample, outputs) is None:
+        return 0.0
+    return judged.get(index)
 
 
 def case_failed(scores: dict[str, float], guards: tuple[str, ...]) -> bool:
@@ -198,14 +260,19 @@ def case_failed(scores: dict[str, float], guards: tuple[str, ...]) -> bool:
     return any(score < 1 for metric, score in scores.items() if metric not in guards)
 
 
-def reference_scores(case: Case, reference: Reference) -> list[tuple[Check, float]]:
-    """Each text check's score on a reference; delivery checks need a session."""
-    outputs = Outputs(
+def reference_outputs(reference: Reference) -> Outputs:
+    """What a reference's text checks read."""
+    return Outputs(
         reference.commits, reference.final, reference.files,
         reference.reports, agents_gh(reference.gh), reference.briefs,
     )  # fmt: skip
+
+
+def reference_scores(case: Case, reference: Reference) -> list[tuple[Check, float]]:
+    """Each regex check's score on a reference; delivery checks need a session, judged ones a judge."""
+    outputs = reference_outputs(reference)
     return [
         (check, check_score(check, outputs))
         for check in case.checks
-        if check.artifact != "delivery"
+        if check.artifact != "delivery" and check.judge is None
     ]

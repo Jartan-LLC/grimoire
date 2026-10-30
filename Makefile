@@ -97,7 +97,8 @@ verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift, changelog
 check: lint typecheck test verify  ## Run CI's lint, typecheck, test and verify checks
 
 # The eval targets run locally on your own `claude` login and are never part of check:
-# CI holds no inference token. eval-plan is free; eval-run and eval-screen start sessions.
+# CI holds no inference token. eval-plan is free; eval-run and eval-screen start sessions, and
+# call the judges only with JUDGE=1.
 BASE ?= main
 eval-plan:  ## List the eval suites this change reaches against BASE (default main); TIER=<n> prints that testing tier's steps
 	python3 scripts/eval.py plan --base $(BASE) $(if $(TIER),--tier $(TIER))
@@ -106,7 +107,7 @@ eval-size:  ## Show what SUITE's splits can see on each model, from its recorded
 	python3 scripts/eval.py size $(or $(SUITE),$(error set SUITE=tests/evals/...)) --base $(BASE)
 
 eval-run:  ## Run SUITE's cases on ARM (none, old or new), SAMPLES each (spends inference)
-	python3 scripts/eval.py run $(or $(SUITE),$(error set SUITE=tests/evals/...)) --arm $(or $(ARM),$(error set ARM=none, ARM=old or ARM=new)) $(if $(SAMPLES),--samples $(SAMPLES)) --base $(BASE) $(if $(SPLIT),--split $(SPLIT)) $(if $(MODEL),--model $(MODEL)) $(if $(RECORD),--record)
+	python3 scripts/eval.py run $(or $(SUITE),$(error set SUITE=tests/evals/...)) --arm $(or $(ARM),$(error set ARM=none, ARM=old or ARM=new)) $(if $(SAMPLES),--samples $(SAMPLES)) --base $(BASE) $(if $(SPLIT),--split $(SPLIT)) $(if $(MODEL),--model $(MODEL)) $(if $(RECORD),--record) $(if $(JUDGE),--judge)
 
 eval-screen:  ## Compare old and new on SUITE's SPLIT (default screen) and print the result (spends inference)
-	python3 scripts/eval.py screen $(or $(SUITE),$(error set SUITE=tests/evals/...)) $(if $(SAMPLES),--samples $(SAMPLES)) --base $(BASE) $(if $(SPLIT),--split $(SPLIT)) $(if $(MODEL),--model $(MODEL)) $(if $(NEW_PLAN),--new-plan)
+	python3 scripts/eval.py screen $(or $(SUITE),$(error set SUITE=tests/evals/...)) $(if $(SAMPLES),--samples $(SAMPLES)) --base $(BASE) $(if $(SPLIT),--split $(SPLIT)) $(if $(MODEL),--model $(MODEL)) $(if $(NEW_PLAN),--new-plan) $(if $(JUDGE),--judge)

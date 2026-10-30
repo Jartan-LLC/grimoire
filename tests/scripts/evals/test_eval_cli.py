@@ -1,17 +1,20 @@
 import argparse
+import dataclasses
+import json
 import pathlib
 import shutil
 import sys
+from collections.abc import Callable
 from typing import cast
 
 import eval as cli
 import pytest
-from evals import cache, session
+from evals import cache, calibrate, jury, labeller, session, trace
 from evals.arms import Arm
 from evals.plan import Listed, Plan
 from evals.suite import Suite, load_suite
 from evals.verdict import MetricVerdict
-from helpers import KEY, SUITE, write_suite
+from helpers import JUDGE, JUDGED, KEY, SUITE, write_suite
 
 
 def test_record_baseline_replaces_only_its_own_model_and_arm(tmp_path: pathlib.Path) -> None:
@@ -96,7 +99,14 @@ def test_screens_on_two_models_keep_their_own_plans_and_alternate_which_arm_star
     monkeypatch.setattr(cli, "run_samples", run)
     monkeypatch.setattr(cli, "decide", nothing)
     args = argparse.Namespace(
-        split="dev", base="main", new_ref=None, samples=2, trial="", new_plan=False, jobs=1
+        split="dev",
+        base="main",
+        new_ref=None,
+        samples=2,
+        trial="",
+        new_plan=False,
+        jobs=1,
+        judge=False,
     )
     for model in ("claude-opus-5-5", "claude-sonnet-5-5", "claude-opus-5-5"):
         spec = session.Spec(model, "2.1.310", 1.0, tmp_path, store)
@@ -118,7 +128,9 @@ def test_the_read_list_names_a_must_hold_failure_the_primary_passes(
     clean = cache.Sample("k2", "c1", "new", 1, {}, True, [], [], "", {}, {})
     scores = {"k1": {"kept": 1.0, "no_exploit": 0.0}, "k2": {"kept": 1.0, "no_exploit": 1.0}}
 
-    def sample_scores(_: object, sample: cache.Sample, __: object) -> dict[str, float]:
+    def sample_scores(
+        _: object, sample: cache.Sample, __: object, *, unjudged_ok: bool = False
+    ) -> dict[str, float]:
         return scores[sample.key]
 
     monkeypatch.setattr(cli, "sample_scores", sample_scores)
@@ -207,7 +219,7 @@ def test_a_screen_under_a_changed_plan_runs_nothing_until_a_new_plan(
     def screen(samples: int, new_plan: bool = False) -> int:
         args = argparse.Namespace(
             split="dev", base="main", new_ref=None, samples=samples, trial="",
-            new_plan=new_plan, jobs=1,
+            new_plan=new_plan, jobs=1, judge=False,
         )  # fmt: skip
         return cli.screen(args, suite, spec, store)
 
@@ -479,3 +491,446 @@ def test_eval_size_still_advises_on_a_weak_split_and_fails(
     out = capsys.readouterr().out
     assert "too few units for any verdict; add cases" in out
     assert "no old or no none baselines on this split; record them" in out
+
+
+def test_a_plan_pins_the_judges_without_redrawing_sessions_when_they_change(
+    tmp_path: pathlib.Path,
+) -> None:
+    plain = load_suite(write_suite(tmp_path / "plain"))
+    judged = load_suite(write_suite(tmp_path / "judged", SUITE + JUDGE, KEY + JUDGED))
+    old = Arm("old", "h", {})
+    spec = session.Spec("claude-opus-5-5", "2.1.310", 1.0, tmp_path, tmp_path / "store")
+    assert "judges" not in cli.pinned(plain, "dev", 3, spec, old)
+    plan = cli.pinned(judged, "dev", 3, spec, old)
+    assert plan["judges"] == {"flags": jury.instrument(judged.judges["flags"])}
+    arms = {"old": old, "new": Arm("new", "n", {})}
+    base = cli.drawn(list(judged.cases), plan, arms, "t1")
+    assert cli.drawn(list(judged.cases), plan | {"judges": {"flags": "other"}}, arms, "t1") == base
+
+
+def test_a_judge_without_a_cleared_stamp_gates_nothing(tmp_path: pathlib.Path) -> None:
+    suite = load_suite(write_suite(tmp_path, SUITE + JUDGE, KEY + JUDGED))
+    assert cli.advisory(suite) == {"flags": "no calibration stamp"}
+    assert [m.id for m in cli.judged_metrics(suite)] == ["kept", "delivered", "kept@flags"]
+    judge = suite.judges["flags"]
+    folder = calibrate.judge_dir(suite.path, "flags")
+    missed = calibrate.Stamp(
+        judge="flags",
+        instrument=jury.instrument(judge),
+        versions=(jury.instrument(judge),),
+        labels=calibrate.labels_hash(folder / "labels"),
+        labeller="claude-opus-5-5 xhigh",
+        date="2026-10-27",
+        cells=(),
+        references={"c1": calibrate.text_hash("Issue 42.")},
+    )
+    calibrate.write_stamp(folder / "stamp.toml", missed)
+    assert "bar missed" in cli.advisory(suite)["flags"]
+    cells = (
+        calibrate.Cell("natural", "old", tp=38, fn=2, tn=40),
+        calibrate.Cell("sibling", tn=40),
+        calibrate.Cell("reference", tp=1),
+        *(calibrate.Cell(k, tn=10) for k in calibrate.CONTROL_KINDS),
+        *(calibrate.Cell(k, tp=60) for k in calibrate.INVARIANCE_KINDS),
+    )
+    cleared = dataclasses.replace(
+        missed, cells=cells, gold_right=10, gold_n=10, labelled=10, fleiss=0.9
+    )
+    calibrate.write_stamp(folder / "stamp.toml", cleared)
+    assert cli.advisory(suite) == {}
+    assert [m.id for m in cli.judged_metrics(suite)] == ["kept", "delivered"]
+    # J = 0.95 + 1.0 - 1: a harm the split sees at 0.38 is 0.40 on the true scale
+    (line,) = cli._judged_scale(suite, 0.38)  # pyright: ignore[reportPrivateUsage]
+    assert "J = 0.95; that harm is 0.40 on the true scale" in line
+    (line,) = cli._judged_scale(suite, 0.96)  # pyright: ignore[reportPrivateUsage]
+    assert "that harm is none on the true scale" in line  # 0.96 / 0.95 is past any harm
+
+
+def test_align_scores_held_out_once_per_version_and_burns_a_missed_one(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    held = JUDGE.replace("question", 'held_out = ["c1"]\nquestion')
+    suite = load_suite(write_suite(tmp_path / "suite", SUITE + held, KEY + JUDGED))
+    judge = suite.judges["flags"]
+    labels = calibrate.judge_dir(suite.path, "flags") / "labels" / "c1.toml"
+    calibrate.write_labels(
+        labels,
+        [
+            calibrate.Label("k1", "c1", "old", "", "m e", ("yes",) * 3, "yes", "fix: Closes #42"),
+            calibrate.Label("k2", "c1", "none", "", "m e", ("no",) * 3, "no", "fix: y"),
+        ],
+    )
+    calls: list[str] = []
+
+    def says_no(j: object, reference: str, text: str) -> tuple[jury.Answer, str]:
+        calls.append(text)
+        usage: dict[str, object] = {judge.model: {}}
+        return jury.Answer("no", ""), json.dumps({"modelUsage": usage, "structured_output": {}})
+
+    monkeypatch.setattr(jury, "call", says_no)
+    args = argparse.Namespace(set="held-out", jobs=1, labeller_model="m", labeller_effort="e")
+    store = tmp_path / "store"
+    assert cli.align(args, suite, judge, store) == 1  # an always-no judge misses the bar
+    stamp = calibrate.read_stamp(labels.parent.parent / "stamp.toml")
+    assert stamp is not None
+    assert stamp.versions == (jury.instrument(judge),)
+    assert stamp.burned == ("k1", "k2")
+    assert stamp.cell("natural") == calibrate.Cell("natural", tp=0, fn=1, tn=1, fp=0)
+    out = capsys.readouterr().out
+    assert "MISSED" in out
+    assert not out.startswith("\n")  # no failed call, so no empty failure list
+    with pytest.raises(SystemExit, match="scored on held-out already"):
+        cli.align(args, suite, judge, store)
+    before = len(calls)
+    args.set = "dev"
+    assert cli.align(args, suite, judge, store) == 0
+    assert len(calls) == before  # every answer was kept
+    assert "disagrees: natural c1 old True (no, no, no): k1" in capsys.readouterr().out
+    assert calibrate.read_stamp(labels.parent.parent / "stamp.toml") == stamp
+
+
+def test_align_prints_each_failed_judge_call(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    suite = load_suite(write_suite(tmp_path / "suite", SUITE + JUDGE, KEY + JUDGED))
+    judge = suite.judges["flags"]
+    calibrate.write_labels(
+        calibrate.judge_dir(suite.path, "flags") / "labels" / "c1.toml",
+        [calibrate.Label("k1", "c1", "old", "", "m e", ("yes",) * 3, "yes", "fix: Closes #42")],
+    )
+
+    def fails(*_: object) -> list[str]:
+        return ["failed: API Error: overloaded"]
+
+    monkeypatch.setattr(jury, "fill", fails)
+    args = argparse.Namespace(set="dev", jobs=1, labeller_model="m", labeller_effort="e")
+    assert cli.align(args, suite, judge, tmp_path / "store") == 1  # no answer was kept
+    out = capsys.readouterr().out
+    assert out.startswith("failed: API Error: overloaded\nINCOMPLETE:")
+
+
+def test_align_stamps_a_cleared_version_again_once_its_labels_change(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    held = JUDGE.replace("question", 'held_out = ["c1"]\nquestion')
+    suite = load_suite(write_suite(tmp_path / "suite", SUITE + held, KEY + JUDGED))
+    judge = suite.judges["flags"]
+    folder = calibrate.judge_dir(suite.path, "flags")
+    calibrate.write_labels(
+        folder / "labels" / "c1.toml",
+        [calibrate.Label("k1", "c1", "old", "", "m e", ("yes",) * 3, "yes", "fix: Closes #42")],
+    )
+    cleared = calibrate.Stamp(
+        judge="flags",
+        instrument=jury.instrument(judge),
+        versions=(jury.instrument(judge),),
+        labels="the labels before k1",
+        labeller="m e",
+        date="2026-10-27",
+        cells=(
+            calibrate.Cell("natural", "old", tp=40, tn=40),
+            calibrate.Cell("sibling", tn=40),
+            calibrate.Cell("reference", tp=1),
+            *(calibrate.Cell(k, tn=10) for k in calibrate.CONTROL_KINDS),
+            *(calibrate.Cell(k, tp=60) for k in calibrate.INVARIANCE_KINDS),
+        ),
+        references={"c1": calibrate.text_hash("Issue 42.")},
+        gold_right=10,
+        gold_n=10,
+        labelled=10,
+        fleiss=0.9,
+    )
+    calibrate.write_stamp(folder / "stamp.toml", cleared)
+
+    def says_no(j: object, reference: str, text: str) -> tuple[jury.Answer, str]:
+        return jury.Answer("no", ""), json.dumps({"modelUsage": {judge.model: {}}})
+
+    monkeypatch.setattr(jury, "call", says_no)
+    args = argparse.Namespace(set="held-out", jobs=1, labeller_model="m", labeller_effort="e")
+    assert cli.align(args, suite, judge, tmp_path / "store") == 1  # scored again, and missed
+    stamp = calibrate.read_stamp(folder / "stamp.toml")
+    assert stamp is not None
+    assert stamp.versions == (jury.instrument(judge),)
+    assert stamp.labels == calibrate.labels_hash(folder / "labels")
+    assert stamp.burned == ("k1",)
+    assert "MISSED" in capsys.readouterr().out
+
+
+def test_a_gold_item_without_a_labelling_panel_stops_label_and_align(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    held = JUDGE.replace("question", 'held_out = ["c1"]\nquestion')
+    root = write_suite(tmp_path / "suite", SUITE + held, KEY + JUDGED)
+    (root / "cases" / "c1" / "reference").mkdir()
+    for name, commit in (("pass-1", "fix: Closes #42"), ("pass-2", "fix: Closes #42 zebra")):
+        (root / "cases" / "c1" / "reference" / f"{name}.toml").write_text(
+            f'commits = ["{commit}"]\nfinal = "Done."\n'
+        )
+    suite = load_suite(root)
+    judge = suite.judges["flags"]
+    payload = {
+        "findings": [{"quote": "Closes #42", "rating": "", "subject": "the issue"}],
+        "match": 0,
+        "answer": "yes",
+        "rationale": "It names it.",
+    }
+
+    def labels_all_but_zebra(
+        case: object, panel: object, message: Callable[[str], str]
+    ) -> tuple[labeller.Labelled | None, str]:
+        if "zebra" in message(""):
+            return None, "Error: overloaded"
+        return labeller.labelled_of(payload), json.dumps({"structured_output": payload})
+
+    def says_no(j: object, reference: str, text: str) -> tuple[jury.Answer, str]:
+        return jury.Answer("no", ""), json.dumps({"modelUsage": {judge.model: {}}})
+
+    monkeypatch.setattr(labeller, "call", labels_all_but_zebra)
+    monkeypatch.setattr(jury, "call", says_no)
+    store = tmp_path / "store"
+    gold = argparse.Namespace(gold=True, labeller_model="m", labeller_effort="e")
+    assert cli.label(gold, suite, judge, store) == 1  # 1 of 1 right, but 1 has no panel
+    out = capsys.readouterr().out
+    assert "INCOMPLETE: 1 gold items" in out
+    assert "\n\n" not in out  # no wrong gold item, so no empty list of them
+    args = argparse.Namespace(set="held-out", jobs=1, labeller_model="m", labeller_effort="e")
+    assert cli.align(args, suite, judge, store) == 1
+    assert "INCOMPLETE: 1 gold items lack a labelling panel" in capsys.readouterr().out
+    assert calibrate.read_stamp(calibrate.judge_dir(suite.path, "flags") / "stamp.toml") is None
+
+
+def test_align_scores_no_version_on_held_out_past_the_cap(tmp_path: pathlib.Path) -> None:
+    suite = load_suite(write_suite(tmp_path / "suite", SUITE + JUDGE, KEY + JUDGED))
+    judge = suite.judges["flags"]
+    tried = tuple(f"version {i}" for i in range(calibrate.MAX_VERSIONS))
+    stamp = calibrate.Stamp("flags", tried[-1], tried, "l", "m e", "2026-10-27", ())
+    calibrate.write_stamp(calibrate.judge_dir(suite.path, "flags") / "stamp.toml", stamp)
+    args = argparse.Namespace(set="held-out", jobs=1, labeller_model="m", labeller_effort="e")
+    with pytest.raises(SystemExit, match="report the missed bar"):
+        cli.align(args, suite, judge, tmp_path / "store")
+
+
+def test_stored_samples_are_found_by_the_key_the_case_has_now(tmp_path: pathlib.Path) -> None:
+    root = write_suite(tmp_path / "suite")
+    case = load_suite(root).cases[0]
+    arm = Arm("old", "h", {})
+    store = tmp_path / "store"
+    spec = session.Spec("claude-opus-5-5", "2.1.311", 1.0, tmp_path, store)
+
+    def keep(index: int, key: str) -> None:
+        sample = cache.Sample(key, "c1", "old", index, {}, True, [], [], "", {}, {})
+        cache.save(store, sample, "")
+
+    for index in (0, 1, 3, 4 + cli.MISSES):  # a gap at 2; the last lies past MISSES empty indices
+        keep(index, session.key_of(case, arm, index, spec))
+    found = cli.drawn_samples(store, lambda i: session.key_of(case, arm, i, spec))
+    assert [s.index for s in found] == [0, 1, 3]
+    # the same case drawn on its earlier fixture is not picked up once the fixture changes
+    (root / "cases" / "c1" / "fixture" / "app.py").write_text("x = 2\n")
+    changed = load_suite(root).cases[0]
+    assert cli.drawn_samples(store, lambda i: session.key_of(changed, arm, i, spec)) == []
+    other = dataclasses.replace(spec, version="2.1.312")
+    assert cli.drawn_samples(store, lambda i: session.key_of(case, arm, i, other)) == []
+
+
+def test_a_real_items_model_is_its_reports_subagent_or_else_the_session(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    suite = load_suite(write_suite(tmp_path / "suite", SUITE + JUDGE, KEY + JUDGED))
+    case = suite.cases[0]
+    sample = cache.Sample("k1", "c1", "old", 0, {}, True, [], ["fix: Closes #42"], "", {}, {})
+    report = trace.Report(0, "praxis:general-reviewer", "claude-sonnet-5-5", "A finding.")
+
+    def parsed(*_: object) -> trace.Trace:
+        return trace.Trace(reports=[report])
+
+    monkeypatch.setattr(cli, "parsed_trace", parsed)
+    commits = next(c for c in case.checks if c.judge)
+    (real,) = cli._real(tmp_path, sample, case, commits, "claude-opus-5-5")  # pyright: ignore[reportPrivateUsage]
+    assert real.model == "claude-opus-5-5"
+    reports = dataclasses.replace(commits, artifact="report:praxis:general-reviewer")
+    (real,) = cli._real(tmp_path, sample, case, reports, "claude-opus-5-5")  # pyright: ignore[reportPrivateUsage]
+    assert real.model == "claude-sonnet-5-5"
+
+
+def test_a_probe_takes_its_items_a_case_at_a_time(tmp_path: pathlib.Path) -> None:
+    suite = load_suite(write_suite(tmp_path))
+    check = suite.cases[0].checks[0]
+
+    def real(case_id: str, key: str) -> cli.Real:
+        case = dataclasses.replace(suite.cases[0], id=case_id)
+        sample = cache.Sample(key, case_id, "old", 0, {}, True, [], [], "", {}, {})
+        return cli.Real(sample, case, check, "text", "")
+
+    reals = [real("a", "a1"), real("a", "a2"), real("a", "a3"), real("b", "b1"), real("c", "c1")]
+    assert [r.sample.key for r in cli.spread(reals, 4)] == ["a1", "b1", "c1", "a2"]
+    assert cli.spread(reals, 0) == []
+
+
+def judged_store(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, key: str = KEY + JUDGED
+) -> tuple[Suite, pathlib.Path, list[str]]:
+    """A suite with a judged check in `key`, a store whose sessions are stubbed, and the judge calls made.
+
+    Each stubbed session commits "fix: Closes #42"; the judge says yes, quoting it.
+    """
+    suite = load_suite(write_suite(tmp_path / "suite", SUITE + JUDGE, key))
+    store = tmp_path / "store"
+    monkeypatch.setenv(cache.STORE, str(store))
+    calls: list[str] = []
+
+    def says_yes(j: object, reference: str, text: str) -> tuple[jury.Answer, str]:
+        calls.append(text)
+        envelope: dict[str, object] = {"modelUsage": {"claude-opus-5-5": {}}}
+        return jury.Answer("yes", "Closes #42"), json.dumps(envelope)
+
+    def arm(name: str, *_: object) -> Arm:
+        return Arm(name, "h", {})
+
+    def run(work: list[cli.Work], _: int) -> list[cache.Sample]:
+        done: list[cache.Sample] = []
+        for case, a, index, __ in work:
+            sample = cache.Sample(
+                f"{a.name}-{index}", case.id, a.name, index, {}, True, [], ["fix: Closes #42"],
+                "Done.", {}, {},
+            )  # fmt: skip
+            cache.save(store, sample, "")
+            done.append(sample)
+        return done
+
+    def version() -> str:
+        return "2.1.312"
+
+    def branch(*_: str) -> str:
+        return "feature/x\n"
+
+    monkeypatch.setattr(jury, "call", says_yes)
+    monkeypatch.setattr(cli, "build_arm", arm)
+    monkeypatch.setattr(cli, "run_samples", run)
+    monkeypatch.setattr(cli, "claude_version", version)
+    monkeypatch.setattr(cli, "git", branch)
+    return suite, store, calls
+
+
+@pytest.mark.parametrize("command", ["run", "screen"])
+def test_a_run_or_screen_calls_no_judge_unless_asked_to(
+    command: str,
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    suite, _, calls = judged_store(tmp_path, monkeypatch)
+
+    def nothing(*_: object) -> None:
+        return None
+
+    monkeypatch.setattr(cli, "decide", nothing)
+    argv = ["eval.py", command, str(suite.path), "--samples", "1", "--split", "dev"]
+    argv += ["--arm", "old"] if command == "run" else []
+    monkeypatch.setattr(sys, "argv", argv)
+    assert cli.main() == 0
+    assert calls == []
+    if command == "run":
+        assert "c1: failed in 0 of 1; not judged: kept@flags" in capsys.readouterr().out
+    monkeypatch.setattr(sys, "argv", [*argv, "--judge"])
+    assert cli.main() == 0
+    assert len(calls) == suite.judges["flags"].panel  # both arms' artifacts are one text
+    if command == "run":
+        out = capsys.readouterr().out
+        assert "c1: failed in 0 of 1\n" in out
+        assert "not judged" not in out
+
+
+def test_a_gating_judged_metric_with_no_answers_is_not_judged_and_never_ships(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    suite, store, calls = judged_store(tmp_path, monkeypatch)
+
+    def gates(_: Suite) -> dict[str, str]:
+        return {}  # as if the judge's stamp shows it cleared its bar
+
+    def base(*_: object) -> str:
+        return "0" * 40
+
+    monkeypatch.setattr(cli, "advisory", gates)
+    monkeypatch.setattr(cli, "merge_base", base)
+    arms = {"old": Arm("old", "o", {}), "new": Arm("new", "n", {})}
+    done = cli.run_samples(
+        [(suite.cases[0], arms[a], 0, cast("session.Spec", None)) for a in arms], 1
+    )
+    args = argparse.Namespace(judge=False, new_ref="ref", split="dev", samples=1, base="main")
+    plan: dict[str, object] = {"model": "claude-opus-5-5", "claude_code": "2.1.312", "suite": "s"}
+    cli.decide(cli.Screen(args, suite, arms, plan, store), "", done)
+    out = capsys.readouterr().out
+    assert "NOT JUDGED: kept: 2 sample(s) lack a kept judge answer" in out
+    assert "Result: INCONCLUSIVE" in out
+    assert "| kept | primary | 0 | 0.000 | 0.000 | 0 | 0 | 1.000 | 1.000 | NOT JUDGED |" in out
+    spec = session.Spec("claude-opus-5-5", "2.1.312", 1.0, tmp_path, store)
+    record = argparse.Namespace(judge=False, record=True, arm="old")
+    key = suite.cases[0].path / "key.toml"
+    before = key.read_text()
+    cli.baseline_counts(suite, list(suite.cases), done[:1], spec, record)
+    assert "c1: not counted, kept not judged; rerun with --judge" in capsys.readouterr().out
+    assert key.read_text() == before  # no baseline recorded from a count missing the judge
+    assert calls == []
+
+
+def test_a_screen_leaves_out_a_sample_whose_judge_panel_is_missing_and_never_ships(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    suite, store, _ = judged_store(tmp_path, monkeypatch)
+    graded: list[cli.Scores] = []
+
+    def gates(_: Suite) -> dict[str, str]:
+        return {}  # as if the judge's stamp shows it cleared its bar
+
+    def base(*_: object) -> str:
+        return "0" * 40
+
+    def ships(_: object, __: object, ___: cli.Scores, new: cli.Scores) -> dict[str, MetricVerdict]:
+        graded.append(new)  # every metric's verdict ships, so only the missing panel can stop it
+        return {
+            "kept": MetricVerdict("kept", 1, 0.0, 1.0, 1, 0, 0.01, 1.0, "BETTER"),
+            "delivered": MetricVerdict("delivered", 1, 1.0, 1.0, 0, 0, 1.0, 0.5, "PASS"),
+        }
+
+    monkeypatch.setattr(cli, "advisory", gates)
+    monkeypatch.setattr(cli, "merge_base", base)
+    monkeypatch.setattr(cli, "judge", ships)
+    arms = {"old": Arm("old", "o", {}), "new": Arm("new", "n", {})}
+    done = cli.run_samples(
+        [(suite.cases[0], arms[a], 0, cast("session.Spec", None)) for a in arms], 1
+    )
+    cli.fill_judgments(suite, done, store, 1)
+    unjudged = dataclasses.replace(done[1], key="new-1", index=1, commits=["fix: Closes #42 now"])
+    cache.save(store, unjudged, "")
+    args = argparse.Namespace(judge=True, new_ref="ref", split="dev", samples=2, base="main")
+    plan: dict[str, object] = {"model": "claude-opus-5-5", "claude_code": "2.1.312", "suite": "s"}
+    cli.decide(cli.Screen(args, suite, arms, plan, store), "", [*done, unjudged])
+    out = capsys.readouterr().out
+    assert "judge panels incomplete (1); rerun to retry them" in out
+    assert "Result: INCONCLUSIVE" in out
+    assert [len(scores) for scores in graded[0]["kept"].values()] == [1]
+
+
+def test_a_judged_guard_and_an_excluded_sample_leave_a_case_counted(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    guard = JUDGED.replace('metric = "kept"', 'metric = "delivered"')
+    suite, store, calls = judged_store(tmp_path, monkeypatch, KEY + guard)
+
+    def gates(_: Suite) -> dict[str, str]:
+        return {}  # as if the judge's stamp shows it cleared its bar
+
+    monkeypatch.setattr(cli, "advisory", gates)
+    (drawn,) = cli.run_samples(
+        [(suite.cases[0], Arm("old", "o", {}), 0, cast("session.Spec", None))], 1
+    )
+    excluded = dataclasses.replace(drawn, key="old-1", index=1, valid=False)
+    cache.save(store, excluded, "")
+    assert cli.not_judged(suite, [excluded], store) == {}
+    spec = session.Spec("claude-opus-5-5", "2.1.312", 1.0, tmp_path, store)
+    count = argparse.Namespace(judge=False, record=False, arm="old")
+    cli.baseline_counts(suite, list(suite.cases), [drawn], spec, count)
+    assert "c1: failed in 0 of 1; not judged: delivered" in capsys.readouterr().out
+    assert calls == []

@@ -3,7 +3,7 @@ kind = "regression"
 hints = ["500", "comparison"]
 
 [[check]]
-metric = "found"
+metric = "found_regex"
 artifact = "report:praxis:general-reviewer"
 present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b).){0,1500}?(?:>=?\s*500|\b500\b)'''
 
@@ -12,6 +12,16 @@ present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d
 id = "bug-500-not-retried"
 verify = "python3 -c \"from fetchkit.retry import with_retries; from fetchkit.transport import Response; r=iter([Response(500, ''), Response(200, 'ok')]); assert with_retries(lambda: next(r), sleep=lambda s: None).ok\""
 
+[[check]]
+metric = "found"
+artifact = "report:praxis:general-reviewer"
+judge = "flags-plant"
+reference = """
+`_transient` in fetchkit/retry.py tests `response.status > 500`, so a 500 response is no longer
+retried, though the docstring promises a retry for every 5xx. Only a finding about 500 falling
+outside that comparison counts. Count it only when the report rates it Critical.
+"""
+yes_ratings = ["Critical"]
 
 [[check]]
 metric = "format"
@@ -27,12 +37,12 @@ present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
 model = "claude-opus-5-5"
 arm = "old"
 failures = 0
-runs = 3
+runs = 6
 runner = 2
 
 [[baseline]]
 model = "claude-opus-5-5"
 arm = "none"
-failures = 0
-runs = 3
+failures = 1
+runs = 6
 runner = 2

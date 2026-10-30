@@ -3,10 +3,20 @@ kind = "regression"
 hints = ["comment", "duplicate", "UTC"]
 
 [[check]]
-metric = "found"
+metric = "found_regex"
 artifact = "report:praxis:general-reviewer"
 present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b).){0,1500}?(?:retold|retell|duplicate[ds]? (?:comment|fact)|duplication|word for word|already (?:told|state|say)|nonlocal|repeats? (?:the|a|that) (?:same )?(?:comment|fact))'''
 
+[[check]]
+metric = "found"
+artifact = "report:praxis:general-reviewer"
+judge = "flags-plant"
+reference = """
+The comment in `last_updated` in stockroom/api.py, `# Timestamps are stored in UTC; convert to
+local time only when displaying them.`, repeats word for word a comment in stockroom/models.py.
+Only a finding about that repeated comment counts. Count it only when the report rates it
+Important or Critical.
+"""
 
 [[check]]
 metric = "format"
@@ -21,13 +31,13 @@ present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
 [[baseline]]
 model = "claude-opus-5-5"
 arm = "old"
-failures = 2
-runs = 3
+failures = 1
+runs = 6
 runner = 2
 
 [[baseline]]
 model = "claude-opus-5-5"
 arm = "none"
-failures = 3
-runs = 3
+failures = 6
+runs = 6
 runner = 2

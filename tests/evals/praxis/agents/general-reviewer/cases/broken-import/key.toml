@@ -3,7 +3,7 @@ kind = "regression"
 hints = ["import", "rename"]
 
 [[check]]
-metric = "found"
+metric = "found_regex"
 artifact = "report:praxis:general-reviewer"
 present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b).){0,1500}?(?:tally\.parse|import|ModuleNotFound|renamed)'''
 
@@ -12,6 +12,16 @@ present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d
 id = "broken-import"
 verify = "python3 -c \"import tally.report\""
 
+[[check]]
+metric = "found"
+artifact = "report:praxis:general-reviewer"
+judge = "flags-plant"
+reference = """
+The branch renames tally/parse.py to tally/rows.py, but tally/report.py still imports `from
+tally.parse import parse_rows`, so importing it fails with ModuleNotFoundError. Only a finding
+about that broken import counts. Count it only when the report rates it Critical.
+"""
+yes_ratings = ["Critical"]
 
 [[check]]
 metric = "format"
@@ -27,12 +37,12 @@ present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
 model = "claude-opus-5-5"
 arm = "old"
 failures = 0
-runs = 3
+runs = 6
 runner = 2
 
 [[baseline]]
 model = "claude-opus-5-5"
 arm = "none"
 failures = 0
-runs = 3
+runs = 6
 runner = 2

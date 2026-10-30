@@ -3,10 +3,20 @@ kind = "regression"
 hints = ["debug", "print"]
 
 [[check]]
-metric = "found"
+metric = "found_regex"
 artifact = "report:praxis:general-reviewer"
 present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b).){0,1500}?(?:\bprint\b|debug)'''
 
+[[check]]
+metric = "found"
+artifact = "report:praxis:general-reviewer"
+judge = "flags-plant"
+reference = """
+`restock` in stockroom/store.py leaves the debugging line `print("DEBUG restock", sku, current,
+delivered)` in shipped code. Only a finding about that debug print counts. Count it at any
+rating, Minor included.
+"""
+yes_ratings = ["Critical", "Important", "Minor"]
 
 [[check]]
 metric = "format"
@@ -22,12 +32,12 @@ present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
 model = "claude-opus-5-5"
 arm = "old"
 failures = 0
-runs = 3
+runs = 6
 runner = 2
 
 [[baseline]]
 model = "claude-opus-5-5"
 arm = "none"
 failures = 0
-runs = 3
+runs = 6
 runner = 2

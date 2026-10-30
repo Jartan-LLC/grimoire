@@ -1,0 +1,151 @@
+# Judge flags-plant's calibration, written by `scripts/eval.py judge-align`.
+# Edit nothing but human_audited by hand: tests/evals/README.md, Judges.
+judge = "flags-plant"
+instrument = "01bb68caa48613c7fe464c84b21d12d95102aa76f357ab79044bb98df7238697"
+versions = ["01bb68caa48613c7fe464c84b21d12d95102aa76f357ab79044bb98df7238697"]
+labels = "578669bccd022d7345bdf49e692f65e92bac348aa19ebebd13f8536b2d6158b9"
+labeller = "claude-fable-5-1 xhigh"
+date = "2026-10-30"
+human_audited = 0
+gold_right = 403
+gold_n = 407
+labelled = 276
+unsure = 0
+fleiss = 1.0
+unanimous = 144
+panels = 144
+burned = []
+
+[references]
+"blanket-suppression" = "dfdd830607c772b0"
+"broken-import" = "b7925c641239264c"
+"bug-500-not-retried" = "500d33cc38406ae7"
+"bug-discount-precedence" = "f4d69f2aaf837492"
+"bug-page-slice" = "6a676f9350412cb2"
+"bug-unknown-sku" = "983a6fef01cd7850"
+"copied-backoff" = "5c6d00309d1e814a"
+"gone-fallback" = "a310f8fcd63667f4"
+"leftover-debug" = "5a1922a2650d4a97"
+"misleading-retry-count" = "3d6d701f554e5a14"
+"nonlocal-backoff" = "b33fd169c09a8df8"
+"nonlocal-parse" = "4adb2263402fbb9d"
+"nonlocal-stamp" = "297798dc7459edb2"
+"reinvented-batched" = "127bb17e59dde123"
+"reinvented-median" = "4501edeb5c0e0559"
+"retold-refund-fee" = "a151ed2237c54798"
+"retold-utc" = "4fd126948f078e8c"
+"stub-iban-check" = "356721384a24c59e"
+"tombstone-rounding" = "feb0c86e2a44a4be"
+"unanchored-todo" = "ee12606cdda5c251"
+
+[[cell]]
+kind = "compare"
+arm = ""
+tp = 98
+fn = 1
+tn = 45
+fp = 0
+
+[[cell]]
+kind = "control-empty"
+arm = ""
+tp = 0
+fn = 0
+tn = 10
+fp = 0
+
+[[cell]]
+kind = "control-injection"
+arm = ""
+tp = 0
+fn = 0
+tn = 10
+fp = 0
+
+[[cell]]
+kind = "control-offtopic"
+arm = ""
+tp = 0
+fn = 0
+tn = 10
+fp = 0
+
+[[cell]]
+kind = "control-unknown"
+arm = ""
+tp = 0
+fn = 0
+tn = 10
+fp = 0
+
+[[cell]]
+kind = "dev"
+arm = "none"
+tp = 40
+fn = 0
+tn = 26
+fp = 0
+
+[[cell]]
+kind = "dev"
+arm = "old"
+tp = 45
+fn = 0
+tn = 21
+fp = 0
+
+[[cell]]
+kind = "invariance-format"
+arm = ""
+tp = 99
+fn = 0
+tn = 45
+fp = 0
+
+[[cell]]
+kind = "invariance-minor"
+arm = ""
+tp = 99
+fn = 0
+tn = 45
+fp = 0
+
+[[cell]]
+kind = "natural"
+arm = "none"
+tp = 44
+fn = 0
+tn = 28
+fp = 0
+
+[[cell]]
+kind = "natural"
+arm = "old"
+tp = 55
+fn = 0
+tn = 17
+fp = 0
+
+[[cell]]
+kind = "reference"
+arm = ""
+tp = 30
+fn = 0
+tn = 36
+fp = 0
+
+[[cell]]
+kind = "sibling"
+arm = ""
+tp = 0
+fn = 0
+tn = 144
+fp = 0
+
+[[cell]]
+kind = "single"
+arm = ""
+tp = 99
+fn = 0
+tn = 45
+fp = 0

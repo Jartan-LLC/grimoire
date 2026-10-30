@@ -4,8 +4,8 @@ import re
 import pytest
 from evals import gh_stub, grade, trace
 from evals.cache import Sample
-from evals.suite import Check, load_suite
-from helpers import KEY, write_suite
+from evals.suite import Case, Check, Reference, load_suite
+from helpers import JUDGE, JUDGED, KEY, SUITE, write_suite
 from test_trace import CPW, PLUGINS, REVIEWER, commit, handed_back, inside, load_skill, spawn
 
 
@@ -296,3 +296,60 @@ def test_a_file_check_the_sample_did_not_collect_refuses_to_grade(tmp_path: path
         grade.scores(case, drawn_before, parsed)
     drawn_before.collected = ["pr-draft.md"]
     assert grade.scores(case, drawn_before, parsed)["kept"] < 1
+
+
+def judged_case(tmp_path: pathlib.Path) -> Case:
+    return load_suite(write_suite(tmp_path, SUITE + JUDGE, KEY + JUDGED)).cases[0]
+
+
+def test_a_judged_check_reads_its_panel_and_averages_with_the_regex_checks(
+    tmp_path: pathlib.Path,
+) -> None:
+    case = judged_case(tmp_path)
+    parsed = trace.parse([*load_skill("s1", "x", CPW), *commit("c1")], PLUGINS)
+    good = sample(["fix: y\n\nCloses #42"], "Done.")
+    assert grade.scores(case, good, parsed, {3: 1.0}) == {"kept": 1.0, "delivered": 1.0}
+    assert grade.scores(case, good, parsed, {3: 0.0})["kept"] == pytest.approx(2 / 3)
+    with pytest.raises(grade.Unjudged, match="check 3"):
+        grade.scores(case, good, parsed)
+
+
+def test_an_unjudged_check_leaves_its_whole_metric_out_when_allowed(tmp_path: pathlib.Path) -> None:
+    case = judged_case(tmp_path)
+    parsed = trace.parse([*load_skill("s1", "x", CPW), *commit("c1")], PLUGINS)
+    good = sample(["fix: y\n\nCloses #42"], "Done.")
+    # kept's two regex checks pass, but kept is not scored on them alone
+    assert grade.scores(case, good, parsed, unjudged_ok=True) == {"delivered": 1.0}
+    held = grade.scores(case, good, parsed, advisory={"flags"}, unjudged_ok=True)
+    assert held == {"kept": 1.0, "delivered": 1.0}
+
+
+def test_a_spoiled_sample_or_an_empty_artifact_fails_a_judged_check_without_a_judge(
+    tmp_path: pathlib.Path,
+) -> None:
+    case = judged_case(tmp_path)
+    parsed = trace.parse(commit("c1"), PLUGINS)
+    spoiled = sample(["fix: y\n\nCloses #42"], "Done.", spoiled="timeout")
+    assert grade.scores(case, spoiled, parsed)["kept"] == 0.0
+    empty = sample([], "Done.")  # no commit: the regex on commits fails too, the absent check holds
+    assert grade.scores(case, empty, parsed)["kept"] == pytest.approx(1 / 3)
+    check = case.checks[3]
+    assert grade.judged_text(check, empty, grade.outputs_of(empty, parsed)) is None
+    assert grade.judged_text(check, spoiled, grade.outputs_of(spoiled, parsed)) is None
+
+
+def test_a_judge_that_may_not_gate_scores_a_reported_metric_of_its_own(
+    tmp_path: pathlib.Path,
+) -> None:
+    case = judged_case(tmp_path)
+    parsed = trace.parse([*load_skill("s1", "x", CPW), *commit("c1")], PLUGINS)
+    good = sample(["fix: y\n\nCloses #42"], "Done.")
+    scores = grade.scores(case, good, parsed, {3: 0.0}, advisory={"flags"})
+    assert scores == {"kept": 1.0, "delivered": 1.0, "kept@flags": 0.0}
+    assert grade.advisory_metric(case.checks[3]) == "kept@flags"
+
+
+def test_reference_scores_leave_judged_checks_out(tmp_path: pathlib.Path) -> None:
+    case = judged_case(tmp_path)
+    reference = Reference("pass-1", True, ("fix: y\n\nCloses #42",), "Done.", {})
+    assert [c.judge for c, _ in grade.reference_scores(case, reference)] == [None, None]

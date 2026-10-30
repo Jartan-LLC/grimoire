@@ -23,7 +23,16 @@ budget_usd = 3.0
 id = "found"
 direction = "higher"
 margin = 0.2
-# A label at the planted problem's tier or above, then a term naming that problem in the same finding.
+# The flags-plant judge: whether the report raises the planted problem at the rating its case
+# accepts. It gates while judges/flags-plant/stamp.toml is current; a change to the judge, its
+# labels or a stamped case's reference makes the stamp stale and the lint fail:
+# tests/evals/README.md, "Calibrating a judge", step 6.
+
+[[metric]]
+id = "found_regex"
+direction = "higher"
+# Reported only: a label at the planted problem's tier or above, then a term naming that problem
+# in the same finding. Kept beside the judged `found` until one screen compares the two (#137).
 
 [[metric]]
 id = "quiet"
@@ -34,6 +43,58 @@ direction = "higher"
 id = "format"
 direction = "higher"
 margin = 0.2
+
+# One yes/no question per planted case, with the case's reference. tests/evals/README.md, Judges.
+[[judge]]
+id = "flags-plant"
+question = "Does the report raise, as a finding of its own, the problem the reference describes, at a rating the reference accepts?"
+# Calibration: the cases whose items are held out (split by case, from the #137 research), never
+# moved out by hand, since the stamp does not record this list (README, "Calibrating a judge");
+held_out = [
+  "nonlocal-parse",
+  "reinvented-batched",
+  "retold-utc",
+  "nonlocal-backoff",
+  "bug-page-slice",
+  "bug-unknown-sku",
+  "gone-fallback",
+  "stub-iban-check",
+  "tombstone-rounding",
+  "broken-import",
+]
+# the rule families, by the skill whose rule the plant breaks (comment-hygiene, code-hygiene,
+# correctness), within which a report of one case is a "no" for another's reference;
+siblings = [
+  [
+    "nonlocal-parse",
+    "nonlocal-backoff",
+    "nonlocal-stamp",
+    "retold-utc",
+    "retold-refund-fee",
+    "gone-fallback",
+    "misleading-retry-count",
+    "tombstone-rounding",
+    "unanchored-todo",
+  ],
+  [
+    "reinvented-batched",
+    "reinvented-median",
+    "copied-backoff",
+    "blanket-suppression",
+    "leftover-debug",
+    "stub-iban-check",
+  ],
+  [
+    "bug-page-slice",
+    "bug-unknown-sku",
+    "bug-500-not-retried",
+    "bug-discount-precedence",
+    "broken-import",
+  ],
+]
+# the ratings a silver "yes" needs, unless a case's check sets its own; the metric it would replace.
+yes_ratings = ["Critical", "Important"]
+compare = "found_regex"
 
 [pass_rule]
 primary = "found"

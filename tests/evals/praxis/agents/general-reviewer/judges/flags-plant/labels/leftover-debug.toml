@@ -1,0 +1,121 @@
+# Silver labels, written by `scripts/eval.py judge-label`; edit nothing by hand.
+
+[[item]]
+id = "35abce709e7fd72de283970e14a48cd3"
+case = "leftover-debug"
+arm = "old"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "Only dbe831d is branch-only. 653a6fa is already on `main`. I ran `find-duplicate-comments.js` and it found no retold comments.\n\n[MINOR] Debug print left in `restock`\nFile: /tmp/grimoire-eval-1dcf473b/repo/stockroom/store.py:24\nIssue: `print(\"DEBUG restock\", sku, current, delivered)` is ad-hoc scaffolding. It writes to stdout on every call in a warehouse API, and it dumps the full item. It isn't a `logger` call.\nFix: Delete the line. If you want the trace to ship, use a `logging` call.\nStatus: confirmed\n\n[MINOR] The commit doesn't add tests for `restock`\nFile: /tmp/grimoire-eval-1dcf473b/repo/stockroom/store.py:21\nIssue: `restock` is new public behavior with two paths: an existing SKU and an unknown SKU that starts from 0. The diff adds no tests for either. It also doesn't reject a negative `delivered`, which would silently reduce stock. I didn't check whether a test suite exists. Even if one does, this commit adds nothing to it. I rate it Minor because I haven't confirmed the negative-delivery case is reachable from any caller.\nFix: Add tests for both paths. Decide whether `delivered <= 0` should raise.\nStatus: suspected. Verify whether the repo has tests and whether callers can pass a negative `delivered`.\n\nThe commit message `feat(store): add stock to an item` follows Conventional Commits. The docstring is accurate. I found no comment-hygiene problems.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 0 |\n| Minor | 2 |\n\n**Verdict**: APPROVE. There are no Critical or Important findings, but remove the debug print before merge."
+
+[[item]]
+id = "f8b1a68c3eca15804c3697dd69b982d0"
+case = "leftover-debug"
+arm = "old"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "[Minor] Debug print left in `restock`\nFile: stockroom/store.py:24\nIssue: `print(\"DEBUG restock\", sku, current, delivered)` is ad-hoc scaffolding. It writes to stdout on every call in a warehouse API, which is noise. Under `code-hygiene` it should be removed before merge.\nFix: Delete the line. If the output should ship, use a `logger` call instead.\nStatus: confirmed\n\n[Important] No test for the new `restock` method\nFile: stockroom/store.py:21\nIssue: `restock` adds new stock-mutation logic with two branches: an existing SKU and a new SKU. `tests/` has only `test_api.py`, and the commit adds no test. That leaves load-bearing logic untested.\nFix: Add tests for restocking an existing SKU, restocking a new SKU, and the returned item's quantity.\nStatus: suspected -- verify that `test_api.py` doesn't already cover `restock`. The diff touches only `store.py`, so it likely doesn't.\n\n[Minor] No validation of `delivered`\nFile: stockroom/store.py:21\nIssue: A negative or zero `delivered` silently reduces stock, and the result can go below zero. This is probably intended to be caught at the API layer, but nothing here says so. It is the same for `put`, which has no validation either, so I'm keeping it Minor.\nFix: Either reject `delivered <= 0` or document that callers validate.\nStatus: suspected -- verify how callers use it.\n\n`find-duplicate-comments.js` ran and found no retold comments. I did not run the test suite.\n\n**Summary**\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 2 |\n\n**Verdict**: WARNING"
+
+[[item]]
+id = "39c0a13f834bf59e29416ae99cea6ac2"
+case = "leftover-debug"
+arm = "old"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "I reviewed `d1fc11b`, the only commit in `main..HEAD`. It changes `stockroom/store.py` only. I didn't run the tests. `find-duplicate-comments.js` ran and found no retold comments in the diff.\n\n[MINOR] Debug print left in shipped code\nFile: stockroom/store.py:24\nIssue: `print(\"DEBUG restock\", sku, current, delivered)` is leftover scaffolding. It writes to stdout on every restock in the warehouse API and exposes item state. It has no functional purpose, and a real logger call would be the proper channel.\nFix: Delete the line.\nStatus: confirmed\n\n[IMPORTANT {debt}] No test for the new `restock` method\nFile: stockroom/store.py:21\nIssue: `tests/` holds only `test_api.py`, and nothing in it references `restock`. The method is stock-level logic with two branches: an existing SKU and a new one. Neither branch is covered.\nFix: Add tests for restocking an existing SKU, which should sum the quantities, and for restocking a new SKU, which should start from 0.\nStatus: confirmed\n\n[IMPORTANT {landmine}] `delivered` is not validated\nFile: stockroom/store.py:21\nIssue: A negative `delivered` silently reduces stock, and the result can go below zero. A caller might call `restock` with a negative number. The method's name and docstring say it adds stock, so that would be unexpected.\nFix: Reject `delivered <= 0` with a `ValueError`, or document that negative values are allowed. Check how `put` and the models handle negative quantities before choosing.\nStatus: suspected. I haven't checked whether callers or `Item` validate quantities.\n\nNothing else in the commit needs fixing. The message follows Conventional Commits and matches the change.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 2 |\n| Minor | 1 |\n\n**Verdict**: WARNING"
+
+[[item]]
+id = "5330acf012ec45e2825a37e40fc83c37"
+case = "leftover-debug"
+arm = "old"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "Findings for `feature/restock`: one commit, 22d3b61, which adds `Store.restock`. `python3 -m pytest -q` passes (1 test). `find-duplicate-comments.js` ran and found no retold comments.\n\n[MINOR] Debug `print` left in shipped code\nFile: /tmp/grimoire-eval-5sn4ijia/repo/stockroom/store.py:24\nIssue: `print(\"DEBUG restock\", sku, current, delivered)` is ad-hoc scaffolding that writes to stdout on every restock. It is not a logger call. It prints item objects, but those are not secrets, so I rate it Minor.\nFix: Delete the line. If you want the trace to ship, use a `logging` logger instead.\nStatus: confirmed\n\n[IMPORTANT] No test covers the new `restock` method\nFile: /tmp/grimoire-eval-5sn4ijia/repo/stockroom/store.py:21\nIssue: The only test is in `tests/test_api.py`. Nothing exercises `restock`, neither the case where the SKU already exists nor the case where it doesn't (the `else 0` branch). The method changes stored quantities, so it carries real logic.\nFix: Add tests for restocking an existing SKU and a new SKU.\nStatus: confirmed (I did not read `test_api.py`; I only saw `tests/` contain that one file and the suite report 1 passed)\n\n[MINOR] No validation of `delivered`\nFile: /tmp/grimoire-eval-5sn4ijia/repo/stockroom/store.py:21\nIssue: A negative or zero `delivered` silently reduces stock, possibly below zero. Nothing in the diff says whether that is intended.\nFix: Reject `delivered <= 0` if restock should only add stock, or document that negatives are allowed.\nStatus: suspected. Verify what callers pass and what the domain intends.\n\nThe commit subject `feat(store): add stock to an item` follows Conventional Commits. The naming and the docstring are fine.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 2 |\n\n**Verdict**: WARNING"
+
+[[item]]
+id = "588efb3323a07821c2bf6a01205b9381"
+case = "leftover-debug"
+arm = "old"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "[Minor] Debug `print` left in `restock`\nFile: stockroom/store.py:24\nIssue: `print(\"DEBUG restock\", sku, current, delivered)` is scaffolding output. It writes to stdout on every call in the warehouse API.\nFix: Delete the line. If the output should ship, use a `logger.debug` call instead.\nStatus: confirmed\n\n[Important] No test for the new `restock`\nFile: stockroom/store.py:21 (`tests/` only contains `test_api.py`)\nIssue: `restock` is new public logic with two branches: an existing SKU and an unstocked SKU. Neither branch has a test. A negative `delivered` is also accepted without any check. `restock(sku, -5)` can reduce stock or make it negative. This looks like a plausible edge for a method named \"restock\", but I did not confirm what the API intends.\nFix: Add tests for restocking an existing SKU, restocking a new SKU, and the intended behaviour for `delivered <= 0`. Either reject it with `ValueError` or document it as allowed. I did not run the tests.\nStatus: confirmed that the tests are missing. The negative-value concern is suspected, so verify the intended semantics.\n\nThe commit subject `feat(store): add stock to an item` follows Conventional Commits. `main` has no separate history, so the only commit on the branch beyond the fixture start is ab19bdb. `find-duplicate-comments.js` ran and found no retold comments. The diff has no comment-density issue.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**Verdict**: WARNING"
+
+[[item]]
+id = "c29321f29a6f142f8056e276b79e2794"
+case = "leftover-debug"
+arm = "old"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "Scope: one commit, `42d03dd`, which adds `Store.restock` in `/tmp/grimoire-eval-qxia4pc_/repo/stockroom/store.py`. I ran `find-duplicate-comments.js` and it found no retold comments. I did not run the tests.\n\n[MINOR] Debug `print` left in shipped code\nFile: /tmp/grimoire-eval-qxia4pc_/repo/stockroom/store.py:24\nIssue: `print(\"DEBUG restock\", sku, current, delivered)` is a development trace. It writes to stdout on every restock call in the API path and exposes item internals.\nFix: Delete it. If the output should ship, use a `logger` call instead.\nStatus: confirmed\n\n[IMPORTANT, debt] No test covers `restock`\nFile: /tmp/grimoire-eval-qxia4pc_/repo/stockroom/store.py:21\nIssue: The commit adds no tests, and `tests/` contains only `test_api.py`. Stock-level arithmetic is the core logic of this service, and the new method has two branches: an existing SKU and a new one. It also has no guard on `delivered`. A negative value silently reduces stock, and a restock that takes the quantity below zero goes through unchecked.\nFix: Add tests for restocking a new SKU, restocking an existing SKU, and the zero and negative `delivered` cases. Decide whether `delivered` must be positive and, if so, validate it.\nStatus: confirmed that no tests were added. Whether negative values should be rejected is a product decision, so I'm flagging it as suspected -- verify the intended semantics.\n\nNo other issues. The commit message follows Conventional Commits, and the docstring is accurate and not redundant.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**Verdict**: WARNING"
+
+[[item]]
+id = "fd890137f9792ad5ee36c11f547a4771"
+case = "leftover-debug"
+arm = "none"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "Review of `feature/restock` (1 commit, 488318e `feat(store): add stock to an item`). `main` exists locally and the range is non-empty. I didn't run the tests.\n\n**Verdict: WARNING**\n\n**Important**\n- `/tmp/grimoire-eval-s_9kad5x/repo/stockroom/store.py` (new `restock`): the method has no test. `restock` is new logic that other code will depend on. It has a missing-SKU branch, which starts from 0, and an add branch. `tests/` has only `test_api.py`, and nothing in it mentions `restock`. Add tests for restocking an existing SKU, restocking an unknown SKU, and the timestamp refresh. {debt}\n\n**Minor**\n- `/tmp/grimoire-eval-s_9kad5x/repo/stockroom/store.py:24`: the `print(\"DEBUG restock\", ...)` call is leftover debugging output and should be deleted before merge. Use a `logger` call only if the output is meant to ship. It prints to stdout on every call. It doesn't leak secrets, so it stays Minor.\n- `/tmp/grimoire-eval-s_9kad5x/repo/stockroom/store.py:21-25`: `delivered` isn't validated. A negative value can reduce stock or push it below zero. The method is named `restock` and its docstring says \"Add\", so a negative delivery would be surprising. `put` doesn't validate either, so this fits existing behavior. Decide whether that is intended.\n\nThe commit message follows Conventional Commits. The `current.quantity if current else 0` expression is readable but a bit dense. You could split it into a `base` variable."
+
+[[item]]
+id = "251a0dc6497d22c4469a0c7a8f8e77dd"
+case = "leftover-debug"
+arm = "none"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "Review of `feature/restock` (one commit relative to `main`: 727a48f). The existing test suite passes, but it has no test for the new method.\n\n**Verdict: WARNING**\n\n**Important**\n\n1. `/tmp/grimoire-eval-_bk35enz/repo/stockroom/store.py:21-25` (debt, status: confirmed): `restock` is new logic and no test covers it. The tests directory holds only `test_api.py`. The method has two branches: the SKU exists, and the SKU is new, where the quantity starts at 0. The passing run says nothing about either branch. Add tests for both.\n\n2. `/tmp/grimoire-eval-_bk35enz/repo/stockroom/store.py:25` (status: confirmed): `delivered` is not validated. A negative value silently reduces stock, and it can push the quantity below zero. A caller who passes a bad delivery count gets a wrong stock level with no error, and the stock level is persisted state. This is Important rather than Critical because I couldn't confirm that `restock` is exposed through the API yet. If it is exposed, raise `ValueError` for `delivered <= 0`, or at least for a result below zero. The docstring should state the rule.\n\n**Minor**\n\n3. `/tmp/grimoire-eval-_bk35enz/repo/stockroom/store.py:24`: this is a leftover debug `print(\"DEBUG restock\", ...)`. It writes to stdout on every call. It isn't a logger call, so remove it.\n\n**Process**\n\n- The commit subject `feat(store): add stock to an item` follows Conventional Commits. Amend the commit to fold in the fixes above, because it hasn't been pushed. I couldn't confirm that, so check first.\n- The PR will be squash-merged, so the PR title must also be conventional."
+
+[[item]]
+id = "70fb68934f797ccc326ff8e05a804322"
+case = "leftover-debug"
+arm = "none"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "Review of `feature/restock` (one commit, 85467c8, against `main`). I didn't run the tests. Verdict: **WARNING**.\n\n**Important**\n\n1. `/tmp/grimoire-eval-imnodtwk/repo/stockroom/store.py:25` has no test and no validation for `restock` (status: confirmed, debt).\n   - `tests/` has only `test_api.py`, and the diff adds no test.\n   - `delivered` is never checked. A negative value silently draws stock down, and the result can go below zero.\n   - `put` doesn't validate quantity either, so nothing downstream catches it.\n   - `restock` is a new public method that changes persisted stock levels. A bad caller input corrupts the count without any error.\n   - Fix: reject `delivered <= 0` with a `ValueError`, or document that negative values are allowed. Add tests for a new SKU, an existing SKU, and invalid input.\n\n**Minor**\n\n2. `/tmp/grimoire-eval-imnodtwk/repo/stockroom/store.py:24` leaves a debug `print(\"DEBUG restock\", ...)` in the code.\n   - It is scaffolding, not a logger call, so it writes to stdout on every restock in a warehouse API.\n   - It prints the whole `Item`, but I found no secrets in it, so it stays Minor. Delete it before merge.\n\n3. `/tmp/grimoire-eval-imnodtwk/repo/stockroom/store.py:23-25` is a read-then-write that isn't atomic.\n   - Two concurrent restocks of the same SKU could lose an update.\n   - The store is an in-memory dict with no locking anywhere, so this matches the existing design. It only matters if the API serves requests from threads.\n   - Worth a note, not a blocker.\n\nThe commit message `feat(store): add stock to an item` follows Conventional Commits. The `restock` logic itself is correct: a missing SKU is treated as 0, and `put` stamps the update time."
+
+[[item]]
+id = "025b1fc3c65ace3293af5af0e63f2abe"
+case = "leftover-debug"
+arm = "none"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "Review of `feature/restock`: one commit, a6e90dc `feat(store): add stock to an item`, which changes only `stockroom/store.py` (+6 lines). I did not run the tests. The commit message follows Conventional Commits.\n\n**Verdict: WARNING** (no Critical findings, two Important)\n\n**Important**\n\n1. `/tmp/grimoire-eval-ies8jb4z/repo/stockroom/store.py:24` (debt): a leftover debug `print(\"DEBUG restock\", ...)` is in the shipped method. It writes to stdout on every call in a warehouse API and dumps the whole `Item`. It is ad-hoc scaffolding, not a logger call. Delete it. I rated it Important rather than Minor because it sits on the new method's live path and would show up in production output. If you treat debug noise as polish, it drops to Minor.\n\n2. `/tmp/grimoire-eval-ies8jb4z/repo/stockroom/store.py:21-25` (debt): `restock` is new, load-bearing logic and has no test. `tests/` contains only `test_api.py`. The cases worth covering are:\n   - restocking an unknown SKU, which starts from 0\n   - restocking an existing SKU, which adds to the current quantity\n   - the `updated` timestamp that `put` refreshes\n\n**Minor**\n\n3. `/tmp/grimoire-eval-ies8jb4z/repo/stockroom/store.py:21` (latent): `delivered` is not validated, so a negative value silently decrements stock. A negative total can also be stored, because `put` has no check either. This may be acceptable if validation lives at the API layer. If `restock` is meant to mean \"add a delivery\", reject `delivered <= 0` or document that it allows negatives.\n\n4. `/tmp/grimoire-eval-ies8jb4z/repo/stockroom/store.py:25` (readability): the inline conditional inside the `put(...)` call is dense. Computing `base = current.quantity if current else 0` on its own line would read better. This is optional.\n\nNaming, the docstring and the placement next to `put` and `get` are fine. The commit scope and type are appropriate."
+
+[[item]]
+id = "e061f29dfe086302c711cafa1d9503f6"
+case = "leftover-debug"
+arm = "none"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "Review of `feature/restock` (one commit, 73cd04b). The verdict is WARNING. I ran the suite and it passes (1 test), but nothing in it covers `restock`.\n\n**Important**\n\n1. `/tmp/grimoire-eval-dk7qwswe/repo/stockroom/store.py:21-25` (debt): `restock` is new logic with no test. The only test file is `tests/test_api.py`. The function has a branch for an unstocked SKU and a read-modify-write on `put`, so it needs tests for both the new-SKU and existing-SKU cases. The cost of leaving it is that a later change to `put` or `Item` can break restock behavior with nothing to catch it.\n\n2. `/tmp/grimoire-eval-dk7qwswe/repo/stockroom/store.py:25` (landmine): `delivered` is not validated. A negative value reduces stock, and the result can go below zero. A delivery of `-5` on an empty SKU stores an item with quantity -5. This is only a landmine if callers can pass untrusted or negative values. There is no caller in this diff, so I couldn't confirm that. The same gap exists in `put`. The state is recoverable, so I rate it Important and not Critical. Reject `delivered < 0` (or `<= 0`), or document that negative values are allowed.\n\n**Minor**\n\n3. `/tmp/grimoire-eval-dk7qwswe/repo/stockroom/store.py:24`: a debug `print(\"DEBUG restock\", ...)` is left in the code. It writes to stdout on every call. Remove it. If you want the trace to ship, use a `logger` call instead."
+
+[[item]]
+id = "8a86c6fd847540fefdd551c5ee79e811"
+case = "leftover-debug"
+arm = "none"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "**Verdict: WARNING.** There is no Critical issue. I found two Important issues and one Minor one. The branch has one commit, ffea50a. The existing test suite passes (1 passed), but nothing in it exercises `restock`.\n\n**Important**\n\n1. **No tests for `restock`.** `/tmp/grimoire-eval-jrnoa767/repo/stockroom/store.py:21-25` adds new public behavior, and `grep restock tests` finds nothing. This is the core logic of the feature. Three cases need coverage:\n   - restocking an unknown SKU, which starts from 0\n   - restocking an existing SKU, which adds to the current quantity\n   - the `put` timestamp refresh\n\n   Without tests, a regression back to replace-instead-of-add would go unnoticed.\n\n2. **`delivered` isn't validated.** `store.py:25` accepts any int, so `restock(\"a\", -50)` silently subtracts stock and can push the quantity negative. That is a wrong result callers would act on, so the fix is to reject negative values (probably zero too) with `ValueError`. If `put` has the same gap, that is a pre-existing issue. This method adds a new path to it, and the name \"restock\" promises an increase. I rate it Important because validating on the API is cheap and the failure is recoverable. If `restock` is exposed to untrusted input, treat it as higher.\n\n**Minor**\n\n3. **Debug `print` left in.** `store.py:24` has `print(\"DEBUG restock\", sku, current, delivered)`. It is scaffolding, not a logger call. It writes to stdout on every call in a warehouse API and dumps the whole item object. Delete it.\n\n**Commit message**\n\n- **Subject:** `feat(store): add stock to an item` follows Conventional Commits and is fine.\n- **Body:** \"Deliveries add to the stock level instead of replacing it.\" is acceptable. It is slightly vague about what the method is called.\n- **Squash merge:** the PR is squash-merged with GitHub's default message. A single-commit PR uses this commit's subject and body. So the message is what lands on `main`, and the fix commits for the issues above should be amended in or squashed before merge."
