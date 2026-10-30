@@ -6,9 +6,9 @@ question and the reference. It does not answer the question outright: it lists e
 finding the artifact makes (its opening words, the rating it gives, its subject), names
 the one that is about what the reference describes, then answers. The label follows by
 rule from the matched finding when the judge or the case's check sets `yes_ratings`,
-else it is the answer, and a "yes" needs a matched finding found in the artifact. Three
-labellers per item: a unanimous label stands; anything else goes to one adjudicator,
-given their three outputs. tests/evals/README.md ("Judges") says when the panel itself
+else it is the answer, and a "yes" needs a matched finding found in the artifact.
+`LABELLERS` labellers per item: a unanimous label stands; anything else goes to one
+adjudicator, given their outputs. tests/evals/README.md ("Judges") says when the panel itself
 may be trusted.
 """
 
@@ -101,7 +101,7 @@ class Labelled:
 def prompt(  # noqa: PLR0913 -- one argument per part of the message
     task: str, diff: str, question: str, reference: str, text: str, *, others: Sequence[str] = ()
 ) -> str:
-    """The user message of one labeller, or of the adjudicator when `others` holds the three outputs."""
+    """The user message of one labeller, or of the adjudicator when `others` holds the labellers' outputs."""
     parts = [
         f"<task>\n{task.strip()}\n</task>",
         f"<diff>\n{diff.strip() or '(no diff: the branch adds no commit)'}\n</diff>",
@@ -317,7 +317,7 @@ def panel_label(  # noqa: PLR0913 -- the call's inputs, and whether it may call
     *,
     may_call: bool = True,
 ) -> tuple[tuple[str, ...], str] | None:
-    """The labelling panel on one item: the three labellers' labels and the final one.
+    """The labelling panel on one item: each labeller's label and the final one.
 
     None at the first labeller missing, with no later one called: the panel cannot complete.
     """

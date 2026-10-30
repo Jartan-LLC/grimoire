@@ -148,7 +148,7 @@ class Stamp:
     """One judge's calibration, as `judge-align` wrote it on its held-out items.
 
     `versions` lists each judge version (instrument hash) scored on held-out, oldest
-    first; `burned` the held-out items of failed versions, dev from then on. `labels`
+    first; `burned` the held-out natural items of failed versions, dev from then on. `labels`
     hashes the label files; `references` each judged case's reference. `gold_*` count
     the labelling panel's answers on gold items; `labelled`, `unsure` and `fleiss` its
     real items. `unanimous` of `panels` natural items had a panel that did not split.
@@ -489,7 +489,7 @@ def read_stamp(path: pathlib.Path) -> Stamp | None:
 
 @dataclass(frozen=True)
 class Label:
-    """A real artifact and its silver label: `votes` are the three labellers', `label` the panel's.
+    """A real artifact and its silver label: `votes` are the labellers', `label` the panel's.
 
     `label` is yes, no or unsure (excluded from every count but the unsure share).
     """

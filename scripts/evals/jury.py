@@ -31,7 +31,7 @@ from .suite import Judge
 ANSWERS = ("yes", "no", "unknown")
 TIMEOUT_S = 600
 BUDGET_USD = 2.0
-BREAKER = 3  # calls in a row the API limited stop starting new ones
+BREAKER = 3  # after this many calls in a row limited by the API, no new call starts
 SANDBOX_PREFIX = "grimoire-eval-"  # session.run_sample's sandbox directories
 SYSTEM = """\
 You grade one output of an AI agent by answering one yes/no question about it.

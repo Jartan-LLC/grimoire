@@ -25,15 +25,14 @@ direction = "higher"
 margin = 0.2
 # The flags-plant judge: whether the report raises the planted problem at the rating its case
 # accepts. It gates while judges/flags-plant/stamp.toml is current; a change to the judge, its
-# labels or a stamped case's reference makes the stamp stale, and the lint fails until the judge
-# is calibrated again.
+# labels or a stamped case's reference makes the stamp stale and the lint fail:
+# tests/evals/README.md, "Calibrating a judge", step 6.
 
 [[metric]]
 id = "found_regex"
 direction = "higher"
-# Reported only: the regex `found` was before the judge, a label at the planted problem's tier or
-# above, then a term naming that problem in the same finding. Kept beside the judge until one
-# screen compares the two after the judge clears its bar (#137).
+# Reported only: a label at the planted problem's tier or above, then a term naming that problem
+# in the same finding. Kept beside the judged `found` until one screen compares the two (#137).
 
 [[metric]]
 id = "quiet"

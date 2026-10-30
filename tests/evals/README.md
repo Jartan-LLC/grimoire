@@ -171,8 +171,9 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   table gets a `.ruff_cache/` written into it by the commit hooks, and the case hash counts every file in
   the fixture, so each hook run would redraw the case's samples.
 - **Check the checks.** Write several passing references that differ in wording, order and approach, and
-  failing references for the target check. The lint runs the checks on all of them. Prefer checks on what
-  the agent produced over checks on how it got there.
+  failing references for the target check. The lint runs the regex checks on all of them; a judged check
+  is scored on the references when its judge is calibrated (Judges, bar row 5). Prefer checks on what the
+  agent produced over checks on how it got there.
 - **Ask one question per case.** One target behaviour, graded by checks that answer it.
 
 ## Splits
@@ -263,7 +264,8 @@ that reimplementation counts, and only when the report rates it Important or Cri
 - `run` and `screen` call a judge only with `--judge` (`JUDGE=1` with make), because judge calls weigh
   heavily on the usage limit. Without it they still read kept answers, but a metric that lacks one on any
   sample is NOT JUDGED, never a pass or a fail: a screen whose primary or a guard is not judged is
-  INCONCLUSIVE, and `run` neither counts nor records a case whose own behaviour that metric scores.
+  INCONCLUSIVE, and `run` neither counts nor records a case while a metric it counts (any but a guard)
+  is not judged.
   The `judge-*` commands call by design, naming the judge with `--judge <id>`.
 - With `--judge`, a sample whose panel is still incomplete (an API error, a usage limit) is left out like
   an excluded sample: the screen cannot SHIP until a rerun fills it.
@@ -275,8 +277,9 @@ that reimplementation counts, and only when the report rates it Important or Cri
   must-hold metric is refused: one judge error in a screen would read as HURT.
 - Judge error shrinks a true effect by J = TPR + TNR - 1 and, when it is the same in both arms, makes no
   false HURT. Guard margins on a judged metric are on the scale the judge observes. `make eval-size` prints J
-  for a judged primary metric. The screen warns when J differs between arms by more than 0.1, and when the
-  judge's model wrote the artifact it judges.
+  for a judged primary metric. For a judge that gates, the screen repeats its stamp's warnings (J
+  differing by more than 0.1 between the arms it was calibrated on, a dev TPR or TNR more than 0.1 above
+  held-out's), and it warns when the judge's model wrote the artifact it judges.
 - The plan pins each judge's version: a changed judge refuses a verdict until `NEW_PLAN=1`, and regrades
   the drawn samples without new sessions.
 
@@ -311,9 +314,9 @@ sample of held-out labels and edits that count.
    so a sample drawn on an older fixture, runner or Claude Code is never labelled. A label once written
    is never changed. It prints each set's count per class: until each reaches 40, draw more sessions
    (`make eval-run ... SAMPLES=` above the count drawn) and label again. `--gold` then runs the panel on
-   the gold items. If it is below 0.98 right, or the printed Fleiss kappa is below 0.80, the question or
-   a reference is underspecified: stop and report it to the maintainer. `--labeller-model` picks the
-   panel's model (Opus 5.5 by default).
+   the gold items, one item at a time: hours for a few hundred items. If it is below 0.98 right, or the
+   printed Fleiss kappa is below 0.80, the question or a reference is underspecified: stop and report it
+   to the maintainer. `--labeller-model` picks the panel's model (Opus 5.5 by default).
 4. Tune on dev: `python3 scripts/eval.py judge-align <suite> --judge <id> --set dev` prints each row and
    each disagreement. Read them, revise the question (or the prompt texts in `scripts/evals/jury.py`),
    repeat.
@@ -402,13 +405,13 @@ for nothing; between rounds, `make check` is enough.
    INCONCLUSIVE otherwise. On a watch model a must-hold failure is printed as STANDING and left out of
    the result.
 9. **Read transcripts before trusting a result:** every failing sample of the primary metric, of a
-   must-hold metric and of any metric that came out WORSE (the screen lists each with its key), every unit
-   counted as a gain, two passing samples per arm picked at random, and any unit every arm fails, which is
-   often a broken case. Look too for behaviour no check covers, such as a test skipped or a rule recited
-   instead of followed. On `screen` and `confirm`, someone other than the author reads them and reports
-   only whether the case is broken. A broken held-out case voids that run: fix it in `dev`, burn it, and
-   rerun on fresh cases. A calibration screen chooses no text, so a case fixed during calibration stays
-   on its split.
+   must-hold metric and of any metric that came out WORSE (the screen lists each with its key), every
+   sample whose judge panel split on the primary metric (listed too), every unit counted as a gain, two
+   passing samples per arm picked at random, and any unit every arm fails, which is often a broken case.
+   Look too for behaviour no check covers, such as a test skipped or a rule recited instead of followed.
+   On `screen` and `confirm`, someone other than the author reads them and reports only whether the case
+   is broken. A broken held-out case voids that run: fix it in `dev`, burn it, and rerun on fresh cases.
+   A calibration screen chooses no text, so a case fixed during calibration stays on its split.
 10. **Report a missed bar as it is,** with its baseline. Never set a new bar from the failing run.
 
 ## Commands
