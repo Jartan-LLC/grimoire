@@ -53,6 +53,7 @@ from evals.suite import (
     Suite,
     SuiteError,
     load_suite,
+    older,
     python_cache,
     tree_hash,
 )
@@ -93,11 +94,27 @@ def old_holds(target: str, base: str) -> bool:
     )
 
 
+def old_holds_removed(suite: Suite, base: str) -> bool:
+    """Whether the merge base with `base` has the suite's target or a text it replaces, so `none` differs from `old`."""
+    return any(old_holds(t, base) for t in suite.removed())
+
+
 def claude_version() -> str:
     """The installed Claude Code version, part of every sample's cache key."""
     return str(
         run([CLAUDE, "--version"], capture_output=True, text=True, check=True).stdout
     ).split()[0]
+
+
+def checked_version(suite: Suite) -> str:
+    """The installed Claude Code version; exits when it is older than the suite's `claude_code`."""
+    version = claude_version()
+    if suite.claude_code and older(version, suite.claude_code):
+        raise SystemExit(
+            f"Claude Code {version} is older than {suite.claude_code}, which "
+            f"{shown(suite.path)}/suite.toml needs: update Claude Code"
+        )
+    return version
 
 
 def shown(path: pathlib.Path) -> str:
@@ -119,7 +136,7 @@ def load(path: str) -> Suite:
 
 
 def build_arm(name: str, suite: Suite, base: str, new_ref: str | None, store: pathlib.Path) -> Arm:
-    """Arm `old` (plugins at the merge base with `base`), `none` (old without the target) or `new`.
+    """Arm `old` (plugins at the merge base with `base`), `none` (old without the target and what it replaces) or `new`.
 
     `new` is the working tree, or `new_ref` when given: the merge base itself there is
     an A/A comparison, and `none` (old without the target) is the positive control.
@@ -129,9 +146,9 @@ def build_arm(name: str, suite: Suite, base: str, new_ref: str | None, store: pa
     if name == "old":
         return old
     if name == "none":
-        return none_arm(old, suite.target, arms)
+        return none_arm(old, suite.target, arms, suite.replaces)
     if new_ref == "none":
-        stripped = none_arm(old, suite.target, arms)
+        stripped = none_arm(old, suite.target, arms, suite.replaces)
         return Arm("new", stripped.hash, stripped.plugins)
     if new_ref is not None:
         return old_arm(ROOT, new_ref, arms, name="new")
@@ -404,6 +421,8 @@ def pinned(
     }
     if suite.judges:  # absent otherwise, so a plan fixed before judges existed still matches
         plan["judges"] = {j.id: jury.instrument(j) for j in suite.judges.values()}
+    if spec.env:  # absent otherwise, as for judges
+        plan["env"] = dict(sorted(spec.env.items()))
     return plan
 
 
@@ -689,7 +708,7 @@ def split_panels(suite: Suite, samples: list[cache.Sample], store: pathlib.Path)
 
 def split_report(
     suite: Suite,
-    old_holds_target: bool = True,
+    has_control: bool = True,
     advise: bool = True,
     splits: tuple[str, ...] = ("screen", "confirm"),
 ) -> tuple[list[str], bool]:
@@ -700,8 +719,9 @@ def split_report(
     A case missing either arm's baseline on a model counts as one the target does not change.
     The chance runs high: each case's few baseline runs are read as its exact failure rate,
     and baselines count each case's own non-guard checks, so a target case whose checks the
-    pass rule does not read adds to it though the verdict cannot see that case. A target the merge base lacks
-    gets no control at all, and a gate model missing either arm's baselines is too weak.
+    pass rule does not read adds to it though the verdict cannot see that case. Without
+    `has_control`, when the merge base lacks the suite's target and every text it replaces,
+    there is no control at all; a gate model missing either arm's baselines is too weak.
     With `advise`, a weak split's lines also say what fixes it: add cases, record baselines.
     """
     rule = suite.pass_rule
@@ -736,8 +756,8 @@ def split_report(
             )
             weak = True
         for model in suite.models:
-            if not old_holds_target:
-                # Old lacks a new target, so the `none` control would be old against itself.
+            if not has_control:
+                # Old holds nothing `none` removes, so the control would be old against itself.
                 lines.append(
                     f"    {model}: the target is not at the merge base yet: no positive control"
                 )
@@ -856,7 +876,9 @@ def plan_command(base: str, tier: int | None = None) -> int:
     lists it with no steps, so a wrong tier-1 call shows what it waves through. It exits 1 when
     a suite does not load, and at tier 4, where a weak split binds, when a direct suite's split
     is too weak or a changed file has no suite; at tiers 2 and 3 the screen split's power report
-    is printed for the PR to say what it shows, without its advice.
+    is printed for the PR to say what it shows, without its advice. At any tier it names each
+    text a direct suite `replaces` that the merge base does not hold: a misspelt name, or one
+    the renaming change has already merged.
     """
     plan = make_plan(ROOT, base)
     for error in plan.broken:
@@ -869,13 +891,19 @@ def plan_command(base: str, tier: int | None = None) -> int:
         suite = entry.suite
         kind = "DIRECT" if entry.direct else "INDIRECT"
         print(f"{shown(suite.path)}: {kind}, covers {', '.join(entry.hits)}")
+        for text in suite.replaces if entry.direct else ():
+            if not old_holds(text, base):
+                print(
+                    f"  replaces {text!r}, which the merge base does not hold: check the name, "
+                    "or drop it once the rename has merged"
+                )
         if tier is None or tier == 1:
             continue
         if entry.direct:
             binds = tier == FULL
             # The confirm split runs only at tier 4.
             splits = ("screen", "confirm") if binds else ("screen",)
-            lines, weak = split_report(suite, old_holds(suite.target, base), binds, splits)
+            lines, weak = split_report(suite, old_holds_removed(suite, base), binds, splits)
             print(
                 "  what its splits can see:"
                 if binds
@@ -922,18 +950,22 @@ def show(key: str, store: pathlib.Path) -> int:
     print(f"\n--- final reply\n{sample.final}")
     for path, text in sorted(sample.files.items()):
         print(f"\n--- file {path}\n{text}")
+    for command, code in (sample.verified or {}).items():
+        print(f"\n--- verify {command}: {'timed out' if code is None else f'exit {code}'}")
     if sample.gh is not None:
         argvs = [cast("list[str]", call.get("argv", [])) for call in sample.gh]
         logged = "\n".join(f"gh {gh_stub.call_line(argv)}" for argv in argvs)
         print(f"\n--- gh calls: every call the stub logged, Claude Code's own included\n{logged}")
         print(f"\n--- gh text graded: Claude Code's own calls left out\n{grade.gh_text(sample.gh)}")
     parsed = parsed_trace(store, sample)
-    print("\n--- skills delivered (event index, agent)")
+    print("\n--- skills delivered (event index, agent, spawn)")
     for d in parsed.deliveries:
-        print(f"  {d.index} {d.skill} {d.agent or 'main'}")
-    print("\n--- writes (event index, agent)")
+        print(f"  {d.index} {d.skill} {d.agent or 'main'} {d.spawn or '-'}")
+    print("\n--- writes (event index, agent, spawn)")
     for w in parsed.writes:
-        print(f"  {w.index} {w.kind} ok={w.ok} {w.agent or 'main'} {w.text[:120]!r}")
+        print(
+            f"  {w.index} {w.kind} ok={w.ok} {w.agent or 'main'} {w.spawn or '-'} {w.text[:120]!r}"
+        )
     for b in parsed.briefs:
         print(f"\n--- brief to {b.agent} (event index {b.index})\n{b.text}")
     for r in parsed.reports:
@@ -1159,11 +1191,19 @@ def baseline_specs(
     names = args.arms.split(",")
     if stray := [n for n in names if n not in ("old", "none")]:
         raise SystemExit(f"--arms takes old and none, not {', '.join(stray)}")
-    version = claude_version()
+    version = checked_version(suite)
     return [
         (
             build_arm(name, suite, args.base, None, store),
-            session.Spec(model, version, suite.budget_usd, ROOT, store, timeout_s=suite.timeout_s),
+            session.Spec(
+                model,
+                version,
+                suite.budget_usd,
+                ROOT,
+                store,
+                timeout_s=suite.timeout_s,
+                env=suite.env,
+            ),
         )
         for name in names
         for model in suite.models
@@ -1398,7 +1438,7 @@ def main() -> int:
         return show(args.key, cache.root(ROOT)) if args.command == "show" else judge_command(args)
     if args.command == "size":
         suite = load(args.suite)
-        lines, weak = split_report(suite, old_holds(suite.target, args.base))
+        lines, weak = split_report(suite, old_holds_removed(suite, args.base))
         print(f"{shown(suite.path)}:")
         print("\n".join(lines))
         return 1 if weak else 0
@@ -1410,8 +1450,9 @@ def main() -> int:
         raise SystemExit(f"{model} is not one of the suite's models {list(suite.models)}")
     store = cache.root(ROOT)
     spec = session.Spec(
-        model, claude_version(), suite.budget_usd, ROOT, store, timeout_s=suite.timeout_s
-    )
+        model, checked_version(suite), suite.budget_usd, ROOT, store,
+        timeout_s=suite.timeout_s, env=suite.env,
+    )  # fmt: skip
     if args.command == "screen":
         return screen(args, suite, spec, store)
     if args.arm == "new" and args.split is None:

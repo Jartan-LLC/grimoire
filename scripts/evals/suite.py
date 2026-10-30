@@ -6,10 +6,12 @@ outputs the lint grades. `tests/evals/README.md` says how to write them.
 """
 
 import dataclasses
+import fnmatch
 import hashlib
 import json
 import pathlib
 import re
+import shlex
 import tomllib
 from dataclasses import dataclass
 from typing import cast
@@ -21,14 +23,35 @@ KINDS = ("target", "regression", "cost", "trigger")
 TEXT_ARTIFACTS = ("commits", "final", "gh")
 REPORT = "report:"
 BRIEF = "brief:"
+FILES = "files:"
 DIRECTIONS = ("higher",)  # every check scores 1 when it holds
 RULES = ("better", "no-regression")
 STATES = ("in-context", "late", "evicted", "absent", "loaded", "not-loaded")
-WRITE_KINDS = ("commit", "push", "pr", "issue", "file")
+WRITE_KINDS = ("commit", "push", "pr", "issue", "file", "spawn")
+# Checks on how the session's subagents worked, read from its trace like a delivery check.
+SPAWN_CHECKS = ("overlap", "spawn-writes", "barrier")
+# Graded from a session only, never a reference.
+SESSION_ARTIFACTS = ("delivery", "verify", *SPAWN_CHECKS)
+# The keys each session check takes beside `metric` and `artifact`.
+SESSION_KEYS: dict[str, frozenset[str]] = {
+    "delivery": frozenset(("skill", "agent", "write", "state")),
+    "verify": frozenset(("command",)),
+    "overlap": frozenset(),
+    "spawn-writes": frozenset(("write",)),
+    "barrier": frozenset(),
+}
 ARMS = ("none", "old")
 MAX_EXIT = 255
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
 JUDGE_MODEL = "claude-opus-5-5"
+# The only variables a suite's `env` may set. A list, not a pattern: Claude Code reads
+# credentials and extra directories from CLAUDE_CODE_* names too, and a suite must carry
+# neither. Add a variable here when a suite needs it.
+SUITE_ENV = (
+    "CLAUDE_CODE_FORK_SUBAGENT",
+    "CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH",
+    "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS",
+)
 JUDGE_KEYS = frozenset(
     ("id", "question", "model", "effort", "panel", "held_out", "siblings", "yes_ratings", "compare")
 )
@@ -44,16 +67,21 @@ class SuiteError(ValueError):
 class Check:
     """One graded condition on a sample, scored 0 or 1, counted toward `metric`.
 
-    A text check names an artifact (`commits`, `final`, `file:<path>`, `gh` (the calls
-    the sandbox's `gh` recorded, Claude Code's own aside), `report:<agent>` (every report
-    that agent handed back) or `brief:<agent>` (every Agent-call prompt the main thread
-    sent that agent type, but for a call that ended in error)) and a `present` or
+    A text check names an artifact (`commits`, `final`, `file:<path>`, `files:<glob>` (every
+    file the glob matches, `glob_match`, each after a `==> <path> <==` line), `gh` (the
+    calls the sandbox's `gh` recorded, Claude Code's own aside), `report:<agent>` (every
+    report that agent handed back) or `brief:<agent>` (every Agent-call prompt the main
+    thread sent that agent type, but for a call that ended in error)) and a `present` or
     `absent` regex, or a `judge` (a suite `[[judge]]` id) and the `reference` that judge
     reads beside the artifact, with `yes_ratings` when this case's silver labels accept
-    other ratings than the judge's. A delivery check names a `skill` and a `state`: with a `write` kind,
-    the state the skill must be in at every such write; without one, `loaded` or
-    `not-loaded` over the whole session (trigger cases). It reads the main thread's
-    deliveries and writes, or with an `agent`, that subagent's.
+    other ratings than the judge's. A delivery check names a `skill` and a `state`: with a
+    `write` kind, the state the skill must be in at every such write; without one, `loaded`
+    or `not-loaded` over the whole session (trigger cases). It reads the main thread's
+    deliveries and writes, or with an `agent`, that subagent's. A spawn check reads the
+    session's subagents: `overlap` (no file written by two spawns), `spawn-writes` with a
+    `write` kind (no spawn made such a write) or `barrier` (no main-thread file write while
+    a spawn it made had not ended). A `verify` check runs its `command` on the session's
+    final tree and holds when it exits 0.
     """
 
     metric: str
@@ -67,6 +95,7 @@ class Check:
     judge: str | None = None
     reference: str = ""
     yes_ratings: tuple[str, ...] = ()
+    command: str | None = None
 
 
 @dataclass(frozen=True)
@@ -162,7 +191,9 @@ class Case:
     A `remote` case's session gets a local `origin` and a `gh` that records each call
     and answers from the `gh` replies, first match first. The `origin` holds every
     fixture branch when the runner makes it; a `build.py` may make its own (see
-    `session.add_origin`).
+    `session.add_origin`). A case's session loads every plugin of the arm but those
+    named in `without`. `turns` are the user's later messages, each sent once the turn
+    before has ended.
     """
 
     id: str
@@ -177,6 +208,8 @@ class Case:
     baselines: tuple[Baseline, ...] = ()
     remote: bool = False
     gh: tuple[Reply, ...] = ()
+    without: tuple[str, ...] = ()
+    turns: tuple[str, ...] = ()
     # The hash when the suite was loaded; a run keys and checks its samples against it.
     loaded: str = ""
 
@@ -193,14 +226,25 @@ class Case:
         """The fixture paths a check reads after the session, to collect before cleanup."""
         return sorted({c.artifact[5:] for c in self.checks if c.artifact.startswith("file:")})
 
+    def globs(self) -> list[str]:
+        """The globs a `files:` check reads after the session: every file they match is collected."""
+        return sorted(
+            {c.artifact.removeprefix(FILES) for c in self.checks if c.artifact.startswith(FILES)}
+        )
+
+    def commands(self) -> list[str]:
+        """The `verify` commands to run on the session's final tree before cleanup."""
+        return sorted({c.command for c in self.checks if c.command is not None})
+
     def pinned(self) -> str:
         """The hash the case had when loaded, so a run's samples all describe one version."""
         return self.loaded or self.hash()
 
     def hash(self) -> str:
-        """What a session depends on, as on disk now: prompt, fixture, build script; of the key, only a remote case's `gh` replies.
+        """What a session depends on, as on disk now: prompt, fixture, build script; of the key, a remote case's `gh` replies, `without` and `turns`.
 
-        Those count as loaded, not as on disk now: the session reads them.
+        Those count as loaded, not as on disk now. Each is folded in only when set, so a
+        case without them keeps the hash it had before they existed.
         """
         inputs = [self.path / "prompt.md", self.path / "build.py"]
         fixture = self.path / "fixture"
@@ -211,10 +255,17 @@ class Case:
             else []
         )
         digest = tree_hash(self.path, files)
-        if not self.remote:
-            return digest
-        replies = json.dumps([dataclasses.asdict(r) for r in self.gh])
-        return hashlib.sha256(f"{digest}\0{replies}".encode()).hexdigest()
+        if self.remote:
+            replies = json.dumps([dataclasses.asdict(r) for r in self.gh])
+            digest = hashlib.sha256(f"{digest}\0{replies}".encode()).hexdigest()
+        options: dict[str, list[str]] = {}
+        if self.without:
+            options["without"] = sorted(self.without)
+        if self.turns:
+            options["turns"] = list(self.turns)
+        if options:
+            digest = hashlib.sha256(f"{digest}\0{json.dumps(options)}".encode()).hexdigest()
+        return digest
 
 
 @dataclass(frozen=True)
@@ -264,6 +315,13 @@ class Suite:
     burned: tuple[str, ...]
     cases: tuple[Case, ...]
     judges: dict[str, Judge] = dataclasses.field(default_factory=dict[str, Judge])
+    replaces: tuple[str, ...] = ()
+    env: dict[str, str] = dataclasses.field(default_factory=dict[str, str])
+    claude_code: str = ""  # the oldest Claude Code its sessions may run on; "" for any
+
+    def removed(self) -> tuple[str, ...]:
+        """What the `none` arm removes from `old`: the target, then each text it replaces."""
+        return (self.target, *self.replaces)
 
     def split(self, name: str | None) -> list[Case]:
         """The cases of one split, or all of them."""
@@ -272,6 +330,54 @@ class Suite:
     def unit(self, case_id: str) -> str:
         """The unit the verdict compares: the case's cluster, or the case itself."""
         return self.clusters.get(case_id, case_id)
+
+
+def glob_match(path: str, pattern: str) -> bool:
+    """Whether a `/`-separated relative path matches a glob: `*`, `?` and `[...]` stay within one name, `**` spans any number."""
+    return _glob_match(path.split("/"), pattern.split("/"))
+
+
+def _glob_match(names: list[str], parts: list[str]) -> bool:
+    if not parts:
+        return not names
+    if parts[0] == "**":
+        return any(_glob_match(names[i:], parts[1:]) for i in range(len(names) + 1))
+    return (
+        bool(names)
+        and fnmatch.fnmatchcase(names[0], parts[0])
+        and _glob_match(names[1:], parts[1:])
+    )
+
+
+def older(version: str, minimum: str) -> bool:
+    """Whether dotted version `version` is older than `minimum`; text after the numbers is ignored.
+
+    A missing part counts as 0, so 2.1 is 2.1.0.
+    """
+
+    def numbers(text: str) -> list[int]:
+        found = re.match(r"\d+(?:\.\d+)*", text)
+        return [int(n) for n in found[0].split(".")] if found else []
+
+    have, need = numbers(version), numbers(minimum)
+    width = max(len(have), len(need))
+    return have + [0] * (width - len(have)) < need + [0] * (width - len(need))
+
+
+def _env(data: Table, where: pathlib.Path) -> dict[str, str]:
+    table = data.get("env", {})
+    if not isinstance(table, dict) or not all(
+        isinstance(v, str) for v in cast("Table", table).values()
+    ):
+        raise SuiteError(f'{where}: [env] must be a table of NAME = "value" strings')
+    env = cast("dict[str, str]", table)
+    for name in env:
+        if name not in SUITE_ENV:
+            raise SuiteError(
+                f"{where}: [env] sets {name!r}: a suite sets only {', '.join(SUITE_ENV)} "
+                "(scripts/evals/suite.py SUITE_ENV)"
+            )
+    return env
 
 
 def python_cache(path: pathlib.Path) -> bool:
@@ -347,26 +453,8 @@ def _check(
     if metric not in metrics:
         raise SuiteError(f"{where}: check metric {metric!r} is not a metric of the suite")
     artifact = _str(table, "artifact", where)
-    if artifact == "delivery":
-        skill = _str(table, "skill", where)
-        agent = _str(table, "agent", where) if "agent" in table else ""
-        if "write" not in table:
-            return Check(
-                metric,
-                artifact,
-                skill=skill,
-                state=_str(table, "state", where, ("loaded", "not-loaded")),
-                agent=agent,
-            )
-        write = _str(table, "write", where, WRITE_KINDS)
-        return Check(
-            metric,
-            artifact,
-            skill=skill,
-            write=write,
-            state=_str(table, "state", where, STATES[:4]),
-            agent=agent,
-        )
+    if artifact in SESSION_ARTIFACTS:
+        return _session_check(table, where, metric, artifact)
     if "agent" in table:
         raise SuiteError(
             f"{where}: 'agent' is for delivery checks; a text check names it as report:<agent> "
@@ -375,11 +463,14 @@ def _check(
     if not (
         artifact in TEXT_ARTIFACTS
         or artifact.startswith("file:")
-        or any(artifact.startswith(p) and artifact != p for p in (REPORT, BRIEF))
+        or any(artifact.startswith(p) and artifact != p for p in (REPORT, BRIEF, FILES))
     ):
+        kinds = (
+            *TEXT_ARTIFACTS, "file:<path>", f"{FILES}<glob>", f"{REPORT}<agent>",
+            f"{BRIEF}<agent>", *SESSION_ARTIFACTS,
+        )  # fmt: skip
         raise SuiteError(
-            f"{where}: artifact {artifact!r} is not commits, final, gh, file:<path>, "
-            "report:<agent>, brief:<agent> or delivery"
+            f"{where}: artifact {artifact!r} is not {', '.join(kinds[:-1])} or {kinds[-1]}"
         )
     present, absent = table.get("present"), table.get("absent")
     if sum(table.get(k) is not None for k in ("present", "absent", "judge")) != 1:
@@ -393,6 +484,45 @@ def _check(
     if present is not None:
         return Check(metric, artifact, present=_regex(present, where))
     return Check(metric, artifact, absent=_regex(absent, where))
+
+
+def _session_check(table: Table, where: pathlib.Path, metric: str, artifact: str) -> Check:
+    """A delivery, verify or spawn check: a check graded from the session, never a reference."""
+    if stray := sorted(set(table) - {"metric", "artifact"} - SESSION_KEYS[artifact]):
+        raise SuiteError(f"{where}: a {artifact} check takes no {', '.join(stray)}")
+    if artifact in SPAWN_CHECKS:
+        write = _str(table, "write", where, WRITE_KINDS) if artifact == "spawn-writes" else None
+        return Check(metric, artifact, write=write)
+    if artifact == "verify":
+        command = _str(table, "command", where)
+        try:
+            words = shlex.split(command)
+        except ValueError as error:
+            raise SuiteError(
+                f"{where}: a verify check's 'command' does not parse: {error}"
+            ) from None
+        if not words:
+            raise SuiteError(f"{where}: a verify check's 'command' is empty")
+        return Check(metric, artifact, command=command)
+    skill = _str(table, "skill", where)
+    agent = _str(table, "agent", where) if "agent" in table else ""
+    if "write" not in table:
+        return Check(
+            metric,
+            artifact,
+            skill=skill,
+            state=_str(table, "state", where, ("loaded", "not-loaded")),
+            agent=agent,
+        )
+    write = _str(table, "write", where, WRITE_KINDS)
+    return Check(
+        metric,
+        artifact,
+        skill=skill,
+        write=write,
+        state=_str(table, "state", where, STATES[:4]),
+        agent=agent,
+    )
 
 
 def _judged(table: Table, where: pathlib.Path, metric: Metric, judges: dict[str, Judge]) -> Check:
@@ -500,6 +630,13 @@ def _baselines(key: Table, where: pathlib.Path) -> tuple[Baseline, ...]:
     return tuple(found)
 
 
+def _turns(key: Table, where: pathlib.Path) -> tuple[str, ...]:
+    turns = _strs(key, "turns", where)
+    if any(not t.strip() for t in turns):
+        raise SuiteError(f"{where}: a turn in 'turns' is empty")
+    return turns
+
+
 def load_case(
     path: pathlib.Path, metrics: dict[str, Metric], judges: dict[str, Judge] | None = None
 ) -> Case:
@@ -540,6 +677,8 @@ def load_case(
         baselines=_baselines(key, key_path),
         remote=_remote(key, key_path, replies),
         gh=replies,
+        without=_strs(key, "without", key_path),
+        turns=_turns(key, key_path),
         references=tuple(_reference(p) for p in sorted(references.glob("*.toml")))
         if references.is_dir()
         else (),
@@ -679,8 +818,12 @@ def load_suite(path: pathlib.Path) -> Suite:
     watch = _strs(data, "watch", where)
     if stray := [m for m in watch if m not in models]:
         raise SuiteError(f"{where}: watch names {stray}, which are not in models")
-    if ":" not in target:
-        raise SuiteError(f"{where}: 'target' must be <plugin>:<name>")
+    replaces = _strs(data, "replaces", where)
+    claude_code = _str(data, "claude_code", where) if "claude_code" in data else ""
+    if claude_code and not re.fullmatch(r"\d+(\.\d+)*", claude_code):
+        raise SuiteError(f"{where}: 'claude_code' must be a version such as \"2.1.302\"")
+    if any(":" not in t for t in (target, *replaces)):
+        raise SuiteError(f"{where}: 'target' and each of 'replaces' must be <plugin>:<name>")
     return Suite(
         path=path,
         target=target,
@@ -695,4 +838,7 @@ def load_suite(path: pathlib.Path) -> Suite:
         burned=_strs(data, "BURNED", where),
         cases=cases,
         judges=judges,
+        replaces=replaces,
+        env=_env(data, where),
+        claude_code=claude_code,
     )

@@ -9,6 +9,11 @@ CLAUDE = shutil.which("claude") or "claude"
 UV = shutil.which("uv") or "uv"
 
 
+def start(args: list[str], **options: Any) -> subprocess.Popen[str]:
+    """`subprocess.Popen` on an argument list this package built, in text mode; no shell."""
+    return subprocess.Popen(args, text=True, **options)  # noqa: S603 -- no shell, as for `run`
+
+
 def run(args: list[str], **options: Any) -> subprocess.CompletedProcess[Any]:
     """`subprocess.run` on an argument list this package built; nothing goes through a shell.
 

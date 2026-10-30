@@ -73,13 +73,17 @@ class Sample:
     files: dict[str, str]
     usage: dict[str, object]
     spoiled: str = ""
-    # The `file:` paths the key named at draw time; None in samples drawn before it was kept.
+    # The `file:` paths and `files:<glob>` artifacts the key named at draw time; None in samples
+    # drawn before it was kept.
     collected: list[str] | None = None
     # The (agent, skill) pairs the debug log named as preloaded; None before they were kept.
     preloads: list[list[str]] | None = None
     # Each call the sandbox's `gh` recorded (argv, stdin, the files it named); None for a case
     # without a remote, and in samples drawn before it was kept.
     gh: list[dict[str, object]] | None = None
+    # Each `verify` command run on the final tree and its exit code, None for a timeout; None
+    # in samples drawn before it was kept.
+    verified: dict[str, int | None] | None = None
 
 
 def _paths(store: pathlib.Path, sample_key: str) -> tuple[pathlib.Path, pathlib.Path]:

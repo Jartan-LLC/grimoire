@@ -67,11 +67,14 @@ right. Never commit the scratch suite; say in the PR what its cases showed.
 A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a skill,
 `tests/evals/<plugin>/agents/<name>/` for an agent.
 
-- `suite.toml`: what it covers, the models it runs on, its metrics, its pass rule and its clusters.
+- `suite.toml`: what it covers, the models it runs on, its metrics, its pass rule and its clusters;
+  when it needs them, what its target replaces, its sessions' `[env]` and the oldest Claude Code it runs
+  on.
 - `cases/<id>/prompt.md`: the task, as the user would type it.
 - `cases/<id>/fixture/` and an optional `build.py`: the repository the session starts in.
 - `cases/<id>/key.toml`: the split, the kind, the checks, and the facts, plants and baseline counts
-  the checks rely on; for a task that pushes or calls `gh`, its remote and `gh` replies.
+  the checks rely on; for a task that pushes or calls `gh`, its remote and `gh` replies; for a
+  conversation, its later `turns`; and any plugins its sessions run `without`.
 - `cases/<id>/fix/`: the files that fix the case's planted problems, laid over the fixture by the lint.
 - `cases/<id>/reference/`: outputs that pass every check, and outputs that fail the case's target check.
 
@@ -81,6 +84,10 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
 - `new`: the plugins in your working tree.
 - `none`: `old` with the text under test removed: a skill's directory deleted and its preloads dropped,
   or an agent's or command's body cut to its first line.
+  A target that renames or replaces texts of `old` lists them in `suite.toml` as
+  `replaces = ["<plugin>:<name>", ...]` (top-level, above the first `[table]`), and `none` removes them
+  too, so it holds none of the texts the change replaces. `make eval-plan` names an entry the merge
+  base does not hold.
 
 ## Choosing cases
 
@@ -170,6 +177,23 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
 - **Keep tool configuration out of a fixture.** A fixture whose `pyproject.toml` has a `[tool.ruff]`
   table gets a `.ruff_cache/` written into it by the commit hooks, and the case hash counts every file in
   the fixture, so each hook run would redraw the case's samples.
+- **A conversation** gives the user's later messages in the key, `turns = ["...", "..."]`, after
+  `prompt.md`'s first one. Each is sent once the turn before has ended. Under `-p` the main thread's
+  subagents run in the background, and a turn that starts a background task (a subagent or a
+  background command) ends only with the session, so no later turn can follow it: the sample is
+  excluded, with that reason. Put the turn that spawns subagents last. A session that ends before
+  every turn has run is excluded too. The lint reads the turns for `hints`, and a fact
+  `where = "prompt"` may sit in any turn. The turns count in the case hash.
+- **A case that runs without some plugins,** such as a skill measured where praxis's hook cannot help,
+  lists them in its key: `without = ["praxis"]`. Its sessions load every other plugin of the arm. The
+  list counts in the case hash, like the fixture, and the lint fails a name that is no plugin.
+- **A suite that needs Claude Code configured** sets the variables in an `[env]` table of `suite.toml`,
+  such as `CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS = "0"`. It may set only the variables `SUITE_ENV` in
+  `scripts/evals/suite.py` lists, none a credential; add one there when a suite needs it. They are set
+  after the runner drops the caller's `CLAUDE*` variables, and the runner's own settings win over
+  them. Changing them draws new samples. A suite that needs a recent Claude Code sets
+  `claude_code = "<version>"` (top-level, above the first `[table]`), the oldest version its sessions
+  may run on: a run or screen on an older one stops before any session.
 - **Check the checks.** Write several passing references that differ in wording, order and approach, and
   failing references for the target check. The lint runs the regex checks on all of them; a judged check
   is scored on the references when its judge is calibrated (Judges, bar row 5). Prefer checks on what the
@@ -193,13 +217,36 @@ the PR how many versions you screened.
 - **Grade what the agent produced:** a regex over the commit messages, the final reply, a file, what
   the agent sent to GitHub or a subagent, or a subagent's report (below). An `absent` check fails when
   the agent produced nothing to check.
+- **Several files at once:** `artifact = "files:<glob>"` reads every file of the session's final tree
+  that the glob matches, `.git` and Python's caches aside, in path order, each after a
+  `==> <path> <==` line: `*`, `?` and `[...]` match within one name, `**` across any number of
+  directories. A link that leads out of the tree is not read. A reference gives the files under
+  `[files]`, as for `file:<path>`.
+- **Whether the result works:** `artifact = "verify"` with a `command`, such as
+  `command = "python3 -m pytest -q"` for planted tests, runs the command without a shell in the
+  session's final tree and environment, and holds when it exits 0 within 60 seconds. It is not graded
+  on references.
 - **Whether a skill was in context when the agent wrote** is a guard or a diagnostic, not a primary
   metric, except in trigger cases, where loading the skill is the behaviour under test.
 - **A subagent's work:** `report:<agent>` is every report that agent handed back, `brief:<agent>` every
   Agent-call prompt the main thread sent that agent type (a call that ended in error aside), and a
   delivery check with `agent = "<plugin>:<agent>"` reads that subagent's skill loads and writes instead
-  of the main thread's. A reference gives reports under `[reports]` and briefs under `[briefs]`, as
-  `"<plugin>:<agent>" = "text"`.
+  of the main thread's. Subagents are followed at every depth, a subagent's own subagents included, and
+  so is an Agent call run in the background, which under `-p` is every one the main thread makes: its
+  report is the one Claude Code's notification carries when the agent finishes. A sample whose session
+  ends before a subagent the main thread started has reported or failed is excluded, unless the session
+  timed out or hit its budget or turn cap, which spoils it instead. A reference gives reports under
+  `[reports]` and briefs under `[briefs]`, as `"<plugin>:<agent>" = "text"`.
+- **How the subagents worked:** each Agent call is a spawn, and these checks read every spawn at
+  every depth, two spawns of one agent type apart. `artifact = "overlap"` holds when no file was
+  written by two spawns (the main thread's writes aside); `artifact = "spawn-writes"` with a `write`
+  kind when no spawn made that write, even one that failed, such as `write = "commit"`;
+  `artifact = "barrier"` when the main thread wrote no file, nor tried to, between an Agent call and
+  the end of every spawn out with it, at its report or at the notice that it failed. `overlap` and
+  `barrier` see a file written by a Write or Edit call only, not one written through Bash, such as
+  with `sed -i`. A delivery check's `write = "spawn"` is an Agent call: with `state = "in-context"`
+  the skill arrived before every Agent call of the main thread, or with an `agent`, of that subagent.
+  None of these is graded on references.
 - **What the agent sent to GitHub:** `gh` is every call the stub recorded but Claude Code's own (below),
   one `gh <arguments>` line each with newlines written as `\n`, then a blank line, then every text the
   calls passed, newlines kept: each argument and its tails (past each leading letter of a short flag or a
@@ -358,31 +405,33 @@ for nothing; between rounds, `make check` is enough.
    that always fails, and the baselines count each case's own checks, guards aside, so a target case
    whose checks the pass rule does not read adds to it though the verdict cannot see that case. Trust it
    only as far as the calibration's positive controls bear it out. A new skill has no positive control
-   until it is on main, since removing it from `old` changes nothing. A split below 80% is too weak, and
-   so is one missing `old` or `none` baselines on a gate model. At tier 4, for a direct suite, add cases
-   the text changes on that model to a split below 80%, and record any missing baselines
-   (`make eval-run ... RECORD=1`). Do not shrink the suite or the samples to save cost.
+   until it is on main, since removing it from `old` changes nothing, unless it `replaces` texts `old`
+   holds ("The arms"). A split below 80% is too weak, and so is one missing `old` or `none` baselines on
+   a gate model. At tier 4, for a direct suite, add cases the text changes on that model to a split
+   below 80%, and record any missing baselines (`make eval-run ... RECORD=1`). Do not shrink the suite
+   or the samples to save cost.
 3. **Both arms run in the same screen,** interleaved, because the model changes over time and an older
    baseline mixes that in; which arm of a pair starts first alternates. Screen on the models
    `make eval-plan TIER=<n>` prints, one at a time (`MODEL=...`). Each arm draws the suite's
    `min_samples` per case unless `SAMPLES=` says otherwise.
-4. **Rerun rather than reuse** when anything a session sees changes: the fixture, the runner's setup
-   (bump `RUNNER` in `scripts/evals/session.py`, after which the lint demands fresh baselines; for the
-   `gh` stub or the remote setup, `REMOTE_RUNNER` beside it, which redraws remote cases only and makes
-   the lint demand fresh baselines of those, recorded with their `remote_runner`), the model
-   or Claude Code. A screen reuses drawn samples only to resume or to regrade after a fix to a key;
+4. **Rerun rather than reuse** when anything a session sees changes: the fixture, the runner's setup,
+   the model or Claude Code. Bump `RUNNER` in `scripts/evals/session.py` when a change to the setup
+   could alter how a session does a task under test; the lint then demands fresh baselines. For a
+   change to the `gh` stub or the remote setup, bump `REMOTE_RUNNER` beside it instead: it redraws
+   remote cases only, and the lint demands fresh baselines of those, recorded with their
+   `remote_runner`. A screen reuses drawn samples only to resume or to regrade after a fix to a key;
    `make eval-run` keeps a case's samples per arm, model and Claude Code version, so a rerun regrades
    them and a larger `SAMPLES=` draws only the extra ones. Run `make check` on an edited case before
    drawing on it: a lint fix after the draw changes what the sessions saw.
 5. **Count every sample.** A sample that fails for a reason outside the agent (an API error, a usage
-   limit, a leak of user settings into the session, the session reaching the suite's files) is excluded
-   and retried up to three times; when the API is limiting requests, each retry waits first, and once
-   limits persist the run stops starting sessions and reports the rest as not run, so rerun it later to
-   resume. While any sample is still excluded, the screen cannot SHIP, though harm it already shows
-   still comes out HURT; its summary counts excluded and spoiled samples per arm. A sample the agent
-   itself spoiled (a timeout, the budget or turn cap) counts as failing every check. A session times
-   out after 30 minutes; a suite whose sessions run longer sets `timeout_s` in `suite.toml`, and
-   changing it draws new samples.
+   limit, a leak of user settings into the session, the session reaching the suite's files or another
+   arm's plugins) is excluded and retried up to three times; when the API is limiting requests, each
+   retry waits first, and once limits persist the run stops starting sessions and reports the rest as
+   not run, so rerun it later to resume. While any sample is still excluded, the screen cannot SHIP,
+   though harm it already shows still comes out HURT; its summary counts excluded and spoiled samples
+   per arm. A sample the agent itself spoiled (a timeout, the budget or turn cap) counts as failing
+   every check. A session times out after 30 minutes; a suite whose sessions run longer sets
+   `timeout_s` in `suite.toml`, and changing it draws new samples.
 6. **The verdict compares the arms task by task:** `new`'s mean minus `old`'s, per unit.
    - Under a `better` rule the primary metric is BETTER when an exact one-sided paired permutation test
      in that direction is below 0.05; under `no-regression` it is tested like a guard and never BETTER.
@@ -444,8 +493,9 @@ for nothing; between rounds, `make check` is enough.
   copied or not, draws its samples again and needs `--new-plan` (`NEW_PLAN=1`) once: its plan named each
   arm's plugins by their path in the store.
 - `python3 scripts/eval.py show <key>`: one sample's commits, final reply, the files its checks read,
-  every `gh` call the stub logged (Claude Code's own included) and the `gh` text its checks read, skill
-  deliveries and writes with the agent that made each, subagents' briefs and reports, and hook context.
+  each `verify` command's exit code, every `gh` call the stub logged (Claude Code's own included) and
+  the `gh` text its checks read, skill deliveries and writes with the agent and spawn that made each,
+  subagents' briefs and reports, and hook context.
 - `python3 scripts/eval.py lint`: the mechanical checks from "Writing a case", and that each judge's
   stamp is current; `make verify` runs it.
 - `python3 scripts/eval.py judge-probe`, `judge-label` and `judge-align`: calibrate a judge (see
@@ -474,8 +524,13 @@ After changing the runner or the verdict rule:
 
 - Sessions load only this repository's plugins, with no user skills or settings, so a case cannot show how
   a skill competes with others a user has installed.
-- Each session is one `claude -p` call: a case cannot test behaviour that should stop and ask the user,
-  nor a workflow that spans sessions, such as a PR reviewed in one and its review addressed in the next.
+- Each session is one `claude -p` call: a case cannot test a workflow that spans sessions, such as a PR
+  reviewed in one and its review addressed in the next. A case's `turns` are written before the
+  session, so they cannot answer what the agent asks, and a turn cannot follow one that started a
+  background task (a subagent or a background command): such a sample is excluded.
+- Sessions run without the ScheduleWakeup and CronCreate tools, as a wakeup the agent sets for itself
+  keeps the session waiting until it fires: a case cannot test a text that tells the agent to schedule
+  one.
 - GitHub is a stub: `gh` answers only from the case's replies, the same for every call that matches, so
   a case shows what the agent sent, not what GitHub would do with it.
 - The session's environment controls (GH_TOKEN, GH_CONFIG_DIR, GIT_ALLOW_PROTOCOL) hold only while it
@@ -491,12 +546,11 @@ After changing the runner or the verdict rule:
   `git config remote.origin.url` still gives the URL `build.py` set.
 - The lint knows when a baseline predates the runner, not when the model or Claude Code changed; rerun
   baselines after either.
-- A subagent's own subagents are not followed, nor a SendMessage follow-up, nor the report and skill
-  loads of an Agent call run in the background: `brief:<agent>` holds the prompts of the Agent calls
-  that started that agent, background ones included, and no follow-up. A delivery check with an `agent`
-  reads every spawn of that agent as one. The skills an agent's frontmatter preloads are read from a
-  line of Claude Code's debug log, which it does not promise to keep: if that line changes, every
-  preload reads as absent.
+- A SendMessage follow-up to a subagent is not followed: `brief:<agent>` holds the prompts of the main
+  thread's Agent calls that started that agent, and no follow-up. A delivery check with an `agent`
+  reads every spawn of that agent, at any depth, as one; the spawn checks (Graders) tell them apart.
+  The skills an agent's frontmatter preloads are read from a line of Claude Code's debug log, which it
+  does not promise to keep: if that line changes, every preload reads as absent.
 - A sample's venv uses the base Python's packages, the interpreter uv builds venvs on, not this
   checkout's `.venv`: that Python needs pytest, which the runner checks before the first session. The
   venv has no pip of its own, so a session's bare `pip install` reaches the base Python, where later
@@ -504,14 +558,15 @@ After changing the runner or the verdict rule:
 - Claude Code's own context reaches every session, the account's name and email included: some
   sessions commit with that identity.
 - A key fix regrades drawn samples once the screen is rerun with `NEW_PLAN=1` (the plan pins every file
-  of the suite), except a fix that makes a check read a file the samples did not collect: grading
-  refuses, and the screen needs fresh samples (a new `--trial`).
-- The check that a session stayed out of the suite reads the absolute paths in its tool calls, and the
-  stub's `gh-stub-replies.json` by name: a relative path gets past it, such as `cd` into an arm then
-  `ls ../../samples`, or `cat ../gh-stub/*` from the repository, and so does a path built from an
-  environment variable that holds the store's path, such as `ls $GIT_CEILING_DIRECTORIES/samples`, and
-  an absolute path that names a directory above one the check guards, such as `grep -r` over the
-  sandbox or `/tmp`, which reaches the stub's `gh-stub/`.
+  of the suite), except a fix that makes a check read a file or glob the samples did not collect, or a
+  `verify` command they did not run: grading refuses, and the screen needs fresh samples (a new
+  `--trial`).
+- The check that a session stayed out of the suite and the other arms reads the absolute paths in its
+  tool calls, and the stub's `gh-stub-replies.json` by name: a relative path gets past it, such as `cd`
+  into its arm then `ls ../../samples` or `ls ../old-<tree>`, or `cat ../gh-stub/*` from the
+  repository, and so does a path built from an environment variable that holds the store's path,
+  such as `ls $GIT_CEILING_DIRECTORIES/samples`, and an absolute path that names a directory above one
+  the check guards, such as `grep -r` over the sandbox or `/tmp`, which reaches the stub's `gh-stub/`.
 - A run reads each case from the checkout as it was when the run began. A sample whose case changed on
   disk since (a branch switch, an edit) is excluded and retried, so keep the checkout still while a run
   draws.

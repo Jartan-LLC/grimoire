@@ -1,14 +1,19 @@
 """Session setup: the parts that run no `claude` session."""
 
 import dataclasses
+import io
 import json
 import os
 import pathlib
 import subprocess
+import sys
 import tempfile
+import threading
+import time
+from typing import Any
 
 import pytest
-from evals import cache, gh_stub, session
+from evals import cache, gh_stub, proc, session
 from evals.arms import Arm
 from evals.proc import GIT, run
 from evals.suite import Case, load_suite
@@ -64,6 +69,8 @@ def test_claude_args_load_every_arm_plugin_and_switch_off_the_builtins() -> None
     assert args[args.index("--settings") + 1] == json.dumps(session.BUILTINS_OFF)
     assert args[args.index("--max-budget-usd") + 1] == "1.5"
     assert args[args.index("--debug-file") + 1] == "/s/debug.log"
+    at = args.index("--disallowedTools")
+    assert args[at + 1 : at + 3] == ["ScheduleWakeup", "CronCreate"]
     for flag in (
         "--strict-mcp-config", "--no-session-persistence", "--include-hook-events",
         "--forward-subagent-text",
@@ -412,6 +419,7 @@ def test_private_paths_from_a_worktree_hold_every_working_tree_of_the_clone(
         str(sibling.resolve()),
         str(worktree / "tests" / "evals" / "x"),
         str(store / "samples"),
+        str(store / "arms"),
     ]
     remote = dataclasses.replace(case, remote=True)
     assert session.private_paths(remote, spec, tmp_path / "sandbox")[-2:] == [
@@ -430,7 +438,9 @@ def test_no_path_a_remote_session_is_given_holds_a_private_sandbox_path(
     for made in ("tmp", "repo", "venv", "origin.git"):
         (sandbox / made).mkdir(parents=True)
     session.install_gh(sandbox, ())
-    env = session.sample_env({"PATH": "/usr/bin"}, checkout, sandbox, tmp_path / "store", True)
+    env = session.sample_env(
+        {"PATH": "/usr/bin"}, checkout, sandbox, tmp_path / "store", gh_stub=True
+    )
     given = [str(p) for p in sandbox.rglob("*")]
     given += [part for value in env.values() for part in value.split(os.pathsep)]
     spec = session.Spec("m", "v", 1.0, checkout, tmp_path / "store")
@@ -482,3 +492,233 @@ def test_a_case_changed_on_disk_after_loading_is_excluded_before_its_session(
     sample, _ = session._session(case, Arm("old", "h", {}), 0, spec, "k")  # pyright: ignore[reportPrivateUsage]
     assert not sample.valid
     assert "changed on disk" in sample.reasons[0]
+
+
+def test_collect_reads_named_files_and_every_file_a_glob_matches_outside_git(
+    tmp_path: pathlib.Path,
+) -> None:
+    key = KEY.replace('artifact = "commits"', 'artifact = "files:**/*.py"').replace(
+        'artifact = "final"', 'artifact = "file:notes.md"'
+    )
+    case = load_suite(write_suite(tmp_path / "suite", key=key)).cases[0]
+    repo = tmp_path / "repo"
+    session.build_fixture(case, repo, session.git_env(dict(os.environ)))
+    (repo / "pkg").mkdir()
+    (repo / "pkg" / "b.py").write_bytes(b"y = '\xff'\n")
+    (repo / "notes.md").write_text("n\n")
+    (repo / ".git" / "hook.py").write_text("no\n")
+    (repo / "pkg" / "__pycache__").mkdir()
+    (repo / "pkg" / "__pycache__" / "b.py").write_text("no\n")
+    (tmp_path / "outside.py").write_text("no\n")
+    (repo / "pkg" / "out.py").symlink_to(tmp_path / "outside.py")
+    (repo / "pkg" / "in.py").symlink_to(repo / "app.py")
+    assert session.collect(case, repo) == {
+        "notes.md": "n\n", "app.py": "x = 1\n", "pkg/b.py": "y = '\ufffd'\n",
+        "pkg/in.py": "x = 1\n",
+    }  # fmt: skip
+    (repo / "notes.md").unlink()
+    (repo / "notes.md").symlink_to(tmp_path / "outside.py")
+    assert "notes.md" not in session.collect(case, repo)
+
+
+def test_verify_returns_the_exit_code_or_none_on_a_timeout(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    env = dict(os.environ)
+    assert session.verify("python3 -c 'raise SystemExit(3)'", tmp_path, env) == 3
+    assert session.verify("python3 -c 'pass'", tmp_path, env) == 0
+    assert session.verify("no-such-command-here --x", tmp_path, env) == session.NOT_STARTED
+    monkeypatch.setattr(session, "VERIFY_TIMEOUT_S", 0.2)
+    assert session.verify("python3 -c 'import time; time.sleep(5)'", tmp_path, env) is None
+
+
+def test_verify_kills_what_a_timed_out_command_started(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(session, "VERIFY_TIMEOUT_S", 0.2)
+    command = "sh -c '(sleep 1; touch survived) & sleep 5'"
+    assert session.verify(command, tmp_path, dict(os.environ)) is None
+    time.sleep(1.5)
+    assert not (tmp_path / "survived").exists()
+
+
+def test_verify_kills_what_a_command_that_exited_left_running(tmp_path: pathlib.Path) -> None:
+    command = "sh -c '(sleep 1; touch survived) &'"
+    assert session.verify(command, tmp_path, dict(os.environ)) == 0
+    time.sleep(1.5)
+    assert not (tmp_path / "survived").exists()
+
+
+def test_sample_env_sets_the_suites_variables_after_the_strip_and_before_the_runners(
+    tmp_path: pathlib.Path,
+) -> None:
+    base = {"PATH": "/usr/bin", "CLAUDE_CODE_FORK_SUBAGENT": "0"}
+    suite_env = {
+        "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS": "0",
+        "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "0",
+    }
+    sandbox, store = tmp_path / "sandbox", tmp_path / "store"
+    env = session.sample_env(base, tmp_path, sandbox, store, suite_env=suite_env)
+    assert "CLAUDE_CODE_FORK_SUBAGENT" not in env
+    assert env["CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS"] == "0"
+    assert env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] == "1"
+
+
+def test_a_suites_env_is_in_the_key_only_when_set(tmp_path: pathlib.Path) -> None:
+    case = load_suite(write_suite(tmp_path / "suite")).cases[0]
+
+    def key(env: dict[str, str]) -> str:
+        spec = session.Spec("m", "v", 1.0, tmp_path, tmp_path / "store", "s1", env=env)
+        return session.key_of(case, Arm("old", "h", {}), 0, spec)
+
+    assert key({}) == cache.key(case.pinned(), f"old:h:s1:r{session.RUNNER}", "m", "v", 0)
+    assert len({key({}), key({"CLAUDE_CODE_X": "1"}), key({"CLAUDE_CODE_X": "0"})}) == 3
+
+
+def test_a_case_without_a_plugin_loads_every_other_plugin_of_the_arm(
+    tmp_path: pathlib.Path,
+) -> None:
+    arm = Arm("old", "h", {"gitwise": "/a/gitwise", "praxis": "/a/praxis"})
+    plain = load_suite(write_suite(tmp_path / "a")).cases[0]
+    assert session.loaded_arm(plain, arm) == arm
+    without = load_suite(write_suite(tmp_path / "b", key='without = ["praxis"]\n' + KEY)).cases[0]
+    assert session.loaded_arm(without, arm) == Arm("old", "h", {"gitwise": "/a/gitwise"})
+
+
+# A stand-in for `claude -p --input-format stream-json`: it answers each message with a
+# `result` event, first noting whether the next one had already arrived; a message
+# holding BG starts a background task, whose result it sends only once stdin closes, one
+# holding DIE ends the session with no result, and ORPHAN starts a process that keeps
+# the session's stdout open after the session is killed.
+FAKE_CLAUDE = """
+import json, os, select, subprocess, sys, time
+
+log = open(sys.argv[1], "w")
+
+def line():
+    data = b""
+    while not data.endswith(b"\\n"):
+        chunk = os.read(0, 1)
+        if not chunk:
+            return None
+        data += chunk
+    return json.loads(data)["message"]["content"]
+
+def say(event):
+    print(json.dumps(event), flush=True)
+
+while (text := line()) is not None:
+    if text == "HANG":
+        time.sleep(30)
+    if text == "ORPHAN":
+        subprocess.Popen(["sleep", "30"])
+        time.sleep(30)
+    if "DIE" in text:
+        sys.exit(1)
+    if "BG" in text:
+        say({"type": "system", "subtype": "task_started", "is_backgrounded": True})
+        while line() is not None:
+            pass
+        log.write(text + " early=False\\n")
+        say({"type": "result", "subtype": "success"})
+        break
+    early = bool(select.select([0], [], [], 0.3)[0])
+    log.write(f"{text} early={early}\\n")
+    log.flush()
+    say({"type": "result", "subtype": "success"})
+"""
+
+
+def converse(
+    tmp_path: pathlib.Path, messages: tuple[str, ...], timeout_s: float = 20
+) -> tuple[bool, str, list[str], list[str]]:
+    """What `converse` returns, the messages the stand-in got and the lines it wrote."""
+    fake, log, out = tmp_path / "fake.py", tmp_path / "log.txt", tmp_path / "out.jsonl"
+    fake.write_text(FAKE_CLAUDE)
+    with out.open("w") as handle:
+        timed_out, cut_short = session.converse(
+            [sys.executable, str(fake), str(log)], messages,
+            cwd=tmp_path, env=dict(os.environ), out=handle, timeout_s=timeout_s,
+        )  # fmt: skip
+    return timed_out, cut_short, log.read_text().splitlines(), out.read_text().splitlines()
+
+
+def test_converse_sends_each_turn_once_the_one_before_has_its_result(
+    tmp_path: pathlib.Path,
+) -> None:
+    timed_out, cut_short, got, lines = converse(tmp_path, ("one", "two", "three"))
+    # The last message is followed by stdin closing, which reads as ready too.
+    assert got == ["one early=False", "two early=False", "three early=True"]
+    assert (timed_out, cut_short, len(lines)) == (False, "", 3)
+
+
+def test_converse_sends_no_turn_after_one_that_started_a_background_task(
+    tmp_path: pathlib.Path,
+) -> None:
+    timed_out, cut_short, got, _ = converse(tmp_path, ("one", "BG two", "three"))
+    assert got == ["one early=False", "BG two early=False"]
+    assert not timed_out
+    assert cut_short.startswith("turn 2 started a background task")
+    assert cut_short.endswith("so turn 3 of 3 was not sent")
+
+
+@pytest.mark.parametrize(
+    ("messages", "said"),
+    [
+        (("one", "DIE two", "three"), "after 1 of 3 turns had their result, 2 sent"),
+        (("one", "DIE two"), "after 1 of 2 turns had their result, 2 sent"),
+    ],
+)
+def test_converse_says_when_the_session_ends_before_its_turns_all_ran(
+    tmp_path: pathlib.Path, messages: tuple[str, ...], said: str
+) -> None:
+    timed_out, cut_short, got, _ = converse(tmp_path, messages)
+    assert got == ["one early=False"]
+    assert not timed_out
+    assert cut_short == f"the session ended {said}"
+
+
+def test_converse_stops_a_session_past_its_timeout(tmp_path: pathlib.Path) -> None:
+    timed_out, _, got, _ = converse(tmp_path, ("HANG", "two"), timeout_s=0.5)
+    assert (timed_out, got) == (True, [])
+
+
+def test_converse_stops_what_a_timed_out_session_started_on_its_output(
+    tmp_path: pathlib.Path,
+) -> None:
+    began = time.monotonic()
+    timed_out, _, _, _ = converse(tmp_path, ("ORPHAN",), timeout_s=0.5)
+    assert timed_out
+    assert time.monotonic() - began < 10
+
+
+def test_converse_stops_the_session_when_writing_its_output_fails(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    started: list[subprocess.Popen[str]] = []
+
+    def start(args: list[str], **options: Any) -> subprocess.Popen[str]:
+        started.append(proc.start(args, **options))
+        return started[-1]
+
+    class Full(io.StringIO):
+        def write(self, s: str, /) -> int:
+            raise OSError("no space left on device")
+
+    fake = tmp_path / "fake.py"
+    fake.write_text(FAKE_CLAUDE)
+    monkeypatch.setattr(session, "start", start)
+    with pytest.raises(OSError, match="no space"):
+        session.converse(
+            [sys.executable, str(fake), str(tmp_path / "log.txt")], ("one", "HANG"),
+            cwd=tmp_path, env=dict(os.environ), out=Full(), timeout_s=60,
+        )  # fmt: skip
+    assert started[0].poll() is not None
+    assert not any(isinstance(t, threading.Timer) for t in threading.enumerate())
+
+
+def test_a_multi_turn_case_reads_its_messages_from_stdin() -> None:
+    arm = Arm("new", "h", {"gitwise": "/a/gitwise"})
+    args = session.claude_args(None, arm, "claude-opus-5-5", 1.5, pathlib.Path("/s/debug.log"))
+    assert args[1:3] == ["-p", "--model"]
+    assert args[-2:] == ["--input-format", "stream-json"]

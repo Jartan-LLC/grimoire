@@ -1,7 +1,7 @@
 import pathlib
 
 import pytest
-from evals.suite import Reply, SuiteError, load_suite
+from evals.suite import Reply, SuiteError, glob_match, load_suite, older
 from helpers import JUDGE, JUDGED, KEY, SUITE, write_suite
 
 
@@ -344,4 +344,160 @@ def test_a_check_can_read_the_gh_calls_and_an_agents_briefs(tmp_path: pathlib.Pa
     )
     (reference / "pass-1.toml").write_text("gh = 3\n")
     with pytest.raises(SuiteError, match="'final' and 'gh' must be strings"):
+        load_suite(root)
+
+
+SPAWN_CHECKS = """
+[[check]]
+metric = "kept"
+artifact = "overlap"
+
+[[check]]
+metric = "kept"
+artifact = "spawn-writes"
+write = "commit"
+
+[[check]]
+metric = "kept"
+artifact = "barrier"
+
+[[check]]
+metric = "delivered"
+artifact = "delivery"
+skill = "gitwise:commit-pr-writing"
+write = "spawn"
+state = "in-context"
+"""
+
+
+def test_spawn_checks_load(tmp_path: pathlib.Path) -> None:
+    key = KEY.split("[[check]]")[0] + SPAWN_CHECKS
+    case = load_suite(write_suite(tmp_path, key=key)).cases[0]
+    assert [(c.artifact, c.write) for c in case.checks] == [
+        ("overlap", None), ("spawn-writes", "commit"), ("barrier", None), ("delivery", "spawn"),
+    ]  # fmt: skip
+    with pytest.raises(SuiteError, match="'write' must be one of"):
+        load_suite(write_suite(tmp_path / "x", key=key.replace('write = "commit"', "")))
+    for stray in ('agent = "general-purpose"', 'present = "x"'):
+        broken = key.replace('write = "commit"', f'write = "commit"\n{stray}')
+        with pytest.raises(SuiteError, match="a spawn-writes check takes no"):
+            load_suite(write_suite(tmp_path / stray[:5], key=broken))
+
+
+def test_glob_match_keeps_a_star_within_one_name_and_lets_two_span_any() -> None:
+    assert glob_match("src/a.py", "src/*.py")
+    assert not glob_match("src/pkg/a.py", "src/*.py")
+    assert glob_match("src/pkg/a.py", "src/**/*.py")
+    assert glob_match("src/a.py", "src/**/*.py")
+    assert glob_match("src/pkg/a.py", "**")
+    assert glob_match(".hidden/a.py", "*/a.py")
+    assert not glob_match("src", "src/**/*.py")
+
+
+def test_files_and_verify_checks_load_and_name_what_the_session_collects(
+    tmp_path: pathlib.Path,
+) -> None:
+    key = KEY + (
+        '\n[[check]]\nmetric = "kept"\nartifact = "files:src/**/*.py"\npresent = "x"\n'
+        '\n[[check]]\nmetric = "kept"\nartifact = "verify"\ncommand = "python3 -m pytest"\n'
+    )
+    case = load_suite(write_suite(tmp_path, key=key)).cases[0]
+    assert (case.files(), case.globs(), case.commands()) == (
+        [],
+        ["src/**/*.py"],
+        ["python3 -m pytest"],
+    )
+    for command, message in (
+        ("", "'command' must be a string"),
+        ('command = " "', "is empty"),
+        ('command = "python3 -c \'x"', "does not parse: No closing quotation"),
+    ):
+        broken = key.replace('command = "python3 -m pytest"', command)
+        with pytest.raises(SuiteError, match=message):
+            load_suite(write_suite(tmp_path / message[:4], key=broken))
+    with pytest.raises(SuiteError, match="is not commits"):
+        load_suite(write_suite(tmp_path / "e", key=key.replace("files:src/**/*.py", "files:")))
+    stray = key.replace('pytest"\n', 'pytest"\npresent = "x"\n')
+    with pytest.raises(SuiteError, match="a verify check takes no present"):
+        load_suite(write_suite(tmp_path / "p", key=stray))
+
+
+def test_a_suite_names_what_its_target_replaces(tmp_path: pathlib.Path) -> None:
+    replacing = SUITE.replace("target =", 'replaces = ["recursio:old-skill"]\ntarget =', 1)
+    suite = load_suite(write_suite(tmp_path / "a", replacing))
+    assert suite.removed() == ("gitwise:commit-pr-writing", "recursio:old-skill")
+    assert load_suite(write_suite(tmp_path / "b")).removed() == ("gitwise:commit-pr-writing",)
+    with pytest.raises(SuiteError, match="each of 'replaces' must be <plugin>:<name>"):
+        load_suite(write_suite(tmp_path / "c", replacing.replace("recursio:old-skill", "old")))
+
+
+ENV_SUITE = (
+    SUITE.replace("target =", 'claude_code = "2.1.302"\ntarget =', 1)
+    + '\n[env]\nCLAUDE_CODE_FORK_SUBAGENT = "1"\nCLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS = "0"\n'
+)
+
+
+def test_a_suite_sets_claude_code_variables_and_a_minimum_version(tmp_path: pathlib.Path) -> None:
+    suite = load_suite(write_suite(tmp_path / "a", ENV_SUITE))
+    assert suite.env == {
+        "CLAUDE_CODE_FORK_SUBAGENT": "1", "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS": "0",
+    }  # fmt: skip
+    assert suite.claude_code == "2.1.302"
+    plain = load_suite(write_suite(tmp_path / "b"))
+    assert (plain.env, plain.claude_code) == ({}, "")
+
+
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [
+        (("CLAUDE_CODE_FORK_SUBAGENT", "PATH"), "sets 'PATH'"),
+        (("CLAUDE_CODE_FORK_SUBAGENT", "CLAUDE_CODE_OAUTH_TOKEN"), "sets 'CLAUDE_CODE_OAUTH"),
+        (("CLAUDE_CODE_FORK_SUBAGENT", "CLAUDE_CODE_USE_BEDROCK"), "sets 'CLAUDE_CODE_USE_"),
+        (("CLAUDE_CODE_FORK_SUBAGENT", "CLAUDE_CODE_GATEWAY_TOKEN"), "sets 'CLAUDE_CODE_GATE"),
+        (
+            ("CLAUDE_CODE_FORK_SUBAGENT", "CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD"),
+            "sets 'CLAUDE_CODE_ADDITIONAL",
+        ),
+        (('= "1"', "= 1"), "must be a table of"),
+        (('"2.1.302"', '">=2.1.302"'), "'claude_code' must be a version"),
+    ],
+)
+def test_load_suite_rejects_a_bad_env_or_version(
+    tmp_path: pathlib.Path, change: tuple[str, str], message: str
+) -> None:
+    with pytest.raises(SuiteError, match=message):
+        load_suite(write_suite(tmp_path, ENV_SUITE.replace(*change)))
+
+
+def test_older_compares_versions_number_by_number() -> None:
+    assert older("2.1.99", "2.1.302")
+    assert not older("2.1.314 (Claude Code)", "2.1.302")
+    assert not older("2.1.302", "2.1.302")
+    assert not older("2.1", "2.1.0")
+    assert older("2.0", "2.0.1")
+    assert older("no version", "2.1.0")
+
+
+def test_without_counts_in_a_case_hash_only_when_set(tmp_path: pathlib.Path) -> None:
+    root = write_suite(tmp_path)
+    plain = load_suite(root).cases[0]
+    key = root / "cases" / "c1" / "key.toml"
+    key.write_text("without = []\n" + KEY)
+    assert load_suite(root).cases[0].hash() == plain.hash()
+    key.write_text('without = ["praxis"]\n' + KEY)
+    without = load_suite(root).cases[0]
+    assert (without.without, without.hash() != plain.hash()) == (("praxis",), True)
+
+
+def test_turns_load_and_count_in_a_case_hash_with_without(tmp_path: pathlib.Path) -> None:
+    root = write_suite(tmp_path)
+    key = root / "cases" / "c1" / "key.toml"
+    key.write_text('without = ["praxis"]\n' + KEY)
+    without = load_suite(root).cases[0]
+    key.write_text('without = ["praxis"]\nturns = ["Now commit it."]\n' + KEY)
+    both = load_suite(root).cases[0]
+    assert both.turns == ("Now commit it.",)
+    assert both.hash() != without.hash()
+    key.write_text('turns = [" "]\n' + KEY)
+    with pytest.raises(SuiteError, match="a turn in 'turns' is empty"):
         load_suite(root)

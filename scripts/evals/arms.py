@@ -1,17 +1,19 @@
 """Build the plugin sets a suite runs against: `old` from a git ref, `new` from the working tree."""
 
+import hashlib
 import io
 import pathlib
 import shutil
 import tarfile
 import tempfile
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 from .proc import GIT, run
 from .suite import tree_hash
 
 # Names the cached `none` arm: bump it when what none_arm removes changes, so it is rebuilt.
-NONE_REVISION = 1
+NONE_REVISION = 2
 
 
 @dataclass(frozen=True)
@@ -21,6 +23,11 @@ class Arm:
     name: str
     hash: str
     plugins: dict[str, str]
+
+    @property
+    def root(self) -> str:
+        """The directory holding the arm's `plugins/`; empty for an arm with no plugin."""
+        return next((str(pathlib.Path(d).parent.parent) for d in self.plugins.values()), "")
 
 
 def _git(root: pathlib.Path, *args: str) -> bytes:
@@ -115,32 +122,21 @@ def _cut_body(document: pathlib.Path) -> None:
     document.write_text("\n".join([*lines[: end + 1], "", *body[:1], ""]))
 
 
-def none_arm(old: Arm, target: str, store: pathlib.Path) -> Arm:
-    """`old` with the text under test removed.
-
-    A skill's directory is deleted and every agent's preload of it dropped, so the
-    agent starts without it; an agent's or command's body is cut to its first line,
-    keeping its frontmatter so callers still find it. Pointers to a deleted skill in
-    other files stay: an agent told to load it finds nothing, as with no skill at all.
-    A target `old` does not hold yet, a new one, leaves `old` as it is.
-    """
+def _holds(arm: Arm, target: str) -> bool:
     plugin, _, name = target.partition(":")
-    if plugin not in old.plugins or not any(
-        (pathlib.Path(old.plugins[plugin]) / part).exists()
+    return plugin in arm.plugins and any(
+        (pathlib.Path(arm.plugins[plugin]) / part).exists()
         for part in (f"skills/{name}", f"agents/{name}.md", f"commands/{name}.md")
-    ):
-        return Arm("none", old.hash, old.plugins)
-    source = pathlib.Path(old.plugins[plugin]).parent.parent
-    target_dir = store / f"none-r{NONE_REVISION}-{old.hash[:16]}-{plugin}-{name}"
-    if target_dir.is_dir():
-        return arm_of("none", target_dir)
-    store.mkdir(parents=True, exist_ok=True)
-    staged = pathlib.Path(tempfile.mkdtemp(dir=store, prefix=".build-"))
-    shutil.copytree(source, staged, dirs_exist_ok=True)
-    root = staged / "plugins" / plugin
+    )
+
+
+def _remove(plugins: pathlib.Path, target: str) -> None:
+    """Remove `target` from the plugin tree `plugins`, as `none_arm` says."""
+    plugin, _, name = target.partition(":")
+    root = plugins / plugin
     if (root / "skills" / name).is_dir():
         shutil.rmtree(root / "skills" / name)
-        for agent in (staged / "plugins").glob("*/agents/*.md"):
+        for agent in plugins.glob("*/agents/*.md"):
             names = {f"{plugin}:{name}"} | (
                 {name} if agent.parent.parent.name == plugin else set[str]()
             )
@@ -149,5 +145,32 @@ def none_arm(old: Arm, target: str, store: pathlib.Path) -> Arm:
         _cut_body(root / "agents" / f"{name}.md")
     else:
         _cut_body(root / "commands" / f"{name}.md")
+
+
+def none_arm(old: Arm, target: str, store: pathlib.Path, replaces: Sequence[str] = ()) -> Arm:
+    """`old` with the text under test removed: `target`, and each text the target `replaces`.
+
+    A skill's directory is deleted and every agent's preload of it dropped, so the
+    agent starts without it; an agent's or command's body is cut to its first line,
+    keeping its frontmatter so callers still find it. Pointers to a deleted skill in
+    other files stay: an agent told to load it finds nothing, as with no skill at all.
+    A text `old` does not hold, such as a new target, is left out; when `old` holds none
+    of them, `none` is `old` as it is.
+    """
+    held = [t for t in (target, *replaces) if _holds(old, t)]
+    if not held:
+        return Arm("none", old.hash, old.plugins)
+    source = pathlib.Path(old.root)
+    # Several texts go by a digest: their names joined could pass a file name's 255 bytes.
+    joined = "+".join(t.replace(":", "-") for t in held)
+    removed = joined if len(held) == 1 else hashlib.sha256(joined.encode()).hexdigest()[:16]
+    target_dir = store / f"none-r{NONE_REVISION}-{old.hash[:16]}-{removed}"
+    if target_dir.is_dir():
+        return arm_of("none", target_dir)
+    store.mkdir(parents=True, exist_ok=True)
+    staged = pathlib.Path(tempfile.mkdtemp(dir=store, prefix=".build-"))
+    shutil.copytree(source, staged, dirs_exist_ok=True)
+    for removing in held:
+        _remove(staged / "plugins", removing)
     _install(staged, target_dir)
     return arm_of("none", target_dir)

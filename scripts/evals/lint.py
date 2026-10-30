@@ -1,33 +1,29 @@
 """Check what a script can check about a suite before any session runs (part of make verify).
 
-tests/evals/README.md holds the rules; this enforces the mechanical ones: the prompt
-uses none of the case's hint words, the facts a check needs are where the writer can
-find them, every planted problem fails its `verify` command and passes once fixed, the
-passing references pass every check and each failing reference fails one, each target
-case records a baseline failure, no baseline was drawn under another RUNNER or, for a
-remote case, another REMOTE_RUNNER, no baseline of a case without a remote records a
-remote_runner, a `gh` check reads a case whose session records its gh calls, and a
-judge's tracked stamp and labels parse and the stamp still describes the judge (its
-version, labels and references). It cannot tell that every check can fail, only that
-some check fails on each failing reference; judged checks are not run on references.
+tests/evals/README.md holds the rules; this enforces the mechanical ones: the prompt and
+the later turns use none of the case's hint words, a case's `without` names only
+plugins, the facts a check needs are where the writer can find them, every planted
+problem fails its `verify` command and passes once fixed, the passing references pass
+every check and each failing reference fails one, each target case records a baseline
+failure, no baseline was drawn under another RUNNER or, for a remote case, another
+REMOTE_RUNNER, no baseline of a case without a remote records a remote_runner, a `gh`
+check reads a case whose session records its gh calls, and a judge's tracked stamp and
+labels parse and the stamp still describes the judge (its version, labels and
+references). It cannot tell that every check can fail, only that some check fails on
+each failing reference; judged checks are not run on references.
 """
 
 import fnmatch
 import os
 import pathlib
-import shlex
 import shutil
-import subprocess
 import tempfile
 import tomllib
 
 from . import calibrate, jury
 from .grade import reference_scores
-from .proc import run
-from .session import REMOTE_RUNNER, RUNNER, build_fixture, git_env
-from .suite import Case, Suite, SuiteError, load_suite
-
-VERIFY_TIMEOUT_S = 60
+from .session import REMOTE_RUNNER, RUNNER, build_fixture, git_env, verify
+from .suite import SESSION_ARTIFACTS, Case, Suite, SuiteError, load_suite
 
 
 def _verify(case: Case, command: str, fixed: bool) -> int | None:
@@ -43,14 +39,7 @@ def _verify(case: Case, command: str, fixed: bool) -> int | None:
         build_fixture(case, work, git_env(dict(os.environ)))
         if fixed and (case.path / "fix").is_dir():
             shutil.copytree(case.path / "fix", work, dirs_exist_ok=True)
-        try:
-            done = run(
-                shlex.split(command), cwd=work, env=git_env(dict(os.environ)),
-                capture_output=True, timeout=VERIFY_TIMEOUT_S, check=False,
-            )  # fmt: skip
-        except subprocess.TimeoutExpired:
-            return None
-        return int(done.returncode)
+        return verify(command, work, git_env(dict(os.environ)))
 
 
 def _fact_problems(case: Case) -> list[str]:
@@ -58,7 +47,7 @@ def _fact_problems(case: Case) -> list[str]:
     for fact in case.facts:
         fixture_file = case.path / "fixture" / fact.where.removeprefix("fixture:")
         if fact.where == "prompt":
-            text = case.prompt
+            text = "\n".join((case.prompt, *case.turns))
         elif fact.where.startswith("fixture:") and fixture_file.is_file():
             text = fixture_file.read_text()
         else:
@@ -87,7 +76,7 @@ def _plant_problems(case: Case) -> list[str]:
 
 def _reference_problems(case: Case) -> list[str]:
     found: list[str] = []
-    if any(c.artifact != "delivery" for c in case.checks):
+    if any(c.artifact not in SESSION_ARTIFACTS for c in case.checks):
         if not any(r.passes for r in case.references):
             found.append(f"{case.path}: no reference/pass*.toml")
         if case.kind == "target" and all(r.passes for r in case.references):
@@ -105,6 +94,8 @@ def case_problems(case: Case) -> list[str]:
     """One message per rule the case breaks."""
     prompt = case.prompt.lower()
     found = [f"{case.path}: prompt.md gives away {h!r}" for h in case.hints if h.lower() in prompt]
+    turns = "\n".join(case.turns).lower()
+    found += [f"{case.path}: a turn gives away {h!r}" for h in case.hints if h.lower() in turns]
     found += _fact_problems(case) + _plant_problems(case) + _reference_problems(case)
     if not case.remote and any(c.artifact == "gh" for c in case.checks):
         found.append(
@@ -160,6 +151,11 @@ def suite_problems(suite: Suite, root: pathlib.Path, tracked: list[str]) -> list
             found.append(f"{where}: burned case {burned!r} is still in {by_id[burned].split}")
     for case in suite.cases:
         found += case_problems(case)
+        found += [
+            f"{case.path}: without names {name!r}, which is no plugin"
+            for name in case.without
+            if not (root / "plugins" / name / ".claude-plugin" / "plugin.json").is_file()
+        ]
     return found + judge_problems(suite)
 
 

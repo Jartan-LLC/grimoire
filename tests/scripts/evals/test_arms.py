@@ -3,7 +3,7 @@ import pathlib
 
 import pytest
 from evals import session
-from evals.arms import merge_base, new_arm, none_arm, old_arm
+from evals.arms import Arm, merge_base, new_arm, none_arm, old_arm
 from evals.proc import GIT, run
 
 
@@ -125,3 +125,35 @@ def test_a_named_old_arm_is_a_second_arm_from_the_same_ref(
     store = tmp_path / "store"
     first, second = old_arm(repo, "main", store), old_arm(repo, "main", store, name="new")
     assert (first.name, second.name, first.hash) == ("old", "new", second.hash)
+
+
+def test_none_arm_also_removes_what_a_new_target_replaces(
+    repo: pathlib.Path, tmp_path: pathlib.Path
+) -> None:
+    commands = repo / "plugins" / "demo" / "commands"
+    commands.mkdir()
+    (commands / "build.md").write_text(
+        "---\ndescription: Builds.\n---\n\nBuild it.\n\nAll of it.\n"
+    )
+    many = tuple(f"demo:{'x' * 60}-{n}" for n in range(5))
+    for text in many:
+        (commands / f"{text.removeprefix('demo:')}.md").write_text("---\n---\n\nGo.\n")
+    git(repo, "add", "-A")
+    git(repo, "commit", "-q", "-m", "command")
+    store = tmp_path / "store"
+    old = old_arm(repo, "main", store)
+    none = none_arm(old, "demo:renamed", store, ("demo:s", "demo:build"))
+    root = pathlib.Path(none.plugins["demo"])
+    assert not (root / "skills" / "s").exists()
+    assert (
+        root / "commands" / "build.md"
+    ).read_text() == "---\ndescription: Builds.\n---\n\nBuild it.\n"
+    assert none.hash != old.hash
+    assert none_arm(old, "demo:renamed", store, ("demo:s", "demo:build")) == none
+    assert none_arm(old, "demo:s", store).hash != none.hash
+    assert len(pathlib.Path(none_arm(old, "demo:s", store, many).root).name) < 64
+
+
+def test_an_arms_root_holds_its_plugins_directory() -> None:
+    assert Arm("old", "h", {"demo": "/store/arms/old-1/plugins/demo"}).root == "/store/arms/old-1"
+    assert Arm("old", "h", {}).root == ""

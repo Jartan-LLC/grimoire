@@ -1,4 +1,4 @@
-"""Events shaped as probe runs on Claude Code 2.1.309 (2.1.311 for subagents) emitted them."""
+"""Events shaped as probe runs on Claude Code 2.1.309 (2.1.311 and 2.1.314 for subagents) emitted them."""
 
 from evals import trace
 
@@ -146,15 +146,22 @@ def test_parse_attributes_a_subagents_loads_writes_and_report_to_its_agent() -> 
         *commit("c2"),
     ]
     parsed = trace.parse(events, PLUGINS)
-    assert [(w.index, w.agent) for w in parsed.writes] == [(4, REVIEWER), (7, "")]
-    assert [(d.skill, d.agent) for d in parsed.deliveries] == [
-        ("gitwise:commit-pr-writing", REVIEWER)
+    assert [(w.index, w.kind, w.agent, w.spawn) for w in parsed.writes] == [
+        (0, "spawn", "", ""), (4, "commit", REVIEWER, "a1"), (7, "commit", "", ""),
+    ]  # fmt: skip
+    assert [(d.skill, d.agent, d.spawn) for d in parsed.deliveries] == [
+        ("gitwise:commit-pr-writing", REVIEWER, "a1")
     ]
     assert parsed.reports == [
         trace.Report(
-            6, REVIEWER, "claude-sonnet-5-5", "[CRITICAL] mean divides by n - 1\nVerdict: BLOCK"
+            6,
+            REVIEWER,
+            "claude-sonnet-5-5",
+            "[CRITICAL] mean divides by n - 1\nVerdict: BLOCK",
+            "a1",
         )
     ]
+    assert parsed.spawns == [trace.Spawn("a1", 0, REVIEWER, "", 6)]
 
 
 def test_parse_names_an_agent_call_without_a_type_general_purpose_and_skips_a_failed_report() -> (
@@ -162,7 +169,7 @@ def test_parse_names_an_agent_call_without_a_type_general_purpose_and_skips_a_fa
 ):
     events = [spawn("a1", None), *inside("a1", commit("c1")), handed_back("a1", "x", error=True)]
     parsed = trace.parse(events, PLUGINS)
-    assert [w.agent for w in parsed.writes] == ["general-purpose"]
+    assert [w.agent for w in parsed.writes if w.kind == "commit"] == ["general-purpose"]
     assert parsed.reports == []
 
 
@@ -182,6 +189,95 @@ def test_parse_keeps_each_brief_the_main_thread_sent_in_order_and_no_subagents_o
         trace.Brief(2, "general-purpose", "Find the tests."),
         trace.Brief(3, REVIEWER, "Review again."),
     ]
+
+
+def launched(call_id: str) -> trace.Event:
+    """The result of an Agent call run in the background: no report, only the launch."""
+    note = {"type": "text", "text": "Async agent launched successfully."}
+    event = result_of(call_id) | {
+        "tool_use_result": {"isAsync": True, "status": "async_launched", "agentId": "x"}
+    }
+    return event | {
+        "message": {"content": [{"type": "tool_result", "tool_use_id": call_id, "content": [note]}]}
+    }
+
+
+def notification(call_id: str, summary: str, status: str = "completed") -> trace.Event:
+    return {
+        "type": "system",
+        "subtype": "task_notification",
+        "tool_use_id": call_id,
+        "status": status,
+        "summary": summary,
+    }
+
+
+def said(model: str) -> trace.Event:
+    return {
+        "type": "assistant",
+        "message": {"model": model, "content": [{"type": "text", "text": "ok"}]},
+    }
+
+
+def test_parse_reads_a_background_agents_report_from_its_notification() -> None:
+    events = [
+        spawn("a1"),
+        launched("a1"),
+        call("b1", "Bash", command="sleep 9", run_in_background=True),
+        result_of("b1"),
+        *inside("a1", [said("claude-sonnet-5-5"), *commit("c1")]),
+        notification("b1", "a background command's notification"),
+        notification("a1", "Verdict: BLOCK"),
+        RESULT,
+    ]
+    parsed = trace.parse(events, PLUGINS)
+    assert parsed.reports == [
+        trace.Report(8, REVIEWER, "claude-sonnet-5-5", "Verdict: BLOCK", "a1")
+    ]
+    assert parsed.spawns == [trace.Spawn("a1", 0, REVIEWER, "", 8)]
+    assert [(w.agent, w.spawn) for w in parsed.writes if w.kind == "commit"] == [(REVIEWER, "a1")]
+
+
+def test_parse_takes_no_report_from_a_failed_notification_but_ends_its_spawn_there() -> None:
+    events = [spawn("a1"), launched("a1"), notification("a1", "API error", status="failed")]
+    parsed = trace.parse(events, PLUGINS)
+    assert parsed.reports == []
+    assert parsed.spawns == [trace.Spawn("a1", 0, REVIEWER, "", 2)]
+    assert trace.parse(events[:2], PLUGINS).spawns == [trace.Spawn("a1", 0, REVIEWER, "", None)]
+
+
+def test_parse_follows_a_subagents_own_subagents_and_keeps_one_report_per_spawn() -> None:
+    work = [
+        *load_skill("s1", "gitwise:commit-pr-writing", CPW),
+        call("w1", "Write", file_path="/repo/b.py", content="x"),
+        result_of("w1"),
+    ]
+    events = [
+        spawn("a1"),
+        launched("a1"),
+        *inside("a1", [call("n1", "Agent", prompt="Write b.py.", subagent_type="general-purpose")]),
+        *inside("n1", work),
+        notification("n1", "I wrote b.py."),
+        # The nested call's result holds the report again, framed, with no tool_use_result.
+        *inside("a1", [result_of("n1")]),
+        notification("a1", "Done."),
+    ]
+    parsed = trace.parse(events, PLUGINS)
+    assert [(w.kind, w.agent, w.spawn, w.text) for w in parsed.writes] == [
+        ("spawn", "", "", "Review it."),
+        ("spawn", REVIEWER, "a1", "Write b.py."),
+        ("file", "general-purpose", "n1", "/repo/b.py"),
+    ]
+    assert [(d.agent, d.spawn) for d in parsed.deliveries] == [("general-purpose", "n1")]
+    assert [(r.agent, r.text, r.spawn) for r in parsed.reports] == [
+        ("general-purpose", "I wrote b.py.", "n1"),
+        (REVIEWER, "Done.", "a1"),
+    ]
+    assert parsed.spawns == [
+        trace.Spawn("a1", 0, REVIEWER, "", 10),
+        trace.Spawn("n1", 2, "general-purpose", "a1", 8),
+    ]
+    assert [b.agent for b in parsed.briefs] == [REVIEWER]
 
 
 def test_parse_places_each_preload_at_its_agents_call_in_order() -> None:
@@ -221,7 +317,12 @@ def test_parse_reads_hook_context_and_compactions() -> None:
 
 def classify(events: list[trace.Event], timed_out: bool = False) -> tuple[list[str], str]:
     return trace.classify(
-        trace.parse(events, PLUGINS), PLUGINS, MODEL, timed_out, ["/checkout"], arms="/store/arms"
+        trace.parse(events, PLUGINS),
+        PLUGINS,
+        MODEL,
+        timed_out,
+        ["/checkout"],
+        own="/store/arms/old-1",
     )
 
 
@@ -254,9 +355,10 @@ def test_classify_excludes_a_session_that_reached_the_suite() -> None:
     assert classify(events) == (["the session reached /checkout"], "")
 
 
-def test_classify_lets_a_session_read_any_arm_inside_the_checkout() -> None:
+def test_classify_lets_a_session_read_its_own_arm_and_no_other() -> None:
     arms = "/checkout/.git/grimoire-evals/arms"
-    plugins = {"gitwise": f"{arms}/old-1/plugins/gitwise"}
+    own = f"{arms}/none-r2-h-praxis-review"
+    plugins = {"gitwise": f"{own}/plugins/gitwise"}
     skill_file = plugins["gitwise"] + "/skills/commit-pr-writing/SKILL.md"
     events = [
         init(plugins=[{"name": "gitwise", "path": plugins["gitwise"]}]),
@@ -269,10 +371,17 @@ def test_classify_lets_a_session_read_any_arm_inside_the_checkout() -> None:
         if command is not None:
             events[1] = call("r1", "Bash", command=command)
         parsed = trace.parse(events, plugins)
-        return trace.classify(parsed, plugins, MODEL, False, ["/checkout"], arms=arms)[0]
+        return trace.classify(parsed, plugins, MODEL, False, ["/checkout", arms], own=own)[0]
 
     assert reasons() == []
-    assert reasons(f"ls {arms}/old-1/plugins {arms}/old-1 {arms}/new-2/plugins/gitwise") == []
+    assert reasons(f"ls {own}/plugins {own}") == []
+    other_arm = f"the session reached /checkout, {arms}"
+    assert reasons(f"cat {arms}/old-1/plugins/gitwise/skills/commit-pr-writing/SKILL.md") == [
+        other_arm
+    ]
+    assert reasons(f"ls {own}-pr/plugins") == [other_arm]
+    assert reasons(f"ls {own}+praxis-x/plugins") == [other_arm]
+    assert reasons(f"ls {arms}") == [other_arm]
     assert reasons(f"cat {skill_file} /checkout/tests/evals/x/key.toml") == [
         "the session reached /checkout"
     ]
@@ -289,6 +398,7 @@ def test_classify_from_a_worktree_catches_the_main_checkout_and_a_path_back_out_
         main,
         f"{main}/.claude/worktrees/w/tests/evals/x",
         samples,
+        arms,
     ]
     plugins = {"gitwise": f"{arms}/old-1/plugins/gitwise"}
 
@@ -300,9 +410,10 @@ def test_classify_from_a_worktree_catches_the_main_checkout_and_a_path_back_out_
             RESULT,
         ]
         parsed = trace.parse(events, plugins)
-        return trace.classify(parsed, plugins, MODEL, False, private, arms=arms)[0]
+        return trace.classify(parsed, plugins, MODEL, False, private, own=f"{arms}/old-1")[0]
 
-    assert reasons(f"cat {plugins['gitwise']}/skills/s/SKILL.md {arms}/new-2/plugins") == []
+    assert reasons(f"cat {plugins['gitwise']}/skills/s/SKILL.md") == []
+    assert reasons(f"ls {arms}/new-2/plugins") == [f"the session reached /main, {arms}"]
     assert reasons(f"cat {main}/tests/evals/x/cases/c1/reference/pass.toml") == [
         "the session reached /main"
     ]
@@ -320,7 +431,7 @@ def test_classify_catches_a_private_path_written_with_a_doubled_slash() -> None:
     events = [init(), call("r1", "Bash", command=command), result_of("r1")]
     parsed = trace.parse([*events, RESULT], PLUGINS)
     private = ["/workspaces/grimoire"]
-    assert trace.classify(parsed, PLUGINS, MODEL, False, private, arms="/store/arms")[0] == [
+    assert trace.classify(parsed, PLUGINS, MODEL, False, private, own="/store/arms/old-1")[0] == [
         "the session reached /workspaces/grimoire"
     ]
 
@@ -329,7 +440,7 @@ def test_classify_matches_a_private_path_only_whole() -> None:
     def reasons(command: str, private: list[str]) -> list[str]:
         events = [init(), call("r1", "Bash", command=command), result_of("r1"), RESULT]
         parsed = trace.parse(events, PLUGINS)
-        return trace.classify(parsed, PLUGINS, MODEL, False, private, arms="/store/arms")[0]
+        return trace.classify(parsed, PLUGINS, MODEL, False, private, own="/store/arms/old-1")[0]
 
     worktree, sandbox = "/t/grimoire", "/t/grimoire-eval-x"
     assert reasons(f"cat {sandbox}/repo/a.md {worktree}.bak", [worktree]) == []
@@ -347,7 +458,7 @@ def test_classify_excludes_a_session_that_reached_the_gh_stubs_replies() -> None
     def reasons(command: str) -> list[str]:
         events = [init(), call("r1", "Bash", command=command), result_of("r1"), RESULT]
         parsed = trace.parse(events, PLUGINS)
-        return trace.classify(parsed, PLUGINS, MODEL, False, private, arms="/store/arms")[0]
+        return trace.classify(parsed, PLUGINS, MODEL, False, private, own="/store/arms/old-1")[0]
 
     assert reasons("cat ../gh-stub/gh-stub-replies.json") == [
         "the session reached gh-stub-replies.json"
@@ -370,6 +481,23 @@ def test_classify_excludes_an_error_result_and_marks_caps_and_timeouts_as_spoile
         assert classify([init(), RESULT | {"is_error": True, "subtype": subtype}]) == ([], subtype)
     assert classify([init()], timed_out=True) == ([], "timeout")
     assert classify([], timed_out=True) == ([], "timeout")
+
+
+def test_classify_excludes_a_session_that_ended_before_a_main_thread_spawn_did() -> None:
+    nested = inside("a2", [spawn("n1")])  # a subagent's own spawn, never ended
+    ended = [spawn("a2"), launched("a2"), *nested, notification("a2", "x", status="failed")]
+    open_spawn = [spawn("a1"), launched("a1")]
+    assert classify([init(), *ended, RESULT]) == ([], "")
+    assert classify([init(), *open_spawn, *ended, RESULT]) == (
+        [
+            f"the main thread's spawn a1 ({REVIEWER}) never ended: no report and no notice "
+            "that it failed came by the session's end"
+        ],
+        "",
+    )
+    capped = RESULT | {"is_error": True, "subtype": "error_max_budget_usd"}
+    assert classify([init(), *open_spawn, capped]) == ([], "error_max_budget_usd")
+    assert classify([init(), *open_spawn], timed_out=True) == ([], "timeout")
 
 
 def test_state_is_in_context_when_the_skill_arrived_before_the_write() -> None:
@@ -410,6 +538,21 @@ def test_usage_reads_the_sessions_tokens_and_cost() -> None:
     assert trace.usage(trace.parse([RESULT], PLUGINS)) == {
         "cost_usd": 0.2, "turns": 3, "tokens": {"output_tokens": 10},
     }  # fmt: skip
+
+
+def test_usage_sums_turns_and_tokens_over_every_turn_and_takes_the_last_cost() -> None:
+    first = RESULT | {"usage": {"output_tokens": 10, "service_tier": "standard"}}
+    last = RESULT | {
+        "total_cost_usd": 0.5,
+        "num_turns": 2,
+        "usage": {"output_tokens": 5, "input_tokens": 7, "service_tier": "priority"},
+    }
+    assert trace.usage(trace.parse([first, last], PLUGINS)) == {
+        "cost_usd": 0.5,
+        "turns": 5,
+        "tokens": {"output_tokens": 15, "service_tier": "priority", "input_tokens": 7},
+    }
+    assert trace.usage(trace.parse([], PLUGINS)) == {"cost_usd": None, "turns": None, "tokens": {}}
 
 
 def test_load_text_skips_lines_that_are_not_json_objects() -> None:

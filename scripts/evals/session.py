@@ -13,23 +13,28 @@ the stream holds back by default, and the debug log names each skill an agent's
 frontmatter preloads; only those lines are kept, as the sample's `preloads`.
 """
 
+import contextlib
 import json
 import os
 import pathlib
 import re
+import shlex
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
 import threading
 import time
-from dataclasses import asdict, dataclass
+from collections.abc import Sequence
+from dataclasses import asdict, dataclass, field, replace
+from typing import TextIO, cast
 
 from . import cache, trace
 from .arms import Arm
 from .gh_stub import REPLIES, TEMP_ROOTS
-from .proc import CLAUDE, GIT, UV, run
-from .suite import TIMEOUT_S, Case, Reply
+from .proc import CLAUDE, GIT, UV, run, start
+from .suite import FILES, TIMEOUT_S, Case, Reply, glob_match, python_cache
 
 BUILTINS_OFF = {
     "enabledPlugins": {
@@ -38,12 +43,15 @@ BUILTINS_OFF = {
         "cc-plugin-plugin-authoring@builtin": False,
     }
 }
+# A wakeup or cron job the agent schedules for itself keeps `claude -p` alive until it
+# fires (20 minutes in #160), and no task under test needs one.
+SCHEDULERS = ("ScheduleWakeup", "CronCreate")
 RETRIES = 3
 BACKOFF_S = 30  # the first wait after the API limits requests; it doubles per retry
 BREAKER = 3  # samples in a row still limited after every retry stop the run
 LIMITED = re.compile(r"(?i)limiting requests|usage limit|rate limit|overloaded|\b(429|529)\b")
-# Part of every sample's key: bump it when a change to the session setup changes what a
-# session can do, so no sample drawn under the old setup is reused.
+# Part of every sample's key: bump it when a change to the session setup could change how a
+# session does a task under test, so no sample drawn under the old setup is reused.
 RUNNER = 2
 # Part of a remote case's sample key only: bump it when a change to the gh stub or to the
 # remote setup changes what a remote session can do, so only remote cases draw again.
@@ -59,11 +67,13 @@ SSH_AGENT = ("SSH_AUTH_SOCK", "SSH_AGENT_PID")
 STUB_TOKEN = "grimoire-eval-stub"  # noqa: S105 -- a dummy that authenticates nothing
 # A temp directory the stub reads besides the runner's, which TMPDIR can move elsewhere.
 SHARED_TMP = pathlib.Path("/tmp")  # noqa: S108 -- read for a body file, never written
+VERIFY_TIMEOUT_S = 60
+NOT_STARTED = 127  # a shell's exit code for a command it cannot find
 
 
 @dataclass(frozen=True)
 class Spec:
-    """What every sample of one run shares."""
+    """What every sample of one run shares; `env` is the suite's."""
 
     model: str
     version: str
@@ -72,6 +82,7 @@ class Spec:
     store: pathlib.Path
     screen: str = ""
     timeout_s: float = TIMEOUT_S
+    env: dict[str, str] = field(default_factory=dict[str, str])
 
 
 def git_env(base: dict[str, str]) -> dict[str, str]:
@@ -99,12 +110,14 @@ def claude_env(base: dict[str, str]) -> dict[str, str]:
     }
 
 
-def sample_env(
+def sample_env(  # noqa: PLR0913 -- `suite_env` is apart from `base`: it is set after the strip
     base: dict[str, str],
     checkout: pathlib.Path,
     sandbox: pathlib.Path,
     store: pathlib.Path,
+    *,
     gh_stub: bool = False,
+    suite_env: dict[str, str] | None = None,
 ) -> dict[str, str]:
     """The session's environment: git isolated, this checkout off PATH, the sample's own venv and TMPDIR.
 
@@ -116,6 +129,7 @@ def sample_env(
     CLAUDE* variables go too: the calling session's own (CLAUDECODE and the like)
     would tell the child it runs nested, and others (CLAUDE_EFFORT) would change it.
     The login ones stay, so a token, config-dir, Bedrock or Vertex login still works.
+    The suite's `suite_env` is set after that, and the runner's own settings after it.
     With `gh_stub`, the sandbox's `bin/` comes first, so its `gh` answers every call. For
     the real `gh` run by its path: gh's token and host variables are dropped, GH_TOKEN is
     set to a dummy, which gh sends to github.com in place of a token from the OS keyring,
@@ -127,7 +141,7 @@ def sample_env(
     GIT_ALLOW_PROTOCOL can reach the network with a key under HOME, as one that unsets
     the gh variables reaches the user's gh login.
     """
-    env = claude_env(git_env(base))
+    env = claude_env(git_env(base)) | (suite_env or {})
     for name in ("VIRTUAL_ENV", "PYTHONPATH", "PYTHONHOME", cache.STORE):
         env.pop(name, None)
     inside = str(checkout.resolve())
@@ -152,11 +166,14 @@ def sample_env(
 
 
 def claude_args(
-    prompt: str, arm: Arm, model: str, budget_usd: float, debug_log: pathlib.Path
+    prompt: str | None, arm: Arm, model: str, budget_usd: float, debug_log: pathlib.Path
 ) -> list[str]:
-    """The `claude` command line for one sample, writing its debug log to `debug_log`."""
+    """The `claude` command line for one sample, writing its debug log to `debug_log`.
+
+    With no `prompt`, the session reads its messages from stdin as stream-json (`converse`).
+    """
     args = [
-        CLAUDE, "-p", prompt,
+        CLAUDE, "-p", *([] if prompt is None else [prompt]),
         "--model", model,
         "--output-format", "stream-json", "--verbose", "--include-hook-events",
         "--forward-subagent-text", "--debug-file", str(debug_log),
@@ -165,11 +182,117 @@ def claude_args(
         "--strict-mcp-config",
         "--no-session-persistence",
         "--dangerously-skip-permissions",
+        "--disallowedTools", *SCHEDULERS,
         "--max-budget-usd", f"{budget_usd:g}",
     ]  # fmt: skip
     for directory in arm.plugins.values():
         args += ["--plugin-dir", directory, "--add-dir", directory]
+    if prompt is None:
+        args += ["--input-format", "stream-json"]
     return args
+
+
+def _message(text: str) -> str:
+    return json.dumps({"type": "user", "message": {"role": "user", "content": text}}) + "\n"
+
+
+def _event(line: str) -> dict[str, object]:
+    """A trace line's event; empty for a line that is no JSON object (stderr noise)."""
+    try:
+        event = json.loads(line)
+    except json.JSONDecodeError:
+        return {}
+    return cast("dict[str, object]", event) if isinstance(event, dict) else {}
+
+
+def converse(  # noqa: PLR0913 -- where it runs, what it writes and how long it may take are apart
+    args: list[str],
+    messages: Sequence[str],
+    *,
+    cwd: pathlib.Path,
+    env: dict[str, str],
+    out: TextIO,
+    timeout_s: float,
+) -> tuple[bool, str]:
+    """Run a session whose turns are `messages`, sent on stdin, writing its output to `out`.
+
+    Each message after the first goes in once the turn before has ended in a `result`
+    event: one sent sooner joins the turn in progress. Stdin closes right after the
+    last, as a session still runs the messages it got before the close, and the
+    background tasks they start. A turn that starts a background task, such as a
+    subagent the main thread spawns, emits its `result` only when the session ends
+    (probe on 2.1.314), so no later turn can follow it: the runner then sends no more.
+    A session that ends before it got every message, or before each turn it got has
+    its `result`, was cut short too. Returns whether the session timed out, and why its
+    turns did not all run, or "".
+
+    A timeout kills every process the session started, not only `claude`: one left
+    holding its output open would keep the read waiting.
+    """
+    session = start(
+        args, cwd=cwd, env=env, start_new_session=True,
+        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+    )  # fmt: skip
+    stdin, stdout = cast("TextIO", session.stdin), cast("TextIO", session.stdout)
+    expired = threading.Event()
+
+    def kill() -> None:
+        with contextlib.suppress(ProcessLookupError):  # nothing of the session is left
+            os.killpg(session.pid, signal.SIGKILL)
+
+    def expire() -> None:
+        expired.set()
+        kill()
+
+    timer = threading.Timer(timeout_s, expire)
+    timer.start()
+    pending, sent, results, cut_short = list(messages), 0, 0, ""
+
+    def send() -> None:
+        nonlocal sent
+        try:
+            stdin.write(_message(pending.pop(0)))
+            stdin.flush()
+            sent += 1
+            if not pending:
+                stdin.close()
+        except OSError:  # the session has ended: nothing more can reach it
+            pending.clear()
+
+    def stop() -> None:
+        pending.clear()
+        with contextlib.suppress(OSError):  # the session has ended already
+            stdin.close()
+
+    try:
+        send()
+        for line in stdout:
+            out.write(line)
+            event = _event(line)
+            if event.get("type") == "result":
+                results += 1
+            if not pending:
+                continue
+            if event.get("subtype") == "task_started" and event.get("is_backgrounded") is True:
+                cut_short = (
+                    f"turn {sent} started a background task, whose result comes only when the "
+                    f"session ends, so turn {sent + 1} of {len(messages)} was not sent"
+                )
+                stop()
+            elif event.get("type") == "result":
+                send()
+        session.wait()
+    finally:
+        timer.cancel()
+        if session.poll() is None:  # the loop raised: stop the session rather than leave it
+            kill()
+            session.wait()
+    if not cut_short and not expired.is_set() and min(sent, results) < len(messages):
+        cut_short = (
+            f"the session ended after {results} of {len(messages)} turns had their result, "
+            f"{sent} sent"
+        )
+    return expired.is_set(), cut_short
 
 
 def preloads(debug_log: str) -> list[tuple[str, str]]:
@@ -262,13 +385,69 @@ def new_commits(repo: pathlib.Path, env: dict[str, str], fixture_heads: list[str
     return [m.strip() for m in out.split("\x1e") if m.strip()]
 
 
+def verify(command: str, repo: pathlib.Path, env: dict[str, str]) -> int | None:
+    """The exit code of a `verify` command run in `repo`, or None when it timed out; no shell runs it.
+
+    A command that cannot start, such as one naming no executable, exits NOT_STARTED. Once
+    the command exits or times out, every process it started is killed too, such as a
+    server a test left running.
+    """
+    try:
+        process = start(
+            shlex.split(command), cwd=repo, env=env,
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True,
+        )  # fmt: skip
+    except OSError:
+        return NOT_STARTED
+    try:
+        code: int | None = process.wait(timeout=VERIFY_TIMEOUT_S)
+    except subprocess.TimeoutExpired:
+        code = None
+    with contextlib.suppress(ProcessLookupError):  # the command left nothing running
+        os.killpg(process.pid, signal.SIGKILL)
+    process.wait()
+    return code
+
+
+def collect(case: Case, repo: pathlib.Path) -> dict[str, str]:
+    """The text of every file a `file:` or `files:` check of the case reads, by its path in `repo`.
+
+    A glob is matched against every file of the tree but `.git`'s and Python's caches. A
+    file that is not UTF-8 is read with its bad bytes replaced, and one that resolves
+    outside `repo`, through a link the agent made, is not read.
+    """
+    inside = repo.resolve()
+
+    def read(path: str) -> str | None:
+        file = repo / path
+        if not file.is_file() or not file.resolve().is_relative_to(inside):
+            return None
+        return file.read_text(errors="replace")
+
+    named = {p: read(p) for p in case.files()}
+    found = {p: text for p, text in named.items() if text is not None}
+    if not (globs := case.globs()):
+        return found
+    for folder, dirs, names in os.walk(repo):
+        dirs[:] = sorted(d for d in dirs if d != ".git")
+        for name in sorted(names):
+            path = (pathlib.Path(folder) / name).relative_to(repo)
+            if python_cache(path) or not any(glob_match(path.as_posix(), g) for g in globs):
+                continue
+            if (text := read(path.as_posix())) is not None:
+                found[path.as_posix()] = text
+    return found
+
+
 def private_paths(case: Case, spec: Spec, sandbox: pathlib.Path) -> list[str]:
-    """The paths a session must not name: the checkout, every working tree of its clone, suite and samples.
+    """The paths a session must not name: the checkout, every working tree of its clone, suite, samples and arms.
 
     The clone's other working trees, the main one and each sibling worktree, hold the
-    same suite and its answers. A remote case's session must not name the `gh` stub's
-    directory in `sandbox`, nor its REPLIES file by any path: a reply's `match` can show
-    what the case wants the agent to send.
+    same suite and its answers. The arms are private but for the session's own, which
+    `trace.classify` lets it read: another arm's copy of the text under test would let a
+    `none` session read the skill it lacks. A remote case's session must not name the
+    `gh` stub's directory in `sandbox`, nor its REPLIES file by any path: a reply's
+    `match` can show what the case wants the agent to send.
     """
     listed = run(
         [GIT, "worktree", "list", "--porcelain"],
@@ -284,16 +463,23 @@ def private_paths(case: Case, spec: Spec, sandbox: pathlib.Path) -> list[str]:
         dict.fromkeys(
             [
                 str(spec.checkout), *trees, str(case.path.parent.parent),
-                str(spec.store / "samples"), *stub,
+                str(spec.store / "samples"), str(cache.arms(spec.store)), *stub,
             ]
         )
     )  # fmt: skip
+
+
+def loaded_arm(case: Case, arm: Arm) -> Arm:
+    """`arm` as the case's session loads it: without the plugins the case's `without` names."""
+    return replace(arm, plugins={n: d for n, d in arm.plugins.items() if n not in case.without})
 
 
 def _session(
     case: Case, arm: Arm, index: int, spec: Spec, sample_key: str
 ) -> tuple[cache.Sample, str]:
     """Run one session in a fresh sandbox and collect what it left."""
+    own = arm.root
+    arm = loaded_arm(case, arm)
     sandbox = pathlib.Path(tempfile.mkdtemp(prefix="grimoire-eval-"))
     try:
         (sandbox / "tmp").mkdir()
@@ -316,26 +502,43 @@ def _session(
         debug_log = sandbox / "debug.log"
         timed_out = False
         session_env = sample_env(
-            dict(os.environ), spec.checkout, sandbox, spec.store, gh_stub=case.remote
+            dict(os.environ),
+            spec.checkout,
+            sandbox,
+            spec.store,
+            gh_stub=case.remote,
+            suite_env=spec.env,
         )
+        cut_short = ""
         with out.open("w") as handle:
-            try:
-                run(
-                    claude_args(case.prompt, arm, spec.model, spec.budget_usd, debug_log),
-                    cwd=repo, env=session_env,
-                    stdout=handle, stderr=subprocess.STDOUT, timeout=spec.timeout_s, check=False,
+            if case.turns:
+                args = claude_args(None, arm, spec.model, spec.budget_usd, debug_log)
+                timed_out, cut_short = converse(
+                    args, (case.prompt, *case.turns),
+                    cwd=repo, env=session_env, out=handle, timeout_s=spec.timeout_s,
                 )  # fmt: skip
-            except subprocess.TimeoutExpired:
-                timed_out = True
+            else:
+                try:
+                    run(
+                        claude_args(case.prompt, arm, spec.model, spec.budget_usd, debug_log),
+                        cwd=repo, env=session_env, stdout=handle, stderr=subprocess.STDOUT,
+                        timeout=spec.timeout_s, check=False,
+                    )  # fmt: skip
+                except subprocess.TimeoutExpired:
+                    timed_out = True
         text = out.read_text()
         loaded = preloads(debug_log.read_text(errors="replace")) if debug_log.is_file() else []
         parsed = trace.parse(trace.load(out), arm.plugins, loaded)
         private = private_paths(case, spec, sandbox)
         reasons, spoiled = trace.classify(
-            parsed, arm.plugins, spec.model, timed_out, private, arms=str(cache.arms(spec.store))
+            parsed, arm.plugins, spec.model, timed_out, private, own=own
         )
+        reasons += [cut_short] if cut_short else []
         result = parsed.result or {}
-        files = {p: (repo / p).read_text() for p in case.files() if (repo / p).is_file()}
+        files = collect(case, repo)
+        commits = new_commits(repo, env, heads)
+        # An excluded sample is drawn again and never graded: its commands need not run.
+        verified = {} if reasons else {c: verify(c, repo, session_env) for c in case.commands()}
         sample = cache.Sample(
             key=sample_key,
             case=case.id,
@@ -344,7 +547,7 @@ def _session(
             plugins=arm.plugins,
             valid=not reasons,
             reasons=reasons,
-            commits=new_commits(repo, env, heads),
+            commits=commits,
             final=str(result.get("result", "")),
             files=files,
             usage=trace.usage(parsed)
@@ -353,9 +556,10 @@ def _session(
                 "agents": [[r.agent, r.model] for r in parsed.reports],
             },
             spoiled=spoiled,
-            collected=case.files(),
+            collected=[*case.files(), *(FILES + g for g in case.globs())],
             preloads=[list(p) for p in loaded],
             gh=gh_calls(sandbox) if case.remote else None,
+            verified=verified,
         )
         return sample, text
     finally:
@@ -413,11 +617,13 @@ def key_of(case: Case, arm: Arm, index: int, spec: Spec) -> str:
     """The key of the sample (case, arm, index) under `spec`.
 
     RUNNER is in every key, REMOTE_RUNNER in a remote case's only, and a timeout other
-    than TIMEOUT_S in its suite's only.
+    than TIMEOUT_S, or an `env`, in its suite's only.
     """
     runner = f"r{RUNNER}" + (f":g{REMOTE_RUNNER}" if case.remote else "")
     if spec.timeout_s != TIMEOUT_S:
         runner += f":t{spec.timeout_s:g}"
+    if spec.env:
+        runner += f":e{json.dumps(sorted(spec.env.items()))}"
     return cache.key(
         case.pinned(),
         f"{arm.name}:{arm.hash}:{spec.screen}:{runner}",
@@ -441,8 +647,8 @@ def run_sample(
     key, so `new` never reuses `old`'s sessions even when their plugins are identical,
     and `spec.screen` is too, so each screen draws fresh samples for both arms while a
     rerun of the same screen resumes it. RUNNER is in every key, REMOTE_RUNNER in a
-    remote case's only, and a timeout other than TIMEOUT_S in its suite's only, so a
-    changed timeout draws new samples instead of reusing the ones it cut off.
+    remote case's only, and a timeout other than TIMEOUT_S or an `env` in its suite's
+    only, so a changed timeout draws new samples instead of reusing the ones it cut off.
     """
     sample_key = key_of(case, arm, index, spec)
     if (cached := cache.load(spec.store, sample_key)) is not None and cached.valid:

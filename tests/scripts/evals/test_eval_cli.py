@@ -292,7 +292,7 @@ def test_the_planner_skips_the_control_only_for_a_target_old_does_not_hold(
     tmp_path: pathlib.Path,
 ) -> None:
     both: dict[str, tuple[int | None, int | None]] = {"claude-opus-5-5": (3, 3)}
-    lines, weak = cli.split_report(power_suite(tmp_path / "new", 8, both), old_holds_target=False)
+    lines, weak = cli.split_report(power_suite(tmp_path / "new", 8, both), has_control=False)
     assert not weak
     assert any("no positive control" in line for line in lines)
     unrecorded: dict[str, tuple[int | None, int | None]] = {"claude-opus-5-5": (None, None)}
@@ -372,6 +372,29 @@ def test_the_plan_without_a_tier_lists_what_the_change_reaches_and_asks_for_one(
     ]
     assert len(lines) == 4
     assert "TIER=<n>" in lines[3]
+
+
+def test_the_plan_names_a_replaced_text_the_merge_base_does_not_hold(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    plan, direct, _ = reach(tmp_path)
+    suite = dataclasses.replace(plan.suites[0].suite, replaces=("demo:held", "demo:typo"))
+    plan.suites[0] = Listed(suite, ["d.md"], direct=True)
+
+    def make_plan(root: pathlib.Path, base: str) -> Plan:
+        return plan
+
+    def holds(target: str, base: str) -> bool:
+        return target != "demo:typo"
+
+    monkeypatch.setattr(cli, "make_plan", make_plan)
+    monkeypatch.setattr(cli, "old_holds", holds)
+    assert cli.plan_command("main", None) == 0
+    assert capsys.readouterr().out.splitlines()[:2] == [
+        f"{direct}: DIRECT, covers d.md",
+        "  replaces 'demo:typo', which the merge base does not hold: check the name, or drop it "
+        "once the rename has merged",
+    ]
 
 
 def test_the_plan_at_tier_1_lists_what_the_change_reaches_with_no_steps(
@@ -506,6 +529,27 @@ def test_a_plan_pins_the_judges_without_redrawing_sessions_when_they_change(
     arms = {"old": old, "new": Arm("new", "n", {})}
     base = cli.drawn(list(judged.cases), plan, arms, "t1")
     assert cli.drawn(list(judged.cases), plan | {"judges": {"flags": "other"}}, arms, "t1") == base
+
+
+def test_a_plan_pins_the_suites_env_only_when_it_sets_one(tmp_path: pathlib.Path) -> None:
+    suite = load_suite(write_suite(tmp_path / "suite"))
+    old = Arm("old", "h", {})
+    spec = session.Spec("claude-opus-5-5", "2.1.310", 1.0, tmp_path, tmp_path / "store")
+    assert "env" not in cli.pinned(suite, "dev", 3, spec, old)
+    with_env = dataclasses.replace(spec, env={"CLAUDE_CODE_FORK_SUBAGENT": "1"})
+    assert cli.pinned(suite, "dev", 3, with_env, old)["env"] == {"CLAUDE_CODE_FORK_SUBAGENT": "1"}
+
+
+def test_a_run_refuses_a_claude_code_older_than_the_suite_needs(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = write_suite(tmp_path, SUITE.replace("target =", 'claude_code = "2.1.302"\ntarget =', 1))
+    suite = load_suite(root)
+    monkeypatch.setattr(cli, "claude_version", lambda: "2.1.301")
+    with pytest.raises(SystemExit, match=r"Claude Code 2\.1\.301 is older than 2\.1\.302"):
+        cli.checked_version(suite)
+    monkeypatch.setattr(cli, "claude_version", lambda: "2.1.314")
+    assert cli.checked_version(suite) == "2.1.314"
 
 
 def test_a_judge_without_a_cleared_stamp_gates_nothing(tmp_path: pathlib.Path) -> None:
