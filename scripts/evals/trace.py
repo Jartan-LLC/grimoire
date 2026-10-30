@@ -46,6 +46,7 @@ WRITES = (
     ("pr", re.compile(r"\bgh\s+pr\s+(create|edit|review)\b")),
     ("issue", re.compile(r"\bgh\s+issue\s+(create|comment)\b")),
 )
+SPAWN = "spawn"  # the write kind of an Agent call, whose text is its prompt
 
 # An absolute path in a tool call's input, so `..` in it can be resolved away.
 _PATH = re.compile(r"""(?<![\w.~-])/[^\s"'`;|&<>()]+""")
@@ -203,6 +204,8 @@ def _hook_context(output: str) -> str:
 def _write(name: str, tool_input: dict[str, object]) -> tuple[str, str] | None:
     if name in ("Write", "Edit"):
         return "file", str(tool_input.get("file_path", ""))
+    if name == AGENT:
+        return SPAWN, str(tool_input.get("prompt", ""))
     command = tool_input.get("command")
     if name == "Bash" and isinstance(command, str):
         for kind, pattern in WRITES:

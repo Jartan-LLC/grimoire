@@ -25,7 +25,7 @@ from . import calibrate, jury
 from .grade import reference_scores
 from .proc import run
 from .session import REMOTE_RUNNER, RUNNER, build_fixture, git_env
-from .suite import Case, Suite, SuiteError, load_suite
+from .suite import SESSION_ARTIFACTS, Case, Suite, SuiteError, load_suite
 
 VERIFY_TIMEOUT_S = 60
 
@@ -87,7 +87,7 @@ def _plant_problems(case: Case) -> list[str]:
 
 def _reference_problems(case: Case) -> list[str]:
     found: list[str] = []
-    if any(c.artifact != "delivery" for c in case.checks):
+    if any(c.artifact not in SESSION_ARTIFACTS for c in case.checks):
         if not any(r.passes for r in case.references):
             found.append(f"{case.path}: no reference/pass*.toml")
         if case.kind == "target" and all(r.passes for r in case.references):

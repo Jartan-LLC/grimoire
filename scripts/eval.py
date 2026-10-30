@@ -928,12 +928,14 @@ def show(key: str, store: pathlib.Path) -> int:
         print(f"\n--- gh calls: every call the stub logged, Claude Code's own included\n{logged}")
         print(f"\n--- gh text graded: Claude Code's own calls left out\n{grade.gh_text(sample.gh)}")
     parsed = parsed_trace(store, sample)
-    print("\n--- skills delivered (event index, agent)")
+    print("\n--- skills delivered (event index, agent, spawn)")
     for d in parsed.deliveries:
-        print(f"  {d.index} {d.skill} {d.agent or 'main'}")
-    print("\n--- writes (event index, agent)")
+        print(f"  {d.index} {d.skill} {d.agent or 'main'} {d.spawn or '-'}")
+    print("\n--- writes (event index, agent, spawn)")
     for w in parsed.writes:
-        print(f"  {w.index} {w.kind} ok={w.ok} {w.agent or 'main'} {w.text[:120]!r}")
+        print(
+            f"  {w.index} {w.kind} ok={w.ok} {w.agent or 'main'} {w.spawn or '-'} {w.text[:120]!r}"
+        )
     for b in parsed.briefs:
         print(f"\n--- brief to {b.agent} (event index {b.index})\n{b.text}")
     for r in parsed.reports:

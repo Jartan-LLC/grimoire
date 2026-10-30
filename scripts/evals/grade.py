@@ -1,13 +1,15 @@
-"""Graders: a regex over an artifact, a skill's delivery state, or a judge's kept answers."""
+"""Graders: a regex over an artifact, a skill's delivery state, how the subagents worked, or a judge's kept answers."""
 
 import dataclasses
+import math
+import posixpath
 import re
 from collections.abc import Collection, Iterable, Mapping, Sequence
 from typing import cast
 
 from . import gh_stub, trace
 from .cache import Sample
-from .suite import BRIEF, REPORT, Case, Check, Reference
+from .suite import BRIEF, REPORT, SESSION_ARTIFACTS, Case, Check, Reference
 
 
 class Uncollected(Exception):  # noqa: N818 -- reads as the condition, like StopIteration
@@ -170,6 +172,59 @@ def delivery_score(check: Check, parsed: trace.Trace) -> float:
     return 1.0 if held else 0.0
 
 
+def overlap_score(parsed: trace.Trace) -> float:
+    """1.0 when no file was written by two spawns; the main thread's writes and failed ones do not count."""
+    writers: dict[str, set[str]] = {}
+    for w in parsed.writes:
+        if w.kind == "file" and w.ok and w.spawn:
+            writers.setdefault(posixpath.normpath(w.text), set()).add(w.spawn)
+    return 0.0 if any(len(spawns) > 1 for spawns in writers.values()) else 1.0
+
+
+def spawn_writes_score(check: Check, parsed: trace.Trace) -> float:
+    """1.0 when no spawn, at any depth, made a write of `check.write`, even one that failed."""
+    return 0.0 if any(w.kind == check.write and w.spawn for w in parsed.writes) else 1.0
+
+
+def waves(parsed: trace.Trace) -> list[tuple[int, float]]:
+    """Each stretch of events from a main-thread Agent call to the last report of every spawn out with it.
+
+    A spawn that never reported stays out to the end of the session.
+    """
+    spans = sorted(
+        (s.index, math.inf if s.reported is None else s.reported) for s in parsed.spawns if not s.by
+    )
+    merged: list[tuple[int, float]] = []
+    for start, end in spans:
+        if merged and start <= merged[-1][1]:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], end))
+        else:
+            merged.append((start, end))
+    return merged
+
+
+def barrier_score(parsed: trace.Trace) -> float:
+    """1.0 when the main thread wrote no file, or tried to, inside a wave."""
+    inside = any(
+        start < w.index < end
+        for w in parsed.writes
+        if w.kind == "file" and not w.spawn
+        for start, end in waves(parsed)
+    )
+    return 0.0 if inside else 1.0
+
+
+def session_score(check: Check, parsed: trace.Trace) -> float:
+    """A delivery or spawn check's score on the session's trace."""
+    if check.artifact == "delivery":
+        return delivery_score(check, parsed)
+    if check.artifact == "overlap":
+        return overlap_score(parsed)
+    if check.artifact == "spawn-writes":
+        return spawn_writes_score(check, parsed)
+    return barrier_score(parsed)
+
+
 def _mean_by_metric(pairs: list[tuple[str, float]]) -> dict[str, float]:
     by_metric: dict[str, list[float]] = {}
     for metric, score in pairs:
@@ -229,8 +284,8 @@ def scores(  # noqa: PLR0913 -- `unjudged_ok` says what a missing judge answer d
         metric = metric_of(check, advisory)
         if sample.spoiled:
             score = 0.0
-        elif check.artifact == "delivery":
-            score = delivery_score(check, parsed)
+        elif check.artifact in SESSION_ARTIFACTS:
+            score = session_score(check, parsed)
         elif check.judge is not None:
             found = _judged_score(check, index, sample, outputs, judged or {})
             if found is None and not unjudged_ok:
@@ -269,10 +324,10 @@ def reference_outputs(reference: Reference) -> Outputs:
 
 
 def reference_scores(case: Case, reference: Reference) -> list[tuple[Check, float]]:
-    """Each regex check's score on a reference; delivery checks need a session, judged ones a judge."""
+    """Each regex check's score on a reference; delivery and spawn checks need a session, judged ones a judge."""
     outputs = reference_outputs(reference)
     return [
         (check, check_score(check, outputs))
         for check in case.checks
-        if check.artifact != "delivery" and check.judge is None
+        if check.artifact not in SESSION_ARTIFACTS and check.judge is None
     ]

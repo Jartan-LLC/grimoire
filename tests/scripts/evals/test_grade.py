@@ -1,3 +1,4 @@
+import dataclasses
 import pathlib
 import re
 
@@ -6,7 +7,20 @@ from evals import gh_stub, grade, trace
 from evals.cache import Sample
 from evals.suite import Case, Check, Reference, load_suite
 from helpers import JUDGE, JUDGED, KEY, SUITE, write_suite
-from test_trace import CPW, PLUGINS, REVIEWER, commit, handed_back, inside, load_skill, spawn
+from test_trace import (
+    CPW,
+    PLUGINS,
+    REVIEWER,
+    call,
+    commit,
+    handed_back,
+    inside,
+    launched,
+    load_skill,
+    notification,
+    result_of,
+    spawn,
+)
 
 
 def sample(commits: list[str], final: str, spoiled: str = "") -> Sample:
@@ -90,6 +104,75 @@ def test_a_delivery_check_reads_only_its_own_agents_loads_and_writes() -> None:
         [*load_skill("s1", "x", CPW), spawn("a1"), *inside("a1", commit("c1"))], PLUGINS
     )
     assert grade.delivery_score(reviewer, loaded_outside) == 0.0
+
+
+def wrote(call_id: str, path: str) -> list[trace.Event]:
+    return [call(call_id, "Write", file_path=path, content="x"), result_of(call_id)]
+
+
+def test_an_overlap_check_fails_when_two_spawns_wrote_one_file() -> None:
+    def overlap(events: list[trace.Event]) -> float:
+        return grade.overlap_score(trace.parse(events, PLUGINS))
+
+    apart = [
+        spawn("a1"), *inside("a1", wrote("w1", "/repo/a.py")),
+        spawn("a2"), *inside("a2", [*wrote("w2", "/repo/b.py"), *wrote("w3", "/repo/b.py")]),
+        *wrote("w4", "/repo/a.py"),  # the main thread's write is no spawn's
+    ]  # fmt: skip
+    assert overlap(apart) == 1.0
+    assert overlap([*apart, spawn("a3"), *inside("a3", wrote("w5", "/repo/x/../a.py"))]) == 0.0
+    failed = [call("w5", "Write", file_path="/repo/a.py"), result_of("w5", error=True)]
+    assert overlap([*apart, spawn("a3"), *inside("a3", failed)]) == 1.0
+
+
+def test_a_spawn_writes_check_fails_on_any_spawns_attempt_at_any_depth() -> None:
+    check = Check("isolated", "spawn-writes", write="commit")
+    nested = [call("n1", "Agent", prompt="Commit it."), *inside("n1", commit("c1"))]
+    assert grade.spawn_writes_score(check, trace.parse([*commit("c0")], PLUGINS)) == 1.0
+    assert (
+        grade.spawn_writes_score(check, trace.parse([spawn("a1"), *inside("a1", nested)], PLUGINS))
+        == 0.0
+    )
+    refused = [call("c2", "Bash", command="git commit -m x"), result_of("c2", error=True)]
+    assert (
+        grade.spawn_writes_score(check, trace.parse([spawn("a1"), *inside("a1", refused)], PLUGINS))
+        == 0.0
+    )
+
+
+def test_a_barrier_check_fails_on_a_main_thread_write_while_a_spawn_is_out() -> None:
+    def barrier(events: list[trace.Event]) -> float:
+        return grade.barrier_score(trace.parse(events, PLUGINS))
+
+    wave = [spawn("a1"), launched("a1"), spawn("a2"), launched("a2")]
+    after = [notification("a1", "done"), notification("a2", "done"), *wrote("w1", "/repo/glue.py")]
+    assert barrier([*wrote("w0", "/repo/types.py"), *wave, *after]) == 1.0
+    early = [notification("a1", "done"), *wrote("w1", "/repo/glue.py"), notification("a2", "done")]
+    assert barrier([*wave, *early]) == 0.0
+    never = [notification("a1", "done"), *wrote("w1", "/repo/glue.py")]
+    assert barrier([*wave, *never]) == 0.0
+
+
+def test_waves_merge_spawns_whose_lifetimes_overlap() -> None:
+    events = [
+        spawn("a1"), launched("a1"), spawn("a2"), launched("a2"), notification("a1", "x"),
+        notification("a2", "x"), spawn("a3"), launched("a3"), notification("a3", "x"),
+    ]  # fmt: skip
+    assert grade.waves(trace.parse(events, PLUGINS)) == [(0, 5), (6, 8)]
+
+
+def test_a_spawn_delivery_check_asks_for_the_skill_before_each_agent_call() -> None:
+    check = Check(
+        "d", "delivery", skill="gitwise:commit-pr-writing", write="spawn", state="in-context"
+    )
+    one, two = [spawn("a1"), launched("a1")], [spawn("a2"), launched("a2")]
+    first = trace.parse([*load_skill("s1", "x", CPW), *one, *two], PLUGINS)
+    assert grade.delivery_score(check, first) == 1.0
+    between = trace.parse([*one, *load_skill("s1", "x", CPW), *two], PLUGINS)
+    assert grade.delivery_score(check, between) == 0.0
+    in_part = dataclasses.replace(check, agent=REVIEWER)
+    split = [*load_skill("s1", "x", CPW), call("n1", "Agent", prompt="Build b."), result_of("n1")]
+    assert grade.delivery_score(in_part, trace.parse([*one, *inside("a1", split)], PLUGINS)) == 1.0
 
 
 def test_a_report_check_reads_every_report_its_agent_handed_back() -> None:

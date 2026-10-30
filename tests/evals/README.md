@@ -202,6 +202,14 @@ the PR how many versions you screened.
   so is an Agent call run in the background, which under `-p` is every one the main thread makes: its
   report is the one Claude Code's notification carries when the agent finishes. A reference gives reports under `[reports]` and briefs under `[briefs]`, as
   `"<plugin>:<agent>" = "text"`.
+- **How the subagents worked:** each Agent call is a spawn, and these checks read every spawn at
+  every depth, two spawns of one agent type apart. `artifact = "overlap"` holds when no file was
+  written by two spawns (the main thread's writes aside); `artifact = "spawn-writes"` with a `write`
+  kind when no spawn made that write, even one that failed, such as `write = "commit"`;
+  `artifact = "barrier"` when the main thread wrote no file, nor tried to, between an Agent call and
+  the last report of the spawns out with it. A delivery check's `write = "spawn"` is an Agent call: with
+  `state = "in-context"` the skill arrived before every Agent call of the main thread, or with an
+  `agent`, of that subagent. None of these is graded on references.
 - **What the agent sent to GitHub:** `gh` is every call the stub recorded but Claude Code's own (below),
   one `gh <arguments>` line each with newlines written as `\n`, then a blank line, then every text the
   calls passed, newlines kept: each argument and its tails (past each leading letter of a short flag or a
@@ -447,7 +455,7 @@ for nothing; between rounds, `make check` is enough.
   arm's plugins by their path in the store.
 - `python3 scripts/eval.py show <key>`: one sample's commits, final reply, the files its checks read,
   every `gh` call the stub logged (Claude Code's own included) and the `gh` text its checks read, skill
-  deliveries and writes with the agent that made each, subagents' briefs and reports, and hook context.
+  deliveries and writes with the agent and spawn that made each, subagents' briefs and reports, and hook context.
 - `python3 scripts/eval.py lint`: the mechanical checks from "Writing a case", and that each judge's
   stamp is current; `make verify` runs it.
 - `python3 scripts/eval.py judge-probe`, `judge-label` and `judge-align`: calibrate a judge (see
@@ -495,9 +503,9 @@ After changing the runner or the verdict rule:
   baselines after either.
 - A SendMessage follow-up to a subagent is not followed: `brief:<agent>` holds the prompts of the main
   thread's Agent calls that started that agent, and no follow-up. A delivery check with an `agent`
-  reads every spawn of that agent, at any depth, as one. The skills an agent's frontmatter preloads are read from a
-  line of Claude Code's debug log, which it does not promise to keep: if that line changes, every
-  preload reads as absent.
+  reads every spawn of that agent, at any depth, as one; the spawn checks (Graders) tell them apart.
+  The skills an agent's frontmatter preloads are read from a line of Claude Code's debug log, which it
+  does not promise to keep: if that line changes, every preload reads as absent.
 - A sample's venv uses the base Python's packages, the interpreter uv builds venvs on, not this
   checkout's `.venv`: that Python needs pytest, which the runner checks before the first session. The
   venv has no pip of its own, so a session's bare `pip install` reaches the base Python, where later

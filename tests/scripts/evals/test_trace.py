@@ -146,10 +146,9 @@ def test_parse_attributes_a_subagents_loads_writes_and_report_to_its_agent() -> 
         *commit("c2"),
     ]
     parsed = trace.parse(events, PLUGINS)
-    assert [(w.index, w.agent, w.spawn) for w in parsed.writes] == [
-        (4, REVIEWER, "a1"),
-        (7, "", ""),
-    ]
+    assert [(w.index, w.kind, w.agent, w.spawn) for w in parsed.writes] == [
+        (0, "spawn", "", ""), (4, "commit", REVIEWER, "a1"), (7, "commit", "", ""),
+    ]  # fmt: skip
     assert [(d.skill, d.agent, d.spawn) for d in parsed.deliveries] == [
         ("gitwise:commit-pr-writing", REVIEWER, "a1")
     ]
@@ -170,7 +169,7 @@ def test_parse_names_an_agent_call_without_a_type_general_purpose_and_skips_a_fa
 ):
     events = [spawn("a1", None), *inside("a1", commit("c1")), handed_back("a1", "x", error=True)]
     parsed = trace.parse(events, PLUGINS)
-    assert [w.agent for w in parsed.writes] == ["general-purpose"]
+    assert [w.agent for w in parsed.writes if w.kind == "commit"] == ["general-purpose"]
     assert parsed.reports == []
 
 
@@ -236,7 +235,7 @@ def test_parse_reads_a_background_agents_report_from_its_notification() -> None:
         trace.Report(8, REVIEWER, "claude-sonnet-5-5", "Verdict: BLOCK", "a1")
     ]
     assert parsed.spawns == [trace.Spawn("a1", 0, REVIEWER, "", 8)]
-    assert [(w.agent, w.spawn) for w in parsed.writes] == [(REVIEWER, "a1")]
+    assert [(w.agent, w.spawn) for w in parsed.writes if w.kind == "commit"] == [(REVIEWER, "a1")]
 
 
 def test_parse_skips_a_notification_that_did_not_complete() -> None:
@@ -263,8 +262,10 @@ def test_parse_follows_a_subagents_own_subagents_and_keeps_one_report_per_spawn(
         notification("a1", "Done."),
     ]
     parsed = trace.parse(events, PLUGINS)
-    assert [(w.agent, w.spawn, w.text) for w in parsed.writes] == [
-        ("general-purpose", "n1", "/repo/b.py")
+    assert [(w.kind, w.agent, w.spawn, w.text) for w in parsed.writes] == [
+        ("spawn", "", "", "Review it."),
+        ("spawn", REVIEWER, "a1", "Write b.py."),
+        ("file", "general-purpose", "n1", "/repo/b.py"),
     ]
     assert [(d.agent, d.spawn) for d in parsed.deliveries] == [("general-purpose", "n1")]
     assert [(r.agent, r.text, r.spawn) for r in parsed.reports] == [

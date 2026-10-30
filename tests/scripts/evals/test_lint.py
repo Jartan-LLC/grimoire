@@ -6,6 +6,7 @@ from evals import lint as lint_module
 from evals.lint import lint
 from evals.suite import load_suite
 from helpers import JUDGE, JUDGED, KEY, SUITE, write_suite
+from test_suite import SPAWN_CHECKS
 
 TRACKED = ["plugins/gitwise/skills/commit-pr-writing/SKILL.md"]
 VERIFY = """
@@ -88,6 +89,16 @@ def test_lint_grades_gh_and_brief_checks_and_wants_a_remote_for_gh(root: pathlib
     (case / "reference" / "pass-1.toml").write_text('gh = "gh pr create --draft"\n')
     found = lint(root, TRACKED)
     assert any("reference pass-1 fails kept" in f for f in found)
+
+
+def test_lint_wants_no_reference_for_a_case_of_delivery_and_spawn_checks_only(
+    root: pathlib.Path,
+) -> None:
+    key = KEY.split("[[check]]")[0] + SPAWN_CHECKS + "[[baseline]]" + KEY.split("[[baseline]]")[1]
+    case = suite_at(root, key=key)
+    for reference in (case / "reference").iterdir():
+        reference.unlink()
+    assert lint(root, TRACKED) == []
 
 
 def test_lint_requires_a_recorded_baseline_failure_on_a_target_case(root: pathlib.Path) -> None:

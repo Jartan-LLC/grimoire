@@ -24,7 +24,10 @@ BRIEF = "brief:"
 DIRECTIONS = ("higher",)  # every check scores 1 when it holds
 RULES = ("better", "no-regression")
 STATES = ("in-context", "late", "evicted", "absent", "loaded", "not-loaded")
-WRITE_KINDS = ("commit", "push", "pr", "issue", "file")
+WRITE_KINDS = ("commit", "push", "pr", "issue", "file", "spawn")
+# Checks on how the session's subagents worked, read from its trace like a delivery check.
+SPAWN_CHECKS = ("overlap", "spawn-writes", "barrier")
+SESSION_ARTIFACTS = ("delivery", *SPAWN_CHECKS)  # graded from a session only, never a reference
 ARMS = ("none", "old")
 MAX_EXIT = 255
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
@@ -53,7 +56,10 @@ class Check:
     other ratings than the judge's. A delivery check names a `skill` and a `state`: with a `write` kind,
     the state the skill must be in at every such write; without one, `loaded` or
     `not-loaded` over the whole session (trigger cases). It reads the main thread's
-    deliveries and writes, or with an `agent`, that subagent's.
+    deliveries and writes, or with an `agent`, that subagent's. A spawn check reads the
+    session's subagents: `overlap` (no file written by two spawns), `spawn-writes` with a
+    `write` kind (no spawn made such a write) or `barrier` (no main-thread file write while
+    a spawn it made had not reported).
     """
 
     metric: str
@@ -347,26 +353,8 @@ def _check(
     if metric not in metrics:
         raise SuiteError(f"{where}: check metric {metric!r} is not a metric of the suite")
     artifact = _str(table, "artifact", where)
-    if artifact == "delivery":
-        skill = _str(table, "skill", where)
-        agent = _str(table, "agent", where) if "agent" in table else ""
-        if "write" not in table:
-            return Check(
-                metric,
-                artifact,
-                skill=skill,
-                state=_str(table, "state", where, ("loaded", "not-loaded")),
-                agent=agent,
-            )
-        write = _str(table, "write", where, WRITE_KINDS)
-        return Check(
-            metric,
-            artifact,
-            skill=skill,
-            write=write,
-            state=_str(table, "state", where, STATES[:4]),
-            agent=agent,
-        )
+    if artifact in SESSION_ARTIFACTS:
+        return _session_check(table, where, metric, artifact)
     if "agent" in table:
         raise SuiteError(
             f"{where}: 'agent' is for delivery checks; a text check names it as report:<agent> "
@@ -379,7 +367,7 @@ def _check(
     ):
         raise SuiteError(
             f"{where}: artifact {artifact!r} is not commits, final, gh, file:<path>, "
-            "report:<agent>, brief:<agent> or delivery"
+            "report:<agent>, brief:<agent>, delivery, overlap, spawn-writes or barrier"
         )
     present, absent = table.get("present"), table.get("absent")
     if sum(table.get(k) is not None for k in ("present", "absent", "judge")) != 1:
@@ -393,6 +381,32 @@ def _check(
     if present is not None:
         return Check(metric, artifact, present=_regex(present, where))
     return Check(metric, artifact, absent=_regex(absent, where))
+
+
+def _session_check(table: Table, where: pathlib.Path, metric: str, artifact: str) -> Check:
+    """A delivery or spawn check, graded from the session's trace."""
+    if artifact in SPAWN_CHECKS:
+        write = _str(table, "write", where, WRITE_KINDS) if artifact == "spawn-writes" else None
+        return Check(metric, artifact, write=write)
+    skill = _str(table, "skill", where)
+    agent = _str(table, "agent", where) if "agent" in table else ""
+    if "write" not in table:
+        return Check(
+            metric,
+            artifact,
+            skill=skill,
+            state=_str(table, "state", where, ("loaded", "not-loaded")),
+            agent=agent,
+        )
+    write = _str(table, "write", where, WRITE_KINDS)
+    return Check(
+        metric,
+        artifact,
+        skill=skill,
+        write=write,
+        state=_str(table, "state", where, STATES[:4]),
+        agent=agent,
+    )
 
 
 def _judged(table: Table, where: pathlib.Path, metric: Metric, judges: dict[str, Judge]) -> Check:

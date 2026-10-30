@@ -345,3 +345,36 @@ def test_a_check_can_read_the_gh_calls_and_an_agents_briefs(tmp_path: pathlib.Pa
     (reference / "pass-1.toml").write_text("gh = 3\n")
     with pytest.raises(SuiteError, match="'final' and 'gh' must be strings"):
         load_suite(root)
+
+
+SPAWN_CHECKS = """
+[[check]]
+metric = "kept"
+artifact = "overlap"
+
+[[check]]
+metric = "kept"
+artifact = "spawn-writes"
+write = "commit"
+
+[[check]]
+metric = "kept"
+artifact = "barrier"
+
+[[check]]
+metric = "delivered"
+artifact = "delivery"
+skill = "gitwise:commit-pr-writing"
+write = "spawn"
+state = "in-context"
+"""
+
+
+def test_spawn_checks_load(tmp_path: pathlib.Path) -> None:
+    key = KEY.split("[[check]]")[0] + SPAWN_CHECKS
+    case = load_suite(write_suite(tmp_path, key=key)).cases[0]
+    assert [(c.artifact, c.write) for c in case.checks] == [
+        ("overlap", None), ("spawn-writes", "commit"), ("barrier", None), ("delivery", "spawn"),
+    ]  # fmt: skip
+    with pytest.raises(SuiteError, match="'write' must be one of"):
+        load_suite(write_suite(tmp_path / "x", key=key.replace('write = "commit"', "")))
