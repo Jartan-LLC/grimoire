@@ -32,6 +32,14 @@ WRITE_KINDS = ("commit", "push", "pr", "issue", "file", "spawn")
 SPAWN_CHECKS = ("overlap", "spawn-writes", "barrier")
 # Graded from a session only, never a reference.
 SESSION_ARTIFACTS = ("delivery", "verify", *SPAWN_CHECKS)
+# The keys each session check takes beside `metric` and `artifact`.
+SESSION_KEYS: dict[str, frozenset[str]] = {
+    "delivery": frozenset(("skill", "agent", "write", "state")),
+    "verify": frozenset(("command",)),
+    "overlap": frozenset(),
+    "spawn-writes": frozenset(("write",)),
+    "barrier": frozenset(),
+}
 ARMS = ("none", "old")
 MAX_EXIT = 255
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
@@ -478,6 +486,8 @@ def _check(
 
 def _session_check(table: Table, where: pathlib.Path, metric: str, artifact: str) -> Check:
     """A delivery or spawn check, graded from the session's trace."""
+    if stray := sorted(set(table) - {"metric", "artifact"} - SESSION_KEYS[artifact]):
+        raise SuiteError(f"{where}: a {artifact} check takes no {', '.join(stray)}")
     if artifact in SPAWN_CHECKS:
         write = _str(table, "write", where, WRITE_KINDS) if artifact == "spawn-writes" else None
         return Check(metric, artifact, write=write)

@@ -378,6 +378,10 @@ def test_spawn_checks_load(tmp_path: pathlib.Path) -> None:
     ]  # fmt: skip
     with pytest.raises(SuiteError, match="'write' must be one of"):
         load_suite(write_suite(tmp_path / "x", key=key.replace('write = "commit"', "")))
+    for stray in ('agent = "general-purpose"', 'present = "x"'):
+        broken = key.replace('write = "commit"', f'write = "commit"\n{stray}')
+        with pytest.raises(SuiteError, match="a spawn-writes check takes no"):
+            load_suite(write_suite(tmp_path / stray[:5], key=broken))
 
 
 def test_glob_match_keeps_a_star_within_one_name_and_lets_two_span_any() -> None:
@@ -413,6 +417,9 @@ def test_files_and_verify_checks_load_and_name_what_the_session_collects(
             load_suite(write_suite(tmp_path / message[:4], key=broken))
     with pytest.raises(SuiteError, match="is not commits"):
         load_suite(write_suite(tmp_path / "e", key=key.replace("files:src/**/*.py", "files:")))
+    stray = key.replace('pytest"\n', 'pytest"\npresent = "x"\n')
+    with pytest.raises(SuiteError, match="a verify check takes no present"):
+        load_suite(write_suite(tmp_path / "p", key=stray))
 
 
 def test_a_suite_names_what_its_target_replaces(tmp_path: pathlib.Path) -> None:
