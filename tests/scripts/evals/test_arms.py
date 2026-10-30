@@ -3,7 +3,7 @@ import pathlib
 
 import pytest
 from evals import session
-from evals.arms import merge_base, new_arm, none_arm, old_arm
+from evals.arms import Arm, merge_base, new_arm, none_arm, old_arm
 from evals.proc import GIT, run
 
 
@@ -148,3 +148,8 @@ def test_none_arm_also_removes_what_a_new_target_replaces(
     assert none.hash != old.hash
     assert none_arm(old, "demo:renamed", store, ("demo:s", "demo:build")) == none
     assert none_arm(old, "demo:s", store).hash != none.hash
+
+
+def test_an_arms_root_holds_its_plugins_directory() -> None:
+    assert Arm("old", "h", {"demo": "/store/arms/old-1/plugins/demo"}).root == "/store/arms/old-1"
+    assert Arm("old", "h", {}).root == ""

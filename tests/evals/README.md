@@ -411,9 +411,9 @@ for nothing; between rounds, `make check` is enough.
    them and a larger `SAMPLES=` draws only the extra ones. Run `make check` on an edited case before
    drawing on it: a lint fix after the draw changes what the sessions saw.
 5. **Count every sample.** A sample that fails for a reason outside the agent (an API error, a usage
-   limit, a leak of user settings into the session, the session reaching the suite's files) is excluded
-   and retried up to three times; when the API is limiting requests, each retry waits first, and once
-   limits persist the run stops starting sessions and reports the rest as not run, so rerun it later to
+   limit, a leak of user settings into the session, the session reaching the suite's files or another
+   arm's plugins) is excluded and retried up to three times; when the API is limiting requests, each
+   retry waits first, and once limits persist the run stops starting sessions and reports the rest as not run, so rerun it later to
    resume. While any sample is still excluded, the screen cannot SHIP, though harm it already shows
    still comes out HURT; its summary counts excluded and spoiled samples per arm. A sample the agent
    itself spoiled (a timeout, the budget or turn cap) counts as failing every check. A session times
@@ -544,9 +544,9 @@ After changing the runner or the verdict rule:
   of the suite), except a fix that makes a check read a file or glob the samples did not collect, or a
   `verify` command they did not run: grading refuses, and the screen needs fresh samples (a new
   `--trial`).
-- The check that a session stayed out of the suite reads the absolute paths in its tool calls, and the
-  stub's `gh-stub-replies.json` by name: a relative path gets past it, such as `cd` into an arm then
-  `ls ../../samples`, or `cat ../gh-stub/*` from the repository, and so does a path built from an
+- The check that a session stayed out of the suite and the other arms reads the absolute paths in its
+  tool calls, and the stub's `gh-stub-replies.json` by name: a relative path gets past it, such as `cd`
+  into its arm then `ls ../../samples` or `ls ../old-<tree>`, or `cat ../gh-stub/*` from the repository, and so does a path built from an
   environment variable that holds the store's path, such as `ls $GIT_CEILING_DIRECTORIES/samples`, and
   an absolute path that names a directory above one the check guards, such as `grep -r` over the
   sandbox or `/tmp`, which reaches the stub's `gh-stub/`.

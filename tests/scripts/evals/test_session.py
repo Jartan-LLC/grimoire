@@ -413,6 +413,7 @@ def test_private_paths_from_a_worktree_hold_every_working_tree_of_the_clone(
         str(sibling.resolve()),
         str(worktree / "tests" / "evals" / "x"),
         str(store / "samples"),
+        str(store / "arms"),
     ]
     remote = dataclasses.replace(case, remote=True)
     assert session.private_paths(remote, spec, tmp_path / "sandbox")[-2:] == [

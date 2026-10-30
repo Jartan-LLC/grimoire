@@ -23,6 +23,11 @@ class Arm:
     hash: str
     plugins: dict[str, str]
 
+    @property
+    def root(self) -> str:
+        """The directory holding the arm's `plugins/`; empty for an arm with no plugin."""
+        return next((str(pathlib.Path(d).parent.parent) for d in self.plugins.values()), "")
+
 
 def _git(root: pathlib.Path, *args: str) -> bytes:
     return run([GIT, *args], cwd=root, capture_output=True, check=True).stdout

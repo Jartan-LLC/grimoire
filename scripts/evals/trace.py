@@ -444,24 +444,24 @@ def _normalised(text: str) -> str:
     return _PATH.sub(lambda m: posixpath.normpath(m[0]), text)
 
 
-def classify(  # noqa: PLR0913 -- `arms` is apart from `private`: paths under it may be read
+def classify(  # noqa: PLR0913 -- `own` is apart from `private`: paths under it may be read
     trace: Trace,
     plugin_dirs: dict[str, str],
     model: str,
     timed_out: bool,
     private: list[str],
     *,
-    arms: str,
+    own: str,
 ) -> tuple[list[str], str]:
     """Why a sample must be excluded, and how the arm spoiled it; both empty for a clean sample.
 
     Excluded (the infrastructure failed, so the sample says nothing about the arm):
     plugins other than the arm's at the arm's paths, an MCP server, an auto-memory
     path, another model, an error result, a crash before the result, or a tool call
-    naming one of the `private` paths, which hold the suite and its answers. A path under
-    `arms`, the directory holding every arm, does not count: the store that holds it is
-    in the clone's git directory, inside the main checkout. Quotes are dropped and each
-    absolute path normalised first, so `"<arms>"/../samples` names the samples.
+    naming one of the `private` paths, which hold the suite and its answers and the other
+    arms. A path under `own`, the session's own arm, does not count: the store that holds
+    it is in the clone's git directory, inside the main checkout. Quotes are dropped and
+    each absolute path normalised first, so `"<own>"/../../samples` names the samples.
     Spoiled (the arm's own doing, so the sample counts and fails every check): a
     timeout, or a result cut off by the turn or budget cap.
     """
@@ -481,14 +481,17 @@ def classify(  # noqa: PLR0913 -- `arms` is apart from `private`: paths under it
         reasons.append(f"memory loaded: {trace.init.get('memory_paths')}")
     if trace.init.get("model") != model:
         reasons.append(f"model {trace.init.get('model')!r} is not {model!r}")
-    outside = [
-        _normalised(text.replace('"', "").replace("'", "")).replace(arms, "")
+    # A path counts only whole, not followed by a character that continues a file name: a
+    # worktree at /tmp/grimoire is not named by the sandbox /tmp/grimoire-eval-x, nor the
+    # arm none-...-praxis-review by a sibling none-...-praxis-review-pr.
+    whole = {p: re.compile(re.escape(p) + r"(?![\w.~-])") for p in [*private, own] if p}
+    texts = [
+        _normalised(text.replace('"', "").replace("'", ""))
         for tool_input in trace.tool_inputs
         for text in _strings(json.loads(tool_input))
     ]
-    # A private path counts only whole, not followed by a character that continues a file
-    # name: a worktree at /tmp/grimoire is not named by the sandbox /tmp/grimoire-eval-x.
-    bounded = {p: re.compile(re.escape(p) + r"(?![\w.~-])") for p in private}
+    outside = [whole[own].sub("", text) for text in texts] if own else texts
+    bounded = {p: at for p, at in whole.items() if p in private}
     if touched := sorted({p for p, at in bounded.items() for text in outside if at.search(text)}):
         reasons.append(f"the session reached {', '.join(touched)}")
     spoiled = ""

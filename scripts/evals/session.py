@@ -389,12 +389,14 @@ def collect(case: Case, repo: pathlib.Path) -> dict[str, str]:
 
 
 def private_paths(case: Case, spec: Spec, sandbox: pathlib.Path) -> list[str]:
-    """The paths a session must not name: the checkout, every working tree of its clone, suite and samples.
+    """The paths a session must not name: the checkout, every working tree of its clone, suite, samples and arms.
 
     The clone's other working trees, the main one and each sibling worktree, hold the
-    same suite and its answers. A remote case's session must not name the `gh` stub's
-    directory in `sandbox`, nor its REPLIES file by any path: a reply's `match` can show
-    what the case wants the agent to send.
+    same suite and its answers. The arms are private but for the session's own, which
+    `trace.classify` lets it read: another arm's copy of the text under test would let a
+    `none` session read the skill it lacks. A remote case's session must not name the
+    `gh` stub's directory in `sandbox`, nor its REPLIES file by any path: a reply's
+    `match` can show what the case wants the agent to send.
     """
     listed = run(
         [GIT, "worktree", "list", "--porcelain"],
@@ -410,7 +412,7 @@ def private_paths(case: Case, spec: Spec, sandbox: pathlib.Path) -> list[str]:
         dict.fromkeys(
             [
                 str(spec.checkout), *trees, str(case.path.parent.parent),
-                str(spec.store / "samples"), *stub,
+                str(spec.store / "samples"), str(cache.arms(spec.store)), *stub,
             ]
         )
     )  # fmt: skip
@@ -425,6 +427,7 @@ def _session(
     case: Case, arm: Arm, index: int, spec: Spec, sample_key: str
 ) -> tuple[cache.Sample, str]:
     """Run one session in a fresh sandbox and collect what it left."""
+    own = arm.root
     arm = loaded_arm(case, arm)
     sandbox = pathlib.Path(tempfile.mkdtemp(prefix="grimoire-eval-"))
     try:
@@ -477,7 +480,7 @@ def _session(
         parsed = trace.parse(trace.load(out), arm.plugins, loaded)
         private = private_paths(case, spec, sandbox)
         reasons, spoiled = trace.classify(
-            parsed, arm.plugins, spec.model, timed_out, private, arms=str(cache.arms(spec.store))
+            parsed, arm.plugins, spec.model, timed_out, private, own=own
         )
         reasons += [unsent] if unsent else []
         result = parsed.result or {}

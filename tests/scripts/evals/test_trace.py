@@ -316,7 +316,12 @@ def test_parse_reads_hook_context_and_compactions() -> None:
 
 def classify(events: list[trace.Event], timed_out: bool = False) -> tuple[list[str], str]:
     return trace.classify(
-        trace.parse(events, PLUGINS), PLUGINS, MODEL, timed_out, ["/checkout"], arms="/store/arms"
+        trace.parse(events, PLUGINS),
+        PLUGINS,
+        MODEL,
+        timed_out,
+        ["/checkout"],
+        own="/store/arms/old-1",
     )
 
 
@@ -349,9 +354,10 @@ def test_classify_excludes_a_session_that_reached_the_suite() -> None:
     assert classify(events) == (["the session reached /checkout"], "")
 
 
-def test_classify_lets_a_session_read_any_arm_inside_the_checkout() -> None:
+def test_classify_lets_a_session_read_its_own_arm_and_no_other() -> None:
     arms = "/checkout/.git/grimoire-evals/arms"
-    plugins = {"gitwise": f"{arms}/old-1/plugins/gitwise"}
+    own = f"{arms}/none-r2-h-praxis-review"
+    plugins = {"gitwise": f"{own}/plugins/gitwise"}
     skill_file = plugins["gitwise"] + "/skills/commit-pr-writing/SKILL.md"
     events = [
         init(plugins=[{"name": "gitwise", "path": plugins["gitwise"]}]),
@@ -364,10 +370,16 @@ def test_classify_lets_a_session_read_any_arm_inside_the_checkout() -> None:
         if command is not None:
             events[1] = call("r1", "Bash", command=command)
         parsed = trace.parse(events, plugins)
-        return trace.classify(parsed, plugins, MODEL, False, ["/checkout"], arms=arms)[0]
+        return trace.classify(parsed, plugins, MODEL, False, ["/checkout", arms], own=own)[0]
 
     assert reasons() == []
-    assert reasons(f"ls {arms}/old-1/plugins {arms}/old-1 {arms}/new-2/plugins/gitwise") == []
+    assert reasons(f"ls {own}/plugins {own}") == []
+    other_arm = f"the session reached /checkout, {arms}"
+    assert reasons(f"cat {arms}/old-1/plugins/gitwise/skills/commit-pr-writing/SKILL.md") == [
+        other_arm
+    ]
+    assert reasons(f"ls {own}-pr/plugins") == [other_arm]
+    assert reasons(f"ls {arms}") == [other_arm]
     assert reasons(f"cat {skill_file} /checkout/tests/evals/x/key.toml") == [
         "the session reached /checkout"
     ]
@@ -384,6 +396,7 @@ def test_classify_from_a_worktree_catches_the_main_checkout_and_a_path_back_out_
         main,
         f"{main}/.claude/worktrees/w/tests/evals/x",
         samples,
+        arms,
     ]
     plugins = {"gitwise": f"{arms}/old-1/plugins/gitwise"}
 
@@ -395,9 +408,10 @@ def test_classify_from_a_worktree_catches_the_main_checkout_and_a_path_back_out_
             RESULT,
         ]
         parsed = trace.parse(events, plugins)
-        return trace.classify(parsed, plugins, MODEL, False, private, arms=arms)[0]
+        return trace.classify(parsed, plugins, MODEL, False, private, own=f"{arms}/old-1")[0]
 
-    assert reasons(f"cat {plugins['gitwise']}/skills/s/SKILL.md {arms}/new-2/plugins") == []
+    assert reasons(f"cat {plugins['gitwise']}/skills/s/SKILL.md") == []
+    assert reasons(f"ls {arms}/new-2/plugins") == [f"the session reached /main, {arms}"]
     assert reasons(f"cat {main}/tests/evals/x/cases/c1/reference/pass.toml") == [
         "the session reached /main"
     ]
@@ -415,7 +429,7 @@ def test_classify_catches_a_private_path_written_with_a_doubled_slash() -> None:
     events = [init(), call("r1", "Bash", command=command), result_of("r1")]
     parsed = trace.parse([*events, RESULT], PLUGINS)
     private = ["/workspaces/grimoire"]
-    assert trace.classify(parsed, PLUGINS, MODEL, False, private, arms="/store/arms")[0] == [
+    assert trace.classify(parsed, PLUGINS, MODEL, False, private, own="/store/arms/old-1")[0] == [
         "the session reached /workspaces/grimoire"
     ]
 
@@ -424,7 +438,7 @@ def test_classify_matches_a_private_path_only_whole() -> None:
     def reasons(command: str, private: list[str]) -> list[str]:
         events = [init(), call("r1", "Bash", command=command), result_of("r1"), RESULT]
         parsed = trace.parse(events, PLUGINS)
-        return trace.classify(parsed, PLUGINS, MODEL, False, private, arms="/store/arms")[0]
+        return trace.classify(parsed, PLUGINS, MODEL, False, private, own="/store/arms/old-1")[0]
 
     worktree, sandbox = "/t/grimoire", "/t/grimoire-eval-x"
     assert reasons(f"cat {sandbox}/repo/a.md {worktree}.bak", [worktree]) == []
@@ -442,7 +456,7 @@ def test_classify_excludes_a_session_that_reached_the_gh_stubs_replies() -> None
     def reasons(command: str) -> list[str]:
         events = [init(), call("r1", "Bash", command=command), result_of("r1"), RESULT]
         parsed = trace.parse(events, PLUGINS)
-        return trace.classify(parsed, PLUGINS, MODEL, False, private, arms="/store/arms")[0]
+        return trace.classify(parsed, PLUGINS, MODEL, False, private, own="/store/arms/old-1")[0]
 
     assert reasons("cat ../gh-stub/gh-stub-replies.json") == [
         "the session reached gh-stub-replies.json"
