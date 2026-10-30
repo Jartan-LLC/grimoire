@@ -177,7 +177,8 @@ class Case:
     A `remote` case's session gets a local `origin` and a `gh` that records each call
     and answers from the `gh` replies, first match first. The `origin` holds every
     fixture branch when the runner makes it; a `build.py` may make its own (see
-    `session.add_origin`).
+    `session.add_origin`). A case's session loads every plugin of the arm but those
+    named in `without`.
     """
 
     id: str
@@ -192,6 +193,7 @@ class Case:
     baselines: tuple[Baseline, ...] = ()
     remote: bool = False
     gh: tuple[Reply, ...] = ()
+    without: tuple[str, ...] = ()
     # The hash when the suite was loaded; a run keys and checks its samples against it.
     loaded: str = ""
 
@@ -223,9 +225,10 @@ class Case:
         return self.loaded or self.hash()
 
     def hash(self) -> str:
-        """What a session depends on, as on disk now: prompt, fixture, build script; of the key, only a remote case's `gh` replies.
+        """What a session depends on, as on disk now: prompt, fixture, build script; of the key, a remote case's `gh` replies and `without`.
 
-        Those count as loaded, not as on disk now: the session reads them.
+        Those count as loaded, not as on disk now. Each is folded in only when set, so a
+        case without them keeps the hash it had before they existed.
         """
         inputs = [self.path / "prompt.md", self.path / "build.py"]
         fixture = self.path / "fixture"
@@ -236,10 +239,13 @@ class Case:
             else []
         )
         digest = tree_hash(self.path, files)
-        if not self.remote:
-            return digest
-        replies = json.dumps([dataclasses.asdict(r) for r in self.gh])
-        return hashlib.sha256(f"{digest}\0{replies}".encode()).hexdigest()
+        if self.remote:
+            replies = json.dumps([dataclasses.asdict(r) for r in self.gh])
+            digest = hashlib.sha256(f"{digest}\0{replies}".encode()).hexdigest()
+        if self.without:
+            options = json.dumps({"without": sorted(self.without)})
+            digest = hashlib.sha256(f"{digest}\0{options}".encode()).hexdigest()
+        return digest
 
 
 @dataclass(frozen=True)
@@ -629,6 +635,7 @@ def load_case(
         baselines=_baselines(key, key_path),
         remote=_remote(key, key_path, replies),
         gh=replies,
+        without=_strs(key, "without", key_path),
         references=tuple(_reference(p) for p in sorted(references.glob("*.toml")))
         if references.is_dir()
         else (),

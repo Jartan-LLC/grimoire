@@ -538,3 +538,13 @@ def test_a_suites_env_is_in_the_key_only_when_set(tmp_path: pathlib.Path) -> Non
 
     assert key({}) == cache.key(case.pinned(), f"old:h:s1:r{session.RUNNER}", "m", "v", 0)
     assert len({key({}), key({"CLAUDE_CODE_X": "1"}), key({"CLAUDE_CODE_X": "0"})}) == 3
+
+
+def test_a_case_without_a_plugin_loads_every_other_plugin_of_the_arm(
+    tmp_path: pathlib.Path,
+) -> None:
+    arm = Arm("old", "h", {"gitwise": "/a/gitwise", "praxis": "/a/praxis"})
+    plain = load_suite(write_suite(tmp_path / "a")).cases[0]
+    assert session.loaded_arm(plain, arm) == arm
+    without = load_suite(write_suite(tmp_path / "b", key='without = ["praxis"]\n' + KEY)).cases[0]
+    assert session.loaded_arm(without, arm) == Arm("old", "h", {"gitwise": "/a/gitwise"})

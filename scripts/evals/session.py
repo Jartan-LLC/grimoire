@@ -24,7 +24,7 @@ import sys
 import tempfile
 import threading
 import time
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 
 from . import cache, trace
 from .arms import Arm
@@ -326,10 +326,16 @@ def private_paths(case: Case, spec: Spec, sandbox: pathlib.Path) -> list[str]:
     )  # fmt: skip
 
 
+def loaded_arm(case: Case, arm: Arm) -> Arm:
+    """`arm` as the case's session loads it: without the plugins the case's `without` names."""
+    return replace(arm, plugins={n: d for n, d in arm.plugins.items() if n not in case.without})
+
+
 def _session(
     case: Case, arm: Arm, index: int, spec: Spec, sample_key: str
 ) -> tuple[cache.Sample, str]:
     """Run one session in a fresh sandbox and collect what it left."""
+    arm = loaded_arm(case, arm)
     sandbox = pathlib.Path(tempfile.mkdtemp(prefix="grimoire-eval-"))
     try:
         (sandbox / "tmp").mkdir()

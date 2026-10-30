@@ -458,3 +458,14 @@ def test_older_compares_versions_number_by_number() -> None:
     assert not older("2.1.314 (Claude Code)", "2.1.302")
     assert not older("2.1.302", "2.1.302")
     assert older("2.1", "2.1.0")
+
+
+def test_without_counts_in_a_case_hash_only_when_set(tmp_path: pathlib.Path) -> None:
+    root = write_suite(tmp_path)
+    plain = load_suite(root).cases[0]
+    key = root / "cases" / "c1" / "key.toml"
+    key.write_text("without = []\n" + KEY)
+    assert load_suite(root).cases[0].hash() == plain.hash()
+    key.write_text('without = ["praxis"]\n' + KEY)
+    without = load_suite(root).cases[0]
+    assert (without.without, without.hash() != plain.hash()) == (("praxis",), True)

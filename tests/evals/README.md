@@ -173,6 +173,9 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
 - **Keep tool configuration out of a fixture.** A fixture whose `pyproject.toml` has a `[tool.ruff]`
   table gets a `.ruff_cache/` written into it by the commit hooks, and the case hash counts every file in
   the fixture, so each hook run would redraw the case's samples.
+- **A case that runs without some plugins,** such as a skill measured where praxis's hook cannot help,
+  lists them in its key: `without = ["praxis"]`. Its sessions load every other plugin of the arm. The
+  list counts in the case hash, like the fixture, and the lint fails a name that is no plugin.
 - **A suite that needs Claude Code configured** sets the variables in an `[env]` table of `suite.toml`,
   `CLAUDE_CODE_*` names only and no login's, such as `CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS = "0"`. They
   are set after the runner drops the caller's `CLAUDE*` variables, and the runner's own settings win

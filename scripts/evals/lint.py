@@ -148,6 +148,11 @@ def suite_problems(suite: Suite, root: pathlib.Path, tracked: list[str]) -> list
             found.append(f"{where}: burned case {burned!r} is still in {by_id[burned].split}")
     for case in suite.cases:
         found += case_problems(case)
+        found += [
+            f"{case.path}: without names {name!r}, which is no plugin"
+            for name in case.without
+            if not (root / "plugins" / name / ".claude-plugin" / "plugin.json").is_file()
+        ]
     return found + judge_problems(suite)
 
 

@@ -209,3 +209,12 @@ def test_lint_names_labels_that_do_not_parse(root: pathlib.Path) -> None:
     labels.mkdir(parents=True)
     (labels / "c1.toml").write_text('[[item]]\nid = "k"\n')
     assert any("labels do not parse" in f for f in lint(root, TRACKED))
+
+
+def test_lint_names_a_without_that_is_no_plugin(root: pathlib.Path) -> None:
+    (root / "plugins" / "gitwise" / ".claude-plugin").mkdir()
+    (root / "plugins" / "gitwise" / ".claude-plugin" / "plugin.json").write_text("{}\n")
+    suite_at(root, key='without = ["gitwise", "praxsi"]\n' + KEY)
+    assert [f.split(": ", 1)[1] for f in lint(root, TRACKED)] == [
+        "without names 'praxsi', which is no plugin"
+    ]
