@@ -31,13 +31,13 @@ present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
 [[baseline]]
 model = "claude-opus-5-5"
 arm = "old"
-failures = 1
-runs = 3
+failures = 3
+runs = 6
 runner = 2
 
 [[baseline]]
 model = "claude-opus-5-5"
 arm = "none"
-failures = 3
-runs = 3
+failures = 6
+runs = 6
 runner = 2

@@ -24,9 +24,9 @@ id = "found"
 direction = "higher"
 margin = 0.2
 # The flags-plant judge: whether the report raises the planted problem at the rating its case
-# accepts. It gates nothing until judges/flags-plant/stamp.toml shows it cleared its bar; until
-# then it reports as found@flags-plant and this primary has no scores, so a screen of this
-# suite is INCONCLUSIVE.
+# accepts. It gates while judges/flags-plant/stamp.toml is current; a change to the judge, its
+# labels or a stamped case's reference makes the stamp stale, and the lint fails until the judge
+# is calibrated again.
 
 [[metric]]
 id = "found_regex"
