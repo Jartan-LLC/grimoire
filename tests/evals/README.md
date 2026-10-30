@@ -413,12 +413,12 @@ for nothing; between rounds, `make check` is enough.
    baseline mixes that in; which arm of a pair starts first alternates. Screen on the models
    `make eval-plan TIER=<n>` prints, one at a time (`MODEL=...`). Each arm draws the suite's
    `min_samples` per case unless `SAMPLES=` says otherwise.
-4. **Rerun rather than reuse** when anything a session sees changes: the fixture, the runner's setup
-   (bump `RUNNER` in `scripts/evals/session.py` when the change could alter how a session does a task
-   under test, after which the lint demands fresh baselines; for the
-   `gh` stub or the remote setup, `REMOTE_RUNNER` beside it, which redraws remote cases only and makes
-   the lint demand fresh baselines of those, recorded with their `remote_runner`), the model
-   or Claude Code. A screen reuses drawn samples only to resume or to regrade after a fix to a key;
+4. **Rerun rather than reuse** when anything a session sees changes: the fixture, the runner's setup,
+   the model or Claude Code. Bump `RUNNER` in `scripts/evals/session.py` when a change to the setup
+   could alter how a session does a task under test; the lint then demands fresh baselines. For a
+   change to the `gh` stub or the remote setup, bump `REMOTE_RUNNER` beside it instead: it redraws
+   remote cases only, and the lint demands fresh baselines of those, recorded with their
+   `remote_runner`. A screen reuses drawn samples only to resume or to regrade after a fix to a key;
    `make eval-run` keeps a case's samples per arm, model and Claude Code version, so a rerun regrades
    them and a larger `SAMPLES=` draws only the extra ones. Run `make check` on an edited case before
    drawing on it: a lint fix after the draw changes what the sessions saw.
