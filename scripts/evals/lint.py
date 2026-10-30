@@ -1,16 +1,16 @@
 """Check what a script can check about a suite before any session runs (part of make verify).
 
 tests/evals/README.md holds the rules; this enforces the mechanical ones: the prompt and
-the later turns use none of the case's hint words, the facts a check needs are where the
-writer can find them, every planted problem fails its `verify` command and passes once
-fixed, the passing references pass every check and each failing reference fails one,
-each target case records a baseline failure, no baseline was drawn under another RUNNER
-or, for a remote case, another REMOTE_RUNNER, no baseline of a case without a remote
-records a remote_runner, a `gh` check reads a case whose session records its gh calls,
-and a judge's tracked stamp and labels parse and the stamp still describes the judge
-(its version, labels and references). It cannot tell that every check can fail, only
-that some check fails on each failing reference; judged checks are not run on
-references.
+the later turns use none of the case's hint words, a case's `without` names only
+plugins, the facts a check needs are where the writer can find them, every planted
+problem fails its `verify` command and passes once fixed, the passing references pass
+every check and each failing reference fails one, each target case records a baseline
+failure, no baseline was drawn under another RUNNER or, for a remote case, another
+REMOTE_RUNNER, no baseline of a case without a remote records a remote_runner, a `gh`
+check reads a case whose session records its gh calls, and a judge's tracked stamp and
+labels parse and the stamp still describes the judge (its version, labels and
+references). It cannot tell that every check can fail, only that some check fails on
+each failing reference; judged checks are not run on references.
 """
 
 import fnmatch

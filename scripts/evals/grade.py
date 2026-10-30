@@ -1,4 +1,8 @@
-"""Graders: a regex over an artifact, a skill's delivery state, how the subagents worked, or a judge's kept answers."""
+"""Graders for a sample's checks.
+
+A check grades a regex over an artifact, a skill's delivery state, how the subagents
+worked, whether a command passes on the final tree, or a judge's kept answers.
+"""
 
 import dataclasses
 import math
@@ -351,7 +355,7 @@ def reference_outputs(reference: Reference) -> Outputs:
 
 
 def reference_scores(case: Case, reference: Reference) -> list[tuple[Check, float]]:
-    """Each regex check's score on a reference; delivery and spawn checks need a session, judged ones a judge."""
+    """Each regex check's score on a reference; delivery, verify and spawn checks need a session, judged ones a judge."""
     outputs = reference_outputs(reference)
     return [
         (check, check_score(check, outputs))

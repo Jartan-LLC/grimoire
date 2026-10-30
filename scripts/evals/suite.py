@@ -67,16 +67,16 @@ class SuiteError(ValueError):
 class Check:
     """One graded condition on a sample, scored 0 or 1, counted toward `metric`.
 
-    A text check names an artifact (`commits`, `final`, `file:<path>`, `files:<glob>`
-    (every file the glob matches, `glob_match`, each after a `==> <path> <==` line), `gh` (the calls
-    the sandbox's `gh` recorded, Claude Code's own aside), `report:<agent>` (every report
-    that agent handed back) or `brief:<agent>` (every Agent-call prompt the main thread
-    sent that agent type, but for a call that ended in error)) and a `present` or
+    A text check names an artifact (`commits`, `final`, `file:<path>`, `files:<glob>` (every
+    file the glob matches, `glob_match`, each after a `==> <path> <==` line), `gh` (the
+    calls the sandbox's `gh` recorded, Claude Code's own aside), `report:<agent>` (every
+    report that agent handed back) or `brief:<agent>` (every Agent-call prompt the main
+    thread sent that agent type, but for a call that ended in error)) and a `present` or
     `absent` regex, or a `judge` (a suite `[[judge]]` id) and the `reference` that judge
     reads beside the artifact, with `yes_ratings` when this case's silver labels accept
-    other ratings than the judge's. A delivery check names a `skill` and a `state`: with a `write` kind,
-    the state the skill must be in at every such write; without one, `loaded` or
-    `not-loaded` over the whole session (trigger cases). It reads the main thread's
+    other ratings than the judge's. A delivery check names a `skill` and a `state`: with a
+    `write` kind, the state the skill must be in at every such write; without one, `loaded`
+    or `not-loaded` over the whole session (trigger cases). It reads the main thread's
     deliveries and writes, or with an `agent`, that subagent's. A spawn check reads the
     session's subagents: `overlap` (no file written by two spawns), `spawn-writes` with a
     `write` kind (no spawn made such a write) or `barrier` (no main-thread file write while
@@ -487,7 +487,7 @@ def _check(
 
 
 def _session_check(table: Table, where: pathlib.Path, metric: str, artifact: str) -> Check:
-    """A delivery or spawn check, graded from the session's trace."""
+    """A delivery, verify or spawn check: a check graded from the session, never a reference."""
     if stray := sorted(set(table) - {"metric", "artifact"} - SESSION_KEYS[artifact]):
         raise SuiteError(f"{where}: a {artifact} check takes no {', '.join(stray)}")
     if artifact in SPAWN_CHECKS:

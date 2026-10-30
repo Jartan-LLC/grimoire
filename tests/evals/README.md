@@ -233,10 +233,10 @@ the PR how many versions you screened.
   delivery check with `agent = "<plugin>:<agent>"` reads that subagent's skill loads and writes instead
   of the main thread's. Subagents are followed at every depth, a subagent's own subagents included, and
   so is an Agent call run in the background, which under `-p` is every one the main thread makes: its
-  report is the one Claude Code's notification carries when the agent finishes. A sample whose
-  session ends before a subagent the main thread started has reported or failed is excluded, unless
-  the session timed out or hit its budget or turn cap, which spoils it instead. A reference gives reports under `[reports]` and briefs under `[briefs]`, as
-  `"<plugin>:<agent>" = "text"`.
+  report is the one Claude Code's notification carries when the agent finishes. A sample whose session
+  ends before a subagent the main thread started has reported or failed is excluded, unless the session
+  timed out or hit its budget or turn cap, which spoils it instead. A reference gives reports under
+  `[reports]` and briefs under `[briefs]`, as `"<plugin>:<agent>" = "text"`.
 - **How the subagents worked:** each Agent call is a spawn, and these checks read every spawn at
   every depth, two spawns of one agent type apart. `artifact = "overlap"` holds when no file was
   written by two spawns (the main thread's writes aside); `artifact = "spawn-writes"` with a `write`
@@ -405,10 +405,11 @@ for nothing; between rounds, `make check` is enough.
    that always fails, and the baselines count each case's own checks, guards aside, so a target case
    whose checks the pass rule does not read adds to it though the verdict cannot see that case. Trust it
    only as far as the calibration's positive controls bear it out. A new skill has no positive control
-   until it is on main, since removing it from `old` changes nothing. A split below 80% is too weak, and
-   so is one missing `old` or `none` baselines on a gate model. At tier 4, for a direct suite, add cases
-   the text changes on that model to a split below 80%, and record any missing baselines
-   (`make eval-run ... RECORD=1`). Do not shrink the suite or the samples to save cost.
+   until it is on main, since removing it from `old` changes nothing, unless it `replaces` texts `old`
+   holds ("The arms"). A split below 80% is too weak, and so is one missing `old` or `none` baselines on
+   a gate model. At tier 4, for a direct suite, add cases the text changes on that model to a split
+   below 80%, and record any missing baselines (`make eval-run ... RECORD=1`). Do not shrink the suite
+   or the samples to save cost.
 3. **Both arms run in the same screen,** interleaved, because the model changes over time and an older
    baseline mixes that in; which arm of a pair starts first alternates. Screen on the models
    `make eval-plan TIER=<n>` prints, one at a time (`MODEL=...`). Each arm draws the suite's
@@ -492,9 +493,9 @@ for nothing; between rounds, `make check` is enough.
   copied or not, draws its samples again and needs `--new-plan` (`NEW_PLAN=1`) once: its plan named each
   arm's plugins by their path in the store.
 - `python3 scripts/eval.py show <key>`: one sample's commits, final reply, the files its checks read,
-  every `gh` call the stub logged (Claude Code's own included) and the `gh` text its checks read, skill
-  deliveries and writes with the agent and spawn that made each, subagents' briefs and reports, and
-  hook context.
+  each `verify` command's exit code, every `gh` call the stub logged (Claude Code's own included) and
+  the `gh` text its checks read, skill deliveries and writes with the agent and spawn that made each,
+  subagents' briefs and reports, and hook context.
 - `python3 scripts/eval.py lint`: the mechanical checks from "Writing a case", and that each judge's
   stamp is current; `make verify` runs it.
 - `python3 scripts/eval.py judge-probe`, `judge-label` and `judge-align`: calibrate a judge (see
