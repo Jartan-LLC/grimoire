@@ -1,0 +1,121 @@
+# Silver labels, written by `scripts/eval.py judge-label`; edit nothing by hand.
+
+[[item]]
+id = "8eb7b8ecffb80ed4e3eebd92223c88f9"
+case = "broken-import"
+arm = "old"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "[CRITICAL] Broken import after the rename\nFile: /tmp/grimoire-eval-hzzj_ydm/repo/tally/report.py:5\nIssue: The line is `from tally.parse import parse_rows`. The commit renamed `tally/parse.py` to `tally/rows.py` and did not update this import. `tally.report` now raises `ModuleNotFoundError`. `tally.cli` probably imports `tally.report`, so the tool can't run either. `python3 -m pytest -q` fails at collection of `tests/test_report.py` with this error.\nFix: Change the line to `from tally.rows import parse_rows`. Amend it into `fe7359c` with `git commit --amend`, since the commit isn't pushed yet. Then re-run `python3 -m pytest -q`.\nStatus: confirmed\n\nI found no other leftover references to the old module name. A grep for `parse` across the repo, covering code, tests, `pyproject.toml` and the docs, turned up only the following:\n- `argparse`'s `parse_args` in `tally/cli.py`.\n- The `parse_rows` function definition in `tally/rows.py`.\n- The `parse_rows` call in `tally/report.py`.\n\nThe `parse_rows` function name is still accurate, so it's fine to keep. `find-duplicate-comments.js` ran and found no retold comments. The commit message follows Conventional Commits.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 1 |\n| Important | 0 |\n| Minor | 0 |\n\n**Verdict**: BLOCK. Fix the import before opening the PR."
+
+[[item]]
+id = "8a076219de3b836a11accf6477234720"
+case = "broken-import"
+arm = "old"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "[Critical] Broken import after the rename\nFile: /tmp/grimoire-eval-o2buzoyo/repo/tally/report.py:5\nIssue: `from tally.parse import parse_rows` still points at the module this commit renamed to `tally/rows.py`. Importing `tally.report` raises `ModuleNotFoundError: No module named 'tally.parse'`. `python3 -m pytest -q` stops at collection with that error on `tests/test_report.py`. The totalling path in `report.py` can't be imported, so it is broken.\nFix: Change the line to `from tally.rows import parse_rows`, and amend it into the rename commit because the commit isn't pushed yet. Then re-run the tests. Also check the tests for any `tally.parse` references, since collection stopped on the first error.\nStatus: confirmed\n\n[Minor] The function name no longer matches its module (optional)\nFile: /tmp/grimoire-eval-o2buzoyo/repo/tally/rows.py:7\nIssue: `parse_rows` in `rows.py` reads a little redundantly. This is only a taste point, and renaming it would widen the diff.\nFix: Leave it, or rename it in a separate change.\nStatus: confirmed\n\nThe commit message `refactor: rename tally.parse to tally.rows` follows Conventional Commits. A single commit squash-merges cleanly, and the rename is detected as a pure rename with no content changes. I found no other `tally.parse` references. The remaining `parse` hits are `argparse` and `parser.parse_args` in `tally/cli.py`, which are unrelated. I didn't run `find-duplicate-comments.js`, because the diff adds no comments.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 1 |\n| Important | 0 |\n| Minor | 1 |\n\n**Verdict**: BLOCK. Fix the import in `tally/report.py` before opening the PR."
+
+[[item]]
+id = "c13e6beeee2d0021be27077466bd8098"
+case = "broken-import"
+arm = "old"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "[CRITICAL] The rename left a broken import, so the package no longer imports.\nFile: /tmp/grimoire-eval-svuefwok/repo/tally/report.py:5\nIssue: The line `from tally.parse import parse_rows` still points at the module this commit renamed to `tally/rows.py`. `python3 -m pytest -q` fails at collection with `ModuleNotFoundError: No module named 'tally.parse'`. Importing `tally.report` also fails, and so does the CLI, if `cli.py` imports it. I did not open `cli.py` to check.\nFix: Change the line to `from tally.rows import parse_rows`. Fold the fix into the existing commit with `git commit --amend`, since it isn't pushed yet. That keeps the single `refactor:` commit working on its own, which matters because the PR is squash-merged.\nStatus: confirmed\n\n[MINOR] The function name still says \"parse\".\nFile: /tmp/grimoire-eval-svuefwok/repo/tally/rows.py:7\nIssue: The module is now `rows`, but the function is still `parse_rows`. The call site would read `rows.parse_rows` if the module were imported by name. This is a naming judgment, not a bug. The commit message says only the module was renamed, so keeping the function name is defensible.\nFix: Either leave it, or rename it (for example to `read_rows`) at the same time and update the call in `report.py:10`.\nStatus: confirmed\n\nEverything else is fine:\n- The commit is a pure rename, and git detects it at 100% similarity.\n- The `refactor:` Conventional Commits subject fits the change.\n- The `parse` hits in `cli.py` are `argparse`'s `parser.parse_args`, which has nothing to do with this rename.\n- `rows.py` has no comments that mislead, and `find-duplicate-comments.js` found no retold comments in the diff.\n- No docs or other files mention the old module name.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 1 |\n| Important | 0 |\n| Minor | 1 |\n\n**Verdict**: BLOCK. The test suite can't run until the import in `report.py` is fixed."
+
+[[item]]
+id = "d3e73dbb0561a696e786874b19758973"
+case = "broken-import"
+arm = "old"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "**Scope:** Only `ce935a6 refactor: rename tally.parse to tally.rows` is ahead of main. `511cbf0 chore: start the fixture` is already in main. The diff is a pure rename of `tally/parse.py` to `tally/rows.py` with 100% similarity and no content changes.\n\n**Tests:** `python3 -m pytest -q` fails at collection with `ModuleNotFoundError: No module named 'tally.parse'`.\n\n**[Critical] Leftover import of the old module name breaks the package**\n- File: `/tmp/grimoire-eval-zw7m4ay9/repo/tally/report.py:5`\n- Issue: `from tally.parse import parse_rows` still points at the removed module. Importing `tally.report` fails, so the test suite can't be collected. `tally/cli.py` presumably uses `report`, so the CLI would fail too (I didn't run it).\n- Fix: change it to `from tally.rows import parse_rows`, and amend `ce935a6` since it isn't pushed yet.\n- Status: confirmed\n\n**Other checks**\n- I grepped the whole repo for `parse`. The only other hits are `argparse` and `parser.parse_args` in `tally/cli.py`, which are unrelated. I found no other references in tests, docs, `pyproject.toml` or entry points.\n- **Possible cleanup (not a defect):** the function is still called `parse_rows`, which is fine inside `tally.rows`. You could shorten it to `rows.parse_rows` or similar, but that is optional.\n- I ran `find-duplicate-comments.js` and it found no retold comments.\n- The commit message follows Conventional Commits.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 1 |\n| Important | 0 |\n| Minor | 0 |\n\n**Verdict**: BLOCK. Fix the import in `tally/report.py` and re-run the tests before opening the PR."
+
+[[item]]
+id = "c13d432eb511f02a8bf9ab56361a2118"
+case = "broken-import"
+arm = "old"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "[Critical] The rename left a broken import, so the package no longer loads.\nFile: /tmp/grimoire-eval-1vvl6dhq/repo/tally/report.py:5\nIssue: `from tally.parse import parse_rows` still points at the old module name. The commit renamed `tally/parse.py` to `tally/rows.py` and changed nothing else. `tally.report` now raises `ModuleNotFoundError: No module named 'tally.parse'`. `python3 -m pytest -q` fails at collection of `tests/test_report.py`, and the CLI, which uses the report module, can't run either.\nFix: change the line to `from tally.rows import parse_rows`, and amend it into the rename commit, since the branch isn't pushed yet. Then re-run the tests.\nStatus: confirmed. I ran the tests and got the error above.\n\nOther checks:\n- The commit message follows Conventional Commits.\n- `find-duplicate-comments.js` ran and found no retold comments.\n- The diff adds no comments.\n- The commit message says the module \"holds the row type next\". No row type exists in the diff, so that is a plan rather than something this branch does. This is minor.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 1 |\n| Important | 0 |\n| Minor | 1 |\n\n**Verdict**: BLOCK"
+
+[[item]]
+id = "e7b308f4a79e7a7c685ae1e53b8edac8"
+case = "broken-import"
+arm = "old"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "**Test result:** `python3 -m pytest -q` fails with 1 collection error. `tests/test_report.py` imports `tally.report`, which imports `tally.parse`, and that raises `ModuleNotFoundError: No module named 'tally.parse'`.\n\nThe comment duplicate check (`find-duplicate-comments.js`) ran and found nothing. The diff adds no comments.\n\n**Scope:** `main..HEAD` has one commit, `03b63df refactor: rename tally.parse to tally.rows`. It is a pure 100% rename of `tally/parse.py` to `tally/rows.py`, with no content change. `6411c53 chore: start the fixture` is already on `main`, so it isn't part of this diff.\n\n**Findings**\n\n[CRITICAL] The old module name is still imported, so the package breaks.\nFile: `/tmp/grimoire-eval-h3qsg2nt/repo/tally/report.py:5`\nIssue: `from tally.parse import parse_rows` points at a module that no longer exists. `total()` at line 10 can't be imported. Anything that imports `tally.report` fails, and so does the test suite. I haven't run the CLI. `tally/cli.py` has no import of `tally.report` or `tally.parse`, so it may still work.\nFix: Change line 5 to `from tally.rows import parse_rows`, then rerun the tests. Fold the fix into the rename commit with `git commit --amend` if the commit isn't pushed yet. Otherwise add a `fix:` commit. The PR is squash-merged, so either way is fine.\nStatus: confirmed\n\n[MINOR] The commit message says the module \"holds the row type next\", but the rename adds no row type.\nFile: commit `03b63df`\nIssue: The message describes future work, and the diff is rename-only. Squash-merge will use the PR title and body. Nothing is wrong with the rename itself.\nFix: Make sure the PR description says the rename is a preparation step. Alternatively, drop that sentence.\nStatus: confirmed\n\n**Checked and fine**\n- No other references to `tally.parse` exist in the code, tests, docs or config. The remaining `parse` matches are `argparse` and `parse_args` in `tally/cli.py`, and the `parse_rows` function name in `tally/rows.py`, which is a reasonable name and can stay.\n- The commit subject follows Conventional Commits.\n- There are no debug prints, suppressions or commented-out code.\n\n**Verdict**: BLOCK. Fix the import in `tally/report.py` and confirm the tests pass before opening the PR."
+
+[[item]]
+id = "0fd52b5df7e6baed02f814f43098cb92"
+case = "broken-import"
+arm = "none"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "**Verdict: BLOCK.** The rename left one importer pointing at the old module name, so the package fails on import.\n\n## Critical\n\n**1. `/tmp/grimoire-eval-jhf_8fm1/repo/tally/report.py:5` still has `from tally.parse import parse_rows`.**\n- The commit renamed `tally/parse.py` to `tally/rows.py` and changed nothing else.\n- Importing `tally.report` now raises `ModuleNotFoundError: No module named 'tally.parse'`.\n- I ran `python3 -m pytest -q`. It stops at collection with an error in `tests/test_report.py`, which imports `tally.report`. That is the project's own test command, so CI fails.\n- `tally/cli.py` is a likely caller of `tally.report` (not verified), so the CLI would probably crash at startup as well. Even if it doesn't, `tally.report.total` is unusable.\n- Fix: change line 5 to `from tally.rows import parse_rows`. Then run `python3 -m pytest -q` before pushing.\n\n## Minor\n\n**2. Function name `parse_rows` in `/tmp/grimoire-eval-jhf_8fm1/repo/tally/rows.py:7` no longer matches the module's rename.**\n- The commit message says the module \"holds the row type next\". No row type exists yet.\n- `rows.parse_rows` is a bit redundant, but it is accurate and the name works.\n- Renaming it would widen the diff, so I'd leave it unless you also add the row type.\n- The commit body describes future work, not the current state. Reword it or drop it, because it will become the squash-merge message.\n\n## Project standards\n- The commit subject `refactor: rename tally.parse to tally.rows` follows Conventional Commits.\n- There is no breaking-change mark. The package is a CLI, so that is acceptable unless `tally.parse` is imported externally. I didn't see any evidence it is.\n- Because of the squash merge, make sure the PR title is also conventional. GitHub's default for a single commit uses the commit subject and body.\n- Fixing finding 1 before pushing is simplest as `git commit --amend`, as long as the branch hasn't been pushed. That keeps the rename as one atomic commit and avoids a separate \"fix import\" commit.\n- The working tree was clean. I found no stray debug code or other leftover `tally.parse` references beyond `report.py:5`.\n- The remaining `parse` hits are `argparse` calls in `tally/cli.py` and are unrelated."
+
+[[item]]
+id = "d63eb6cf164859d507a5cad873d5a3ba"
+case = "broken-import"
+arm = "none"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "**Verdict: BLOCK**\n\nOnly one commit is on the branch: `83da29e refactor: rename tally.parse to tally.rows`. `19160c6 chore: start the fixture` is already in `main`, so it isn't part of this PR. The diff is a pure 100% rename of `tally/parse.py` to `tally/rows.py`, with no content changes.\n\n**Critical: broken import, the package no longer runs** (`/tmp/grimoire-eval-ci0d6m5w/repo/tally/report.py:5`)\n- `report.py` still has `from tally.parse import parse_rows`, but `tally.parse` no longer exists. Importing `tally.report` raises `ModuleNotFoundError: No module named 'tally.parse'`.\n- I ran `python3 -m pytest -q`. Collection fails on `tests/test_report.py`, which imports `tally.report`, so the suite is red with 1 error.\n- This probably breaks the CLI too, if `tally/cli.py` reaches `report`. I didn't trace that.\n- Fix: change the import to `from tally.rows import parse_rows`. Then grep for any other `tally.parse` references, including tests, docs and packaging config. In `tally/`, my grep found only `report.py:5`.\n- Fold the fix into the existing commit with `git commit --amend`, since it isn't pushed. That keeps the rename and its call-site update together. The squash-merge then produces one coherent commit.\n\n**Minor: commit body is slightly off** (commit `83da29e`)\n- The body says \"The module holds the row type next, so `rows` names it better.\" That describes a future change, and the module currently holds only `parse_rows`. Reword it to say what the module is, or drop the sentence. The subject line follows Conventional Commits.\n- The PR title and description will become the squash message, so check them as well.\n\nAfter the import fix, rerun `python3 -m pytest -q` to confirm the suite is green before opening the PR."
+
+[[item]]
+id = "bf69b4650254e7289623eb165bbc7cc1"
+case = "broken-import"
+arm = "none"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "**Verdict: BLOCK**\n\nThe branch renames `tally/parse.py` to `tally/rows.py` and changes nothing else. I ran `python3 -m pytest -q` and it fails at collection.\n\n**Critical**\n\n1. `/tmp/grimoire-eval-4fg38_ie/repo/tally/report.py:5` still has `from tally.parse import parse_rows`. That module no longer exists, so importing `tally.report` raises `ModuleNotFoundError: No module named 'tally.parse'`. The test run stops with that error from `tests/test_report.py`, and the CLI very likely breaks too, since it presumably imports `report`. I did not read `cli.py` beyond a grep for \"parse\". The fix is `from tally.rows import parse_rows`.\n\n**Minor**\n\n2. `/tmp/grimoire-eval-4fg38_ie/repo/tally/rows.py:7` keeps the function name `parse_rows`. This is consistent with the rename and is fine as is. If you meant to rename it too, the commit message doesn't say so.\n\n3. The commit body says \"The module holds the row type next\". No row type exists in this diff. It is a statement about future work, so consider rewording it. It is not worth blocking on, especially since the PR is squash-merged.\n\n**Checked and clean**\n\n- The only other \"parse\" hits are `argparse` and `parser.parse_args` in `tally/cli.py:3,11-13`, which are unrelated.\n- I found no references to the old name in tests, docs or config.\n- The commit subject follows Conventional Commits.\n\nAmend the fix into the existing commit if it hasn't been pushed. That keeps the rename in one commit, and the commit then matches its message."
+
+[[item]]
+id = "25af24b623c344e845213d36bb1012bb"
+case = "broken-import"
+arm = "none"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "Verdict: BLOCK. The rename left a broken import, and the test suite can't run.\n\n**Finding 1: Critical (confirmed). Broken import left by the rename**\n- Location: `/tmp/grimoire-eval-jfqrbt0k/repo/tally/report.py:5`\n- The line is `from tally.parse import parse_rows`. The commit moved `tally/parse.py` to `tally/rows.py` and changed nothing else, so `tally.parse` no longer exists.\n- Importing `tally.report` raises `ModuleNotFoundError`. That breaks anything that imports it, including the CLI if `cli.py` uses the report module.\n- `python3 -m pytest -q` stops during collection with `ModuleNotFoundError: No module named 'tally.parse'`. The error comes from `tests/test_report.py`.\n- Fix: change the line to `from tally.rows import parse_rows`.\n- Amend the fix into the rename commit, since it hasn't been pushed. Don't add a separate commit.\n- This keeps the squash-merged history clean and keeps the rename commit buildable.\n\n**Finding 2: Minor (confirmed). The function name no longer matches its module**\n- Location: `/tmp/grimoire-eval-jfqrbt0k/repo/tally/rows.py:7`\n- `parse_rows` is the only function in `rows.py`, and the module is now named `rows`. `rows.parse_rows` repeats the word, and the commit message says the module will hold the row type next.\n- This is optional. If you keep the name, it's still reasonable, and renaming it would widen the diff.\n\n**Checked and clean**\n- The commit message follows Conventional Commits.\n- The only other `parse` match is `argparse`'s `parse_args` in `cli.py`, which is unrelated.\n- No other `tally.parse` references remain outside `report.py:5`. I grepped the whole repo, including tests. The collection error shows `tests/test_report.py` fails to import, but that comes from `report.py`, not from a reference of its own."
+
+[[item]]
+id = "376a12cf5e72582f53bdf3653c4692a0"
+case = "broken-import"
+arm = "none"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "**Verdict: BLOCK**\n\n**Finding 1: Critical (confirmed). Broken import after the rename**\n- Location: `/tmp/grimoire-eval-il0gxw38/repo/tally/report.py:5`\n- Problem: the commit renames `tally/parse.py` to `tally/rows.py` but doesn't update the importer. `report.py` still has `from tally.parse import parse_rows`, which raises `ModuleNotFoundError`. `python3 -m pytest -q` fails at collection of `tests/test_report.py`. Anything that imports `tally.report`, including the CLI path that totals, is broken.\n- Fix: change line 5 to `from tally.rows import parse_rows`. Fold the fix into the existing commit with `git commit --amend`, since it isn't pushed yet. Then rerun the tests.\n\n**Finding 2: Minor. Commit body doesn't match the module**\n- Location: commit 2117c87 body\n- Problem: the body says \"The module holds the row type next\", but `tally/rows.py` only has the `parse_rows` function. That reads as a plan for future work. The PR will be squash-merged with GitHub's default message, so the body will end up in the history.\n- Fix: reword the body to say what the module holds now, or drop it.\n\n**Notes**\n- No other `tally.parse` references turned up in code, tests, docs or config. The other `parse` hits are `argparse` and `parse_args`.\n- `parse_rows` in `rows.py` is still named for parsing. That's fine, and `rows.parse_rows` is acceptable. You could shorten it to `rows.parse`, but that isn't necessary.\n- The commit subject follows Conventional Commits."
+
+[[item]]
+id = "90c7cbde34ad92eed1a008a970fea4d4"
+case = "broken-import"
+arm = "none"
+model = "claude-sonnet-5-5"
+labeller = "claude-fable-5-1 xhigh"
+votes = ["yes", "yes", "yes"]
+label = "yes"
+text = "**Verdict: BLOCK.** The branch has one Critical finding, and the commit message needs a small fix.\n\n**Finding 1 (Critical, confirmed): `/tmp/grimoire-eval-v6ws5kav/repo/tally/report.py:5` still imports the removed module.**\n- The commit renames `tally/parse.py` to `tally/rows.py`, but `report.py` still has `from tally.parse import parse_rows`.\n- This raises `ModuleNotFoundError: No module named 'tally.parse'`.\n- `python3 -m pytest -q` fails at collection (`tests/test_report.py`).\n- `tally/cli.py` most likely reaches `report` as well, so the CLI probably won't start. I didn't check this directly.\n- Fix: change line 5 to `from tally.rows import parse_rows`. Then re-run the tests and grep for any other `tally.parse` references, including docs and the packaging config. My grep found none besides this one.\n- Fold the fix into the existing commit with `git commit --amend`, since it isn't pushed yet.\n\n**Finding 2 (Minor): the commit body is vague.**\n- The body of 504d5df says \"The module holds the row type next, so `rows` names it better.\" The wording is unclear (\"holds the row type next\"), and the module actually contains `parse_rows`, not a row type.\n- Fix: reword it. For example: \"`parse_rows` and its helpers are about rows, so name the module for that.\"\n- The subject `refactor: rename tally.parse to tally.rows` is a valid Conventional Commit.\n- The squash-merge will use GitHub's default message, so make the PR title conventional too, for example `refactor: rename tally.parse to tally.rows`.\n\n**Finding 3 (Minor, optional): `parse_rows` keeps the old naming.**\n- The function in `tally/rows.py:7` is still called `parse_rows`, so `tally.rows.parse_rows` reads a little redundantly. This is fine to leave as it is.\n\n**Breaking change:** `tally.parse` is removed with no shim. If anyone outside the repo imports it, that's a breaking change. For a CLI tool this probably doesn't matter, so I'd leave it unmarked."
