@@ -350,19 +350,18 @@ class _Spawns:
             self.reported[report.spawn] = report.index
             self.ended.setdefault(report.spawn, report.index)
 
+    def notified(self, trace: Trace, index: int, event: Event) -> None:
+        """A followed call's notification ends its spawn; only a completed one carries a report.
 
-def _notified(trace: Trace, index: int, event: Event, spawns: _Spawns) -> None:
-    """A followed call's notification ends its spawn; only a completed one carries a report.
-
-    The summary of one that failed is the error, not the agent's report.
-    """
-    call_id = str(event.get("tool_use_id"))
-    if call_id not in spawns.agents:
-        return
-    if event.get("status") == "completed":
-        agent, model = spawns.agents[call_id], spawns.models.get(call_id, "")
-        spawns.report(trace, Report(index, agent, model, str(event.get("summary", "")), call_id))
-    spawns.ended.setdefault(call_id, index)
+        The summary of one that failed is the error, not the agent's report.
+        """
+        call_id = str(event.get("tool_use_id"))
+        if call_id not in self.agents:
+            return
+        if event.get("status") == "completed":
+            agent, model = self.agents[call_id], self.models.get(call_id, "")
+            self.report(trace, Report(index, agent, model, str(event.get("summary", "")), call_id))
+        self.ended.setdefault(call_id, index)
 
 
 def _whole(trace: Trace, index: int, event: Event, spawns: _Spawns) -> None:
@@ -371,7 +370,7 @@ def _whole(trace: Trace, index: int, event: Event, spawns: _Spawns) -> None:
     if kind == "system":
         _system(trace, index, event)
         if event.get("subtype") == "task_notification":
-            _notified(trace, index, event, spawns)
+            spawns.notified(trace, index, event)
     elif kind == "result":
         trace.result = event
         trace.results.append(event)
