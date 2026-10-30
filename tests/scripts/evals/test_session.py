@@ -457,6 +457,21 @@ def test_the_remote_runner_is_in_a_remote_cases_key_only(
     assert key(remote) != before[1]
 
 
+def test_a_timeout_other_than_the_default_is_in_the_key(tmp_path: pathlib.Path) -> None:
+    case = load_suite(write_suite(tmp_path / "suite")).cases[0]
+    breaker = session.Breaker()
+    breaker.tripped.set()
+
+    def key(timeout_s: float) -> str:
+        spec = session.Spec("m", "v", 1.0, tmp_path, tmp_path / "store", "s1", timeout_s)
+        return session.run_sample(case, Arm("old", "h", {}), 0, spec, breaker).key
+
+    assert key(session.TIMEOUT_S) == cache.key(
+        case.pinned(), f"old:h:s1:r{session.RUNNER}", "m", "v", 0
+    )
+    assert key(3600) not in {key(session.TIMEOUT_S), key(5400)}
+
+
 def test_a_case_changed_on_disk_after_loading_is_excluded_before_its_session(
     tmp_path: pathlib.Path,
 ) -> None:

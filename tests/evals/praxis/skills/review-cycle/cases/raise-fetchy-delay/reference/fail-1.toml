@@ -1,0 +1,8 @@
+commits = []
+final = "PR opened."
+gh = "gh pr create --draft --title t --body b\n\nb\n"
+
+[files]
+".claude/workspace/issue-58/feature--issue-58/cycle.md" = "Raised: default. Recommendation: keep 100 ms.\n"
+"AGENTS.md" = "# Agent notes\n\n## Defaults\n\nAsk before changing a default: the services behind fetchy tuned their own timeouts.\n"
+"src/retry.js" = "fixed\n"

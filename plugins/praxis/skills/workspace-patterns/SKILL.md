@@ -36,6 +36,8 @@ Where the project's own rules say otherwise, follow them.
   ones as they are.
 - `pr.md` in a branch folder is the PR title and description while the branch has no open PR: the title on
   its first line, the description after a blank line. Once the PR exists, the PR holds them.
+- `cycle.md` in a branch folder is the state of a review cycle on that branch, which praxis's
+  review-cycle command writes and resumes from.
 - To find a branch's folder, look for one first: `.claude/workspace/*/<branch folder>/`. Failing
   that, make it in the folder of the issue the PR closes (`gh pr view <n> --json
   closingIssuesReferences`) or the work is for, and failing that, in a new effort folder.

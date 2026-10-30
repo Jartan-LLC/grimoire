@@ -1,0 +1,139 @@
+split = "screen"
+kind = "target"
+hints = ["doc-reviewer", "general-reviewer", "test-reviewer"]
+remote = true
+
+[[check]]
+metric = "rule"
+artifact = "brief:praxis:doc-reviewer"
+present = '''\S'''
+
+[[check]]
+metric = "rule"
+artifact = "brief:praxis:backend-reviewer"
+present = '''\A\Z'''
+
+[[check]]
+metric = "rule"
+artifact = "brief:praxis:test-reviewer"
+present = '''\A\Z'''
+
+[[check]]
+metric = "rule"
+artifact = "brief:praxis:structure-reviewer"
+present = '''\A\Z'''
+
+[[check]]
+metric = "quiet"
+artifact = "gh"
+present = '''\A(?!(?:.+\n)*gh (?:.* )?pr (?:ready|comment|review|merge)\b)'''
+
+[[gh]]
+match = '''(^|\s)pr create\b'''
+stdout = "https://github.com/acme/ratelimit/pull/123\n"
+
+[[gh]]
+match = '''(^|\s)pr ready\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)pr view\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr diff\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr checks\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr checkout\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr edit\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)pr list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)pr status\b'''
+stdout = "Current branch\n  There is no pull request associated with [feature/issue-23]\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 23, \"title\": \"Accept hourly limits such as 100/h\", \"body\": \"Our API quota is per hour. parse_window should accept an `h` unit, so SlidingWindow(\\\"100/h\\\") allows 100 calls in any hour.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/ratelimit/issues/23\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:	Accept hourly limits such as 100/h\nstate:	OPEN\nauthor:	dana\nlabels:	\ncomments:	0\nassignees:	\nprojects:	\nmilestone:	\nnumber:	23\n--\nOur API quota is per hour. parse_window should accept an `h` unit, so SlidingWindow(\"100/h\") allows 100 calls in any hour.\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[{\"number\": 23, \"title\": \"Accept hourly limits such as 100/h\", \"state\": \"OPEN\", \"url\": \"https://github.com/acme/ratelimit/issues/23\"}]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = "23	OPEN	Accept hourly limits such as 100/h		2026-10-20T10:00:00Z\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*pulls'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b.*--json'''
+stdout = "{\"name\": \"ratelimit\", \"nameWithOwner\": \"acme/ratelimit\", \"url\": \"https://github.com/acme/ratelimit\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PUBLIC\", \"owner\": {\"login\": \"acme\"}}\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "name:	acme/ratelimit\ndescription:	\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account alice (keyring)\n"
+
+[[gh]]
+match = '''(^|\s)api user\b'''
+stdout = "{\"login\": \"alice\"}\n"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 2
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[check]]
+metric = "kept"
+artifact = "gh"
+present = '''\A(?!(?:.+\n)*gh (?:.* )?pr (?:merge)\b)'''

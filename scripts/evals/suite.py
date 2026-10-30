@@ -14,6 +14,8 @@ import tomllib
 from dataclasses import dataclass
 from typing import cast
 
+TIMEOUT_S = 1800  # a session's wall-clock limit, unless the suite's `timeout_s` sets another
+
 SPLITS = ("dev", "screen", "confirm")
 KINDS = ("target", "regression", "cost", "trigger")
 TEXT_ARTIFACTS = ("commits", "final", "gh")
@@ -223,6 +225,7 @@ class Suite:
     metrics: dict[str, Metric]
     pass_rule: PassRule
     budget_usd: float
+    timeout_s: float
     clusters: dict[str, str]
     burned: tuple[str, ...]
     cases: tuple[Case, ...]
@@ -561,6 +564,7 @@ def load_suite(path: pathlib.Path) -> Suite:
         metrics=metrics,
         pass_rule=pass_rule,
         budget_usd=_number(data, "budget_usd", where, 2.0),
+        timeout_s=_number(data, "timeout_s", where, TIMEOUT_S),
         clusters=clusters,
         burned=_strs(data, "BURNED", where),
         cases=cases,

@@ -44,4 +44,4 @@ Run the Verify commands from the agent instruction files (`CLAUDE.md`, `AGENTS.m
 
 ### 7. Push
 
-Push the branch with all commits. If the branch already has a PR (`gh pr view --json number,title,body,baseRefName`), check its title and description against `git diff <baseRefName>...HEAD`, update what no longer holds as `gitwise:commit-pr-writing` says (`gh pr edit <number>`), and tell the user what you changed.
+Push the branch with all commits. Tell the user they can run `/praxis:review-cycle` to take it through review rounds to a draft PR. If the branch already has a PR (`gh pr view --json number,title,body,baseRefName`), check its title and description against `git diff <baseRefName>...HEAD`, update what no longer holds as `gitwise:commit-pr-writing` says (`gh pr edit <number>`), and tell the user what you changed.

@@ -231,6 +231,11 @@ the PR how many versions you screened.
 Every screen follows these steps; `make eval-plan TIER=<n>` prints the screens a tier takes. A scratch
 suite is not screened: run and read it as "Smoke tests" says.
 
+Screen and confirm once the change's text has settled: on a branch going through review rounds, on
+the head its last round leaves, the closing round on its words included. A review fix that changes
+text a session reads voids every earlier screen of it, so screening between rounds spends the runs
+for nothing; between rounds, `make check` is enough.
+
 1. **Fix the test before the first run.** The plan holds every file of the suite (cases, keys, baselines,
    references), the samples per case, the model ID, the Claude Code version, the runner's flags and
    `old`'s plugins (`new` changes as you iterate). Your branch's first screen of a split on a model fixes
@@ -268,7 +273,9 @@ suite is not screened: run and read it as "Smoke tests" says.
    limits persist the run stops starting sessions and reports the rest as not run, so rerun it later to
    resume. While any sample is still excluded, the screen cannot SHIP, though harm it already shows
    still comes out HURT; its summary counts excluded and spoiled samples per arm. A sample the agent
-   itself spoiled (a timeout, the budget or turn cap) counts as failing every check.
+   itself spoiled (a timeout, the budget or turn cap) counts as failing every check. A session times
+   out after 30 minutes; a suite whose sessions run longer sets `timeout_s` in `suite.toml`, and
+   changing it draws new samples.
 6. **The verdict compares the arms task by task:** `new`'s mean minus `old`'s, per unit.
    - Under a `better` rule the primary metric is BETTER when an exact one-sided paired permutation test
      in that direction is below 0.05; under `no-regression` it is tested like a guard and never BETTER.

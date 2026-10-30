@@ -1,0 +1,9 @@
+commits = []
+final = ""
+
+[files]
+".claude/workspace/issue-23/feature--issue-23/3.md" = "## Code Review\n\n### Critical Issues\nNone found\n\n### Important Issues\nNone found\n\n### Minor Issues\n1. **y** -- `README.md:3`. Add a sentence.\n\nAnswer: fixed in the round-3 commit.\n\n### Summary\nOne Minor finding.\n"
+".claude/workspace/issue-23/feature--issue-23/1.md" = "## Code Review\n\n### Critical Issues\nNone found\n\n### Important Issues\n1. **An unknown unit silently counts as seconds** -- `src/ratelimit/window.py:11`. `UNITS.get(unit, 1)` turns `\"100/d\"` into 100 calls a second instead of rejecting it.\n\nAnswer: fixed in the round-1 commit.\n\n### Minor Issues\n1. **The README does not mention the hourly unit** -- `README.md:3`. Add a sentence.\n\nAnswer: fixed in the round-1 commit.\n\n### Summary\nOne Important and one Minor finding.\n"
+
+[briefs]
+"general-purpose" = "Review the whole branch against main."

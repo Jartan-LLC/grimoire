@@ -1,0 +1,5 @@
+commits = ["docs: add the README line"]
+final = ""
+
+[files]
+"README.md" = "Between attempts it waits 100 ms.\n"

@@ -1,0 +1,11 @@
+commits = []
+final = ""
+
+[files]
+".claude/workspace/issue-44/feature--issue-44/3.md" = "## Code Review\n\n### Critical Issues\nNone found\n\n### Important Issues\nNone found\n\n### Minor Issues\n1. **y** -- `README.md:3`. Add a sentence.\n\nAnswer: fixed in the round-3 commit.\n\n### Summary\nOne Minor finding.\n"
+".claude/workspace/issue-44/feature--issue-44/1.md" = "## Code Review\n\n### Critical Issues\nNone found\n\n### Important Issues\n1. **A missing Retry-After header means no wait at all** -- `src/retry.js:13`. `headers.get` returns `null` for a missing header and `Number(null)` is `0`, so `parseRetryAfter` returns `0` and the retry fires at once instead of after `DELAY_MS`.\n\nAnswer: fixed in the round-1 commit.\n\n### Minor Issues\n1. **The README does not mention Retry-After** -- `README.md:3`. Add a sentence.\n\nAnswer: fixed in the round-1 commit.\n\n### Summary\nOne Important and one Minor finding.\n"
+
+[briefs]
+"general-purpose" = "Run the praxis:review-pr skill on feature/issue-44 against main. Review the whole branch against its base, not only the latest commit or the commits since the last round.\n\nRun the praxis:address-review skill on 3.md. Context: an earlier round found The README does not mention Retry-After.\n\nRun the praxis:review-pr skill on feature/issue-44 against main.\n\nReview the whole branch, never only the latest commit."
+"praxis:general-reviewer" = "Run the praxis:address-review skill on 3.md. Earlier: The README does not mention Retry-After."
+"praxis:doc-reviewer" = "Run the praxis:review-pr skill on feature/issue-44 against main. Limited to the documentation, comments and commit messages."

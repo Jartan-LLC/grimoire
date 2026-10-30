@@ -29,7 +29,7 @@ from . import cache, trace
 from .arms import Arm
 from .gh_stub import REPLIES, TEMP_ROOTS
 from .proc import CLAUDE, GIT, UV, run
-from .suite import Case, Reply
+from .suite import TIMEOUT_S, Case, Reply
 
 BUILTINS_OFF = {
     "enabledPlugins": {
@@ -38,7 +38,6 @@ BUILTINS_OFF = {
         "cc-plugin-plugin-authoring@builtin": False,
     }
 }
-TIMEOUT_S = 1800
 RETRIES = 3
 BACKOFF_S = 30  # the first wait after the API limits requests; it doubles per retry
 BREAKER = 3  # samples in a row still limited after every retry stop the run
@@ -72,6 +71,7 @@ class Spec:
     checkout: pathlib.Path
     store: pathlib.Path
     screen: str = ""
+    timeout_s: float = TIMEOUT_S
 
 
 def git_env(base: dict[str, str]) -> dict[str, str]:
@@ -318,7 +318,7 @@ def _session(
                 run(
                     claude_args(case.prompt, arm, spec.model, spec.budget_usd, debug_log),
                     cwd=repo, env=session_env,
-                    stdout=handle, stderr=subprocess.STDOUT, timeout=TIMEOUT_S, check=False,
+                    stdout=handle, stderr=subprocess.STDOUT, timeout=spec.timeout_s, check=False,
                 )  # fmt: skip
             except subprocess.TimeoutExpired:
                 timed_out = True
@@ -418,9 +418,12 @@ def run_sample(
     key, so `new` never reuses `old`'s sessions even when their plugins are identical,
     and `spec.screen` is too, so each screen draws fresh samples for both arms while a
     rerun of the same screen resumes it. RUNNER is in every key, REMOTE_RUNNER in a
-    remote case's only.
+    remote case's only, and a timeout other than TIMEOUT_S in its suite's only, so a
+    changed timeout draws new samples instead of reusing the ones it cut off.
     """
     runner = f"r{RUNNER}" + (f":g{REMOTE_RUNNER}" if case.remote else "")
+    if spec.timeout_s != TIMEOUT_S:
+        runner += f":t{spec.timeout_s:g}"
     sample_key = cache.key(
         case.pinned(),
         f"{arm.name}:{arm.hash}:{spec.screen}:{runner}",

@@ -1,0 +1,136 @@
+split = "confirm"
+kind = "target"
+hints = ["2.md", "1.md", "earlier"]
+remote = true
+
+[[check]]
+metric = "rule"
+artifact = "file:.claude/workspace/issue-73/feature--issue-73/2.md"
+present = '''(?m)^#{2,3} (?:Critical|Important)'''
+
+# Either finding of the first review: by its title, or in other words within a sentence that names
+# the earlier review or round. A brief that only says the earlier findings were fixed passes.
+[[check]]
+metric = "rule"
+artifact = "brief:praxis:general-reviewer"
+absent = '''(?i)Capital\s+letters\s+are\s+dropped|README\s+does\s+not\s+mention\s+the\s+lowercase\s+option|(?:\bround[\s-]*(?:1|one)\b|\b(?:first|earlier|previous|prior|last|1st)\s+(?:review|round))[^.;\n]{0,120}?(?:capital|upper-?case|A-Z|\[\^a-z0-9\]|README)'''
+
+[[check]]
+metric = "rule"
+artifact = "brief:praxis:doc-reviewer"
+absent = '''(?i)Capital\s+letters\s+are\s+dropped|README\s+does\s+not\s+mention\s+the\s+lowercase\s+option|(?:\bround[\s-]*(?:1|one)\b|\b(?:first|earlier|previous|prior|last|1st)\s+(?:review|round))[^.;\n]{0,120}?(?:capital|upper-?case|A-Z|\[\^a-z0-9\]|README)'''
+
+[[check]]
+metric = "kept"
+artifact = "file:.claude/workspace/issue-73/feature--issue-73/1.md"
+present = '''(?i)The README does not mention the lowercase option'''
+
+[[check]]
+metric = "quiet"
+artifact = "gh"
+present = '''\A(?!(?:.+\n)*gh (?:.* )?pr (?:ready|comment|review|merge)\b)'''
+
+[[gh]]
+match = '''(^|\s)pr create\b'''
+stdout = "https://github.com/acme/slugkit/pull/173\n"
+
+[[gh]]
+match = '''(^|\s)pr ready\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)pr view\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr diff\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr checks\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr checkout\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr edit\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)pr list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)pr status\b'''
+stdout = "Current branch\n  There is no pull request associated with [feature/issue-73]\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 73, \"title\": \"Let callers keep capital letters in a slug\", \"body\": \"Our wiki page names are case-sensitive. slugify always lowercases; callers should be able to pass `lowercase: false` to keep the original case, so `Hello World` becomes `Hello-World`.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/slugkit/issues/73\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:	Let callers keep capital letters in a slug\nstate:	OPEN\nauthor:	dana\nlabels:	\ncomments:	0\nassignees:	\nprojects:	\nmilestone:	\nnumber:	73\n--\nOur wiki page names are case-sensitive. slugify always lowercases; callers should be able to pass `lowercase: false` to keep the original case, so `Hello World` becomes `Hello-World`.\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[{\"number\": 73, \"title\": \"Let callers keep capital letters in a slug\", \"state\": \"OPEN\", \"url\": \"https://github.com/acme/slugkit/issues/73\"}]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = "73	OPEN	Let callers keep capital letters in a slug		2026-10-20T10:00:00Z\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*pulls'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b.*--json'''
+stdout = "{\"name\": \"slugkit\", \"nameWithOwner\": \"acme/slugkit\", \"url\": \"https://github.com/acme/slugkit\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PUBLIC\", \"owner\": {\"login\": \"acme\"}}\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "name:	acme/slugkit\ndescription:	\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account alice (keyring)\n"
+
+[[gh]]
+match = '''(^|\s)api user\b'''
+stdout = "{\"login\": \"alice\"}\n"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 2
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3

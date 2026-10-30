@@ -1,0 +1,183 @@
+split = "screen"
+kind = "target"
+hints = ["3.md", "cycle.md", "resume", "draft"]
+remote = true
+
+[[check]]
+metric = "rule"
+artifact = "file:.claude/workspace/issue-67/feature--issue-67/3.md"
+present = '''(?m)^#{2,3} (?:Critical|Important)'''
+
+# The resumed round is carried on: each finding in its review gets the addresser's answer, which a
+# lone review does not write. A review with no finding has nothing to answer.
+[[check]]
+metric = "rule"
+artifact = "file:.claude/workspace/issue-67/feature--issue-67/3.md"
+present = '''(?im)^\W*answer(?:ed|s)?\b|\A(?![\s\S]*^\s*(?:\d+[.)]|[-*])\s+\*\*)'''
+
+# Reviewer briefs only, whatever agent type ran them: a match counts from a brief that names
+# review-pr up to one that names address-review or the addresser, and a type no brief went to passes.
+[[check]]
+metric = "rule"
+artifact = "brief:general-purpose"
+present = '''(?i)\A(?!(?:[\s\S]*review-pr)?(?:(?!address-review|addresser)[\s\S])*?(?:slug\s+with\s+no\s+dash|README\s+does\s+not\s+say\s+a\s+cut\s+slug|comment\s+on\s+trimToLength))'''
+
+[[check]]
+metric = "rule"
+artifact = "brief:claude"
+present = '''(?i)\A(?!(?:[\s\S]*review-pr)?(?:(?!address-review|addresser)[\s\S])*?(?:slug\s+with\s+no\s+dash|README\s+does\s+not\s+say\s+a\s+cut\s+slug|comment\s+on\s+trimToLength))'''
+
+[[check]]
+metric = "rule"
+artifact = "brief:praxis:general-reviewer"
+present = '''(?i)\A(?!(?:[\s\S]*review-pr)?(?:(?!address-review|addresser)[\s\S])*?(?:slug\s+with\s+no\s+dash|README\s+does\s+not\s+say\s+a\s+cut\s+slug|comment\s+on\s+trimToLength))'''
+
+[[check]]
+metric = "rule"
+artifact = "brief:praxis:doc-reviewer"
+present = '''(?i)\A(?!(?:[\s\S]*review-pr)?(?:(?!address-review|addresser)[\s\S])*?(?:slug\s+with\s+no\s+dash|README\s+does\s+not\s+say\s+a\s+cut\s+slug|comment\s+on\s+trimToLength))'''
+
+[[check]]
+metric = "rule"
+artifact = "gh"
+present = '''\A(?:.+\n)*gh (?:.* )?pr create\b.*--draft'''
+
+[[check]]
+metric = "kept"
+artifact = "file:.claude/workspace/issue-67/feature--issue-67/1.md"
+present = '''Answer: fixed in the round-1 commit'''
+
+[[check]]
+metric = "quiet"
+artifact = "gh"
+present = '''\A(?!(?:.+\n)*gh (?:.* )?pr (?:ready|comment|review|merge)\b)'''
+
+[[check]]
+metric = "quiet"
+artifact = "gh"
+absent = '''(?i)while you were away|decided without you|decided for you|while you were out|in your absence'''
+
+[[check]]
+metric = "quiet"
+artifact = "brief:general-purpose"
+present = '''(?i)\A(?!(?:[\s\S]*review-pr)?(?:(?!address-review|addresser)[\s\S])*?(?:(?:(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:only|just)\s+(?:review\s+|look\s+at\s+|check\s+|at\s+)?(?:the\s+|this\s+)?(?:latest|last|newest|new|recent|most\s+recent)\s+(?:[\w-]+\s+)?(?:commits?|changes?|diff|fix(?:es)?)\b|(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:only|just)\s+(?:review\s+|look\s+at\s+|check\s+|at\s+)?(?:the\s+)?(?:commits?|changes?|diff)\s+(?:since|after)\b|\b(?:latest|last|newest)\s+commits?\s+only\b|(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:review|look\s+at|check|focus\s+on)\s+(?:the\s+)?(?:commits?|changes?|diff)\s+(?:since|after)\s+(?:the\s+)?(?:last|previous|prior|round))))'''
+
+[[check]]
+metric = "quiet"
+artifact = "brief:claude"
+present = '''(?i)\A(?!(?:[\s\S]*review-pr)?(?:(?!address-review|addresser)[\s\S])*?(?:(?:(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:only|just)\s+(?:review\s+|look\s+at\s+|check\s+|at\s+)?(?:the\s+|this\s+)?(?:latest|last|newest|new|recent|most\s+recent)\s+(?:[\w-]+\s+)?(?:commits?|changes?|diff|fix(?:es)?)\b|(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:only|just)\s+(?:review\s+|look\s+at\s+|check\s+|at\s+)?(?:the\s+)?(?:commits?|changes?|diff)\s+(?:since|after)\b|\b(?:latest|last|newest)\s+commits?\s+only\b|(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:review|look\s+at|check|focus\s+on)\s+(?:the\s+)?(?:commits?|changes?|diff)\s+(?:since|after)\s+(?:the\s+)?(?:last|previous|prior|round))))'''
+
+[[check]]
+metric = "quiet"
+artifact = "brief:praxis:general-reviewer"
+present = '''(?i)\A(?!(?:[\s\S]*review-pr)?(?:(?!address-review|addresser)[\s\S])*?(?:(?:(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:only|just)\s+(?:review\s+|look\s+at\s+|check\s+|at\s+)?(?:the\s+|this\s+)?(?:latest|last|newest|new|recent|most\s+recent)\s+(?:[\w-]+\s+)?(?:commits?|changes?|diff|fix(?:es)?)\b|(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:only|just)\s+(?:review\s+|look\s+at\s+|check\s+|at\s+)?(?:the\s+)?(?:commits?|changes?|diff)\s+(?:since|after)\b|\b(?:latest|last|newest)\s+commits?\s+only\b|(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:review|look\s+at|check|focus\s+on)\s+(?:the\s+)?(?:commits?|changes?|diff)\s+(?:since|after)\s+(?:the\s+)?(?:last|previous|prior|round))))'''
+
+[[check]]
+metric = "quiet"
+artifact = "brief:praxis:doc-reviewer"
+present = '''(?i)\A(?!(?:[\s\S]*review-pr)?(?:(?!address-review|addresser)[\s\S])*?(?:(?:(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:only|just)\s+(?:review\s+|look\s+at\s+|check\s+|at\s+)?(?:the\s+|this\s+)?(?:latest|last|newest|new|recent|most\s+recent)\s+(?:[\w-]+\s+)?(?:commits?|changes?|diff|fix(?:es)?)\b|(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:only|just)\s+(?:review\s+|look\s+at\s+|check\s+|at\s+)?(?:the\s+)?(?:commits?|changes?|diff)\s+(?:since|after)\b|\b(?:latest|last|newest)\s+commits?\s+only\b|(?<!not )(?<!never )(?<!n't )(?<!than )(?<!of )\b(?:review|look\s+at|check|focus\s+on)\s+(?:the\s+)?(?:commits?|changes?|diff)\s+(?:since|after)\s+(?:the\s+)?(?:last|previous|prior|round))))'''
+
+[[gh]]
+match = '''(^|\s)pr create\b'''
+stdout = "https://github.com/acme/slugkit/pull/167\n"
+
+[[gh]]
+match = '''(^|\s)pr ready\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)pr view\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr diff\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr checks\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr checkout\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr edit\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)pr list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)pr status\b'''
+stdout = "Current branch\n  There is no pull request associated with [feature/issue-67]\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 67, \"title\": \"Don't end a cut slug halfway through a word\", \"body\": \"slugify('Hello big world', { maxLength: 10 }) returns 'hello-big-', with a trailing dash, and other inputs stop halfway through a word. A cut slug should end at the last whole word that fits.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/slugkit/issues/67\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tDon't end a cut slug halfway through a word\nstate:\tOPEN\nauthor:\tdana\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t67\n--\nslugify('Hello big world', { maxLength: 10 }) returns 'hello-big-', with a trailing dash, and other inputs stop halfway through a word. A cut slug should end at the last whole word that fits.\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[{\"number\": 67, \"title\": \"Don't end a cut slug halfway through a word\", \"state\": \"OPEN\", \"url\": \"https://github.com/acme/slugkit/issues/67\"}]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = "67\tOPEN\tDon't end a cut slug halfway through a word\t\t2026-10-20T10:00:00Z\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*pulls'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b.*--json'''
+stdout = "{\"name\": \"slugkit\", \"nameWithOwner\": \"acme/slugkit\", \"url\": \"https://github.com/acme/slugkit\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PUBLIC\", \"owner\": {\"login\": \"acme\"}}\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "name:\tacme/slugkit\ndescription:\t\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account alice (keyring)\n"
+
+[[gh]]
+match = '''(^|\s)api user\b'''
+stdout = "{\"login\": \"alice\"}\n"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 1
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 2
+runs = 3
+runner = 2
+remote_runner = 3

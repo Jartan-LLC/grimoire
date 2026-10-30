@@ -1,0 +1,6 @@
+commits = ["docs"]
+final = ""
+gh = "gh pr create --draft --title t\n\nb\n"
+
+[files]
+"README.md" = "x"

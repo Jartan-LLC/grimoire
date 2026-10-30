@@ -1,0 +1,11 @@
+commits = []
+final = ""
+gh = "gh -R acme/slugkit pr create --title t --draft --body b\n\nb\n"
+
+[files]
+".claude/workspace/issue-67/feature--issue-67/1.md" = "## Code Review\n\n### Critical Issues\nNone found\n\n### Important Issues\n1. **A slug with no dash within maxLength is not cut** -- `src/slug.js:14`.\n\nAnswer: fixed in the round-1 commit.\n\n### Summary\nOne Important finding.\n"
+".claude/workspace/issue-67/feature--issue-67/3.md" = "## Code Review\n\n### Critical Issues\nNone found\n\n### Important Issues\nNone found\n\n### Minor Issues\nNone found\n\n### Summary\nNo findings.\n"
+
+[briefs]
+"praxis:general-reviewer" = "Review feature/issue-67 against main, never only the latest commit."
+"general-purpose" = "Run the praxis:review-pr skill on feature/issue-67.\n\nRun the praxis:address-review skill on 3.md. Context: round 1 found a slug with no dash within maxLength was not cut."

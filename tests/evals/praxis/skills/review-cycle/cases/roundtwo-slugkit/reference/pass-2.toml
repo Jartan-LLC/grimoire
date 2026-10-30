@@ -1,0 +1,10 @@
+commits = []
+final = ""
+
+[files]
+".claude/workspace/issue-73/feature--issue-73/1.md" = "## Code Review\n\n### Critical Issues\nNone found\n\n### Important Issues\n1. **Capital letters are dropped when lowercase is false** -- `src/slug.js:7`. The character class `[^a-z0-9]` still matches `A-Z`, so each capital becomes a dash: `slugify('Hello World', { lowercase: false })` returns `ello-orld`. No test covers the option.\n\n### Minor Issues\n1. **The README does not mention the lowercase option** -- `README.md:3`. Add a sentence.\n\n### Summary\nOne Important and one Minor finding.\n"
+".claude/workspace/issue-73/feature--issue-73/2.md" = "## Code Review\n\n## Critical Issues\nNone found\n\n## Important Issues\n1. **Callers cannot tell `toSlug` takes a second argument** -- `src/slug.js:4`. The export changed shape.\n\n## Minor Issues\nNone found\n"
+
+[briefs]
+"praxis:general-reviewer" = "Branch feature/issue-73, three commits: feat(slug): let callers keep capital letters; fix(slug): keep capitals when lowercase is false; docs(readme): describe the lowercase option. Review all of it."
+"praxis:doc-reviewer" = "Commit messages: feat(slug): let callers keep capital letters / fix(slug): keep capitals when lowercase is false / docs(readme): describe the lowercase option. Check the README and comments."

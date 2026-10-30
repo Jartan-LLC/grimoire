@@ -1,0 +1,8 @@
+commits = []
+final = ""
+
+[files]
+
+[briefs]
+"praxis:doc-reviewer" = "docs"
+"praxis:test-reviewer" = "tests"

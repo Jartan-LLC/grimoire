@@ -1,0 +1,52 @@
+# The review-cycle command (#66): rounds of review-pr and address-review until two come back clean, a
+# closing round on the change's words, then a draft PR. Target cases: decide mode reaches the draft with
+# no away-style header; raise mode stops the PR on a raised finding and asks; a cycle resumes from
+# cycle.md with reviewers blind to earlier rounds. review-pr's new lines: a scoped request runs only the
+# reviewers for that part, and reviewers get nothing from an earlier review. Regression: implement-issue
+# still stops at the push. Remote cases run against a recording gh. tests/evals/README.md says how the
+# suite is run. Not calibrated: a new command has no positive control until it is on main.
+target = "praxis:review-cycle"
+# Cases moved off a held-out split, each with its reason in a comment.
+BURNED = [
+  # Screened, then found broken: their fixtures claimed fixes no commit held, and their brief
+  # checks read the addresser's briefs and the command's own whole-branch line.
+  "resume-confload",
+  "resume-slugkit",
+  # Confirmed, then found broken: its prompt claimed fixes its fixture never held.
+  "roundtwo-ratelimit",
+]
+covers = [
+  "plugins/praxis/skills/review-cycle/**",
+  "plugins/praxis/skills/review-pr/SKILL.md",
+  "plugins/praxis/skills/workspace-patterns/SKILL.md",
+  "plugins/praxis/skills/implement-issue/SKILL.md",
+]
+models = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]
+# A full cycle runs several review-pr fan-outs: about $3.35 and 9 minutes per sample on Opus.
+budget_usd = 25.0
+# Haiku's full cycles ran past the default 30 minutes.
+timeout_s = 5400
+
+[[metric]]
+id = "rule"
+direction = "higher"
+# Target cases: the end state the command or review-pr's new lines call for.
+
+[[metric]]
+id = "kept"
+direction = "higher"
+margin = 0.2
+# The planted bug fixed, earlier reviews left as they were, implement-issue's own work done.
+
+[[metric]]
+id = "quiet"
+direction = "higher"
+margin = 0.2
+# Nothing posted or marked ready, no away-style header, reviewers not narrowed to recent commits.
+
+[pass_rule]
+primary = "rule"
+rule = "better"
+guards = ["kept", "quiet"]
+min_effect = 0.5
+min_samples = 3

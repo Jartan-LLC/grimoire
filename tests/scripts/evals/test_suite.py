@@ -10,9 +10,17 @@ def test_load_suite_reads_metrics_rule_and_cases(tmp_path: pathlib.Path) -> None
     assert list(suite.metrics) == ["kept", "delivered"]
     assert suite.pass_rule.guards == ("delivered",)
     assert suite.budget_usd == 2.0
+    assert suite.timeout_s == 1800
     (case,) = suite.cases
     assert (case.id, case.split, case.kind, len(case.checks)) == ("c1", "dev", "target", 3)
     assert suite.split("screen") == []
+
+
+def test_load_suite_reads_a_session_timeout(tmp_path: pathlib.Path) -> None:
+    suite = load_suite(
+        write_suite(tmp_path, SUITE.replace("target =", "timeout_s = 3600\ntarget =", 1))
+    )
+    assert suite.timeout_s == 3600
 
 
 def test_case_hash_covers_prompt_and_fixture_but_not_the_key(tmp_path: pathlib.Path) -> None:
@@ -72,6 +80,11 @@ def test_case_hash_covers_prompt_and_fixture_but_not_the_key(tmp_path: pathlib.P
             "must-hold metric 'delivered'",
         ),
         (SUITE, "split = ", "Invalid"),
+        (
+            SUITE.replace("target =", 'timeout_s = "1h"\ntarget =', 1),
+            KEY,
+            "'timeout_s' must be a number",
+        ),
     ],
 )
 def test_load_suite_names_the_file_and_the_problem(

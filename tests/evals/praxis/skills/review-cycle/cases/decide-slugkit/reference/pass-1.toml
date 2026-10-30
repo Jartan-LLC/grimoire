@@ -1,0 +1,8 @@
+commits = []
+final = ""
+gh = "gh pr create --draft --title t --body-file /tmp/b.md\n\nbody\n"
+
+[files]
+".claude/workspace/issue-61/feature--issue-61/1.md" = "## Code Review\n\n### Critical Issues\nNone found\n\n### Important Issues\nNone found\n\n### Minor Issues\n1. **x** -- `README.md:3`. Add a sentence.\n\n### Summary\nOne Minor finding.\n"
+".claude/workspace/issue-61/feature--issue-61/cycle.md" = "mode: decide\n"
+"src/slug.js" = "fixed\n"
