@@ -708,7 +708,7 @@ def split_panels(suite: Suite, samples: list[cache.Sample], store: pathlib.Path)
 
 def split_report(
     suite: Suite,
-    old_holds_removed: bool = True,
+    has_control: bool = True,
     advise: bool = True,
     splits: tuple[str, ...] = ("screen", "confirm"),
 ) -> tuple[list[str], bool]:
@@ -719,9 +719,9 @@ def split_report(
     A case missing either arm's baseline on a model counts as one the target does not change.
     The chance runs high: each case's few baseline runs are read as its exact failure rate,
     and baselines count each case's own non-guard checks, so a target case whose checks the
-    pass rule does not read adds to it though the verdict cannot see that case. A suite whose
-    target and replaced texts the merge base all lacks gets no control at all, and a gate
-    model missing either arm's baselines is too weak.
+    pass rule does not read adds to it though the verdict cannot see that case. Without
+    `has_control`, when the merge base lacks the suite's target and every text it replaces,
+    there is no control at all; a gate model missing either arm's baselines is too weak.
     With `advise`, a weak split's lines also say what fixes it: add cases, record baselines.
     """
     rule = suite.pass_rule
@@ -756,7 +756,7 @@ def split_report(
             )
             weak = True
         for model in suite.models:
-            if not old_holds_removed:
+            if not has_control:
                 # Old holds nothing `none` removes, so the control would be old against itself.
                 lines.append(
                     f"    {model}: the target is not at the merge base yet: no positive control"
