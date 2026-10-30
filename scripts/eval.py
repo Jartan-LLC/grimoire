@@ -789,7 +789,7 @@ def _judged_scale(suite: Suite, harm: float) -> list[str]:
         stamp = calibrate.standing(suite.path, suite.cases, j, jury.instrument(j)).stamp
         if not asked or j.id in held or stamp is None or not (score := calibrate.j_of(stamp)):
             continue
-        true = f"{harm / score:.2f}" if harm <= 1 else "none"
+        true = f"{harm / score:.2f}" if harm / score <= 1 else "none"
         lines.append(
             f"    judge {j.id} scores {primary}: J = {score:.2f}; that harm is {true} on the true scale"
         )

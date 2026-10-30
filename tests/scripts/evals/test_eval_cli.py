@@ -542,6 +542,8 @@ def test_a_judge_without_a_cleared_stamp_gates_nothing(tmp_path: pathlib.Path) -
     # J = 0.95 + 1.0 - 1: a harm the split sees at 0.38 is 0.40 on the true scale
     (line,) = cli._judged_scale(suite, 0.38)  # pyright: ignore[reportPrivateUsage]
     assert "J = 0.95; that harm is 0.40 on the true scale" in line
+    (line,) = cli._judged_scale(suite, 0.96)  # pyright: ignore[reportPrivateUsage]
+    assert "that harm is none on the true scale" in line  # 0.96 / 0.95 is past any harm
 
 
 def test_align_scores_held_out_once_per_version_and_burns_a_missed_one(
