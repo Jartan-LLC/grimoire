@@ -86,7 +86,8 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   or an agent's or command's body cut to its first line.
   A target that renames or replaces texts of `old` lists them in `suite.toml` as
   `replaces = ["<plugin>:<name>", ...]` (top-level, above the first `[table]`), and `none` removes them
-  too, so it holds none of the texts the change replaces.
+  too, so it holds none of the texts the change replaces. `make eval-plan` names an entry the merge
+  base does not hold.
 
 ## Choosing cases
 

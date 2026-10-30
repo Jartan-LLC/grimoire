@@ -374,6 +374,29 @@ def test_the_plan_without_a_tier_lists_what_the_change_reaches_and_asks_for_one(
     assert "TIER=<n>" in lines[3]
 
 
+def test_the_plan_names_a_replaced_text_the_merge_base_does_not_hold(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    plan, direct, _ = reach(tmp_path)
+    suite = dataclasses.replace(plan.suites[0].suite, replaces=("demo:held", "demo:typo"))
+    plan.suites[0] = Listed(suite, ["d.md"], direct=True)
+
+    def make_plan(root: pathlib.Path, base: str) -> Plan:
+        return plan
+
+    def holds(target: str, base: str) -> bool:
+        return target != "demo:typo"
+
+    monkeypatch.setattr(cli, "make_plan", make_plan)
+    monkeypatch.setattr(cli, "old_holds", holds)
+    assert cli.plan_command("main", None) == 0
+    assert capsys.readouterr().out.splitlines()[:2] == [
+        f"{direct}: DIRECT, covers d.md",
+        "  replaces 'demo:typo', which the merge base does not hold: check the name, or drop it "
+        "once the rename has merged",
+    ]
+
+
 def test_the_plan_at_tier_1_lists_what_the_change_reaches_with_no_steps(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:

@@ -876,7 +876,9 @@ def plan_command(base: str, tier: int | None = None) -> int:
     lists it with no steps, so a wrong tier-1 call shows what it waves through. It exits 1 when
     a suite does not load, and at tier 4, where a weak split binds, when a direct suite's split
     is too weak or a changed file has no suite; at tiers 2 and 3 the screen split's power report
-    is printed for the PR to say what it shows, without its advice.
+    is printed for the PR to say what it shows, without its advice. At any tier it names each
+    text a direct suite `replaces` that the merge base does not hold: a misspelt name, or one
+    the renaming change has already merged.
     """
     plan = make_plan(ROOT, base)
     for error in plan.broken:
@@ -889,6 +891,12 @@ def plan_command(base: str, tier: int | None = None) -> int:
         suite = entry.suite
         kind = "DIRECT" if entry.direct else "INDIRECT"
         print(f"{shown(suite.path)}: {kind}, covers {', '.join(entry.hits)}")
+        for text in suite.replaces if entry.direct else ():
+            if not old_holds(text, base):
+                print(
+                    f"  replaces {text!r}, which the merge base does not hold: check the name, "
+                    "or drop it once the rename has merged"
+                )
         if tier is None or tier == 1:
             continue
         if entry.direct:
