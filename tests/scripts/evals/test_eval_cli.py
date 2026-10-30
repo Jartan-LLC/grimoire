@@ -292,7 +292,7 @@ def test_the_planner_skips_the_control_only_for_a_target_old_does_not_hold(
     tmp_path: pathlib.Path,
 ) -> None:
     both: dict[str, tuple[int | None, int | None]] = {"claude-opus-5-5": (3, 3)}
-    lines, weak = cli.split_report(power_suite(tmp_path / "new", 8, both), old_holds_target=False)
+    lines, weak = cli.split_report(power_suite(tmp_path / "new", 8, both), old_holds_removed=False)
     assert not weak
     assert any("no positive control" in line for line in lines)
     unrecorded: dict[str, tuple[int | None, int | None]] = {"claude-opus-5-5": (None, None)}

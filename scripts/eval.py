@@ -94,6 +94,11 @@ def old_holds(target: str, base: str) -> bool:
     )
 
 
+def old_holds_removed(suite: Suite, base: str) -> bool:
+    """Whether the merge base with `base` has the suite's target or a text it replaces, so `none` differs from `old`."""
+    return any(old_holds(t, base) for t in suite.removed())
+
+
 def claude_version() -> str:
     """The installed Claude Code version, part of every sample's cache key."""
     return str(
@@ -703,7 +708,7 @@ def split_panels(suite: Suite, samples: list[cache.Sample], store: pathlib.Path)
 
 def split_report(
     suite: Suite,
-    old_holds_target: bool = True,
+    old_holds_removed: bool = True,
     advise: bool = True,
     splits: tuple[str, ...] = ("screen", "confirm"),
 ) -> tuple[list[str], bool]:
@@ -714,8 +719,9 @@ def split_report(
     A case missing either arm's baseline on a model counts as one the target does not change.
     The chance runs high: each case's few baseline runs are read as its exact failure rate,
     and baselines count each case's own non-guard checks, so a target case whose checks the
-    pass rule does not read adds to it though the verdict cannot see that case. A target the merge base lacks
-    gets no control at all, and a gate model missing either arm's baselines is too weak.
+    pass rule does not read adds to it though the verdict cannot see that case. A suite whose
+    target and replaced texts the merge base all lacks gets no control at all, and a gate
+    model missing either arm's baselines is too weak.
     With `advise`, a weak split's lines also say what fixes it: add cases, record baselines.
     """
     rule = suite.pass_rule
@@ -750,8 +756,8 @@ def split_report(
             )
             weak = True
         for model in suite.models:
-            if not old_holds_target:
-                # Old lacks a new target, so the `none` control would be old against itself.
+            if not old_holds_removed:
+                # Old holds nothing `none` removes, so the control would be old against itself.
                 lines.append(
                     f"    {model}: the target is not at the merge base yet: no positive control"
                 )
@@ -889,8 +895,7 @@ def plan_command(base: str, tier: int | None = None) -> int:
             binds = tier == FULL
             # The confirm split runs only at tier 4.
             splits = ("screen", "confirm") if binds else ("screen",)
-            held = any(old_holds(t, base) for t in suite.removed())
-            lines, weak = split_report(suite, held, binds, splits)
+            lines, weak = split_report(suite, old_holds_removed(suite, base), binds, splits)
             print(
                 "  what its splits can see:"
                 if binds
@@ -1425,7 +1430,7 @@ def main() -> int:
         return show(args.key, cache.root(ROOT)) if args.command == "show" else judge_command(args)
     if args.command == "size":
         suite = load(args.suite)
-        lines, weak = split_report(suite, any(old_holds(t, args.base) for t in suite.removed()))
+        lines, weak = split_report(suite, old_holds_removed(suite, args.base))
         print(f"{shown(suite.path)}:")
         print("\n".join(lines))
         return 1 if weak else 0
