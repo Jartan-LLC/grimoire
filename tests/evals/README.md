@@ -238,7 +238,7 @@ the PR how many versions you screened.
   written by two spawns (the main thread's writes aside); `artifact = "spawn-writes"` with a `write`
   kind when no spawn made that write, even one that failed, such as `write = "commit"`;
   `artifact = "barrier"` when the main thread wrote no file, nor tried to, between an Agent call and
-  the last report of the spawns out with it. A delivery check's `write = "spawn"` is an Agent call: with
+  the end of every spawn out with it, at its report or at the notice that it failed. A delivery check's `write = "spawn"` is an Agent call: with
   `state = "in-context"` the skill arrived before every Agent call of the main thread, or with an
   `agent`, of that subagent. None of these is graded on references.
 - **What the agent sent to GitHub:** `gh` is every call the stub recorded but Claude Code's own (below),

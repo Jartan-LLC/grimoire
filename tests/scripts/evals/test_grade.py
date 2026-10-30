@@ -151,6 +151,8 @@ def test_a_barrier_check_fails_on_a_main_thread_write_while_a_spawn_is_out() -> 
     assert barrier([*wave, *early]) == 0.0
     never = [notification("a1", "done"), *wrote("w1", "/repo/glue.py")]
     assert barrier([*wave, *never]) == 0.0
+    failed = [notification("a1", "done"), notification("a2", "API error", status="failed")]
+    assert barrier([*wave, *failed, *wrote("w1", "/repo/glue.py")]) == 1.0
 
 
 def test_waves_merge_spawns_whose_lifetimes_overlap() -> None:

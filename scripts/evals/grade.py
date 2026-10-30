@@ -195,12 +195,13 @@ def spawn_writes_score(check: Check, parsed: trace.Trace) -> float:
 
 
 def waves(parsed: trace.Trace) -> list[tuple[int, float]]:
-    """Each stretch of events from a main-thread Agent call to the last report of every spawn out with it.
+    """Each stretch of events from a main-thread Agent call until every spawn out with it has ended.
 
-    A spawn that never reported stays out to the end of the session.
+    A spawn ends at its report, or at a notification that it failed; one that never
+    ended stays out to the end of the session.
     """
     spans = sorted(
-        (s.index, math.inf if s.reported is None else s.reported) for s in parsed.spawns if not s.by
+        (s.index, math.inf if s.ended is None else s.ended) for s in parsed.spawns if not s.by
     )
     merged: list[tuple[int, float]] = []
     for start, end in spans:

@@ -238,11 +238,12 @@ def test_parse_reads_a_background_agents_report_from_its_notification() -> None:
     assert [(w.agent, w.spawn) for w in parsed.writes if w.kind == "commit"] == [(REVIEWER, "a1")]
 
 
-def test_parse_skips_a_notification_that_did_not_complete() -> None:
-    events = [spawn("a1"), launched("a1"), notification("a1", "partial", status="failed")]
+def test_parse_takes_no_report_from_a_failed_notification_but_ends_its_spawn_there() -> None:
+    events = [spawn("a1"), launched("a1"), notification("a1", "API error", status="failed")]
     parsed = trace.parse(events, PLUGINS)
     assert parsed.reports == []
-    assert parsed.spawns == [trace.Spawn("a1", 0, REVIEWER, "", None)]
+    assert parsed.spawns == [trace.Spawn("a1", 0, REVIEWER, "", 2)]
+    assert trace.parse(events[:2], PLUGINS).spawns == [trace.Spawn("a1", 0, REVIEWER, "", None)]
 
 
 def test_parse_follows_a_subagents_own_subagents_and_keeps_one_report_per_spawn() -> None:

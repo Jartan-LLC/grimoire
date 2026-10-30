@@ -117,14 +117,15 @@ class Spawn:
     """An Agent call at event `index` that started agent type `agent`, and did not end in error.
 
     `id` is the call's id; `by` the spawn whose agent made the call, empty for the main
-    thread; `reported` the event its report arrived at, None when none did.
+    thread; `ended` the event its agent finished at, with its report or a notification
+    that it failed, None when it never finished.
     """
 
     id: str
     index: int
     agent: str
     by: str = ""
-    reported: int | None = None
+    ended: int | None = None
 
 
 @dataclass
@@ -320,6 +321,7 @@ class _Spawns:
     agents: dict[str, str] = field(default_factory=dict[str, str])  # -> the agent it started
     launched: dict[str, tuple[int, str]] = field(default_factory=dict[str, tuple[int, str]])
     reported: dict[str, int] = field(default_factory=dict[str, int])
+    ended: dict[str, int] = field(default_factory=dict[str, int])  # reported, or failed
     models: dict[str, str] = field(default_factory=dict[str, str])  # the subagent's model
     by_agent: dict[str, list[tuple[int, str]]] = field(
         default_factory=dict[str, list[tuple[int, str]]]
@@ -346,13 +348,21 @@ class _Spawns:
         if report.spawn not in self.reported:
             trace.reports.append(report)
             self.reported[report.spawn] = report.index
+            self.ended.setdefault(report.spawn, report.index)
 
 
 def _notified(trace: Trace, index: int, event: Event, spawns: _Spawns) -> None:
+    """A followed call's notification ends its spawn; only a completed one carries a report.
+
+    The summary of one that failed is the error, not the agent's report.
+    """
     call_id = str(event.get("tool_use_id"))
-    if call_id in spawns.agents and event.get("status") == "completed":
+    if call_id not in spawns.agents:
+        return
+    if event.get("status") == "completed":
         agent, model = spawns.agents[call_id], spawns.models.get(call_id, "")
         spawns.report(trace, Report(index, agent, model, str(event.get("summary", "")), call_id))
+    spawns.ended.setdefault(call_id, index)
 
 
 def _whole(trace: Trace, index: int, event: Event, spawns: _Spawns) -> None:
@@ -414,7 +424,7 @@ def parse(
     failed = _failed_calls(events)
     trace.briefs = [b for call_id, b in spawns.briefs.items() if call_id not in failed]
     trace.spawns = [
-        Spawn(call_id, at, spawns.agents[call_id], by, spawns.reported.get(call_id))
+        Spawn(call_id, at, spawns.agents[call_id], by, spawns.ended.get(call_id))
         for call_id, (at, by) in spawns.launched.items()
         if call_id not in failed
     ]

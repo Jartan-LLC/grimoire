@@ -72,7 +72,7 @@ class Check:
     deliveries and writes, or with an `agent`, that subagent's. A spawn check reads the
     session's subagents: `overlap` (no file written by two spawns), `spawn-writes` with a
     `write` kind (no spawn made such a write) or `barrier` (no main-thread file write while
-    a spawn it made had not reported). A `verify` check runs its `command` on the session's
+    a spawn it made had not ended). A `verify` check runs its `command` on the session's
     final tree and holds when it exits 0.
     """
 
