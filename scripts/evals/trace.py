@@ -3,18 +3,25 @@
 Shapes, from probe runs on Claude Code 2.1.309: a `system`/`init` event lists the
 loaded plugins, MCP servers and memory paths; a Skill call's tool_result says only
 "Launching skill", and the skill's text follows as a synthetic user event starting
-"Base directory for this skill: <path>"; a `result` event ends the session, its
-`usage` the session's tokens and `total_cost_usd` its cost. The init event's
-`skills` list holds only user-invocable skills, so it cannot show delivery.
+"Base directory for this skill: <path>"; a `result` event ends a turn of the main
+thread, `total_cost_usd` the session's cost so far, `usage` and `num_turns` that
+turn's only. The init event's `skills` list holds only user-invocable skills, so it
+cannot show delivery.
 
-Subagents, from probe runs on 2.1.311 with `--forward-subagent-text`: each event a
-subagent emits carries `parent_tool_use_id`, the id of the main thread's Agent call
-that started it, and its loads and writes are attributed to that agent. Other events
-carry the field too (a long tool call's heartbeats name the call itself), so only an
-Agent call's id makes an event a subagent's. The Agent call's result carries the
-report in `tool_use_result`. A subagent's own subagents are not sent. The skills an
-agent's frontmatter preloads reach no event: Claude Code's debug log names them, and
-`parse` takes them as `preloads`.
+Subagents, from probe runs on 2.1.311 and 2.1.314 with `--forward-subagent-text`: each
+event a subagent emits carries `parent_tool_use_id`, the id of the Agent call that
+started it, and its loads and writes are attributed to that agent and that call (its
+spawn). A subagent's own subagents are sent too, their events naming their own Agent
+call. Other events carry the field as well (a long tool call's heartbeats name the call
+itself), so only a followed Agent call's id makes an event a subagent's. A foreground
+Agent call's result carries the report in `tool_use_result`. Under `-p` on 2.1.314 the
+main thread's Agent calls run in the background: the call's result only says the agent
+was launched, and the report comes later as a `system`/`task_notification` event, its
+`tool_use_id` the call's and its `summary` the report; each notification starts a new
+main-thread turn, whose `result` event arrives only when the session ends. A subagent's
+own Agent calls run in the foreground, and their results carry no `tool_use_result`, but
+they get a notification too. The skills an agent's frontmatter preloads reach no event:
+Claude Code's debug log names them, and `parse` takes them as `preloads`.
 """
 
 import json
@@ -50,7 +57,8 @@ type Event = dict[str, object]
 class Write:
     """A write the agent made: `index` is where its text was fixed (the tool call).
 
-    `agent` is the subagent that made it; empty for the main thread.
+    `agent` is the subagent that made it, empty for the main thread; `spawn` is the id of
+    the Agent call that started that subagent, so two spawns of one agent stay apart.
     """
 
     index: int
@@ -58,11 +66,12 @@ class Write:
     ok: bool
     text: str
     agent: str = ""
+    spawn: str = ""
 
 
 @dataclass(frozen=True)
 class Delivery:
-    """A skill's text reaching the session at event `index`; `agent` as for a `Write`.
+    """A skill's text reaching the session at event `index`; `agent` and `spawn` as for a `Write`.
 
     A preloaded skill is placed at the Agent call that started its agent.
     """
@@ -71,16 +80,23 @@ class Delivery:
     skill: str
     path: str
     agent: str = ""
+    spawn: str = ""
 
 
 @dataclass(frozen=True)
 class Report:
-    """A subagent's final report, handed back as its Agent call's result at event `index`."""
+    """A subagent's final report, handed back at event `index` to the Agent call `spawn`.
+
+    It arrives as the call's result, or for a call run in the background as its
+    notification, which names no model: `model` is then the one the subagent's own
+    messages name.
+    """
 
     index: int
     agent: str
     model: str
     text: str
+    spawn: str = ""
 
 
 @dataclass(frozen=True)
@@ -95,16 +111,33 @@ class Brief:
     text: str
 
 
+@dataclass(frozen=True)
+class Spawn:
+    """An Agent call at event `index` that started agent type `agent`, and did not end in error.
+
+    `id` is the call's id; `by` the spawn whose agent made the call, empty for the main
+    thread; `reported` the event its report arrived at, None when none did.
+    """
+
+    id: str
+    index: int
+    agent: str
+    by: str = ""
+    reported: int | None = None
+
+
 @dataclass
 class Trace:
-    """What the runner reads from one session."""
+    """What the runner reads from one session; `result` is the last of `results`."""
 
     init: Event | None = None
     result: Event | None = None
+    results: list[Event] = field(default_factory=list[Event])
     writes: list[Write] = field(default_factory=list[Write])
     deliveries: list[Delivery] = field(default_factory=list[Delivery])
     reports: list[Report] = field(default_factory=list[Report])
     briefs: list[Brief] = field(default_factory=list[Brief])
+    spawns: list[Spawn] = field(default_factory=list[Spawn])
     compacts: list[int] = field(default_factory=list[int])
     hook_contexts: list[tuple[int, str]] = field(default_factory=list[tuple[int, str]])
     tool_inputs: list[str] = field(default_factory=list[str])
@@ -188,43 +221,53 @@ def _system(trace: Trace, index: int, event: Event) -> None:
         trace.hook_contexts.append((index, context))
 
 
-type Call = tuple[int, str, dict[str, object], str]  # index, tool name, input, agent
+type Call = tuple[int, str, dict[str, object], str, str]  # index, tool name, input, agent, spawn
 
 
-def _report(index: int, event: Event, agent: str) -> Report:
+def _report(index: int, event: Event, agent: str, spawn: str) -> Report | None:
+    """The report in an Agent call's result; None when the result holds none.
+
+    A background call's result only says the agent was launched, and a subagent's own
+    call's result carries no `tool_use_result`: their reports come as notifications.
+    """
     handed = event.get("tool_use_result")
-    result = cast("dict[str, object]", handed) if isinstance(handed, dict) else {}
+    if not isinstance(handed, dict):
+        return None
+    result = cast("dict[str, object]", handed)
+    if result.get("isAsync") is True:
+        return None
     content = result.get("content")
     blocks = cast("list[dict[str, object]]", content) if isinstance(content, list) else []
     texts = [str(b.get("text", "")) for b in blocks if b.get("type") == "text"]
     text = "\n".join(t for t in texts if not t.startswith(HARNESS_NOTE))
-    return Report(index, agent, str(result.get("resolvedModel", "")), text)
+    return Report(index, agent, str(result.get("resolvedModel", "")), text, spawn)
 
 
 def _result(
     trace: Trace, index: int, block: dict[str, object], call: Call, plugin_dirs: dict[str, str]
 ) -> None:
-    at, name, tool_input, agent = call
+    at, name, tool_input, agent, spawn = call
     ok = block.get("is_error") is not True
     if (write := _write(name, tool_input)) is not None:
-        trace.writes.append(Write(at, write[0], ok, write[1], agent))
+        trace.writes.append(Write(at, write[0], ok, write[1], agent, spawn))
     path = tool_input.get("file_path")
     if name == "Read" and ok and isinstance(path, str) and (skill := skill_of(path, plugin_dirs)):
-        trace.deliveries.append(Delivery(index, skill, path, agent))
+        trace.deliveries.append(Delivery(index, skill, path, agent, spawn))
 
 
 def _skill_text(
-    trace: Trace, index: int, text: str, plugin_dirs: dict[str, str], agent: str
+    trace: Trace, index: int, text: str, plugin_dirs: dict[str, str], who: tuple[str, str]
 ) -> None:
+    """Record the skill whose text `text` is, delivered to `who`: its (agent, spawn)."""
     if not text.startswith(SKILL_TEXT):
         return
     path = text[len(SKILL_TEXT) :].split("\n", 1)[0].strip()
     if skill := skill_of(path + "/", plugin_dirs):
-        trace.deliveries.append(Delivery(index, skill, path, agent))
+        trace.deliveries.append(Delivery(index, skill, path, *who))
 
 
 def _preload(
-    trace: Trace, spawns: dict[str, list[int]], preloads: Sequence[tuple[str, str]],
+    trace: Trace, spawns: dict[str, list[tuple[int, str]]], preloads: Sequence[tuple[str, str]],
     plugin_dirs: dict[str, str],
 ) -> None:  # fmt: skip
     """Place each preloaded skill at its agent's Agent call: the k-th preload of a skill, at the k-th call.
@@ -243,7 +286,8 @@ def _preload(
             plugin = agent.partition(":")[0]
         if count < len(calls) and plugin in plugin_dirs:
             path = plugin_dirs[plugin].rstrip("/") + "/skills/" + skill
-            trace.deliveries.append(Delivery(calls[count], f"{plugin}:{skill}", path, agent))
+            at, spawn = calls[count]
+            trace.deliveries.append(Delivery(at, f"{plugin}:{skill}", path, agent, spawn))
 
 
 def _failed_calls(events: list[Event]) -> set[str]:
@@ -257,32 +301,93 @@ def _failed_calls(events: list[Event]) -> set[str]:
     }
 
 
+def _model(event: Event) -> str:
+    message = event.get("message")
+    return (
+        str(cast("dict[str, object]", message).get("model", ""))
+        if isinstance(message, dict)
+        else ""
+    )
+
+
+@dataclass
+class _Spawns:
+    """The Agent calls `parse` follows, keyed by call id, as it reads the events."""
+
+    agents: dict[str, str] = field(default_factory=dict[str, str])  # -> the agent it started
+    launched: dict[str, tuple[int, str]] = field(default_factory=dict[str, tuple[int, str]])
+    reported: dict[str, int] = field(default_factory=dict[str, int])
+    models: dict[str, str] = field(default_factory=dict[str, str])  # the subagent's model
+    by_agent: dict[str, list[tuple[int, str]]] = field(
+        default_factory=dict[str, list[tuple[int, str]]]
+    )  # each agent's spawns in order, for its preloads
+    briefs: dict[str, Brief] = field(default_factory=dict[str, Brief])  # the main thread's only
+
+    def launch(self, index: int, call_id: str, inputs: dict[str, object], by: str) -> None:
+        """Follow the Agent call `call_id`, made at `index` by the spawn `by` (empty: the main thread)."""
+        started = str(inputs.get("subagent_type") or DEFAULT_AGENT)
+        self.agents[call_id] = started
+        self.launched[call_id] = (index, by)
+        self.by_agent.setdefault(started, []).append((index, call_id))
+        if not by:
+            self.briefs[call_id] = Brief(index, started, str(inputs.get("prompt", "")))
+
+    def answered(self, trace: Trace, index: int, event: Event, call_id: str) -> None:
+        """Read the report in the result of a followed Agent call that did not end in error."""
+        started = self.agents.get(call_id)
+        if started is not None and (report := _report(index, event, started, call_id)):
+            self.report(trace, report)
+
+    def report(self, trace: Trace, report: Report) -> None:
+        """Keep the first report of a call: one that has both a result and a notification has one report."""
+        if report.spawn not in self.reported:
+            trace.reports.append(report)
+            self.reported[report.spawn] = report.index
+
+
+def _notified(trace: Trace, index: int, event: Event, spawns: _Spawns) -> None:
+    call_id = str(event.get("tool_use_id"))
+    if call_id in spawns.agents and event.get("status") == "completed":
+        agent, model = spawns.agents[call_id], spawns.models.get(call_id, "")
+        spawns.report(trace, Report(index, agent, model, str(event.get("summary", "")), call_id))
+
+
+def _whole(trace: Trace, index: int, event: Event, spawns: _Spawns) -> None:
+    """Read what an event says whichever agent sent it: system events, results, tool inputs."""
+    kind = event.get("type")
+    if kind == "system":
+        _system(trace, index, event)
+        if event.get("subtype") == "task_notification":
+            _notified(trace, index, event, spawns)
+    elif kind == "result":
+        trace.result = event
+        trace.results.append(event)
+    elif kind == "assistant":
+        trace.tool_inputs += [
+            json.dumps(b.get("input")) for b in _content(event) if b.get("type") == "tool_use"
+        ]
+
+
 def parse(
     events: list[Event], plugin_dirs: dict[str, str], preloads: Sequence[tuple[str, str]] = ()
 ) -> Trace:
-    """Read init, result, writes, skill deliveries, briefs, reports, compactions and hook context from `events`.
+    """Read init, results, writes, skill deliveries, spawns, briefs, reports, compactions and hook context from `events`.
 
     `preloads` are the (agent, skill) pairs Claude Code's debug log names, in its order.
     """
     trace = Trace()
     calls: dict[str, Call] = {}
-    agents: dict[str, str] = {}  # each main-thread Agent call's id -> the agent it started
-    spawns: dict[str, list[int]] = {}
-    briefs: dict[str, Brief] = {}  # each main-thread Agent call's id -> its brief
+    spawns = _Spawns()
     for index, event in enumerate(events):
         kind = event.get("type")
-        if kind == "system":
-            _system(trace, index, event)
-        elif kind == "result":
-            trace.result = event
-        if kind == "assistant":
-            trace.tool_inputs += [
-                json.dumps(b.get("input")) for b in _content(event) if b.get("type") == "tool_use"
-            ]
+        _whole(trace, index, event, spawns)
         parent = event.get("parent_tool_use_id")
-        agent = "" if parent is None else agents.get(str(parent))
+        spawn = "" if parent is None else str(parent)
+        agent = spawns.agents.get(spawn) if spawn else ""
         if agent is None:
             continue
+        if kind == "assistant" and spawn and (model := _model(event)):
+            spawns.models[spawn] = model
         for block in _content(event):
             block_type = block.get("type")
             if kind == "assistant" and block_type == "tool_use":
@@ -291,23 +396,26 @@ def parse(
                     cast("dict[str, object]", tool_input) if isinstance(tool_input, dict) else {}
                 )
                 call_id, name = str(block.get("id")), str(block.get("name"))
-                calls[call_id] = (index, name, inputs, agent)
-                if name == AGENT and not agent:
-                    started = str(inputs.get("subagent_type") or DEFAULT_AGENT)
-                    agents[call_id] = started
-                    spawns.setdefault(started, []).append(index)
-                    briefs[call_id] = Brief(index, started, str(inputs.get("prompt", "")))
+                calls[call_id] = (index, name, inputs, agent, spawn)
+                if name == AGENT:
+                    spawns.launch(index, call_id, inputs, spawn)
             elif kind == "user" and block_type == "tool_result":
-                if (call := calls.get(str(block.get("tool_use_id")))) is not None:
+                call_id = str(block.get("tool_use_id"))
+                if (call := calls.get(call_id)) is not None:
                     _result(trace, index, block, call, plugin_dirs)
-                    started = agents.get(str(block.get("tool_use_id")))
-                    if started is not None and block.get("is_error") is not True:
-                        trace.reports.append(_report(index, event, started))
+                    if block.get("is_error") is not True:
+                        spawns.answered(trace, index, event, call_id)
             elif kind == "user" and block_type == "text":
-                _skill_text(trace, index, str(block.get("text", "")), plugin_dirs, agent)
+                text = str(block.get("text", ""))
+                _skill_text(trace, index, text, plugin_dirs, (agent, spawn))
     failed = _failed_calls(events)
-    trace.briefs = [brief for call_id, brief in briefs.items() if call_id not in failed]
-    _preload(trace, spawns, preloads, plugin_dirs)
+    trace.briefs = [b for call_id, b in spawns.briefs.items() if call_id not in failed]
+    trace.spawns = [
+        Spawn(call_id, at, spawns.agents[call_id], by, spawns.reported.get(call_id))
+        for call_id, (at, by) in spawns.launched.items()
+        if call_id not in failed
+    ]
+    _preload(trace, spawns.by_agent, preloads, plugin_dirs)
     trace.writes.sort(key=lambda w: w.index)
     trace.deliveries.sort(key=lambda d: d.index)
     return trace
@@ -415,12 +523,29 @@ def state(trace: Trace, write: Write, skill: str) -> tuple[str, bool]:
     return "absent", False
 
 
+def _count(value: object) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
 def usage(trace: Trace) -> dict[str, object]:
-    """The session's tokens and cost, from the result event."""
-    result = trace.result or {}
-    tokens = result.get("usage")
+    """The session's tokens, turns and cost.
+
+    The cost is the last result event's, which totals the session; tokens and turns are
+    summed over every result event, as each counts only its own turn of the main thread.
+    A token field that is not a count (a nested table, a tier name) is the last one's.
+    """
+    tokens: dict[str, object] = {}
+    for result in trace.results:
+        found = result.get("usage")
+        for name, value in cast(
+            "dict[str, object]", found if isinstance(found, dict) else {}
+        ).items():
+            before = tokens.get(name, 0)
+            summed = _count(value) and _count(before)
+            tokens[name] = cast("int", before) + cast("int", value) if summed else value
+    turns = [cast("int", t) for r in trace.results if _count(t := r.get("num_turns"))]
     return {
-        "cost_usd": result.get("total_cost_usd"),
-        "turns": result.get("num_turns"),
-        "tokens": cast("dict[str, object]", tokens) if isinstance(tokens, dict) else {},
+        "cost_usd": (trace.result or {}).get("total_cost_usd"),
+        "turns": sum(turns) if turns else None,
+        "tokens": tokens,
     }

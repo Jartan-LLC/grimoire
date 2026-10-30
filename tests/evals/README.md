@@ -198,7 +198,9 @@ the PR how many versions you screened.
 - **A subagent's work:** `report:<agent>` is every report that agent handed back, `brief:<agent>` every
   Agent-call prompt the main thread sent that agent type (a call that ended in error aside), and a
   delivery check with `agent = "<plugin>:<agent>"` reads that subagent's skill loads and writes instead
-  of the main thread's. A reference gives reports under `[reports]` and briefs under `[briefs]`, as
+  of the main thread's. Subagents are followed at every depth, a subagent's own subagents included, and
+  so is an Agent call run in the background, which under `-p` is every one the main thread makes: its
+  report is the one Claude Code's notification carries when the agent finishes. A reference gives reports under `[reports]` and briefs under `[briefs]`, as
   `"<plugin>:<agent>" = "text"`.
 - **What the agent sent to GitHub:** `gh` is every call the stub recorded but Claude Code's own (below),
   one `gh <arguments>` line each with newlines written as `\n`, then a blank line, then every text the
@@ -491,10 +493,9 @@ After changing the runner or the verdict rule:
   `git config remote.origin.url` still gives the URL `build.py` set.
 - The lint knows when a baseline predates the runner, not when the model or Claude Code changed; rerun
   baselines after either.
-- A subagent's own subagents are not followed, nor a SendMessage follow-up, nor the report and skill
-  loads of an Agent call run in the background: `brief:<agent>` holds the prompts of the Agent calls
-  that started that agent, background ones included, and no follow-up. A delivery check with an `agent`
-  reads every spawn of that agent as one. The skills an agent's frontmatter preloads are read from a
+- A SendMessage follow-up to a subagent is not followed: `brief:<agent>` holds the prompts of the main
+  thread's Agent calls that started that agent, and no follow-up. A delivery check with an `agent`
+  reads every spawn of that agent, at any depth, as one. The skills an agent's frontmatter preloads are read from a
   line of Claude Code's debug log, which it does not promise to keep: if that line changes, every
   preload reads as absent.
 - A sample's venv uses the base Python's packages, the interpreter uv builds venvs on, not this
