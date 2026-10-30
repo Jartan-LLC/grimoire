@@ -225,17 +225,24 @@ def converse(  # noqa: PLR0913 -- where it runs, what it writes and how long it 
     A session that ends before it got every message, or before each turn it got has
     its `result`, was cut short too. Returns whether the session timed out, and why its
     turns did not all run, or "".
+
+    A timeout kills every process the session started, not only `claude`: one left
+    holding its output open would keep the read waiting.
     """
     session = start(
-        args, cwd=cwd, env=env,
+        args, cwd=cwd, env=env, start_new_session=True,
         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
     )  # fmt: skip
     stdin, stdout = cast("TextIO", session.stdin), cast("TextIO", session.stdout)
     expired = threading.Event()
 
+    def kill() -> None:
+        with contextlib.suppress(ProcessLookupError):  # nothing of the session is left
+            os.killpg(session.pid, signal.SIGKILL)
+
     def expire() -> None:
         expired.set()
-        session.kill()
+        kill()
 
     timer = threading.Timer(timeout_s, expire)
     timer.start()
@@ -278,7 +285,7 @@ def converse(  # noqa: PLR0913 -- where it runs, what it writes and how long it 
     finally:
         timer.cancel()
         if session.poll() is None:  # the loop raised: stop the session rather than leave it
-            session.kill()
+            kill()
             session.wait()
     if not cut_short and not expired.is_set() and min(sent, results) < len(messages):
         cut_short = (

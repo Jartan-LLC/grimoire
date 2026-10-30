@@ -587,10 +587,11 @@ def test_a_case_without_a_plugin_loads_every_other_plugin_of_the_arm(
 
 # A stand-in for `claude -p --input-format stream-json`: it answers each message with a
 # `result` event, first noting whether the next one had already arrived; a message
-# holding BG starts a background task, whose result it sends only once stdin closes, and
-# one holding DIE ends the session with no result.
+# holding BG starts a background task, whose result it sends only once stdin closes, one
+# holding DIE ends the session with no result, and ORPHAN starts a process that keeps
+# the session's stdout open after the session is killed.
 FAKE_CLAUDE = """
-import json, os, select, sys, time
+import json, os, select, subprocess, sys, time
 
 log = open(sys.argv[1], "w")
 
@@ -608,6 +609,9 @@ def say(event):
 
 while (text := line()) is not None:
     if text == "HANG":
+        time.sleep(30)
+    if text == "ORPHAN":
+        subprocess.Popen(["sleep", "30"])
         time.sleep(30)
     if "DIE" in text:
         sys.exit(1)
@@ -677,6 +681,15 @@ def test_converse_says_when_the_session_ends_before_its_turns_all_ran(
 def test_converse_stops_a_session_past_its_timeout(tmp_path: pathlib.Path) -> None:
     timed_out, _, got, _ = converse(tmp_path, ("HANG", "two"), timeout_s=0.5)
     assert (timed_out, got) == (True, [])
+
+
+def test_converse_stops_what_a_timed_out_session_started_on_its_output(
+    tmp_path: pathlib.Path,
+) -> None:
+    began = time.monotonic()
+    timed_out, _, _, _ = converse(tmp_path, ("ORPHAN",), timeout_s=0.5)
+    assert timed_out
+    assert time.monotonic() - began < 10
 
 
 def test_converse_stops_the_session_when_writing_its_output_fails(
