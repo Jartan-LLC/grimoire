@@ -1,8 +1,0 @@
-# bundled English list (excerpt)
-the	1000
-of	900
-and	880
-setting	40
-configuration	30
-release	25
-version	25

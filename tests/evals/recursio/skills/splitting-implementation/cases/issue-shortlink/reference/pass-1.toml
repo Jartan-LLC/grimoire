@@ -1,4 +1,0 @@
-final = "Pushed feature/issue-12: file store, expiry, click analytics and the admin command."
-
-[briefs]
-"general-purpose" = "Write src/file-store.js: a FileStore with create, resolve and remove over one JSON file."

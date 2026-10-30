@@ -1,4 +1,0 @@
-final = "Pushed feature/issue-58: CSV, NDJSON and iCalendar exports with the shared filters."
-
-[briefs]
-"general-purpose" = "Write src/export/ics.js: toIcs(events) per RFC 5545, with line folding and escaping."

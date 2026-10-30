@@ -1,4 +1,0 @@
-final = "textstats is built: tokenizer, statistics, reports and the command, each with tests."
-
-[briefs]
-"general-purpose" = "Build src/textstats/tokenize.py: sentences(text) and words(text) as the contract below says."

@@ -1,1 +1,0 @@
-Add the email, webhook and SMS channels from the README, each with its own tests, and the priority router that sends a message through the right channels. Use injected clients so nothing touches the network in tests.

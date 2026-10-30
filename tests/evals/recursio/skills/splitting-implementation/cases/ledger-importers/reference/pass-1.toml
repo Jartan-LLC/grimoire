@@ -1,4 +1,0 @@
-final = "The CSV, OFX and QIF importers and `ledger summary` are in, with tests."
-
-[briefs]
-"general-purpose" = "Write ledger/importers/ofx.py: parse(path) -> list[Transaction] for OFX 1.x files."

@@ -1,1 +1,0 @@
-We're building spellbook to check our docs in CI, and the README has the spec. Please implement all of it: the dictionary loader, the suggestions, the Markdown-aware checker and the command, with tests, so we can wire it into CI next week.

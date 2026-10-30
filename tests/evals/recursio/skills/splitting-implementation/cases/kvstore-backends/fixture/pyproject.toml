@@ -1,7 +1,0 @@
-[project]
-name = "kvs"
-version = "0.1.0"
-requires-python = ">=3.11"
-
-[project.scripts]
-kvs = "kvs.cli:main"
