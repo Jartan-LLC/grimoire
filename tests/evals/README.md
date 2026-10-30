@@ -67,11 +67,14 @@ right. Never commit the scratch suite; say in the PR what its cases showed.
 A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a skill,
 `tests/evals/<plugin>/agents/<name>/` for an agent.
 
-- `suite.toml`: what it covers, the models it runs on, its metrics, its pass rule and its clusters.
+- `suite.toml`: what it covers, the models it runs on, its metrics, its pass rule and its clusters;
+  when it needs them, what its target replaces, its sessions' `[env]` and the oldest Claude Code it runs
+  on.
 - `cases/<id>/prompt.md`: the task, as the user would type it.
 - `cases/<id>/fixture/` and an optional `build.py`: the repository the session starts in.
 - `cases/<id>/key.toml`: the split, the kind, the checks, and the facts, plants and baseline counts
-  the checks rely on; for a task that pushes or calls `gh`, its remote and `gh` replies.
+  the checks rely on; for a task that pushes or calls `gh`, its remote and `gh` replies; for a
+  conversation, its later `turns`; and any plugins its sessions run `without`.
 - `cases/<id>/fix/`: the files that fix the case's planted problems, laid over the fixture by the lint.
 - `cases/<id>/reference/`: outputs that pass every check, and outputs that fail the case's target check.
 
