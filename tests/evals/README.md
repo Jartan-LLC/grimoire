@@ -180,8 +180,9 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   `prompt.md`'s first one. Each is sent once the turn before has ended. Under `-p` the main thread's
   subagents run in the background, and a turn that starts one ends only with the session, so no
   later turn can follow it: the sample is excluded, with that reason. Put the turn that spawns
-  subagents last. The lint reads the turns for `hints`, and a fact `where = "prompt"` may sit in any
-  turn. The turns count in the case hash.
+  subagents last. A session that ends before every turn has run is excluded too. The lint reads the
+  turns for `hints`, and a fact `where = "prompt"` may sit in any turn. The turns count in the case
+  hash.
 - **A case that runs without some plugins,** such as a skill measured where praxis's hook cannot help,
   lists them in its key: `without = ["praxis"]`. Its sessions load every other plugin of the arm. The
   list counts in the case hash, like the fixture, and the lint fails a name that is no plugin.

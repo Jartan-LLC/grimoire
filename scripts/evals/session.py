@@ -219,8 +219,9 @@ def converse(  # noqa: PLR0913 -- where it runs, what it writes and how long it 
     last, as a session still runs the messages it got before the close. A turn that
     starts a background task, such as a subagent the main thread spawns, emits its
     `result` only when the session ends (probe on 2.1.314), so no later turn can follow
-    it: the runner then sends no more. Returns whether the session timed out, and why a
-    turn was not sent, or "".
+    it: the runner then sends no more. A session that ends before it got every message,
+    or before each turn it got has its `result`, was cut short too. Returns whether the
+    session timed out, and why its turns did not all run, or "".
     """
     session = start(
         args, cwd=cwd, env=env,
@@ -235,7 +236,7 @@ def converse(  # noqa: PLR0913 -- where it runs, what it writes and how long it 
 
     timer = threading.Timer(timeout_s, expire)
     timer.start()
-    pending, sent, unsent = list(messages), 0, ""
+    pending, sent, results, cut_short = list(messages), 0, 0, ""
 
     def send() -> None:
         nonlocal sent
@@ -258,10 +259,11 @@ def converse(  # noqa: PLR0913 -- where it runs, what it writes and how long it 
         for line in stdout:
             out.write(line)
             event = _event(line)
+            results += event.get("type") == "result"
             if not pending:
                 continue
             if event.get("subtype") == "task_started" and event.get("is_backgrounded") is True:
-                unsent = (
+                cut_short = (
                     f"turn {sent} started a background task, whose result comes only when the "
                     f"session ends, so turn {sent + 1} of {len(messages)} was not sent"
                 )
@@ -274,7 +276,12 @@ def converse(  # noqa: PLR0913 -- where it runs, what it writes and how long it 
         if session.poll() is None:  # the loop raised: stop the session rather than leave it
             session.kill()
             session.wait()
-    return expired.is_set(), unsent
+    if not cut_short and not expired.is_set() and min(sent, results) < len(messages):
+        cut_short = (
+            f"the session ended after {results} of {len(messages)} turns had their result, "
+            f"{sent} sent"
+        )
+    return expired.is_set(), cut_short
 
 
 def preloads(debug_log: str) -> list[tuple[str, str]]:
@@ -467,11 +474,11 @@ def _session(
             gh_stub=case.remote,
             suite_env=spec.env,
         )
-        unsent = ""
+        cut_short = ""
         with out.open("w") as handle:
             if case.turns:
                 args = claude_args(None, arm, spec.model, spec.budget_usd, debug_log)
-                timed_out, unsent = converse(
+                timed_out, cut_short = converse(
                     args, (case.prompt, *case.turns),
                     cwd=repo, env=session_env, out=handle, timeout_s=spec.timeout_s,
                 )  # fmt: skip
@@ -491,7 +498,7 @@ def _session(
         reasons, spoiled = trace.classify(
             parsed, arm.plugins, spec.model, timed_out, private, own=own
         )
-        reasons += [unsent] if unsent else []
+        reasons += [cut_short] if cut_short else []
         result = parsed.result or {}
         files = collect(case, repo)
         commits = new_commits(repo, env, heads)

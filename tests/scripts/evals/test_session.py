@@ -558,8 +558,9 @@ def test_a_case_without_a_plugin_loads_every_other_plugin_of_the_arm(
 
 
 # A stand-in for `claude -p --input-format stream-json`: it answers each message with a
-# `result` event, first noting whether the next one had already arrived, and a message
-# holding BG starts a background task, whose result it sends only once stdin closes.
+# `result` event, first noting whether the next one had already arrived; a message
+# holding BG starts a background task, whose result it sends only once stdin closes, and
+# one holding DIE ends the session with no result.
 FAKE_CLAUDE = """
 import json, os, select, sys, time
 
@@ -580,6 +581,8 @@ def say(event):
 while (text := line()) is not None:
     if text == "HANG":
         time.sleep(30)
+    if "DIE" in text:
+        sys.exit(1)
     if "BG" in text:
         say({"type": "system", "subtype": "task_started", "is_backgrounded": True})
         while line() is not None:
@@ -601,30 +604,46 @@ def converse(
     fake, log, out = tmp_path / "fake.py", tmp_path / "log.txt", tmp_path / "out.jsonl"
     fake.write_text(FAKE_CLAUDE)
     with out.open("w") as handle:
-        timed_out, unsent = session.converse(
+        timed_out, cut_short = session.converse(
             [sys.executable, str(fake), str(log)], messages,
             cwd=tmp_path, env=dict(os.environ), out=handle, timeout_s=timeout_s,
         )  # fmt: skip
-    return timed_out, unsent, log.read_text().splitlines(), out.read_text().splitlines()
+    return timed_out, cut_short, log.read_text().splitlines(), out.read_text().splitlines()
 
 
 def test_converse_sends_each_turn_once_the_one_before_has_its_result(
     tmp_path: pathlib.Path,
 ) -> None:
-    timed_out, unsent, got, lines = converse(tmp_path, ("one", "two", "three"))
+    timed_out, cut_short, got, lines = converse(tmp_path, ("one", "two", "three"))
     # The last message is followed by stdin closing, which reads as ready too.
     assert got == ["one early=False", "two early=False", "three early=True"]
-    assert (timed_out, unsent, len(lines)) == (False, "", 3)
+    assert (timed_out, cut_short, len(lines)) == (False, "", 3)
 
 
 def test_converse_sends_no_turn_after_one_that_started_a_background_task(
     tmp_path: pathlib.Path,
 ) -> None:
-    timed_out, unsent, got, _ = converse(tmp_path, ("one", "BG two", "three"))
+    timed_out, cut_short, got, _ = converse(tmp_path, ("one", "BG two", "three"))
     assert got == ["one early=False", "BG two early=False"]
     assert not timed_out
-    assert unsent.startswith("turn 2 started a background task")
-    assert unsent.endswith("so turn 3 of 3 was not sent")
+    assert cut_short.startswith("turn 2 started a background task")
+    assert cut_short.endswith("so turn 3 of 3 was not sent")
+
+
+@pytest.mark.parametrize(
+    ("messages", "said"),
+    [
+        (("one", "DIE two", "three"), "after 1 of 3 turns had their result, 2 sent"),
+        (("one", "DIE two"), "after 1 of 2 turns had their result, 2 sent"),
+    ],
+)
+def test_converse_says_when_the_session_ends_before_its_turns_all_ran(
+    tmp_path: pathlib.Path, messages: tuple[str, ...], said: str
+) -> None:
+    timed_out, cut_short, got, _ = converse(tmp_path, messages)
+    assert got == ["one early=False"]
+    assert not timed_out
+    assert cut_short == f"the session ended {said}"
 
 
 def test_converse_stops_a_session_past_its_timeout(tmp_path: pathlib.Path) -> None:
