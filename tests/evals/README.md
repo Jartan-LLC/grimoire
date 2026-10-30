@@ -308,12 +308,12 @@ sample of held-out labels and edits that count.
 3. `python3 scripts/eval.py judge-label <suite> --judge <id>`: the panel labels every stored artifact the
    judge reads that has no label yet, into `judges/<id>/labels/<case>.toml`. It reads the samples `make
    eval-run` draws on arms `old` and `none` (`--arms`, `--base`), found by each case's key as it is now,
-   so a sample drawn on an older fixture, runner or Claude Code is never labelled. A
-   label once written is never changed. It prints each set's count per class: until each reaches 40, draw
-   more sessions (`make eval-run ... SAMPLES=` above the count drawn) and label again. `--gold` then runs
-   the panel on the gold items. If it is below 0.98 right, or the printed Fleiss kappa is below 0.80, the
-   question or a reference is underspecified: stop and report it to the maintainer. `--labeller-model`
-   picks the panel's model (Opus 5.5 by default).
+   so a sample drawn on an older fixture, runner or Claude Code is never labelled. A label once written
+   is never changed. It prints each set's count per class: until each reaches 40, draw more sessions
+   (`make eval-run ... SAMPLES=` above the count drawn) and label again. `--gold` then runs the panel on
+   the gold items. If it is below 0.98 right, or the printed Fleiss kappa is below 0.80, the question or
+   a reference is underspecified: stop and report it to the maintainer. `--labeller-model` picks the
+   panel's model (Opus 5.5 by default).
 4. Tune on dev: `python3 scripts/eval.py judge-align <suite> --judge <id> --set dev` prints each row and
    each disagreement. Read them, revise the question (or the prompt texts in `scripts/evals/jury.py`),
    repeat.
@@ -339,10 +339,10 @@ for nothing; between rounds, `make check` is enough.
 
 1. **Fix the test before the first run.** The plan holds every file of the suite (cases, keys, baselines,
    references), the samples per case, the model ID, the Claude Code version, the runner's flags,
-   `old`'s plugins (`new` changes as you iterate) and each judge's version. Your branch's first screen of a split on a model fixes
-   it, each model keeping its own; a later screen with a different plan runs nothing and says what
-   changed. `NEW_PLAN=1` (`--new-plan`) fixes a new one, and the PR says why. Never add samples after
-   seeing a result.
+   `old`'s plugins (`new` changes as you iterate) and each judge's version. Your branch's first screen
+   of a split on a model fixes it, each model keeping its own; a later screen with a different plan runs
+   nothing and says what changed. `NEW_PLAN=1` (`--new-plan`) fixes a new one, and the PR says why.
+   Never add samples after seeing a result.
 2. **Check the suite can see the effect.** `make eval-size`, and `make eval-plan TIER=<n>` for the
    splits it reports, simulate the verdict rule at each split's size: the smallest harm it would catch
    80% of the time, under a `better` rule the smallest gain (both assuming independent units at a 0.5

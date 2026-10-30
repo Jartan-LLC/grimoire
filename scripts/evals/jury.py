@@ -1,7 +1,7 @@
 """Judged checks: a model answers one yes/no question about one artifact, beside a reference.
 
 Named `jury` because `verdict.judge` already names the per-metric comparison. A judge
-is `claude -p` with no tools, the suite's model and effort, a fixed system prompt and a
+is `claude -p` with no tools, the judge's model and effort, a fixed system prompt and a
 JSON schema; it sees the question, the case's reference and the artifact, with the
 names of plugins and their skills, agents and commands and the sandbox and store paths
 replaced by neutral tokens. Each sample is answered `panel` times, the majority

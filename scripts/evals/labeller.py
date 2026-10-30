@@ -6,10 +6,10 @@ question and the reference. It does not answer the question outright: it lists e
 finding the artifact makes (its opening words, the rating it gives, its subject), names
 the one that is about what the reference describes, then answers. The label follows by
 rule from the matched finding when the judge or the case's check sets `yes_ratings`,
-else it is the answer,
-and a "yes" needs a matched finding found in the artifact. Three labellers per item: a
-unanimous label stands; anything else goes to one adjudicator, given their three
-outputs. tests/evals/README.md ("Judges") says when the panel itself may be trusted.
+else it is the answer, and a "yes" needs a matched finding found in the artifact. Three
+labellers per item: a unanimous label stands; anything else goes to one adjudicator,
+given their three outputs. tests/evals/README.md ("Judges") says when the panel itself
+may be trusted.
 """
 
 import hashlib

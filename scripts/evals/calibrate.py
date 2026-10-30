@@ -708,8 +708,9 @@ def items(judge: Judge, which: str, sources: Sources, burned: Collection[str] = 
 
     Natural items are the labelled real artifacts of the set (unsure ones aside); gold
     references follow their case; each natural item also gives a sibling swap (when its
-    case has a sibling in the same set, so no reference crosses sets) and two invariance pairs; ten of each control. On held-out, the
-    dev natural items come too, as kind `dev`, for the overfit warning.
+    case has a sibling in the same set, so no reference crosses sets) and two invariance
+    pairs; CONTROLS of each control kind. On held-out, the dev natural items come too, as
+    kind `dev`, for the overfit warning.
     """
     held = which == "held-out"
     refs = sources.references
