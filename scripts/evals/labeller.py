@@ -285,8 +285,8 @@ def _labelled(  # noqa: PLR0913 -- the call's inputs, and whether it may call
 ) -> Labelled | None:
     """One labeller's output on (reference, stripped text), kept or, with `may_call`, called; None without one."""
     call_key = key(panel, case.pinned(), judge, item, index=index, others=others)
-    if (kept := load(store, call_key)) is not None or not may_call:
-        return kept
+    if (stored := load(store, call_key)) is not None or not may_call:
+        return stored
     reference, text = item
     out, raw = call(
         case,
