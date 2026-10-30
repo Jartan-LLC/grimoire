@@ -237,7 +237,7 @@ id = "flags-plant"
 question = "Does the report raise, as a finding of its own, the problem the reference describes, at a rating the reference accepts?"
 # model = "claude-opus-5-5", effort = "high" and panel = 3 are the defaults.
 # Calibration only:
-held_out = ["nonlocal-parse", "retold-utc"]        # cases scored once per judge version; the rest are dev
+held_out = ["nonlocal-parse", "retold-utc"]        # the held-out set, never tuned on; the rest are dev
 siblings = [["nonlocal-parse", "nonlocal-stamp"]]  # cases whose plants are of one kind
 yes_ratings = ["Critical", "Important"]            # a silver label is yes when the plant's finding is rated so
 compare = "found_regex"                            # the metric the judge would replace

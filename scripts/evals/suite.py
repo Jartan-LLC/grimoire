@@ -75,7 +75,7 @@ class Judge:
 
     `model` at `effort` answers each sample `panel` times, the majority deciding. The
     rest serves calibration only (tests/evals/README.md, "Judges"): the `held_out`
-    cases' items are scored once per judge version, the other cases' are dev; each
+    cases' items are the held-out set, never tuned on, the other cases' are dev; each
     `siblings` group holds cases whose plants are of one kind, so a report of one judged
     against another's reference is a hard "no"; `yes_ratings`, when set, derives a
     silver label from the rating the labeller reads on the matched finding; `compare`

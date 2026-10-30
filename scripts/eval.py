@@ -1278,9 +1278,10 @@ def label(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.
 
 
 def align(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.Path) -> int:
-    """Score the judge on one set's items; on held-out, once per judge version, write its stamp.
+    """Score the judge on one set's items, and on held-out write its stamp.
 
-    A cleared stamp gone stale by its labels or a dev reference is written again (`calibrate.held_out_refusal`).
+    Held-out is scored as `calibrate.held_out_refusal` allows: once per judge version, and
+    again to stamp anew a cleared version gone stale by its labels or a dev reference.
     """
     folder = calibrate.judge_dir(suite.path, judge_.id)
     old = calibrate.read_stamp(folder / "stamp.toml")
