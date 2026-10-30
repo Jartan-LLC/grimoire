@@ -1296,7 +1296,8 @@ def align(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.
         raise SystemExit(refused)
     found = calibrate.items(judge_, args.set, material, old.burned if old else ())
     failed = jury.fill(store, [(judge_, i.reference, _stripped(i.text)) for i in found], args.jobs)
-    print("\n".join(failed))
+    if failed:
+        print("\n".join(failed))
     panels_ = {i.id: jury.lookup(store, judge_, i.reference, _stripped(i.text)) for i in found}
     if missing := [k for k, p in panels_.items() if p is None]:
         print(f"INCOMPLETE: {len(missing)} items lack a full panel; rerun to retry them")

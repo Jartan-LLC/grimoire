@@ -576,7 +576,9 @@ def test_align_scores_held_out_once_per_version_and_burns_a_missed_one(
     assert stamp.versions == (jury.instrument(judge),)
     assert stamp.burned == ("k1", "k2")
     assert stamp.cell("natural") == calibrate.Cell("natural", tp=0, fn=1, tn=1, fp=0)
-    assert "MISSED" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert "MISSED" in out
+    assert not out.startswith("\n")  # no failed call, so no empty failure list
     with pytest.raises(SystemExit, match="scored on held-out already"):
         cli.align(args, suite, judge, store)
     before = len(calls)
