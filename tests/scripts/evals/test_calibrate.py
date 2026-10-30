@@ -152,6 +152,7 @@ def test_gates_only_on_a_current_stamp_that_cleared() -> None:
     stamp = cleared_stamp()
     assert calibrate.gates(stamp, "i1", {"c1": "h1"}, "l1") == ""
     assert calibrate.gates(stamp, "i1", {"c1": "h1", "c9": "new"}, "l1") == ""
+    assert calibrate.gates(stamp, "i1", {}, "l1") == ""  # c1 removed
     assert calibrate.gates(None, "i1", {}, "l1") == "no calibration stamp"
     assert "another version" in calibrate.gates(stamp, "i2", {"c1": "h1"}, "l1")
     assert "labels changed" in calibrate.gates(stamp, "i1", {"c1": "h1"}, "l2")

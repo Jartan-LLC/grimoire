@@ -113,6 +113,19 @@ def test_the_judgment_key_changes_with_each_input_and_nothing_else() -> None:
     assert jury.judgment_key(other, "ref", "text", 0) == base
 
 
+@pytest.mark.parametrize(
+    ("name", "value"),
+    [("SYSTEM", "Grade it."), ("TEMPLATE", "{question} {reference} {output}"), ("SCHEMA", {})],
+)
+def test_the_judgment_key_and_instrument_change_with_each_prompt_text(
+    name: str, value: object, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    key, version = jury.judgment_key(JUDGE, "ref", "text", 0), jury.instrument(JUDGE)
+    monkeypatch.setattr(jury, name, value)
+    assert jury.judgment_key(JUDGE, "ref", "text", 0) != key
+    assert jury.instrument(JUDGE) != version
+
+
 def test_the_instrument_changes_with_the_panel_and_the_call_but_not_calibration_fields() -> None:
     base = jury.instrument(JUDGE)
     assert jury.instrument(dataclasses.replace(JUDGE, panel=1)) != base
@@ -167,6 +180,21 @@ def test_fill_stops_calling_once_the_api_keeps_limiting(tmp_path: pathlib.Path) 
     assert len(calls) == jury.BREAKER
     assert len(failed) == 4 * JUDGE.panel
     assert sum("not called" in line for line in failed) == 4 * JUDGE.panel - jury.BREAKER
+
+
+def test_an_answer_resets_the_count_of_limited_calls(tmp_path: pathlib.Path) -> None:
+    said = iter([None, None, "no"])
+    calls: list[str] = []
+
+    def calling(judge: Judge, reference: str, text: str) -> tuple[jury.Answer | None, str]:
+        calls.append(text)
+        if next(said, None) == "no":
+            return jury.Answer("no", ""), envelope({"answer": "no", "quote": ""})
+        return None, "API Error: usage limit reached"
+
+    jobs = [(JUDGE, "ref", f"text {i}") for i in range(4)]
+    jury.fill(tmp_path, jobs, 1, calling)
+    assert len(calls) == 3 + jury.BREAKER  # two limited, an answer, then BREAKER in a row
 
 
 def test_args_give_the_judge_no_tools_and_ask_for_the_schema() -> None:

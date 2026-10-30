@@ -145,6 +145,18 @@ def test_the_call_key_changes_with_each_input() -> None:
     assert labeller.key(panel, "case", rule, ("ref", "text"), index=0, others=()) == base
 
 
+@pytest.mark.parametrize(
+    ("name", "value"), [("SYSTEM", "Label it."), ("ADJUDICATE", "Decide."), ("SCHEMA", {})]
+)
+def test_the_call_key_changes_with_each_prompt_text(
+    name: str, value: object, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    panel, judge = labeller.Labeller("claude-opus-5-5", "xhigh"), Judge("flags", "Q?")
+    base = labeller.key(panel, "case", judge, ("ref", "text"), index=0, others=())
+    monkeypatch.setattr(labeller, name, value)
+    assert labeller.key(panel, "case", judge, ("ref", "text"), index=0, others=()) != base
+
+
 def test_only_the_adjudicator_sees_the_labellers_work() -> None:
     plain = labeller.prompt("Review it.", "diff", "Q?", "ref", "report")
     assert "<labeller>" not in plain
