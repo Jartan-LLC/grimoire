@@ -465,10 +465,12 @@ def _check(
         or artifact.startswith("file:")
         or any(artifact.startswith(p) and artifact != p for p in (REPORT, BRIEF, FILES))
     ):
+        kinds = (
+            *TEXT_ARTIFACTS, "file:<path>", f"{FILES}<glob>", f"{REPORT}<agent>",
+            f"{BRIEF}<agent>", *SESSION_ARTIFACTS,
+        )  # fmt: skip
         raise SuiteError(
-            f"{where}: artifact {artifact!r} is not commits, final, gh, file:<path>, "
-            "files:<glob>, report:<agent>, brief:<agent>, delivery, verify, overlap, "
-            "spawn-writes or barrier"
+            f"{where}: artifact {artifact!r} is not {', '.join(kinds[:-1])} or {kinds[-1]}"
         )
     present, absent = table.get("present"), table.get("absent")
     if sum(table.get(k) is not None for k in ("present", "absent", "judge")) != 1:
