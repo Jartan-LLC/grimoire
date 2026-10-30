@@ -396,7 +396,7 @@ def toml_str(text: str) -> str:
         elif code in SURROGATES:  # a lone one, from a decoded escape
             out.append("\\uFFFD")
         elif code not in PRINTABLE:
-            out.append(f"\\u{code:04X}" if code <= 0xFFFF else f"\\U{code:08X}")  # noqa: PLR2004
+            out.append(f"\\u{code:04X}" if code <= 0xFFFF else f"\\U{code:08X}")  # noqa: PLR2004 -- the last code point a \u escape holds
         else:
             out.append(char)
     return '"' + "".join(out) + '"'
