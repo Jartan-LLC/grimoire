@@ -506,9 +506,18 @@ def test_collect_reads_named_files_and_every_file_a_glob_matches_outside_git(
     (repo / "pkg" / "b.py").write_bytes(b"y = '\xff'\n")
     (repo / "notes.md").write_text("n\n")
     (repo / ".git" / "hook.py").write_text("no\n")
+    (repo / "pkg" / "__pycache__").mkdir()
+    (repo / "pkg" / "__pycache__" / "b.py").write_text("no\n")
+    (tmp_path / "outside.py").write_text("no\n")
+    (repo / "pkg" / "out.py").symlink_to(tmp_path / "outside.py")
+    (repo / "pkg" / "in.py").symlink_to(repo / "app.py")
     assert session.collect(case, repo) == {
         "notes.md": "n\n", "app.py": "x = 1\n", "pkg/b.py": "y = '\ufffd'\n",
+        "pkg/in.py": "x = 1\n",
     }  # fmt: skip
+    (repo / "notes.md").unlink()
+    (repo / "notes.md").symlink_to(tmp_path / "outside.py")
+    assert "notes.md" not in session.collect(case, repo)
 
 
 def test_verify_returns_the_exit_code_or_none_on_a_timeout(

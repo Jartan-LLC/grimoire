@@ -33,7 +33,7 @@ from . import cache, trace
 from .arms import Arm
 from .gh_stub import REPLIES, TEMP_ROOTS
 from .proc import CLAUDE, GIT, UV, run, start
-from .suite import FILES, TIMEOUT_S, Case, Reply, glob_match
+from .suite import FILES, TIMEOUT_S, Case, Reply, glob_match, python_cache
 
 BUILTINS_OFF = {
     "enabledPlugins": {
@@ -395,18 +395,30 @@ def verify(command: str, repo: pathlib.Path, env: dict[str, str]) -> int | None:
 def collect(case: Case, repo: pathlib.Path) -> dict[str, str]:
     """The text of every file a `file:` or `files:` check of the case reads, by its path in `repo`.
 
-    A glob is matched against every file of the tree but `.git`'s; a file that is not
-    UTF-8 is read with its bad bytes replaced.
+    A glob is matched against every file of the tree but `.git`'s and Python's caches. A
+    file that is not UTF-8 is read with its bad bytes replaced, and one that resolves
+    outside `repo`, through a link the agent made, is not read.
     """
-    found = {p: (repo / p).read_text() for p in case.files() if (repo / p).is_file()}
+    inside = repo.resolve()
+
+    def read(path: str) -> str | None:
+        file = repo / path
+        if not file.is_file() or not file.resolve().is_relative_to(inside):
+            return None
+        return file.read_text(errors="replace")
+
+    named = {p: read(p) for p in case.files()}
+    found = {p: text for p, text in named.items() if text is not None}
     if not (globs := case.globs()):
         return found
     for folder, dirs, names in os.walk(repo):
         dirs[:] = sorted(d for d in dirs if d != ".git")
         for name in sorted(names):
-            path = (pathlib.Path(folder) / name).relative_to(repo).as_posix()
-            if any(glob_match(path, g) for g in globs) and (repo / path).is_file():
-                found[path] = (repo / path).read_text(errors="replace")
+            path = (pathlib.Path(folder) / name).relative_to(repo)
+            if python_cache(path) or not any(glob_match(path.as_posix(), g) for g in globs):
+                continue
+            if (text := read(path.as_posix())) is not None:
+                found[path.as_posix()] = text
     return found
 
 

@@ -217,9 +217,10 @@ the PR how many versions you screened.
   the agent sent to GitHub or a subagent, or a subagent's report (below). An `absent` check fails when
   the agent produced nothing to check.
 - **Several files at once:** `artifact = "files:<glob>"` reads every file of the session's final tree
-  that the glob matches, `.git` aside, in path order, each after a `==> <path> <==` line: `*`, `?` and
-  `[...]` match within one name, `**` across any number of directories. A reference gives the files
-  under `[files]`, as for `file:<path>`.
+  that the glob matches, `.git` and Python's caches aside, in path order, each after a
+  `==> <path> <==` line: `*`, `?` and `[...]` match within one name, `**` across any number of
+  directories. A link that leads out of the tree is not read. A reference gives the files under
+  `[files]`, as for `file:<path>`.
 - **Whether the result works:** `artifact = "verify"` with a `command`, such as
   `command = "python3 -m pytest -q"` for planted tests, runs the command without a shell in the
   session's final tree and environment, and holds when it exits 0 within 60 seconds. It is not graded
