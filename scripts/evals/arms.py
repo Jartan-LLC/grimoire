@@ -1,5 +1,6 @@
 """Build the plugin sets a suite runs against: `old` from a git ref, `new` from the working tree."""
 
+import hashlib
 import io
 import pathlib
 import shutil
@@ -160,7 +161,9 @@ def none_arm(old: Arm, target: str, store: pathlib.Path, replaces: Sequence[str]
     if not held:
         return Arm("none", old.hash, old.plugins)
     source = pathlib.Path(next(iter(old.plugins.values()))).parent.parent
-    removed = "+".join(t.replace(":", "-") for t in held)
+    # Several texts go by a digest: their names joined could pass a file name's 255 bytes.
+    joined = "+".join(t.replace(":", "-") for t in held)
+    removed = joined if len(held) == 1 else hashlib.sha256(joined.encode()).hexdigest()[:16]
     target_dir = store / f"none-r{NONE_REVISION}-{old.hash[:16]}-{removed}"
     if target_dir.is_dir():
         return arm_of("none", target_dir)

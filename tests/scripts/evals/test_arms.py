@@ -135,6 +135,9 @@ def test_none_arm_also_removes_what_a_new_target_replaces(
     (commands / "build.md").write_text(
         "---\ndescription: Builds.\n---\n\nBuild it.\n\nAll of it.\n"
     )
+    many = tuple(f"demo:{'x' * 60}-{n}" for n in range(5))
+    for text in many:
+        (commands / f"{text.removeprefix('demo:')}.md").write_text("---\n---\n\nGo.\n")
     git(repo, "add", "-A")
     git(repo, "commit", "-q", "-m", "command")
     store = tmp_path / "store"
@@ -148,6 +151,7 @@ def test_none_arm_also_removes_what_a_new_target_replaces(
     assert none.hash != old.hash
     assert none_arm(old, "demo:renamed", store, ("demo:s", "demo:build")) == none
     assert none_arm(old, "demo:s", store).hash != none.hash
+    assert len(pathlib.Path(none_arm(old, "demo:s", store, many).root).name) < 64
 
 
 def test_an_arms_root_holds_its_plugins_directory() -> None:
