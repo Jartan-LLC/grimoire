@@ -20,6 +20,7 @@ import pathlib
 import re
 import shlex
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -379,18 +380,22 @@ def new_commits(repo: pathlib.Path, env: dict[str, str], fixture_heads: list[str
 def verify(command: str, repo: pathlib.Path, env: dict[str, str]) -> int | None:
     """The exit code of a `verify` command run in `repo`, or None when it timed out; no shell runs it.
 
-    A command that cannot start, such as one naming no executable, exits NOT_STARTED.
+    A command that cannot start, such as one naming no executable, exits NOT_STARTED. On a
+    timeout every process the command started is killed, not only the command itself.
     """
     try:
-        done = run(
+        process = start(
             shlex.split(command), cwd=repo, env=env,
-            capture_output=True, timeout=VERIFY_TIMEOUT_S, check=False,
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True,
         )  # fmt: skip
-    except subprocess.TimeoutExpired:
-        return None
     except OSError:
         return NOT_STARTED
-    return int(done.returncode)
+    try:
+        return process.wait(timeout=VERIFY_TIMEOUT_S)
+    except subprocess.TimeoutExpired:
+        os.killpg(process.pid, signal.SIGKILL)
+        process.wait()
+        return None
 
 
 def collect(case: Case, repo: pathlib.Path) -> dict[str, str]:

@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
 from typing import Any
 
 import pytest
@@ -529,6 +530,16 @@ def test_verify_returns_the_exit_code_or_none_on_a_timeout(
     assert session.verify("no-such-command-here --x", tmp_path, env) == session.NOT_STARTED
     monkeypatch.setattr(session, "VERIFY_TIMEOUT_S", 0.2)
     assert session.verify("python3 -c 'import time; time.sleep(5)'", tmp_path, env) is None
+
+
+def test_verify_kills_what_a_timed_out_command_started(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(session, "VERIFY_TIMEOUT_S", 0.2)
+    command = "sh -c '(sleep 1; touch survived) & sleep 5'"
+    assert session.verify(command, tmp_path, dict(os.environ)) is None
+    time.sleep(1.5)
+    assert not (tmp_path / "survived").exists()
 
 
 def test_sample_env_sets_the_suites_variables_after_the_strip_and_before_the_runners(
