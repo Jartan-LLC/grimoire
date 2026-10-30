@@ -275,6 +275,18 @@ def lookup(store: pathlib.Path, judge: Judge, reference: str, text: str) -> Pane
     return majority(votes)
 
 
+def shared_flags(schema: dict[str, object], budget: float) -> list[str]:
+    """The flags a judge's and a labeller's call share: the schema, JSON out, no customizations."""
+    return [
+        "--json-schema", json.dumps(schema),
+        "--output-format", "json",
+        "--safe-mode",
+        "--strict-mcp-config",
+        "--no-session-persistence",
+        "--max-budget-usd", f"{budget:g}",
+    ]  # fmt: skip
+
+
 def args(judge: Judge, reference: str, text: str) -> list[str]:
     """The `claude` command line of one call: no tools, no customizations, a schema, JSON out."""
     return [
@@ -283,12 +295,7 @@ def args(judge: Judge, reference: str, text: str) -> list[str]:
         "--effort", judge.effort,
         "--system-prompt", SYSTEM,
         "--tools", "",
-        "--json-schema", json.dumps(SCHEMA),
-        "--output-format", "json",
-        "--safe-mode",
-        "--strict-mcp-config",
-        "--no-session-persistence",
-        "--max-budget-usd", f"{BUDGET_USD:g}",
+        *shared_flags(SCHEMA, BUDGET_USD),
     ]  # fmt: skip
 
 

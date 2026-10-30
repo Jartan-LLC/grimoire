@@ -24,7 +24,7 @@ from dataclasses import asdict, dataclass
 from typing import cast
 
 from . import calibrate
-from .jury import Names, envelope_of, keep, kept, spaced, strip
+from .jury import Names, envelope_of, keep, kept, shared_flags, spaced, strip
 from .proc import CLAUDE, GIT, run
 from .session import build_fixture, claude_env, git_env
 from .suite import Case, Judge, Suite
@@ -242,12 +242,7 @@ def args(model: str, effort: str, message: str) -> list[str]:
         "--tools", "Read,Grep,Glob",
         "--restricted",
         "--permission-prompts", "none",
-        "--json-schema", json.dumps(SCHEMA),
-        "--output-format", "json",
-        "--safe-mode",
-        "--strict-mcp-config",
-        "--no-session-persistence",
-        "--max-budget-usd", f"{BUDGET_USD:g}",
+        *shared_flags(SCHEMA, BUDGET_USD),
     ]  # fmt: skip
 
 
