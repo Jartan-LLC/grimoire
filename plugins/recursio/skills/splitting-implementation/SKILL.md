@@ -19,7 +19,7 @@ Otherwise, split when the work has two or more parts that each:
 - **divide along file or module boundaries**. Tightly or circularly coupled files, and a feature with its tests, stay in one part. [Each side of a tight coupling guesses at the other.]
 - **can be checked alone**, by something short of the whole system. [A part that cannot be checked alone fails only at the barrier, after its context is gone.]
 
-Each part then gets a fresh context for its slice alone, and the parts run side by side. Otherwise build it yourself, as for a sequential chain where each step needs the last, one monolithic failing check, or a quick targeted change. Splitting costs more tokens than building directly.
+Each part then gets a fresh context for its slice alone, and the parts run side by side. A part that depends on others, such as a command that joins them, goes in a later wave (section 6); it does not stop the independent parts from splitting. Otherwise build it yourself, as for a sequential chain where each step needs the last, one monolithic failing check, or a quick targeted change. Splitting costs more tokens than building directly.
 
 A wide, same-shaped edit across many files, such as a rename or a mechanical migration, fits Claude Code's built-in `/batch`: suggest it to the user rather than splitting.
 
@@ -86,10 +86,10 @@ A brief carries everything its part needs without this skill:
 
 - its depth: one or two levels below the main thread;
 - its contract and its scope; it writes nowhere else;
-- its contract tests, read-only, and the test command;
+- its contract tests, read-only, and a test command that runs its own tests only;
 - no staging or committing;
 - the interfaces it depends on, pasted as text;
-- every requirement the part owns, manifest and export updates included;
+- every requirement the part owns, manifest and export updates included, pointed to where it is written (a spec section, an issue) rather than restated;
 - only the settled decisions it touches;
 - the names of the skills its work needs;
 - the report format (section 8), and a request to report any decision a sibling may also face.
