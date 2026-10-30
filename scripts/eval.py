@@ -1167,122 +1167,6 @@ def _stripped(text: str) -> str:
     return jury.strip(text, jury.names_of(ROOT))
 
 
-def _labelled(  # noqa: PLR0913 -- the call's inputs, and whether it may call
-    store: pathlib.Path,
-    panel: labeller.Labeller,
-    case: Case,
-    judge_: Judge,
-    item: tuple[str, str],
-    *,
-    index: int,
-    others: tuple[str, ...] = (),
-    call: bool = True,
-) -> labeller.Labelled | None:
-    """One labeller's output on (reference, stripped text), kept or, with `call`, called; None without one."""
-    key = labeller.key(panel, case.pinned(), judge_, item, index=index, others=others)
-    if (kept := labeller.load(store, key)) is not None or not call:
-        return kept
-    reference, text = item
-    out, raw = labeller.call(
-        case,
-        panel,
-        lambda diff: labeller.prompt(
-            case.prompt, diff, judge_.question, reference, text, others=others
-        ),
-    )
-    if out is None:
-        print(f"  labeller call failed ({case.id}): {raw.strip()[:200]}", flush=True)
-        return None
-    labeller.save(store, key, raw)
-    return out
-
-
-def panel_label(  # noqa: PLR0913 -- the call's inputs, and whether it may call
-    store: pathlib.Path,
-    panel: labeller.Labeller,
-    case: Case,
-    judge_: Judge,
-    item: tuple[str, str],
-    *,
-    call: bool = True,
-) -> tuple[tuple[str, ...], str] | None:
-    """The labelling panel on one item: the three labellers' labels and the final one; None if one is missing."""
-    _, text = item
-    accepted = labeller.ratings(case, judge_)
-    outs = [
-        _labelled(store, panel, case, judge_, item, index=i, call=call)
-        for i in range(labeller.LABELLERS)
-    ]
-    if any(o is None for o in outs):
-        return None
-    done = [o for o in outs if o is not None]
-    votes = tuple(labeller.label_of(o, text, accepted) for o in done)
-    if (final := labeller.unanimous(votes)) is not None:
-        return votes, final
-    others = tuple(json.dumps(dataclasses.asdict(o)) for o in done)
-    adjudicated = _labelled(
-        store, panel, case, judge_, item, index=labeller.LABELLERS, others=others, call=call
-    )
-    if adjudicated is None:
-        return None
-    return votes, labeller.label_of(adjudicated, text, accepted)
-
-
-def sources(suite: Suite, judge_: Judge) -> calibrate.Sources:
-    """The tracked material a judge's calibration items are made from."""
-    folder = calibrate.judge_dir(suite.path, judge_.id)
-    labels = calibrate.all_labels(folder / "labels")
-    references = calibrate.judged_references(suite.cases, judge_.id)
-    gold: dict[str, list[tuple[str, str, bool]]] = {}
-    compare: dict[str, bool] = {}
-    for case in suite.cases:
-        check = next((c for c in case.checks if c.judge == judge_.id), None)
-        if check is None:
-            continue
-        for ref in case.references:
-            truth = calibrate.reference_truth(case, ref, judge_.compare)
-            if truth is not None:
-                text = calibrate.reference_text(check, ref)
-                gold.setdefault(case.id, []).append((ref.name, text, truth))
-        if judge_.compare:
-            regex = [
-                c
-                for c in case.checks
-                if c.metric == judge_.compare and c.judge is None and c.artifact == check.artifact
-            ]
-            for label in (lb for lb in labels if lb.case == case.id and regex):
-                compare[label.id] = all(grade.text_score(c, label.text) == 1 for c in regex)
-    return calibrate.Sources(references, gold, labels, compare)
-
-
-def gold_panel(
-    suite: Suite, judge_: Judge, panel: labeller.Labeller, store: pathlib.Path, *, call: bool
-) -> tuple[int, int, list[str]]:
-    """The labelling panel on the gold references and sibling swaps of both sets: right, out of, and the wrong ids.
-
-    Without `call` only kept outputs count, and an item with none is left out.
-    """
-    by_id = {c.id: c for c in suite.cases}
-    found = [
-        item
-        for which in ("dev", "held-out")
-        for item in calibrate.items(judge_, which, sources(suite, judge_))
-        if item.kind in ("reference", "sibling")
-    ]
-    right, n, wrong = 0, 0, list[str]()
-    for item in found:
-        pair = (item.reference, _stripped(item.text))
-        result = panel_label(store, panel, by_id[item.case], judge_, pair, call=call)
-        if result is None:
-            continue
-        n += 1
-        if (result[1] == "yes") == item.truth and result[1] != "unsure":
-            right += 1
-        else:
-            wrong.append(item.id)
-    return right, n, wrong
-
-
 def spread[T: Real](reals: Sequence[T], count: int) -> list[T]:
     """`count` items taken a case at a time, round robin in the order given, so a probe sees many cases."""
     by_case: dict[str, list[T]] = {}
@@ -1335,7 +1219,9 @@ def label(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.
     """
     panel = labeller.Labeller(args.labeller_model, args.labeller_effort)
     if args.gold:
-        right, n, wrong = gold_panel(suite, judge_, panel, store, call=True)
+        right, n, wrong = labeller.gold_panel(
+            suite, judge_, panel, store, jury.names_of(ROOT), may_call=True
+        )
         print(f"labelling panel on gold items: {right} of {n} right")
         print("\n".join(f"  wrong: {w}" for w in wrong))
         return 0 if n and right >= calibrate.LABELLER_GOLD * n else 1
@@ -1350,7 +1236,7 @@ def label(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.
     print(f"{len(todo)} artifacts to label, {len(have)} labelled before", flush=True)
 
     def one(real: Real) -> calibrate.Label | None:
-        result = panel_label(
+        result = labeller.panel_label(
             store, panel, real.case, judge_, (real.check.reference, _stripped(real.text))
         )
         if result is None:
@@ -1387,16 +1273,10 @@ def align(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.
     old = calibrate.read_stamp(folder / "stamp.toml")
     instrument = jury.instrument(judge_)
     held = args.set == "held-out"
-    tried = old.versions if old else ()
-    if held and instrument in tried:
-        raise SystemExit("this version of the judge was scored on held-out already: tune on dev")
-    if held and len(tried) >= calibrate.MAX_VERSIONS:
-        raise SystemExit(
-            f"{len(tried)} versions were scored on held-out: report the missed bar (README, Judges)"
-        )
-    material = sources(suite, judge_)
-    burned = old.burned if old else ()
-    found = calibrate.items(judge_, args.set, material, burned)
+    if held and (refused := calibrate.held_out_refusal(old, instrument)):
+        raise SystemExit(refused)
+    material = calibrate.sources(suite, judge_)
+    found = calibrate.items(judge_, args.set, material, old.burned if old else ())
     failed = jury.fill(store, [(judge_, i.reference, _stripped(i.text)) for i in found], args.jobs)
     print("\n".join(failed))
     panels_ = {i.id: jury.lookup(store, judge_, i.reference, _stripped(i.text)) for i in found}
@@ -1405,30 +1285,23 @@ def align(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.
         return 1
     done = {k: p for k, p in panels_.items() if p is not None}
     verdicts = {k: p.score == 1 for k, p in done.items()}
-    single = {k: p.votes[0] == "yes" for k, p in done.items()}
-    natural = [i for i in found if i.kind == "natural"]
-    every = material.labels
-    fleiss, unsure = calibrate.agreement(every)
-    panel_model = sorted({lb.labeller for lb in every})
-    right, n, _ = gold_panel(suite, judge_, _panel_of(args, every), store, call=False)
-    stamp = calibrate.Stamp(
-        judge=judge_.id,
-        instrument=instrument,
-        versions=(*tried, instrument) if held else tried,
+    panel = _panel_of(args, material.labels)
+    right, n, _ = labeller.gold_panel(
+        suite, judge_, panel, store, jury.names_of(ROOT), may_call=False
+    )
+    stamp = calibrate.new_stamp(
+        judge_,
+        instrument,
+        old,
+        held=held,
+        material=material,
+        found=found,
+        verdicts=verdicts,
+        single={k: p.votes[0] == "yes" for k, p in done.items()},
+        split={k for k, p in done.items() if p.split},
+        gold=(right, n),
         labels=calibrate.labels_hash(folder / "labels"),
-        labeller=", ".join(panel_model),
         date=datetime.datetime.now(datetime.UTC).date().isoformat(),
-        cells=tuple(calibrate.cells(found, verdicts, single)),
-        references={c: calibrate.text_hash(r) for c, r in material.references.items()},
-        burned=burned,
-        human_audited=old.human_audited if old else 0,
-        gold_right=right,
-        gold_n=n,
-        labelled=len(every),
-        unsure=unsure,
-        fleiss=fleiss,
-        unanimous=sum(not done[i.id].split for i in natural),
-        panels=len(natural),
     )
     for row in calibrate.rows(stamp):
         print(f"{row.status:5} {row.name}: {row.value}")
@@ -1441,9 +1314,8 @@ def align(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.
             )
     if not held:
         return 0
+    stamp = calibrate.settled(stamp, found)
     passed = calibrate.cleared(stamp)
-    if not passed:
-        stamp = dataclasses.replace(stamp, burned=(*burned, *(i.id for i in natural)))
     calibrate.write_stamp(folder / "stamp.toml", stamp)
     print(f"{'CLEARED' if passed else 'MISSED'}: stamp written to {shown(folder / 'stamp.toml')}")
     return 0 if passed else 1

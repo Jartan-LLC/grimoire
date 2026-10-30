@@ -26,8 +26,8 @@ from collections.abc import Collection, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from typing import cast
 
-from .grade import reference_outputs, reference_scores, text_of
-from .suite import Case, Check, Judge, Reference, tree_hash
+from .grade import reference_outputs, reference_scores, text_of, text_score
+from .suite import Case, Check, Judge, Reference, Suite, tree_hash
 
 Z95 = 1.959964  # two-sided 95% normal quantile, for the Wilson bound
 MIN_CLASS = 40  # held-out items per class (natural positives, natural negatives, siblings)
@@ -624,6 +624,32 @@ class Sources:
     compare: Mapping[str, bool] = field(default_factory=dict[str, bool])  # label id -> verdict
 
 
+def sources(suite: Suite, judge: Judge) -> Sources:
+    """The tracked material a judge's calibration items are made from."""
+    folder = judge_dir(suite.path, judge.id)
+    labels = all_labels(folder / "labels")
+    references = judged_references(suite.cases, judge.id)
+    gold: dict[str, list[tuple[str, str, bool]]] = {}
+    compare: dict[str, bool] = {}
+    for case in suite.cases:
+        check = next((c for c in case.checks if c.judge == judge.id), None)
+        if check is None:
+            continue
+        for ref in case.references:
+            truth = reference_truth(case, ref, judge.compare)
+            if truth is not None:
+                gold.setdefault(case.id, []).append((ref.name, reference_text(check, ref), truth))
+        if judge.compare:
+            regex = [
+                c
+                for c in case.checks
+                if c.metric == judge.compare and c.judge is None and c.artifact == check.artifact
+            ]
+            for label in (lb for lb in labels if lb.case == case.id and regex):
+                compare[label.id] = all(text_score(c, label.text) == 1 for c in regex)
+    return Sources(references, gold, labels, compare)
+
+
 def _controls(judge: Judge, which: str, sources: Sources, natural: list[Label]) -> list[Item]:
     rng = random.Random(f"{judge.id}:{which}:controls")  # noqa: S311 -- a reproducible draw
     cases = sorted({label.case for label in natural})
@@ -781,3 +807,69 @@ def cells(
             if item.compare is not None:
                 count("compare", "", item.truth, item.compare)
     return [by[k] for k in sorted(by)]
+
+
+def held_out_refusal(old: Stamp | None, instrument: str) -> str:
+    """'' when the judge at `instrument` may be scored on held-out, else why not.
+
+    Held-out is scored once per judge version, and on at most MAX_VERSIONS versions.
+    """
+    tried = old.versions if old else ()
+    if instrument in tried:
+        return "this version of the judge was scored on held-out already: tune on dev"
+    if len(tried) >= MAX_VERSIONS:
+        return (
+            f"{len(tried)} versions were scored on held-out: report the missed bar (README, Judges)"
+        )
+    return ""
+
+
+def new_stamp(  # noqa: PLR0913 -- everything a stamp records
+    judge: Judge,
+    instrument: str,
+    old: Stamp | None,
+    *,
+    held: bool,
+    material: Sources,
+    found: Sequence[Item],
+    verdicts: Mapping[str, bool],
+    single: Mapping[str, bool],
+    split: Collection[str],
+    gold: tuple[int, int],
+    labels: str,
+    date: str,
+) -> Stamp:
+    """The stamp of one run on a set's items: `verdicts` the panels', `single` one call's, `split` the panels that split.
+
+    `gold` is the labelling panel's (right, out of) on gold items; on held-out the
+    version joins `versions`.
+    """
+    tried = old.versions if old else ()
+    natural = [i for i in found if i.kind == "natural"]
+    fleiss_value, unsure = agreement(material.labels)
+    return Stamp(
+        judge=judge.id,
+        instrument=instrument,
+        versions=(*tried, instrument) if held else tried,
+        labels=labels,
+        labeller=", ".join(sorted({lb.labeller for lb in material.labels})),
+        date=date,
+        cells=tuple(cells(found, verdicts, single)),
+        references={c: text_hash(r) for c, r in material.references.items()},
+        burned=old.burned if old else (),
+        human_audited=old.human_audited if old else 0,
+        gold_right=gold[0],
+        gold_n=gold[1],
+        labelled=len(material.labels),
+        unsure=unsure,
+        fleiss=fleiss_value,
+        unanimous=sum(i.id not in split for i in natural),
+        panels=len(natural),
+    )
+
+
+def settled(stamp: Stamp, found: Sequence[Item]) -> Stamp:
+    """The stamp a held-out run writes: one that missed the bar burns its natural items, dev from then on."""
+    if cleared(stamp):
+        return stamp
+    return replace(stamp, burned=(*stamp.burned, *(i.id for i in found if i.kind == "natural")))

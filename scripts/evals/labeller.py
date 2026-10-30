@@ -20,13 +20,14 @@ import re
 import subprocess
 import tempfile
 from collections.abc import Callable, Sequence
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import cast
 
-from .jury import spaced
+from . import calibrate
+from .jury import Names, spaced, strip
 from .proc import CLAUDE, GIT, run
 from .session import build_fixture, claude_env, git_env
-from .suite import Case, Judge
+from .suite import Case, Judge, Suite
 
 LABELLERS = 3
 TIMEOUT_S = 1200
@@ -281,3 +282,96 @@ def call(
     stdout = str(done.stdout)
     labelled = parse(stdout, labeller.model)
     return (labelled, stdout) if labelled is not None else (None, f"{stdout}\n{done.stderr}")
+
+
+def _labelled(  # noqa: PLR0913 -- the call's inputs, and whether it may call
+    store: pathlib.Path,
+    panel: Labeller,
+    case: Case,
+    judge: Judge,
+    item: tuple[str, str],
+    *,
+    index: int,
+    others: tuple[str, ...] = (),
+    may_call: bool = True,
+) -> Labelled | None:
+    """One labeller's output on (reference, stripped text), kept or, with `may_call`, called; None without one."""
+    call_key = key(panel, case.pinned(), judge, item, index=index, others=others)
+    if (kept := load(store, call_key)) is not None or not may_call:
+        return kept
+    reference, text = item
+    out, raw = call(
+        case,
+        panel,
+        lambda diff: prompt(case.prompt, diff, judge.question, reference, text, others=others),
+    )
+    if out is None:
+        print(f"  labeller call failed ({case.id}): {raw.strip()[:200]}", flush=True)
+        return None
+    save(store, call_key, raw)
+    return out
+
+
+def panel_label(  # noqa: PLR0913 -- the call's inputs, and whether it may call
+    store: pathlib.Path,
+    panel: Labeller,
+    case: Case,
+    judge: Judge,
+    item: tuple[str, str],
+    *,
+    may_call: bool = True,
+) -> tuple[tuple[str, ...], str] | None:
+    """The labelling panel on one item: the three labellers' labels and the final one; None if one is missing."""
+    _, text = item
+    accepted = ratings(case, judge)
+    outs = [
+        _labelled(store, panel, case, judge, item, index=i, may_call=may_call)
+        for i in range(LABELLERS)
+    ]
+    if any(o is None for o in outs):
+        return None
+    done = [o for o in outs if o is not None]
+    votes = tuple(label_of(o, text, accepted) for o in done)
+    if (final := unanimous(votes)) is not None:
+        return votes, final
+    others = tuple(json.dumps(asdict(o)) for o in done)
+    adjudicated = _labelled(
+        store, panel, case, judge, item, index=LABELLERS, others=others, may_call=may_call
+    )
+    if adjudicated is None:
+        return None
+    return votes, label_of(adjudicated, text, accepted)
+
+
+def gold_panel(  # noqa: PLR0913 -- the panel's inputs, and whether it may call
+    suite: Suite,
+    judge: Judge,
+    panel: Labeller,
+    store: pathlib.Path,
+    names: Names,
+    *,
+    may_call: bool,
+) -> tuple[int, int, list[str]]:
+    """The labelling panel on the gold references and sibling swaps of both sets: right, out of, and the wrong ids.
+
+    Without `may_call` only kept outputs count, and an item with none is left out.
+    """
+    by_id = {c.id: c for c in suite.cases}
+    found = [
+        item
+        for which in ("dev", "held-out")
+        for item in calibrate.items(judge, which, calibrate.sources(suite, judge))
+        if item.kind in ("reference", "sibling")
+    ]
+    right, n, wrong = 0, 0, list[str]()
+    for item in found:
+        pair = (item.reference, strip(item.text, names))
+        result = panel_label(store, panel, by_id[item.case], judge, pair, may_call=may_call)
+        if result is None:
+            continue
+        n += 1
+        if (result[1] == "yes") == item.truth and result[1] != "unsure":
+            right += 1
+        else:
+            wrong.append(item.id)
+    return right, n, wrong
