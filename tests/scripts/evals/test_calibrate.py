@@ -94,7 +94,10 @@ def swap(stamp: Stamp, kind: str, arm: str, cell: Cell) -> Stamp:
         (Cell("control-injection", tn=9, fp=1), "6 control-injection"),
         (Cell("control-empty", tn=9), "6 control-empty"),
         (Cell("invariance-minor", tp=28, tn=28, fp=4), "7 invariance-minor"),
+        (Cell("invariance-format", tp=30, tn=29), "7 invariance-format"),
         (Cell("natural", "none", tp=16, fn=4, tn=20), "8 arm none"),
+        # with the other arm, 88 of 100 positives: a Wilson lower bound over 0.80, a rate under 0.9
+        (Cell("natural", "old", tp=69, fn=11, tn=20), "1 TPR"),
     ],
 )
 def test_each_counted_row_of_the_bar_can_fail_it(cell: Cell, row: str) -> None:

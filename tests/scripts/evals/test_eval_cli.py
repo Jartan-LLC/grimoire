@@ -744,13 +744,13 @@ def test_a_probe_takes_its_items_a_case_at_a_time(tmp_path: pathlib.Path) -> Non
 
 
 def judged_store(
-    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, key: str = KEY + JUDGED
 ) -> tuple[Suite, pathlib.Path, list[str]]:
-    """A suite with a judged check, a store whose sessions are stubbed, and the judge calls made.
+    """A suite with a judged check in `key`, a store whose sessions are stubbed, and the judge calls made.
 
     Each stubbed session commits "fix: Closes #42"; the judge says yes, quoting it.
     """
-    suite = load_suite(write_suite(tmp_path / "suite", SUITE + JUDGE, KEY + JUDGED))
+    suite = load_suite(write_suite(tmp_path / "suite", SUITE + JUDGE, key))
     store = tmp_path / "store"
     monkeypatch.setenv(cache.STORE, str(store))
     calls: list[str] = []
@@ -848,4 +848,65 @@ def test_a_gating_judged_metric_with_no_answers_is_not_judged_and_never_ships(
     cli.baseline_counts(suite, list(suite.cases), done[:1], spec, record)
     assert "c1: not counted, kept not judged; rerun with --judge" in capsys.readouterr().out
     assert key.read_text() == before  # no baseline recorded from a count missing the judge
+    assert calls == []
+
+
+def test_a_screen_leaves_out_a_sample_whose_judge_panel_is_missing_and_never_ships(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    suite, store, _ = judged_store(tmp_path, monkeypatch)
+    graded: list[cli.Scores] = []
+
+    def gates(_: Suite) -> dict[str, str]:
+        return {}  # as if the judge's stamp shows it cleared its bar
+
+    def base(*_: object) -> str:
+        return "0" * 40
+
+    def ships(_: object, __: object, ___: cli.Scores, new: cli.Scores) -> dict[str, MetricVerdict]:
+        graded.append(new)  # every metric's verdict ships, so only the missing panel can stop it
+        return {
+            "kept": MetricVerdict("kept", 1, 0.0, 1.0, 1, 0, 0.01, 1.0, "BETTER"),
+            "delivered": MetricVerdict("delivered", 1, 1.0, 1.0, 0, 0, 1.0, 0.5, "PASS"),
+        }
+
+    monkeypatch.setattr(cli, "advisory", gates)
+    monkeypatch.setattr(cli, "merge_base", base)
+    monkeypatch.setattr(cli, "judge", ships)
+    arms = {"old": Arm("old", "o", {}), "new": Arm("new", "n", {})}
+    done = cli.run_samples(
+        [(suite.cases[0], arms[a], 0, cast("session.Spec", None)) for a in arms], 1
+    )
+    cli.fill_judgments(suite, done, store, 1)
+    unjudged = dataclasses.replace(done[1], key="new-1", index=1, commits=["fix: Closes #42 now"])
+    cache.save(store, unjudged, "")
+    args = argparse.Namespace(judge=True, new_ref="ref", split="dev", samples=2, base="main")
+    plan: dict[str, object] = {"model": "claude-opus-5-5", "claude_code": "2.1.312", "suite": "s"}
+    cli.decide(cli.Screen(args, suite, arms, plan, store), "", [*done, unjudged])
+    out = capsys.readouterr().out
+    assert "judge panels incomplete (1); rerun to retry them" in out
+    assert "Result: INCONCLUSIVE" in out
+    assert [len(scores) for scores in graded[0]["kept"].values()] == [1]
+
+
+def test_a_judged_guard_and_an_excluded_sample_leave_a_case_counted(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    guard = JUDGED.replace('metric = "kept"', 'metric = "delivered"')
+    suite, store, calls = judged_store(tmp_path, monkeypatch, KEY + guard)
+
+    def gates(_: Suite) -> dict[str, str]:
+        return {}  # as if the judge's stamp shows it cleared its bar
+
+    monkeypatch.setattr(cli, "advisory", gates)
+    (drawn,) = cli.run_samples(
+        [(suite.cases[0], Arm("old", "o", {}), 0, cast("session.Spec", None))], 1
+    )
+    excluded = dataclasses.replace(drawn, key="old-1", index=1, valid=False)
+    cache.save(store, excluded, "")
+    assert cli.not_judged(suite, [excluded], store) == {}
+    spec = session.Spec("claude-opus-5-5", "2.1.312", 1.0, tmp_path, store)
+    count = argparse.Namespace(judge=False, record=False, arm="old")
+    cli.baseline_counts(suite, list(suite.cases), [drawn], spec, count)
+    assert "c1: failed in 0 of 1; not judged: delivered" in capsys.readouterr().out
     assert calls == []
