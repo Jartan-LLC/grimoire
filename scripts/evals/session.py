@@ -42,6 +42,9 @@ BUILTINS_OFF = {
         "cc-plugin-plugin-authoring@builtin": False,
     }
 }
+# A wakeup or cron job the agent schedules for itself keeps `claude -p` alive until it
+# fires (20 minutes in #160), and no task under test needs one.
+SCHEDULERS = ("ScheduleWakeup", "CronCreate")
 RETRIES = 3
 BACKOFF_S = 30  # the first wait after the API limits requests; it doubles per retry
 BREAKER = 3  # samples in a row still limited after every retry stop the run
@@ -177,6 +180,7 @@ def claude_args(
         "--strict-mcp-config",
         "--no-session-persistence",
         "--dangerously-skip-permissions",
+        "--disallowedTools", *SCHEDULERS,
         "--max-budget-usd", f"{budget_usd:g}",
     ]  # fmt: skip
     for directory in arm.plugins.values():

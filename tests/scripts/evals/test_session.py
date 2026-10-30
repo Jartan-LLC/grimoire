@@ -65,6 +65,8 @@ def test_claude_args_load_every_arm_plugin_and_switch_off_the_builtins() -> None
     assert args[args.index("--settings") + 1] == json.dumps(session.BUILTINS_OFF)
     assert args[args.index("--max-budget-usd") + 1] == "1.5"
     assert args[args.index("--debug-file") + 1] == "/s/debug.log"
+    at = args.index("--disallowedTools")
+    assert args[at + 1 : at + 3] == ["ScheduleWakeup", "CronCreate"]
     for flag in (
         "--strict-mcp-config", "--no-session-persistence", "--include-hook-events",
         "--forward-subagent-text",

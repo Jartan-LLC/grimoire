@@ -514,6 +514,9 @@ After changing the runner or the verdict rule:
   reviewed in one and its review addressed in the next. A case's `turns` are written before the
   session, so they cannot answer what the agent asks, and a turn cannot follow one that started a
   background subagent: such a sample is excluded.
+- Sessions run without the ScheduleWakeup and CronCreate tools, as a wakeup the agent sets for itself
+  keeps the session waiting until it fires: a case cannot test a text that tells the agent to schedule
+  one.
 - GitHub is a stub: `gh` answers only from the case's replies, the same for every call that matches, so
   a case shows what the agent sent, not what GitHub would do with it.
 - The session's environment controls (GH_TOKEN, GH_CONFIG_DIR, GIT_ALLOW_PROTOCOL) hold only while it
