@@ -219,12 +219,12 @@ def converse(  # noqa: PLR0913 -- where it runs, what it writes and how long it 
     Each message after the first goes in once the turn before has ended in a `result`
     event: one sent sooner joins the turn in progress. Stdin closes right after the
     last, as a session still runs the messages it got before the close, and the
-    background tasks they start. A turn that
-    starts a background task, such as a subagent the main thread spawns, emits its
-    `result` only when the session ends (probe on 2.1.314), so no later turn can follow
-    it: the runner then sends no more. A session that ends before it got every message,
-    or before each turn it got has its `result`, was cut short too. Returns whether the
-    session timed out, and why its turns did not all run, or "".
+    background tasks they start. A turn that starts a background task, such as a
+    subagent the main thread spawns, emits its `result` only when the session ends
+    (probe on 2.1.314), so no later turn can follow it: the runner then sends no more.
+    A session that ends before it got every message, or before each turn it got has
+    its `result`, was cut short too. Returns whether the session timed out, and why its
+    turns did not all run, or "".
     """
     session = start(
         args, cwd=cwd, env=env,
@@ -262,7 +262,8 @@ def converse(  # noqa: PLR0913 -- where it runs, what it writes and how long it 
         for line in stdout:
             out.write(line)
             event = _event(line)
-            results += event.get("type") == "result"
+            if event.get("type") == "result":
+                results += 1
             if not pending:
                 continue
             if event.get("subtype") == "task_started" and event.get("is_backgrounded") is True:
