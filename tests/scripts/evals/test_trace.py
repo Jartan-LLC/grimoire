@@ -380,6 +380,7 @@ def test_classify_lets_a_session_read_its_own_arm_and_no_other() -> None:
         other_arm
     ]
     assert reasons(f"ls {own}-pr/plugins") == [other_arm]
+    assert reasons(f"ls {own}+praxis-x/plugins") == [other_arm]
     assert reasons(f"ls {arms}") == [other_arm]
     assert reasons(f"cat {skill_file} /checkout/tests/evals/x/key.toml") == [
         "the session reached /checkout"

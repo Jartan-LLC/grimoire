@@ -493,8 +493,8 @@ def classify(  # noqa: PLR0913 -- `own` is apart from `private`: paths under it 
         reasons.append(f"model {trace.init.get('model')!r} is not {model!r}")
     # A path counts only whole, not followed by a character that continues a file name: a
     # worktree at /tmp/grimoire is not named by the sandbox /tmp/grimoire-eval-x, nor the
-    # arm none-...-praxis-review by a sibling none-...-praxis-review-pr.
-    whole = {p: re.compile(re.escape(p) + r"(?![\w.~-])") for p in [*private, own] if p}
+    # arm none-...-praxis-review by a sibling none-...-praxis-review-pr or ...-review+x.
+    whole = {p: re.compile(re.escape(p) + r"(?![\w.~+-])") for p in [*private, own] if p}
     texts = [
         _normalised(text.replace('"', "").replace("'", ""))
         for tool_input in trace.tool_inputs
