@@ -49,7 +49,8 @@ margin = 0.2
 [[judge]]
 id = "flags-plant"
 question = "Does the report raise, as a finding of its own, the problem the reference describes, at a rating the reference accepts?"
-# Calibration: the cases whose items are held out (split by case, from the #137 research);
+# Calibration: the cases whose items are held out (split by case, from the #137 research), never
+# moved out by hand, since the stamp does not record this list (README, "Calibrating a judge");
 held_out = [
   "nonlocal-parse",
   "reinvented-batched",

@@ -326,7 +326,9 @@ sample of held-out labels and edits that count.
    reference changed since it was written. After new labels or a dev case's reference edit, `--set
    held-out` stamps a cleared version again without counting a new version; it burns the held-out
    natural items like a missed version if it misses. A held-out case's edited reference must be
-   restored.
+   restored. Never move a case out of `held_out` by hand: the stamp does not record the list, so it
+   stays current, and that case's reference could then be edited and stamped again. A missed version
+   moves its items to dev itself.
 
 ## Running and deciding
 

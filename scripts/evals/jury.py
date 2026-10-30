@@ -103,7 +103,12 @@ def call_hash(judge: Judge) -> str:
 
 
 def instrument(judge: Judge) -> str:
-    """The judge as calibrated: one call's dependencies and the panel size; a stamp names it."""
+    """The judge's version, which a stamp names: one call's dependencies and the panel size.
+
+    The code of `strip`, `vote` and `majority` is not hashed: an edit to it changes what
+    the judge answers or how its votes count, yet leaves the stamp current, so calibrate
+    again after one.
+    """
     return hashlib.sha256(json.dumps([call_hash(judge), judge.panel]).encode()).hexdigest()
 
 
