@@ -1,15 +1,18 @@
 """Session setup: the parts that run no `claude` session."""
 
 import dataclasses
+import io
 import json
 import os
 import pathlib
 import subprocess
 import sys
 import tempfile
+import threading
+from typing import Any
 
 import pytest
-from evals import cache, gh_stub, session
+from evals import cache, gh_stub, proc, session
 from evals.arms import Arm
 from evals.proc import GIT, run
 from evals.suite import Case, load_suite
@@ -627,6 +630,31 @@ def test_converse_sends_no_turn_after_one_that_started_a_background_task(
 def test_converse_stops_a_session_past_its_timeout(tmp_path: pathlib.Path) -> None:
     timed_out, _, got, _ = converse(tmp_path, ("HANG", "two"), timeout_s=0.5)
     assert (timed_out, got) == (True, [])
+
+
+def test_converse_stops_the_session_when_writing_its_output_fails(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    started: list[subprocess.Popen[str]] = []
+
+    def start(args: list[str], **options: Any) -> subprocess.Popen[str]:
+        started.append(proc.start(args, **options))
+        return started[-1]
+
+    class Full(io.StringIO):
+        def write(self, s: str, /) -> int:
+            raise OSError("no space left on device")
+
+    fake = tmp_path / "fake.py"
+    fake.write_text(FAKE_CLAUDE)
+    monkeypatch.setattr(session, "start", start)
+    with pytest.raises(OSError, match="no space"):
+        session.converse(
+            [sys.executable, str(fake), str(tmp_path / "log.txt")], ("one", "HANG"),
+            cwd=tmp_path, env=dict(os.environ), out=Full(), timeout_s=60,
+        )  # fmt: skip
+    assert started[0].poll() is not None
+    assert not any(isinstance(t, threading.Timer) for t in threading.enumerate())
 
 
 def test_a_multi_turn_case_reads_its_messages_from_stdin() -> None:

@@ -253,22 +253,27 @@ def converse(  # noqa: PLR0913 -- where it runs, what it writes and how long it 
         with contextlib.suppress(OSError):  # the session has ended already
             stdin.close()
 
-    send()
-    for line in stdout:
-        out.write(line)
-        event = _event(line)
-        if not pending:
-            continue
-        if event.get("subtype") == "task_started" and event.get("is_backgrounded") is True:
-            unsent = (
-                f"turn {sent} started a background task, whose result comes only when the "
-                f"session ends, so turn {sent + 1} of {len(messages)} was not sent"
-            )
-            stop()
-        elif event.get("type") == "result":
-            send()
-    session.wait()
-    timer.cancel()
+    try:
+        send()
+        for line in stdout:
+            out.write(line)
+            event = _event(line)
+            if not pending:
+                continue
+            if event.get("subtype") == "task_started" and event.get("is_backgrounded") is True:
+                unsent = (
+                    f"turn {sent} started a background task, whose result comes only when the "
+                    f"session ends, so turn {sent + 1} of {len(messages)} was not sent"
+                )
+                stop()
+            elif event.get("type") == "result":
+                send()
+        session.wait()
+    finally:
+        timer.cancel()
+        if session.poll() is None:  # the loop raised: stop the session rather than leave it
+            session.kill()
+            session.wait()
     return expired.is_set(), unsent
 
 
