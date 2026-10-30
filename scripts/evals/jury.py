@@ -171,12 +171,11 @@ def answer_of(payload: object) -> Answer | None:
     return Answer(str(answer), quote)
 
 
-def parse(stdout: str, model: str) -> Answer | None:
-    """The answer in `claude -p --output-format json` output, or None.
+def envelope_of(stdout: str, model: str) -> dict[str, object] | None:
+    """The fields of `claude -p --output-format json` output, or None.
 
-    None when the output is not a JSON object, reports an error, does not name `model`
-    in `modelUsage` (another model answered), or holds no well-formed answer. The answer
-    is read from `structured_output`, else from `result` when that is a JSON object.
+    None when the output is not a JSON object, reports an error, or does not name
+    `model` in `modelUsage` (another model answered).
     """
     try:
         envelope: object = json.loads(stdout)
@@ -187,6 +186,18 @@ def parse(stdout: str, model: str) -> Answer | None:
     fields = cast("dict[str, object]", envelope)
     usage = fields.get("modelUsage")
     if fields.get("is_error") or not isinstance(usage, dict) or model not in usage:
+        return None
+    return fields
+
+
+def parse(stdout: str, model: str) -> Answer | None:
+    """The answer in `claude -p --output-format json` output, or None (`envelope_of`).
+
+    None too when the output holds no well-formed answer. The answer is read from
+    `structured_output`, else from `result` when that is a JSON object.
+    """
+    fields = envelope_of(stdout, model)
+    if fields is None:
         return None
     payload = fields.get("structured_output")
     result = fields.get("result")
@@ -221,28 +232,36 @@ def _path(store: pathlib.Path, key: str) -> pathlib.Path:
     return store / "judgments" / key[:2] / f"{key}.json"
 
 
-def load(store: pathlib.Path, key: str) -> Answer | None:
-    """A kept answer, or None."""
-    path = _path(store, key)
+def kept(path: pathlib.Path) -> object:
+    """The JSON kept at `path`, or None when there is none or it is damaged: the next run calls again."""
     if not path.is_file():
         return None
     try:
-        return answer_of(json.loads(path.read_text()))
-    except (OSError, ValueError):  # a damaged file is no answer: the next run calls again
+        return json.loads(path.read_text())
+    except (OSError, ValueError):
         return None
 
 
-def save(store: pathlib.Path, key: str, answer: Answer, envelope: dict[str, object]) -> None:
-    """Keep an answer with the models that gave it and its cost; written whole or not at all."""
-    path = _path(store, key)
+def keep(path: pathlib.Path, record: object) -> None:
+    """Keep `record` as JSON at `path`, written whole or not at all."""
     path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(record, indent=1))
+    temporary.replace(path)
+
+
+def load(store: pathlib.Path, key: str) -> Answer | None:
+    """A kept answer, or None."""
+    return answer_of(kept(_path(store, key)))
+
+
+def save(store: pathlib.Path, key: str, answer: Answer, envelope: dict[str, object]) -> None:
+    """Keep an answer with the models that gave it and its cost."""
     record = dataclasses.asdict(answer) | {
         "models": sorted(cast("dict[str, object]", envelope.get("modelUsage") or {})),
         "cost_usd": envelope.get("total_cost_usd"),
     }
-    temporary = path.with_suffix(".tmp")
-    temporary.write_text(json.dumps(record, indent=1))
-    temporary.replace(path)
+    keep(_path(store, key), record)
 
 
 def lookup(store: pathlib.Path, judge: Judge, reference: str, text: str) -> Panel | None:

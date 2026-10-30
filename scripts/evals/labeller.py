@@ -24,7 +24,7 @@ from dataclasses import asdict, dataclass
 from typing import cast
 
 from . import calibrate
-from .jury import Names, spaced, strip
+from .jury import Names, envelope_of, keep, kept, spaced, strip
 from .proc import CLAUDE, GIT, run
 from .session import build_fixture, claude_env, git_env
 from .suite import Case, Judge, Suite
@@ -115,18 +115,9 @@ def prompt(  # noqa: PLR0913 -- one argument per part of the message
 
 
 def parse(stdout: str, model: str) -> Labelled | None:
-    """A labeller's output from `claude -p --output-format json`, or None when it holds none."""
-    try:
-        envelope: object = json.loads(stdout)
-    except ValueError:
-        return None
-    if not isinstance(envelope, dict):
-        return None
-    fields = cast("dict[str, object]", envelope)
-    usage = fields.get("modelUsage")
-    if fields.get("is_error") or not isinstance(usage, dict) or model not in usage:
-        return None
-    return labelled_of(fields.get("structured_output"))
+    """A labeller's output from `claude -p --output-format json`, or None when it holds none (`jury.envelope_of`)."""
+    fields = envelope_of(stdout, model)
+    return labelled_of(fields.get("structured_output")) if fields is not None else None
 
 
 def labelled_of(payload: object) -> Labelled | None:
@@ -224,22 +215,12 @@ def _path(store: pathlib.Path, call_key: str) -> pathlib.Path:
 
 def load(store: pathlib.Path, call_key: str) -> Labelled | None:
     """A kept labeller output, or None."""
-    path = _path(store, call_key)
-    if not path.is_file():
-        return None
-    try:
-        return labelled_of(json.loads(path.read_text()))
-    except (OSError, ValueError):  # a damaged file is no output: the next run calls again
-        return None
+    return labelled_of(kept(_path(store, call_key)))
 
 
 def save(store: pathlib.Path, call_key: str, stdout: str) -> None:
-    """Keep a labeller's structured output, written whole or not at all."""
-    path = _path(store, call_key)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(".tmp")
-    temporary.write_text(json.dumps(json.loads(stdout).get("structured_output"), indent=1))
-    temporary.replace(path)
+    """Keep a labeller's structured output."""
+    keep(_path(store, call_key), json.loads(stdout).get("structured_output"))
 
 
 def diff_of(repo: pathlib.Path, env: dict[str, str]) -> str:
