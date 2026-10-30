@@ -1,4 +1,4 @@
-split = "confirm"
+split = "dev"
 kind = "target"
 hints = ["2.md", "1.md", "earlier"]
 remote = true

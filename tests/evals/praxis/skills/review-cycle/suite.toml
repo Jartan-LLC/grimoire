@@ -12,6 +12,8 @@ BURNED = [
   # checks read the addresser's briefs and the command's own whole-branch line.
   "resume-confload",
   "resume-slugkit",
+  # Confirmed, then found broken: its prompt claimed fixes its fixture never held.
+  "roundtwo-ratelimit",
 ]
 covers = [
   "plugins/praxis/skills/review-cycle/**",

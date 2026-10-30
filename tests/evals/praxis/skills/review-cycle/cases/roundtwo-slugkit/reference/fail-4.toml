@@ -1,0 +1,10 @@
+commits = []
+final = ""
+
+[files]
+".claude/workspace/issue-73/feature--issue-73/1.md" = "## Code Review\n\nAll findings fixed.\n"
+".claude/workspace/issue-73/feature--issue-73/2.md" = "## Code Review\n\n### Critical Issues\nNone found\n\n### Important Issues\nNone found\n\n### Minor Issues\nNone found\n\n### Summary\nNo findings.\n"
+
+[briefs]
+"praxis:general-reviewer" = "Review the change on feature/issue-73 against main: the whole branch."
+"praxis:doc-reviewer" = "Review the docs, comments and commit messages on feature/issue-73."
