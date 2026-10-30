@@ -343,6 +343,16 @@ def panel_label(  # noqa: PLR0913 -- the call's inputs, and whether it may call
     return votes, label_of(adjudicated, text, accepted)
 
 
+@dataclass(frozen=True)
+class Gold:
+    """The labelling panel on gold items: `right` of `n` labelled, the `wrong` ids, and the `missing` ones with no panel."""
+
+    right: int
+    n: int
+    wrong: tuple[str, ...]
+    missing: tuple[str, ...]
+
+
 def gold_panel(  # noqa: PLR0913 -- the panel's inputs, and whether it may call
     suite: Suite,
     judge: Judge,
@@ -351,10 +361,11 @@ def gold_panel(  # noqa: PLR0913 -- the panel's inputs, and whether it may call
     names: Names,
     *,
     may_call: bool,
-) -> tuple[int, int, list[str]]:
-    """The labelling panel on the gold references and sibling swaps of both sets: right, out of, and the wrong ids.
+) -> Gold:
+    """The labelling panel on the gold references and sibling swaps of both sets.
 
-    Without `may_call` only kept outputs count, and an item with none is left out.
+    Without `may_call` only kept outputs count; an item with no full panel, kept or
+    called, is `missing` and counts nowhere else.
     """
     by_id = {c.id: c for c in suite.cases}
     found = [
@@ -363,15 +374,16 @@ def gold_panel(  # noqa: PLR0913 -- the panel's inputs, and whether it may call
         for item in calibrate.items(judge, which, calibrate.sources(suite, judge))
         if item.kind in ("reference", "sibling")
     ]
-    right, n, wrong = 0, 0, list[str]()
+    right, n, wrong, missing = 0, 0, list[str](), list[str]()
     for item in found:
         pair = (item.reference, strip(item.text, names))
         result = panel_label(store, panel, by_id[item.case], judge, pair, may_call=may_call)
         if result is None:
+            missing.append(item.id)
             continue
         n += 1
         if (result[1] == "yes") == item.truth and result[1] != "unsure":
             right += 1
         else:
             wrong.append(item.id)
-    return right, n, wrong
+    return Gold(right, n, tuple(wrong), tuple(missing))

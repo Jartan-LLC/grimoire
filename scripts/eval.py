@@ -1219,12 +1219,15 @@ def label(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.
     """
     panel = labeller.Labeller(args.labeller_model, args.labeller_effort)
     if args.gold:
-        right, n, wrong = labeller.gold_panel(
-            suite, judge_, panel, store, jury.names_of(ROOT), may_call=True
-        )
-        print(f"labelling panel on gold items: {right} of {n} right")
-        print("\n".join(f"  wrong: {w}" for w in wrong))
-        return 0 if n and right >= calibrate.LABELLER_GOLD * n else 1
+        gold = labeller.gold_panel(suite, judge_, panel, store, jury.names_of(ROOT), may_call=True)
+        print(f"labelling panel on gold items: {gold.right} of {gold.n} right")
+        print("\n".join(f"  wrong: {w}" for w in gold.wrong))
+        if gold.missing:
+            print(
+                f"INCOMPLETE: {len(gold.missing)} gold items lack a full panel; rerun to retry them"
+            )
+            return 1
+        return 0 if gold.n and gold.right >= calibrate.LABELLER_GOLD * gold.n else 1
     folder = calibrate.judge_dir(suite.path, judge_.id) / "labels"
     kept = calibrate.all_labels(folder)
     have = {lb.id for lb in kept}
@@ -1291,11 +1294,14 @@ def align(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.
         print(f"INCOMPLETE: {len(missing)} items lack a full panel; rerun to retry them")
         return 1
     done = {k: p for k, p in panels_.items() if p is not None}
-    verdicts = {k: p.score == 1 for k, p in done.items()}
     panel = _panel_of(args, material.labels)
-    right, n, _ = labeller.gold_panel(
-        suite, judge_, panel, store, jury.names_of(ROOT), may_call=False
-    )
+    gold = labeller.gold_panel(suite, judge_, panel, store, jury.names_of(ROOT), may_call=False)
+    if gold.missing:
+        print(
+            f"INCOMPLETE: {len(gold.missing)} gold items lack a labelling panel; run judge-label --gold"
+        )
+        return 1
+    verdicts = {k: p.score == 1 for k, p in done.items()}
     stamp = calibrate.new_stamp(
         judge_,
         instrument,
@@ -1306,7 +1312,7 @@ def align(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.
         verdicts=verdicts,
         single={k: p.votes[0] == "yes" for k, p in done.items()},
         split={k for k, p in done.items() if p.split},
-        gold=(right, n),
+        gold=(gold.right, gold.n),
         labels=labels,
         date=datetime.datetime.now(datetime.UTC).date().isoformat(),
     )

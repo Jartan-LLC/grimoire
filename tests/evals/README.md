@@ -318,8 +318,10 @@ sample of held-out labels and edits that count.
    each disagreement. Read them, revise the question (or the prompt texts in `scripts/evals/jury.py`),
    repeat.
 5. Freeze the version and run `--set held-out` once. It writes `judges/<id>/stamp.toml` with every
-   row's counts. A version that misses the bar moves its held-out items to dev: draw and label fresh
-   held-out sessions and try again, at most 3 versions per question; then report the missed bar.
+   row's counts once every item has its judge panel and every gold item its labelling panel, and
+   otherwise prints INCOMPLETE and writes nothing. A version that misses the bar moves its held-out
+   items to dev: draw and label fresh held-out sessions and try again, at most 3 versions per
+   question; then report the missed bar.
 6. Commit the labels and the stamp. The lint fails a stamp whose judge, labels or a stamped case's
    reference changed since it was written. After new labels or a dev case's reference edit, `--set
    held-out` stamps a cleared version again without counting a new version; it burns the held-out

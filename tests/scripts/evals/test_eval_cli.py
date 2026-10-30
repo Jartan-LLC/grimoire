@@ -4,11 +4,12 @@ import json
 import pathlib
 import shutil
 import sys
+from collections.abc import Callable
 from typing import cast
 
 import eval as cli
 import pytest
-from evals import cache, calibrate, jury, session
+from evals import cache, calibrate, jury, labeller, session
 from evals.arms import Arm
 from evals.plan import Listed, Plan
 from evals.suite import Suite, load_suite
@@ -629,6 +630,47 @@ def test_align_stamps_a_cleared_version_again_once_its_labels_change(
     assert stamp.labels == calibrate.labels_hash(folder / "labels")
     assert stamp.burned == ("k1",)
     assert "MISSED" in capsys.readouterr().out
+
+
+def test_a_gold_item_without_a_labelling_panel_stops_label_and_align(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    held = JUDGE.replace("question", 'held_out = ["c1"]\nquestion')
+    root = write_suite(tmp_path / "suite", SUITE + held, KEY + JUDGED)
+    (root / "cases" / "c1" / "reference").mkdir()
+    for name, commit in (("pass-1", "fix: Closes #42"), ("pass-2", "fix: Closes #42 zebra")):
+        (root / "cases" / "c1" / "reference" / f"{name}.toml").write_text(
+            f'commits = ["{commit}"]\nfinal = "Done."\n'
+        )
+    suite = load_suite(root)
+    judge = suite.judges["flags"]
+    payload = {
+        "findings": [{"quote": "Closes #42", "rating": "", "subject": "the issue"}],
+        "match": 0,
+        "answer": "yes",
+        "rationale": "It names it.",
+    }
+
+    def labels_all_but_zebra(
+        case: object, panel: object, message: Callable[[str], str]
+    ) -> tuple[labeller.Labelled | None, str]:
+        if "zebra" in message(""):
+            return None, "Error: overloaded"
+        return labeller.labelled_of(payload), json.dumps({"structured_output": payload})
+
+    def says_no(j: object, reference: str, text: str) -> tuple[jury.Answer, str]:
+        return jury.Answer("no", ""), json.dumps({"modelUsage": {judge.model: {}}})
+
+    monkeypatch.setattr(labeller, "call", labels_all_but_zebra)
+    monkeypatch.setattr(jury, "call", says_no)
+    store = tmp_path / "store"
+    gold = argparse.Namespace(gold=True, labeller_model="m", labeller_effort="e")
+    assert cli.label(gold, suite, judge, store) == 1  # 1 of 1 right, but 1 has no panel
+    assert "INCOMPLETE: 1 gold items" in capsys.readouterr().out
+    args = argparse.Namespace(set="held-out", jobs=1, labeller_model="m", labeller_effort="e")
+    assert cli.align(args, suite, judge, store) == 1
+    assert "INCOMPLETE: 1 gold items lack a labelling panel" in capsys.readouterr().out
+    assert calibrate.read_stamp(calibrate.judge_dir(suite.path, "flags") / "stamp.toml") is None
 
 
 def test_stored_samples_are_found_by_the_key_the_case_has_now(tmp_path: pathlib.Path) -> None:
