@@ -1,0 +1,12 @@
+{
+  "name": "subtool",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "subtool": "src/cli.ts"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}

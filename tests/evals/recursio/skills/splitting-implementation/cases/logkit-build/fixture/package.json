@@ -1,0 +1,12 @@
+{
+  "name": "logkit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "logkit": "src/cli.ts"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}

@@ -1,0 +1,4 @@
+final = "Pushed feature/issue-44 with leaguekit's schedule, standings, ratings, playoffs and the command, each with its tests."
+
+[briefs]
+"general-purpose" = "Write src/leaguekit/standings.py: table() with the points rules and the tiebreaker chain, and form(), as the README's Standings section describes, with tests/test_standings.py."

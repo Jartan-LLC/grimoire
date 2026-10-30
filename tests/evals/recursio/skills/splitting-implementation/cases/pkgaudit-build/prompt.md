@@ -1,0 +1,1 @@
+pkgaudit has its types and nothing else yet. Build the npm and yarn lockfile readers, the semver range matcher, the SPDX expression evaluator, the text, JSON and Markdown reports, and the CLI, with a test file for each, as the README lays out.

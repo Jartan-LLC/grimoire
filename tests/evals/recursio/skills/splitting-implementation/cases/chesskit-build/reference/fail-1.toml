@@ -1,0 +1,1 @@
+final = "chesskit is built: FEN reading and writing, legal move generation with perft, PGN reading, the clocks and the command, each with its tests."

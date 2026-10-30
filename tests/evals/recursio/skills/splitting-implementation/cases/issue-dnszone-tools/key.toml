@@ -1,0 +1,77 @@
+split = "confirm"
+kind = "trigger"
+hints = ["subagent", "parallel", "split", "agents", "delegate", "wave", "recursi"]
+remote = true
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "recursio:splitting-implementation"
+state = "loaded"
+
+[[check]]
+metric = "split"
+artifact = "brief:general-purpose"
+present = '''\S'''
+
+[[gh]]
+match = '''(^|\s)pr create\b'''
+stdout = "https://github.com/acme/zonekit/pull/181\n"
+
+[[gh]]
+match = '''(^|\s)pr view\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr edit\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)pr list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)pr status\b'''
+stdout = "Current branch\n  There is no pull request associated with [feature/issue-81]\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 81, \"title\": \"Zone tooling: parser, checks, wire format and diff\", \"body\": \"We need the zone tooling the README describes, built on the data model in `src/zonekit/model.py`:\\n\\n- the master-file parser (`zonekit.parse`)\\n- the zone checks (`zonekit.validate`)\\n- wire-format encoding and decoding with name compression (`zonekit.wire`)\\n- the comparison of two zones (`zonekit.diff`)\\n- the `zonekit` command with its `check`, `diff` and `encode` subcommands\\n\\nThe README has the rules for each part. Each part needs its own tests.\", \"state\": \"OPEN\", \"author\": {\"login\": \"ravi\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/zonekit/issues/81\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tZone tooling: parser, checks, wire format and diff\nstate:\tOPEN\nauthor:\travi\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t81\n--\nWe need the zone tooling the README describes, built on the data model in `src/zonekit/model.py`:\n\n- the master-file parser (`zonekit.parse`)\n- the zone checks (`zonekit.validate`)\n- wire-format encoding and decoding with name compression (`zonekit.wire`)\n- the comparison of two zones (`zonekit.diff`)\n- the `zonekit` command with its `check`, `diff` and `encode` subcommands\n\nThe README has the rules for each part. Each part needs its own tests.\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[{\"number\": 81, \"title\": \"Zone tooling: parser, checks, wire format and diff\", \"state\": \"OPEN\", \"url\": \"https://github.com/acme/zonekit/issues/81\"}]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = "81\tOPEN\tZone tooling: parser, checks, wire format and diff\t\t2026-10-20T10:00:00Z\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*pulls'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b.*--json'''
+stdout = "{\"name\": \"zonekit\", \"nameWithOwner\": \"acme/zonekit\", \"url\": \"https://github.com/acme/zonekit\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PUBLIC\", \"owner\": {\"login\": \"acme\"}}\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "name:\tacme/zonekit\ndescription:\t\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account alice (keyring)\n"
+
+[[gh]]
+match = '''(^|\s)api user\b'''
+stdout = "{\"login\": \"alice\"}\n"

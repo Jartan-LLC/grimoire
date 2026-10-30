@@ -1,0 +1,12 @@
+{
+  "name": "timesheet",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "timesheet": "src/cli.ts"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}

@@ -1,0 +1,14 @@
+split = "screen"
+kind = "trigger"
+hints = ["subagent", "parallel", "split", "agents", "delegate", "wave", "recursi"]
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "recursio:splitting-implementation"
+state = "loaded"
+
+[[check]]
+metric = "split"
+artifact = "brief:general-purpose"
+present = '''\S'''

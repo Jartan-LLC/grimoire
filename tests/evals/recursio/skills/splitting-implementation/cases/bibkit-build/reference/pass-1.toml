@@ -1,0 +1,4 @@
+final = "bibkit is built: the BibTeX parser and writer, RIS reading and writing, the APA, Chicago and IEEE styles, duplicate detection and the command, each with its tests."
+
+[briefs]
+"general-purpose" = "Write src/bibkit/ris.py: read_ris() and write_ris() with the tag and type mappings the README's RIS section gives, working only on bibkit.model, with tests/test_ris.py."

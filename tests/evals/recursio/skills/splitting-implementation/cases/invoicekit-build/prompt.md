@@ -1,0 +1,1 @@
+Our accountant wants invoices out of the spreadsheet before the next VAT return, so invoicekit has to work for real now. Only the types are in place; please build everything else the README describes, with tests for each module.

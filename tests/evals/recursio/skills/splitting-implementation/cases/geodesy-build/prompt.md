@@ -1,0 +1,1 @@
+Our field crews convert coordinates and work out plot areas by hand in spreadsheets, and two people never get the same number. surveykit is meant to replace that: the README has the whole spec, and only the data types are in place so far. Could you implement it -- coordinate formats and UTM, geodesic distances, polygons, GPS tracks and the surveykit command -- with tests?

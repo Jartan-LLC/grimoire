@@ -1,0 +1,4 @@
+final = "invoicekit is built: VAT, currency conversion, invoice numbering, dunning and the invoicekit command, each with its tests."
+
+[briefs]
+"general-purpose" = "Write src/numbering.js: createSeries, createNumberer, memoryStore and fileStore with gapless numbering, voids and the credit-note series as the README's Numbering section describes, with test/numbering.test.js."

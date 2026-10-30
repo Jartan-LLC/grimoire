@@ -1,0 +1,17 @@
+split = "confirm"
+kind = "trigger"
+hints = ["subagent", "parallel", "split", "agents", "delegate", "wave", "recursi"]
+turns = [
+  "Thanks. chesskit only has these types so far. Build the rest from the README: FEN, move generation with perft, PGN reading, the clocks and the command, with a test module for each.",
+]
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "recursio:splitting-implementation"
+state = "loaded"
+
+[[check]]
+metric = "split"
+artifact = "brief:general-purpose"
+present = '''\S'''

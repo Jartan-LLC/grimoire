@@ -1,0 +1,4 @@
+final = "pkgaudit is built: the lockfile readers, semver ranges, SPDX expressions, the reports and the pkgaudit CLI, each with its tests."
+
+[briefs]
+"general-purpose" = "Write src/semver.ts: parse, compare, parseRange, satisfies, sortVersions and maxSatisfying with caret, tilde, x-range and hyphen ranges and the prerelease rule, as the README's Versions and ranges section describes, with test/semver.test.ts."

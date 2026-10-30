@@ -1,0 +1,7 @@
+[project]
+name = "bibkit"
+version = "0.1.0"
+requires-python = ">=3.11"
+
+[project.scripts]
+bibkit = "bibkit.cli:main"

@@ -1,0 +1,4 @@
+final = "Pushed feature/issue-67 and opened https://github.com/acme/bookshop/pull/167: pricing, inventory, orders, shipping and checkout, each with its tests."
+
+[briefs]
+"general-purpose" = "Write src/shipping.js: zoneFor, the rate table, pack and quote as the README's Shipping section describes, with test/shipping.test.js; step 4 of .claude/workspace/issue-67/plan.md."

@@ -1,0 +1,12 @@
+{
+  "name": "pkgaudit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "pkgaudit": "src/cli.ts"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}

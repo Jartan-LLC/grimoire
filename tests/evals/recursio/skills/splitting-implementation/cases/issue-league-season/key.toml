@@ -1,0 +1,77 @@
+split = "dev"
+kind = "trigger"
+hints = ["subagent", "parallel", "split", "agents", "delegate", "wave", "recursi"]
+remote = true
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "recursio:splitting-implementation"
+state = "loaded"
+
+[[check]]
+metric = "split"
+artifact = "brief:general-purpose"
+present = '''\S'''
+
+[[gh]]
+match = '''(^|\s)pr create\b'''
+stdout = "https://github.com/acme/leaguekit/pull/144\n"
+
+[[gh]]
+match = '''(^|\s)pr view\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr edit\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)pr list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)pr status\b'''
+stdout = "Current branch\n  There is no pull request associated with [feature/issue-44]\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 44, \"title\": \"Season tooling: schedule, table, ratings and playoffs\", \"body\": \"We need the season tooling the README describes, built on the data model in `src/leaguekit/model.py`:\\n\\n- the fixture schedule (`leaguekit.schedule`)\\n- the league table and its tiebreakers (`leaguekit.standings`)\\n- Elo ratings (`leaguekit.ratings`)\\n- the playoff bracket (`leaguekit.playoffs`)\\n- the `leaguekit` command with its `schedule`, `table`, `ratings` and `bracket` subcommands\\n\\nThe README has the rules for each part. Each part needs its own tests.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/leaguekit/issues/44\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tSeason tooling: schedule, table, ratings and playoffs\nstate:\tOPEN\nauthor:\tdana\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t44\n--\nWe need the season tooling the README describes, built on the data model in `src/leaguekit/model.py`:\n\n- the fixture schedule (`leaguekit.schedule`)\n- the league table and its tiebreakers (`leaguekit.standings`)\n- Elo ratings (`leaguekit.ratings`)\n- the playoff bracket (`leaguekit.playoffs`)\n- the `leaguekit` command with its `schedule`, `table`, `ratings` and `bracket` subcommands\n\nThe README has the rules for each part. Each part needs its own tests.\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[{\"number\": 44, \"title\": \"Season tooling: schedule, table, ratings and playoffs\", \"state\": \"OPEN\", \"url\": \"https://github.com/acme/leaguekit/issues/44\"}]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = "44\tOPEN\tSeason tooling: schedule, table, ratings and playoffs\t\t2026-10-20T10:00:00Z\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*pulls'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b.*--json'''
+stdout = "{\"name\": \"leaguekit\", \"nameWithOwner\": \"acme/leaguekit\", \"url\": \"https://github.com/acme/leaguekit\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PUBLIC\", \"owner\": {\"login\": \"acme\"}}\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "name:\tacme/leaguekit\ndescription:\t\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account alice (keyring)\n"
+
+[[gh]]
+match = '''(^|\s)api user\b'''
+stdout = "{\"login\": \"alice\"}\n"

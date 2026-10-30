@@ -1,0 +1,17 @@
+split = "screen"
+kind = "trigger"
+hints = ["subagent", "parallel", "split", "agents", "delegate", "wave", "recursi"]
+turns = [
+  "Thanks, that's what I hoped. Now please build everything else the README describes on top of the model: the BibTeX parser and writer, the RIS reader and writer, the three reference styles, duplicate detection and the bibkit command, each module with its own tests.",
+]
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "recursio:splitting-implementation"
+state = "loaded"
+
+[[check]]
+metric = "split"
+artifact = "brief:general-purpose"
+present = '''\S'''

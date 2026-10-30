@@ -1,13 +1,17 @@
-# Trigger suite for the splitting-implementation skill (#121): is the skill consulted on a build of
-# several parts, and does it stay out of work that only looks like one? Should-split cases are multi-part builds in plain chat, with no word about subagents, and
-# multi-part issues through /praxis:implement-issue; near misses share the skill's words but need
-# something else: a one-file fix, a migration chain, splitting one file into modules, a
-# recursive-descent parser, a test-first request, a wide rename, issues for a roadmap, a small issue.
-# Every case runs with praxis installed, as users run it; one implement-issue case runs without
-# recursio, where praxis's line on loading skills must not set off a split of its own. The skill's
-# gate may rightly say to build the work directly, so a session that consults it and builds
-# directly passes `recall`; a split with no skill loaded passes `split` and fails `recall`.
-# tests/evals/README.md says how the suite is run.
+# Trigger suite for the splitting-implementation skill (#121): is the skill consulted on a build
+# its gate says to split, and does it stay out of work that only looks like one? Should-split cases
+# are large builds: three or more independent modules, each real work with its own tests, sharing
+# only a small contract the fixture holds, plus at most one command that joins them; each fixture's
+# README holds the spec. They come in plain chat with no word about subagents, some over several
+# turns with the build asked last, and through /praxis:implement-issue with a plan that lists the
+# parts, in Python and Node. A build whose parts are a function or two is no should-split case: the
+# gate rightly builds it directly. Near misses share the skill's words but need something else: a
+# one-file fix, a migration chain, splitting one file into modules, a recursive algorithm, a
+# test-first request, a wide rename, issues for a roadmap, a small issue. Every case runs with
+# praxis installed, as users run it; one implement-issue case runs without recursio, where praxis's
+# line on loading skills must not set off a split of its own. `recall` asks only that the skill be
+# consulted, so a session that loads it and builds directly passes; a split with no skill loaded
+# passes `split` and fails `recall`. tests/evals/README.md says how the suite is run.
 target = "recursio:splitting-implementation"
 # recursio 1.1.4's skills the target renames or absorbs, so none is recursio without any of them.
 replaces = [
@@ -30,8 +34,8 @@ budget_usd = 10.0
 [[metric]]
 id = "recall"
 direction = "higher"
-# Should split: the main thread loaded the skill. A session that loads it and builds directly
-# passes; whether it split is `split`.
+# Should split, on the large builds only: the main thread loaded the skill. A session that loads
+# it and builds directly passes; whether it split is `split`.
 
 [[metric]]
 id = "quiet"
@@ -42,7 +46,8 @@ margin = 0.1
 [[metric]]
 id = "split"
 direction = "higher"
-# Should split, reported: the main thread spawned a general-purpose subagent.
+# Should split, reported, on the large builds only: the main thread spawned a general-purpose
+# subagent.
 
 [pass_rule]
 primary = "recall"

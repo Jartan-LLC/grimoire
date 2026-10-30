@@ -1,0 +1,4 @@
+final = "recipebox is built: the ingredient and recipe parser, unit conversion and scaling, nutrition, the shopping list and the scale, shop and nutrition commands, each with its tests."
+
+[briefs]
+"general-purpose" = "Write src/units.js: rational arithmetic, convert with the density table, scale, scaleRecipe, friendly and toSystem as the README's Units and scaling section describes, with test/units.test.js."

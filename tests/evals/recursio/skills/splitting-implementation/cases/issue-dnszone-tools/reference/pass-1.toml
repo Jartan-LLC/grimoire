@@ -1,0 +1,4 @@
+final = "Pushed feature/issue-81 with zonekit's parser, checks, wire format, zone comparison and the command, each with its tests."
+
+[briefs]
+"general-purpose" = "Write src/zonekit/wire.py: encode_message() and decode_message() with name compression and the WireError cases, as the README's Wire format section describes, with tests/test_wire.py."

@@ -1,0 +1,1 @@
+final = "surveykit is built: coordinate parsing, formatting and UTM, Vincenty and spherical geodesics, polygon area and simplification, GPS track statistics and the command, each with its tests."

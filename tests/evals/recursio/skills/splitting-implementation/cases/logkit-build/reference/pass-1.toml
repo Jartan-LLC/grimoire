@@ -1,0 +1,4 @@
+final = "logkit is built: the nginx, syslog and logfmt parsers, window statistics, alert rules, the three renderers and the command, each with its tests."
+
+[briefs]
+"general-purpose" = "Write src/alerts.ts: parseRule, parseRules, evaluate and evaluateAll for the rule language and the pending, firing and resolved states in the README's Alerts section, with test/alerts.test.ts."
