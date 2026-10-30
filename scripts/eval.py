@@ -1228,7 +1228,8 @@ def label(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.
     if args.gold:
         gold = labeller.gold_panel(suite, judge_, panel, store, jury.names_of(ROOT), may_call=True)
         print(f"labelling panel on gold items: {gold.right} of {gold.n} right")
-        print("\n".join(f"  wrong: {w}" for w in gold.wrong))
+        for w in gold.wrong:
+            print(f"  wrong: {w}")
         if gold.missing:
             print(
                 f"INCOMPLETE: {len(gold.missing)} gold items lack a full panel; rerun to retry them"

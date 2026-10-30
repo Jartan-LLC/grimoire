@@ -670,7 +670,9 @@ def test_a_gold_item_without_a_labelling_panel_stops_label_and_align(
     store = tmp_path / "store"
     gold = argparse.Namespace(gold=True, labeller_model="m", labeller_effort="e")
     assert cli.label(gold, suite, judge, store) == 1  # 1 of 1 right, but 1 has no panel
-    assert "INCOMPLETE: 1 gold items" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert "INCOMPLETE: 1 gold items" in out
+    assert "\n\n" not in out  # no wrong gold item, so no empty list of them
     args = argparse.Namespace(set="held-out", jobs=1, labeller_model="m", labeller_effort="e")
     assert cli.align(args, suite, judge, store) == 1
     assert "INCOMPLETE: 1 gold items lack a labelling panel" in capsys.readouterr().out
