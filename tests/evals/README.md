@@ -234,7 +234,7 @@ what a "yes" means for it:
 # suite.toml
 [[judge]]
 id = "flags-plant"
-question = "Does the report raise, as a finding of its own rated Important or Critical, the problem the reference describes?"
+question = "Does the report raise, as a finding of its own, the problem the reference describes, at a rating the reference accepts?"
 # model = "claude-opus-5-5", effort = "high" and panel = 3 are the defaults.
 # Calibration only:
 held_out = ["nonlocal-parse", "retold-utc"]        # cases scored once per judge version; the rest are dev
@@ -249,7 +249,7 @@ artifact = "report:praxis:general-reviewer"
 judge = "flags-plant"
 reference = """
 The branch adds `_median` to tally/stats.py beside `statistics.median`. Only a finding whose subject is
-that reimplementation counts.
+that reimplementation counts, and only when the report rates it Important or Critical.
 """
 # yes_ratings = ["Critical"]  # when this case's silver labels need other ratings than the judge's
 ```
@@ -273,8 +273,8 @@ that reimplementation counts.
 - A judge gates nothing until its stamp shows it cleared the bar below. Until then its checks score into
   a reported metric of their own, `<metric>@<judge>`, and the screen says why. A judged check on a
   must-hold metric is refused: one judge error in a screen would read as HURT.
-- Judge error shrinks a true effect by J = TPR + TNR - 1 and, being the same in both arms, makes no false
-  HURT. Guard margins on a judged metric are on the scale the judge observes. `make eval-size` prints J
+- Judge error shrinks a true effect by J = TPR + TNR - 1 and, when it is the same in both arms, makes no
+  false HURT. Guard margins on a judged metric are on the scale the judge observes. `make eval-size` prints J
   for a judged primary metric. The screen warns when J differs between arms by more than 0.1, and when the
   judge's model wrote the artifact it judges.
 - The plan pins each judge's version: a changed judge refuses a verdict until `NEW_PLAN=1`, and regrades
