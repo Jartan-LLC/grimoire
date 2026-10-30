@@ -1,11 +1,12 @@
 import json
 import pathlib
+from collections.abc import Callable, Sequence
 
 import pytest
-from evals import labeller
+from evals import jury, labeller
 from evals.labeller import Finding, Labelled
-from evals.suite import Judge, load_suite
-from helpers import JUDGED, KEY, SUITE, write_suite
+from evals.suite import Case, Judge, load_suite
+from helpers import JUDGE, JUDGED, KEY, SUITE, write_suite
 
 TEXT = "**Important**\n\n1. `stats.py`: `_median` reimplements statistics.median.\n\n**Minor**\n\n1. A name."
 FOUND = (
@@ -174,3 +175,110 @@ def test_args_give_the_labeller_read_only_tools() -> None:
     assert line[line.index("--tools") + 1] == "Read,Grep,Glob"
     assert "--restricted" in line
     assert "--dangerously-skip-permissions" not in line
+
+
+def output(answer: str, quote: str = "Closes #42") -> dict[str, object]:
+    """A labeller's structured output matching one finding that quotes `quote`."""
+    found = [{"quote": quote, "rating": "", "subject": "the issue"}]
+    return {"findings": found, "match": 0, "answer": answer, "rationale": "Read it."}
+
+
+class Panel:
+    """A stand-in for `labeller.call` that answers in turn and records every message."""
+
+    def __init__(self, answers: Sequence[str | None]) -> None:
+        self.answers = iter(answers)
+        self.messages: list[str] = []
+
+    def __call__(
+        self, case: object, panel: object, message: Callable[[str], str]
+    ) -> tuple[Labelled | None, str]:
+        self.messages.append(message("the diff"))
+        answer = next(self.answers)
+        if answer is None:
+            return None, "Error: overloaded"
+        payload = output(answer)
+        return labeller.labelled_of(payload), json.dumps({"structured_output": payload})
+
+
+PANEL = labeller.Labeller("claude-opus-5-5", "xhigh")
+ITEM = ("Issue 42.", "fix: Closes #42")
+
+
+def judged_case(tmp_path: pathlib.Path) -> tuple[Case, Judge]:
+    suite = load_suite(write_suite(tmp_path / "suite", SUITE + JUDGE, KEY + JUDGED))
+    return suite.cases[0], suite.judges["flags"]
+
+
+def test_a_unanimous_panel_takes_three_calls_and_no_adjudicator(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case, judge = judged_case(tmp_path)
+    calls = Panel(["yes", "yes", "yes"])
+    monkeypatch.setattr(labeller, "call", calls)
+    store = tmp_path / "store"
+    assert labeller.panel_label(store, PANEL, case, judge, ITEM) == (("yes",) * 3, "yes")
+    assert len(calls.messages) == labeller.LABELLERS
+    assert all("<labeller>" not in m for m in calls.messages)
+    # kept: read back without calling
+    assert labeller.panel_label(store, PANEL, case, judge, ITEM, may_call=False) == (
+        ("yes",) * 3,
+        "yes",
+    )
+
+
+def test_a_split_panel_goes_to_an_adjudicator_given_the_three_outputs(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case, judge = judged_case(tmp_path)
+    calls = Panel(["yes", "no", "yes", "no"])
+    monkeypatch.setattr(labeller, "call", calls)
+    store = tmp_path / "store"
+    assert labeller.panel_label(store, PANEL, case, judge, ITEM) == (("yes", "no", "yes"), "no")
+    assert len(calls.messages) == labeller.LABELLERS + 1
+    adjudicator = calls.messages[-1]
+    assert adjudicator.count("<labeller>") == labeller.LABELLERS
+    for answer in ("yes", "no", "yes"):
+        kept = json.dumps(
+            {
+                "findings": [{"quote": "Closes #42", "rating": "", "subject": "the issue"}],
+                "match": 0,
+                "answer": answer,
+                "rationale": "Read it.",
+            }
+        )
+        assert kept in adjudicator
+    assert labeller.panel_label(store, PANEL, case, judge, ITEM, may_call=False) == (
+        ("yes", "no", "yes"),
+        "no",
+    )
+
+
+@pytest.mark.parametrize("answers", [["yes", None, "yes"], ["yes", "no", "yes", None]])
+def test_a_panel_missing_a_member_or_its_adjudicator_gives_no_label(
+    answers: list[str | None], tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case, judge = judged_case(tmp_path)
+    monkeypatch.setattr(labeller, "call", Panel(answers))
+    assert labeller.panel_label(tmp_path / "store", PANEL, case, judge, ITEM) is None
+
+
+def test_gold_counts_an_unsure_kept_label_as_wrong_and_a_missing_one_nowhere(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = write_suite(tmp_path / "suite", SUITE + JUDGE, KEY + JUDGED)
+    (root / "cases" / "c1" / "reference").mkdir()
+    commits = {"pass-1": "fix: Closes #42", "fail-1": "fix: Closes #42 later", "pass-2": "fix: #42"}
+    for name, commit in commits.items():
+        (root / "cases" / "c1" / "reference" / f"{name}.toml").write_text(
+            f'commits = ["{commit}"]\nfinal = "Done."\n'
+        )
+    suite = load_suite(root)
+    judge, case = suite.judges["flags"], suite.cases[0]
+    store = tmp_path / "store"
+    monkeypatch.setattr(labeller, "call", Panel(["unsure"] * 2 * (labeller.LABELLERS + 1)))
+    for text in (commits["pass-1"], commits["fail-1"]):  # a yes and a no, each labelled unsure
+        assert labeller.panel_label(store, PANEL, case, judge, ("Issue 42.", text))
+    gold = labeller.gold_panel(suite, judge, PANEL, store, jury.Names((), ()), may_call=False)
+    labelled = ("reference:c1:fail-1", "reference:c1:pass-1")
+    assert gold == labeller.Gold(0, 2, labelled, ("reference:c1:pass-2",))
