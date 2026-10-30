@@ -193,6 +193,14 @@ the PR how many versions you screened.
 - **Grade what the agent produced:** a regex over the commit messages, the final reply, a file, what
   the agent sent to GitHub or a subagent, or a subagent's report (below). An `absent` check fails when
   the agent produced nothing to check.
+- **Several files at once:** `artifact = "files:<glob>"` reads every file of the session's final tree
+  that the glob matches, `.git` aside, in path order, each after a `==> <path> <==` line: `*`, `?` and
+  `[...]` match within one name, `**` across any number of directories. A reference gives the files
+  under `[files]`, as for `file:<path>`.
+- **Whether the result works:** `artifact = "verify"` with a `command`, such as
+  `command = "python3 -m pytest -q"` for planted tests, runs the command without a shell in the
+  session's final tree and environment, and holds when it exits 0 within 60 seconds. It is not graded
+  on references.
 - **Whether a skill was in context when the agent wrote** is a guard or a diagnostic, not a primary
   metric, except in trigger cases, where loading the skill is the behaviour under test.
 - **A subagent's work:** `report:<agent>` is every report that agent handed back, `brief:<agent>` every
@@ -513,8 +521,9 @@ After changing the runner or the verdict rule:
 - Claude Code's own context reaches every session, the account's name and email included: some
   sessions commit with that identity.
 - A key fix regrades drawn samples once the screen is rerun with `NEW_PLAN=1` (the plan pins every file
-  of the suite), except a fix that makes a check read a file the samples did not collect: grading
-  refuses, and the screen needs fresh samples (a new `--trial`).
+  of the suite), except a fix that makes a check read a file or glob the samples did not collect, or a
+  `verify` command they did not run: grading refuses, and the screen needs fresh samples (a new
+  `--trial`).
 - The check that a session stayed out of the suite reads the absolute paths in its tool calls, and the
   stub's `gh-stub-replies.json` by name: a relative path gets past it, such as `cd` into an arm then
   `ls ../../samples`, or `cat ../gh-stub/*` from the repository, and so does a path built from an

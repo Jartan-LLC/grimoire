@@ -6,6 +6,7 @@ outputs the lint grades. `tests/evals/README.md` says how to write them.
 """
 
 import dataclasses
+import fnmatch
 import hashlib
 import json
 import pathlib
@@ -21,13 +22,15 @@ KINDS = ("target", "regression", "cost", "trigger")
 TEXT_ARTIFACTS = ("commits", "final", "gh")
 REPORT = "report:"
 BRIEF = "brief:"
+FILES = "files:"
 DIRECTIONS = ("higher",)  # every check scores 1 when it holds
 RULES = ("better", "no-regression")
 STATES = ("in-context", "late", "evicted", "absent", "loaded", "not-loaded")
 WRITE_KINDS = ("commit", "push", "pr", "issue", "file", "spawn")
 # Checks on how the session's subagents worked, read from its trace like a delivery check.
 SPAWN_CHECKS = ("overlap", "spawn-writes", "barrier")
-SESSION_ARTIFACTS = ("delivery", *SPAWN_CHECKS)  # graded from a session only, never a reference
+# Graded from a session only, never a reference.
+SESSION_ARTIFACTS = ("delivery", "verify", *SPAWN_CHECKS)
 ARMS = ("none", "old")
 MAX_EXIT = 255
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
@@ -47,7 +50,8 @@ class SuiteError(ValueError):
 class Check:
     """One graded condition on a sample, scored 0 or 1, counted toward `metric`.
 
-    A text check names an artifact (`commits`, `final`, `file:<path>`, `gh` (the calls
+    A text check names an artifact (`commits`, `final`, `file:<path>`, `files:<glob>`
+    (every file the glob matches, `glob_match`, each after a `==> <path> <==` line), `gh` (the calls
     the sandbox's `gh` recorded, Claude Code's own aside), `report:<agent>` (every report
     that agent handed back) or `brief:<agent>` (every Agent-call prompt the main thread
     sent that agent type, but for a call that ended in error)) and a `present` or
@@ -59,7 +63,8 @@ class Check:
     deliveries and writes, or with an `agent`, that subagent's. A spawn check reads the
     session's subagents: `overlap` (no file written by two spawns), `spawn-writes` with a
     `write` kind (no spawn made such a write) or `barrier` (no main-thread file write while
-    a spawn it made had not reported).
+    a spawn it made had not reported). A `verify` check runs its `command` on the session's
+    final tree and holds when it exits 0.
     """
 
     metric: str
@@ -73,6 +78,7 @@ class Check:
     judge: str | None = None
     reference: str = ""
     yes_ratings: tuple[str, ...] = ()
+    command: str | None = None
 
 
 @dataclass(frozen=True)
@@ -199,6 +205,16 @@ class Case:
         """The fixture paths a check reads after the session, to collect before cleanup."""
         return sorted({c.artifact[5:] for c in self.checks if c.artifact.startswith("file:")})
 
+    def globs(self) -> list[str]:
+        """The globs a `files:` check reads after the session: every file they match is collected."""
+        return sorted(
+            {c.artifact.removeprefix(FILES) for c in self.checks if c.artifact.startswith(FILES)}
+        )
+
+    def commands(self) -> list[str]:
+        """The `verify` commands to run on the session's final tree before cleanup."""
+        return sorted({c.command for c in self.checks if c.command is not None})
+
     def pinned(self) -> str:
         """The hash the case had when loaded, so a run's samples all describe one version."""
         return self.loaded or self.hash()
@@ -278,6 +294,23 @@ class Suite:
     def unit(self, case_id: str) -> str:
         """The unit the verdict compares: the case's cluster, or the case itself."""
         return self.clusters.get(case_id, case_id)
+
+
+def glob_match(path: str, pattern: str) -> bool:
+    """Whether a `/`-separated relative path matches a glob: `*`, `?` and `[...]` stay within one name, `**` spans any number."""
+    return _glob_match(path.split("/"), pattern.split("/"))
+
+
+def _glob_match(names: list[str], parts: list[str]) -> bool:
+    if not parts:
+        return not names
+    if parts[0] == "**":
+        return any(_glob_match(names[i:], parts[1:]) for i in range(len(names) + 1))
+    return (
+        bool(names)
+        and fnmatch.fnmatchcase(names[0], parts[0])
+        and _glob_match(names[1:], parts[1:])
+    )
 
 
 def python_cache(path: pathlib.Path) -> bool:
@@ -363,11 +396,12 @@ def _check(
     if not (
         artifact in TEXT_ARTIFACTS
         or artifact.startswith("file:")
-        or any(artifact.startswith(p) and artifact != p for p in (REPORT, BRIEF))
+        or any(artifact.startswith(p) and artifact != p for p in (REPORT, BRIEF, FILES))
     ):
         raise SuiteError(
             f"{where}: artifact {artifact!r} is not commits, final, gh, file:<path>, "
-            "report:<agent>, brief:<agent>, delivery, overlap, spawn-writes or barrier"
+            "files:<glob>, report:<agent>, brief:<agent>, delivery, verify, overlap, "
+            "spawn-writes or barrier"
         )
     present, absent = table.get("present"), table.get("absent")
     if sum(table.get(k) is not None for k in ("present", "absent", "judge")) != 1:
@@ -388,6 +422,11 @@ def _session_check(table: Table, where: pathlib.Path, metric: str, artifact: str
     if artifact in SPAWN_CHECKS:
         write = _str(table, "write", where, WRITE_KINDS) if artifact == "spawn-writes" else None
         return Check(metric, artifact, write=write)
+    if artifact == "verify":
+        command = _str(table, "command", where)
+        if not command.strip():
+            raise SuiteError(f"{where}: a verify check's 'command' is empty")
+        return Check(metric, artifact, command=command)
     skill = _str(table, "skill", where)
     agent = _str(table, "agent", where) if "agent" in table else ""
     if "write" not in table:

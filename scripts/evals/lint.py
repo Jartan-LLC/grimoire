@@ -15,19 +15,14 @@ some check fails on each failing reference; judged checks are not run on referen
 import fnmatch
 import os
 import pathlib
-import shlex
 import shutil
-import subprocess
 import tempfile
 import tomllib
 
 from . import calibrate, jury
 from .grade import reference_scores
-from .proc import run
-from .session import REMOTE_RUNNER, RUNNER, build_fixture, git_env
+from .session import REMOTE_RUNNER, RUNNER, build_fixture, git_env, verify
 from .suite import SESSION_ARTIFACTS, Case, Suite, SuiteError, load_suite
-
-VERIFY_TIMEOUT_S = 60
 
 
 def _verify(case: Case, command: str, fixed: bool) -> int | None:
@@ -43,14 +38,7 @@ def _verify(case: Case, command: str, fixed: bool) -> int | None:
         build_fixture(case, work, git_env(dict(os.environ)))
         if fixed and (case.path / "fix").is_dir():
             shutil.copytree(case.path / "fix", work, dirs_exist_ok=True)
-        try:
-            done = run(
-                shlex.split(command), cwd=work, env=git_env(dict(os.environ)),
-                capture_output=True, timeout=VERIFY_TIMEOUT_S, check=False,
-            )  # fmt: skip
-        except subprocess.TimeoutExpired:
-            return None
-        return int(done.returncode)
+        return verify(command, work, git_env(dict(os.environ)))
 
 
 def _fact_problems(case: Case) -> list[str]:

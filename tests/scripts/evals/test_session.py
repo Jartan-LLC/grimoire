@@ -482,3 +482,31 @@ def test_a_case_changed_on_disk_after_loading_is_excluded_before_its_session(
     sample, _ = session._session(case, Arm("old", "h", {}), 0, spec, "k")  # pyright: ignore[reportPrivateUsage]
     assert not sample.valid
     assert "changed on disk" in sample.reasons[0]
+
+
+def test_collect_reads_named_files_and_every_file_a_glob_matches_outside_git(
+    tmp_path: pathlib.Path,
+) -> None:
+    key = KEY.replace('artifact = "commits"', 'artifact = "files:**/*.py"').replace(
+        'artifact = "final"', 'artifact = "file:notes.md"'
+    )
+    case = load_suite(write_suite(tmp_path / "suite", key=key)).cases[0]
+    repo = tmp_path / "repo"
+    session.build_fixture(case, repo, session.git_env(dict(os.environ)))
+    (repo / "pkg").mkdir()
+    (repo / "pkg" / "b.py").write_bytes(b"y = '\xff'\n")
+    (repo / "notes.md").write_text("n\n")
+    (repo / ".git" / "hook.py").write_text("no\n")
+    assert session.collect(case, repo) == {
+        "notes.md": "n\n", "app.py": "x = 1\n", "pkg/b.py": "y = '\ufffd'\n",
+    }  # fmt: skip
+
+
+def test_verify_returns_the_exit_code_or_none_on_a_timeout(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    env = dict(os.environ)
+    assert session.verify("python3 -c 'raise SystemExit(3)'", tmp_path, env) == 3
+    assert session.verify("python3 -c 'pass'", tmp_path, env) == 0
+    monkeypatch.setattr(session, "VERIFY_TIMEOUT_S", 0.2)
+    assert session.verify("python3 -c 'import time; time.sleep(5)'", tmp_path, env) is None

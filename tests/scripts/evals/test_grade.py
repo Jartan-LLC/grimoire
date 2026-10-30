@@ -381,6 +381,51 @@ def test_a_file_check_the_sample_did_not_collect_refuses_to_grade(tmp_path: path
     assert grade.scores(case, drawn_before, parsed)["kept"] < 1
 
 
+def test_a_files_check_reads_every_collected_file_its_glob_matches() -> None:
+    files = {"src/a.py": "# a", "src/pkg/b.py": "# b", "README.md": "# r", "src/c.txt": "c"}
+    outputs = grade.Outputs(files=files)
+    assert (
+        grade.text_of(outputs, "files:src/**/*.py")
+        == "==> src/a.py <==\n# a\n==> src/pkg/b.py <==\n# b"
+    )
+    assert grade.text_of(outputs, "files:src/*.py") == "==> src/a.py <==\n# a"
+    assert grade.text_of(outputs, "files:docs/*") == ""
+
+
+VERIFY_CHECK = (
+    '\n[[check]]\nmetric = "kept"\nartifact = "verify"\ncommand = "python3 -m pytest -q"\n'
+)
+GLOB_CHECK = '\n[[check]]\nmetric = "kept"\nartifact = "files:src/**"\npresent = "fix"\n'
+
+
+def test_a_verify_check_holds_only_when_its_command_exited_0(tmp_path: pathlib.Path) -> None:
+    case = load_suite(write_suite(tmp_path, key=KEY + VERIFY_CHECK)).cases[0]
+    parsed = trace.parse([*load_skill("s1", "x", CPW), *commit("c1")], PLUGINS)
+    drawn = sample(["fix: y\n\nCloses #42"], "Done.")
+    for code, kept in ((0, 1.0), (1, 2 / 3), (None, 2 / 3)):
+        drawn.verified = {"python3 -m pytest -q": code}
+        assert grade.scores(case, drawn, parsed)["kept"] == pytest.approx(kept)
+
+
+def test_a_verify_or_files_check_the_sample_did_not_collect_refuses_to_grade(
+    tmp_path: pathlib.Path,
+) -> None:
+    parsed = trace.parse([*load_skill("s1", "x", CPW), *commit("c1")], PLUGINS)
+    drawn = sample(["fix: y\n\nCloses #42"], "Done.")
+    verify_case = load_suite(write_suite(tmp_path / "v", key=KEY + VERIFY_CHECK)).cases[0]
+    ran: dict[str, int | None] = {"python3 check.py": 0}
+    for before in (None, ran):
+        drawn.verified = before
+        with pytest.raises(grade.Uncollected, match="python3 -m pytest -q"):
+            grade.scores(verify_case, drawn, parsed)
+    glob_case = load_suite(write_suite(tmp_path / "g", key=KEY + GLOB_CHECK)).cases[0]
+    drawn.collected = ["notes.md"]
+    with pytest.raises(grade.Uncollected, match=r"files:src/\*\*"):
+        grade.scores(glob_case, drawn, parsed)
+    drawn.collected = ["files:src/**"]
+    assert grade.scores(glob_case, drawn, parsed)["kept"] < 1
+
+
 def judged_case(tmp_path: pathlib.Path) -> Case:
     return load_suite(write_suite(tmp_path, SUITE + JUDGE, KEY + JUDGED)).cases[0]
 

@@ -1,7 +1,7 @@
 import pathlib
 
 import pytest
-from evals.suite import Reply, SuiteError, load_suite
+from evals.suite import Reply, SuiteError, glob_match, load_suite
 from helpers import JUDGE, JUDGED, KEY, SUITE, write_suite
 
 
@@ -378,3 +378,34 @@ def test_spawn_checks_load(tmp_path: pathlib.Path) -> None:
     ]  # fmt: skip
     with pytest.raises(SuiteError, match="'write' must be one of"):
         load_suite(write_suite(tmp_path / "x", key=key.replace('write = "commit"', "")))
+
+
+def test_glob_match_keeps_a_star_within_one_name_and_lets_two_span_any() -> None:
+    assert glob_match("src/a.py", "src/*.py")
+    assert not glob_match("src/pkg/a.py", "src/*.py")
+    assert glob_match("src/pkg/a.py", "src/**/*.py")
+    assert glob_match("src/a.py", "src/**/*.py")
+    assert glob_match("src/pkg/a.py", "**")
+    assert glob_match(".hidden/a.py", "*/a.py")
+    assert not glob_match("src", "src/**/*.py")
+
+
+def test_files_and_verify_checks_load_and_name_what_the_session_collects(
+    tmp_path: pathlib.Path,
+) -> None:
+    key = KEY + (
+        '\n[[check]]\nmetric = "kept"\nartifact = "files:src/**/*.py"\npresent = "x"\n'
+        '\n[[check]]\nmetric = "kept"\nartifact = "verify"\ncommand = "python3 -m pytest"\n'
+    )
+    case = load_suite(write_suite(tmp_path, key=key)).cases[0]
+    assert (case.files(), case.globs(), case.commands()) == (
+        [],
+        ["src/**/*.py"],
+        ["python3 -m pytest"],
+    )
+    for command, message in (("", "'command' must be a string"), ('command = " "', "is empty")):
+        broken = key.replace('command = "python3 -m pytest"', command)
+        with pytest.raises(SuiteError, match=message):
+            load_suite(write_suite(tmp_path / message[:4], key=broken))
+    with pytest.raises(SuiteError, match="is not commits"):
+        load_suite(write_suite(tmp_path / "e", key=key.replace("files:src/**/*.py", "files:")))

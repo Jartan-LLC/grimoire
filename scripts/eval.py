@@ -922,6 +922,8 @@ def show(key: str, store: pathlib.Path) -> int:
     print(f"\n--- final reply\n{sample.final}")
     for path, text in sorted(sample.files.items()):
         print(f"\n--- file {path}\n{text}")
+    for command, code in (sample.verified or {}).items():
+        print(f"\n--- verify {command}: {'timed out' if code is None else f'exit {code}'}")
     if sample.gh is not None:
         argvs = [cast("list[str]", call.get("argv", [])) for call in sample.gh]
         logged = "\n".join(f"gh {gh_stub.call_line(argv)}" for argv in argvs)

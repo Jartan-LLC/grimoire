@@ -9,11 +9,11 @@ from typing import cast
 
 from . import gh_stub, trace
 from .cache import Sample
-from .suite import BRIEF, REPORT, SESSION_ARTIFACTS, Case, Check, Reference
+from .suite import BRIEF, FILES, REPORT, SESSION_ARTIFACTS, Case, Check, Reference, glob_match
 
 
 class Uncollected(Exception):  # noqa: N818 -- reads as the condition, like StopIteration
-    """A check reads a file the sample was drawn without collecting."""
+    """A check reads a file or a verify result the sample was drawn without collecting."""
 
 
 class Unjudged(Exception):  # noqa: N818 -- reads as the condition, like StopIteration
@@ -47,18 +47,26 @@ class Outputs:
 
 
 def text_of(outputs: Outputs, artifact: str) -> str:
-    """The text a check reads: the commit messages, the final reply, a collected file, the gh calls, or an agent's reports or briefs."""
-    if artifact == "commits":
-        return "\n\n".join(outputs.commits)
-    if artifact == "final":
-        return outputs.final
-    if artifact == "gh":
-        return outputs.gh
+    """The text a check reads: the commit messages, the final reply, collected files, the gh calls, or an agent's reports or briefs."""
+    whole = {"commits": "\n\n".join(outputs.commits), "final": outputs.final, "gh": outputs.gh}
+    if artifact in whole:
+        return whole[artifact]
+    if artifact.startswith(FILES):
+        return files_text(outputs.files, artifact.removeprefix(FILES))
     if artifact.startswith(REPORT):
         return outputs.reports.get(artifact.removeprefix(REPORT), "")
     if artifact.startswith(BRIEF):
         return outputs.briefs.get(artifact.removeprefix(BRIEF), "")
     return outputs.files.get(artifact.removeprefix("file:"), "")
+
+
+def files_text(files: Mapping[str, str], pattern: str) -> str:
+    """Every file the glob matches, in path order, each after a `==> <path> <==` line."""
+    return "\n".join(
+        f"==> {path} <==\n{text}"
+        for path, text in sorted(files.items())
+        if glob_match(path, pattern)
+    )
 
 
 def gh_text(calls: Sequence[dict[str, object]]) -> str:
@@ -214,8 +222,10 @@ def barrier_score(parsed: trace.Trace) -> float:
     return 0.0 if inside else 1.0
 
 
-def session_score(check: Check, parsed: trace.Trace) -> float:
-    """A delivery or spawn check's score on the session's trace."""
+def session_score(check: Check, sample: Sample, parsed: trace.Trace) -> float:
+    """A delivery, verify or spawn check's score on the session."""
+    if check.artifact == "verify":
+        return 1.0 if (sample.verified or {}).get(str(check.command)) == 0 else 0.0
     if check.artifact == "delivery":
         return delivery_score(check, parsed)
     if check.artifact == "overlap":
@@ -274,10 +284,9 @@ def scores(  # noqa: PLR0913 -- `unjudged_ok` says what a missing judge answer d
     unjudged: set[str] = set()
     outputs = outputs_of(sample, parsed)
     for index, check in enumerate(case.checks):
-        path = check.artifact.removeprefix("file:")
-        if check.artifact != path and sample.collected is not None and path not in sample.collected:
+        if (missing := _uncollected(check, sample)) is not None:
             raise Uncollected(
-                f"sample {sample.key} did not collect {path}, which its key now reads: "
+                f"sample {sample.key} did not collect {missing}, which its key now reads: "
                 "draw fresh samples (a new --trial for a screen; for a baseline run, delete the "
                 "case's samples from the store)"
             )
@@ -285,7 +294,7 @@ def scores(  # noqa: PLR0913 -- `unjudged_ok` says what a missing judge answer d
         if sample.spoiled:
             score = 0.0
         elif check.artifact in SESSION_ARTIFACTS:
-            score = session_score(check, parsed)
+            score = session_score(check, sample, parsed)
         elif check.judge is not None:
             found = _judged_score(check, index, sample, outputs, judged or {})
             if found is None and not unjudged_ok:
@@ -300,6 +309,20 @@ def scores(  # noqa: PLR0913 -- `unjudged_ok` says what a missing judge answer d
             score = check_score(check, outputs)
         pairs.append((metric, score))
     return {m: s for m, s in _mean_by_metric(pairs).items() if m not in unjudged}
+
+
+def _uncollected(check: Check, sample: Sample) -> str | None:
+    """What a check reads that the sample was drawn without, as a key fix after the draw would add."""
+    if check.artifact == "verify":
+        ran = sample.verified or {}
+        return None if check.command in ran else f"the result of {check.command!r}"
+    if check.artifact.startswith("file:"):
+        wanted = check.artifact.removeprefix("file:")
+    elif check.artifact.startswith(FILES):
+        wanted = check.artifact
+    else:
+        return None
+    return None if sample.collected is None or wanted in sample.collected else wanted
 
 
 def _judged_score(

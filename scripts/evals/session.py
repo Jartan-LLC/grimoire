@@ -17,6 +17,7 @@ import json
 import os
 import pathlib
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -29,7 +30,7 @@ from . import cache, trace
 from .arms import Arm
 from .gh_stub import REPLIES, TEMP_ROOTS
 from .proc import CLAUDE, GIT, UV, run
-from .suite import TIMEOUT_S, Case, Reply
+from .suite import FILES, TIMEOUT_S, Case, Reply, glob_match
 
 BUILTINS_OFF = {
     "enabledPlugins": {
@@ -59,6 +60,7 @@ SSH_AGENT = ("SSH_AUTH_SOCK", "SSH_AGENT_PID")
 STUB_TOKEN = "grimoire-eval-stub"  # noqa: S105 -- a dummy that authenticates nothing
 # A temp directory the stub reads besides the runner's, which TMPDIR can move elsewhere.
 SHARED_TMP = pathlib.Path("/tmp")  # noqa: S108 -- read for a body file, never written
+VERIFY_TIMEOUT_S = 60
 
 
 @dataclass(frozen=True)
@@ -262,6 +264,36 @@ def new_commits(repo: pathlib.Path, env: dict[str, str], fixture_heads: list[str
     return [m.strip() for m in out.split("\x1e") if m.strip()]
 
 
+def verify(command: str, repo: pathlib.Path, env: dict[str, str]) -> int | None:
+    """The exit code of a `verify` command run in `repo`, or None when it timed out; no shell runs it."""
+    try:
+        done = run(
+            shlex.split(command), cwd=repo, env=env,
+            capture_output=True, timeout=VERIFY_TIMEOUT_S, check=False,
+        )  # fmt: skip
+    except subprocess.TimeoutExpired:
+        return None
+    return int(done.returncode)
+
+
+def collect(case: Case, repo: pathlib.Path) -> dict[str, str]:
+    """The text of every file a `file:` or `files:` check of the case reads, by its path in `repo`.
+
+    A glob is matched against every file of the tree but `.git`'s; a file that is not
+    UTF-8 is read with its bad bytes replaced.
+    """
+    found = {p: (repo / p).read_text() for p in case.files() if (repo / p).is_file()}
+    if not (globs := case.globs()):
+        return found
+    for folder, dirs, names in os.walk(repo):
+        dirs[:] = sorted(d for d in dirs if d != ".git")
+        for name in sorted(names):
+            path = (pathlib.Path(folder) / name).relative_to(repo).as_posix()
+            if any(glob_match(path, g) for g in globs) and (repo / path).is_file():
+                found[path] = (repo / path).read_text(errors="replace")
+    return found
+
+
 def private_paths(case: Case, spec: Spec, sandbox: pathlib.Path) -> list[str]:
     """The paths a session must not name: the checkout, every working tree of its clone, suite and samples.
 
@@ -335,7 +367,9 @@ def _session(
             parsed, arm.plugins, spec.model, timed_out, private, arms=str(cache.arms(spec.store))
         )
         result = parsed.result or {}
-        files = {p: (repo / p).read_text() for p in case.files() if (repo / p).is_file()}
+        files = collect(case, repo)
+        commits = new_commits(repo, env, heads)
+        verified = {c: verify(c, repo, session_env) for c in case.commands()}
         sample = cache.Sample(
             key=sample_key,
             case=case.id,
@@ -344,7 +378,7 @@ def _session(
             plugins=arm.plugins,
             valid=not reasons,
             reasons=reasons,
-            commits=new_commits(repo, env, heads),
+            commits=commits,
             final=str(result.get("result", "")),
             files=files,
             usage=trace.usage(parsed)
@@ -353,9 +387,10 @@ def _session(
                 "agents": [[r.agent, r.model] for r in parsed.reports],
             },
             spoiled=spoiled,
-            collected=case.files(),
+            collected=[*case.files(), *(FILES + g for g in case.globs())],
             preloads=[list(p) for p in loaded],
             gh=gh_calls(sandbox) if case.remote else None,
+            verified=verified,
         )
         return sample, text
     finally:
