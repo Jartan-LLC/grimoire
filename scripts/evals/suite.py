@@ -342,13 +342,18 @@ def _glob_match(names: list[str], parts: list[str]) -> bool:
 
 
 def older(version: str, minimum: str) -> bool:
-    """Whether dotted version `version` is older than `minimum`; text after the numbers is ignored."""
+    """Whether dotted version `version` is older than `minimum`; text after the numbers is ignored.
 
-    def numbers(text: str) -> tuple[int, ...]:
+    A missing part counts as 0, so 2.1 is 2.1.0.
+    """
+
+    def numbers(text: str) -> list[int]:
         found = re.match(r"\d+(?:\.\d+)*", text)
-        return tuple(int(n) for n in found[0].split(".")) if found else ()
+        return [int(n) for n in found[0].split(".")] if found else []
 
-    return numbers(version) < numbers(minimum)
+    have, need = numbers(version), numbers(minimum)
+    width = max(len(have), len(need))
+    return have + [0] * (width - len(have)) < need + [0] * (width - len(need))
 
 
 def _env(data: Table, where: pathlib.Path) -> dict[str, str]:

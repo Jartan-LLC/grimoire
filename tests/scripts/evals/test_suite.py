@@ -466,7 +466,9 @@ def test_older_compares_versions_number_by_number() -> None:
     assert older("2.1.99", "2.1.302")
     assert not older("2.1.314 (Claude Code)", "2.1.302")
     assert not older("2.1.302", "2.1.302")
-    assert older("2.1", "2.1.0")
+    assert not older("2.1", "2.1.0")
+    assert older("2.0", "2.0.1")
+    assert older("no version", "2.1.0")
 
 
 def test_without_counts_in_a_case_hash_only_when_set(tmp_path: pathlib.Path) -> None:
