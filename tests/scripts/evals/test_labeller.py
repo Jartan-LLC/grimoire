@@ -195,6 +195,24 @@ def test_args_give_the_labeller_read_only_tools() -> None:
     assert "--dangerously-skip-permissions" not in line
 
 
+def test_the_judge_and_the_labeller_calls_load_no_customizations() -> None:
+    judge = Judge("flags", "Does the report flag the planted problem?")
+    calls = (
+        (jury.args(judge, "ref", "text"), jury.SCHEMA, jury.BUDGET_USD),
+        (
+            labeller.args("claude-opus-5-5", "xhigh", "message"),
+            labeller.SCHEMA,
+            labeller.BUDGET_USD,
+        ),
+    )
+    for line, schema, budget in calls:
+        for flag in ("--safe-mode", "--strict-mcp-config", "--no-session-persistence"):
+            assert flag in line
+        assert line[line.index("--output-format") + 1] == "json"
+        assert json.loads(line[line.index("--json-schema") + 1]) == schema
+        assert line[line.index("--max-budget-usd") + 1] == f"{budget:g}"
+
+
 def output(answer: str, quote: str = "Closes #42") -> dict[str, object]:
     """A labeller's structured output matching one finding that quotes `quote`."""
     found = [{"quote": quote, "rating": "", "subject": "the issue"}]
