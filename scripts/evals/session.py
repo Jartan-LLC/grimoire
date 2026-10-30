@@ -13,6 +13,7 @@ the stream holds back by default, and the debug log names each skill an agent's
 frontmatter preloads; only those lines are kept, as the sample's `preloads`.
 """
 
+import contextlib
 import json
 import os
 import pathlib
@@ -24,12 +25,14 @@ import sys
 import tempfile
 import threading
 import time
+from collections.abc import Sequence
 from dataclasses import asdict, dataclass, field, replace
+from typing import TextIO, cast
 
 from . import cache, trace
 from .arms import Arm
 from .gh_stub import REPLIES, TEMP_ROOTS
-from .proc import CLAUDE, GIT, UV, run
+from .proc import CLAUDE, GIT, UV, run, start
 from .suite import FILES, TIMEOUT_S, Case, Reply, glob_match
 
 BUILTINS_OFF = {
@@ -158,11 +161,14 @@ def sample_env(  # noqa: PLR0913 -- `suite_env` is apart from `base`: it is set 
 
 
 def claude_args(
-    prompt: str, arm: Arm, model: str, budget_usd: float, debug_log: pathlib.Path
+    prompt: str | None, arm: Arm, model: str, budget_usd: float, debug_log: pathlib.Path
 ) -> list[str]:
-    """The `claude` command line for one sample, writing its debug log to `debug_log`."""
+    """The `claude` command line for one sample, writing its debug log to `debug_log`.
+
+    With no `prompt`, the session reads its messages from stdin as stream-json (`converse`).
+    """
     args = [
-        CLAUDE, "-p", prompt,
+        CLAUDE, "-p", *([] if prompt is None else [prompt]),
         "--model", model,
         "--output-format", "stream-json", "--verbose", "--include-hook-events",
         "--forward-subagent-text", "--debug-file", str(debug_log),
@@ -175,7 +181,91 @@ def claude_args(
     ]  # fmt: skip
     for directory in arm.plugins.values():
         args += ["--plugin-dir", directory, "--add-dir", directory]
+    if prompt is None:
+        args += ["--input-format", "stream-json"]
     return args
+
+
+def _message(text: str) -> str:
+    return json.dumps({"type": "user", "message": {"role": "user", "content": text}}) + "\n"
+
+
+def _event(line: str) -> dict[str, object]:
+    """A trace line's event; empty for a line that is no JSON object (stderr noise)."""
+    try:
+        event = json.loads(line)
+    except json.JSONDecodeError:
+        return {}
+    return cast("dict[str, object]", event) if isinstance(event, dict) else {}
+
+
+def converse(  # noqa: PLR0913 -- where it runs, what it writes and how long it may take are apart
+    args: list[str],
+    messages: Sequence[str],
+    *,
+    cwd: pathlib.Path,
+    env: dict[str, str],
+    out: TextIO,
+    timeout_s: float,
+) -> tuple[bool, str]:
+    """Run a session whose turns are `messages`, sent on stdin, writing its output to `out`.
+
+    Each message after the first goes in once the turn before has ended in a `result`
+    event: one sent sooner joins the turn in progress. Stdin closes right after the
+    last, as a session still runs the messages it got before the close. A turn that
+    starts a background task, such as a subagent the main thread spawns, emits its
+    `result` only when the session ends (probe on 2.1.314), so no later turn can follow
+    it: the runner then sends no more. Returns whether the session timed out, and why a
+    turn was not sent, or "".
+    """
+    session = start(
+        args, cwd=cwd, env=env,
+        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+    )  # fmt: skip
+    stdin, stdout = cast("TextIO", session.stdin), cast("TextIO", session.stdout)
+    expired = threading.Event()
+
+    def expire() -> None:
+        expired.set()
+        session.kill()
+
+    timer = threading.Timer(timeout_s, expire)
+    timer.start()
+    pending, sent, unsent = list(messages), 0, ""
+
+    def send() -> None:
+        nonlocal sent
+        try:
+            stdin.write(_message(pending.pop(0)))
+            stdin.flush()
+            sent += 1
+            if not pending:
+                stdin.close()
+        except OSError:  # the session has ended: nothing more can reach it
+            pending.clear()
+
+    def stop() -> None:
+        pending.clear()
+        with contextlib.suppress(OSError):  # the session has ended already
+            stdin.close()
+
+    send()
+    for line in stdout:
+        out.write(line)
+        event = _event(line)
+        if not pending:
+            continue
+        if event.get("subtype") == "task_started" and event.get("is_backgrounded") is True:
+            unsent = (
+                f"turn {sent} started a background task, whose result comes only when the "
+                f"session ends, so turn {sent + 1} of {len(messages)} was not sent"
+            )
+            stop()
+        elif event.get("type") == "result":
+            send()
+    session.wait()
+    timer.cancel()
+    return expired.is_set(), unsent
 
 
 def preloads(debug_log: str) -> list[tuple[str, str]]:
@@ -365,15 +455,23 @@ def _session(
             gh_stub=case.remote,
             suite_env=spec.env,
         )
+        unsent = ""
         with out.open("w") as handle:
-            try:
-                run(
-                    claude_args(case.prompt, arm, spec.model, spec.budget_usd, debug_log),
-                    cwd=repo, env=session_env,
-                    stdout=handle, stderr=subprocess.STDOUT, timeout=spec.timeout_s, check=False,
+            if case.turns:
+                args = claude_args(None, arm, spec.model, spec.budget_usd, debug_log)
+                timed_out, unsent = converse(
+                    args, (case.prompt, *case.turns),
+                    cwd=repo, env=session_env, out=handle, timeout_s=spec.timeout_s,
                 )  # fmt: skip
-            except subprocess.TimeoutExpired:
-                timed_out = True
+            else:
+                try:
+                    run(
+                        claude_args(case.prompt, arm, spec.model, spec.budget_usd, debug_log),
+                        cwd=repo, env=session_env, stdout=handle, stderr=subprocess.STDOUT,
+                        timeout=spec.timeout_s, check=False,
+                    )  # fmt: skip
+                except subprocess.TimeoutExpired:
+                    timed_out = True
         text = out.read_text()
         loaded = preloads(debug_log.read_text(errors="replace")) if debug_log.is_file() else []
         parsed = trace.parse(trace.load(out), arm.plugins, loaded)
@@ -381,6 +479,7 @@ def _session(
         reasons, spoiled = trace.classify(
             parsed, arm.plugins, spec.model, timed_out, private, arms=str(cache.arms(spec.store))
         )
+        reasons += [unsent] if unsent else []
         result = parsed.result or {}
         files = collect(case, repo)
         commits = new_commits(repo, env, heads)

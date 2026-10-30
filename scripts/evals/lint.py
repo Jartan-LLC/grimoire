@@ -1,8 +1,8 @@
 """Check what a script can check about a suite before any session runs (part of make verify).
 
 tests/evals/README.md holds the rules; this enforces the mechanical ones: the prompt
-uses none of the case's hint words, the facts a check needs are where the writer can
-find them, every planted problem fails its `verify` command and passes once fixed, the
+and the later turns use none of the case's hint words, the facts a check needs are where
+the writer can find them, every planted problem fails its `verify` command and passes once fixed, the
 passing references pass every check and each failing reference fails one, each target
 case records a baseline failure, no baseline was drawn under another RUNNER or, for a
 remote case, another REMOTE_RUNNER, no baseline of a case without a remote records a
@@ -46,7 +46,7 @@ def _fact_problems(case: Case) -> list[str]:
     for fact in case.facts:
         fixture_file = case.path / "fixture" / fact.where.removeprefix("fixture:")
         if fact.where == "prompt":
-            text = case.prompt
+            text = "\n".join((case.prompt, *case.turns))
         elif fact.where.startswith("fixture:") and fixture_file.is_file():
             text = fixture_file.read_text()
         else:
@@ -93,6 +93,8 @@ def case_problems(case: Case) -> list[str]:
     """One message per rule the case breaks."""
     prompt = case.prompt.lower()
     found = [f"{case.path}: prompt.md gives away {h!r}" for h in case.hints if h.lower() in prompt]
+    turns = "\n".join(case.turns).lower()
+    found += [f"{case.path}: a turn gives away {h!r}" for h in case.hints if h.lower() in turns]
     found += _fact_problems(case) + _plant_problems(case) + _reference_problems(case)
     if not case.remote and any(c.artifact == "gh" for c in case.checks):
         found.append(

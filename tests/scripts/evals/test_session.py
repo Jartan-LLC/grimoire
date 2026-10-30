@@ -5,6 +5,7 @@ import json
 import os
 import pathlib
 import subprocess
+import sys
 import tempfile
 
 import pytest
@@ -548,3 +549,85 @@ def test_a_case_without_a_plugin_loads_every_other_plugin_of_the_arm(
     assert session.loaded_arm(plain, arm) == arm
     without = load_suite(write_suite(tmp_path / "b", key='without = ["praxis"]\n' + KEY)).cases[0]
     assert session.loaded_arm(without, arm) == Arm("old", "h", {"gitwise": "/a/gitwise"})
+
+
+# A stand-in for `claude -p --input-format stream-json`: it answers each message with a
+# `result` event, first noting whether the next one had already arrived, and a message
+# holding BG starts a background task, whose result it sends only once stdin closes.
+FAKE_CLAUDE = """
+import json, os, select, sys, time
+
+log = open(sys.argv[1], "w")
+
+def line():
+    data = b""
+    while not data.endswith(b"\\n"):
+        chunk = os.read(0, 1)
+        if not chunk:
+            return None
+        data += chunk
+    return json.loads(data)["message"]["content"]
+
+def say(event):
+    print(json.dumps(event), flush=True)
+
+while (text := line()) is not None:
+    if text == "HANG":
+        time.sleep(30)
+    if "BG" in text:
+        say({"type": "system", "subtype": "task_started", "is_backgrounded": True})
+        while line() is not None:
+            pass
+        log.write(text + " early=False\\n")
+        say({"type": "result", "subtype": "success"})
+        break
+    early = bool(select.select([0], [], [], 0.3)[0])
+    log.write(f"{text} early={early}\\n")
+    log.flush()
+    say({"type": "result", "subtype": "success"})
+"""
+
+
+def converse(
+    tmp_path: pathlib.Path, messages: tuple[str, ...], timeout_s: float = 20
+) -> tuple[bool, str, list[str], list[str]]:
+    """What `converse` returns, the messages the stand-in got and the lines it wrote."""
+    fake, log, out = tmp_path / "fake.py", tmp_path / "log.txt", tmp_path / "out.jsonl"
+    fake.write_text(FAKE_CLAUDE)
+    with out.open("w") as handle:
+        timed_out, unsent = session.converse(
+            [sys.executable, str(fake), str(log)], messages,
+            cwd=tmp_path, env=dict(os.environ), out=handle, timeout_s=timeout_s,
+        )  # fmt: skip
+    return timed_out, unsent, log.read_text().splitlines(), out.read_text().splitlines()
+
+
+def test_converse_sends_each_turn_once_the_one_before_has_its_result(
+    tmp_path: pathlib.Path,
+) -> None:
+    timed_out, unsent, got, lines = converse(tmp_path, ("one", "two", "three"))
+    # The last message is followed by stdin closing, which reads as ready too.
+    assert got == ["one early=False", "two early=False", "three early=True"]
+    assert (timed_out, unsent, len(lines)) == (False, "", 3)
+
+
+def test_converse_sends_no_turn_after_one_that_started_a_background_task(
+    tmp_path: pathlib.Path,
+) -> None:
+    timed_out, unsent, got, _ = converse(tmp_path, ("one", "BG two", "three"))
+    assert got == ["one early=False", "BG two early=False"]
+    assert not timed_out
+    assert unsent.startswith("turn 2 started a background task")
+    assert unsent.endswith("so turn 3 of 3 was not sent")
+
+
+def test_converse_stops_a_session_past_its_timeout(tmp_path: pathlib.Path) -> None:
+    timed_out, _, got, _ = converse(tmp_path, ("HANG", "two"), timeout_s=0.5)
+    assert (timed_out, got) == (True, [])
+
+
+def test_a_multi_turn_case_reads_its_messages_from_stdin() -> None:
+    arm = Arm("new", "h", {"gitwise": "/a/gitwise"})
+    args = session.claude_args(None, arm, "claude-opus-5-5", 1.5, pathlib.Path("/s/debug.log"))
+    assert args[1:3] == ["-p", "--model"]
+    assert args[-2:] == ["--input-format", "stream-json"]

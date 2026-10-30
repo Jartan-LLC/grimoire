@@ -173,6 +173,12 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
 - **Keep tool configuration out of a fixture.** A fixture whose `pyproject.toml` has a `[tool.ruff]`
   table gets a `.ruff_cache/` written into it by the commit hooks, and the case hash counts every file in
   the fixture, so each hook run would redraw the case's samples.
+- **A conversation** gives the user's later messages in the key, `turns = ["...", "..."]`, after
+  `prompt.md`'s first one. Each is sent once the turn before has ended. Under `-p` the main thread's
+  subagents run in the background, and a turn that starts one ends only with the session, so no
+  later turn can follow it: the sample is excluded, with that reason. Put the turn that spawns
+  subagents last. The lint reads the turns for `hints`, and a fact `where = "prompt"` may sit in any
+  turn. The turns count in the case hash.
 - **A case that runs without some plugins,** such as a skill measured where praxis's hook cannot help,
   lists them in its key: `without = ["praxis"]`. Its sessions load every other plugin of the arm. The
   list counts in the case hash, like the fixture, and the lint fails a name that is no plugin.
@@ -504,8 +510,10 @@ After changing the runner or the verdict rule:
 
 - Sessions load only this repository's plugins, with no user skills or settings, so a case cannot show how
   a skill competes with others a user has installed.
-- Each session is one `claude -p` call: a case cannot test behaviour that should stop and ask the user,
-  nor a workflow that spans sessions, such as a PR reviewed in one and its review addressed in the next.
+- Each session is one `claude -p` call: a case cannot test a workflow that spans sessions, such as a PR
+  reviewed in one and its review addressed in the next. A case's `turns` are written before the
+  session, so they cannot answer what the agent asks, and a turn cannot follow one that started a
+  background subagent: such a sample is excluded.
 - GitHub is a stub: `gh` answers only from the case's replies, the same for every call that matches, so
   a case shows what the agent sent, not what GitHub would do with it.
 - The session's environment controls (GH_TOKEN, GH_CONFIG_DIR, GIT_ALLOW_PROTOCOL) hold only while it

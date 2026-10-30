@@ -469,3 +469,17 @@ def test_without_counts_in_a_case_hash_only_when_set(tmp_path: pathlib.Path) -> 
     key.write_text('without = ["praxis"]\n' + KEY)
     without = load_suite(root).cases[0]
     assert (without.without, without.hash() != plain.hash()) == (("praxis",), True)
+
+
+def test_turns_load_and_count_in_a_case_hash_with_without(tmp_path: pathlib.Path) -> None:
+    root = write_suite(tmp_path)
+    key = root / "cases" / "c1" / "key.toml"
+    key.write_text('without = ["praxis"]\n' + KEY)
+    without = load_suite(root).cases[0]
+    key.write_text('without = ["praxis"]\nturns = ["Now commit it."]\n' + KEY)
+    both = load_suite(root).cases[0]
+    assert both.turns == ("Now commit it.",)
+    assert both.hash() != without.hash()
+    key.write_text('turns = [" "]\n' + KEY)
+    with pytest.raises(SuiteError, match="a turn in 'turns' is empty"):
+        load_suite(root)

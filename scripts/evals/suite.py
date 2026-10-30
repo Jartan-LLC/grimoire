@@ -178,7 +178,8 @@ class Case:
     and answers from the `gh` replies, first match first. The `origin` holds every
     fixture branch when the runner makes it; a `build.py` may make its own (see
     `session.add_origin`). A case's session loads every plugin of the arm but those
-    named in `without`.
+    named in `without`. `turns` are the user's later messages, each sent once the turn
+    before has ended.
     """
 
     id: str
@@ -194,6 +195,7 @@ class Case:
     remote: bool = False
     gh: tuple[Reply, ...] = ()
     without: tuple[str, ...] = ()
+    turns: tuple[str, ...] = ()
     # The hash when the suite was loaded; a run keys and checks its samples against it.
     loaded: str = ""
 
@@ -225,7 +227,7 @@ class Case:
         return self.loaded or self.hash()
 
     def hash(self) -> str:
-        """What a session depends on, as on disk now: prompt, fixture, build script; of the key, a remote case's `gh` replies and `without`.
+        """What a session depends on, as on disk now: prompt, fixture, build script; of the key, a remote case's `gh` replies, `without` and `turns`.
 
         Those count as loaded, not as on disk now. Each is folded in only when set, so a
         case without them keeps the hash it had before they existed.
@@ -242,9 +244,13 @@ class Case:
         if self.remote:
             replies = json.dumps([dataclasses.asdict(r) for r in self.gh])
             digest = hashlib.sha256(f"{digest}\0{replies}".encode()).hexdigest()
+        options: dict[str, list[str]] = {}
         if self.without:
-            options = json.dumps({"without": sorted(self.without)})
-            digest = hashlib.sha256(f"{digest}\0{options}".encode()).hexdigest()
+            options["without"] = sorted(self.without)
+        if self.turns:
+            options["turns"] = list(self.turns)
+        if options:
+            digest = hashlib.sha256(f"{digest}\0{json.dumps(options)}".encode()).hexdigest()
         return digest
 
 
@@ -595,6 +601,13 @@ def _baselines(key: Table, where: pathlib.Path) -> tuple[Baseline, ...]:
     return tuple(found)
 
 
+def _turns(key: Table, where: pathlib.Path) -> tuple[str, ...]:
+    turns = _strs(key, "turns", where)
+    if any(not t.strip() for t in turns):
+        raise SuiteError(f"{where}: a turn in 'turns' is empty")
+    return turns
+
+
 def load_case(
     path: pathlib.Path, metrics: dict[str, Metric], judges: dict[str, Judge] | None = None
 ) -> Case:
@@ -636,6 +649,7 @@ def load_case(
         remote=_remote(key, key_path, replies),
         gh=replies,
         without=_strs(key, "without", key_path),
+        turns=_turns(key, key_path),
         references=tuple(_reference(p) for p in sorted(references.glob("*.toml")))
         if references.is_dir()
         else (),

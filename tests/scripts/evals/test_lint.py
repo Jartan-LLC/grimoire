@@ -218,3 +218,12 @@ def test_lint_names_a_without_that_is_no_plugin(root: pathlib.Path) -> None:
     assert [f.split(": ", 1)[1] for f in lint(root, TRACKED)] == [
         "without names 'praxsi', which is no plugin"
     ]
+
+
+def test_lint_reads_the_later_turns_for_hints_and_prompt_facts(root: pathlib.Path) -> None:
+    key = 'turns = ["Keep the issue number."]\n' + KEY.replace('text = "42"', 'text = "number"')
+    case = suite_at(root, key=key)
+    (case / "prompt.md").write_text("Fix it and commit.\n")
+    assert [f.split(": ", 1)[1] for f in lint(root, TRACKED)] == [
+        "a turn gives away 'issue number'"
+    ]
