@@ -181,9 +181,9 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   `prompt.md`'s first one. Each is sent once the turn before has ended. Under `-p` the main thread's
   subagents run in the background, and a turn that starts a background task (a subagent or a
   background command) ends only with the session, so no later turn can follow it: the sample is
-  excluded, with that reason. Put the turn that spawns subagents last. A session that ends before every turn has run is excluded too. The lint reads the
-  turns for `hints`, and a fact `where = "prompt"` may sit in any turn. The turns count in the case
-  hash.
+  excluded, with that reason. Put the turn that spawns subagents last. A session that ends before
+  every turn has run is excluded too. The lint reads the turns for `hints`, and a fact
+  `where = "prompt"` may sit in any turn. The turns count in the case hash.
 - **A case that runs without some plugins,** such as a skill measured where praxis's hook cannot help,
   lists them in its key: `without = ["praxis"]`. Its sessions load every other plugin of the arm. The
   list counts in the case hash, like the fixture, and the lint fails a name that is no plugin.
@@ -233,16 +233,17 @@ the PR how many versions you screened.
   delivery check with `agent = "<plugin>:<agent>"` reads that subagent's skill loads and writes instead
   of the main thread's. Subagents are followed at every depth, a subagent's own subagents included, and
   so is an Agent call run in the background, which under `-p` is every one the main thread makes: its
-  report is the one Claude Code's notification carries when the agent finishes. A reference gives reports under `[reports]` and briefs under `[briefs]`, as
-  `"<plugin>:<agent>" = "text"`.
+  report is the one Claude Code's notification carries when the agent finishes. A reference gives
+  reports under `[reports]` and briefs under `[briefs]`, as `"<plugin>:<agent>" = "text"`.
 - **How the subagents worked:** each Agent call is a spawn, and these checks read every spawn at
   every depth, two spawns of one agent type apart. `artifact = "overlap"` holds when no file was
   written by two spawns (the main thread's writes aside); `artifact = "spawn-writes"` with a `write`
   kind when no spawn made that write, even one that failed, such as `write = "commit"`;
   `artifact = "barrier"` when the main thread wrote no file, nor tried to, between an Agent call and
-  the end of every spawn out with it, at its report or at the notice that it failed. A delivery check's `write = "spawn"` is an Agent call: with
-  `state = "in-context"` the skill arrived before every Agent call of the main thread, or with an
-  `agent`, of that subagent. None of these is graded on references.
+  the end of every spawn out with it, at its report or at the notice that it failed. A delivery
+  check's `write = "spawn"` is an Agent call: with `state = "in-context"` the skill arrived before
+  every Agent call of the main thread, or with an `agent`, of that subagent. None of these is graded
+  on references.
 - **What the agent sent to GitHub:** `gh` is every call the stub recorded but Claude Code's own (below),
   one `gh <arguments>` line each with newlines written as `\n`, then a blank line, then every text the
   calls passed, newlines kept: each argument and its tails (past each leading letter of a short flag or a
@@ -421,12 +422,12 @@ for nothing; between rounds, `make check` is enough.
 5. **Count every sample.** A sample that fails for a reason outside the agent (an API error, a usage
    limit, a leak of user settings into the session, the session reaching the suite's files or another
    arm's plugins) is excluded and retried up to three times; when the API is limiting requests, each
-   retry waits first, and once limits persist the run stops starting sessions and reports the rest as not run, so rerun it later to
-   resume. While any sample is still excluded, the screen cannot SHIP, though harm it already shows
-   still comes out HURT; its summary counts excluded and spoiled samples per arm. A sample the agent
-   itself spoiled (a timeout, the budget or turn cap) counts as failing every check. A session times
-   out after 30 minutes; a suite whose sessions run longer sets `timeout_s` in `suite.toml`, and
-   changing it draws new samples.
+   retry waits first, and once limits persist the run stops starting sessions and reports the rest as
+   not run, so rerun it later to resume. While any sample is still excluded, the screen cannot SHIP,
+   though harm it already shows still comes out HURT; its summary counts excluded and spoiled samples
+   per arm. A sample the agent itself spoiled (a timeout, the budget or turn cap) counts as failing
+   every check. A session times out after 30 minutes; a suite whose sessions run longer sets
+   `timeout_s` in `suite.toml`, and changing it draws new samples.
 6. **The verdict compares the arms task by task:** `new`'s mean minus `old`'s, per unit.
    - Under a `better` rule the primary metric is BETTER when an exact one-sided paired permutation test
      in that direction is below 0.05; under `no-regression` it is tested like a guard and never BETTER.
@@ -489,7 +490,8 @@ for nothing; between rounds, `make check` is enough.
   arm's plugins by their path in the store.
 - `python3 scripts/eval.py show <key>`: one sample's commits, final reply, the files its checks read,
   every `gh` call the stub logged (Claude Code's own included) and the `gh` text its checks read, skill
-  deliveries and writes with the agent and spawn that made each, subagents' briefs and reports, and hook context.
+  deliveries and writes with the agent and spawn that made each, subagents' briefs and reports, and
+  hook context.
 - `python3 scripts/eval.py lint`: the mechanical checks from "Writing a case", and that each judge's
   stamp is current; `make verify` runs it.
 - `python3 scripts/eval.py judge-probe`, `judge-label` and `judge-align`: calibrate a judge (see
@@ -557,10 +559,10 @@ After changing the runner or the verdict rule:
   `--trial`).
 - The check that a session stayed out of the suite and the other arms reads the absolute paths in its
   tool calls, and the stub's `gh-stub-replies.json` by name: a relative path gets past it, such as `cd`
-  into its arm then `ls ../../samples` or `ls ../old-<tree>`, or `cat ../gh-stub/*` from the repository, and so does a path built from an
-  environment variable that holds the store's path, such as `ls $GIT_CEILING_DIRECTORIES/samples`, and
-  an absolute path that names a directory above one the check guards, such as `grep -r` over the
-  sandbox or `/tmp`, which reaches the stub's `gh-stub/`.
+  into its arm then `ls ../../samples` or `ls ../old-<tree>`, or `cat ../gh-stub/*` from the
+  repository, and so does a path built from an environment variable that holds the store's path,
+  such as `ls $GIT_CEILING_DIRECTORIES/samples`, and an absolute path that names a directory above one
+  the check guards, such as `grep -r` over the sandbox or `/tmp`, which reaches the stub's `gh-stub/`.
 - A run reads each case from the checkout as it was when the run began. A sample whose case changed on
   disk since (a branch switch, an edit) is excluded and retried, so keep the checkout still while a run
   draws.
