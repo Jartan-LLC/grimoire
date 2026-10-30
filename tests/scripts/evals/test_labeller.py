@@ -26,6 +26,9 @@ def test_labelled_of_reads_a_well_formed_output() -> None:
     assert labeller.labelled_of(PAYLOAD) == Labelled(
         (Finding("q", "Important", "s"),), 0, "yes", "r"
     )
+    assert labeller.labelled_of(PAYLOAD | {"match": -1, "answer": "no"}) == Labelled(
+        (Finding("q", "Important", "s"),), -1, "no", "r"
+    )
 
 
 @pytest.mark.parametrize(
@@ -33,6 +36,8 @@ def test_labelled_of_reads_a_well_formed_output() -> None:
     [
         PAYLOAD | {"match": True},
         PAYLOAD | {"match": "0"},
+        PAYLOAD | {"match": 1},
+        PAYLOAD | {"match": -2},
         PAYLOAD | {"answer": "probably"},
         PAYLOAD | {"findings": "none"},
         PAYLOAD | {"findings": [{"quote": "q", "rating": "Important"}]},

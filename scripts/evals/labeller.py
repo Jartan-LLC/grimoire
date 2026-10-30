@@ -121,7 +121,7 @@ def parse(stdout: str, model: str) -> Labelled | None:
 
 
 def labelled_of(payload: object) -> Labelled | None:
-    """The labeller output in a structured payload, or None."""
+    """The labeller output in a structured payload, or None, as when `match` is neither -1 nor a finding's index."""
     if not isinstance(payload, dict):
         return None
     fields = cast("dict[str, object]", payload)
@@ -141,7 +141,8 @@ def labelled_of(payload: object) -> Labelled | None:
         if not all(isinstance(v, str) for v in values):
             return None
         findings.append(Finding(*cast("list[str]", values)))
-    return Labelled(tuple(findings), match, str(answer), why)
+    in_range = -1 <= match < len(findings)
+    return Labelled(tuple(findings), match, str(answer), why) if in_range else None
 
 
 def label_of(labelled: Labelled, text: str, yes_ratings: Sequence[str]) -> str:
