@@ -242,10 +242,11 @@ the PR how many versions you screened.
   written by two spawns (the main thread's writes aside); `artifact = "spawn-writes"` with a `write`
   kind when no spawn made that write, even one that failed, such as `write = "commit"`;
   `artifact = "barrier"` when the main thread wrote no file, nor tried to, between an Agent call and
-  the end of every spawn out with it, at its report or at the notice that it failed. A delivery
-  check's `write = "spawn"` is an Agent call: with `state = "in-context"` the skill arrived before
-  every Agent call of the main thread, or with an `agent`, of that subagent. None of these is graded
-  on references.
+  the end of every spawn out with it, at its report or at the notice that it failed. `overlap` and
+  `barrier` see a file written by a Write or Edit call only, not one written through Bash, such as
+  with `sed -i`. A delivery check's `write = "spawn"` is an Agent call: with `state = "in-context"`
+  the skill arrived before every Agent call of the main thread, or with an `agent`, of that subagent.
+  None of these is graded on references.
 - **What the agent sent to GitHub:** `gh` is every call the stub recorded but Claude Code's own (below),
   one `gh <arguments>` line each with newlines written as `\n`, then a blank line, then every text the
   calls passed, newlines kept: each argument and its tails (past each leading letter of a short flag or a
