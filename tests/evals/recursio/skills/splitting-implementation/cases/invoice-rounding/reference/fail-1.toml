@@ -1,0 +1,4 @@
+final = "invoice_total now sums the rounded line totals; the failing test passes."
+
+[briefs]
+"general-purpose" = "Fix invoice_total in src/invoicer/totals.py."

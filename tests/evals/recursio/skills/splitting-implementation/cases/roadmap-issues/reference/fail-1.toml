@@ -1,0 +1,4 @@
+final = "Opened three issues, one per roadmap item, each with acceptance criteria."
+
+[briefs]
+"general-purpose" = "Draft the issue for bounce handling."

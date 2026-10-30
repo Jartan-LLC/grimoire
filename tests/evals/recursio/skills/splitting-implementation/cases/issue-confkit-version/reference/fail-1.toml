@@ -1,0 +1,4 @@
+final = "Pushed feature/issue-9: confkit --version prints the package version."
+
+[briefs]
+"general-purpose" = "Add the --version flag to src/confkit/cli.py."

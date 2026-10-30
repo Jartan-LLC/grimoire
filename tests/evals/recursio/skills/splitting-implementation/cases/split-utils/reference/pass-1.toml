@@ -1,0 +1,1 @@
+final = "utils.py is now units.py, dates.py and text.py; pantry.utils re-exports the old names."

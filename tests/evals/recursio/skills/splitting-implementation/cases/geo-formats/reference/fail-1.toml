@@ -1,0 +1,1 @@
+final = "GeoJSON, WKT and GPX readers and writers and `geokit convert` are in, with round-trip tests."

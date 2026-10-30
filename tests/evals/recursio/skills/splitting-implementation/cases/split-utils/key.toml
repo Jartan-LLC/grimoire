@@ -1,0 +1,15 @@
+split = "dev"
+kind = "trigger"
+hints = ["subagent", "parallel", "agents", "delegate"]
+without = ["praxis"]
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "recursio:splitting-implementation"
+state = "not-loaded"
+
+[[check]]
+metric = "quiet"
+artifact = "brief:general-purpose"
+present = '''\A\Z'''

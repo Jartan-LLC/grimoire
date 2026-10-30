@@ -1,0 +1,4 @@
+final = "Pushed feature/issue-31 with tabkit stats: inference, summaries, histogram and the command."
+
+[briefs]
+"general-purpose" = "Write src/tabkit/infer.py: infer_type(values) -> ColumnType, with tests."

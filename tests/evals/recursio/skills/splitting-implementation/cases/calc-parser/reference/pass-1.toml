@@ -1,0 +1,1 @@
+final = "calc/parser.py parses and evaluates expressions; tests cover precedence, ^, unary minus, variables and errors."

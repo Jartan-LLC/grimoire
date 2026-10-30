@@ -1,0 +1,49 @@
+# Trigger suite for the splitting-implementation skill (#121): does the skill load before the main
+# thread spawns parts on work that should be split, and stay out of work that should not? Should-split
+# cases are multi-part builds in plain chat, with no word about subagents, and multi-part issues
+# through /praxis:implement-issue; near misses share the skill's words but need something else: a
+# one-file fix, a migration chain, splitting one file into modules, a recursive-descent parser, a
+# test-first request, a wide rename, issues for a roadmap, a small issue. Plain-chat cases run
+# without praxis, so its hook cannot help; implement-issue cases keep it, and one runs without
+# recursio, where praxis's line on loading skills must not set off a split of its own.
+# A split with no skill loaded shows as a sample that passes `split` and fails `recall`.
+# tests/evals/README.md says how the suite is run.
+target = "recursio:splitting-implementation"
+# recursio 1.1.4's skills the target renames or absorbs, so none is recursio without any of them.
+replaces = [
+  "recursio:recursive-development",
+  "recursio:recursive-planning",
+  "recursio:recursive-quality",
+  "recursio:recursive-execution",
+]
+covers = [
+  "plugins/recursio/skills/splitting-implementation/**",
+  "plugins/praxis/skills/implement-issue/SKILL.md",
+]
+models = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]
+# Should-split sessions build several modules through parts, praxis cases push a branch too.
+budget_usd = 10.0
+
+[[metric]]
+id = "recall"
+direction = "higher"
+# Should split: the skill was in the main thread's context at every Agent call it made, and it
+# made one.
+
+[[metric]]
+id = "quiet"
+direction = "higher"
+margin = 0.1
+# Near misses: the skill not loaded, and no general-purpose subagent spawned.
+
+[[metric]]
+id = "split"
+direction = "higher"
+# Should split, reported: the main thread spawned a general-purpose subagent.
+
+[pass_rule]
+primary = "recall"
+rule = "better"
+guards = ["quiet"]
+min_effect = 0.5
+min_samples = 3

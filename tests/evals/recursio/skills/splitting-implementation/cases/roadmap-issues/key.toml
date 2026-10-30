@@ -1,0 +1,86 @@
+split = "screen"
+kind = "trigger"
+hints = ["subagent", "parallel", "agents", "delegate"]
+without = ["praxis"]
+remote = true
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "recursio:splitting-implementation"
+state = "not-loaded"
+
+[[check]]
+metric = "quiet"
+artifact = "brief:general-purpose"
+present = '''\A\Z'''
+
+[[gh]]
+match = '''(^|\s)pr create\b'''
+stdout = "https://github.com/acme/mailroom/pull/139\n"
+
+[[gh]]
+match = '''(^|\s)pr view\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr edit\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)pr list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)pr status\b'''
+stdout = "Current branch\n  There is no pull request associated with [feature/issue-39]\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 39, \"title\": \"Roadmap\", \"body\": \"See the README.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/mailroom/issues/39\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tRoadmap\nstate:\tOPEN\nauthor:\tdana\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t39\n--\nSee the README.\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[{\"number\": 39, \"title\": \"Roadmap\", \"state\": \"OPEN\", \"url\": \"https://github.com/acme/mailroom/issues/39\"}]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = "39\tOPEN\tRoadmap\t\t2026-10-20T10:00:00Z\n"
+
+[[gh]]
+match = '''(^|\s)issue create\b'''
+stdout = "https://github.com/acme/mailroom/issues/40\n"
+
+[[gh]]
+match = '''(^|\s)label list\b'''
+stdout = "bug\tSomething is not working\t#d73a4a\nenhancement\tNew feature or request\t#a2eeef\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*pulls'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b.*--json'''
+stdout = "{\"name\": \"mailroom\", \"nameWithOwner\": \"acme/mailroom\", \"url\": \"https://github.com/acme/mailroom\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PUBLIC\", \"owner\": {\"login\": \"acme\"}}\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "name:\tacme/mailroom\ndescription:\t\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account alice (keyring)\n"
+
+[[gh]]
+match = '''(^|\s)api user\b'''
+stdout = "{\"login\": \"alice\"}\n"

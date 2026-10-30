@@ -1,0 +1,1 @@
+final = "invoice_total now sums the rounded line totals; the failing test passes."

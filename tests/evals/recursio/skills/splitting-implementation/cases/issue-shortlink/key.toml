@@ -1,0 +1,78 @@
+split = "dev"
+kind = "trigger"
+hints = ["subagent", "parallel", "split", "agents", "delegate", "wave", "recursi"]
+remote = true
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "recursio:splitting-implementation"
+write = "spawn"
+state = "in-context"
+
+[[check]]
+metric = "split"
+artifact = "brief:general-purpose"
+present = '''\S'''
+
+[[gh]]
+match = '''(^|\s)pr create\b'''
+stdout = "https://github.com/acme/shortlink/pull/112\n"
+
+[[gh]]
+match = '''(^|\s)pr view\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr edit\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)pr list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)pr status\b'''
+stdout = "Current branch\n  There is no pull request associated with [feature/issue-12]\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 12, \"title\": \"Persistence, expiry, click stats and an admin command\", \"body\": \"Links live only in memory today. We need four things, each with tests: (1) a file-backed store (one JSON file, atomic writes) with the same interface as the memory store; (2) expiry: a link may carry `expiresAt`, `resolve` ignores expired links, and a sweeper removes them; (3) click analytics: count resolves per link per day, with a `topLinks(n, days)` query; (4) an admin command, `shortlink-admin list | delete CODE | stats`, over the file store.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/shortlink/issues/12\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tPersistence, expiry, click stats and an admin command\nstate:\tOPEN\nauthor:\tdana\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t12\n--\nLinks live only in memory today. We need four things, each with tests: (1) a file-backed store (one JSON file, atomic writes) with the same interface as the memory store; (2) expiry: a link may carry `expiresAt`, `resolve` ignores expired links, and a sweeper removes them; (3) click analytics: count resolves per link per day, with a `topLinks(n, days)` query; (4) an admin command, `shortlink-admin list | delete CODE | stats`, over the file store.\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[{\"number\": 12, \"title\": \"Persistence, expiry, click stats and an admin command\", \"state\": \"OPEN\", \"url\": \"https://github.com/acme/shortlink/issues/12\"}]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = "12\tOPEN\tPersistence, expiry, click stats and an admin command\t\t2026-10-20T10:00:00Z\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*pulls'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b.*--json'''
+stdout = "{\"name\": \"shortlink\", \"nameWithOwner\": \"acme/shortlink\", \"url\": \"https://github.com/acme/shortlink\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PUBLIC\", \"owner\": {\"login\": \"acme\"}}\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "name:\tacme/shortlink\ndescription:\t\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account alice (keyring)\n"
+
+[[gh]]
+match = '''(^|\s)api user\b'''
+stdout = "{\"login\": \"alice\"}\n"

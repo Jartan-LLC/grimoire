@@ -1,0 +1,4 @@
+final = "Wrote the slugify tests first, saw them fail, then implemented slugify; all pass."
+
+[briefs]
+"general-purpose" = "Write the slugify tests."

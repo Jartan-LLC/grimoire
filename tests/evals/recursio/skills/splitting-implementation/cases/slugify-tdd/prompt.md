@@ -1,0 +1,1 @@
+Test-first, please: write failing tests for a `slugify(title, max_length=60)` in blogtools/text.py -- accents folded to ASCII, runs of separators collapsed to one hyphen, cut at a word boundary within max_length -- then make them pass.

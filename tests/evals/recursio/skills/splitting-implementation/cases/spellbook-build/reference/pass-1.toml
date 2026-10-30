@@ -1,0 +1,4 @@
+final = "spellbook is implemented: dictionaries, suggestions, the Markdown checker and the command, with tests."
+
+[briefs]
+"general-purpose" = "Write src/spellbook/suggest.py: suggestions ranked by Damerau-Levenshtein distance, then frequency."

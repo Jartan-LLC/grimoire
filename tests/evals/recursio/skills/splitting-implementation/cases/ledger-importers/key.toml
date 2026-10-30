@@ -1,0 +1,19 @@
+split = "dev"
+kind = "trigger"
+hints = ["subagent", "parallel", "split", "agents", "delegate", "wave", "recursi"]
+without = ["praxis"]
+turns = [
+  "Thanks. Now add the three importers the README plans (CSV, OFX and QIF), each turning a file into Transaction records, plus the summary command. Write tests for each importer and for the summary.",
+]
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "recursio:splitting-implementation"
+write = "spawn"
+state = "in-context"
+
+[[check]]
+metric = "split"
+artifact = "brief:general-purpose"
+present = '''\S'''

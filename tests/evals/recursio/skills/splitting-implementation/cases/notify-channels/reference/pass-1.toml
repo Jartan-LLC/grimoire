@@ -1,0 +1,4 @@
+final = "Email, webhook and SMS channels and the router are in, each tested with injected clients."
+
+[briefs]
+"general-purpose" = "Write src/sms.js: an SmsChannel whose send(message) splits long texts into segments."

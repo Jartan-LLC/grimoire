@@ -1,0 +1,4 @@
+final = "GeoJSON, WKT and GPX readers and writers and `geokit convert` are in, with round-trip tests."
+
+[briefs]
+"general-purpose" = "Write src/geokit/wkt.py: loads(text) and dumps(shape) for Point, LineString and Polygon."

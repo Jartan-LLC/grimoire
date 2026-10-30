@@ -1,0 +1,4 @@
+final = "Added the StatsD, Prometheus, JSON-lines and fan-out sinks, each with tests."
+
+[briefs]
+"general-purpose" = "Write src/prometheus.js: a PrometheusSink rendering the text exposition format."

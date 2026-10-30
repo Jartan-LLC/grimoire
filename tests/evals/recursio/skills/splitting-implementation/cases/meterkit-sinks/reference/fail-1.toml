@@ -1,0 +1,1 @@
+final = "Added the StatsD, Prometheus, JSON-lines and fan-out sinks, each with tests."
