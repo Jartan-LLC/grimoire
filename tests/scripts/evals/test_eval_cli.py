@@ -589,6 +589,26 @@ def test_align_scores_held_out_once_per_version_and_burns_a_missed_one(
     assert calibrate.read_stamp(labels.parent.parent / "stamp.toml") == stamp
 
 
+def test_align_prints_each_failed_judge_call(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    suite = load_suite(write_suite(tmp_path / "suite", SUITE + JUDGE, KEY + JUDGED))
+    judge = suite.judges["flags"]
+    calibrate.write_labels(
+        calibrate.judge_dir(suite.path, "flags") / "labels" / "c1.toml",
+        [calibrate.Label("k1", "c1", "old", "", "m e", ("yes",) * 3, "yes", "fix: Closes #42")],
+    )
+
+    def fails(*_: object) -> list[str]:
+        return ["failed: API Error: overloaded"]
+
+    monkeypatch.setattr(jury, "fill", fails)
+    args = argparse.Namespace(set="dev", jobs=1, labeller_model="m", labeller_effort="e")
+    assert cli.align(args, suite, judge, tmp_path / "store") == 1  # no answer was kept
+    out = capsys.readouterr().out
+    assert out.startswith("failed: API Error: overloaded\nINCOMPLETE:")
+
+
 def test_align_stamps_a_cleared_version_again_once_its_labels_change(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
