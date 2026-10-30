@@ -10,9 +10,13 @@ export const ALIGNMENTS = ["start", "center", "end", "left", "right"] as const;
 
 export type Align = (typeof ALIGNMENTS)[number];
 
-/** Where a cue sits on screen. `line`, `position` and `size` keep WebVTT's text, as `"10%"`. */
+/**
+ * Where a cue sits on screen. `line`, `position` and `size` keep WebVTT's text, as `"10%"`;
+ * `vertical` is WebVTT's `rl` or `lr`, null for horizontal text.
+ */
 export interface Position {
   align: Align;
+  vertical: "rl" | "lr" | null;
   line: string | null;
   position: string | null;
   size: string | null;

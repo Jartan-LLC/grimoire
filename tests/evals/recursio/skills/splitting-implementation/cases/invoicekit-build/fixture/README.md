@@ -127,8 +127,8 @@ reminders: [{ level, date }] }`) and payments (`{ date, buyer, amount: Money }`)
 - `daysOverdue(dueDate, asOf)`: whole calendar days after the due date, 0 when not overdue.
 - Default schedule, which a caller may replace: level 1 at 7 days overdue, `Payment reminder`, no
   fee; level 2 at 21 days, `Second reminder`, fee 5.00; level 3 at 35 days, `Final notice`, fee
-  10.00. Fees are in the invoice's currency; a JPY invoice charges JPY 500 and JPY 1,000 (the
-  amounts scaled to the currency's digits).
+  10.00. Fees are in the invoice's currency, 5 and 10 whole units of it (EUR 5.00, BHD 5.000),
+  except in JPY, which charges JPY 500 and JPY 1,000.
 - `interest(principalChanges, dueDate, asOf, baseRates, { marginPct = 8 })`: statutory interest at
   the base rate plus 8 percentage points a year, simple, actual/365 (leap years too). It runs from
   the day after the due date through `asOf`, each day at the rate in force that day on the balance
