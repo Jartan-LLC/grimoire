@@ -537,7 +537,8 @@ def _session(
         result = parsed.result or {}
         files = collect(case, repo)
         commits = new_commits(repo, env, heads)
-        verified = {c: verify(c, repo, session_env) for c in case.commands()}
+        # An excluded sample is drawn again and never graded: its commands need not run.
+        verified = {} if reasons else {c: verify(c, repo, session_env) for c in case.commands()}
         sample = cache.Sample(
             key=sample_key,
             case=case.id,
