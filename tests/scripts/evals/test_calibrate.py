@@ -117,21 +117,26 @@ def test_the_labelling_panel_can_fail_the_bar(stamp: Stamp, row: str) -> None:
     assert not calibrate.cleared(stamp)
 
 
-def test_kappa_below_the_bar_fails_even_with_both_rates_at_point() -> None:
-    # 0.9 on each class over few items: rates fail the bound, kappa needs 80 items
+def test_kappa_on_fewer_than_80_natural_items_fails() -> None:
     stamp = swap(cleared_stamp(), "natural", "old", Cell("natural", "old"))
     assert "3 kappa, natural items" in failing(stamp)
 
 
-def test_warnings_and_records_never_fail_the_bar() -> None:
-    gap = swap(
-        cleared_stamp(), "natural", "none", Cell("natural", "none", tp=18, fn=2, tn=18, fp=2)
-    )
-    gap = dataclasses.replace(gap, cells=(*gap.cells, Cell("dev", "old", tp=40, tn=40)))
-    statuses = {r.name: r.status for r in calibrate.rows(gap)}
-    assert statuses.get("per-arm J gap") is None or statuses["per-arm J gap"] == "warn"
-    assert calibrate.cleared(gap) == (failing(gap) == [])
-    assert all(r.status in ("pass", "warn", "info") for r in calibrate.rows(cleared_stamp()))
+def test_kappa_below_the_bar_fails_while_both_rates_clear() -> None:
+    # 420 positives and 60 negatives: TPR 0.950 and TNR 0.933 clear, kappa is 0.788
+    skewed = Cell("natural", "old", tp=380, fn=20, tn=37, fp=3)
+    stamp = swap(cleared_stamp(), "natural", "old", skewed)
+    assert failing(stamp) == ["3 kappa, natural items"]
+
+
+def test_a_dev_rate_over_held_out_warns_and_fails_nothing_itself() -> None:
+    # held-out TPR 0.9 at least on a cleared stamp, so dev can exceed it by more than GAP
+    # only when row 1 fails as well
+    low = swap(cleared_stamp(), "natural", "old", Cell("natural", "old", tp=13, fn=7, tn=20))
+    stamp = dataclasses.replace(low, cells=(*low.cells, Cell("dev", "old", tp=40, tn=40)))
+    statuses = {r.name: r.status for r in calibrate.rows(stamp)}
+    assert statuses["dev TPR over held-out"] == "warn"
+    assert "dev TPR over held-out" not in failing(stamp)
 
 
 def test_a_per_arm_j_gap_over_a_tenth_warns() -> None:
@@ -140,6 +145,7 @@ def test_a_per_arm_j_gap_over_a_tenth_warns() -> None:
     )
     warned = [r for r in calibrate.rows(stamp) if r.status == "warn"]
     assert [r.name for r in warned] == ["per-arm J gap"]
+    assert calibrate.cleared(stamp)
 
 
 def test_gates_only_on_a_current_stamp_that_cleared() -> None:

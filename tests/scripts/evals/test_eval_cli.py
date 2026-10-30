@@ -673,6 +673,17 @@ def test_a_gold_item_without_a_labelling_panel_stops_label_and_align(
     assert calibrate.read_stamp(calibrate.judge_dir(suite.path, "flags") / "stamp.toml") is None
 
 
+def test_align_scores_no_version_on_held_out_past_the_cap(tmp_path: pathlib.Path) -> None:
+    suite = load_suite(write_suite(tmp_path / "suite", SUITE + JUDGE, KEY + JUDGED))
+    judge = suite.judges["flags"]
+    tried = tuple(f"version {i}" for i in range(calibrate.MAX_VERSIONS))
+    stamp = calibrate.Stamp("flags", tried[-1], tried, "l", "m e", "2026-10-27", ())
+    calibrate.write_stamp(calibrate.judge_dir(suite.path, "flags") / "stamp.toml", stamp)
+    args = argparse.Namespace(set="held-out", jobs=1, labeller_model="m", labeller_effort="e")
+    with pytest.raises(SystemExit, match="report the missed bar"):
+        cli.align(args, suite, judge, tmp_path / "store")
+
+
 def test_stored_samples_are_found_by_the_key_the_case_has_now(tmp_path: pathlib.Path) -> None:
     root = write_suite(tmp_path / "suite")
     case = load_suite(root).cases[0]
