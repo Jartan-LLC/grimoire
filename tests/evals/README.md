@@ -187,9 +187,10 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   lists them in its key: `without = ["praxis"]`. Its sessions load every other plugin of the arm. The
   list counts in the case hash, like the fixture, and the lint fails a name that is no plugin.
 - **A suite that needs Claude Code configured** sets the variables in an `[env]` table of `suite.toml`,
-  `CLAUDE_CODE_*` names only and no login's, such as `CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS = "0"`. They
-  are set after the runner drops the caller's `CLAUDE*` variables, and the runner's own settings win
-  over them. Changing them draws new samples. A suite that needs a recent Claude Code sets
+  such as `CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS = "0"`. It may set only the variables `SUITE_ENV` in
+  `scripts/evals/suite.py` lists, none a credential; add one there when a suite needs it. They are set
+  after the runner drops the caller's `CLAUDE*` variables, and the runner's own settings win over
+  them. Changing them draws new samples. A suite that needs a recent Claude Code sets
   `claude_code = "<version>"` (top-level, above the first `[table]`), the oldest version its sessions
   may run on: a run or screen on an older one stops before any session.
 - **Check the checks.** Write several passing references that differ in wording, order and approach, and

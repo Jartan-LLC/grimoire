@@ -444,8 +444,13 @@ def test_a_suite_sets_claude_code_variables_and_a_minimum_version(tmp_path: path
     ("change", "message"),
     [
         (("CLAUDE_CODE_FORK_SUBAGENT", "PATH"), "sets 'PATH'"),
-        (("CLAUDE_CODE_FORK_SUBAGENT", "CLAUDE_CODE_OAUTH_TOKEN"), "never a login's"),
-        (("CLAUDE_CODE_FORK_SUBAGENT", "CLAUDE_CODE_USE_BEDROCK"), "never a login's"),
+        (("CLAUDE_CODE_FORK_SUBAGENT", "CLAUDE_CODE_OAUTH_TOKEN"), "sets 'CLAUDE_CODE_OAUTH"),
+        (("CLAUDE_CODE_FORK_SUBAGENT", "CLAUDE_CODE_USE_BEDROCK"), "sets 'CLAUDE_CODE_USE_"),
+        (("CLAUDE_CODE_FORK_SUBAGENT", "CLAUDE_CODE_GATEWAY_TOKEN"), "sets 'CLAUDE_CODE_GATE"),
+        (
+            ("CLAUDE_CODE_FORK_SUBAGENT", "CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD"),
+            "sets 'CLAUDE_CODE_ADDITIONAL",
+        ),
         (('= "1"', "= 1"), "must be a table of"),
         (('"2.1.302"', '">=2.1.302"'), "'claude_code' must be a version"),
     ],

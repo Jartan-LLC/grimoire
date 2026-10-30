@@ -36,9 +36,14 @@ ARMS = ("none", "old")
 MAX_EXIT = 255
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
 JUDGE_MODEL = "claude-opus-5-5"
-# A suite's `env` sets CLAUDE_CODE_* variables only, never the login ones `claude_env` keeps.
-ENV_PREFIX = "CLAUDE_CODE_"
-LOGIN_ENV = ("CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CODE_USE_")
+# The only variables a suite's `env` may set. A list, not a pattern: Claude Code reads
+# credentials and extra directories from CLAUDE_CODE_* names too, and a suite must carry
+# neither. Add a variable here when a suite needs it.
+SUITE_ENV = (
+    "CLAUDE_CODE_FORK_SUBAGENT",
+    "CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH",
+    "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS",
+)
 JUDGE_KEYS = frozenset(
     ("id", "question", "model", "effort", "panel", "held_out", "siblings", "yes_ratings", "compare")
 )
@@ -354,10 +359,10 @@ def _env(data: Table, where: pathlib.Path) -> dict[str, str]:
         raise SuiteError(f'{where}: [env] must be a table of NAME = "value" strings')
     env = cast("dict[str, str]", table)
     for name in env:
-        if not name.startswith(ENV_PREFIX) or name.startswith(LOGIN_ENV):
+        if name not in SUITE_ENV:
             raise SuiteError(
-                f"{where}: [env] sets {name!r}: a suite sets {ENV_PREFIX}* variables only, "
-                "never a login's"
+                f"{where}: [env] sets {name!r}: a suite sets only {', '.join(SUITE_ENV)} "
+                "(scripts/evals/suite.py SUITE_ENV)"
             )
     return env
 
