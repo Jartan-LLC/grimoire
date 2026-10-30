@@ -1,7 +1,7 @@
 ---
 name: splitting-implementation
-description: Deciding whether to split an implementation across parallel subagents, and splitting it so the parts fit together. Most changes are best built directly; a large change that divides along loosely coupled files or modules is split into small waves, with shared interfaces, files and contract tests settled first, each subagent briefed on its part alone, and the combined code verified before the next wave.
-when_to_use: Before spawning subagents to write code, or when about to implement a feature, issue or project with several parts (for example 'build X with A, B and C', several new modules, a multi-part feature); also when given one part of such a split to build. Not for one-file fixes, splitting work into issues or PRs, splitting one file into modules, or recursive algorithms.
+description: Building a feature or project with several modules -- how to divide it into parts that fit together, and when to build the parts in parallel subagents.
+when_to_use: Implementing a feature, issue or project with several parts or modules.
 user-invocable: false
 ---
 
@@ -13,13 +13,13 @@ Whether to divide implementation work among subagents in one session, and how to
 
 A part whose brief says it is two levels below the main thread is at the depth limit: it builds its part and never splits, whatever else this skill says. [Parts that load this skill on their own re-split past the limit and collide.]
 
-Otherwise, build it yourself unless all three hold:
+Otherwise, split when the work has two or more parts that each:
 
-- **Large**: more than one context holds comfortably, or several modules.
-- **Loosely coupled**: it divides along file or module boundaries. Tightly or circularly coupled files, and a feature with its tests, stay in one part. [Each side of a tight coupling guesses at the other.]
-- **Checkable in parts**: each part can be checked alone, by something short of the whole system. [A part that cannot be checked alone fails only at the barrier, after its context is gone.]
+- **are real work**: a module or feature with its tests, not one function or one test file.
+- **divide along file or module boundaries**. Tightly or circularly coupled files, and a feature with its tests, stay in one part. [Each side of a tight coupling guesses at the other.]
+- **can be checked alone**, by something short of the whole system. [A part that cannot be checked alone fails only at the barrier, after its context is gone.]
 
-Do not split a sequential chain where each step needs the last, one monolithic failing check, a quick targeted change, or parts that would each be one function or one test file. Splitting buys accuracy and context relief, not speed: it costs several times the tokens and usually more wall clock.
+Each part then gets a fresh context for its slice alone, and the parts run side by side. Otherwise build it yourself, as for a sequential chain where each step needs the last, one monolithic failing check, or a quick targeted change. Splitting costs more tokens than building directly.
 
 A wide, same-shaped edit across many files, such as a rename or a mechanical migration, fits Claude Code's built-in `/batch`: suggest it to the user rather than splitting.
 
@@ -41,7 +41,7 @@ If this skill was lost to compaction, load it again and resume from the status l
 
 ## 3. Splitting again
 
-A part splits again only when both hold: after reading its slice it finds sub-structure its parent could not have listed, and holding the whole slice would overload its context. If the parent could have seen the split, the parent splits flat into a later wave instead. [Each extra level adds briefs and a barrier that a flat split does without.]
+A part splits again when, after reading its slice, it finds sub-parts that meet the gate in section 1. Where the parent could have listed those sub-parts, it splits flat into a later wave instead. [Each extra level adds briefs and a barrier that a flat split does without.]
 
 A part whose slice is too big and does not split cleanly reports up rather than building it in one pass. [Building it in one pass overloads the part's context.]
 
@@ -94,7 +94,7 @@ A brief carries everything its part needs without this skill:
 - the names of the skills its work needs;
 - the report format (section 8), and a request to report any decision a sibling may also face.
 
-A part one level below the main thread may split again, so its brief adds: "If, after reading your part, you find sub-structure your parent could not have listed and holding it all would overload your context, load `recursio:splitting-implementation` before splitting; your own parts are at the depth limit and build." A part two levels below gets no split line, and its brief says it is at the depth limit and builds.
+A part one level below the main thread may split again, so its brief adds: "If, after reading your part, you find sub-parts that each are real work and can be built and checked alone, load `recursio:splitting-implementation` before splitting; your own parts are at the depth limit and build." A part two levels below gets no split line, and its brief says it is at the depth limit and builds.
 
 Keep briefs compact: never the whole plan or a sibling's code. [A part handed everything works from the plan instead of its scope.]
 

@@ -1,12 +1,12 @@
 ---
 name: recursive-implement
-description: Implement a plan, issue or description without stopping to ask, splitting it across parallel subagents only where that pays; leaves the work uncommitted and unreviewed.
+description: Implement a plan, issue or description without stopping to ask, splitting it across parallel subagents where that pays; leaves the work uncommitted and unreviewed.
 argument-hint: Plan file path, issue number, or description
 ---
 
 # Recursive Implement
 
-Implement a plan, an issue or a description to completion in the main thread, splitting it across parallel subagents only where that pays.
+Implement a plan, an issue or a description to completion in the main thread, splitting it across parallel subagents where that pays.
 
 By invoking this command the user grants one thing: deciding without asking and running to completion. Nothing else: never commit, branch, push, open a PR, post to GitHub, run a code review, or take an action the project's rules say to ask about first. Build around such an action and list it under Left for the user.
 

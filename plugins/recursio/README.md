@@ -1,8 +1,8 @@
 # Recursio
 
-Teaches your agent when to split implementation work across parallel subagents, and how to split it so the parts fit together. Most changes are built directly; a large change that divides along loosely coupled files or modules is split into small waves.
+Teaches your agent when to split implementation work across parallel subagents, and how to split it so the parts fit together. A change with several parts that are each real work and divide along file or module boundaries is split into small waves, each part built in a fresh context.
 
-Splitting buys accuracy and context relief, not speed: a split costs several times the tokens of building directly, and usually more wall-clock time.
+A split costs more tokens than building directly.
 
 ## Installation
 
@@ -30,7 +30,7 @@ Recursio leans on Claude Code's subagents. Under Codex the skill and the command
 
 ### Commands
 
-- `/recursio:recursive-implement` -- implement a plan file, an issue or a description to completion without stopping to ask, splitting it only where that pays. It decides open questions itself and lists each decision in its report. It never commits, branches, pushes, opens a PR or runs a code review: the work is left uncommitted and unreviewed.
+- `/recursio:recursive-implement` -- implement a plan file, an issue or a description to completion without stopping to ask, splitting it where that pays. It decides open questions itself and lists each decision in its report. It never commits, branches, pushes, opens a PR or runs a code review: the work is left uncommitted and unreviewed.
 
 ## Quick Start
 
