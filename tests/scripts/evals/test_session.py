@@ -430,7 +430,9 @@ def test_no_path_a_remote_session_is_given_holds_a_private_sandbox_path(
     for made in ("tmp", "repo", "venv", "origin.git"):
         (sandbox / made).mkdir(parents=True)
     session.install_gh(sandbox, ())
-    env = session.sample_env({"PATH": "/usr/bin"}, checkout, sandbox, tmp_path / "store", True)
+    env = session.sample_env(
+        {"PATH": "/usr/bin"}, checkout, sandbox, tmp_path / "store", gh_stub=True
+    )
     given = [str(p) for p in sandbox.rglob("*")]
     given += [part for value in env.values() for part in value.split(os.pathsep)]
     spec = session.Spec("m", "v", 1.0, checkout, tmp_path / "store")
@@ -510,3 +512,29 @@ def test_verify_returns_the_exit_code_or_none_on_a_timeout(
     assert session.verify("python3 -c 'pass'", tmp_path, env) == 0
     monkeypatch.setattr(session, "VERIFY_TIMEOUT_S", 0.2)
     assert session.verify("python3 -c 'import time; time.sleep(5)'", tmp_path, env) is None
+
+
+def test_sample_env_sets_the_suites_variables_after_the_strip_and_before_the_runners(
+    tmp_path: pathlib.Path,
+) -> None:
+    base = {"PATH": "/usr/bin", "CLAUDE_CODE_FORK_SUBAGENT": "0"}
+    suite_env = {
+        "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS": "0",
+        "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "0",
+    }
+    sandbox, store = tmp_path / "sandbox", tmp_path / "store"
+    env = session.sample_env(base, tmp_path, sandbox, store, suite_env=suite_env)
+    assert "CLAUDE_CODE_FORK_SUBAGENT" not in env
+    assert env["CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS"] == "0"
+    assert env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] == "1"
+
+
+def test_a_suites_env_is_in_the_key_only_when_set(tmp_path: pathlib.Path) -> None:
+    case = load_suite(write_suite(tmp_path / "suite")).cases[0]
+
+    def key(env: dict[str, str]) -> str:
+        spec = session.Spec("m", "v", 1.0, tmp_path, tmp_path / "store", "s1", env=env)
+        return session.key_of(case, Arm("old", "h", {}), 0, spec)
+
+    assert key({}) == cache.key(case.pinned(), f"old:h:s1:r{session.RUNNER}", "m", "v", 0)
+    assert len({key({}), key({"CLAUDE_CODE_X": "1"}), key({"CLAUDE_CODE_X": "0"})}) == 3

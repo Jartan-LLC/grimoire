@@ -35,6 +35,9 @@ ARMS = ("none", "old")
 MAX_EXIT = 255
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
 JUDGE_MODEL = "claude-opus-5-5"
+# A suite's `env` sets CLAUDE_CODE_* variables only, never the login ones `claude_env` keeps.
+ENV_PREFIX = "CLAUDE_CODE_"
+LOGIN_ENV = ("CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CODE_USE_")
 JUDGE_KEYS = frozenset(
     ("id", "question", "model", "effort", "panel", "held_out", "siblings", "yes_ratings", "compare")
 )
@@ -287,6 +290,8 @@ class Suite:
     cases: tuple[Case, ...]
     judges: dict[str, Judge] = dataclasses.field(default_factory=dict[str, Judge])
     replaces: tuple[str, ...] = ()
+    env: dict[str, str] = dataclasses.field(default_factory=dict[str, str])
+    claude_code: str = ""  # the oldest Claude Code its sessions may run on; "" for any
 
     def removed(self) -> tuple[str, ...]:
         """What the `none` arm removes from `old`: the target, then each text it replaces."""
@@ -316,6 +321,32 @@ def _glob_match(names: list[str], parts: list[str]) -> bool:
         and fnmatch.fnmatchcase(names[0], parts[0])
         and _glob_match(names[1:], parts[1:])
     )
+
+
+def older(version: str, minimum: str) -> bool:
+    """Whether dotted version `version` is older than `minimum`; text after the numbers is ignored."""
+
+    def numbers(text: str) -> tuple[int, ...]:
+        found = re.match(r"\d+(?:\.\d+)*", text)
+        return tuple(int(n) for n in found[0].split(".")) if found else ()
+
+    return numbers(version) < numbers(minimum)
+
+
+def _env(data: Table, where: pathlib.Path) -> dict[str, str]:
+    table = data.get("env", {})
+    if not isinstance(table, dict) or not all(
+        isinstance(v, str) for v in cast("Table", table).values()
+    ):
+        raise SuiteError(f'{where}: [env] must be a table of NAME = "value" strings')
+    env = cast("dict[str, str]", table)
+    for name in env:
+        if not name.startswith(ENV_PREFIX) or name.startswith(LOGIN_ENV):
+            raise SuiteError(
+                f"{where}: [env] sets {name!r}: a suite sets {ENV_PREFIX}* variables only, "
+                "never a login's"
+            )
+    return env
 
 
 def python_cache(path: pathlib.Path) -> bool:
@@ -738,6 +769,9 @@ def load_suite(path: pathlib.Path) -> Suite:
     if stray := [m for m in watch if m not in models]:
         raise SuiteError(f"{where}: watch names {stray}, which are not in models")
     replaces = _strs(data, "replaces", where)
+    claude_code = _str(data, "claude_code", where) if "claude_code" in data else ""
+    if claude_code and not re.fullmatch(r"\d+(\.\d+)*", claude_code):
+        raise SuiteError(f"{where}: 'claude_code' must be a version such as \"2.1.302\"")
     if any(":" not in t for t in (target, *replaces)):
         raise SuiteError(f"{where}: 'target' and each of 'replaces' must be <plugin>:<name>")
     return Suite(
@@ -755,4 +789,6 @@ def load_suite(path: pathlib.Path) -> Suite:
         cases=cases,
         judges=judges,
         replaces=replaces,
+        env=_env(data, where),
+        claude_code=claude_code,
     )

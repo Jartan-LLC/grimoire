@@ -24,7 +24,7 @@ import sys
 import tempfile
 import threading
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 
 from . import cache, trace
 from .arms import Arm
@@ -65,7 +65,7 @@ VERIFY_TIMEOUT_S = 60
 
 @dataclass(frozen=True)
 class Spec:
-    """What every sample of one run shares."""
+    """What every sample of one run shares; `env` is the suite's."""
 
     model: str
     version: str
@@ -74,6 +74,7 @@ class Spec:
     store: pathlib.Path
     screen: str = ""
     timeout_s: float = TIMEOUT_S
+    env: dict[str, str] = field(default_factory=dict[str, str])
 
 
 def git_env(base: dict[str, str]) -> dict[str, str]:
@@ -101,12 +102,14 @@ def claude_env(base: dict[str, str]) -> dict[str, str]:
     }
 
 
-def sample_env(
+def sample_env(  # noqa: PLR0913 -- `suite_env` is apart from `base`: it is set after the strip
     base: dict[str, str],
     checkout: pathlib.Path,
     sandbox: pathlib.Path,
     store: pathlib.Path,
+    *,
     gh_stub: bool = False,
+    suite_env: dict[str, str] | None = None,
 ) -> dict[str, str]:
     """The session's environment: git isolated, this checkout off PATH, the sample's own venv and TMPDIR.
 
@@ -118,6 +121,7 @@ def sample_env(
     CLAUDE* variables go too: the calling session's own (CLAUDECODE and the like)
     would tell the child it runs nested, and others (CLAUDE_EFFORT) would change it.
     The login ones stay, so a token, config-dir, Bedrock or Vertex login still works.
+    The suite's `suite_env` is set after that, and the runner's own settings after it.
     With `gh_stub`, the sandbox's `bin/` comes first, so its `gh` answers every call. For
     the real `gh` run by its path: gh's token and host variables are dropped, GH_TOKEN is
     set to a dummy, which gh sends to github.com in place of a token from the OS keyring,
@@ -129,7 +133,7 @@ def sample_env(
     GIT_ALLOW_PROTOCOL can reach the network with a key under HOME, as one that unsets
     the gh variables reaches the user's gh login.
     """
-    env = claude_env(git_env(base))
+    env = claude_env(git_env(base)) | (suite_env or {})
     for name in ("VIRTUAL_ENV", "PYTHONPATH", "PYTHONHOME", cache.STORE):
         env.pop(name, None)
     inside = str(checkout.resolve())
@@ -348,7 +352,12 @@ def _session(
         debug_log = sandbox / "debug.log"
         timed_out = False
         session_env = sample_env(
-            dict(os.environ), spec.checkout, sandbox, spec.store, gh_stub=case.remote
+            dict(os.environ),
+            spec.checkout,
+            sandbox,
+            spec.store,
+            gh_stub=case.remote,
+            suite_env=spec.env,
         )
         with out.open("w") as handle:
             try:
@@ -448,11 +457,13 @@ def key_of(case: Case, arm: Arm, index: int, spec: Spec) -> str:
     """The key of the sample (case, arm, index) under `spec`.
 
     RUNNER is in every key, REMOTE_RUNNER in a remote case's only, and a timeout other
-    than TIMEOUT_S in its suite's only.
+    than TIMEOUT_S, or an `env`, in its suite's only.
     """
     runner = f"r{RUNNER}" + (f":g{REMOTE_RUNNER}" if case.remote else "")
     if spec.timeout_s != TIMEOUT_S:
         runner += f":t{spec.timeout_s:g}"
+    if spec.env:
+        runner += f":e{json.dumps(sorted(spec.env.items()))}"
     return cache.key(
         case.pinned(),
         f"{arm.name}:{arm.hash}:{spec.screen}:{runner}",
@@ -476,8 +487,8 @@ def run_sample(
     key, so `new` never reuses `old`'s sessions even when their plugins are identical,
     and `spec.screen` is too, so each screen draws fresh samples for both arms while a
     rerun of the same screen resumes it. RUNNER is in every key, REMOTE_RUNNER in a
-    remote case's only, and a timeout other than TIMEOUT_S in its suite's only, so a
-    changed timeout draws new samples instead of reusing the ones it cut off.
+    remote case's only, and a timeout other than TIMEOUT_S or an `env` in its suite's
+    only, so a changed timeout draws new samples instead of reusing the ones it cut off.
     """
     sample_key = key_of(case, arm, index, spec)
     if (cached := cache.load(spec.store, sample_key)) is not None and cached.valid:

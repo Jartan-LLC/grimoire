@@ -1,7 +1,7 @@
 import pathlib
 
 import pytest
-from evals.suite import Reply, SuiteError, glob_match, load_suite
+from evals.suite import Reply, SuiteError, glob_match, load_suite, older
 from helpers import JUDGE, JUDGED, KEY, SUITE, write_suite
 
 
@@ -418,3 +418,43 @@ def test_a_suite_names_what_its_target_replaces(tmp_path: pathlib.Path) -> None:
     assert load_suite(write_suite(tmp_path / "b")).removed() == ("gitwise:commit-pr-writing",)
     with pytest.raises(SuiteError, match="each of 'replaces' must be <plugin>:<name>"):
         load_suite(write_suite(tmp_path / "c", replacing.replace("recursio:old-skill", "old")))
+
+
+ENV_SUITE = (
+    SUITE.replace("target =", 'claude_code = "2.1.302"\ntarget =', 1)
+    + '\n[env]\nCLAUDE_CODE_FORK_SUBAGENT = "1"\nCLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS = "0"\n'
+)
+
+
+def test_a_suite_sets_claude_code_variables_and_a_minimum_version(tmp_path: pathlib.Path) -> None:
+    suite = load_suite(write_suite(tmp_path / "a", ENV_SUITE))
+    assert suite.env == {
+        "CLAUDE_CODE_FORK_SUBAGENT": "1", "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS": "0",
+    }  # fmt: skip
+    assert suite.claude_code == "2.1.302"
+    plain = load_suite(write_suite(tmp_path / "b"))
+    assert (plain.env, plain.claude_code) == ({}, "")
+
+
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [
+        (("CLAUDE_CODE_FORK_SUBAGENT", "PATH"), "sets 'PATH'"),
+        (("CLAUDE_CODE_FORK_SUBAGENT", "CLAUDE_CODE_OAUTH_TOKEN"), "never a login's"),
+        (("CLAUDE_CODE_FORK_SUBAGENT", "CLAUDE_CODE_USE_BEDROCK"), "never a login's"),
+        (('= "1"', "= 1"), "must be a table of"),
+        (('"2.1.302"', '">=2.1.302"'), "'claude_code' must be a version"),
+    ],
+)
+def test_load_suite_rejects_a_bad_env_or_version(
+    tmp_path: pathlib.Path, change: tuple[str, str], message: str
+) -> None:
+    with pytest.raises(SuiteError, match=message):
+        load_suite(write_suite(tmp_path, ENV_SUITE.replace(*change)))
+
+
+def test_older_compares_versions_number_by_number() -> None:
+    assert older("2.1.99", "2.1.302")
+    assert not older("2.1.314 (Claude Code)", "2.1.302")
+    assert not older("2.1.302", "2.1.302")
+    assert older("2.1", "2.1.0")

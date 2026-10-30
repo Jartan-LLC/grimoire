@@ -53,6 +53,7 @@ from evals.suite import (
     Suite,
     SuiteError,
     load_suite,
+    older,
     python_cache,
     tree_hash,
 )
@@ -98,6 +99,17 @@ def claude_version() -> str:
     return str(
         run([CLAUDE, "--version"], capture_output=True, text=True, check=True).stdout
     ).split()[0]
+
+
+def checked_version(suite: Suite) -> str:
+    """The installed Claude Code version; exits when it is older than the suite's `claude_code`."""
+    version = claude_version()
+    if suite.claude_code and older(version, suite.claude_code):
+        raise SystemExit(
+            f"Claude Code {version} is older than {suite.claude_code}, which "
+            f"{shown(suite.path)}/suite.toml needs: update Claude Code"
+        )
+    return version
 
 
 def shown(path: pathlib.Path) -> str:
@@ -404,6 +416,8 @@ def pinned(
     }
     if suite.judges:  # absent otherwise, so a plan fixed before judges existed still matches
         plan["judges"] = {j.id: jury.instrument(j) for j in suite.judges.values()}
+    if spec.env:  # absent otherwise, as for judges
+        plan["env"] = dict(sorted(spec.env.items()))
     return plan
 
 
@@ -1164,11 +1178,19 @@ def baseline_specs(
     names = args.arms.split(",")
     if stray := [n for n in names if n not in ("old", "none")]:
         raise SystemExit(f"--arms takes old and none, not {', '.join(stray)}")
-    version = claude_version()
+    version = checked_version(suite)
     return [
         (
             build_arm(name, suite, args.base, None, store),
-            session.Spec(model, version, suite.budget_usd, ROOT, store, timeout_s=suite.timeout_s),
+            session.Spec(
+                model,
+                version,
+                suite.budget_usd,
+                ROOT,
+                store,
+                timeout_s=suite.timeout_s,
+                env=suite.env,
+            ),
         )
         for name in names
         for model in suite.models
@@ -1415,8 +1437,9 @@ def main() -> int:
         raise SystemExit(f"{model} is not one of the suite's models {list(suite.models)}")
     store = cache.root(ROOT)
     spec = session.Spec(
-        model, claude_version(), suite.budget_usd, ROOT, store, timeout_s=suite.timeout_s
-    )
+        model, checked_version(suite), suite.budget_usd, ROOT, store,
+        timeout_s=suite.timeout_s, env=suite.env,
+    )  # fmt: skip
     if args.command == "screen":
         return screen(args, suite, spec, store)
     if args.arm == "new" and args.split is None:

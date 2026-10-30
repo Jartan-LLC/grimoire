@@ -173,6 +173,12 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
 - **Keep tool configuration out of a fixture.** A fixture whose `pyproject.toml` has a `[tool.ruff]`
   table gets a `.ruff_cache/` written into it by the commit hooks, and the case hash counts every file in
   the fixture, so each hook run would redraw the case's samples.
+- **A suite that needs Claude Code configured** sets the variables in an `[env]` table of `suite.toml`,
+  `CLAUDE_CODE_*` names only and no login's, such as `CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS = "0"`. They
+  are set after the runner drops the caller's `CLAUDE*` variables, and the runner's own settings win
+  over them. Changing them draws new samples. A suite that needs a recent Claude Code sets
+  `claude_code = "<version>"` (top-level, above the first `[table]`), the oldest version its sessions
+  may run on: a run or screen on an older one stops before any session.
 - **Check the checks.** Write several passing references that differ in wording, order and approach, and
   failing references for the target check. The lint runs the regex checks on all of them; a judged check
   is scored on the references when its judge is calibrated (Judges, bar row 5). Prefer checks on what the

@@ -508,6 +508,27 @@ def test_a_plan_pins_the_judges_without_redrawing_sessions_when_they_change(
     assert cli.drawn(list(judged.cases), plan | {"judges": {"flags": "other"}}, arms, "t1") == base
 
 
+def test_a_plan_pins_the_suites_env_only_when_it_sets_one(tmp_path: pathlib.Path) -> None:
+    suite = load_suite(write_suite(tmp_path / "suite"))
+    old = Arm("old", "h", {})
+    spec = session.Spec("claude-opus-5-5", "2.1.310", 1.0, tmp_path, tmp_path / "store")
+    assert "env" not in cli.pinned(suite, "dev", 3, spec, old)
+    with_env = dataclasses.replace(spec, env={"CLAUDE_CODE_FORK_SUBAGENT": "1"})
+    assert cli.pinned(suite, "dev", 3, with_env, old)["env"] == {"CLAUDE_CODE_FORK_SUBAGENT": "1"}
+
+
+def test_a_run_refuses_a_claude_code_older_than_the_suite_needs(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = write_suite(tmp_path, SUITE.replace("target =", 'claude_code = "2.1.302"\ntarget =', 1))
+    suite = load_suite(root)
+    monkeypatch.setattr(cli, "claude_version", lambda: "2.1.301")
+    with pytest.raises(SystemExit, match=r"Claude Code 2\.1\.301 is older than 2\.1\.302"):
+        cli.checked_version(suite)
+    monkeypatch.setattr(cli, "claude_version", lambda: "2.1.314")
+    assert cli.checked_version(suite) == "2.1.314"
+
+
 def test_a_judge_without_a_cleared_stamp_gates_nothing(tmp_path: pathlib.Path) -> None:
     suite = load_suite(write_suite(tmp_path, SUITE + JUDGE, KEY + JUDGED))
     assert cli.advisory(suite) == {"flags": "no calibration stamp"}
