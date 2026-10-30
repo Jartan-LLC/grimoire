@@ -32,7 +32,7 @@ Based on the issue area, read the appropriate project documentation in `docs/`.
 
 ### 4. Implement
 
-Load the `gitwise:commit-pr-writing` skill. Before you write code, read `writing.md` in the `praxis:comment-hygiene` skill, even when the skill is already loaded: it covers the comments, docstrings and file headers you write and the ones your change makes false. Follow the plan if one exists. Work through changes methodically. Make progressive commits as logical units of work are completed rather than one monolithic commit at the end, writing each commit message as `gitwise:commit-pr-writing` says.
+Load the `gitwise:commit-pr-writing` skill. Before you write code, read `writing.md` in the `praxis:comment-hygiene` skill, even when the skill is already loaded: it covers the comments, docstrings and file headers you write and the ones your change makes false. Before you write code, load the installed skills this work calls for, such as one on splitting it across subagents. Follow the plan if one exists. Work through changes methodically. Make progressive commits as logical units of work are completed rather than one monolithic commit at the end, writing each commit message as `gitwise:commit-pr-writing` says.
 
 ### 5. Update Documentation
 
