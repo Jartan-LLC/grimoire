@@ -214,11 +214,12 @@ def waves(parsed: trace.Trace) -> list[tuple[int, float]]:
 
 def barrier_score(parsed: trace.Trace) -> float:
     """1.0 when the main thread wrote no file, or tried to, inside a wave."""
+    spans = waves(parsed)
     inside = any(
         start < w.index < end
         for w in parsed.writes
         if w.kind == "file" and not w.spawn
-        for start, end in waves(parsed)
+        for start, end in spans
     )
     return 0.0 if inside else 1.0
 
@@ -233,7 +234,9 @@ def session_score(check: Check, sample: Sample, parsed: trace.Trace) -> float:
         return overlap_score(parsed)
     if check.artifact == "spawn-writes":
         return spawn_writes_score(check, parsed)
-    return barrier_score(parsed)
+    if check.artifact == "barrier":
+        return barrier_score(parsed)
+    raise ValueError(f"no session grader for {check.artifact!r}")
 
 
 def _mean_by_metric(pairs: list[tuple[str, float]]) -> dict[str, float]:

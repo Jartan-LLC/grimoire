@@ -155,6 +155,13 @@ def test_a_barrier_check_fails_on_a_main_thread_write_while_a_spawn_is_out() -> 
     assert barrier([*wave, *failed, *wrote("w1", "/repo/glue.py")]) == 1.0
 
 
+def test_a_session_check_with_no_grader_refuses_rather_than_scores() -> None:
+    parsed = trace.parse([spawn("a1"), launched("a1")], PLUGINS)
+    assert grade.session_score(Check("m", "barrier"), sample([], ""), parsed) == 1.0
+    with pytest.raises(ValueError, match="no session grader for 'fan-out'"):
+        grade.session_score(Check("m", "fan-out"), sample([], ""), parsed)
+
+
 def test_waves_merge_spawns_whose_lifetimes_overlap() -> None:
     events = [
         spawn("a1"), launched("a1"), spawn("a2"), launched("a2"), notification("a1", "x"),
