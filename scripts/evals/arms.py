@@ -160,7 +160,7 @@ def none_arm(old: Arm, target: str, store: pathlib.Path, replaces: Sequence[str]
     held = [t for t in (target, *replaces) if _holds(old, t)]
     if not held:
         return Arm("none", old.hash, old.plugins)
-    source = pathlib.Path(next(iter(old.plugins.values()))).parent.parent
+    source = pathlib.Path(old.root)
     # Several texts go by a digest: their names joined could pass a file name's 255 bytes.
     joined = "+".join(t.replace(":", "-") for t in held)
     removed = joined if len(held) == 1 else hashlib.sha256(joined.encode()).hexdigest()[:16]
