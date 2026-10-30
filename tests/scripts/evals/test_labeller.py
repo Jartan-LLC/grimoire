@@ -1,5 +1,6 @@
 import json
 import pathlib
+import subprocess
 from collections.abc import Callable, Sequence
 
 import pytest
@@ -294,3 +295,34 @@ def test_gold_counts_an_unsure_kept_label_as_wrong_and_a_missing_one_nowhere(
     gold = labeller.gold_panel(suite, judge, PANEL, store, jury.Names((), ()), may_call=False)
     labelled = ("reference:c1:fail-1", "reference:c1:pass-1")
     assert gold == labeller.Gold(0, 2, labelled, ("reference:c1:pass-2",))
+
+
+def test_a_fixture_that_does_not_build_and_a_damaged_output_give_no_label(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case, _ = judged_case(tmp_path)
+
+    def broken(*_: object) -> None:
+        raise subprocess.CalledProcessError(1, ["python3", "build.py"])
+
+    monkeypatch.setattr(labeller, "build_fixture", broken)
+    out, raw = labeller.call(case, PANEL, lambda diff: "message")
+    assert out is None
+    assert "build.py" in raw
+    labeller.save(tmp_path, "ab12", json.dumps({"structured_output": PAYLOAD}))
+    assert labeller.load(tmp_path, "ab12") is not None
+    (tmp_path / "labels" / "ab" / "ab12.json").write_text('{"findings": ')
+    assert labeller.load(tmp_path, "ab12") is None
+
+
+def test_an_output_that_cannot_be_kept_gives_no_label(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case, judge = judged_case(tmp_path)
+
+    def full(*_: object) -> None:
+        raise OSError(28, "No space left on device")
+
+    monkeypatch.setattr(labeller, "call", Panel(["yes"] * labeller.LABELLERS))
+    monkeypatch.setattr(labeller, "save", full)
+    assert labeller.panel_label(tmp_path / "store", PANEL, case, judge, ITEM) is None

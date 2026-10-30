@@ -204,3 +204,35 @@ def test_args_give_the_judge_no_tools_and_ask_for_the_schema() -> None:
     assert line[line.index("--effort") + 1] == JUDGE.effort
     assert json.loads(line[line.index("--json-schema") + 1]) == jury.SCHEMA
     assert "<reference>\nref\n</reference>" in line[2]
+
+
+def test_a_call_that_cannot_start_and_a_damaged_answer_are_no_answer(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def too_long(*_: object, **__: object) -> None:
+        raise OSError(7, "Argument list too long")
+
+    monkeypatch.setattr(jury, "run", too_long)
+    answer, raw = jury.call(JUDGE, "ref", "text")
+    assert answer is None
+    assert "Argument list too long" in raw
+    key = jury.judgment_key(JUDGE, "ref", "text", 0)
+    jury.save(tmp_path, key, jury.Answer("no", ""), {})
+    assert jury.load(tmp_path, key) == jury.Answer("no", "")
+    (tmp_path / "judgments" / key[:2] / f"{key}.json").write_text('{"answer": "no", ')
+    assert jury.load(tmp_path, key) is None
+
+
+def test_an_answer_that_cannot_be_kept_is_a_failed_call(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def full(*_: object) -> None:
+        raise OSError(28, "No space left on device")
+
+    def calling(judge: Judge, reference: str, text: str) -> tuple[jury.Answer | None, str]:
+        return jury.Answer("no", ""), envelope({"answer": "no", "quote": ""})
+
+    monkeypatch.setattr(jury, "save", full)
+    failed = jury.fill(tmp_path, [(JUDGE, "ref", "a")], 1, calling)
+    assert len(failed) == JUDGE.panel
+    assert all("not kept: [Errno 28]" in line for line in failed)

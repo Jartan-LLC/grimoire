@@ -226,7 +226,10 @@ def load(store: pathlib.Path, key: str) -> Answer | None:
     path = _path(store, key)
     if not path.is_file():
         return None
-    return answer_of(json.loads(path.read_text()))
+    try:
+        return answer_of(json.loads(path.read_text()))
+    except (OSError, ValueError):  # a damaged file is no answer: the next run calls again
+        return None
 
 
 def save(store: pathlib.Path, key: str, answer: Answer, envelope: dict[str, object]) -> None:
@@ -283,6 +286,8 @@ def call(judge: Judge, reference: str, text: str) -> tuple[Answer | None, str]:
             )  # fmt: skip
         except subprocess.TimeoutExpired:
             return None, "timeout"
+        except OSError as error:  # E2BIG on a message past the argument limit, say
+            return None, f"claude did not start: {error}"
     stdout = str(done.stdout)
     answer = parse(stdout, judge.model)
     return (answer, stdout) if answer is not None else (None, f"{stdout}\n{done.stderr}")
@@ -323,7 +328,10 @@ def fill(
             limited[0] = limited[0] + 1 if answer is None and LIMITED.search(raw) else 0
         if answer is None:
             return f"{key}: no answer: {raw.strip()[:200]}"
-        save(store, key, answer, cast("dict[str, object]", json.loads(raw)))
+        try:
+            save(store, key, answer, cast("dict[str, object]", json.loads(raw)))
+        except (OSError, ValueError) as error:
+            return f"{key}: answer not kept: {error}"
         return ""
 
     with ThreadPoolExecutor(max_workers=workers) as pool:

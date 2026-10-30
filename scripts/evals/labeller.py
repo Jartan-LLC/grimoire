@@ -225,7 +225,12 @@ def _path(store: pathlib.Path, call_key: str) -> pathlib.Path:
 def load(store: pathlib.Path, call_key: str) -> Labelled | None:
     """A kept labeller output, or None."""
     path = _path(store, call_key)
-    return labelled_of(json.loads(path.read_text())) if path.is_file() else None
+    if not path.is_file():
+        return None
+    try:
+        return labelled_of(json.loads(path.read_text()))
+    except (OSError, ValueError):  # a damaged file is no output: the next run calls again
+        return None
 
 
 def save(store: pathlib.Path, call_key: str, stdout: str) -> None:
@@ -271,14 +276,16 @@ def call(
     with tempfile.TemporaryDirectory(prefix="grimoire-label-") as scratch:
         repo = pathlib.Path(scratch) / "repo"
         env = git_env(dict(os.environ))
-        build_fixture(case, repo, env)
         try:
+            build_fixture(case, repo, env)
             done = run(
                 args(labeller.model, labeller.effort, message(diff_of(repo, env))), cwd=repo, env=claude_env(dict(os.environ)),
                 capture_output=True, text=True, timeout=TIMEOUT_S, check=False,
             )  # fmt: skip
         except subprocess.TimeoutExpired:
             return None, "timeout"
+        except (OSError, subprocess.SubprocessError) as error:  # a fixture build, or E2BIG
+            return None, f"no session: {error}"
     stdout = str(done.stdout)
     labelled = parse(stdout, labeller.model)
     return (labelled, stdout) if labelled is not None else (None, f"{stdout}\n{done.stderr}")
@@ -308,7 +315,11 @@ def _labelled(  # noqa: PLR0913 -- the call's inputs, and whether it may call
     if out is None:
         print(f"  labeller call failed ({case.id}): {raw.strip()[:200]}", flush=True)
         return None
-    save(store, call_key, raw)
+    try:
+        save(store, call_key, raw)
+    except OSError as error:
+        print(f"  labeller output not kept ({case.id}): {error}", flush=True)
+        return None
     return out
 
 
