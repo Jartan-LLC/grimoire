@@ -542,6 +542,13 @@ def test_verify_kills_what_a_timed_out_command_started(
     assert not (tmp_path / "survived").exists()
 
 
+def test_verify_kills_what_a_command_that_exited_left_running(tmp_path: pathlib.Path) -> None:
+    command = "sh -c '(sleep 1; touch survived) &'"
+    assert session.verify(command, tmp_path, dict(os.environ)) == 0
+    time.sleep(1.5)
+    assert not (tmp_path / "survived").exists()
+
+
 def test_sample_env_sets_the_suites_variables_after_the_strip_and_before_the_runners(
     tmp_path: pathlib.Path,
 ) -> None:

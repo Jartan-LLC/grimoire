@@ -381,8 +381,9 @@ def new_commits(repo: pathlib.Path, env: dict[str, str], fixture_heads: list[str
 def verify(command: str, repo: pathlib.Path, env: dict[str, str]) -> int | None:
     """The exit code of a `verify` command run in `repo`, or None when it timed out; no shell runs it.
 
-    A command that cannot start, such as one naming no executable, exits NOT_STARTED. On a
-    timeout every process the command started is killed, not only the command itself.
+    A command that cannot start, such as one naming no executable, exits NOT_STARTED. Once
+    the command exits or times out, every process it started is killed too, such as a
+    server a test left running.
     """
     try:
         process = start(
@@ -392,11 +393,13 @@ def verify(command: str, repo: pathlib.Path, env: dict[str, str]) -> int | None:
     except OSError:
         return NOT_STARTED
     try:
-        return process.wait(timeout=VERIFY_TIMEOUT_S)
+        code: int | None = process.wait(timeout=VERIFY_TIMEOUT_S)
     except subprocess.TimeoutExpired:
+        code = None
+    with contextlib.suppress(ProcessLookupError):  # the command left nothing running
         os.killpg(process.pid, signal.SIGKILL)
-        process.wait()
-        return None
+    process.wait()
+    return code
 
 
 def collect(case: Case, repo: pathlib.Path) -> dict[str, str]:
