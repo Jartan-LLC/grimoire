@@ -1130,18 +1130,25 @@ def real_items(
                 store, functools.partial(session.key_of, case, arm, spec=spec)
             ):
                 if sample.valid and not sample.spoiled:
-                    found += _real(store, sample, case, check)
+                    found += _real(store, sample, case, check, spec.model)
     return found
 
 
-def _real(store: pathlib.Path, sample: cache.Sample, case: Case, check: Check) -> list[Real]:
-    """The sample as a real item, or nothing when its artifact is empty."""
+def _real(
+    store: pathlib.Path, sample: cache.Sample, case: Case, check: Check, session_model: str
+) -> list[Real]:
+    """The sample as a real item, or nothing when its artifact is empty.
+
+    A report's model is its subagent's; any other artifact's is the session's.
+    """
     parsed = parsed_trace(store, sample)
     text = grade.text_of(grade.outputs_of(sample, parsed), check.artifact)
     if not text.strip():
         return []
-    agent = check.artifact.removeprefix("report:")
-    model = next((r.model for r in parsed.reports if r.agent == agent), "")
+    model = session_model
+    if check.artifact.startswith("report:"):
+        agent = check.artifact.removeprefix("report:")
+        model = next((r.model for r in parsed.reports if r.agent == agent), "")
     return [Real(sample, case, check, text, model)]
 
 

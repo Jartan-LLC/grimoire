@@ -9,7 +9,7 @@ from typing import cast
 
 import eval as cli
 import pytest
-from evals import cache, calibrate, jury, labeller, session
+from evals import cache, calibrate, jury, labeller, session, trace
 from evals.arms import Arm
 from evals.plan import Listed, Plan
 from evals.suite import Suite, load_suite
@@ -707,6 +707,26 @@ def test_stored_samples_are_found_by_the_key_the_case_has_now(tmp_path: pathlib.
     assert cli.drawn_samples(store, lambda i: session.key_of(changed, arm, i, spec)) == []
     other = dataclasses.replace(spec, version="2.1.312")
     assert cli.drawn_samples(store, lambda i: session.key_of(case, arm, i, other)) == []
+
+
+def test_a_real_items_model_is_its_reports_subagent_or_else_the_session(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    suite = load_suite(write_suite(tmp_path / "suite", SUITE + JUDGE, KEY + JUDGED))
+    case = suite.cases[0]
+    sample = cache.Sample("k1", "c1", "old", 0, {}, True, [], ["fix: Closes #42"], "", {}, {})
+    report = trace.Report(0, "praxis:general-reviewer", "claude-sonnet-5-5", "A finding.")
+
+    def parsed(*_: object) -> trace.Trace:
+        return trace.Trace(reports=[report])
+
+    monkeypatch.setattr(cli, "parsed_trace", parsed)
+    commits = next(c for c in case.checks if c.judge)
+    (real,) = cli._real(tmp_path, sample, case, commits, "claude-opus-5-5")  # pyright: ignore[reportPrivateUsage]
+    assert real.model == "claude-opus-5-5"
+    reports = dataclasses.replace(commits, artifact="report:praxis:general-reviewer")
+    (real,) = cli._real(tmp_path, sample, case, reports, "claude-opus-5-5")  # pyright: ignore[reportPrivateUsage]
+    assert real.model == "claude-sonnet-5-5"
 
 
 def test_a_probe_takes_its_items_a_case_at_a_time(tmp_path: pathlib.Path) -> None:
