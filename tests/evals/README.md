@@ -178,9 +178,9 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
   the fixture, so each hook run would redraw the case's samples.
 - **A conversation** gives the user's later messages in the key, `turns = ["...", "..."]`, after
   `prompt.md`'s first one. Each is sent once the turn before has ended. Under `-p` the main thread's
-  subagents run in the background, and a turn that starts one ends only with the session, so no
-  later turn can follow it: the sample is excluded, with that reason. Put the turn that spawns
-  subagents last. A session that ends before every turn has run is excluded too. The lint reads the
+  subagents run in the background, and a turn that starts a background task (a subagent or a
+  background command) ends only with the session, so no later turn can follow it: the sample is
+  excluded, with that reason. Put the turn that spawns subagents last. A session that ends before every turn has run is excluded too. The lint reads the
   turns for `hints`, and a fact `where = "prompt"` may sit in any turn. The turns count in the case
   hash.
 - **A case that runs without some plugins,** such as a skill measured where praxis's hook cannot help,
@@ -519,7 +519,7 @@ After changing the runner or the verdict rule:
 - Each session is one `claude -p` call: a case cannot test a workflow that spans sessions, such as a PR
   reviewed in one and its review addressed in the next. A case's `turns` are written before the
   session, so they cannot answer what the agent asks, and a turn cannot follow one that started a
-  background subagent: such a sample is excluded.
+  background task (a subagent or a background command): such a sample is excluded.
 - Sessions run without the ScheduleWakeup and CronCreate tools, as a wakeup the agent sets for itself
   keeps the session waiting until it fires: a case cannot test a text that tells the agent to schedule
   one.
