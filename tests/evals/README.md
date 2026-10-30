@@ -81,6 +81,9 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
 - `new`: the plugins in your working tree.
 - `none`: `old` with the text under test removed: a skill's directory deleted and its preloads dropped,
   or an agent's or command's body cut to its first line.
+  A target that renames or replaces texts of `old` lists them in `suite.toml` as
+  `replaces = ["<plugin>:<name>", ...]` (top-level, above the first `[table]`), and `none` removes them
+  too, so it holds none of the texts the change replaces.
 
 ## Choosing cases
 

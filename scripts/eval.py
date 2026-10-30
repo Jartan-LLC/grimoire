@@ -119,7 +119,7 @@ def load(path: str) -> Suite:
 
 
 def build_arm(name: str, suite: Suite, base: str, new_ref: str | None, store: pathlib.Path) -> Arm:
-    """Arm `old` (plugins at the merge base with `base`), `none` (old without the target) or `new`.
+    """Arm `old` (plugins at the merge base with `base`), `none` (old without the target and what it replaces) or `new`.
 
     `new` is the working tree, or `new_ref` when given: the merge base itself there is
     an A/A comparison, and `none` (old without the target) is the positive control.
@@ -129,9 +129,9 @@ def build_arm(name: str, suite: Suite, base: str, new_ref: str | None, store: pa
     if name == "old":
         return old
     if name == "none":
-        return none_arm(old, suite.target, arms)
+        return none_arm(old, suite.target, arms, suite.replaces)
     if new_ref == "none":
-        stripped = none_arm(old, suite.target, arms)
+        stripped = none_arm(old, suite.target, arms, suite.replaces)
         return Arm("new", stripped.hash, stripped.plugins)
     if new_ref is not None:
         return old_arm(ROOT, new_ref, arms, name="new")
@@ -875,7 +875,8 @@ def plan_command(base: str, tier: int | None = None) -> int:
             binds = tier == FULL
             # The confirm split runs only at tier 4.
             splits = ("screen", "confirm") if binds else ("screen",)
-            lines, weak = split_report(suite, old_holds(suite.target, base), binds, splits)
+            held = any(old_holds(t, base) for t in suite.removed())
+            lines, weak = split_report(suite, held, binds, splits)
             print(
                 "  what its splits can see:"
                 if binds
@@ -1402,7 +1403,7 @@ def main() -> int:
         return show(args.key, cache.root(ROOT)) if args.command == "show" else judge_command(args)
     if args.command == "size":
         suite = load(args.suite)
-        lines, weak = split_report(suite, old_holds(suite.target, args.base))
+        lines, weak = split_report(suite, any(old_holds(t, args.base) for t in suite.removed()))
         print(f"{shown(suite.path)}:")
         print("\n".join(lines))
         return 1 if weak else 0

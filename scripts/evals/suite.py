@@ -286,6 +286,11 @@ class Suite:
     burned: tuple[str, ...]
     cases: tuple[Case, ...]
     judges: dict[str, Judge] = dataclasses.field(default_factory=dict[str, Judge])
+    replaces: tuple[str, ...] = ()
+
+    def removed(self) -> tuple[str, ...]:
+        """What the `none` arm removes from `old`: the target, then each text it replaces."""
+        return (self.target, *self.replaces)
 
     def split(self, name: str | None) -> list[Case]:
         """The cases of one split, or all of them."""
@@ -732,8 +737,9 @@ def load_suite(path: pathlib.Path) -> Suite:
     watch = _strs(data, "watch", where)
     if stray := [m for m in watch if m not in models]:
         raise SuiteError(f"{where}: watch names {stray}, which are not in models")
-    if ":" not in target:
-        raise SuiteError(f"{where}: 'target' must be <plugin>:<name>")
+    replaces = _strs(data, "replaces", where)
+    if any(":" not in t for t in (target, *replaces)):
+        raise SuiteError(f"{where}: 'target' and each of 'replaces' must be <plugin>:<name>")
     return Suite(
         path=path,
         target=target,
@@ -748,4 +754,5 @@ def load_suite(path: pathlib.Path) -> Suite:
         burned=_strs(data, "BURNED", where),
         cases=cases,
         judges=judges,
+        replaces=replaces,
     )

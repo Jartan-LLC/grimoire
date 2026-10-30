@@ -409,3 +409,12 @@ def test_files_and_verify_checks_load_and_name_what_the_session_collects(
             load_suite(write_suite(tmp_path / message[:4], key=broken))
     with pytest.raises(SuiteError, match="is not commits"):
         load_suite(write_suite(tmp_path / "e", key=key.replace("files:src/**/*.py", "files:")))
+
+
+def test_a_suite_names_what_its_target_replaces(tmp_path: pathlib.Path) -> None:
+    replacing = SUITE.replace("target =", 'replaces = ["recursio:old-skill"]\ntarget =', 1)
+    suite = load_suite(write_suite(tmp_path / "a", replacing))
+    assert suite.removed() == ("gitwise:commit-pr-writing", "recursio:old-skill")
+    assert load_suite(write_suite(tmp_path / "b")).removed() == ("gitwise:commit-pr-writing",)
+    with pytest.raises(SuiteError, match="each of 'replaces' must be <plugin>:<name>"):
+        load_suite(write_suite(tmp_path / "c", replacing.replace("recursio:old-skill", "old")))
