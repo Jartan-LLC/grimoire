@@ -318,16 +318,18 @@ def panel_label(  # noqa: PLR0913 -- the call's inputs, and whether it may call
     *,
     may_call: bool = True,
 ) -> tuple[tuple[str, ...], str] | None:
-    """The labelling panel on one item: the three labellers' labels and the final one; None if one is missing."""
+    """The labelling panel on one item: the three labellers' labels and the final one.
+
+    None at the first labeller missing, with no later one called: the panel cannot complete.
+    """
     _, text = item
     accepted = ratings(case, judge)
-    outs = [
-        _labelled(store, panel, case, judge, item, index=i, may_call=may_call)
-        for i in range(LABELLERS)
-    ]
-    if any(o is None for o in outs):
-        return None
-    done = [o for o in outs if o is not None]
+    done: list[Labelled] = []
+    for i in range(LABELLERS):
+        out = _labelled(store, panel, case, judge, item, index=i, may_call=may_call)
+        if out is None:
+            return None
+        done.append(out)
     votes = tuple(label_of(o, text, accepted) for o in done)
     if (final := unanimous(votes)) is not None:
         return votes, final

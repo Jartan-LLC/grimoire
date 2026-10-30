@@ -281,6 +281,16 @@ def test_a_panel_missing_a_member_or_its_adjudicator_gives_no_label(
     assert labeller.panel_label(tmp_path / "store", PANEL, case, judge, ITEM) is None
 
 
+def test_a_panel_calls_no_labeller_after_one_fails(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case, judge = judged_case(tmp_path)
+    calls = Panel([None, "yes", "yes"])
+    monkeypatch.setattr(labeller, "call", calls)
+    assert labeller.panel_label(tmp_path / "store", PANEL, case, judge, ITEM) is None
+    assert len(calls.messages) == 1
+
+
 def test_gold_counts_an_unsure_kept_label_as_wrong_and_a_missing_one_nowhere(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
