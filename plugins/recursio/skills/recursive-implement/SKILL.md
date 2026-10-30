@@ -1,45 +1,50 @@
 ---
 name: recursive-implement
-description: Build a project using recursive multi-agent development with TDD
-argument-hint: Project description, issue number, or plan file path
+description: Implement a plan, issue or description without stopping to ask, splitting it across parallel subagents only where that pays; leaves the work uncommitted and unreviewed.
+argument-hint: Plan file path, issue number, or description
 ---
 
 # Recursive Implement
 
-Build a project (or feature) using waves of parallel nested subagents with TDD at every level.
+Implement a plan, an issue or a description to completion in the main thread, splitting it across parallel subagents only where that pays.
+
+By invoking this command the user grants one thing: deciding without asking and running to completion. Nothing else: never commit, branch, push, open a PR, post to GitHub, run a code review, or take an action the project's rules say to ask about first. Build around such an action and list it under Left for the user.
+
+Where the project's own rules say otherwise, follow them.
 
 ## Process
 
-### 1. Gather Context
+### 1. Load the Skill
 
-Collect everything the orchestrator needs into a single prompt:
+Load the `recursio:splitting-implementation` skill.
 
-- **From the user's request:** the project description, issue number, or plan file path
-- **If issue number:** fetch the issue body with `gh issue view <number>` and include it
-- **From conversation:** if the user discussed requirements, architecture decisions, constraints, or preferences in this session, summarize the relevant parts
-- **From existing project:** if working in an existing codebase, note the language, test framework, key conventions, and any relevant file paths
+### 2. Take the Input
 
-### 2. Launch Orchestrator
+- **A plan file**, an old `wave-plan-*.md` included: read it.
+- **An issue number**: run `gh issue view <number> --comments`, and read `.claude/workspace/issue-<number>/plan.md` if it exists.
+- **A description**: take it as given.
 
-Spawn a `recursive-orchestrator`. The prompt should contain:
+Add the requirements discussed in the conversation, and read the project's rules and its Verify commands. If `split.md` in the effort's folder records waves already done, resume from the first wave whose barrier has not passed.
 
-```text
-[Project description or plan file path]
+### 3. Split or Build
 
-[Conversation context if any -- requirements, constraints, decisions made]
+Act as the root in the main thread: split or build as the skill says. When splitting, write `split.md`, the contracts and the contract tests, then run the waves.
 
-[Existing project context if any -- language, conventions, key files]
+### 4. Update Docs and Changelog
 
-Working directory: [cwd]
-```
+Make the doc and changelog changes the project's rules say the change owes.
 
-### 3. Report Results
+### 5. Verify
 
-Relay the orchestrator's final report to the user.
+Run the project's Verify commands and fix what fails.
 
-## Failure Recovery
+### 6. Report
 
-If the orchestrator reports a failure, present the context to the user. On re-run:
+Tell the user:
 
-- The wave plan persists in `.claude/workspace/` -- pass the file path to skip re-planning
-- Completed source files and tests remain on disk -- the orchestrator can build on them
+- what was built, and the test results;
+- for each part: split, built or could not split;
+- each decision taken without asking, and its source;
+- what is left for the user;
+- the path of `split.md`, if one was written;
+- that the work is uncommitted and unreviewed.

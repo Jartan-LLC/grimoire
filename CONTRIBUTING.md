@@ -67,8 +67,6 @@ python3 -m pytest tests/<source path>/test_<name>.py
   generated: after you change a plugin's name, version, description, keywords,
   category or agents, run `python3 scripts/generate-codex.py` and commit its
   output.
-- `find-duplicate-comments.js` reports comments in the identical copies of
-  `hooks/scripts/sync-codex-agents.js` as retold; dismiss it.
 - Report security issues privately via [SECURITY.md](.github/SECURITY.md). Ask
   questions in Discussions (Q&A); report bugs and feature requests through the
   issue forms. Everyone taking part follows the
@@ -86,7 +84,7 @@ python3 -m pytest tests/<source path>/test_<name>.py
    entries carry (`name`, `source`, `description`, `category`, `keywords`,
    `author`, `license`). Add its row to the plugin table in `README.md`.
 3. If the plugin ships agents, copy `hooks/scripts/sync-codex-agents.js` and its
-   `SessionStart` entry in `hooks/hooks.json` from `plugins/recursio/`. Nothing
+   `SessionStart` entry in `hooks/hooks.json` from `plugins/praxis/`. Nothing
    checks that they are there.
 4. Run `python3 scripts/generate-codex.py` and commit the output.
 5. Add a line under `## Unreleased` in the root `CHANGELOG.md`.

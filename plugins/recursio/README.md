@@ -1,6 +1,8 @@
 # Recursio
 
-Recursive multi-agent development system that decomposes projects into waves of parallel nested subagents with TDD at every level. Works for greenfield and existing codebases.
+Teaches your agent when to split implementation work across parallel subagents, and how to split it so the parts fit together. Most changes are built directly; a large change that divides along loosely coupled files or modules is split into small waves.
+
+Splitting buys accuracy and context relief, not speed: a split costs several times the tokens of building directly, and usually more wall-clock time.
 
 ## Installation
 
@@ -18,41 +20,25 @@ codex plugin marketplace add Jartan-LLC/grimoire
 codex plugin add recursio@grimoire
 ```
 
-Recursio leans harder on Claude Code than the other plugins. Its skills and
-agent roles install under Codex, but nested wave orchestration depends on
-spawning subagents that themselves spawn subagents, under per-agent tool
-constraints Codex has no equivalent for. Expect `recursive-implement` to behave
-differently there.
+Recursio leans on Claude Code's subagents. Under Codex the skill and the command load, recursio ships no agent roles, and the agent builds the parts of a split itself, wave by wave.
 
 ## What's Included
 
 ### Skills
 
-- **recursive-development** -- core principles: nesting, scope ownership, TDD, context flow
-- **recursive-planning** -- wave plan design: module identification, dependency mapping, contract guidance
-- **recursive-quality** -- quality patterns, anti-patterns, contract richness, critical rules
-- **recursive-execution** -- wave barriers, agent constraints, review-fix evaluation
-
-### Agents
-
-- **recursive-orchestrator** (opus) -- coordinates waves of parallel subagents
-- **recursive-implementer** (sonnet) -- implements modules with TDD, nests for sub-concerns
-- **recursive-planner** (opus) -- architects wave plans from project descriptions
-- **recursive-reviewer** (sonnet) -- reviews code for bugs, quality, and structural artifacts
+- **splitting-implementation** -- whether to split an implementation across parallel subagents, and how: what to settle first, what each subagent is told and reports back, and how each wave is checked on the combined code. The command loads it; otherwise your agent loads it when the work in hand matches its description.
 
 ### Commands
 
-- `/recursio:recursive-implement` -- build a project using the full recursive development pipeline
-
-### Hooks
-
-- **SessionStart** -- installs this plugin's Codex agent roles (no-op outside Codex)
+- `/recursio:recursive-implement` -- implement a plan file, an issue or a description to completion without stopping to ask, splitting it only where that pays. It decides open questions itself and lists each decision in its report. It never commits, branches, pushes, opens a PR or runs a code review: the work is left uncommitted and unreviewed.
 
 ## Quick Start
 
 ```text
 /recursio:recursive-implement Build a CLI tool that parses JSON logs and outputs summary reports
 ```
+
+To leave Claude Code working until the project's checks pass, use its built-in `/goal` with the project's Verify commands as the condition.
 
 ## License
 

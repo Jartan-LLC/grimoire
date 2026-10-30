@@ -1,17 +1,15 @@
 {
   "name": "recursio",
-  "version": "1.1.4",
-  "description": "Recursive multi-agent development system with TDD -- decomposes projects into waves of parallel nested subagents",
+  "version": "2.0.0",
+  "description": "Splitting implementation across parallel subagents -- when a split pays, and how to split so the parts fit",
   "interface": {
     "displayName": "Recursio",
-    "shortDescription": "Recursive multi-agent development system with TDD",
+    "shortDescription": "Splitting implementation across parallel subagents",
     "category": "Development"
   },
   "keywords": [
     "recursive",
     "multi-agent",
-    "tdd",
-    "wave-plan",
     "orchestration"
   ]
 }
