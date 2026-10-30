@@ -1,0 +1,4 @@
+final = "Renamed fetchJson to getJson in src/, scripts/ and test/; tests pass."
+
+[briefs]
+"general-purpose" = "Rename fetchJson in the scripts/ directory."

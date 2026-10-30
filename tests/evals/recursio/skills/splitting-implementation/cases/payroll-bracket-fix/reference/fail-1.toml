@@ -1,0 +1,4 @@
+final = "bracket_for now keeps income on an upper bound in the lower bracket; the failing test passes."
+
+[briefs]
+"general-purpose" = "Fix the bound check in src/payroll/brackets.py."

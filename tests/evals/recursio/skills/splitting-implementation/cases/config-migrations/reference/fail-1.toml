@@ -1,0 +1,4 @@
+final = "Added migrations 3-to-4, 4-to-5 and 5-to-6 to the chain, with tests that run a version 1 config through to version 6."
+
+[briefs]
+"general-purpose" = "Write src/migrations/5-to-6.js and its test."

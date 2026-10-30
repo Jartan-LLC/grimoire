@@ -1,0 +1,1 @@
+Let's do this test-first. Write failing tests for `parseDuration(text)` in src/duration.js -- it should take things like `1h30m`, `90s`, `2.5h` and `1:30:00`, return seconds, and throw on junk -- then make them pass.

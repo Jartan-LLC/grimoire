@@ -1,0 +1,1 @@
+final = "helpers.js is now strings.js, arrays.js and dates.js; src/helpers.js re-exports the old names and the tests import the new modules."

@@ -1,0 +1,17 @@
+split = "confirm"
+kind = "trigger"
+hints = ["subagent", "parallel", "agents", "delegate", "wave"]
+turns = [
+  "OK. Rename `fetchJson` to `getJson` everywhere it is defined, imported or called -- src/, scripts/ and test/ -- and keep the tests passing.",
+]
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "recursio:splitting-implementation"
+state = "not-loaded"
+
+[[check]]
+metric = "quiet"
+artifact = "brief:general-purpose"
+present = '''\A\Z'''

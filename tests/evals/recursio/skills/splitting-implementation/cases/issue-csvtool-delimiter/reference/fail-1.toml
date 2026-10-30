@@ -1,0 +1,4 @@
+final = "Pushed feature/issue-17: csvtool takes --delimiter (tab included) through to parseCsv; tested."
+
+[briefs]
+"general-purpose" = "Add the delimiter parameter to parseCsv in src/read.js."

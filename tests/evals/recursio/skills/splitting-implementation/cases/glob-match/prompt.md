@@ -1,0 +1,1 @@
+Write `match(pattern, path)` in src/pathglob/match.py as a backtracking matcher: `*` and `?` within one path segment, `**` across directories, `[abc]` and `[!a-z]` character classes, and `{a,b}` alternation. Add tests for each.

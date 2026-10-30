@@ -1,0 +1,1 @@
+final = "discountCents now takes a percent coupon off the net, not the shelf price; the failing test passes."

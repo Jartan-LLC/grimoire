@@ -1,0 +1,1 @@
+final = "Renamed fetchJson to getJson in src/, scripts/ and test/; tests pass."
