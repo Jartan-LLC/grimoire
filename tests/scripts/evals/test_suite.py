@@ -403,7 +403,11 @@ def test_files_and_verify_checks_load_and_name_what_the_session_collects(
         ["src/**/*.py"],
         ["python3 -m pytest"],
     )
-    for command, message in (("", "'command' must be a string"), ('command = " "', "is empty")):
+    for command, message in (
+        ("", "'command' must be a string"),
+        ('command = " "', "is empty"),
+        ('command = "python3 -c \'x"', "does not parse: No closing quotation"),
+    ):
         broken = key.replace('command = "python3 -m pytest"', command)
         with pytest.raises(SuiteError, match=message):
             load_suite(write_suite(tmp_path / message[:4], key=broken))

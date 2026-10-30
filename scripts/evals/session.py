@@ -67,6 +67,7 @@ STUB_TOKEN = "grimoire-eval-stub"  # noqa: S105 -- a dummy that authenticates no
 # A temp directory the stub reads besides the runner's, which TMPDIR can move elsewhere.
 SHARED_TMP = pathlib.Path("/tmp")  # noqa: S108 -- read for a body file, never written
 VERIFY_TIMEOUT_S = 60
+NOT_STARTED = 127  # a shell's exit code for a command it cannot find
 
 
 @dataclass(frozen=True)
@@ -375,7 +376,10 @@ def new_commits(repo: pathlib.Path, env: dict[str, str], fixture_heads: list[str
 
 
 def verify(command: str, repo: pathlib.Path, env: dict[str, str]) -> int | None:
-    """The exit code of a `verify` command run in `repo`, or None when it timed out; no shell runs it."""
+    """The exit code of a `verify` command run in `repo`, or None when it timed out; no shell runs it.
+
+    A command that cannot start, such as one naming no executable, exits NOT_STARTED.
+    """
     try:
         done = run(
             shlex.split(command), cwd=repo, env=env,
@@ -383,6 +387,8 @@ def verify(command: str, repo: pathlib.Path, env: dict[str, str]) -> int | None:
         )  # fmt: skip
     except subprocess.TimeoutExpired:
         return None
+    except OSError:
+        return NOT_STARTED
     return int(done.returncode)
 
 

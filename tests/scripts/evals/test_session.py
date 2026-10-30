@@ -517,6 +517,7 @@ def test_verify_returns_the_exit_code_or_none_on_a_timeout(
     env = dict(os.environ)
     assert session.verify("python3 -c 'raise SystemExit(3)'", tmp_path, env) == 3
     assert session.verify("python3 -c 'pass'", tmp_path, env) == 0
+    assert session.verify("no-such-command-here --x", tmp_path, env) == session.NOT_STARTED
     monkeypatch.setattr(session, "VERIFY_TIMEOUT_S", 0.2)
     assert session.verify("python3 -c 'import time; time.sleep(5)'", tmp_path, env) is None
 

@@ -11,6 +11,7 @@ import hashlib
 import json
 import pathlib
 import re
+import shlex
 import tomllib
 from dataclasses import dataclass
 from typing import cast
@@ -472,7 +473,13 @@ def _session_check(table: Table, where: pathlib.Path, metric: str, artifact: str
         return Check(metric, artifact, write=write)
     if artifact == "verify":
         command = _str(table, "command", where)
-        if not command.strip():
+        try:
+            words = shlex.split(command)
+        except ValueError as error:
+            raise SuiteError(
+                f"{where}: a verify check's 'command' does not parse: {error}"
+            ) from None
+        if not words:
             raise SuiteError(f"{where}: a verify check's 'command' is empty")
         return Check(metric, artifact, command=command)
     skill = _str(table, "skill", where)
