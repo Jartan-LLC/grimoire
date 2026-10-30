@@ -1,7 +1,6 @@
 split = "dev"
 kind = "trigger"
 hints = ["subagent", "parallel", "agents", "delegate", "wave"]
-without = ["praxis"]
 turns = [
   "Fine. Rename `get_user` to `fetch_user` everywhere it is defined, imported or called -- the package, scripts/ and tests/ -- and keep the tests passing.",
 ]

@@ -1,0 +1,4 @@
+final = "stationkit is built: the three readers, quality control, derived values and daily summaries, the reports and the command, each with its tests."
+
+[briefs]
+"general-purpose" = "Write src/stationkit/qc.py: check(readings, limits) -> list[Flag] for the range, step, flatline and gap checks the README describes, with tests/test_qc.py."

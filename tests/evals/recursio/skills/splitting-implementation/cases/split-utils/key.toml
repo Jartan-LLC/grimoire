@@ -1,7 +1,6 @@
 split = "dev"
 kind = "trigger"
 hints = ["subagent", "parallel", "agents", "delegate"]
-without = ["praxis"]
 
 [[check]]
 metric = "quiet"

@@ -7,8 +7,7 @@ remote = true
 metric = "recall"
 artifact = "delivery"
 skill = "recursio:splitting-implementation"
-write = "spawn"
-state = "in-context"
+state = "loaded"
 
 [[check]]
 metric = "split"

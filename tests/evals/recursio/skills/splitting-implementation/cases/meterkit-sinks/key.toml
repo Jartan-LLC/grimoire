@@ -1,7 +1,6 @@
 split = "confirm"
 kind = "trigger"
 hints = ["subagent", "parallel", "split", "agents", "delegate", "wave", "recursi"]
-without = ["praxis"]
 turns = [
   "Right. Please add a StatsD sink (UDP through an injected socket), a Prometheus text-format exporter, a JSON-lines file sink, and a fan-out sink that writes to several sinks at once. Tests for each.",
 ]
@@ -10,8 +9,7 @@ turns = [
 metric = "recall"
 artifact = "delivery"
 skill = "recursio:splitting-implementation"
-write = "spawn"
-state = "in-context"
+state = "loaded"
 
 [[check]]
 metric = "split"

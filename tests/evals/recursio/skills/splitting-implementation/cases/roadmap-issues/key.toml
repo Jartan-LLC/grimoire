@@ -1,7 +1,6 @@
 split = "screen"
 kind = "trigger"
 hints = ["subagent", "parallel", "agents", "delegate"]
-without = ["praxis"]
 remote = true
 
 [[check]]

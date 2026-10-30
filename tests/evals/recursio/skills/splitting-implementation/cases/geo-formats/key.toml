@@ -1,7 +1,6 @@
 split = "dev"
 kind = "trigger"
 hints = ["subagent", "parallel", "split", "agents", "delegate", "wave", "recursi"]
-without = ["praxis"]
 turns = [
   "OK, no holes needed. Go ahead: add readers and writers for GeoJSON, WKT and GPX, each with round-trip tests, and a `geokit convert IN OUT` command that picks both formats from the file extensions.",
 ]
@@ -10,8 +9,7 @@ turns = [
 metric = "recall"
 artifact = "delivery"
 skill = "recursio:splitting-implementation"
-write = "spawn"
-state = "in-context"
+state = "loaded"
 
 [[check]]
 metric = "split"

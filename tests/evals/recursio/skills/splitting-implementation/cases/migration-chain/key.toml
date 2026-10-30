@@ -1,7 +1,6 @@
 split = "dev"
 kind = "trigger"
 hints = ["subagent", "parallel", "agents", "delegate", "wave"]
-without = ["praxis"]
 turns = [
   "Good. Add three migrations: 0004 adds a `customers.email_normalized` column, 0005 fills it from `email` (trimmed and lowercased), and 0006 adds a unique index on it. Each one runs on the schema the one before leaves. Add tests.",
 ]

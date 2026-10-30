@@ -1,14 +1,12 @@
 split = "dev"
 kind = "trigger"
 hints = ["subagent", "parallel", "split", "agents", "delegate", "wave", "recursi"]
-without = ["praxis"]
 
 [[check]]
 metric = "recall"
 artifact = "delivery"
 skill = "recursio:splitting-implementation"
-write = "spawn"
-state = "in-context"
+state = "loaded"
 
 [[check]]
 metric = "split"

@@ -1,7 +1,6 @@
 split = "confirm"
 kind = "trigger"
 hints = ["subagent", "parallel", "agents", "delegate", "wave"]
-without = ["praxis"]
 turns = [
   "Right, it's a stub. Implement it: walk the directory recursively, sum the file sizes under each directory, skip symlinks so loops cannot happen, and print the N largest directories (`--top N`, default 10). Tests with tmp_path.",
 ]
