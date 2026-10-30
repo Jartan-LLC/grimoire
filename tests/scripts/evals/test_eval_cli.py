@@ -584,6 +584,53 @@ def test_align_scores_held_out_once_per_version_and_burns_a_missed_one(
     assert calibrate.read_stamp(labels.parent.parent / "stamp.toml") == stamp
 
 
+def test_align_stamps_a_cleared_version_again_once_its_labels_change(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    held = JUDGE.replace("question", 'held_out = ["c1"]\nquestion')
+    suite = load_suite(write_suite(tmp_path / "suite", SUITE + held, KEY + JUDGED))
+    judge = suite.judges["flags"]
+    folder = calibrate.judge_dir(suite.path, "flags")
+    calibrate.write_labels(
+        folder / "labels" / "c1.toml",
+        [calibrate.Label("k1", "c1", "old", "", "m e", ("yes",) * 3, "yes", "fix: Closes #42")],
+    )
+    cleared = calibrate.Stamp(
+        judge="flags",
+        instrument=jury.instrument(judge),
+        versions=(jury.instrument(judge),),
+        labels="the labels before k1",
+        labeller="m e",
+        date="2026-10-27",
+        cells=(
+            calibrate.Cell("natural", "old", tp=40, tn=40),
+            calibrate.Cell("sibling", tn=40),
+            calibrate.Cell("reference", tp=1),
+            *(calibrate.Cell(k, tn=10) for k in calibrate.CONTROL_KINDS),
+            *(calibrate.Cell(k, tp=60) for k in calibrate.INVARIANCE_KINDS),
+        ),
+        references={"c1": calibrate.text_hash("Issue 42.")},
+        gold_right=10,
+        gold_n=10,
+        labelled=10,
+        fleiss=0.9,
+    )
+    calibrate.write_stamp(folder / "stamp.toml", cleared)
+
+    def says_no(j: object, reference: str, text: str) -> tuple[jury.Answer, str]:
+        return jury.Answer("no", ""), json.dumps({"modelUsage": {judge.model: {}}})
+
+    monkeypatch.setattr(jury, "call", says_no)
+    args = argparse.Namespace(set="held-out", jobs=1, labeller_model="m", labeller_effort="e")
+    assert cli.align(args, suite, judge, tmp_path / "store") == 1  # scored again, and missed
+    stamp = calibrate.read_stamp(folder / "stamp.toml")
+    assert stamp is not None
+    assert stamp.versions == (jury.instrument(judge),)
+    assert stamp.labels == calibrate.labels_hash(folder / "labels")
+    assert stamp.burned == ("k1",)
+    assert "MISSED" in capsys.readouterr().out
+
+
 def test_stored_samples_are_found_by_the_key_the_case_has_now(tmp_path: pathlib.Path) -> None:
     root = write_suite(tmp_path / "suite")
     case = load_suite(root).cases[0]

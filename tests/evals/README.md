@@ -321,7 +321,9 @@ sample of held-out labels and edits that count.
    row's counts. A version that misses the bar moves its held-out items to dev: draw and label fresh
    held-out sessions and try again, at most 3 versions per question; then report the missed bar.
 6. Commit the labels and the stamp. The lint fails a stamp whose judge, labels or a stamped case's
-   reference changed since it was written.
+   reference changed since it was written. After new labels or a dev case's reference edit, `--set
+   held-out` stamps a cleared version again without counting a new version; it burns the held-out
+   items like a missed version if it misses. A held-out case's edited reference must be restored.
 
 ## Running and deciding
 

@@ -154,6 +154,33 @@ def test_gates_only_on_a_current_stamp_that_cleared() -> None:
     assert "bar missed" in calibrate.gates(missed, "i1", {"c1": "h1"}, "l1")
 
 
+def test_a_cleared_version_stale_by_labels_or_a_dev_reference_is_stamped_again() -> None:
+    judge = Judge("flags", "Q?", held_out=("c2",))
+    stamp = dataclasses.replace(cleared_stamp(), references={"c1": "h1", "c2": "h2"})
+    refs = {"c1": "h1", "c2": "h2"}
+    refusal = calibrate.held_out_refusal
+    assert "scored on held-out already" in refusal(judge, stamp, "i1", refs, "l1")
+    assert refusal(judge, stamp, "i1", refs, "l2") == ""
+    assert refusal(judge, stamp, "i1", refs | {"c1": "h9"}, "l1") == ""
+    assert "restore it" in refusal(judge, stamp, "i1", refs | {"c2": "h9"}, "l2")
+    missed = dataclasses.replace(stamp, gold_right=0)
+    assert "scored on held-out already" in refusal(judge, missed, "i1", refs, "l2")
+    assert refusal(judge, stamp, "i2", refs, "l2") == ""
+
+
+def test_a_stamp_lists_each_version_once() -> None:
+    material = calibrate.Sources({}, {}, [])
+
+    def stamped(instrument: str) -> Stamp:
+        return calibrate.new_stamp(
+            Judge("flags", "Q?"), instrument, cleared_stamp(), held=True, material=material,
+            found=[], verdicts={}, single={}, split=(), gold=(0, 0), labels="l2", date="d",
+        )  # fmt: skip
+
+    assert stamped("i1").versions == ("i1",)
+    assert stamped("i2").versions == ("i1", "i2")
+
+
 def test_a_stamp_round_trips_and_a_broken_one_is_refused(tmp_path: pathlib.Path) -> None:
     path = tmp_path / "stamp.toml"
     stamp = dataclasses.replace(cleared_stamp(), burned=("k1",), human_audited=3)

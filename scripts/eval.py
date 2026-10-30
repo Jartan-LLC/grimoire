@@ -1268,14 +1268,21 @@ def label(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.
 
 
 def align(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.Path) -> int:
-    """Score the judge on one set's items; on held-out, once per judge version, write its stamp."""
+    """Score the judge on one set's items; on held-out, once per judge version, write its stamp.
+
+    A cleared stamp gone stale by its labels or a dev reference is written again (`calibrate.held_out_refusal`).
+    """
     folder = calibrate.judge_dir(suite.path, judge_.id)
     old = calibrate.read_stamp(folder / "stamp.toml")
     instrument = jury.instrument(judge_)
     held = args.set == "held-out"
-    if held and (refused := calibrate.held_out_refusal(old, instrument)):
-        raise SystemExit(refused)
     material = calibrate.sources(suite, judge_)
+    references = {c: calibrate.text_hash(r) for c, r in material.references.items()}
+    labels = calibrate.labels_hash(folder / "labels")
+    if held and (
+        refused := calibrate.held_out_refusal(judge_, old, instrument, references, labels)
+    ):
+        raise SystemExit(refused)
     found = calibrate.items(judge_, args.set, material, old.burned if old else ())
     failed = jury.fill(store, [(judge_, i.reference, _stripped(i.text)) for i in found], args.jobs)
     print("\n".join(failed))
@@ -1300,7 +1307,7 @@ def align(args: argparse.Namespace, suite: Suite, judge_: Judge, store: pathlib.
         single={k: p.votes[0] == "yes" for k, p in done.items()},
         split={k for k, p in done.items() if p.split},
         gold=(right, n),
-        labels=calibrate.labels_hash(folder / "labels"),
+        labels=labels,
         date=datetime.datetime.now(datetime.UTC).date().isoformat(),
     )
     for row in calibrate.rows(stamp):

@@ -308,17 +308,24 @@ def text_hash(text: str) -> str:
     return hashlib.sha256(text.encode()).hexdigest()[:16]
 
 
+def changed_references(stamp: Stamp, references: Mapping[str, str]) -> list[str]:
+    """The stamped cases whose reference hash in `references` differs from the stamp's; a removed case has none."""
+    return sorted(c for c, h in stamp.references.items() if references.get(c, h) != h)
+
+
 def stale(stamp: Stamp, instrument: str, references: Mapping[str, str], labels: str) -> str:
     """'' when the stamp still describes the judge, else what changed since it was written.
 
     `references` maps each judged case to its reference's `text_hash`. A case added or
     removed after the stamp leaves it current: one calibration covers the question.
+    Labelling an added case's artifacts changes the labels, and `held_out_refusal` lets
+    the same version be stamped again.
     """
     if stamp.instrument != instrument:
         return "the stamp is for another version of the judge"
     if stamp.labels != labels:
         return "the labels changed since the stamp"
-    if changed := sorted(c for c, h in stamp.references.items() if references.get(c, h) != h):
+    if changed := changed_references(stamp, references):
         return f"the reference of {', '.join(changed)} changed since the stamp"
     return ""
 
@@ -809,12 +816,30 @@ def cells(
     return [by[k] for k in sorted(by)]
 
 
-def held_out_refusal(old: Stamp | None, instrument: str) -> str:
+def held_out_refusal(
+    judge: Judge,
+    old: Stamp | None,
+    instrument: str,
+    references: Mapping[str, str],
+    labels: str,
+) -> str:
     """'' when the judge at `instrument` may be scored on held-out, else why not.
 
-    Held-out is scored once per judge version, and on at most MAX_VERSIONS versions.
+    Held-out is scored once per judge version, and on at most MAX_VERSIONS versions. A
+    version whose stamp cleared the bar and then went stale by its labels or a dev case's
+    reference is scored again to stamp it anew, as the same version; a changed held-out
+    reference is tuning and must be restored. `references` and `labels` are as `stale`
+    takes them.
     """
     tried = old.versions if old else ()
+    if old is not None and old.instrument == instrument and cleared(old):
+        if edited := [c for c in changed_references(old, references) if c in judge.held_out]:
+            return (
+                f"the reference of held-out {', '.join(edited)} changed since the stamp: "
+                "restore it, since editing it is tuning"
+            )
+        if stale(old, instrument, references, labels):
+            return ""
     if instrument in tried:
         return "this version of the judge was scored on held-out already: tune on dev"
     if len(tried) >= MAX_VERSIONS:
@@ -841,8 +866,8 @@ def new_stamp(  # noqa: PLR0913 -- everything a stamp records
 ) -> Stamp:
     """The stamp of one run on a set's items: `verdicts` the panels', `single` one call's, `split` the panels that split.
 
-    `gold` is the labelling panel's (right, out of) on gold items; on held-out the
-    version joins `versions`.
+    `gold` is the labelling panel's (right, out of) on gold items; on held-out a version
+    not yet tried joins `versions`.
     """
     tried = old.versions if old else ()
     natural = [i for i in found if i.kind == "natural"]
@@ -850,7 +875,7 @@ def new_stamp(  # noqa: PLR0913 -- everything a stamp records
     return Stamp(
         judge=judge.id,
         instrument=instrument,
-        versions=(*tried, instrument) if held else tried,
+        versions=(*tried, instrument) if held and instrument not in tried else tried,
         labels=labels,
         labeller=", ".join(sorted({lb.labeller for lb in material.labels})),
         date=date,

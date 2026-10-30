@@ -176,8 +176,8 @@ def judge_problems(suite: Suite) -> list[str]:
         standing = calibrate.standing(suite.path, suite.cases, judge, jury.instrument(judge))
         if standing.stale:
             found.append(
-                f"{folder / 'stamp.toml'}: {standing.stale}: run judge-align again, "
-                "or restore what changed"
+                f"{folder / 'stamp.toml'}: {standing.stale}: restore what changed, or "
+                "stamp the judge as it is now with judge-align --set held-out"
             )
     return found
 
