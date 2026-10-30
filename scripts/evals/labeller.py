@@ -121,7 +121,11 @@ def parse(stdout: str, model: str) -> Labelled | None:
 
 
 def labelled_of(payload: object) -> Labelled | None:
-    """The labeller output in a structured payload, or None, as when `match` is neither -1 nor a finding's index."""
+    """The labeller output in a structured payload, or None if the payload is malformed.
+
+    It is None too when `match` is neither -1 nor a finding's index. `load` reads kept outputs
+    through it, so such a kept output counts as none and is called again.
+    """
     if not isinstance(payload, dict):
         return None
     fields = cast("dict[str, object]", payload)
