@@ -118,7 +118,7 @@ Each part reports:
 
 - Spawn each part as the agent type that fits it best: general-purpose by default, a project or language agent when one fits the part's work. A part that may split again needs a type with the Agent tool.
 - Spawn the wave's parts in one message, with no `name` and never as a fork. [With agent teams on, a named spawn becomes a teammate, which cannot nest; a fork inherits the whole conversation and gives no context relief.]
-- Before spawning, record each file `git status --porcelain -uall` lists with its hash, and a hash of each contract file and contract test; at the root, in split.md. [A list of names misses a part's edit to a file already changed.]
+- Before spawning, record each file `git status --porcelain -uall` lists with its `git hash-object -w`, or `deleted` for a path it lists as deleted, and the `git hash-object -w` of each contract file and contract test; at the root, in split.md. [A list of names misses a part's edit to a file already changed; `-w` stores the file so the barrier can restore it.]
 - Build nothing yourself while a part runs. [Your writes land in a part's scope and fail the scope check.]
 - At the root, parts usually run in the background and report as notifications in later turns. Start the barrier only after every part listed under the wave in split.md has reported. [A barrier on half the wave passes code that is not there yet.]
 
