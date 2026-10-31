@@ -95,7 +95,7 @@ Write each brief from [brief-template.md](brief-template.md). A brief carries ev
 - the names of the skills its work needs;
 - the report format (section 8), and a request to report any decision a sibling may also face.
 
-A part one level below the main thread may split again, so its brief adds: "After reading your part, if it may hold sub-parts that each are real work, load `recursio:splitting-implementation` and decide with its section 1 gate whether to split; your own parts are at the depth limit and build." A part two levels below gets no split line, and its brief says it is at the depth limit and builds.
+A part one level below the main thread may split again, so its brief carries the template's split line. A part two levels below gets the template's depth-limit line instead.
 
 Keep briefs compact: never the whole plan or a sibling's code. [A part handed everything works from the plan instead of its scope.]
 
@@ -120,7 +120,7 @@ Each part reports:
 
 ## 10. At the barrier
 
-Work through [barrier.md](barrier.md) once every part of the wave has reported. Code review is not the barrier's job.
+Work through [barrier.md](barrier.md) once every part of the wave has reported.
 
 ## 11. split.md
 
