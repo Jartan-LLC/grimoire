@@ -1,0 +1,17 @@
+split = "confirm"
+kind = "trigger"
+hints = ["subagent", "parallel", "split", "agents", "delegate", "wave", "recursi"]
+turns = [
+  "Good, that is what the mbox reader needs. Now write the rest of listarc as the README describes: the mbox reader and writer, MIME parsing, header decoding, threading, search and the listarc command, with a test file in t/ for each module.",
+]
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "recursio:splitting-implementation"
+state = "loaded"
+
+[[check]]
+metric = "split"
+artifact = "brief:general-purpose"
+present = '''\S'''

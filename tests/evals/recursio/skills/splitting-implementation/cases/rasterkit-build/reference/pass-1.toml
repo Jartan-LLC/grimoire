@@ -1,0 +1,4 @@
+final = "rasterkit is built: Netpbm and BMP reading and writing, geometry and resizing, filters, palettes and dithering, and the rasterkit command, each with its test program."
+
+[briefs]
+"general-purpose" = "Write src/bmp.h and src/bmp.c: rk_bmp_read and rk_bmp_write for every header, bit depth and compression the README's BMP section lists, using only src/raster.h, with tests/test_bmp.c."

@@ -1,0 +1,1 @@
+We're standardising on read* names for anything that touches the disk. Please rename `loadSettings` to `readSettings` across the repo -- the definition and every import and call in src/, scripts/ and test/ -- and keep `npm test` green.

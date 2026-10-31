@@ -1,10 +1,10 @@
-# Trigger suite for the splitting-implementation skill (#121): is the skill consulted on a build
-# its gate says to split, and does it stay out of work that only looks like one? Should-split cases
-# are large builds: three or more independent modules, each real work with its own tests, sharing
-# only a small contract the fixture holds, plus at most one command that joins them; each fixture's
-# README holds the spec. They come in plain chat with no word about subagents, some over several
-# turns with the build asked last, and through /praxis:implement-issue with a plan that lists the
-# parts, in Python and Node. A build whose parts are a function or two is no should-split case: the
+# Trigger suite for the splitting-implementation skill (#121): is the skill consulted on a build its
+# gate says to split, and does it stay out of work that only looks like one? Should-split cases are
+# large builds: three or more independent modules, each real work with its own tests, sharing only a
+# small contract the fixture holds, plus at most one command that joins them; each fixture's README
+# holds the spec. They come in plain chat with no word about subagents, some over several turns with
+# the build asked last, and through /praxis:implement-issue with a plan that lists the parts, in
+# Python, Node, C and Perl. A build whose parts are a function or two is no should-split case: the
 # gate rightly builds it directly. Near misses share the skill's words but need something else: a
 # one-file fix, a migration chain, splitting one file into modules, a recursive algorithm, a
 # test-first request, a wide rename, issues for a roadmap, a small issue. Every case runs with

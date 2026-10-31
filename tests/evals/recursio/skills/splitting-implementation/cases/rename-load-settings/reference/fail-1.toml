@@ -1,0 +1,4 @@
+final = "Renamed loadSettings to readSettings in src/, scripts/ and test/; npm test passes."
+
+[briefs]
+"general-purpose" = "Rename loadSettings in the scripts/ directory."
