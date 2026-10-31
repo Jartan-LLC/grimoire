@@ -34,6 +34,7 @@ If this skill was lost to compaction, load it again and resume from the status l
 - Scopes are disjoint: every file belongs to one part. [Parts share one workspace with no lock; two writers lose work.]
 - Contract files and contract tests are read-only to parts. [A part that edits them passes its own tests and breaks a sibling.]
 - No agent below the main thread stages, commits, pushes or switches branches, and the main thread never commits while a wave runs. Stage files by name, never `git add -A`. [A commit mid-wave captures a sibling's half-written files.]
+- Under a workflow that commits as it goes, commit after each wave's barrier: a split replaces building and committing one part at a time, not the commits.
 - Parts run formatters and installers on their own scope only. [A repo-wide run rewrites a sibling's files under it.]
 - Never hand a brief down unsplit: split it into two or more parts, or build it. [A pass-through level adds tokens and no relief.]
 - A part asks no questions; it reports. [A question ends the part with nothing built.]
