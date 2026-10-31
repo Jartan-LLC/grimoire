@@ -30,7 +30,7 @@ Recursio leans on Claude Code's subagents. Under Codex the skill and the command
 
 ### Commands
 
-- `/recursio:recursive-implement` -- implement a plan file, an issue or a description to completion without stopping to ask, splitting it where that pays. It decides open questions itself and lists each decision in its report. It never commits, branches, pushes, opens a PR or runs a code review: the work is left uncommitted and unreviewed.
+- `/recursio:recursive-implement` -- implement a plan file, an issue or a description to completion without stopping to ask, splitting it where that pays. It decides open questions itself and lists each decision in its report. It never commits, branches, pushes, opens a PR, posts to GitHub or runs a code review: the work is left uncommitted and unreviewed. Anything the project's rules say to ask about first is left for you, listed in its report.
 
 ## Quick Start
 
