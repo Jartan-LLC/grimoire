@@ -79,9 +79,9 @@ class Check:
     or `not-loaded` over the whole session (trigger cases). It reads the main thread's
     deliveries and writes, or with an `agent`, that subagent's. A spawn check reads the
     session's subagents: `overlap` (no file written by two spawns), `spawn-writes` with a
-    `write` kind (no spawn made such a write) or `barrier` (no main-thread file write while
-    a spawn it made had not ended). A `verify` check runs its `command` on the session's
-    final tree and holds when it exits 0.
+    `write` kind (no spawn made such a write) or `barrier` (no main-thread commit, nor file
+    write outside `.claude/workspace/`, while a spawn it made had not ended). A `verify`
+    check runs its `command` on the session's final tree and holds when it exits 0.
     """
 
     metric: str

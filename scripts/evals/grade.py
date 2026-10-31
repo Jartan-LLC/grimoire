@@ -216,14 +216,27 @@ def waves(parsed: trace.Trace) -> list[tuple[int, float]]:
     return merged
 
 
+WORKSPACE = "/.claude/workspace/"  # the main thread's working notes, such as split.md
+
+
+def _breaks_barrier(write: trace.Write) -> bool:
+    """Whether a main-thread write, or an attempt at one, would break a wave's barrier.
+
+    A commit does; so does a file write, unless it lands under `.claude/workspace/`,
+    where the main thread keeps the part statuses it updates as each part reports.
+    """
+    if write.spawn:
+        return False
+    if write.kind == "commit":
+        return True
+    return write.kind == "file" and WORKSPACE not in "/" + posixpath.normpath(write.text)
+
+
 def barrier_score(parsed: trace.Trace) -> float:
-    """1.0 when the main thread wrote no file, or tried to, inside a wave."""
+    """1.0 when the main thread made no commit and wrote no file outside `.claude/workspace/`, nor tried to, inside a wave."""
     spans = waves(parsed)
     inside = any(
-        start < w.index < end
-        for w in parsed.writes
-        if w.kind == "file" and not w.spawn
-        for start, end in spans
+        start < w.index < end for w in parsed.writes if _breaks_barrier(w) for start, end in spans
     )
     return 0.0 if inside else 1.0
 

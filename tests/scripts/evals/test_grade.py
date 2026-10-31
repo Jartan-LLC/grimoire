@@ -155,6 +155,21 @@ def test_a_barrier_check_fails_on_a_main_thread_write_while_a_spawn_is_out() -> 
     assert barrier([*wave, *failed, *wrote("w1", "/repo/glue.py")]) == 1.0
 
 
+def test_a_barrier_check_fails_on_a_main_thread_commit_while_a_spawn_is_out() -> None:
+    wave = [spawn("a1"), launched("a1")]
+    early = trace.parse([*wave, *commit("c1"), notification("a1", "done")], PLUGINS)
+    assert grade.barrier_score(early) == 0.0
+    after = trace.parse([*wave, notification("a1", "done"), *commit("c1")], PLUGINS)
+    assert grade.barrier_score(after) == 1.0
+
+
+def test_a_barrier_check_lets_the_main_thread_update_its_workspace_notes_mid_wave() -> None:
+    wave = [spawn("a1"), launched("a1")]
+    status = wrote("w1", "/repo/.claude/workspace/issue-52/split.md")
+    parsed = trace.parse([*wave, *status, notification("a1", "done")], PLUGINS)
+    assert grade.barrier_score(parsed) == 1.0
+
+
 def test_a_session_check_with_no_grader_refuses_rather_than_scores() -> None:
     parsed = trace.parse([spawn("a1"), launched("a1")], PLUGINS)
     assert grade.session_score(Check("m", "barrier"), sample([], ""), parsed) == 1.0
