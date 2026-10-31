@@ -1,6 +1,6 @@
 ---
 name: recursive-implement
-description: Implement a plan, issue or description without stopping to ask, splitting it across parallel subagents where that pays; leaves the work uncommitted and unreviewed.
+description: Build a plan, issue or description unattended, for a user who hands it over and walks away -- decides without asking, splits it across parallel subagents where that pays, and leaves the work uncommitted and unreviewed.
 argument-hint: Plan file path, issue number, or description
 ---
 
