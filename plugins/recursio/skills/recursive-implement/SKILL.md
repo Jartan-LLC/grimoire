@@ -10,7 +10,7 @@ Implement a plan, an issue or a description to completion in the main thread, sp
 
 By invoking this command the user grants one thing: deciding without asking and running to completion. Nothing else: never commit, branch, push, open a PR, post to GitHub, run a code review, or take an action the project's rules say to ask about first. Build around such an action and list it under Left for the user.
 
-Where the project's own rules say otherwise, follow them.
+Where the project's own rules say otherwise, follow them, but never past this grant.
 
 ## Process
 
