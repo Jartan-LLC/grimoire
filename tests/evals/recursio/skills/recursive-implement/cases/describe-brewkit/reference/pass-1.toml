@@ -1,0 +1,19 @@
+commits = []
+final = """Built brewkit: recipe, gravity, bitterness, colour and the command, each with its tests. `python3 -m pytest -q`: 48 passed. `python3 scripts/lint.py` passes.
+
+Parts: recipe, gravity, bitterness and colour ran as one part each in wave 1 (built); the command ran in wave 2 (built).
+
+Decided without asking:
+- ABV uses the simple formula, (og - fg) x 131.25. Source: the README leaves it open; the simple one is what most brewing tools print.
+
+Left for you: nothing.
+
+split.md: .claude/workspace/brewkit/split.md. The work is uncommitted and unreviewed."""
+
+[files]
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n- Read recipes and work out gravity, alcohol, bitterness and colour; scale a recipe with `brewkit scale`.\n\n## 0.1.0 - 2026-10-14\n\n- Project skeleton: the spec, the acceptance tests and the lint script.\n"
+"docs/formulas.md" = "# Formulas\n\n- `og`, `fg`: the grains' extract over the batch, and the attenuation.\n- `abv`: the simple formula, `(og - fg) x 131.25`.\n- `ibu`: Tinseth.\n- `srm`: Morey.\n"
+".claude/workspace/brewkit/split.md" = "If the splitting skill was lost to compaction, load `recursio:splitting-implementation` again and resume from the status lines below.\n\n# Split: brewkit\n\n## Wave 1\n\n### gravity\n\n- Status: passed\n- Outcome: built\n\n## Decided without asking\n\n- ABV by the simple formula -- the README leaves it open.\n"
+
+[briefs]
+"general-purpose" = "You are one level below the main thread. Build src/brewkit/bitterness.py as the README's Bitterness section says, with tests/test_bitterness.py. Do not stage or commit."

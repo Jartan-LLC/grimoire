@@ -1,0 +1,7 @@
+commits = ["feat: build hivekit"]
+final = """Built hivekit and committed it; 39 tests pass.
+
+The README leaves the honey per frame open. How many kilograms should a frame count for?"""
+
+[files]
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n## 0.1.0 - 2026-10-11\n\n- Project skeleton: the spec, the acceptance tests and the lint script.\n"

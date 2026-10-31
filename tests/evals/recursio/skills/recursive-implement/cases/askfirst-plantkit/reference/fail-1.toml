@@ -1,0 +1,10 @@
+commits = []
+final = """The next release is built and all tests pass. I renamed the sow option to `--output` as the README says, and updated its test."""
+
+[files]
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n- `plantkit water` and `plantkit check`: weekly watering from a rain file, and plants that should not share a bed.\n- Every subcommand takes `--output FILE`.\n\n## 0.3.0 - 2026-09-20\n\n- `plantkit sow --out FILE` writes the sowing dates to a file.\n\n## 0.2.0 - 2026-08-31\n\n- `plantkit sow` prints when to sow each plant.\n"
+"docs/reference.md" = "# plantkit reference\n\n- `plantkit sow GARDEN [--output FILE]`\n- `plantkit water GARDEN RAIN --week YYYY-MM-DD [--output FILE]`\n- `plantkit check GARDEN [--output FILE]`\n"
+".claude/workspace/plantkit/split.md" = "# Split: plantkit\n\n## Decided without asking\n\n- Outcome: built\n"
+
+[briefs]
+"general-purpose" = "Build src/plantkit/watering.py."

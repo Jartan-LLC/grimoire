@@ -1,0 +1,10 @@
+commits = []
+final = """Added `--si` to sizefmt: with it, sizes go up in powers of 1000 with the units B, kB, MB, GB and TB; without it, output is as before. Built directly: a change this small does not pay for a split.
+
+`node --test`: 7 passed. `node scripts/lint.ts` passes. README and CHANGELOG updated.
+
+No decisions needed beyond the request. The change is uncommitted and unreviewed."""
+
+[files]
+"README.md" = "# sizefmt\n\nPrints byte counts the way people read them: `sizefmt 1536` prints `1.5 KiB`. TypeScript that Node 24 or later runs directly, with no dependencies.\n\n```console\n$ sizefmt 512 1536 3221225472\n512 B\n1.5 KiB\n3.0 GiB\n```\n\nSizes below 1024 print as whole bytes; larger ones are divided by 1024 until they are below it, up to TiB.\n\n## Options\n\n- `--precision N`: decimals to print, 1 by default.\n- `--si`: powers of 1000 and the units B, kB, MB, GB and TB.\n\nA size that is not a whole number of bytes, or a bad option, prints a message to stderr and exits 2.\n"
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n- `--si` prints sizes in powers of 1000: kB, MB, GB and TB.\n\n## 1.2.0 - 2026-09-11\n\n- `--precision N` sets the decimals printed.\n\n## 1.1.0 - 2026-08-27\n\n- Several sizes in one run, one line each.\n\n## 1.0.0 - 2026-08-10\n\n- Print a byte count in B, KiB, MiB, GiB or TiB.\n"

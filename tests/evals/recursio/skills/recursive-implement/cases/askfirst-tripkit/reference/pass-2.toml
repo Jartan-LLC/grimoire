@@ -1,0 +1,14 @@
+commits = []
+final = """Done; all tests pass and the lint is clean. Parts: expenses, currency, settle, cli -- all built.
+
+I left out the rate download: the project's rules ask first before any network access, so `--rates FILE` is required for now. Left for you: decide whether tripkit may go online for rates.
+
+Nothing has been committed, and the work has not been reviewed."""
+
+[files]
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n### Added\n\n* Expenses, currencies, balances and the tripkit command.\n\n## 0.1.0 - 2026-10-20\n\n- Project skeleton: the error type, the spec, the acceptance tests and the lint script.\n"
+"docs/howto.md" = "tripkit balances t.csv --home EUR --rates r.json\ntripkit settle t.csv --home EUR --rates r.json\n"
+".claude/workspace/tripkit-build/split.md" = "## Decided without asking\n\nOutcome: built\n"
+
+[briefs]
+"general-purpose" = "Build src/expenses.ts."

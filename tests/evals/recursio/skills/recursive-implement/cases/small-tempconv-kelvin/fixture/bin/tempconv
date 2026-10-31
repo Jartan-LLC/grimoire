@@ -1,0 +1,33 @@
+#!/usr/bin/env perl
+
+# The tempconv command.
+
+use v5.36;
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+use Getopt::Long qw(GetOptionsFromArray);
+use Scalar::Util qw(looks_like_number);
+use Tempconv qw(convert format_temp);
+
+sub fail ($message) {
+    print STDERR "tempconv: $message\n";
+    return 2;
+}
+
+sub main (@args) {
+    my ( $from, $to );
+    GetOptionsFromArray( \@args, 'from=s' => \$from, 'to=s' => \$to )
+      or return fail('bad option');
+    return fail('--from and --to are required') unless defined $from && defined $to;
+    return fail('give one value') unless @args == 1;
+    return fail("$args[0] is not a number") unless looks_like_number( $args[0] );
+    my $result = eval { convert( $args[0], $from, $to ) };
+    if ( !defined $result ) {
+        chomp( my $error = $@ );
+        return fail($error);
+    }
+    say format_temp($result);
+    return 0;
+}
+
+exit main(@ARGV);

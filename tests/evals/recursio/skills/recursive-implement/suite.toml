@@ -2,15 +2,16 @@
 # plan, or a build a stopped run left half done, and runs it to completion without asking. It leaves
 # the work uncommitted on the branch it started on, with no review, after making the doc and
 # changelog changes the project's rules call for and running its Verify commands; its report lists
-# each decision taken without asking and what is left for the user. Cases: a greenfield build from a
-# description; an issue backed by a plan, whose plan alone asks for the package's exports; a resume
-# from a split.md whose first wave has passed; a small change the command builds without splitting;
-# a build whose spec names a dependency the project's rules say to ask about first. Each fixture's
-# README holds the spec and a planted test file the acceptance tests; three builds leave a decision
-# open, in the spec or an issue comment, that the report must name. Each project's Verify runs a
-# lint whose rule only the existing files show, so a session that skips Verify is likely to fail
-# it. tests/evals/README.md says how the suite is run. Not calibrated: a positive control needs the
-# new command on main.
+# each decision taken without asking and what is left for the user. Each split holds cases of five
+# kinds, in Python, Node or TypeScript, and Perl: a greenfield build from a description; an issue
+# backed by a plan, whose plan alone asks for one more thing; a resume from a split.md whose first
+# wave has passed; a small change the command builds without splitting; a build whose spec asks for
+# something the project's rules say to ask about first (a dependency, removing an option, network
+# access). The spec sits in the fixture's README or the prompt, the acceptance tests in a planted
+# test file; every build but the small and ask-first ones leaves a decision open, in the spec or an
+# issue comment, that the report must name. Each project's Verify runs a lint whose rule only the
+# existing files show, so a session that skips Verify is likely to fail it. tests/evals/README.md
+# says how the suite is run. Not calibrated: a positive control needs the new command on main.
 target = "recursio:recursive-implement"
 covers = ["plugins/recursio/skills/recursive-implement/**"]
 models = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]

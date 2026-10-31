@@ -1,0 +1,7 @@
+name = "allotment 12"
+last_frost = 2026-04-20
+first_frost = 2026-10-25
+
+[beds]
+north = ["tomato", "pepper", "carrot"]
+south = ["onion", "bean", "kale"]

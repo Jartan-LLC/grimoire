@@ -1,0 +1,12 @@
+{
+  "name": "parkkit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "parkkit": "bin/parkkit.js"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}

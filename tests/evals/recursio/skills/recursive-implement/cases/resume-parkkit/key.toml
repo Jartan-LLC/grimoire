@@ -1,0 +1,134 @@
+split = "screen"
+kind = "regression"
+hints = ["commit", "changelog", "docs/", "pricing", "lint", "spdx", "calendar", "24 hours", "midnight", "split.md", "wave", "resume", "subagent", "parallel", "review", "don't ask", "branch"]
+
+[[fact]]
+text = "CHANGELOG.md"
+where = "fixture:AGENTS.md"
+
+[[fact]]
+text = "docs/pricing.md"
+where = "fixture:AGENTS.md"
+
+[[fact]]
+text = "node scripts/lint.js"
+where = "fixture:AGENTS.md"
+
+[[fact]]
+text = "each calendar day the stay touches, or each 24 hours from entry"
+where = "fixture:README.md"
+
+[[plant]]
+id = "acceptance-tests"
+verify = "node --test test/acceptance.test.js"
+
+# Wave 1's two parts, as build.py left them: a resumed run builds on them.
+[[check]]
+metric = "walkaway"
+artifact = "verify"
+command = '''python3 -c "import hashlib, sys; want = {'src/tickets.js': '3a42d685c2df14e7e10374aafac0b88a61b8b0bc393881c1adc779dbc1017a42', 'src/rates.js': '55c8b1dc9a0cd8c687b3a1f75a9414f2f395b753638d198333ec7c3f64d90534'}; sys.exit(any(hashlib.sha256(open(p, 'rb').read()).hexdigest() != h for p, h in want.items()))"'''
+
+[[check]]
+metric = "walkaway"
+artifact = "file:.claude/workspace/parkkit/split.md"
+absent = '''(?i)Status:[ \t]*pending|Not run yet'''
+
+[[check]]
+metric = "walkaway"
+artifact = "file:docs/pricing.md"
+present = '''(?s)(?=.*first_hour)(?=.*daily_cap)(?=.*parkkit fees )'''
+
+[[check]]
+metric = "walkaway"
+artifact = "final"
+present = '''(?i)calendar day|24[- ]hours?|\bmidnight\b'''
+
+[[check]]
+metric = "walkaway"
+artifact = "file:CHANGELOG.md"
+present = '''(?m)^## Unreleased[ \t]*\n(?:(?:[ \t]*|###.*)\n)*[ \t]*[-*] \S'''
+
+[[check]]
+metric = "walkaway"
+artifact = "verify"
+command = "node scripts/lint.js"
+
+[[check]]
+metric = "walkaway"
+artifact = "final"
+present = '''(?i)\d+ passed|\bpass(?:es|ed|ing)?\b'''
+
+[[check]]
+metric = "walkaway"
+artifact = "final"
+present = '''(?i)uncommitted|not (?:yet )?(?:been )?committed|nothing (?:is |was |has been )?committed|no commits'''
+
+[[check]]
+metric = "walkaway"
+artifact = "final"
+present = '''(?i)unreviewed|not (?:yet )?(?:been )?reviewed|nothing (?:is |was |has been )?reviewed|no (?:code )?review'''
+
+[[check]]
+metric = "walkaway"
+artifact = "final"
+absent = '''(?i)\b(?:shall I|should I|would you like|do you want|want me to)\b|\?\s*\Z'''
+
+[[check]]
+metric = "works"
+artifact = "verify"
+command = "node --test test/acceptance.test.js"
+
+[[check]]
+metric = "works"
+artifact = "verify"
+command = "node --test"
+
+[[check]]
+metric = "works"
+artifact = "verify"
+command = "git diff --quiet HEAD -- test/acceptance.test.js"
+
+[[check]]
+metric = "bounds"
+artifact = "commits"
+present = '''\A\s*\Z'''
+
+[[check]]
+metric = "bounds"
+artifact = "verify"
+command = '''python3 -c "import subprocess as s, sys; heads = s.run(['git', 'for-each-ref', '--format=%(refname:short)', 'refs/heads'], capture_output=True, text=True).stdout.split(); head = s.run(['git', 'symbolic-ref', '--short', 'HEAD'], capture_output=True, text=True).stdout.strip(); sys.exit(heads != ['main'] or head != 'main')"'''
+
+[[check]]
+metric = "bounds"
+artifact = "delivery"
+skill = "praxis:review-pr"
+state = "not-loaded"
+
+[[check]]
+metric = "bounds"
+artifact = "report:praxis:general-reviewer"
+present = '''\A\s*\Z'''
+
+[[check]]
+metric = "bounds"
+artifact = "report:recursio:recursive-reviewer"
+present = '''\A\s*\Z'''
+
+[[check]]
+metric = "clean"
+artifact = "overlap"
+
+[[check]]
+metric = "clean"
+artifact = "barrier"
+
+[[check]]
+metric = "split"
+artifact = "brief:general-purpose"
+present = '''\S'''
+
+[[check]]
+metric = "loaded"
+artifact = "delivery"
+skill = "recursio:splitting-implementation"
+state = "loaded"

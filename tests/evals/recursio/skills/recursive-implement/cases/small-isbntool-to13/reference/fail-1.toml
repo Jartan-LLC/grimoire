@@ -1,0 +1,10 @@
+commits = []
+final = """I split the change into two parts, the conversion and the option, and both pass. Do you want me to commit it?"""
+
+[files]
+"README.md" = "# isbntool\n\nChecks ISBNs. Python 3.11 or later, standard library only; the package lives in `src/isbntool/`.\n\n## Usage\n\n```console\n$ isbntool check 0-306-40615-2 978-0-306-40615-8\n0-306-40615-2 valid\n978-0-306-40615-8 invalid\n```\n\n- `isbntool check ISBN...`: one line per ISBN, the ISBN as given and `valid` or `invalid`. Hyphens and spaces are ignored; an ISBN-10 may end in `X`.\n\nThe exit status is 1 when any ISBN is invalid, otherwise 0.\n"
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n## 1.1.0 - 2026-09-07\n\n- ISBN-13s are checked too.\n\n## 1.0.0 - 2026-08-24\n\n- `isbntool check` checks ISBN-10s.\n"
+".claude/workspace/isbntool/split.md" = "# Split: --to13\n"
+
+[briefs]
+"general-purpose" = "Add to13 to src/isbntool/isbn.py."

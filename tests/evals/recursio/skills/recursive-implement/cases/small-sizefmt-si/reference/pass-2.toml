@@ -1,0 +1,6 @@
+commits = []
+final = """Done: `--si` is in, with its README and changelog lines. All tests pass. Nothing has been committed and nothing was reviewed."""
+
+[files]
+"README.md" = "# sizefmt\n\nPrints byte counts the way people read them: `sizefmt 1536` prints `1.5 KiB`. TypeScript that Node 24 or later runs directly, with no dependencies.\n\n```console\n$ sizefmt 512 1536 3221225472\n512 B\n1.5 KiB\n3.0 GiB\n```\n\nSizes below 1024 print as whole bytes; larger ones are divided by 1024 until they are below it, up to TiB. With `--si` they are divided by 1000 instead, up to TB.\n\n## Options\n\n- `--precision N`: decimals to print, 1 by default.\n\nA size that is not a whole number of bytes, or a bad option, prints a message to stderr and exits 2.\n"
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n### Added\n\n- `--si`.\n\n## 1.2.0 - 2026-09-11\n\n- `--precision N` sets the decimals printed.\n\n## 1.1.0 - 2026-08-27\n\n- Several sizes in one run, one line each.\n\n## 1.0.0 - 2026-08-10\n\n- Print a byte count in B, KiB, MiB, GiB or TiB.\n"

@@ -1,0 +1,52 @@
+commits = []
+final = """Built gradekit: scores, weights, letters with the curve, and the command, each with its tests. `node --test`: 41 passed. `node scripts/lint.ts` passes.
+
+Parts: scores, weights and letters ran as one part each in wave 1 (built); the command ran in wave 2 (built).
+
+Decided without asking:
+- A percentage is not rounded before its letter is chosen, so 89.5 is a B. Source: the README leaves it open; the cutoffs read as minimums.
+
+Left for you: nothing.
+
+split.md: .claude/workspace/gradekit/split.md. The work is uncommitted and unreviewed."""
+
+[files]
+"CHANGELOG.md" = """# Changelog
+
+## Unreleased
+
+- Add score parsing, category weights, letter grades, the curve and the gradekit command.
+
+## 0.1.0 - 2026-10-05
+
+- Project skeleton: the percentage formatter, the acceptance tests and the lint script.
+"""
+"docs/usage.md" = """# Using gradekit
+
+```console
+$ gradekit report scores.csv weights.txt
+ana 85.0 B
+$ gradekit report scores.csv weights.txt --curve 85
+ana 89.3 B
+$ gradekit dist scores.csv weights.txt
+A 1
+```
+"""
+".claude/workspace/gradekit/split.md" = """If the splitting skill was lost to compaction, load `recursio:splitting-implementation` again and resume from the status lines below.
+
+# Split: gradekit
+
+## Wave 1
+
+### scores
+
+- Status: passed
+- Outcome: built
+
+## Decided without asking
+
+- Percentages are not rounded before the letter -- the README leaves it open.
+"""
+
+[briefs]
+"general-purpose" = "You are one level below the main thread. Build src/letters.ts as the README's Letters and the curve section says, with test/letters.test.ts. Do not stage or commit."

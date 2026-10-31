@@ -1,0 +1,17 @@
+commits = []
+final = """Done. All 39 tests pass and the lint is clean.
+
+Parts: schedule (built), swaps (built), ical (built), cli (built).
+
+Decision without asking: swaps that put one person on back-to-back weeks are allowed; the issue comment said either is fine, and the README sets no such rule.
+
+Nothing has been committed and nothing was reviewed."""
+gh = "gh issue view 47 --comments\n\nOpen point"
+
+[files]
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n### Added\n\n- Planning, swaps and the calendar export.\n\n## 0.2.0 - 2026-09-28\n"
+"docs/examples.md" = "rotakit plan team.json --from 2026-11-02 --weeks 3\nrotakit swap team.json 2026-11-02 2026-11-16\nrotakit export team.json\n"
+".claude/workspace/rotakit-47/split.md" = "## Decided without asking\n\nOutcome: could not split\n"
+
+[briefs]
+"general-purpose" = "Build the swaps module."

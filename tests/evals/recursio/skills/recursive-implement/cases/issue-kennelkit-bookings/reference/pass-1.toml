@@ -1,0 +1,17 @@
+commits = []
+final = """Issue 18 is built: bookings, prices, occupancy and the kennelkit command, plus `kennelkit occupancy --json` as the plan asks. `node --test`: 46 passed; `node scripts/lint.ts` passes.
+
+Per part: bookings built, pricing built, occupancy built, cli built (wave 2, after the other three).
+
+Decided without asking:
+- `book` refuses a dog whose vaccination runs out before the stay starts. Source: jo's comment on the issue left it to the builder.
+
+Left for you: nothing. split.md is at .claude/workspace/issue-18/split.md. The work is uncommitted and unreviewed, on main."""
+
+[files]
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n- Book and cancel stays, price them and see occupancy, with the `kennelkit` command.\n\n## 0.2.0 - 2026-10-01\n\n- Read and write the kennel file.\n\n## 0.1.0 - 2026-09-18\n\n- The data model: dogs, bookings and the kennel.\n"
+"docs/desk-guide.md" = "# Front desk guide\n\n- Book a stay: `kennelkit book kennel.json rex 2026-12-21 2026-12-28` prints the booking and its price.\n- Cancel one: `kennelkit cancel kennel.json b2`.\n- See how full the runs are: `kennelkit occupancy kennel.json 2026-12-20 2026-12-27`, or add `--json` for the website.\n"
+".claude/workspace/issue-18/split.md" = "# Split: issue 18\n\n### pricing\n\n- Outcome: built\n\n## Decided without asking\n\n- Expired vaccinations are refused -- jo left it open.\n"
+
+[briefs]
+"general-purpose" = "One level below the main thread. Build src/occupancy.ts as the README's Occupancy section says, with test/occupancy.test.ts; do not stage or commit."

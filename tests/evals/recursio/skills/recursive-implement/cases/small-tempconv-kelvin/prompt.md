@@ -1,0 +1,1 @@
+/recursio:recursive-implement Let tempconv convert to and from kelvin: K should work for both --from and --to. A temperature below absolute zero, in any unit, is an error, reported the way an unknown unit is. The tests I expect are in t/kelvin.t.

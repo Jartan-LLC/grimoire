@@ -1,0 +1,7 @@
+commits = ["feat: build brewkit"]
+final = """Built brewkit and committed it; 48 tests pass.
+
+The README leaves the alcohol calculation open. Which ABV formula do you want?"""
+
+[files]
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n## 0.1.0 - 2026-10-14\n\n- Project skeleton: the spec, the acceptance tests and the lint script.\n"
