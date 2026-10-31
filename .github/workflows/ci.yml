@@ -100,16 +100,20 @@ jobs:
   test:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    # The hooks run under whatever Node the user's harness carries; 20 is the oldest
+    # they support.
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22, 24]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      # The oldest Node the hooks support: they run under whatever Node the user's
-      # harness carries.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
