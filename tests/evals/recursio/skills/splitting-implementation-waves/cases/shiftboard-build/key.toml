@@ -1,5 +1,5 @@
 split = "dev"
-# Not screened: a third guard case like fleetlog-build, in plain Node, three modules and a command.
+# A third guard case like fleetlog-build, in plain Node, three modules and a command.
 kind = "regression"
 hints = ["barrier", "wait", "meanwhile", "in the meantime", "until", "commit", "model.js", "split.md"]
 

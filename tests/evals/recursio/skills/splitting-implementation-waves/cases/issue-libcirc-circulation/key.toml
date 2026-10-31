@@ -1,8 +1,6 @@
 split = "dev"
-# Under none, both Opus hand-screen roots broke the barrier: one wrote cli.py and test_cli.py while
-# the parts ran, one committed holds.py before the last part reported. A target case once a recorded
-# baseline shows it. Its Opus roots extended model.py before spawning on both arms, so `contract`
-# fails here without any part touching the contract.
+# A root may extend model.py before spawning, which the skill allows, so `contract` can fail here
+# without any part touching the contract.
 kind = "regression"
 hints = ["barrier", "wait", "meanwhile", "in the meantime", "until", "model.py", "split.md"]
 

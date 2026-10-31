@@ -1,5 +1,5 @@
 split = "dev"
-# Depth should-fire, not screened: built like ledgerkit-importers, the Formats part is four subtitle
+# Depth should-fire: built like ledgerkit-importers, the Formats part is four subtitle
 # formats, each read and written, so under the skill it should load the skill and split once more.
 kind = "regression"
 hints = ["barrier", "wait", "meanwhile", "in the meantime", "until", "split", "nest", "recurs", "depth", "level"]

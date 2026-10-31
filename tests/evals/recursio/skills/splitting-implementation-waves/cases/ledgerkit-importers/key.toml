@@ -1,7 +1,6 @@
 split = "dev"
 # Depth should-fire: the Importers part is four formats, each read and written, so under the skill it
-# loads the skill and splits once more. In the hand screens it did on Opus and Sonnet at a $3.5-4 cap
-# (a Sonnet root at $2 told the part not to split, citing budget); under none no part split again.
+# loads the skill and splits once more.
 kind = "regression"
 hints = ["barrier", "wait", "meanwhile", "in the meantime", "until", "split", "nest", "recurs", "depth", "level"]
 

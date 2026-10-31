@@ -1,6 +1,4 @@
 split = "dev"
-# Under none, both Opus hand-screen roots wrote cli.py and test_cli.py while the parts ran; a target
-# case once a recorded baseline shows it.
 kind = "regression"
 hints = ["barrier", "wait", "meanwhile", "in the meantime", "until", "commit", "model.py", "split.md"]
 

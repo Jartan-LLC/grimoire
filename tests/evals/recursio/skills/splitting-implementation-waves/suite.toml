@@ -10,10 +10,8 @@
 # ADVISORY: every case is on dev and the suite has no `covers`, so `make eval-plan` never lists it
 # and no SHIP depends on it. Run it by hand (`make eval-run`, then `python3 scripts/eval.py show`)
 # to see how the waves ran. Sonnet is the model it is run on; Opus, which the plugins also run on,
-# is listed with no baselines, and Haiku is a watch model, never screened. Under no recursio skill
-# the guard hand screens broke only the barrier: Opus roots by writing or committing while parts ran,
-# a Sonnet root by writing through Bash. Each case stays a regression case until a recorded baseline
-# shows its failure. shiftboard-build and subkit-formats were never screened.
+# is listed with no baselines, and Haiku is a watch model, never screened. Each case stays a
+# regression case until a recorded baseline shows its failure.
 #
 # What the graders cannot see: `barrier` misses a file written through Bash. `contract` cannot tell
 # the root extending the contract before a wave, which the skill allows, from a part editing it, so
