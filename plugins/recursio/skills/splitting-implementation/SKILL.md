@@ -55,7 +55,7 @@ The ceiling: a part one level below the main thread may split once. Its parts ar
 List the decisions that two or more parts would each make and that must agree, in this order:
 
 1. Interfaces and shared types.
-2. Hub files and shared manifests: export lists, package files, `__init__.py`.
+2. Hub files and shared manifests: export lists (such as `__init__.py` or `index.js`) and package files.
 3. New dependencies.
 4. File and test layout.
 
@@ -69,10 +69,10 @@ Before the wave, the level writes the shared types, interfaces and hub files its
 
 A contract sets the ceiling for the code built on it:
 
-- **Completeness**: enumerate all operations, not just common ones; enums for closed sets (prevents string-typing drift); error types alongside success types (`Record | ParseError`); a custom exception hierarchy, base plus subtypes per failure domain.
-- **Flexibility**: batch interfaces (`list[Spec]`) over single-item; injectable I/O (write callables, output streams) for testability; union return types for expected failures, exceptions for unexpected ones.
-- **Modularity**: protocols or interfaces for dependency injection, not concrete dependencies; factories or registries for runtime selection; structured return types (`RunResult`) over bare values.
-- **Typing boundaries**: untyped values (`Any`, `object`) only at input boundaries, such as parsed records, CLI arguments and external data whose shape is unknown; every internal result type fully typed, since its shape is known at design time. A contracts file holds protocols, dataclasses, enums, type aliases and constants, and no callable stubs.
+- **Completeness**: enumerate all operations, not just common ones; enums for closed sets (prevents string-typing drift); error types alongside success types (in Python, `Record | ParseError`); a custom exception hierarchy, base plus subtypes per failure domain.
+- **Flexibility**: batch interfaces (a list of specs) over single-item; injectable I/O (write callables, output streams) for testability; union return types for expected failures, exceptions for unexpected ones.
+- **Modularity**: interfaces for dependency injection, not concrete dependencies; factories or registries for runtime selection; structured return types (`RunResult`) over bare values.
+- **Typing boundaries**: untyped values (in Python, `Any` or `object`; in TypeScript, `unknown`) only at input boundaries, such as parsed records, CLI arguments and external data whose shape is unknown; every internal result type fully typed, since its shape is known at design time. A contracts file holds interfaces, record types (such as dataclasses), enums, type aliases and constants, and no callable stubs.
 
 ## 6. Plan the waves
 
