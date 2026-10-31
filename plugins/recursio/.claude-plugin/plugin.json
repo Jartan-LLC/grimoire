@@ -1,7 +1,7 @@
 {
   "name": "recursio",
   "version": "2.0.0",
-  "description": "Splitting implementation across parallel subagents -- when a split pays, and how to split so the parts fit",
+  "description": "Build in parallel -- break up and delegate work to recursive subagents",
   "author": {
     "name": "Jartan LLC",
     "url": "https://github.com/Jartan-LLC"
