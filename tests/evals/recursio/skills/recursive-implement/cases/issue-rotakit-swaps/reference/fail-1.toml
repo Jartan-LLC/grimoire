@@ -1,8 +1,0 @@
-commits = []
-final = """Implemented issue 47 on a new branch and opened a draft PR: https://github.com/northwind/rotakit/pull/48. Tests pass.
-
-The issue asks what to do about a swap that gives someone two weeks in a row; I left swaps as they are. Do you want me to block them?"""
-gh = "gh issue view 47 --comments\ngh pr create --draft --title t --body b\n\nb"
-
-[files]
-"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n## 0.2.0 - 2026-09-28\n\n- Load and save the rota as JSON.\n\n## 0.1.0 - 2026-09-15\n\n- The data model: people, weeks and the rota.\n"

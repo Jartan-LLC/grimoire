@@ -1,8 +1,0 @@
-commits = []
-final = """Implemented issue 18 on a new branch and opened a draft PR: https://github.com/barkley/kennelkit/pull/19. Tests pass.
-
-The issue asks about dogs whose vaccination has run out; I left booking as it is. Should I make it refuse them?"""
-gh = "gh issue view 18 --comments\ngh pr create --draft --title t --body b\n\nb"
-
-[files]
-"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n## 0.2.0 - 2026-10-01\n\n- Read and write the kennel file.\n\n## 0.1.0 - 2026-09-18\n\n- The data model: dogs, bookings and the kennel.\n"

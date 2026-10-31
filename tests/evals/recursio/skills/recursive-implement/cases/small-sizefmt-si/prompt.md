@@ -1,1 +1,0 @@
-/recursio:recursive-implement Add an --si flag to sizefmt: with it, sizes go up in powers of 1000 and use the units B, kB, MB, GB and TB, instead of powers of 1024 and KiB, MiB and so on. Without the flag nothing changes. The tests I expect are in test/si.test.ts.

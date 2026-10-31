@@ -1,7 +1,0 @@
-[project]
-name = "shelfkit"
-version = "0.2.0"
-requires-python = ">=3.11"
-
-[project.scripts]
-shelfkit = "shelfkit.cli:main"

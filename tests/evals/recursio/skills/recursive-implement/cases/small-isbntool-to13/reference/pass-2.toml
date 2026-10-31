@@ -1,6 +1,0 @@
-commits = []
-final = """Done: `--to13` is in, with its README and changelog lines. All tests pass. Nothing has been committed and nothing was reviewed."""
-
-[files]
-"README.md" = "# isbntool\n\nChecks ISBNs. Python 3.11 or later, standard library only; the package lives in `src/isbntool/`.\n\n## Usage\n\n```console\n$ isbntool check 0-306-40615-2 978-0-306-40615-8\n0-306-40615-2 valid\n978-0-306-40615-8 invalid\n```\n\n- `isbntool check ISBN...`: one line per ISBN, the ISBN as given and `valid` or `invalid`. Hyphens and spaces are ignored; an ISBN-10 may end in `X`.\n\nWith `--to13`, valid ISBNs print as ISBN-13 digits.\n\nThe exit status is 1 when any ISBN is invalid, otherwise 0.\n"
-"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n### Added\n\n- `--to13`.\n\n## 1.1.0 - 2026-09-07\n\n- ISBN-13s are checked too.\n\n## 1.0.0 - 2026-08-24\n\n- `isbntool check` checks ISBN-10s.\n"

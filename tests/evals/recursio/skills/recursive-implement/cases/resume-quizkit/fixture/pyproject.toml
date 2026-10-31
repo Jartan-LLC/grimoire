@@ -1,7 +1,0 @@
-[project]
-name = "quizkit"
-version = "0.1.0"
-requires-python = ">=3.11"
-
-[project.scripts]
-quizkit = "quizkit.cli:main"

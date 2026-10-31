@@ -1,1 +1,0 @@
-/recursio:recursive-implement Give isbntool check a --to13 option: with it, each valid ISBN is printed as its 13-digit form instead of the usual verdict, an ISBN-10 converted and an ISBN-13 printed as it is, digits only. An invalid one still prints its usual line and makes the exit status 1. The tests I expect are in tests/test_to13.py.

@@ -2,12 +2,14 @@
 name: splitting-implementation
 description: Building a feature or project with several modules -- how to divide it into parts that fit together, and when to build the parts in parallel subagents.
 when_to_use: Implementing a feature, issue or project with several parts or modules.
-user-invocable: false
+argument-hint: Task to build (a plan file, an issue or a description)
 ---
 
 # Splitting Implementation
 
 Whether to divide implementation work among subagents in one session, and how to divide it so the parts fit together. The main thread is the root of every split. A level is any agent that splits its work: the main thread, or a part that splits again.
+
+When the user invokes this skill with a task, build that task, splitting it or building it directly as this skill says.
 
 ## 1. Split or build
 

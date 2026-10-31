@@ -1,7 +1,0 @@
-[project]
-name = "plantkit"
-version = "0.3.0"
-requires-python = ">=3.11"
-
-[project.scripts]
-plantkit = "plantkit.cli:main"
