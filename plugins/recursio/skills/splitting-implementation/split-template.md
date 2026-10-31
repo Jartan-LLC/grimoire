@@ -13,7 +13,7 @@ If the splitting skill was lost to compaction, load `recursio:splitting-implemen
 
 ## Wave 1
 
-Snapshot before spawning: <changed files from `git status --porcelain`>; contract hashes: <`git hash-object` of each contract file and contract test>
+Snapshot before spawning: <each file `git status --porcelain -uall` lists, with its `git hash-object`>; contract hashes: <`git hash-object` of each contract file and contract test>
 
 ### <part>
 
