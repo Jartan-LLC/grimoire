@@ -23,6 +23,6 @@ This repository is licensed under the MIT License in LICENSE, with these excepti
   python-project-structure, python-resilience, python-resource-management, python-type-safety
   and uv-package-manager skills in plugins/pythonica/skills/, the rest of
   plugins/pythonica/skills/python-anti-patterns/SKILL.md, and
-  plugins/pythonica/skills/python-testing/references/ are adapted from agents by Seth Hobson,
+  plugins/pythonica/skills/python-testing/references/ are adapted from wshobson/agents by Seth Hobson,
   under the MIT notice in each of those skill directories' LICENSE-wshobson-agents, which must
   ship with them.
