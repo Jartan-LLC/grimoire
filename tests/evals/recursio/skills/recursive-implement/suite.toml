@@ -43,7 +43,8 @@ margin = 0.2
 id = "clean"
 direction = "higher"
 margin = 0.2
-# No file written by two parts; no main-thread write while a wave runs.
+# No file written by two parts; the main thread made no commit and wrote no file outside
+# .claude/workspace/ while a wave ran.
 
 [[metric]]
 id = "bounds"
