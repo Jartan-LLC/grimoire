@@ -1,11 +1,11 @@
 # How a split runs its waves (#121), once recursio:splitting-implementation is in play: the main
-# thread writes and commits nothing while a wave's parts are out, parts keep to their own files and
-# make no commits, the contract and the planted tests stay as they were, and a part whose scope is
-# itself large loads the skill and splits once more. The guard cases are ordinary large builds whose
-# prompt asks for parallel subagents: four or three modules on a small shared contract plus a command
-# that joins them, in plain chat or through /praxis:implement-issue with a plan, in Python and Node.
-# The depth cases give the root two parts, one of them four file formats each read and written, and
-# ask it to build no part itself.
+# thread writes nothing outside .claude/workspace/ and commits nothing while a wave's parts are out,
+# parts keep to their own files and make no commits, the contract and the planted tests stay as they
+# were, and a part whose scope is itself large loads the skill and splits once more. The guard cases
+# are ordinary large builds whose prompt asks for parallel subagents: four or three modules on a
+# small shared contract plus a command that joins them, in plain chat or through
+# /praxis:implement-issue with a plan, in Python and Node. The depth cases give the root two parts,
+# one of them four file formats each read and written, and ask it to build no part itself.
 #
 # ADVISORY: every case is on dev and the suite has no `covers`, so `make eval-plan` never lists it
 # and no SHIP depends on it. Run it by hand (`make eval-run`, then `python3 scripts/eval.py show`)
