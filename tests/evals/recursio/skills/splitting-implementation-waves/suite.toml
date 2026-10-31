@@ -28,8 +28,8 @@ replaces = [
 ]
 models = ["claude-sonnet-5-5", "claude-opus-5-5", "claude-haiku-5-5"]
 watch = ["claude-haiku-5-5"]
-# Root parts run in the background under -p, and the session sees its USD budget: a Sonnet root at a
-# $2 cap told its part not to split, so the cap sits well above the $1-4 the screened sessions spent.
+# Root parts run in the background under -p, and the session sees its USD budget: under a tight cap
+# a Sonnet root told its part not to split, so the cap sits well above what the sessions spend.
 claude_code = "2.1.314"
 budget_usd = 15.0
 timeout_s = 3600

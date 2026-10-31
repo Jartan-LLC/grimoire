@@ -17,7 +17,8 @@ covers = ["plugins/recursio/skills/recursive-implement/**"]
 models = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]
 # Root parts run in the background under -p; the session must wait for every one of them.
 claude_code = "2.1.302"
-# Large builds split across parts: about $1-4 per sample on Opus, more with docs and Verify.
+# The session sees its USD budget, and a tight cap stops a root from splitting; a large build also
+# runs docs and Verify, so the cap sits well above what a session spends.
 budget_usd = 15.0
 timeout_s = 3600
 
