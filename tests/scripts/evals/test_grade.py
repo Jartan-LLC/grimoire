@@ -161,6 +161,9 @@ def test_a_barrier_check_fails_on_a_main_thread_commit_while_a_spawn_is_out() ->
     assert grade.barrier_score(early) == 0.0
     after = trace.parse([*wave, notification("a1", "done"), *commit("c1")], PLUGINS)
     assert grade.barrier_score(after) == 1.0
+    own = inside("a1", [*wrote("w1", "/repo/a.py"), *commit("c2")])
+    part = trace.parse([*wave, *own, notification("a1", "done")], PLUGINS)
+    assert grade.barrier_score(part) == 1.0
 
 
 def test_a_barrier_check_lets_the_main_thread_update_its_workspace_notes_mid_wave() -> None:
