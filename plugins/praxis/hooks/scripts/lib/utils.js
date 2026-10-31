@@ -452,10 +452,9 @@ function grepFile(filePath, pattern) {
   let regex;
   try {
     if (pattern instanceof RegExp) {
-      // Always create a new RegExp without the 'g' flag to prevent lastIndex
-      // state issues when using .test() in a loop (g flag makes .test() stateful,
-      // causing alternating match/miss on consecutive matching lines)
-      const flags = pattern.flags.replace('g', '');
+      // Drop 'g' and 'y': either makes .test() carry lastIndex from one line
+      // to the next, so consecutive matching lines alternate match and miss.
+      const flags = pattern.flags.replace(/[gy]/g, '');
       regex = new RegExp(pattern.source, flags);
     } else {
       regex = new RegExp(pattern);

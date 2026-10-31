@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.3
+
+- The skills adapted from wshobson/agents, everything-claude-code and claude-mpm-skills now ship their source's MIT notice as a `LICENSE-<project>` file in each skill's directory, and the README says which skill came from which project.
+
 ## 1.1.2
 
 - `python-api-docs` no longer points to praxis skills, which may not be
