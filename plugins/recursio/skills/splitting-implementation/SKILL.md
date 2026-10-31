@@ -94,7 +94,8 @@ Write each brief from [brief-template.md](brief-template.md). A brief carries ev
 - its contract tests, read-only, and a test command that runs its own tests only;
 - no staging or committing;
 - the interfaces it depends on, pasted as text;
-- every requirement the part owns, manifest and export updates included, pointed to where it is written (a spec section, an issue) rather than restated;
+- every requirement the part owns, pointed to where it is written (a spec section, an issue) rather than restated;
+- what the part exports and the dependencies it uses, which the level enters in the hub files and manifests before the wave; the part leaves those files alone and reports any other entry it needs;
 - only the settled decisions it touches;
 - the names of the skills its work needs;
 - the report format (section 8), and a request to report any decision a sibling may also face.

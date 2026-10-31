@@ -13,6 +13,7 @@ Scope: write only <files>; everything else is read-only.
 Contract, read-only: <files>. Contract tests, read-only: <files>.
 Test command, your tests only: <command>
 Requirements: <where each is written: spec section, issue>
+Already entered for you in <hub files and manifests>, which you leave alone: exports <names>; dependencies <names>. Report any other entry you need.
 Interfaces you depend on:
 <pasted as text>
 Settled decisions you touch: <list>
