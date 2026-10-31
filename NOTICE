@@ -10,3 +10,18 @@ This repository is licensed under the MIT License in LICENSE, with these excepti
   check-console-log.js are adapted from everything-claude-code by Affaan Mustafa, under the MIT
   notice in plugins/praxis/hooks/scripts/LICENSE-everything-claude-code, which must ship with
   them.
+- plugins/pythonica/skills/python-patterns/SKILL.md, plugins/pythonica/skills/python-testing/SKILL.md
+  and the language-level anti-patterns in plugins/pythonica/skills/python-anti-patterns/SKILL.md are
+  adapted from everything-claude-code by Affaan Mustafa, under the MIT notice in each of those
+  skill directories' LICENSE-everything-claude-code, which must ship with them.
+- plugins/pythonica/skills/pydantic/SKILL.md is adapted from claude-mpm-skills by Claude MPM
+  Contributors, under the MIT notice in plugins/pythonica/skills/pydantic/LICENSE-claude-mpm-skills,
+  which must ship with it.
+- The async-python-patterns, python-code-style, python-configuration, python-error-handling,
+  python-observability, python-packaging, python-performance-optimization,
+  python-project-structure, python-resilience, python-resource-management, python-type-safety
+  and uv-package-manager skills in plugins/pythonica/skills/, the rest of
+  plugins/pythonica/skills/python-anti-patterns/SKILL.md, and
+  plugins/pythonica/skills/python-testing/references/ are adapted from wshobson/agents by Seth Hobson,
+  under the MIT notice in each of those skill directories' LICENSE-wshobson-agents, which must
+  ship with them.

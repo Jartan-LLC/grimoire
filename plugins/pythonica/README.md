@@ -57,11 +57,9 @@ codex plugin add pythonica@grimoire
 
 ## Credits
 
-Skills adapted from:
-
-- [everything-claude-code](https://github.com/affaan-m/everything-claude-code) by Affaan Mustafa
-- [wshobson/agents](https://github.com/wshobson/agents) by wshobson
-- [claude-mpm-skills](https://github.com/bobmatnyc/claude-mpm-skills) by bobmatnyc
+- [wshobson/agents](https://github.com/wshobson/agents) by Seth Hobson -- `async-python-patterns`, `python-anti-patterns` except its language-level anti-patterns, `python-code-style`, `python-configuration`, `python-error-handling`, `python-observability`, `python-packaging`, `python-performance-optimization`, `python-project-structure`, `python-resilience`, `python-resource-management`, `python-type-safety`, `uv-package-manager` and `python-testing`'s `references/` (MIT; `LICENSE-wshobson-agents` in each skill's directory)
+- [everything-claude-code](https://github.com/affaan-m/everything-claude-code) by Affaan Mustafa -- `python-patterns`, `python-testing`'s SKILL.md and `python-anti-patterns`' language-level anti-patterns (MIT; `LICENSE-everything-claude-code` in each skill's directory)
+- [claude-mpm-skills](https://github.com/bobmatnyc/claude-mpm-skills) by Claude MPM Contributors -- `pydantic` (MIT; `LICENSE-claude-mpm-skills` in the skill's directory)
 
 ## License
 
