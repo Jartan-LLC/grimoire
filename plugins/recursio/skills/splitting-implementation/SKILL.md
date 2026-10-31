@@ -23,7 +23,7 @@ Each part then gets a fresh context for its slice alone, and the parts run side 
 
 When the work does not meet the gate, build it directly, as for a sequential chain where each step needs the last, one monolithic failing check, or a quick targeted change. Splitting costs more tokens than building directly.
 
-A wide, same-shaped edit across many files, such as a rename or a mechanical migration, fits Claude Code's built-in `/batch`: suggest it to the user rather than splitting.
+A wide, same-shaped edit across many files, such as a rename or a mechanical migration, fits Claude Code's built-in `/batch`: suggest it to the user rather than splitting, and otherwise build it directly.
 
 A level that cannot spawn subagents builds its parts itself, wave by wave, still settling first (section 4). Under Claude Code that is a level with no Agent tool; under Codex, which allows one level of subagents by default, it is every part below the main thread.
 
