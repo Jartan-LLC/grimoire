@@ -22,6 +22,8 @@ budget_usd = 15.0
 timeout_s = 3600
 
 [env]
+# Under -p this forces the main thread's subagents into the background, as an interactive terminal
+# does when a user runs the command; it makes no Agent call a fork unless the session asks for one.
 CLAUDE_CODE_FORK_SUBAGENT = "1"
 CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS = "0"
 
