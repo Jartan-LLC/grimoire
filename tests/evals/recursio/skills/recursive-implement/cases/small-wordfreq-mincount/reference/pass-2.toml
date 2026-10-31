@@ -1,0 +1,6 @@
+commits = []
+final = """Done: `--min-count` is in, with its docs and changelog line. All tests pass. Nothing has been committed and nothing was reviewed."""
+
+[files]
+"README.md" = "# wordfreq\n\nCounts the words of a text file and prints them most frequent first, one `count word` line each. Words are runs of letters and apostrophes, compared in lower case; ties print in alphabetical order.\n\n## Usage\n\n```console\n$ wordfreq notes.txt\n3 the\n2 and\n1 cat\n```\n\n- `wordfreq FILE`: every word of FILE with its count.\n- `--top N`: only the N most frequent words.\n- `--min-count N`: only words seen at least N times .\n\nA missing file or a bad option prints a message to stderr and exits 2.\n"
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n### Added\n\n- `--min-count N` leaves out words seen fewer than N times.\n\n## 1.1.0 - 2026-09-03\n\n- `--top N` prints only the N most frequent words.\n\n## 1.0.0 - 2026-08-21\n\n- Count the words of a file, most frequent first.\n"

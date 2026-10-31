@@ -1,0 +1,10 @@
+commits = []
+final = """Added `--min-count N` to wordfreq: words seen fewer than N times are left out; N defaults to 1 and a value that is not a positive whole number is a usage error, exit 2. Built directly: a one-file change does not pay for a split.
+
+`npm test`: 9 passed. `node scripts/lint.js` passes. README and CHANGELOG updated.
+
+No decisions needed beyond the request. The change is uncommitted and unreviewed."""
+
+[files]
+"README.md" = "# wordfreq\n\nCounts the words of a text file and prints them most frequent first, one `count word` line each. Words are runs of letters and apostrophes, compared in lower case; ties print in alphabetical order.\n\n## Usage\n\n```console\n$ wordfreq notes.txt\n3 the\n2 and\n1 cat\n```\n\n- `wordfreq FILE`: every word of FILE with its count.\n- `--top N`: only the N most frequent words.\n- `--min-count N`: only words seen at least N times (default 1).\n\nA missing file or a bad option prints a message to stderr and exits 2.\n"
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n- `--min-count N` leaves out words seen fewer than N times.\n\n## 1.1.0 - 2026-09-03\n\n- `--top N` prints only the N most frequent words.\n\n## 1.0.0 - 2026-08-21\n\n- Count the words of a file, most frequent first.\n"

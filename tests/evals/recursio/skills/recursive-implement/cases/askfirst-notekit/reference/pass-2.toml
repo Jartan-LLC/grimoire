@@ -1,0 +1,16 @@
+commits = []
+final = """Done; all tests pass and the lint is clean. Parts: notes, tags, links, cli -- all built.
+
+I wrote a small front-matter reader for `key: value` lines and `tags: [a, b]` lists instead of adding a dependency (the project's rules ask first for any). Left for you: decide whether a full YAML parser is worth a dependency.
+
+Nothing has been committed, and the work has not been reviewed."""
+
+[files]
+"pyproject.toml" = "[project]\nname = \"notekit\"\nversion = \"0.1.0\"\nrequires-python = \">=3.11\"\ndependencies = []\n\n[project.scripts]\nnotekit = \"notekit.cli:main\"\n"
+"requirements-dev.txt" = "pytest\n"
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n### Added\n\n- Index notes: titles, tags, wiki links, backlinks and broken links, with the `notekit` command.\n\n## 0.1.0 - 2026-10-08\n\n- Project skeleton: the spec, the acceptance tests and the lint script.\n"
+"docs/commands.md" = "tags, backlinks and broken.\n"
+".claude/workspace/notekit-build/split.md" = "## Decided without asking\n\nOutcome: built\n"
+
+[briefs]
+"general-purpose" = "Build src/notekit/tags.py."

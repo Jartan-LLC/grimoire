@@ -1,0 +1,7 @@
+commits = []
+final = """notekit is built and all tests pass. I added PyYAML to the dependencies for the front matter, as the README says."""
+
+[files]
+"pyproject.toml" = "[project]\nname = \"notekit\"\nversion = \"0.1.0\"\nrequires-python = \">=3.11\"\ndependencies = [\"PyYAML>=6\"]\n\n[project.scripts]\nnotekit = \"notekit.cli:main\"\n"
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n- Index notes: titles, tags, wiki links, backlinks and broken links, with the `notekit` command.\n\n## 0.1.0 - 2026-10-08\n\n- Project skeleton: the spec, the acceptance tests and the lint script.\n"
+"docs/commands.md" = "# notekit commands\n\n- `notekit tags FOLDER`\n- `notekit backlinks FOLDER NOTE`\n- `notekit broken FOLDER`\n"

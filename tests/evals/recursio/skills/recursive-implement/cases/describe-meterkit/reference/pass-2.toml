@@ -1,0 +1,26 @@
+commits = []
+final = """meterkit is built and every test passes (58 passed); the lint is clean.
+
+Per part: readings built, tariff built, anomaly built, cli built.
+
+Decisions taken without asking:
+1. Bill totals round half to even -- decided here, since the README left the rounding open.
+
+Nothing is left for you. Nothing has been committed, and the work has not been reviewed."""
+
+[files]
+"CHANGELOG.md" = """# Changelog
+
+## Unreleased
+
+### Added
+
+* meterkit command with usage, bill and anomalies.
+
+## 0.1.0 - 2026-10-02
+"""
+"docs/cli.md" = "meterkit usage FILE\nmeterkit bill FILE --peak P --offpeak O --standing S --meter M\nmeterkit anomalies FILE --factor F\n"
+".claude/workspace/meterkit-build/split.md" = "# Split: meterkit\n\n### tariff\n\n- Outcome: **built**\n\n### Decided without asking\n\n- half to even\n"
+
+[briefs]
+"general-purpose" = "Build the tariff module."

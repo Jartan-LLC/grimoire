@@ -1,0 +1,55 @@
+commits = []
+final = """Built meterkit: readings, tariff, anomaly and the command, each with its tests. `python3 -m pytest -q`: 46 passed. `python3 scripts/lint.py` passes.
+
+Parts: readings, tariff and anomaly ran as one part each in wave 1 (built); the command ran in wave 2 (built).
+
+Decided without asking:
+- The bill total rounds half up to cents (ROUND_HALF_UP). Source: the README leaves it open; half up is how most bills round.
+
+Left for you: nothing.
+
+split.md: .claude/workspace/meterkit/split.md. The work is uncommitted and unreviewed."""
+
+[files]
+"CHANGELOG.md" = """# Changelog
+
+## Unreleased
+
+- Add reading parsing, bills, anomalies and the meterkit command.
+
+## 0.1.0 - 2026-10-02
+
+- Project skeleton: the package layout, the acceptance tests and the lint script.
+"""
+"docs/cli.md" = """# meterkit
+
+## usage
+
+`meterkit usage FILE` prints one line per interval.
+
+## bill
+
+`meterkit bill FILE --peak P --offpeak O --standing S [--meter M]`
+
+## anomalies
+
+`meterkit anomalies FILE [--factor F]`
+"""
+".claude/workspace/meterkit/split.md" = """If the splitting skill was lost to compaction, load `recursio:splitting-implementation` again and resume from the status lines below.
+
+# Split: meterkit
+
+## Wave 1
+
+### readings
+
+- Status: passed
+- Outcome: built
+
+## Decided without asking
+
+- The total rounds half up -- the README leaves it open.
+"""
+
+[briefs]
+"general-purpose" = "You are one level below the main thread. Build src/meterkit/readings.py as the README's Readings section says, with tests/test_readings.py. Do not stage or commit."

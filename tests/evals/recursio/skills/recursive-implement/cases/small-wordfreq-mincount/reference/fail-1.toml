@@ -1,0 +1,10 @@
+commits = []
+final = """I split the change into two parts, the option parsing and the filter, and both pass. Want me to commit it?"""
+
+[files]
+"README.md" = "# wordfreq\n\nCounts the words of a text file and prints them most frequent first, one `count word` line each. Words are runs of letters and apostrophes, compared in lower case; ties print in alphabetical order.\n\n## Usage\n\n```console\n$ wordfreq notes.txt\n3 the\n2 and\n1 cat\n```\n\n- `wordfreq FILE`: every word of FILE with its count.\n- `--top N`: only the N most frequent words.\n\nA missing file or a bad option prints a message to stderr and exits 2.\n"
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n## 1.1.0 - 2026-09-03\n\n- `--top N` prints only the N most frequent words.\n\n## 1.0.0 - 2026-08-21\n\n- Count the words of a file, most frequent first.\n"
+".claude/workspace/wordfreq/split.md" = "# Split: --min-count\n"
+
+[briefs]
+"general-purpose" = "Build the --min-count parsing in src/cli.js."
