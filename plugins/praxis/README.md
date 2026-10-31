@@ -74,8 +74,7 @@ codex plugin add gitwise@grimoire
   top-level chat
 - **SessionStart** -- installs this plugin's Codex agent roles (no-op outside
   Codex); re-arms skill activation after a compact, which evicts loaded skills
-- **PreToolUse** -- reminds you to review changes before `git push`; warns about
-  non-standard documentation files; suggests `/compact` at logical intervals
+- **PreToolUse** -- suggests `/compact` at logical intervals
 - **PostToolUse** -- checks changed files for stray `console.log`
 
 The compact suggester reports absolute context size and does not know the
@@ -107,7 +106,7 @@ By hand, or for a human's review, the steps are separate:
 
 ## Credits
 
-- [everything-claude-code](https://github.com/affaan-m/everything-claude-code) by Affaan Mustafa -- `hooks/scripts/lib/utils.js`, `hooks/scripts/lib/transcript-context.js`, `suggest-compact.js`, `check-console-log.js` and the push-reminder and documentation-file hooks in `hooks/hooks.json` (MIT; `hooks/scripts/LICENSE-everything-claude-code`)
+- [everything-claude-code](https://github.com/affaan-m/everything-claude-code) by Affaan Mustafa -- `hooks/scripts/lib/utils.js`, `hooks/scripts/lib/transcript-context.js`, `suggest-compact.js` and `check-console-log.js` (MIT; `hooks/scripts/LICENSE-everything-claude-code`)
 - [humanizer](https://github.com/blader/humanizer) by Siqi Chen -- `plain-writing`'s wording patterns and parts of its SKILL.md, and parts of `voiced-writing`'s SKILL.md (MIT; `LICENSE-humanizer` in each skill's directory)
 - Wikipedia's [Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing) ([CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)) -- the patterns and several of their examples
 
