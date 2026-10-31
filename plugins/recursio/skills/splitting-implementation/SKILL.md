@@ -59,7 +59,7 @@ List the decisions that two or more parts would each make and that must agree, i
 3. New dependencies.
 4. File and test layout.
 
-Then, as judgement, settle what parts could otherwise do differently: naming, error shape, logging, docstring style. The project's own rules already reach every subagent through CLAUDE.md.
+Then, as judgement, settle what parts could otherwise do differently: naming, error shape, logging, docstring style. The project's own rules already reach every subagent through its agent instruction files, such as CLAUDE.md or AGENTS.md.
 
 Take each answer from the project first, then from what the parent or the plan passed down; otherwise decide it and record it in split.md. A decision only one part makes stays with that part. Settle interfaces and decisions; never dictate implementation or hand down code snippets. [A parent that writes a part's internals spends its own context and loses the part's judgement.]
 
