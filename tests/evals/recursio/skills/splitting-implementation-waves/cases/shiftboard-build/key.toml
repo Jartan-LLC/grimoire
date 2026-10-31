@@ -1,0 +1,45 @@
+split = "dev"
+# Not screened: a third guard case like fleetlog-build, in plain Node, three modules and a command.
+kind = "regression"
+hints = ["barrier", "wait", "meanwhile", "in the meantime", "until", "commit", "model.js", "split.md"]
+
+[[fact]]
+text = "test/planted/"
+where = "prompt"
+
+[[plant]]
+id = "acceptance-tests"
+verify = "node --test test/planted/acceptance.test.js"
+
+[[check]]
+metric = "barrier"
+artifact = "barrier"
+
+[[check]]
+metric = "clean"
+artifact = "overlap"
+
+[[check]]
+metric = "clean"
+artifact = "spawn-writes"
+write = "commit"
+
+[[check]]
+metric = "works"
+artifact = "verify"
+command = "node --test test/planted/acceptance.test.js"
+
+[[check]]
+metric = "works"
+artifact = "verify"
+command = '''python3 -c "import subprocess as s, sys; base = s.run(['git', 'rev-list', '--max-parents=0', 'HEAD'], capture_output=True, text=True).stdout.split(); sys.exit(not base or s.run(['git', 'diff', '--quiet', base[-1], '--', 'test/planted']).returncode)"'''
+
+[[check]]
+metric = "contract"
+artifact = "verify"
+command = '''python3 -c "import subprocess as s, sys; base = s.run(['git', 'rev-list', '--max-parents=0', 'HEAD'], capture_output=True, text=True).stdout.split(); sys.exit(not base or s.run(['git', 'diff', '--quiet', base[-1], '--', 'src/model.js', 'test/model.test.js']).returncode)"'''
+
+[[check]]
+metric = "split"
+artifact = "brief:general-purpose"
+present = '''\S'''

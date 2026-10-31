@@ -1,0 +1,4 @@
+final = "The Formats part split into one part per format and wrote load() and convert(); the Timing part built timing.py. The planted tests pass."
+
+[briefs]
+"general-purpose" = "Build the subkit/formats/ package as docs/formats.md describes: a module per format under docs/formats/, each with sniff, parse and dump, plus load() and convert()."

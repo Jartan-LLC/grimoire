@@ -1,0 +1,82 @@
+# How a split runs its waves (#121), once recursio:splitting-implementation is in play: the main
+# thread writes and commits nothing while a wave's parts are out, parts keep to their own files and
+# make no commits, the contract and the planted tests stay as they were, and a part whose scope is
+# itself large loads the skill and splits once more. The guard cases are ordinary large builds whose
+# prompt asks for parallel subagents: four or three modules on a small shared contract plus a command
+# that joins them, in plain chat or through /praxis:implement-issue with a plan, in Python and Node.
+# The depth cases give the root two parts, one of them four file formats each read and written, and
+# ask it to build no part itself.
+#
+# ADVISORY: every case is on dev and the suite has no `covers`, so `make eval-plan` never lists it
+# and no SHIP depends on it. Run it by hand (`make eval-run`, then `python3 scripts/eval.py show`)
+# to see how the waves ran. Sonnet is the model it is run on; Opus, which the plugins also run on,
+# is listed with no baselines, and Haiku is a watch model, never screened. Under no recursio skill
+# the guard hand screens broke only the barrier: Opus roots by writing or committing while parts ran,
+# a Sonnet root by writing through Bash. Each case stays a regression case until a recorded baseline
+# shows its failure. shiftboard-build and subkit-formats were never screened.
+#
+# What the graders cannot see: `barrier` misses a file written through Bash. `contract` cannot tell
+# the root extending the contract before a wave, which the skill allows, from a part editing it, so
+# it is reported only. `resplit` reads every general-purpose spawn as one, so a sibling part's skill
+# load counts for the part that split, and no check sees a part three levels down.
+# tests/evals/README.md says how a suite is run.
+target = "recursio:splitting-implementation"
+# recursio 1.1.4's skills the target renames or absorbs, so none is recursio without any of them.
+replaces = [
+  "recursio:recursive-development",
+  "recursio:recursive-planning",
+  "recursio:recursive-quality",
+  "recursio:recursive-execution",
+]
+models = ["claude-sonnet-5-5", "claude-opus-5-5", "claude-haiku-5-5"]
+watch = ["claude-haiku-5-5"]
+# Root parts run in the background under -p, and the session sees its USD budget: a Sonnet root at a
+# $2 cap told its part not to split, so the cap sits well above the $1-4 the screened sessions spent.
+claude_code = "2.1.314"
+budget_usd = 15.0
+timeout_s = 3600
+
+[env]
+CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS = "0"
+
+[[metric]]
+id = "barrier"
+direction = "higher"
+# The main thread made no commit and wrote no file outside .claude/workspace/ while a part it
+# spawned was out.
+
+[[metric]]
+id = "clean"
+direction = "higher"
+margin = 0.2
+# No file written by two parts; no commit by any part, at any depth.
+
+[[metric]]
+id = "works"
+direction = "higher"
+margin = 0.2
+# The planted tests pass and are as the fixture had them.
+
+[[metric]]
+id = "contract"
+direction = "higher"
+# Reported: the contract module and its tests are as the fixture had them.
+
+[[metric]]
+id = "split"
+direction = "higher"
+# Reported: the main thread spawned a general-purpose part, without which `barrier` passes
+# vacuously.
+
+[[metric]]
+id = "resplit"
+direction = "higher"
+# Reported, depth cases: a general-purpose part made an Agent call, and the skill had reached a
+# part before each such call.
+
+[pass_rule]
+primary = "barrier"
+rule = "better"
+guards = ["clean", "works"]
+min_effect = 0.5
+min_samples = 3

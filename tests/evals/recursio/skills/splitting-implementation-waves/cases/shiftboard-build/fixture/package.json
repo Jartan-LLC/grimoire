@@ -1,0 +1,15 @@
+{
+  "name": "shiftboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "shiftboard": "bin/shiftboard.js"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}

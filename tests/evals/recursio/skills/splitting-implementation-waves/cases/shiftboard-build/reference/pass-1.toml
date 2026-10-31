@@ -1,0 +1,4 @@
+final = "Built rota.js, pay.js and leave.js through three parts, then the shiftboard command; node --test passes, the planted tests included."
+
+[briefs]
+"general-purpose" = "Write src/pay.js as the README's Pay section describes: PREMIUMS, shiftPay(), overtime() and payslip(), with test/pay.test.js and its example in the README's Usage section."

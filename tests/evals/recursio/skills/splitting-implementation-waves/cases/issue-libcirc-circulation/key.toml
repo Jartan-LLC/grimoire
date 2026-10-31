@@ -1,0 +1,106 @@
+split = "dev"
+# Under none, both Opus hand-screen roots broke the barrier: one wrote cli.py and test_cli.py while
+# the parts ran, one committed holds.py before the last part reported. A target case once a recorded
+# baseline shows it. Its Opus roots extended model.py before spawning on both arms, so `contract`
+# fails here without any part touching the contract.
+kind = "regression"
+hints = ["barrier", "wait", "meanwhile", "in the meantime", "until", "model.py", "split.md"]
+
+[[plant]]
+id = "acceptance-tests"
+verify = "python3 -m pytest -q tests/planted"
+
+[[check]]
+metric = "barrier"
+artifact = "barrier"
+
+[[check]]
+metric = "clean"
+artifact = "overlap"
+
+[[check]]
+metric = "clean"
+artifact = "spawn-writes"
+write = "commit"
+
+[[check]]
+metric = "works"
+artifact = "verify"
+command = "python3 -m pytest -q tests/planted"
+
+[[check]]
+metric = "works"
+artifact = "verify"
+command = '''python3 -c "import subprocess as s, sys; base = s.run(['git', 'rev-list', '--max-parents=0', 'HEAD'], capture_output=True, text=True).stdout.split(); sys.exit(not base or s.run(['git', 'diff', '--quiet', base[-1], '--', 'tests/planted']).returncode)"'''
+
+[[check]]
+metric = "contract"
+artifact = "verify"
+command = '''python3 -c "import subprocess as s, sys; base = s.run(['git', 'rev-list', '--max-parents=0', 'HEAD'], capture_output=True, text=True).stdout.split(); sys.exit(not base or s.run(['git', 'diff', '--quiet', base[-1], '--', 'src/libcirc/model.py', 'tests/test_model.py']).returncode)"'''
+
+[[check]]
+metric = "split"
+artifact = "brief:general-purpose"
+present = '''\S'''
+
+[[gh]]
+match = '''(^|\s)pr create\b'''
+stdout = "https://github.com/acme/libcirc/pull/53\n"
+
+[[gh]]
+match = '''(^|\s)pr view\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr edit\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)pr list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)pr status\b'''
+stdout = "Current branch\n  There is no pull request associated with [feature/issue-52]\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 52, \"title\": \"Circulation: loans, fines, holds and the libcirc command\", \"body\": \"We need the circulation tools the README describes, built on the data model in `src/libcirc/model.py`:\\n\\n- loans, due dates and renewals (`libcirc.loans`)\\n- overdue fines and patron accounts (`libcirc.fines`)\\n- the holds queue (`libcirc.holds`)\\n- the `libcirc` command with its `overdue`, `account` and `queue` subcommands\\n\\nThe README has the rules for each part. Each part needs its own tests and an example in the README's Usage section. The planted tests in `tests/planted/` must pass.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/libcirc/issues/52\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tCirculation: loans, fines, holds and the libcirc command\nstate:\tOPEN\nauthor:\tdana\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t52\n--\nWe need the circulation tools the README describes, built on the data model in `src/libcirc/model.py`:\n\n- loans, due dates and renewals (`libcirc.loans`)\n- overdue fines and patron accounts (`libcirc.fines`)\n- the holds queue (`libcirc.holds`)\n- the `libcirc` command with its `overdue`, `account` and `queue` subcommands\n\nThe README has the rules for each part. Each part needs its own tests and an example in the README's Usage section. The planted tests in `tests/planted/` must pass.\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[{\"number\": 52, \"title\": \"Circulation: loans, fines, holds and the libcirc command\", \"state\": \"OPEN\", \"url\": \"https://github.com/acme/libcirc/issues/52\"}]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = "52\tOPEN\tCirculation: loans, fines, holds and the libcirc command\t\t2026-10-20T10:00:00Z\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*pulls'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b.*--json'''
+stdout = "{\"name\": \"libcirc\", \"nameWithOwner\": \"acme/libcirc\", \"url\": \"https://github.com/acme/libcirc\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PUBLIC\", \"owner\": {\"login\": \"acme\"}}\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "name:\tacme/libcirc\ndescription:\t\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account alice (keyring)\n"
+
+[[gh]]
+match = '''(^|\s)api user\b'''
+stdout = "{\"login\": \"alice\"}\n"

@@ -1,0 +1,1 @@
+fleetlog has only its data model so far. Build the four modules and the `fleet` command the README describes, each with its own tests, and give each one its example in the README's Usage section. The tests in `tests/planted/` must pass. Use parallel subagents for the modules.

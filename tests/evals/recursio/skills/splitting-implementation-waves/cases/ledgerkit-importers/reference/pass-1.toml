@@ -1,0 +1,4 @@
+final = "The Importers part split into one part per format and built load(); the Reports part built reports.py. The planted tests pass."
+
+[briefs]
+"general-purpose" = "Build the ledgerkit/importers/ package as docs/importers.md describes: a module per format under docs/formats/, each with parse, sniff and dump, and load()."

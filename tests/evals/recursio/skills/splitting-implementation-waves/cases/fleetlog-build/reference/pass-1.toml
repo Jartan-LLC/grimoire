@@ -1,0 +1,4 @@
+final = "Built economy, service, trips and costs through four parts, then the fleet command; the planted tests and every module's own tests pass."
+
+[briefs]
+"general-purpose" = "Write src/fleetlog/economy.py as the README's Fuel economy section describes, with tests/test_economy.py, and its example in the README's Usage section."
