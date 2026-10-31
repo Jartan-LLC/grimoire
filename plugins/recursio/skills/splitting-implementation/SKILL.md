@@ -42,7 +42,7 @@ If this skill was lost to compaction, load it again and resume from the status l
 
 ## 3. Splitting again
 
-A part splits again when, after reading its slice, it finds sub-parts that meet the gate in section 1. Where the parent could have listed those sub-parts, it splits flat into a later wave instead. [Each extra level adds briefs and a barrier that a flat split does without.]
+A part splits again when, after reading its slice, it finds sub-parts that meet the gate in section 1. A parent that can already list a part's sub-parts makes them parts of a later wave instead of leaving them to a second split. [Each extra level adds briefs and a barrier that a flat split does without.]
 
 A part whose slice is too big and does not split cleanly reports up rather than building it in one pass. [Building it in one pass overloads the part's context.]
 
