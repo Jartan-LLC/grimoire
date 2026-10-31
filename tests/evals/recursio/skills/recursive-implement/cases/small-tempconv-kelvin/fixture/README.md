@@ -1,6 +1,6 @@
 # tempconv
 
-Converts a temperature from one unit to another and prints it with one decimal. Perl 5.36 or later, core modules only; the code lives in `lib/Tempconv.pm` and the command in `bin/tempconv`.
+Converts a temperature from one unit to another and prints it with one decimal. Node 20 or later, no dependencies; the code lives in `src/tempconv.js` and the command in `bin/tempconv.js`.
 
 ## Usage
 

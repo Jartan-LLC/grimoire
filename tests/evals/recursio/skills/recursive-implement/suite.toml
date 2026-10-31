@@ -3,7 +3,7 @@
 # the work uncommitted on the branch it started on, with no review, after making the doc and
 # changelog changes the project's rules call for and running its Verify commands; its report lists
 # each decision taken without asking and what is left for the user. Each split holds cases of five
-# kinds, in Python, Node or TypeScript, and Perl: a greenfield build from a description; an issue
+# kinds, in Python and in Node, plain or TypeScript: a greenfield build from a description; an issue
 # backed by a plan, whose plan alone asks for one more thing; a resume from a split.md whose first
 # wave has passed; a small change the command builds without splitting; a build whose spec asks for
 # something the project's rules say to ask about first (a dependency, removing an option, network

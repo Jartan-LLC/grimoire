@@ -1,6 +1,6 @@
 split = "screen"
 kind = "regression"
-hints = ["commit", "changelog", "readme", "lint", "use v5.36", "subagent", "parallel", "split", "review", "don't ask", "branch"]
+hints = ["commit", "changelog", "readme", "lint", "ts-check", "subagent", "parallel", "split", "review", "don't ask", "branch"]
 
 [[fact]]
 text = "--from and --to"
@@ -15,12 +15,12 @@ text = "The README's Usage section documents every option and every unit."
 where = "fixture:CLAUDE.md"
 
 [[fact]]
-text = "perl scripts/lint.pl"
+text = "node scripts/lint.js"
 where = "fixture:CLAUDE.md"
 
 [[plant]]
 id = "kelvin-tests"
-verify = "prove -l t/kelvin.t"
+verify = "node --test test/kelvin.test.js"
 
 # A one-file change: the command builds it itself, with no part and no split.md.
 [[check]]
@@ -41,7 +41,7 @@ present = '''(?i)kelvin|\bK\b'''
 [[check]]
 metric = "walkaway"
 artifact = "verify"
-command = "perl scripts/lint.pl"
+command = "node scripts/lint.js"
 
 [[check]]
 metric = "walkaway"
@@ -71,17 +71,17 @@ absent = '''(?i)\b(?:shall I|should I|would you like|do you want|want me to)\b|\
 [[check]]
 metric = "works"
 artifact = "verify"
-command = "prove -l t/kelvin.t"
+command = "node --test test/kelvin.test.js"
 
 [[check]]
 metric = "works"
 artifact = "verify"
-command = "prove -l t"
+command = "node --test"
 
 [[check]]
 metric = "works"
 artifact = "verify"
-command = "git diff --quiet HEAD -- t/kelvin.t"
+command = "git diff --quiet HEAD -- test/kelvin.test.js"
 
 [[check]]
 metric = "bounds"

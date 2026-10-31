@@ -1,0 +1,12 @@
+{
+  "name": "tempconv",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "tempconv": "bin/tempconv.js"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}

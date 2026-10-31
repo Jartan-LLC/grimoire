@@ -1,10 +1,10 @@
 commits = []
 final = """tempconv now converts to and from kelvin: `K` works for `--from` and `--to`, and a temperature below absolute zero, in any unit, is an error that exits 2 like an unknown unit. Built directly: a one-file change does not pay for a split.
 
-`prove -l t`: 15 tests pass. `perl scripts/lint.pl` passes. README and CHANGELOG updated.
+`node --test`: 15 tests pass. `node scripts/lint.js` passes. README and CHANGELOG updated.
 
 No decisions needed beyond the request. The change is uncommitted and unreviewed."""
 
 [files]
-"README.md" = "# tempconv\n\nConverts a temperature from one unit to another and prints it with one decimal. Perl 5.36 or later, core modules only; the code lives in `lib/Tempconv.pm` and the command in `bin/tempconv`.\n\n## Usage\n\n```console\n$ tempconv --from C --to F 21.5\n70.7\n```\n\n- `--from UNIT`: the unit of the value given, `C` (Celsius), `F` (Fahrenheit) or `K` (kelvin).\n- `--to UNIT`: the unit to print it in, `C`, `F` or `K`.\n\nAn unknown unit, a temperature below absolute zero, a missing option or a value that is not a number prints `tempconv: <message>` to stderr and exits 2.\n"
+"README.md" = "# tempconv\n\nConverts a temperature from one unit to another and prints it with one decimal. Node 20 or later, no dependencies; the code lives in `src/tempconv.js` and the command in `bin/tempconv.js`.\n\n## Usage\n\n```console\n$ tempconv --from C --to F 21.5\n70.7\n```\n\n- `--from UNIT`: the unit of the value given, `C` (Celsius), `F` (Fahrenheit) or `K` (kelvin).\n- `--to UNIT`: the unit to print it in, `C`, `F` or `K`.\n\nAn unknown unit, a temperature below absolute zero, a missing option or a value that is not a number prints `tempconv: <message>` to stderr and exits 2.\n"
 "CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n- Convert to and from kelvin; a temperature below absolute zero is an error.\n\n## 1.1.0 - 2026-08-30\n\n- Values may be negative or have decimals.\n\n## 1.0.0 - 2026-08-12\n\n- Convert between Celsius and Fahrenheit.\n"

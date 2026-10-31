@@ -8,6 +8,6 @@
 ## Verify
 
 ```bash
-prove -l t
-perl scripts/lint.pl
+node --test
+node scripts/lint.js
 ```
