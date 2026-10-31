@@ -171,6 +171,9 @@ def test_a_barrier_check_lets_the_main_thread_update_its_workspace_notes_mid_wav
     status = wrote("w1", "/repo/.claude/workspace/issue-52/split.md")
     parsed = trace.parse([*wave, *status, notification("a1", "done")], PLUGINS)
     assert grade.barrier_score(parsed) == 1.0
+    climbed = wrote("w2", "/repo/.claude/workspace/../src/x.py")
+    parsed = trace.parse([*wave, *climbed, notification("a1", "done")], PLUGINS)
+    assert grade.barrier_score(parsed) == 0.0
 
 
 def test_a_session_check_with_no_grader_refuses_rather_than_scores() -> None:
