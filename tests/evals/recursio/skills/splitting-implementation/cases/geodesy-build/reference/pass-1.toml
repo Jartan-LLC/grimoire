@@ -1,0 +1,4 @@
+final = "surveykit is built: coordinate parsing, formatting and UTM, Vincenty and spherical geodesics, polygon area and simplification, GPS track statistics and the command, each with its tests."
+
+[briefs]
+"general-purpose" = "Write src/surveykit/coords.py: coordinate parsing and formatting and UTM forward and inverse with the zone exceptions, as the README's Coordinates section describes, using only surveykit.model, with tests/test_coords.py."

@@ -1,0 +1,1 @@
+final = "pkgaudit is built: the lockfile readers, semver ranges, SPDX expressions, the reports and the pkgaudit CLI, each with its tests."

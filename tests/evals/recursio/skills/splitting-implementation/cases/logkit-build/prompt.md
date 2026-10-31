@@ -1,0 +1,1 @@
+Please implement logkit as the README specifies. src/types.ts is all there is so far; I need the three log parsers, the window statistics, the alert rules, the renderers and the logkit command, each with tests.

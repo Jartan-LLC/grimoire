@@ -1,0 +1,128 @@
+split = "confirm"
+kind = "trigger"
+hints = ["subagent", "parallel", "agents", "delegate", "wave"]
+remote = true
+turns = [
+  "Thanks. Please file each roadmap item as its own GitHub issue, with a short summary and a checklist of acceptance criteria, so people on the team can each pick one up.",
+]
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "recursio:splitting-implementation"
+state = "not-loaded"
+
+[[check]]
+metric = "quiet"
+artifact = "brief:general-purpose"
+present = '''\A\Z'''
+
+[[gh]]
+match = '''(^|\s)pr create\b'''
+stdout = "https://github.com/acme/potluck/pull/141\n"
+
+[[gh]]
+match = '''(^|\s)pr view\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr edit\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)pr list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)pr status\b'''
+stdout = "Current branch\n  There is no pull request associated with [main]\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 57, \"title\": \"Roadmap\", \"body\": \"See docs/ROADMAP.md.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/potluck/issues/57\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tRoadmap\nstate:\tOPEN\nauthor:\tdana\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t57\n--\nSee docs/ROADMAP.md.\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[{\"number\": 57, \"title\": \"Roadmap\", \"state\": \"OPEN\", \"url\": \"https://github.com/acme/potluck/issues/57\"}]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = "57\tOPEN\tRoadmap\t\t2026-10-20T10:00:00Z\n"
+
+[[gh]]
+match = '''(^|\s)issue create\b'''
+stdout = "https://github.com/acme/potluck/issues/58\n"
+
+[[gh]]
+match = '''(^|\s)label list\b'''
+stdout = "bug\tSomething is not working\t#d73a4a\nenhancement\tNew feature or request\t#a2eeef\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*pulls'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b.*--json'''
+stdout = "{\"name\": \"potluck\", \"nameWithOwner\": \"acme/potluck\", \"url\": \"https://github.com/acme/potluck\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PUBLIC\", \"owner\": {\"login\": \"acme\"}}\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "name:\tacme/potluck\ndescription:\t\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account alice (keyring)\n"
+
+[[gh]]
+match = '''(^|\s)api user\b'''
+stdout = "{\"login\": \"alice\"}\n"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3

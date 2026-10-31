@@ -1,0 +1,7 @@
+[project]
+name = "diskuse"
+version = "0.1.0"
+requires-python = ">=3.11"
+
+[project.scripts]
+diskuse = "diskuse.cli:main"

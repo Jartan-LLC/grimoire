@@ -1,0 +1,1 @@
+final = "pathglob.match is a backtracking matcher for *, ?, **, character classes and {a,b}; tests cover each."

@@ -59,14 +59,14 @@
     {
       "name": "recursio",
       "source": "./plugins/recursio",
-      "description": "Recursive multi-agent development system with TDD -- decomposes projects into waves of parallel nested subagents",
+      "description": "Build in parallel -- break up and delegate work to recursive subagents",
       "author": {
         "name": "Jartan LLC",
         "url": "https://github.com/Jartan-LLC"
       },
       "license": "MIT",
       "category": "development",
-      "keywords": ["recursive", "multi-agent", "tdd", "wave-plan", "orchestration"]
+      "keywords": ["recursive", "multi-agent", "orchestration"]
     }
   ]
 }

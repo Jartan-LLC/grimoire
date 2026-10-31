@@ -1,0 +1,1 @@
+Please implement innkeeper as specified in README.md: availability and room assignment, rates and quotes, cancellation charges, the housekeeping plan, and the innkeeper command. Each module needs its own test file.

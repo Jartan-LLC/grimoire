@@ -1,0 +1,1 @@
+final = "Renamed get_user to fetch_user across the package, scripts and tests; tests pass."

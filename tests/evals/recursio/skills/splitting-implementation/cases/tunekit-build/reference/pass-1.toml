@@ -1,0 +1,4 @@
+final = "tunekit is built: the ABC reader, music theory, the MIDI writer and reader, the analysis and the tunekit command, each with its tests."
+
+[briefs]
+"general-purpose" = "Write src/midi.js: writeMidi, readMidi and midiToTune for Standard MIDI Files formats 0 and 1 as the README's MIDI section describes, with test/midi.test.js."

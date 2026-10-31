@@ -1,0 +1,1 @@
+final = "Renamed loadSettings to readSettings in src/, scripts/ and test/; npm test passes."

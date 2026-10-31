@@ -1,0 +1,1 @@
+final = "listarc is built: the mbox reader and writer, MIME parsing, header decoding, threading, search and the listarc command, each with its tests."

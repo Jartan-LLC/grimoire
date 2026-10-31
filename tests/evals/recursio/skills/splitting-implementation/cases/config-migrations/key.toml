@@ -1,0 +1,52 @@
+split = "screen"
+kind = "trigger"
+hints = ["subagent", "parallel", "agents", "delegate", "wave"]
+turns = [
+  "Thanks. Now add three migrations: 3-to-4 renames `exclude` to `ignore`, 4-to-5 moves `ignore` under a new `filters` section (`filters.ignore`), and 5-to-6 turns `filters.ignore` from a comma-separated string into a list of trimmed patterns, dropping empty ones. Each runs on the shape the one before leaves. Add tests.",
+]
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "recursio:splitting-implementation"
+state = "not-loaded"
+
+[[check]]
+metric = "quiet"
+artifact = "brief:general-purpose"
+present = '''\A\Z'''
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2

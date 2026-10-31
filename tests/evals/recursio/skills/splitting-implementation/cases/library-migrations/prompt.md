@@ -1,0 +1,1 @@
+Add three migrations to catalog: 0005 adds a `loans.due_at` column, 0006 backfills it for existing loans as `loaned_at` plus the loan period of the member's tier, and 0007 adds an index on `due_at`. Each one runs on the schema the previous one leaves. Include tests.

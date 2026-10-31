@@ -1,0 +1,4 @@
+final = "chesskit is built: FEN reading and writing, legal move generation with perft, PGN reading, the clocks and the command, each with its tests."
+
+[briefs]
+"general-purpose" = "Write src/chesskit/movegen.py: legal_moves(), make_move(), the check and mate tests, uci() and perft() as the README's Move generation section describes, with tests/test_movegen.py checking the published perft counts."

@@ -1,0 +1,1 @@
+final = "Added migrations 0005 to 0007 (loans.due_at, its backfill from the tier loan period, and an index) with tests that run them in order."

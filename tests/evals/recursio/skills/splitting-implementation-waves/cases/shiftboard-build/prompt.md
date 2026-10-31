@@ -1,0 +1,1 @@
+shiftboard has its data model and nothing else yet. Please build the rota checks, pay and leave modules and the `shiftboard` command from the README, each with its own tests, and fill in the README's Usage section with an example for each. The tests in `test/planted/` have to pass. Have parallel subagents build the modules.

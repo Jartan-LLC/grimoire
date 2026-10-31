@@ -1,0 +1,117 @@
+split = "screen"
+kind = "trigger"
+hints = ["subagent", "parallel", "agents", "delegate", "wave"]
+remote = true
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "recursio:splitting-implementation"
+state = "not-loaded"
+
+[[check]]
+metric = "quiet"
+artifact = "brief:general-purpose"
+present = '''\A\Z'''
+
+[[gh]]
+match = '''(^|\s)pr create\b'''
+stdout = "https://github.com/acme/csvtool/pull/117\n"
+
+[[gh]]
+match = '''(^|\s)pr view\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr edit\b'''
+stdout = ""
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)pr list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)pr status\b'''
+stdout = "Current branch\n  There is no pull request associated with [feature/issue-17]\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 17, \"title\": \"Add a --delimiter option\", \"body\": \"`csvtool` only reads comma-separated files. Add a `--delimiter CHAR` option to both commands (default `,`; the word `tab` means a tab) and pass it through to `parseCsv` in src/read.js. Quoted fields must keep working with any delimiter, and a delimiter longer than one character is a usage error (exit 2).\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/csvtool/issues/17\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tAdd a --delimiter option\nstate:\tOPEN\nauthor:\tdana\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t17\n--\n`csvtool` only reads comma-separated files. Add a `--delimiter CHAR` option to both commands (default `,`; the word `tab` means a tab) and pass it through to `parseCsv` in src/read.js. Quoted fields must keep working with any delimiter, and a delimiter longer than one character is a usage error (exit 2).\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[{\"number\": 17, \"title\": \"Add a --delimiter option\", \"state\": \"OPEN\", \"url\": \"https://github.com/acme/csvtool/issues/17\"}]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = "17\tOPEN\tAdd a --delimiter option\t\t2026-10-20T10:00:00Z\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*pulls'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b.*--json'''
+stdout = "{\"name\": \"csvtool\", \"nameWithOwner\": \"acme/csvtool\", \"url\": \"https://github.com/acme/csvtool\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PUBLIC\", \"owner\": {\"login\": \"acme\"}}\n"
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "name:\tacme/csvtool\ndescription:\t\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account alice (keyring)\n"
+
+[[gh]]
+match = '''(^|\s)api user\b'''
+stdout = "{\"login\": \"alice\"}\n"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3

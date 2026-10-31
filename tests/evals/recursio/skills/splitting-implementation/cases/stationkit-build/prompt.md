@@ -1,0 +1,1 @@
+stationkit only has its data model so far. Build the rest from the README: the three ingest formats, quality control, the derived values and daily summaries, the reports and the command, with a test module for each.

@@ -1,0 +1,4 @@
+final = "listarc is built: the mbox reader and writer, MIME parsing, header decoding, threading, search and the listarc command, each with its tests."
+
+[briefs]
+"general-purpose" = "Write lib/Listarc/Thread.pm: thread and flatten by the JWZ steps the README's Threads section gives, using only Listarc::Model, with t/thread.t."

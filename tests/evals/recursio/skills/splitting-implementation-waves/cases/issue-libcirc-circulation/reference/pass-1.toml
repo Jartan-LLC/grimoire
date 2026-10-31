@@ -1,0 +1,4 @@
+final = "Pushed feature/issue-52 with loans, fines, holds and the libcirc command, each with its tests and a Usage example."
+
+[briefs]
+"general-purpose" = "Write src/libcirc/fines.py: RATES, CAPS, overdue_days() over open days, fine() and account(), as the README's Fines section describes, with tests/test_fines.py."

@@ -1,0 +1,57 @@
+# Trigger suite for the splitting-implementation skill (#121): is the skill consulted on a build its
+# gate says to split, and does it stay out of work that only looks like one? Should-split cases are
+# large builds: three or more independent modules, each real work with its own tests, sharing only a
+# small contract the fixture holds, plus at most one command that joins them; each fixture's README
+# holds the spec. They come in plain chat with no word about subagents, some over several turns with
+# the build asked last, and through /praxis:implement-issue with a plan that lists the parts, in
+# Python, Node, C and Perl. A build whose parts are a function or two is no should-split case: the
+# gate rightly builds it directly. Near misses share the skill's words but need something else: a
+# one-file fix, a migration chain, splitting one file into modules, a recursive algorithm, a
+# test-first request, a wide rename, issues for a roadmap, a small issue. Every case runs with
+# praxis installed, as users run it; one implement-issue case runs without recursio, where praxis's
+# line on loading skills must not set off a split of its own. `recall` asks only that the skill be
+# consulted, so a session that loads it and builds directly passes; a split with no skill loaded
+# passes `split` and fails `recall`. tests/evals/README.md says how the suite is run.
+target = "recursio:splitting-implementation"
+# recursio 1.1.4's skills the target renames or absorbs, so none is recursio without any of them.
+replaces = [
+  "recursio:recursive-development",
+  "recursio:recursive-planning",
+  "recursio:recursive-quality",
+  "recursio:recursive-execution",
+]
+covers = [
+  "plugins/recursio/skills/splitting-implementation/**",
+  "plugins/praxis/skills/implement-issue/SKILL.md",
+]
+models = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]
+# Haiku is a watch model: in the smoke runs it never loaded the skill, on any case or with any
+# description tried. Its screens still report harm.
+watch = ["claude-haiku-5-5"]
+# Should-split sessions build several modules through parts, praxis cases push a branch too.
+budget_usd = 10.0
+
+[[metric]]
+id = "recall"
+direction = "higher"
+# Should split, on the large builds only: the main thread loaded the skill. A session that loads
+# it and builds directly passes; whether it split is `split`.
+
+[[metric]]
+id = "quiet"
+direction = "higher"
+margin = 0.1
+# Near misses: the skill not loaded, and no general-purpose subagent spawned.
+
+[[metric]]
+id = "split"
+direction = "higher"
+# Should split, reported, on the large builds only: the main thread spawned a general-purpose
+# subagent.
+
+[pass_rule]
+primary = "recall"
+rule = "better"
+guards = ["quiet"]
+min_effect = 0.5
+min_samples = 3

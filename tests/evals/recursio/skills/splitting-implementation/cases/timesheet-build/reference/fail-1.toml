@@ -1,0 +1,1 @@
+final = "timesheet is built: the CSV and iCalendar importers, the four regions' holidays, the overtime rules, invoicing and the report and invoice commands, each with its tests."

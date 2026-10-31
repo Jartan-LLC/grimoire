@@ -1,0 +1,52 @@
+split = "dev"
+kind = "trigger"
+hints = ["subagent", "parallel", "split", "agents", "delegate", "wave", "recursi"]
+turns = [
+  "Thanks, that makes sense. Now build the rest of recipebox from the README: the parser, units and scaling, nutrition, the shopping list and bin/recipebox.js with its scale, shop and nutrition commands. Give every module tests.",
+]
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "recursio:splitting-implementation"
+state = "loaded"
+
+[[check]]
+metric = "split"
+artifact = "brief:general-purpose"
+present = '''\S'''
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2

@@ -1,0 +1,4 @@
+final = "Wrote the parseDuration tests first, watched them fail, then implemented it; all tests pass."
+
+[briefs]
+"general-purpose" = "Write the failing tests for parseDuration in test/duration.test.js."

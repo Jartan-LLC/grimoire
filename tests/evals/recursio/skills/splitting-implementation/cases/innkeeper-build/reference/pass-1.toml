@@ -1,0 +1,4 @@
+final = "innkeeper is built: availability and room assignment, rates and quotes, cancellation charges, the housekeeping plan and the command, each with its tests."
+
+[briefs]
+"general-purpose" = "Write src/innkeeper/rates.py: nightly_rates() and quote() with seasonal and weekend rates, length-of-stay discounts, occupancy surcharges and half-up rounding as the README's Rates section describes, with tests/test_rates.py."

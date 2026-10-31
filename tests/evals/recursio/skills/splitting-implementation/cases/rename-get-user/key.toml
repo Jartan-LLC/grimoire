@@ -1,0 +1,52 @@
+split = "dev"
+kind = "trigger"
+hints = ["subagent", "parallel", "agents", "delegate", "wave"]
+turns = [
+  "Fine. Rename `get_user` to `fetch_user` everywhere it is defined, imported or called -- the package, scripts/ and tests/ -- and keep the tests passing.",
+]
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "recursio:splitting-implementation"
+state = "not-loaded"
+
+[[check]]
+metric = "quiet"
+artifact = "brief:general-purpose"
+present = '''\A\Z'''
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2

@@ -1,0 +1,1 @@
+final = "logkit is built: the nginx, syslog and logfmt parsers, window statistics, alert rules, the three renderers and the command, each with its tests."

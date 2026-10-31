@@ -1,0 +1,1 @@
+Can you write timesheet? The README is the spec and only the types exist yet: the CSV and calendar importers, the holiday calendars, the overtime rules, invoicing and the timesheet command. Tests for every module, please.

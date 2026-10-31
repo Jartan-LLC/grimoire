@@ -1,0 +1,4 @@
+final = "Added migrations 0004 to 0006 and a test that runs them in order."
+
+[briefs]
+"general-purpose" = "Write src/shopdb/migrations/0005_backfill.py."

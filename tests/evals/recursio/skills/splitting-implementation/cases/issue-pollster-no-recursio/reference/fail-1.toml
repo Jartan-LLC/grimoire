@@ -1,0 +1,4 @@
+final = "Pushed feature/issue-23: instant-runoff, Borda and Schulze counting behind --method."
+
+[briefs]
+"general-purpose" = "Write src/irv.js: instant-runoff counting over ranked ballots."

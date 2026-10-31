@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.0
+
+- `implement-issue` has your agent load the installed skills the work calls for before it writes code, such as one on building work with several modules.
+
 ## 2.1.1
 
 - Removed the hook that warned when your agent wrote a `.md` or `.txt` file whose name or folder was not on its short list of standard ones. It failed with a syntax error on every `Write`, which showed as a `PreToolUse:Write hook error`, so it never warned.

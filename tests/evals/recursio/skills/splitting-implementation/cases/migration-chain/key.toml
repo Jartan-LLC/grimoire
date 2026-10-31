@@ -1,0 +1,52 @@
+split = "dev"
+kind = "trigger"
+hints = ["subagent", "parallel", "agents", "delegate", "wave"]
+turns = [
+  "Good. Add three migrations: 0004 adds a `customers.email_normalized` column, 0005 fills it from `email` (trimmed and lowercased), and 0006 adds a unique index on it. Each one runs on the schema the one before leaves. Add tests.",
+]
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "recursio:splitting-implementation"
+state = "not-loaded"
+
+[[check]]
+metric = "quiet"
+artifact = "brief:general-purpose"
+present = '''\A\Z'''
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2

@@ -1,0 +1,12 @@
+{
+  "name": "csvtool",
+  "version": "0.2.1",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "csvtool": "bin/csvtool.js"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}

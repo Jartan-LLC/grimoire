@@ -1,0 +1,1 @@
+src/helpers.js has become a junk drawer. Break it up into modules by topic -- strings, arrays, dates -- keep src/helpers.js re-exporting the old names so nothing breaks, and point the tests at the new modules.
