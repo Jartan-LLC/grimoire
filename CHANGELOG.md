@@ -8,8 +8,11 @@ in `extraKnownMarketplaces`. Each plugin's own changes are in its
 
 ## 2.0.0
 
-- claudivis 1.1.3, gitwise 2.0.0, praxis 2.2.0, pythonica 1.1.3 and recursio 2.0.0. gitwise,
-  praxis and recursio change existing behaviour: see each plugin's CHANGELOG before upgrading.
+- claudivis 1.1.3, gitwise 2.0.0, praxis 2.2.0, pythonica 1.1.3 and recursio 2.0.0.
+- Breaking: praxis removes its `issue-planner` agent; gitwise's `github-conventions` drops its
+  plan format; recursio becomes one skill, `splitting-implementation`, removing its agents,
+  Codex roles, hook, command and three other skills. Each plugin's CHANGELOG says how to
+  upgrade.
 - praxis's `plain-writing/references/patterns.md` is licensed CC BY-SA 4.0; the rest of the
   repository stays MIT (see NOTICE).
 
