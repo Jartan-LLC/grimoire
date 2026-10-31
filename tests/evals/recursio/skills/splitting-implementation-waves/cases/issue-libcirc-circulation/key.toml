@@ -6,7 +6,7 @@ hints = ["barrier", "wait", "meanwhile", "in the meantime", "until", "model.py",
 
 [[plant]]
 id = "acceptance-tests"
-verify = "python3 -m pytest -q tests/planted"
+verify = "python3 -m unittest discover -s tests/planted"
 
 [[check]]
 metric = "barrier"

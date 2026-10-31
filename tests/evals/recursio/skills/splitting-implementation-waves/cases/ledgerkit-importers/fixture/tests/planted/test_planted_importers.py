@@ -1,5 +1,8 @@
 """Planted acceptance tests: one basic file per format, a round trip per format, and load()."""
 
+import pathlib
+import tempfile
+import unittest
 from datetime import date
 from decimal import Decimal
 
@@ -105,62 +108,58 @@ ROUND = [
 ]
 
 
-def test_formats_registered():
-    assert {"qif", "ofx", "mt940", "camt053"} <= set(FORMATS)
+class PlantedTest(unittest.TestCase):
+    def test_formats_registered(self):
+        assert {"qif", "ofx", "mt940", "camt053"} <= set(FORMATS)
 
+    def test_qif_basic(self):
+        r = qif.parse(QIF)
+        assert [(t.day, t.amount, t.payee) for t in r.transactions] == [
+            (date(2026, 3, 1), Decimal("-3.50"), "Cafe Uno"),
+            (date(2026, 3, 2), Decimal("1200.00"), "Salary"),
+        ]
+        assert r.transactions[1].ref == "1001"
+        assert r.skipped == []
 
-def test_qif_basic():
-    r = qif.parse(QIF)
-    assert [(t.day, t.amount, t.payee) for t in r.transactions] == [
-        (date(2026, 3, 1), Decimal("-3.50"), "Cafe Uno"),
-        (date(2026, 3, 2), Decimal("1200.00"), "Salary"),
-    ]
-    assert r.transactions[1].ref == "1001"
-    assert r.skipped == []
+    def test_ofx_sgml_with_duplicate(self):
+        r = ofx.parse(OFX)
+        assert len(r.transactions) == 1
+        t = r.transactions[0]
+        assert (t.day, t.amount, t.payee, t.ref, t.currency) == (
+            date(2026, 3, 1), Decimal("-3.50"), "Cafe & Bar", "A1", "USD"
+        )
+        assert len(r.skipped) == 1
+        assert r.skipped[0].line == 16
+        assert "duplicate" in r.skipped[0].reason
 
+    def test_mt940_structured_plain_and_balance(self):
+        r = mt940.parse(MT940)
+        got = [(t.day, t.amount, t.payee, t.memo, t.ref, t.currency) for t in r.transactions]
+        assert got == [
+            (date(2026, 3, 1), Decimal("-3.50"), "Cafe Uno", "Coffee morning", None, "EUR"),
+            (date(2026, 3, 2), Decimal("1200"), "Salary March", "ACME GmbH", "SAL-03", "EUR"),
+        ]
+        assert [(s.line, s.reason) for s in r.skipped] == [(11, "balance mismatch")]
 
-def test_ofx_sgml_with_duplicate():
-    r = ofx.parse(OFX)
-    assert len(r.transactions) == 1
-    t = r.transactions[0]
-    assert (t.day, t.amount, t.payee, t.ref, t.currency) == (
-        date(2026, 3, 1), Decimal("-3.50"), "Cafe & Bar", "A1", "USD"
-    )
-    assert len(r.skipped) == 1
-    assert r.skipped[0].line == 16
-    assert "duplicate" in r.skipped[0].reason
+    def test_load_sniffs_each_format(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for name, text, count in (("a.qif", QIF, 2), ("b.ofx", OFX, 1), ("c.sta", MT940, 2), ("d.xml", CAMT, 3)):
+                p = pathlib.Path(tmp) / name
+                p.write_text(text, encoding="utf-8")
+                assert len(load(p).transactions) == count
 
+    def test_camt053_batch_reference_and_pending(self):
+        r = camt053.parse(CAMT)
+        got = [(t.day, t.amount, t.payee, t.memo, t.ref, t.currency) for t in r.transactions]
+        assert got == [
+            (date(2026, 3, 1), Decimal("-3.50"), "Cafe Uno", "Coffee morning", "E2E-1", "EUR"),
+            (date(2026, 3, 2), Decimal("100.00"), "Ann", "", "BATCH-7", "EUR"),
+            (date(2026, 3, 2), Decimal("200.00"), "Bob", "", "E2E-9", "EUR"),
+        ]
+        assert [(s.line, s.reason) for s in r.skipped] == [(27, "pending")]
 
-def test_mt940_structured_plain_and_balance():
-    r = mt940.parse(MT940)
-    got = [(t.day, t.amount, t.payee, t.memo, t.ref, t.currency) for t in r.transactions]
-    assert got == [
-        (date(2026, 3, 1), Decimal("-3.50"), "Cafe Uno", "Coffee morning", None, "EUR"),
-        (date(2026, 3, 2), Decimal("1200"), "Salary March", "ACME GmbH", "SAL-03", "EUR"),
-    ]
-    assert [(s.line, s.reason) for s in r.skipped] == [(11, "balance mismatch")]
-
-
-def test_load_sniffs_each_format(tmp_path):
-    for name, text, count in (("a.qif", QIF, 2), ("b.ofx", OFX, 1), ("c.sta", MT940, 2), ("d.xml", CAMT, 3)):
-        p = tmp_path / name
-        p.write_text(text, encoding="utf-8")
-        assert len(load(p).transactions) == count
-
-
-def test_camt053_batch_reference_and_pending():
-    r = camt053.parse(CAMT)
-    got = [(t.day, t.amount, t.payee, t.memo, t.ref, t.currency) for t in r.transactions]
-    assert got == [
-        (date(2026, 3, 1), Decimal("-3.50"), "Cafe Uno", "Coffee morning", "E2E-1", "EUR"),
-        (date(2026, 3, 2), Decimal("100.00"), "Ann", "", "BATCH-7", "EUR"),
-        (date(2026, 3, 2), Decimal("200.00"), "Bob", "", "E2E-9", "EUR"),
-    ]
-    assert [(s.line, s.reason) for s in r.skipped] == [(27, "pending")]
-
-
-def test_round_trip_every_format():
-    assert qif.parse(qif.dump(ROUND)).transactions == ROUND
-    assert ofx.parse(ofx.dump(ROUND)).transactions == ROUND
-    assert mt940.parse(mt940.dump(ROUND, "DE44500105175407324931")).transactions == ROUND
-    assert camt053.parse(camt053.dump(ROUND)).transactions == ROUND
+    def test_round_trip_every_format(self):
+        assert qif.parse(qif.dump(ROUND)).transactions == ROUND
+        assert ofx.parse(ofx.dump(ROUND)).transactions == ROUND
+        assert mt940.parse(mt940.dump(ROUND, "DE44500105175407324931")).transactions == ROUND
+        assert camt053.parse(camt053.dump(ROUND)).transactions == ROUND

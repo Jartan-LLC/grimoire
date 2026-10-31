@@ -10,7 +10,7 @@ where = "prompt"
 
 [[plant]]
 id = "acceptance-tests"
-verify = "python3 -m pytest -q tests/planted"
+verify = "python3 -m unittest discover -s tests/planted"
 
 [[check]]
 metric = "barrier"
