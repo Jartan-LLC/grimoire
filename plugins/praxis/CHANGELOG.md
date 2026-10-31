@@ -2,7 +2,7 @@
 
 ## 2.2.0
 
-- `implement-issue` has your agent load the installed skills the work calls for before it writes code, such as one on splitting the work across subagents.
+- `implement-issue` has your agent load the installed skills the work calls for before it writes code, such as one on building work with several modules.
 
 ## 2.1.0
 
