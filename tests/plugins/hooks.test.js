@@ -15,13 +15,7 @@ const PLUGINS = path.join(REPO_ROOT, 'plugins');
 
 // Contract breaks in shipped hooks, keyed "<plugin> <description>|<payload label or *>",
 // each with the failure the defect produces.
-const KNOWN_DEFECTS = {
-  // The shell turns the \\ in [\/\\] into one backslash, so node -e fails to parse.
-  'praxis Warn about non-standard documentation files|*': {
-    issue: 'grimoire#76',
-    expected: /^exit 1 .*SyntaxError: Invalid regular expression/s,
-  },
-};
+const KNOWN_DEFECTS = {};
 
 // Hooks the large-context payload drives down their output path, so silence there
 // means the hook stopped doing its job.
@@ -58,7 +52,7 @@ function payloads(event, transcript) {
     hook_event_name: event,
     source: 'compact',
     tool_name: 'Bash',
-    tool_input: { command: 'git commit -m x && git push', file_path: 'notes.txt' },
+    tool_input: { command: 'git commit -m x && git push' },
   };
   return {
     'malformed JSON': '{"session_id": ',

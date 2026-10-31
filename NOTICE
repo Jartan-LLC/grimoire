@@ -7,10 +7,9 @@ This repository is licensed under the MIT License in LICENSE, with these excepti
   adapted from humanizer by Siqi Chen, under the MIT notice in each directory's
   LICENSE-humanizer, which must ship with them.
 - plugins/praxis/hooks/scripts/lib/utils.js, lib/transcript-context.js, suggest-compact.js and
-  check-console-log.js, and the push-reminder and documentation-file hooks in
-  plugins/praxis/hooks/hooks.json, are adapted from everything-claude-code by Affaan Mustafa, under the
-  MIT notice in plugins/praxis/hooks/scripts/LICENSE-everything-claude-code, which must ship
-  with them.
+  check-console-log.js are adapted from everything-claude-code by Affaan Mustafa, under the MIT
+  notice in plugins/praxis/hooks/scripts/LICENSE-everything-claude-code, which must ship with
+  them.
 - plugins/pythonica/skills/python-patterns/SKILL.md, plugins/pythonica/skills/python-testing/SKILL.md
   and the language-level anti-patterns in plugins/pythonica/skills/python-anti-patterns/SKILL.md are
   adapted from everything-claude-code by Affaan Mustafa, under the MIT notice in each of those
