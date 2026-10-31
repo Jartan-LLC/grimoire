@@ -43,3 +43,10 @@ arm = "none"
 failures = 0
 runs = 3
 runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
