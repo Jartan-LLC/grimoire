@@ -24,7 +24,7 @@ Load the `recursio:splitting-implementation` skill.
 - **An issue number**: run `gh issue view <number> --comments`, and read `.claude/workspace/issue-<number>/plan.md` if it exists.
 - **A description**: take it as given.
 
-Add the requirements discussed in the conversation, and read the project's rules and its Verify commands. If `split.md` in the effort's folder records waves already done, resume from the first wave whose barrier has not passed.
+Add the requirements discussed in the conversation, and read the project's rules and its Verify commands. The effort's folder is `.claude/workspace/issue-<number>/` for an issue, otherwise `.claude/workspace/<name>/` with a short name for the work. If a `split.md` under `.claude/workspace/` records waves already done, resume from the first wave whose barrier has not passed.
 
 ### 3. Split or Build
 
