@@ -64,7 +64,7 @@ To pin a project to a marketplace release, set `ref` to a
 {
   "extraKnownMarketplaces": {
     "grimoire": {
-      "source": { "source": "github", "repo": "Jartan-LLC/grimoire", "ref": "marketplace-v1.0.0" }
+      "source": { "source": "github", "repo": "Jartan-LLC/grimoire", "ref": "marketplace-v2.0.0" }
     }
   }
 }
