@@ -11,7 +11,7 @@ Whether to divide implementation work among subagents in one session, and how to
 
 ## 1. Split or build
 
-A part whose brief says it is two levels below the main thread is at the depth limit: it builds its part and never splits, whatever else this skill says. [Parts that load this skill on their own re-split past the limit and collide.]
+A part whose brief says it is two levels below the main thread is at the depth limit: it builds its part and never splits, whatever else this skill says. A part one level below may split again (section 3). [Parts that load this skill on their own re-split past the limit and collide.]
 
 Otherwise, split when the work has two or more parts that each:
 
@@ -83,7 +83,7 @@ A contract sets the ceiling for the code built on it:
 
 ## 7. Briefs
 
-A brief carries everything its part needs without this skill:
+Write each brief from [brief-template.md](brief-template.md). A brief carries everything its part needs without this skill:
 
 - its depth: one or two levels below the main thread;
 - its contract and its scope; it writes nowhere else;
@@ -95,7 +95,7 @@ A brief carries everything its part needs without this skill:
 - the names of the skills its work needs;
 - the report format (section 8), and a request to report any decision a sibling may also face.
 
-A part one level below the main thread may split again, so its brief adds: "If, after reading your part, you find sub-parts that each are real work and can be built and checked alone, load `recursio:splitting-implementation` before splitting; your own parts are at the depth limit and build." A part two levels below gets no split line, and its brief says it is at the depth limit and builds.
+A part one level below the main thread may split again, so its brief adds: "After reading your part, if it may hold sub-parts that each are real work, load `recursio:splitting-implementation` and decide with its section 1 gate whether to split; your own parts are at the depth limit and build." A part two levels below gets no split line, and its brief says it is at the depth limit and builds.
 
 Keep briefs compact: never the whole plan or a sibling's code. [A part handed everything works from the plan instead of its scope.]
 
