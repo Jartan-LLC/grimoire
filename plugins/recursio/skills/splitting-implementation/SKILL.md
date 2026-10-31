@@ -92,7 +92,7 @@ Write each brief from [brief-template.md](brief-template.md). A brief carries ev
 - its depth: one or two levels below the main thread;
 - its contract and its scope; it writes nowhere else;
 - its contract tests, read-only, and a test command that runs its own tests only;
-- no staging or committing;
+- no staging or committing, and formatters and installers run on its own scope only;
 - the interfaces it depends on, pasted as text;
 - every requirement the part owns, pointed to where it is written (a spec section, an issue) rather than restated;
 - what the part exports and the dependencies it uses, which the level enters in the hub files and manifests before the wave; the part leaves those files alone and reports any other entry it needs;
@@ -119,7 +119,7 @@ Each part reports:
 
 - Spawn each part as the agent type that fits it best: general-purpose by default, a project or language agent when one fits the part's work. A part that may split again needs a type with the Agent tool.
 - Spawn the wave's parts in one message, with no `name` and never as a fork. [With agent teams on, a named spawn becomes a teammate, not a subagent, and an in-process teammate runs its own parts only in the foreground; a fork inherits the whole conversation and gives no context relief.]
-- Before spawning, record each file `git status --porcelain -uall` lists with its `git hash-object -w`, or `deleted` for a path it lists as deleted, and the `git hash-object -w` of each contract file and contract test; at the root, in split.md. [A list of names misses a part's edit to a file already changed; `-w` stores the file so the barrier can restore it.]
+- Before spawning, record each file `git status --porcelain -uall` lists with its `git hash-object -w`, or `deleted` for a path it lists as deleted, and the `git hash-object -w` of each contract file and contract test; at the root, in split.md, and below it, in your own context. [A list of names misses a part's edit to a file already changed; `-w` stores the file so the barrier can restore it.]
 - Build nothing yourself while a part runs. [Your writes land in a part's scope and fail the scope check.]
 - At the root, parts usually run in the background and report as notifications in later turns. Start the barrier only after every part listed under the wave in split.md has reported. [A barrier on half the wave passes code that is not there yet.]
 

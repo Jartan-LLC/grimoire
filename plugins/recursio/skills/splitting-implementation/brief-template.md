@@ -18,7 +18,7 @@ Interfaces you depend on:
 <pasted as text>
 Settled decisions you touch: <list>
 Skills to load: <names>
-Do not stage, commit, push or switch branches. Ask no questions; report instead.
+Do not stage, commit, push or switch branches. Run formatters and installers on your scope only. Ask no questions; report instead.
 
 Report: outcome (split, built, or could not split); the test command and its terse output; files written; interface change requests; decisions a sibling may also face; "cannot satisfy the contract" and why, in place of editing a contract file or test.
 ```
