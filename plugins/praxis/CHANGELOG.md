@@ -2,7 +2,7 @@
 
 ## 2.1.1
 
-- Removed the hook that warned when your agent wrote a `.md` or `.txt` file whose name or folder was not on its short list of standard ones. It failed with a syntax error on every `Write`, which showed as a `PreToolUse:Write hook error`, so it never warned, and its list left out files that `information-placement` and `workspace-patterns` name, such as `RELEASING.md` and plans in `.claude/workspace/`.
+- Removed the hook that warned when your agent wrote a `.md` or `.txt` file whose name or folder was not on its short list of standard ones. It failed with a syntax error on every `Write`, which showed as a `PreToolUse:Write hook error`, so it never warned.
 - Removed the hook that printed a reminder to review changes before `git push`. It printed the reminder where neither you nor the model sees it and let the push go ahead, so it changed nothing.
 
 ## 2.1.0
