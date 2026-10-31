@@ -1,0 +1,17 @@
+commits = []
+final = """Issue 23 is built: stock, parcels, expiry and the pantrykit command, plus `pantrykit pack --dry-run` as the plan asks. `node --test`: 52 passed; `node scripts/lint.ts` passes.
+
+Per part: stock built, parcels built, expiry built, cli built (wave 2, after the other three).
+
+Decided without asking:
+- A best-before lot past its date can still be handed out; only use-by lots are held back once their date has passed. Source: the README leaves it open.
+
+Left for you: nothing. split.md is at .claude/workspace/issue-23/split.md. The work is uncommitted and unreviewed, on main."""
+
+[files]
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n- Receive and take stock, pack the weekly parcels and list what is about to expire, with the `pantrykit` command.\n\n## 0.2.0 - 2026-10-12\n\n- Read and write the pantry file.\n\n## 0.1.0 - 2026-09-28\n\n- The data model: items, lots and households.\n"
+"docs/cli.md" = "# The pantrykit command\n\n- `pantrykit receive pantry.json rice 12 2027-04-01` prints `received l8: Rice x12, best-before 2027-04-01`.\n- `pantrykit pack pantry.json h3 2026-11-02` prints each portion, then `packed for Chen`; add `--dry-run` to check a parcel first.\n- `pantrykit expiring pantry.json 2026-11-02 30` prints `2026-11-05 l5 Milk x4` and the rest of the window.\n"
+".claude/workspace/issue-23/split.md" = "# Split: issue 23\n\n### parcels\n\n- Outcome: built\n\n## Decided without asking\n\n- Best-before lots past their date are still handed out -- the README leaves it open.\n"
+
+[briefs]
+"general-purpose" = "One level below the main thread. Build src/expiry.ts as the README's Expiry section says, with test/expiry.test.ts; do not stage or commit."

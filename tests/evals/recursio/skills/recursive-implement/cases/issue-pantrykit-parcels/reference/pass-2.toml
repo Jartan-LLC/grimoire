@@ -1,0 +1,17 @@
+commits = []
+final = """Done. All 44 tests pass and the lint is clean.
+
+Parts: stock (built), parcels (built), expiry (built), cli (built).
+
+Decision without asking: once its date has passed, a best-before lot is skipped like a use-by lot, so nothing past its date leaves the pantry; the README had not settled it.
+
+Nothing has been committed and nothing was reviewed."""
+gh = "gh issue view 23 --comments\n\nStock and parcels"
+
+[files]
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n### Added\n\n- Stock, parcels and expiry.\n\n## 0.2.0 - 2026-10-12\n\n- Read and write the pantry file.\n\n## 0.1.0 - 2026-09-28\n\n- The data model: items, lots and households.\n"
+"docs/cli.md" = "pantrykit receive stock.json oats 20 2027-05-01\npantrykit pack stock.json h1 2026-11-09\npantrykit expiring stock.json 2026-11-09 14\n"
+".claude/workspace/pantrykit-23/split.md" = "## Decided without asking\n\nOutcome: could not split\n"
+
+[briefs]
+"general-purpose" = "Build the parcels module."
