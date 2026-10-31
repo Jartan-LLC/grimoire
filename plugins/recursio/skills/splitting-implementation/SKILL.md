@@ -23,7 +23,7 @@ Each part then gets a fresh context for its slice alone, and the parts run side 
 
 A wide, same-shaped edit across many files, such as a rename or a mechanical migration, fits Claude Code's built-in `/batch`: suggest it to the user rather than splitting.
 
-A level that cannot spawn subagents (no Agent tool, or running under Codex) builds its parts itself, wave by wave, still settling first (section 4).
+A level that cannot spawn subagents builds its parts itself, wave by wave, still settling first (section 4). Under Claude Code that is a level with no Agent tool; under Codex, which allows one level of subagents by default, it is every part below the main thread.
 
 This skill covers dividing work among subagents in one session. Dividing work into issues or PRs is a separate decision.
 

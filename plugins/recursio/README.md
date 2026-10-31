@@ -20,7 +20,7 @@ codex plugin marketplace add Jartan-LLC/grimoire
 codex plugin add recursio@grimoire
 ```
 
-Recursio leans on Claude Code's subagents. Under Codex the skill and the command load, recursio ships no agent roles, and the agent builds the parts of a split itself, wave by wave.
+Recursio leans on Claude Code's subagents. Under Codex the skill and the command load and recursio ships no agent roles. Codex allows one level of subagents by default, so the main thread can split but its parts build their share themselves.
 
 ## What's Included
 
