@@ -124,7 +124,7 @@ Each part reports:
 
 ## 10. At the barrier
 
-Work through [barrier.md](barrier.md) once every part of the wave has reported.
+Work through [barrier.md](barrier.md) once every part of the wave has reported. Below the main thread, the barrier checks only the level's own scope and runs only its scope's tests, since the parent's other parts are still running; the main thread's barrier checks the whole tree and runs the full suite.
 
 ## 11. split.md
 
