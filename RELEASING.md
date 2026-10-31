@@ -133,6 +133,10 @@ Cut the next `marketplace-v*` tag when the maintainer wants pinned consumers to 
 the plugin releases since the last one; a plugin release alone does not call for
 one.
 
+Give it the largest bump among the plugin versions it releases: if any plugin took a
+MAJOR bump since the last tag, the marketplace takes a MAJOR bump, and so on for MINOR and
+PATCH.
+
 To cut one:
 
 1. In a PR, record the release in the root `CHANGELOG.md`: rename
