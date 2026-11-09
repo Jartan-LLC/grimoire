@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/rotate.md" = "# Rotate a log\n\n`logrot app.log --max-size 10M` rotates `app.log` once it passes 10 MB, renaming it to `app.log.1`.\n`--keep N` sets how many old files stay; the default is 7.\n\nAn empty log is left as it is, not rotated. On NFS, a rename is not atomic. A named pipe given\nas FILE is left alone.\n"

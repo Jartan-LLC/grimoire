@@ -39,7 +39,7 @@ A round is clean when its review has nothing Critical or Important, at the revie
 
 ### 4. Run the Closing Round
 
-Spawn a reviewer as in step 2, with `praxis:review-pr` limited to the documentation, comments, docstrings and commit messages the change adds, changes or makes false, and the PR title and description. Address it, verify and push as in step 2. If its fixes change code, the streak starts over: go back to step 2 until two rounds in a row are clean, then run the closing round again.
+Spawn a reviewer as in step 2, with `praxis:review-pr` limited to the documentation, comments, docstrings and commit messages the change adds, changes or makes false, each document's growth against its version at the base included, and the PR title and description. Address it, verify and push as in step 2. If its fixes change code, the streak starts over: go back to step 2 until two rounds in a row are clean, then run the closing round again.
 
 ### 5. Open the Draft
 

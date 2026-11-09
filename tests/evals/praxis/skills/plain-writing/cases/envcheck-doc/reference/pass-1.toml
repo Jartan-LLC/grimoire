@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"README.md" = "# envcheck\n\nCheck a `.env` file against its example.\n\n## Usage\n\nRun `envcheck` in the project. It lists each variable `.env.example` names that `.env` lacks, and\nexits 1 when any are missing, so it can gate CI.\n"

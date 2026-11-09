@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"README.md" = "# tally\n\nTrack hours against projects from the command line.\n\n## Getting started\n\n1. Run `tally init` in your project directory.\n2. Log time with `tally add 1h30 \"review\"`.\n\nIf you see `error: no workspace found`, run `tally init` first.\n"

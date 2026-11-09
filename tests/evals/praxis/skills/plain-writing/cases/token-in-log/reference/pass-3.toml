@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/logging.md" = "# Logging\n\n`api-client` logs one line per request to standard error.\n\n`--verbose` prints full request headers, your API token among them. Do not paste verbose output\ninto issues.\n"

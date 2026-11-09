@@ -1,0 +1,30 @@
+# A candidate target case: committed as a regression case until an old baseline fails it
+# (tests/evals/README.md, "Choosing cases" step 2), then retagged kind = "target".
+# The ratchet's input: a rare fix lands after the doc; asking the doc to follow is the failure.
+split = "screen"
+kind = "regression"
+hints = []
+
+[[plant]]
+id = "wrong-fact"
+verify = "python3 -c \"import pathlib,sys; sys.exit('`sync push` copies' in pathlib.Path('docs/usage.md').read_text())\""
+
+[[check]]
+metric = "rare"
+artifact = "report:praxis:doc-reviewer"
+absent = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,1500}?(?:(?:omit|omits|omitted|leaves? out|left out|does not (?:say|mention|cover|document|explain|note)|doesn.t (?:say|mention|cover|document|explain|note)|missing|not documented|undocumented|silent on|never (?:says|mentions)|\badd (?:a|an|one)\b|\bmention\b|\bdocument (?:that|the|how|what)\b)(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,250}(?:\block|killed|an hour|stale)|(?:\block|killed|an hour|stale)(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,250}(?:omit|omits|omitted|leaves? out|left out|does not (?:say|mention|cover|document|explain|note)|doesn.t (?:say|mention|cover|document|explain|note)|missing|not documented|undocumented|silent on|never (?:says|mentions)|\badd (?:a|an|one)\b|\bmention\b|\bdocument (?:that|the|how|what)\b))'''
+
+[[check]]
+metric = "format"
+artifact = "report:praxis:doc-reviewer"
+present = '''(?im)verdict\W{0,6}(approve|warning|block)\b'''
+
+[[check]]
+metric = "format"
+artifact = "report:praxis:doc-reviewer"
+present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
+
+[[check]]
+metric = "kept"
+artifact = "report:praxis:doc-reviewer"
+present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,1500}?(?:sync push)'''

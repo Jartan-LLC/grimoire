@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/signing-key.md" = "# Rotating the signing key\n\n1. Run `scripts/rotate-key.sh`. It makes a new key and writes its public half to `keys/`.\n2. Commit `keys/`. Never commit the private key.\n3. Users import the new key with `rpm --import keys/RPM-GPG-KEY-acme`.\n\nA key that expires during a build in progress still signs that build. On macOS, gpg-agent may\ncache the passphrase. rpm before 4.14 cannot read ed25519 subkeys.\n"

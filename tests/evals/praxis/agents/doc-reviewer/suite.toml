@@ -1,0 +1,66 @@
+# Whether praxis:doc-reviewer rates rare cases in a doc for people as plain-writing says (#182):
+# a rare case in the main path is Bloat, rated Important, and a rare case left out is no finding.
+# Lean cases pair a lean doc with code whose fix commits handled rare cases (rebuilt from
+# claude-sync #49, enchantments #103, grimoire #97 and #170 and scaffold #275, or invented on the
+# same pattern); bloat cases give the doc as those fix commits grew it. Guards: the reviewer still
+# catches the wrong fact planted in each lean and bloat doc and a wrong default, a dead link and a
+# wrong flag in the cost cases, and leaves a troubleshooting part at the end alone. Must hold: it
+# still raises a missing data-loss warning.
+# tests/evals/README.md says how the suite is run. No baselines yet: until `make eval-run ...
+# RECORD=1` draws them, every case is committed as a regression case.
+target = "praxis:doc-reviewer"
+# Cases moved off a held-out split, each with its reason in a comment.
+BURNED = []
+# The agent preloads plain-writing, which holds the rule; `none` cuts the agent's body only, so a
+# positive control for the rule is a copy of plain-writing without it, screened as `new`.
+covers = [
+  "plugins/praxis/agents/doc-reviewer.md",
+  "plugins/praxis/skills/docs-patterns/references/readme.md",
+]
+# The agent runs on the model its frontmatter pins (Sonnet); `models` sets the main thread that
+# dispatches it and relays its report.
+models = ["claude-opus-5-5"]
+budget_usd = 3.0
+
+[[metric]]
+id = "rare"
+direction = "higher"
+# Lean cases: no finding asks to add a rare case. Bloat cases: a Critical or Important finding
+# names the rare passage. A finding's text runs to the next rating, heading, table row or verdict
+# line, so a note inside a finding that says a rare case was left out on purpose counts as asking
+# to add it; a note under its own heading does not.
+
+[[metric]]
+id = "kept"
+direction = "higher"
+margin = 0.2
+# The wrong fact planted in each lean and bloat doc, and the cost cases' wrong default, dead link
+# and wrong flag, raised at Important or above; a troubleshooting part at the end not raised at
+# Important or above. Each pattern is the planted error's own
+# wording, and a stated value is not read from a line number, so a Bloat finding that does not
+# raise the error fails; a failing reference per case holds one.
+
+[[metric]]
+id = "harm"
+direction = "higher"
+must_hold = true
+# A missing data-loss warning raised at Critical or Important: a finding whose text holds a warning
+# word ("warn", "undone", "irreversible", "data loss", "permanently" and a few more). A Bloat
+# finding that does not raise the warning fails; a failing reference per case holds one. The
+# regex is only a first filter, as in plain-writing's suite: a reader checks every `new` sample of
+# these cases, pass or fail, because a finding that says the flag deletes data in other words fails
+# it, and an Important finding on another subject that holds a warning word passes it. A missing
+# warning the regex passed counts as a must-hold failure, so the run is HURT; a raised warning the
+# regex failed marks the case broken.
+
+[[metric]]
+id = "format"
+direction = "higher"
+margin = 0.2
+
+[pass_rule]
+primary = "rare"
+rule = "better"
+guards = ["kept", "format"]
+min_effect = 0.4  # read only under a `better` rule
+min_samples = 3

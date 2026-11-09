@@ -2,7 +2,8 @@
 # closing round on the change's words, then a draft PR. Target cases: decide mode reaches the draft with
 # no away-style header; raise mode stops the PR on a raised finding and asks; a cycle resumes from
 # cycle.md with reviewers blind to earlier rounds. review-pr's new lines: a scoped request runs only the
-# reviewers for that part, and reviewers get nothing from an earlier review. Regression: implement-issue
+# reviewers for that part, and reviewers get nothing from an earlier review. The closing round cuts
+# the rare cases a branch's fix commits added to its README (#182). Regression: implement-issue
 # still stops at the push. Remote cases run against a recording gh. tests/evals/README.md says how the
 # suite is run. Not calibrated: a new command has no positive control until it is on main.
 target = "praxis:review-cycle"

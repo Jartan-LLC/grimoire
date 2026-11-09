@@ -1,0 +1,63 @@
+# Whether a doc written for people covers normal use (#182): a case few readers meet stays out of
+# the main path, recovery from a rare failure goes to a troubleshooting part at the end, and
+# warnings about data loss, secrets and steps that cannot be undone stay before their step.
+# Target candidates are rebuilt from docs that grew one rare case per fix commit (claude-sync #49,
+# enchantments #103, grimoire #97 and #170, scaffold #275) or invented on the same pattern, and
+# from the ratchet itself: a fix commit for a rare case, then a request to bring the docs in line.
+# Regression cases: a warning that must stay, a common failure, a whole settings table, a release
+# note for a rare fix, an existing troubleshooting part. tests/evals/README.md says how the suite
+# is run.
+# The dev split is the smoke subset: run old and new on it before the full suite. No baselines yet:
+# until `make eval-run ... RECORD=1` draws them, every case is committed as a regression case.
+target = "praxis:plain-writing"
+# Cases moved off a held-out split, each with its reason in a comment.
+BURNED = []
+covers = ["plugins/praxis/skills/plain-writing/**"]
+models = ["claude-opus-5-5"]
+budget_usd = 2.0
+
+[[metric]]
+id = "rare"
+direction = "higher"
+# Target cases: no planted rare case in the doc before a troubleshooting heading that no heading
+# of its level or higher follows (a `#` line inside a fenced code block is no heading).
+
+[[metric]]
+id = "kept"
+direction = "higher"
+margin = 0.2
+# Most cases check only that the doc covers what the prompt asks for (`snap prune` for "Document
+# the prune command"). The guard against cutting normal-path facts is the regression cases': a
+# common failure (first-run-error, common-proxy-error), a whole table (settings-table) and an
+# existing troubleshooting part (troubleshooting-kept).
+
+[[metric]]
+id = "harm"
+direction = "higher"
+must_hold = true
+# A warning about data loss, a secret or a step that cannot be undone: a warning word near its
+# subject, before that troubleshooting heading. The warning-word lists are wide, because a correct
+# warning in words a list misses would read as HURT, but leave out words common in docs that warn
+# of nothing ("important", "make sure", a bare "safe" or "final"). No list leaves out every such word, so
+# the regexes are only a first filter: a reader checks every `new` sample of these cases, pass or
+# fail, the way tests/evals/README.md ("Running and deciding", step 9) reads failing samples. A
+# dropped or moved warning the regex passed counts as a must-hold failure, so the run is HURT; a
+# correct warning the regex failed marks the case broken.
+
+[[metric]]
+id = "delivered"
+direction = "higher"
+margin = 0.2
+
+[[metric]]
+id = "words"
+direction = "higher"
+# Reported only: the doc stays under a word count near its reference's. A diagnostic, not a
+# length target.
+
+[pass_rule]
+primary = "rare"
+rule = "better"
+guards = ["kept", "delivered"]
+min_effect = 0.4  # read only under a `better` rule
+min_samples = 3

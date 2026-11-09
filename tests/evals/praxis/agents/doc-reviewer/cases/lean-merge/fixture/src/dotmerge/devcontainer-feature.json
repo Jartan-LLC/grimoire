@@ -1,0 +1,6 @@
+{
+  "id": "dotmerge",
+  "version": "1.2.0",
+  "name": "dotmerge",
+  "description": "Merges the image settings into ~/.config/tool/settings.json and keeps your original as settings.json.pre-dotmerge."
+}

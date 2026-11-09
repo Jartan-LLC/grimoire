@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says \"zip archive of the vault into `DEST`\" where the code has \"archive of the vault into `DEST`\".\nFile: docs/commands.md:5\nIssue: The doc says \"zip archive of the vault into `DEST`\" where the code has \"archive of the vault into `DEST`\".\nFix: Change it.\nStatus: confirmed\n\n### Not raised\n\nThe backup section omits that an archive written while the clock ran ahead counts as the newest. Rare, so it stays out of a doc for people.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

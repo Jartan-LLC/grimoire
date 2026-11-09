@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/watch.md" = "# Rebuild the index as you write\n\nRun `notes watch ~/notes` in a terminal and leave it running. Each time you save a note, the\nindex is rebuilt. Stop it with Ctrl-C.\n"

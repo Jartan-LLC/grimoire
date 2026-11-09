@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.5.0
+
+- Your agent writes a README, a contributor or release procedure, a docs page or release notes for its readers' normal use: it leaves out cases few readers meet (release notes still name each fix), puts recovery from a rare failure in a short troubleshooting part at the end, and keeps warnings about data loss, security or steps that cannot be undone where the reader acts. Skill, agent and command text is not covered.
+- `doc-reviewer` rates a rare case in such a document as bloat (Important) and raises no finding for one left out, unless it is such a warning or the recovery after a step that cannot be undone.
+- `/praxis:review-cycle`'s closing round weighs each document's growth against its version at the base.
+
 ## 2.4.0
 
 - Subagents are told to load the skills their task calls for before their first tool call, as the main thread already is: skills for the code's language and libraries and for the kind of work, beside any their brief names. Before, a subagent that wrote or reviewed Python almost never loaded a pythonica skill.

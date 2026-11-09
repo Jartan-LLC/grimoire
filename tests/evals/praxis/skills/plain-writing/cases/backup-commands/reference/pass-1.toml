@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/commands.md" = "# Commands\n\n## vault init\n\nRun `vault init` in a directory to make it a vault. It writes `.vault/` beside your files.\n\n## vault status\n\n`vault status` lists the files added, changed or removed since the last backup.\n\n## vault backup\n\n`vault backup DEST` writes a dated `.tar.gz` archive of the vault into `DEST`. It needs GNU or\nBusyBox tar. If tar reports an error, the backup fails; fix the cause and run it again.\n\n## vault restore\n\n`vault restore ARCHIVE` unpacks `ARCHIVE` into the vault. Without `ARCHIVE` it restores the newest\narchive in `DEST`.\n"

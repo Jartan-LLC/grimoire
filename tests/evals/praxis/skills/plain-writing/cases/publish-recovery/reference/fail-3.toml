@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"RELEASING.md" = "# Releasing\n\n1. Bump `version` in `pyproject.toml` and add a `CHANGELOG.md` entry.\n2. Merge the PR.\n3. Tag the merge commit `v<version>` and push the tag.\n4. Run `make publish`. It uploads the final build to PyPI.\n\n## Troubleshooting\n\nIf an upload is broken, yank it on PyPI and release the next patch version.\n"
