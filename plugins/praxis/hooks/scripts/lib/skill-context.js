@@ -10,7 +10,7 @@
 const IMPERATIVE =
   'BEFORE your first tool call: name the applicable skills and load them with Skill. If none, say so. When unsure, load.';
 
-// A subagent gets this ahead of its brief.
+// A subagent gets this right after its brief.
 const SUBAGENT_IMPERATIVE =
   'BEFORE your first tool call: name the skills that apply to the work your task asks for ' +
   '(its language, libraries and kind of work) besides any your task names, and load with Skill ' +
