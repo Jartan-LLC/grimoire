@@ -111,9 +111,8 @@ def parse_frontmatter(text: str, path: pathlib.Path) -> tuple[Frontmatter, str]:
 def plain(value: str, what: str, path: pathlib.Path) -> str:
     """Return `value`, raising on the quoted, block, flow and comment forms YAML reads differently.
 
-    The checks are a leading quote, block or flow indicator, and a comment -- a
-    `#` at the start or after whitespace, so `C#` is still a value. Each would make
-    this parser's string differ from the one Claude Code reads.
+    A `#` counts as a comment only at the start of the value or after whitespace,
+    as in YAML, so `C#` stays a value.
     """
     if value[:1] in ('"', "'", ">", "|", "[", "{"):
         raise ValueError(f"{path}: frontmatter {what} must be a plain unquoted value")
