@@ -12,7 +12,7 @@ verify = "python3 -c \"import pathlib,sys; sys.exit('rpm --import keys/acme.asc'
 [[check]]
 metric = "rare"
 artifact = "report:praxis:doc-reviewer"
-present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,1500}?(?:gpg-agent|macOS|4\.14|ed25519|expires? (?:during|while|mid))'''
+present = '''(?ims)(?:(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b|^[ \t]*#{1,6}[ \t][^\n]*?\b(?:critical|important)\b[^\n]*\n(?:(?!^[ \t]*#{1,6}[ \t])[\s\S])*?^[ \t]*\*\*\d+\.)(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict|\*\*\d+\.)).){0,1500}?(?:gpg-agent|macOS|4\.14|ed25519|expires? (?:during|while|mid))'''
 
 [[check]]
 metric = "format"
@@ -27,4 +27,4 @@ present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
 [[check]]
 metric = "kept"
 artifact = "report:praxis:doc-reviewer"
-present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,1500}?(?:acme\.asc)'''
+present = '''(?ims)(?:(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b|^[ \t]*#{1,6}[ \t][^\n]*?\b(?:critical|important)\b[^\n]*\n(?:(?!^[ \t]*#{1,6}[ \t])[\s\S])*?^[ \t]*\*\*\d+\.)(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict|\*\*\d+\.)).){0,1500}?(?:acme\.asc)'''

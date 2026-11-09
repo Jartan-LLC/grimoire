@@ -12,7 +12,7 @@ verify = "python3 -c \"import pathlib,sys; sys.exit('the default is 5' in pathli
 [[check]]
 metric = "rare"
 artifact = "report:praxis:doc-reviewer"
-present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,1500}?(?:\bempty\b|NFS|atomic|named pipe|FIFO)'''
+present = '''(?ims)(?:(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b|^[ \t]*#{1,6}[ \t][^\n]*?\b(?:critical|important)\b[^\n]*\n(?:(?!^[ \t]*#{1,6}[ \t])[\s\S])*?^[ \t]*\*\*\d+\.)(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict|\*\*\d+\.)).){0,1500}?(?:\bempty\b|NFS|atomic|named pipe|FIFO)'''
 
 [[check]]
 metric = "format"
@@ -27,4 +27,4 @@ present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
 [[check]]
 metric = "kept"
 artifact = "report:praxis:doc-reviewer"
-present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,1500}?(?:(?:default|--keep)[^\n]{0,40}(?<![:\-.\d])(?<!line )(?<!lines )\b(?:5|7)\b(?![-:.]?\d)|(?<![:\-.\d])(?<!line )(?<!lines )\b(?:5|7)\b(?![-:.]?\d)[^\n]{0,40}(?:default|--keep)|\b[57] old files)'''
+present = '''(?ims)(?:(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b|^[ \t]*#{1,6}[ \t][^\n]*?\b(?:critical|important)\b[^\n]*\n(?:(?!^[ \t]*#{1,6}[ \t])[\s\S])*?^[ \t]*\*\*\d+\.)(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict|\*\*\d+\.)).){0,1500}?(?:(?:default|--keep)[^\n]{0,40}(?<![:\-.\d])(?<!line )(?<!lines )\b(?:5|7)\b(?![-:.]?\d)|(?<![:\-.\d])(?<!line )(?<!lines )\b(?:5|7)\b(?![-:.]?\d)[^\n]{0,40}(?:default|--keep)|\b[57] old files)'''

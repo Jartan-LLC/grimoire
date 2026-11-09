@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n## Important\n\n**1. The `fix(prune)` commit has no body**\n- File: commit 9beccd2\n- Problem: It does not say why a vanished directory is skipped rather than ending the run.\n- Fix: Add a sentence giving the reason.\n\n**2. `--purge` has no warning in the docs**\n- File: `docs/usage.md:5`\n- Problem: `--purge` deletes every snapshot and the history file, and nothing can bring them back. The page says only that it clears them.\n- Fix: Put a warning before the command: it cannot be undone.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 2 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"
