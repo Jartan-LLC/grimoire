@@ -36,6 +36,8 @@ const NO_EDIT = /\s--no-edit(?:\s|$)/;
 const MESSAGE_FLAG = /\s(?:-[a-zA-Z]*[mF]|--message\b|--file\b)/;
 // Words that run the command after them: assignments such as `SKIP=x`, keywords, wrappers.
 const PREFIX = /^(?:[A-Za-z_]\w*=(?:"[^"]*"|'[^']*'|\S*)|then|do|else|time|env|command|exec|!|\{)\s+/;
+// A quoted string, or an unclosed one running to the end of a line of a multi-line message.
+const QUOTED = /"[^"]*(?:"|$)|'[^']*(?:'|$)/g;
 const SKILL_NAME = 'commit-pr-writing';
 const SKILL_BODY_PREFIX = 'Base directory for this skill: ';
 const SKILL_BODY = /^Base directory for this skill: .*[\\/]commit-pr-writing\s*$/m;
@@ -57,10 +59,12 @@ function commands(command) {
 
 /** Whether simple command `part` writes a commit message or a PR title or body. */
 function writes(part) {
-  if (HELP.test(part)) return false;
-  if (COMMIT.test(part)) return !NO_EDIT.test(part) || MESSAGE_FLAG.test(part);
+  // Flags are read outside quotes, so a message that names `-h` is no help call.
+  const flags = part.replace(QUOTED, '""');
+  if (HELP.test(flags)) return false;
+  if (COMMIT.test(part)) return !NO_EDIT.test(flags) || MESSAGE_FLAG.test(flags);
   if (PR_CREATE.test(part)) return true;
-  return PR_EDIT.test(part) && PR_TEXT_FLAG.test(part);
+  return PR_EDIT.test(part) && PR_TEXT_FLAG.test(flags);
 }
 
 /** Whether `command` writes a commit message or a PR title or body. */

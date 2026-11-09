@@ -117,6 +117,8 @@ describe('writesText', () => {
     'exec git commit -m x',
     '! git commit -m x',
     '{ git commit -m x; }',
+    'git commit -m "docs: document the -h flag"',
+    "gh pr create --title 'add --help text'",
   ]) {
     test(`true for ${command}`, () => assert.equal(writesText(command), true));
   }
@@ -135,6 +137,7 @@ describe('writesText', () => {
     'echo commit',
     'FOO="git commit -m x" rg y',
     'domain git commit -m x',
+    'gh pr edit 5 --add-label "needs -t triage"',
   ]) {
     test(`false for ${command}`, () => assert.equal(writesText(command), false));
   }
