@@ -2,7 +2,7 @@
 
 ## 2.4.0
 
-- Subagents are told to load the skills their task calls for before their first tool call, as the main thread already is: skills for the code's language and libraries and for the kind of work, beside any their brief names. Before, a subagent that wrote or reviewed Python almost never loaded a pythonica skill. Subagents are told to load a skill on dividing or delegating work only when their brief names one.
+- Subagents are told to load the skills their task calls for before their first tool call, as the main thread already is: skills for the code's language and libraries and for the kind of work, beside any their brief names. Before, a subagent that wrote or reviewed Python almost never loaded a pythonica skill.
 - The reviewer agents can load skills, so a review of Python code can load the pythonica skills for it beside the skills each reviewer always has.
 
 ## 2.3.0

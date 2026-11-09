@@ -10,14 +10,11 @@
 const IMPERATIVE =
   'BEFORE your first tool call: name the applicable skills and load them with Skill. If none, say so. When unsure, load.';
 
-// A subagent gets this ahead of its brief. A skill on dividing work stays with
-// the briefs that name one: a part that loads such a skill on its own splits
-// again past the depth its parent planned.
+// A subagent gets this ahead of its brief.
 const SUBAGENT_IMPERATIVE =
   'BEFORE your first tool call: name the skills that apply to the work your task asks for ' +
   '(its language, libraries and kind of work) besides any your task names, and load with Skill ' +
-  'those not already in your context. Load a skill on dividing or delegating work only if your ' +
-  'task names it. If none apply, say so. When unsure, load.';
+  'those not already in your context. If none apply, say so. When unsure, load.';
 
 const TEXT_BY_EVENT = new Map([
   ['SessionStart', IMPERATIVE],
