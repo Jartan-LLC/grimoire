@@ -6,8 +6,9 @@ released. A `<plugin>:<name>` in a skill's files, an agent, a command or a hook 
 the agent to load that skill, or names that agent or command; one naming nothing points nowhere,
 and nothing at runtime says so. Such a pointer into another plugin, or a bare mention
 of another plugin's name, needs that plugin in the manifest's `dependencies`
-(GUARDRAILS.md): an undeclared plugin may not be installed. Each file's frontmatter
-`name` must also match its directory or file name, and its `description` be present.
+(GUARDRAILS.md): an undeclared plugin may not be installed. Each SKILL.md, agent and
+command file's frontmatter `name` must also match its directory or file name, and its
+`description` be present.
 
 Unqualified names in prose ("spawn `backend-reviewer`") are not checked: telling a
 load from an example would be guesswork.
