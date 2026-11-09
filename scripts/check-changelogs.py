@@ -244,7 +244,7 @@ def main() -> int:
         return 0
 
     found = problems()
-    if args.base:
+    if args.base is not None:
         try:
             found.extend(unbumped(args.base))
         except ValueError as error:
@@ -254,7 +254,7 @@ def main() -> int:
     if found:
         return 1
     print("every plugin has its changelog entry, its own name and dependencies this tree meets")
-    if args.base:
+    if args.base is not None:
         print(f"and every plugin changed since {args.base} has a new version")
     return 0
 

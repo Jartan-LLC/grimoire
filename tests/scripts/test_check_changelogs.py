@@ -413,3 +413,12 @@ def test_main_with_base_fails_an_unbumped_plugin_and_a_base_it_cannot_find(
     out = capsys.readouterr().out
     assert out.startswith("--base no-such-ref: no merge base with HEAD (")
     assert out.endswith("; pass a ref this checkout has, such as origin/main (make: BASE=<ref>)\n")
+
+
+def test_main_fails_an_empty_base(
+    repo: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # `make verify BASE=` passes an empty ref; skipping the bump check would pass silently.
+    monkeypatch.setattr(sys, "argv", ["check-changelogs.py", "--base", ""])
+    assert cc.main() == 1
+    assert capsys.readouterr().out.startswith("--base : no merge base with HEAD (")
