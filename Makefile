@@ -78,7 +78,7 @@ BASE ?= main
 # `git grep -l` exits 1 on no match, so `|| true` would turn the ASCII gate into
 # a permanent no-op and any other non-zero means the invocation itself failed.
 # One logical line because Make gives each recipe line its own shell.
-verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift, changelogs, version bumps since BASE (default main), plugin names and dependencies, skill pointers, eval suites)
+verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift, changelogs, plugin names and dependencies, version bumps since BASE (default main), skill pointers, eval suites)
 	@echo "Checking for non-ASCII characters..."
 	@set +e; git grep -lP '[^\x00-\x7F]'; rc=$$?; set -e; \
 	case "$$rc" in \
@@ -90,8 +90,10 @@ verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift, changelog
 	@python3 -c "import json,subprocess; files=subprocess.run(['git','ls-files','*.json'],capture_output=True,text=True,check=True).stdout.split(); assert files, 'git ls-files matched no JSON -- gate would pass having checked nothing'; [json.load(open(f)) for f in files]"
 	@echo "Checking generated Codex files against their sources..."
 	@python3 scripts/generate-codex.py --check
-	@echo "Checking each plugin's changelog entry, name and dependencies, and a new version for each plugin changed since $(BASE)..."
-	@python3 scripts/check-changelogs.py --base '$(BASE)'
+	@echo "Checking each plugin's changelog entry, name and dependencies..."
+	@python3 scripts/check-changelogs.py
+	@echo "Checking that every plugin changed since $(BASE) has a new version..."
+	@python3 scripts/check-version-bumps.py --base '$(BASE)'
 	@echo "Checking that every skill, agent and command pointer resolves within declared dependencies..."
 	@python3 scripts/check-wiring.py
 	@echo "Checking every eval suite..."

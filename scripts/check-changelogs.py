@@ -7,8 +7,6 @@ a plugin directory named unlike its plugin.json, which release tagging relies on
 plugin this marketplace lacks, or a range rejecting the version here), which would
 leave the dependent plugin failing to load once released. Each would otherwise
 show only after merge.
-`--base <ref>` also fails a plugin changed since the branch left `<ref>` whose
-version did not change: installs that have that version would never get the change.
 `--notes <plugin> <version>` prints that version's entry instead, for the
 GitHub Release body.
 """
@@ -16,13 +14,10 @@ GitHub Release body.
 import argparse
 import json
 import pathlib
-import shutil
-import subprocess
 import sys
 from typing import cast
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-GIT = shutil.which("git") or "git"
 
 
 def section(changelog: str, version: str) -> str:
@@ -168,70 +163,10 @@ def problems() -> list[str]:
     return found
 
 
-def git(*args: str) -> subprocess.CompletedProcess[str]:
-    """Run git in ROOT with these arguments, capturing its output as text."""
-    # Argument lists, never a shell: a ref is one argv item however it is spelt.
-    return subprocess.run(  # noqa: S603
-        [GIT, "-C", str(ROOT), *args], capture_output=True, text=True, check=False
-    )
-
-
-def unbumped(base: str) -> list[str]:
-    """One message per plugin changed since the branch left `base` but not bumped.
-
-    Compares the working tree with the merge base of `base` and HEAD, so changes
-    `base` gained after the branch left it stay out. A plugin changed when any
-    tracked file under plugins/<name>/ but its CHANGELOG.md differs, generated Codex
-    files included: RELEASING.md's bump rule covers them. A plugin new since the merge
-    base, or removed, has no version to keep and is skipped.
-
-    Raises:
-        ValueError: `base` has no merge base with HEAD, or git cannot diff against it,
-            so nothing could be compared.
-    """
-    fork = git("merge-base", base, "HEAD")
-    if fork.returncode != 0:
-        detail = fork.stderr.strip() or "no common commit"
-        raise ValueError(
-            f"--base {base}: no merge base with HEAD ({detail});"
-            " pass a ref this checkout has, such as origin/main (make: BASE=<ref>)"
-        )
-    commit = fork.stdout.strip()
-    diff = git(
-        "diff",
-        "--name-only",
-        "--no-renames",
-        "-z",
-        commit,
-        "--",
-        "plugins/",
-        ":(glob,exclude)plugins/*/CHANGELOG.md",
-    )
-    if diff.returncode != 0:
-        raise ValueError(f"--base {base}: git diff failed ({diff.stderr.strip()})")
-    changed = sorted(
-        {path.split("/")[1] for path in diff.stdout.split("\0") if path.count("/") > 1}
-    )
-    found: list[str] = []
-    for name in changed:
-        manifest = ROOT / "plugins" / name / ".claude-plugin" / "plugin.json"
-        before = git("show", f"{commit}:plugins/{name}/.claude-plugin/plugin.json")
-        if not manifest.is_file() or before.returncode != 0:
-            continue
-        version = json.loads(manifest.read_text()).get("version")
-        if version == json.loads(before.stdout).get("version"):
-            found.append(
-                f"plugins/{name}: changed since {base}, but its version is still {version}:"
-                " bump it in .claude-plugin/plugin.json"
-            )
-    return found
-
-
 def main() -> int:
-    """Check every plugin, with `--base` its version bump too, or print one entry with `--notes`."""
+    """Check every plugin, or with `--notes` print one version's entry."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--notes", nargs=2, metavar=("PLUGIN", "VERSION"))
-    parser.add_argument("--base", metavar="REF", help="also fail a changed plugin not bumped")
     args = parser.parse_args()
 
     if args.notes:
@@ -244,18 +179,11 @@ def main() -> int:
         return 0
 
     found = problems()
-    if args.base is not None:
-        try:
-            found.extend(unbumped(args.base))
-        except ValueError as error:
-            found.append(str(error))
     for message in found:
         print(message)
     if found:
         return 1
     print("every plugin has its changelog entry, its own name and dependencies this tree meets")
-    if args.base is not None:
-        print(f"and every plugin changed since {args.base} has a new version")
     return 0
 
 
