@@ -17,11 +17,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const i=JSON.parse(d);const cmd=i.tool_input?.command||'';if(/\\bgit\\s+(commit|push)\\b|\\bgh\\s+pr\\s+(create|edit)\\b/.test(cmd)){console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'PreToolUse',additionalContext:'Load the gitwise:commit-pr-writing skill.'}}));}else if(i&&typeof i==='object'&&!Array.isArray(i)){console.log(d)}}catch{}})\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/commit-pr-writing.js\"",
             "statusMessage": "Checking commit and PR writing..."
           }
         ],
-        "description": "Load commit-pr-writing on commit and PR text writes (git commit/push, gh pr create/edit)"
+        "description": "Load commit-pr-writing on commit and PR text writes (git commit/push, gh pr create/edit); hold an agent's first commit or PR text write until it is loaded"
       }
     ]
   }

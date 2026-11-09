@@ -6,10 +6,13 @@ target = "gitwise:commit-pr-writing"
 # Cases moved off a held-out split, each with its reason in a comment.
 BURNED = []
 # The skill reaches the agent through hooks: praxis's prompt-time nudge, which loads it before
-# the commit, and gitwise's reminder at the commit itself (#128). `delivered` measures both.
+# the commit, and gitwise's hook at the commit itself, which reminds and, in a session that writes
+# a transcript, holds the first commit until it is loaded (#128). `delivered` measures the nudge
+# and the reminder, not the hold: the runner writes no transcript, so the hook never holds there.
 covers = [
   "plugins/gitwise/skills/commit-pr-writing/**",
   "plugins/gitwise/hooks/hooks.json",
+  "plugins/gitwise/hooks/scripts/**",
   "plugins/praxis/hooks/hooks.json",
   "plugins/praxis/hooks/scripts/suggest-skills.js",
   "plugins/praxis/hooks/scripts/lib/**",

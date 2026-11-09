@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0
+
+- In Claude Code, your agent's first commit that writes a message, or first PR create or edit that sets a title or body, is blocked until it has loaded `commit-pr-writing`, so the message is written under the skill, not before it. The reason tells the agent to load the skill, rewrite the message and rerun the whole command: nothing in a blocked command runs, a `git add` chained before the commit included. Each agent and subagent is blocked at most once. In Codex, or where the hook cannot read the session transcript, it only prompts the agent to load the skill, as before.
+
 ## 2.0.0
 
 - Breaking: `github-conventions` no longer has an implementation plan format (`plan-format.md`). praxis's `plan-issue` carries its own from praxis 2.0.0; if you use praxis, update it to 2.0.0 or later along with gitwise, since earlier versions read the format from here.
