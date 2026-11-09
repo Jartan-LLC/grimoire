@@ -61,6 +61,7 @@ codex plugin add gitwise@grimoire
 - **information-placement** -- where each kind of information belongs (commit message, PR description, comment, docstring, README, changelog, docs, issue, or nowhere) and what no text may hold
 - **logging-patterns** -- log levels, formatting, structured output
 - **plain-writing** -- prose that informs: what to keep and cut, plain voice, a final wording pass
+- **planning** -- plans sized to what a mistake would cost, with each gap settled by whoever owns it
 - **readable-code** -- local clarity: control-flow shape, naming for the reader, reading order and working set
 - **review-severity** -- Critical/Important/Minor by consequence-if-shipped
 - **testing-patterns** -- integration tests, fixture composition, canary markers
