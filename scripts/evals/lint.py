@@ -7,7 +7,7 @@ problem fails its `verify` command and passes once fixed, the passing references
 every check and each failing reference fails one, each target case records a baseline
 failure, no baseline was drawn under another RUNNER or, for a remote case, another
 REMOTE_RUNNER, no baseline of a case without a remote records a remote_runner, a `gh`
-check reads a case whose session records its gh calls, and a judge's tracked stamp and
+check reads a case whose session records its gh calls, a judge's tracked stamp and
 labels parse and the stamp still describes the judge (its version, labels and
 references), and git ignores no file a suite's plan pin or sessions read, so the committed
 suite is the one that ran. It cannot tell that every check can fail, only that some check
