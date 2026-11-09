@@ -55,6 +55,7 @@ from evals.suite import (
     load_suite,
     older,
     python_cache,
+    target_files,
     tree_hash,
 )
 from evals.verdict import (
@@ -84,13 +85,12 @@ def old_holds(target: str, base: str) -> bool:
     """Whether the merge base with `base` has `target`, so removing it is a real control."""
     plugin, _, name = target.partition(":")
     commit = merge_base(ROOT, base)
-    paths = (f"skills/{name}/SKILL.md", f"agents/{name}.md", f"commands/{name}.md")
     return any(
         run(
             [GIT, "cat-file", "-e", f"{commit}:plugins/{plugin}/{p}"], cwd=ROOT, capture_output=True
         ).returncode
         == 0
-        for p in paths
+        for p in target_files(name)
     )
 
 

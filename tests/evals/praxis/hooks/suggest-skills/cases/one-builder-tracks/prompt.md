@@ -1,0 +1,1 @@
+Pass this whole job to one general-purpose subagent and don't write any of it yourself: the three track readers in the README, each a module under geokit/formats/ with its own tests. Tell me how it went.

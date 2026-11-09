@@ -1,0 +1,4 @@
+final = "clipper/paths.py settings_file(): CLIPPER_CONFIG if set, else XDG_CONFIG_HOME/clipper/settings.toml, else ~/.config/clipper/settings.toml."
+
+[briefs]
+"Explore" = "The task, as the main thread handed it over."

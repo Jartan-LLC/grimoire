@@ -1,6 +1,7 @@
 # Eval suites
 
-An eval suite tests whether a change to a skill, agent or command makes the agent behave better or worse.
+An eval suite tests whether a change to a skill, agent, command or hook script makes the agent behave
+better or worse.
 Each case is a small fixture repository and a task. The runner runs the cases as headless `claude -p`
 sessions on two versions of the plugins, grades every session, and compares the two versions task by task.
 Everything runs locally on your own `claude` login.
@@ -65,7 +66,9 @@ right. Never commit the scratch suite; say in the PR what its cases showed.
 ## Layout
 
 A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a skill,
-`tests/evals/<plugin>/agents/<name>/` for an agent.
+`tests/evals/<plugin>/agents/<name>/` for an agent, `tests/evals/<plugin>/hooks/<name>/` for a
+hook script, named without its extension, whose `target` is its path in the plugin: the suite for
+`praxis:hooks/scripts/suggest-skills.js` is `tests/evals/praxis/hooks/suggest-skills/`.
 
 - `suite.toml`: what it covers, the models it runs on, its metrics, its pass rule and its clusters;
   when it needs them, what its target replaces, its sessions' `[env]` and the oldest Claude Code it runs
@@ -84,7 +87,8 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
 - `old`: the plugins at the merge base of your branch with `main`.
 - `new`: the plugins in your working tree.
 - `none`: `old` with the text under test removed: a skill's directory deleted and its preloads dropped,
-  or an agent's or command's body cut to its first line.
+  an agent's or command's body cut to its first line, or every `hooks.json` command that runs a hook
+  script dropped.
   A target that renames or replaces texts of `old` lists them in `suite.toml` as
   `replaces = ["<plugin>:<name>", ...]` (top-level, above the first `[table]`), and `none` removes them
   too, so it holds none of the texts the change replaces. `make eval-plan` names an entry the merge

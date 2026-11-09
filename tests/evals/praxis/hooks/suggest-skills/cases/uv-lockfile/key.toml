@@ -1,0 +1,10 @@
+split = "confirm"
+kind = "trigger"
+hints = ["skill", "pythonica", "uv-package"]
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "pythonica:uv-package-manager"
+state = "loaded"
+agent = "general-purpose"

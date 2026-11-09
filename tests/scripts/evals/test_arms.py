@@ -1,3 +1,4 @@
+import json
 import os
 import pathlib
 
@@ -109,6 +110,37 @@ def test_none_arm_cuts_an_agents_body_to_its_first_line(
     none = none_arm(old_arm(repo, "main", store), "demo:reviewer", store)
     text = pathlib.Path(none.plugins["demo"], "agents", "reviewer.md").read_text()
     assert text == "---\nname: reviewer\ndescription: Reviews.\n---\n\nYou review.\n"
+
+
+def test_none_arm_of_a_hook_script_drops_every_command_that_runs_it(
+    repo: pathlib.Path, tmp_path: pathlib.Path
+) -> None:
+    hooks = repo / "plugins" / "demo" / "hooks"
+    (hooks / "scripts").mkdir(parents=True)
+    (hooks / "scripts" / "nudge.js").write_text("// nudge\n")
+    run_it = {"type": "command", "command": 'node "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/nudge.js"'}
+    require_it = {
+        "type": "command",
+        "command": "node -e \"require(r + '/hooks/scripts/nudge.js')\"",
+    }
+    other = {"type": "command", "command": "node other.js"}
+    manifest = {
+        "hooks": {
+            "UserPromptSubmit": [{"hooks": [run_it]}],
+            "SessionStart": [{"matcher": "*", "hooks": [require_it, other]}],
+        }
+    }
+    (hooks / "hooks.json").write_text(json.dumps(manifest))
+    git(repo, "add", "-A")
+    git(repo, "commit", "-q", "-m", "hook")
+    store = tmp_path / "store"
+    none = none_arm(old_arm(repo, "main", store), "demo:hooks/scripts/nudge.js", store)
+    root = pathlib.Path(none.plugins["demo"])
+    assert json.loads((root / "hooks" / "hooks.json").read_text()) == {
+        "hooks": {"SessionStart": [{"matcher": "*", "hooks": [other]}]}
+    }
+    assert (root / "hooks" / "scripts" / "nudge.js").is_file()
+    assert pathlib.Path(none.root).parent == store
 
 
 def test_none_arm_of_a_target_old_lacks_is_old(repo: pathlib.Path, tmp_path: pathlib.Path) -> None:

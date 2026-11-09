@@ -1,0 +1,1 @@
+When a row fails to format, reports/export.py leaves the output file and the database connection open, and the nightly job runs out of file handles. Have a subagent fix export_rows so both are always released, with a test that shows it.

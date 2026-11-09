@@ -1,0 +1,31 @@
+split = "screen"
+kind = "regression"
+hints = ["skill", "pythonica"]
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "pythonica:python-anti-patterns"
+state = "not-loaded"
+agent = "Explore"
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "pythonica:python-code-style"
+state = "not-loaded"
+agent = "Explore"
+
+[[check]]
+metric = "spawned"
+artifact = "brief:Explore"
+present = '''\S'''
+
+[[check]]
+metric = "answer"
+artifact = "final"
+present = '''archive_2024[.]py'''
+
+[[fact]]
+text = "legacy_total([1.5, 2.25])"
+where = "fixture:tools/archive_2024.py"

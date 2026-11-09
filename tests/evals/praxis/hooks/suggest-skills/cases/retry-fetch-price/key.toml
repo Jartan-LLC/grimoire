@@ -1,0 +1,15 @@
+split = "screen"
+kind = "trigger"
+hints = ["skill", "pythonica", "resilien"]
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "pythonica:python-resilience"
+state = "loaded"
+agent = "general-purpose"
+
+[[check]]
+metric = "works"
+artifact = "verify"
+command = "python3 -m pytest -q"

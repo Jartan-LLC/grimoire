@@ -1,0 +1,41 @@
+split = "confirm"
+kind = "regression"
+hints = ["skill", "pythonica"]
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "pythonica:python-configuration"
+state = "not-loaded"
+agent = "Explore"
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "pythonica:python-patterns"
+state = "not-loaded"
+agent = "Explore"
+
+[[check]]
+metric = "spawned"
+artifact = "brief:Explore"
+present = '''\S'''
+
+[[check]]
+metric = "answer"
+artifact = "final"
+present = '''paths[.]py'''
+
+[[check]]
+metric = "answer"
+artifact = "final"
+present = '''CLIPPER_CONFIG'''
+
+[[check]]
+metric = "answer"
+artifact = "final"
+present = '''XDG_CONFIG_HOME'''
+
+[[fact]]
+text = "CLIPPER_CONFIG"
+where = "fixture:clipper/paths.py"

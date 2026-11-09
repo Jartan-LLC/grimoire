@@ -1,0 +1,1 @@
+Checking a page with 400 links takes minutes because linkcheck/check.py waits for each link before it starts the next. Get a subagent to make check_all check them concurrently, no more than 20 at a time, keeping the results in the order given. The existing tests must keep passing.

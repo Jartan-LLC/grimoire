@@ -1,0 +1,10 @@
+split = "screen"
+kind = "trigger"
+hints = ["skill", "pythonica"]
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "pythonica:python-anti-patterns"
+state = "loaded"
+agent = "praxis:general-reviewer"

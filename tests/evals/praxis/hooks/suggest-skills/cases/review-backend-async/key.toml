@@ -1,0 +1,10 @@
+split = "confirm"
+kind = "trigger"
+hints = ["skill", "pythonica"]
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "pythonica:async-python-patterns"
+state = "loaded"
+agent = "praxis:backend-reviewer"
