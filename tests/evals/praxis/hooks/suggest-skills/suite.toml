@@ -1,9 +1,9 @@
 # Whether praxis's skill imperative reaches subagents (#59, #56): a subagent handed Python to
-# write or review loads the pythonica skill its task is squarely about, and a subagent the
-# imperative should leave alone is not burdened by it. Each case's prompt has the main thread
-# start one subagent: a general-purpose one to write code, a praxis reviewer to review a branch,
-# or Explore to search. Every case runs with every plugin, pythonica and recursio included, as
-# users run them.
+# write or review loads the pythonica skill its task is squarely about; whether a subagent the
+# imperative should leave alone is burdened by it is reported. Each case's prompt has the main
+# thread start one subagent: a general-purpose one to write code, a praxis reviewer to review a
+# branch, or Explore to search. Every case runs with every plugin, pythonica included, as users
+# run them.
 #
 # `recall`: the subagent loaded the case's skill (retry -> python-resilience, concurrency ->
 # async-python-patterns, settings from the environment -> python-configuration, a test suite or
@@ -15,18 +15,16 @@
 # arriving inside that subagent, which Claude Code sends only once its Skill call returned, or a
 # read of the skill's files there; a failed call never counts.
 # Old cannot reach a subagent except through the brief, so recall measures the hook.
-# `quiet` guards two harms. Explore searches in Python repositories load none of the pythonica
-# skills their words touch: "not burdened" is no skill load in the search subagent (a screen
-# reports tokens and cost per arm, so the cost of a needless load shows there). recursio-shaped
-# tasks, one subagent handed a whole multi-module build or a part whose brief puts it at the
-# depth limit, load no recursio:splitting-implementation and start no subagent of their own,
-# since recursio says a part that loads it unasked re-splits past the limit.
+# `quiet`, reported only: Explore searches in Python repositories load none of the pythonica
+# skills their words touch. "Not burdened" is no skill load in the search subagent (a screen
+# reports tokens and cost per arm, so the cost of a needless load shows there). It gates nothing:
+# a held-out split has too few Explore units to reach p < 0.05, so as a guard it could never pass.
+# Whether a subagent splits its work is recursio's to test, not this suite's.
 #
 # What the graders cannot see: a delivery check with an `agent` reads every spawn of that agent
-# type as one, so a second general-purpose spawn's load counts for the first. A guard case whose
-# main thread splits the build itself, against its prompt, can fail `quiet` through a part its
-# own brief told to load recursio's skill; `spawned` shows a guard passing only because no
-# subagent ran. tests/evals/README.md says how the suite is run.
+# type as one, so a second general-purpose spawn's load counts for the first. `spawned` shows a
+# `quiet` pass that came only because no subagent ran. tests/evals/README.md says how the suite
+# is run.
 target = "praxis:hooks/scripts/suggest-skills.js"
 # The reviewer cases measure whether these reviewers load skills, which their Skill tool allows;
 # no case dispatches doc-reviewer, frontend-reviewer or structure-reviewer.
@@ -56,10 +54,7 @@ direction = "higher"
 [[metric]]
 id = "quiet"
 direction = "higher"
-margin = 0.1
-# Explore cases: no pythonica skill the search's words touch was loaded by Explore. recursio
-# cases: the general-purpose subagent loaded no recursio:splitting-implementation, and no
-# subagent started a subagent of its own.
+# Reported, Explore cases: no pythonica skill the search's words touch was loaded by Explore.
 
 [[metric]]
 id = "works"
@@ -74,7 +69,7 @@ direction = "higher"
 [[metric]]
 id = "spawned"
 direction = "higher"
-# Reported, guard cases: the main thread started the subagent the prompt asked for, so a
+# Reported, Explore cases: the main thread started the subagent the prompt asked for, so a
 # `quiet` pass is not only for want of a subagent.
 
 [[metric]]
@@ -86,6 +81,5 @@ direction = "higher"
 [pass_rule]
 primary = "recall"
 rule = "better"
-guards = ["quiet"]
 min_effect = 0.5
 min_samples = 3

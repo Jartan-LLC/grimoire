@@ -1,1 +1,0 @@
-Hand all of this to a single general-purpose subagent and don't build any of it yourself: the three output formats the README describes, each in its own module under reportkit/formats/ with its tests. Tell me what it reports back.

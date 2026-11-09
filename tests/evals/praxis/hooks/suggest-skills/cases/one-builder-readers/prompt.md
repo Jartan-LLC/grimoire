@@ -1,1 +1,0 @@
-Give the whole job to one general-purpose subagent, and leave the building to it: the three readers the README lists, each in its own module under contactkit/readers/ with tests. Let me know what it says when it's done.
