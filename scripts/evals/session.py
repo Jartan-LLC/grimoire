@@ -14,9 +14,9 @@ frontmatter preloads; only those lines are kept, as the sample's `preloads`.
 
 Sessions write no transcript (`--no-session-persistence`), except a `transcript` case's,
 for a hook that reads it: Claude Code writes transcripts only under its configuration
-directory, so that session gets its own, CONFIG_DIR in its sandbox, and goes with it.
-A login `/login` stored in the caller's directory does not reach it (probe on 2.1.321:
-"Not logged in", an excluded sample); one in the environment does.
+directory, so that session gets its own, CONFIG_DIR in its sandbox, deleted with the
+sandbox. A login that `/login` stored in the caller's directory does not reach it (probe
+on 2.1.321: "Not logged in", an excluded sample); one in the environment does.
 """
 
 import contextlib
