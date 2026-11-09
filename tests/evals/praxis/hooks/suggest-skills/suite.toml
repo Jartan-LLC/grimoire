@@ -17,8 +17,9 @@
 # Old cannot reach a subagent except through the brief, so recall measures the hook.
 # `quiet`, reported only: Explore searches in Python repositories load none of the pythonica
 # skills their words touch. "Not burdened" is no skill load in the search subagent (a screen
-# reports tokens and cost per arm, so the cost of a needless load shows there). It gates nothing:
-# a held-out split has too few Explore units to reach p < 0.05, so as a guard it could never pass.
+# reports tokens and cost per arm, so the cost of a needless load shows there). It gates nothing
+# and cannot show harm either: a held-out split has too few Explore units to reach p < 0.05, so
+# it could neither pass as a guard nor come out WORSE as a reported metric.
 # Whether a subagent splits its work is recursio's to test, not this suite's.
 #
 # What the graders cannot see: a delivery check with an `agent` reads every spawn of that agent
