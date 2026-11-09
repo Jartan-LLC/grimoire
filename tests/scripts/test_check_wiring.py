@@ -146,7 +146,7 @@ def test_problems_checks_a_skills_support_files_and_every_hook_file(tree: pathli
     ]
 
 
-def test_problems_skips_local_files_git_ignores(tree: pathlib.Path) -> None:
+def test_problems_skips_local_tool_and_editor_state(tree: pathlib.Path) -> None:
     lib = tree / "plugins" / "lib"
     broken = "Load `lib:convention`."
     (lib / "skills" / "conventions" / "SKILL.md~").write_text(broken)

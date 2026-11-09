@@ -79,9 +79,9 @@ def texts(plugin: str) -> dict[pathlib.Path, str]:
 
     Every file under `skills/` but the SKILL.md files, and every file under `hooks/`, of
     any extension, so a new kind of file is read without being listed here. A file that is
-    not UTF-8 text is left out: a binary asset holds no pointer. So are local files git
-    ignores, which a clean checkout lacks: anything in `node_modules` or a hidden file or
-    directory, and `*~` backups.
+    not UTF-8 text is left out: a binary asset holds no pointer. So are the usual places of
+    local tool and editor state, which a clean checkout lacks: anything in `node_modules`,
+    any hidden file or directory, and `*~` backups. A tracked hidden file is skipped too.
     """
     with_frontmatter = set(documents(plugin))
     found: dict[pathlib.Path, str] = {}
