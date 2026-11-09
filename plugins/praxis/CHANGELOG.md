@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.3.0
+
+- `plan-issue` and `implement-issue` assign the issue to the account `gh` is logged in as when they start on it and it has no assignee. When someone else holds the issue, or the account cannot assign it, your agent tells you and leaves the assignees as they are.
+- `implement-issue` fetches the issue itself as well as its comments, so your agent reads the issue's title, body and assignees.
+
 ## 2.2.2
 
 - In Codex, praxis installs its agent roles in `~/.codex/agents/grimoire/praxis/` (`$CODEX_HOME/agents/grimoire/praxis/` if you set `CODEX_HOME`), and an update replaces them there. Before, each version added a folder named after the version, such as `2.2.1/`, and left the older ones behind, so Codex kept using an old copy of each role. At session start, praxis now deletes every folder in `~/.codex/agents/grimoire/` named after a version, such as `1.12.0` or `2.0.0-rc.1`, or named `local`, with everything in it, recursio's old roles included. It leaves folders with any other name alone.
