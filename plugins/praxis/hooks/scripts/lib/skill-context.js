@@ -1,9 +1,10 @@
 /**
  * The skill-activation imperative suggest-skills.js injects, per hook event.
  *
- * Apart from the entry point because hooks.json's SessionStart entry runs that
- * script through `require`, so it cannot wait for `require.main` before reading
- * stdin, and a test could not load it without it reading stdin and exiting.
+ * Kept out of suggest-skills.js because hooks.json's SessionStart entry runs
+ * that script through `require`: the script cannot check `require.main` before
+ * reading stdin, so a test that loaded it would read stdin and exit the test
+ * process.
  */
 
 const IMPERATIVE =

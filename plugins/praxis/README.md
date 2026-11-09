@@ -73,8 +73,8 @@ codex plugin add gitwise@grimoire
   task, which is what makes any plugin's skills dependably reachable from
   top-level chat
 - **SubagentStart** -- prompts each subagent the same way, in wording for a
-  subagent's brief, to load the skills for the code it writes or reviews, and a
-  skill on dividing work only when its brief names one
+  subagent's brief, to load the skills its task calls for, and a skill on
+  dividing work only when its brief names one
 - **SessionStart** -- installs this plugin's Codex agent roles (no-op outside
   Codex); re-arms skill activation after a compact, which evicts loaded skills
 - **PreToolUse** -- suggests `/compact` at logical intervals
