@@ -1,0 +1,2 @@
+commits = ["feat(calc): add mul\n\nProducts were computed inline at each call site; mul(a, b)\ngives them one name, tested beside add."]
+final = "I made the change, added a test, ran `python3 -m pytest -q` (all pass) and committed it."

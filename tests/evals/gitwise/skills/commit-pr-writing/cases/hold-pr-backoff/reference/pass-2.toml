@@ -1,0 +1,3 @@
+commits = []
+final = "I opened the pull request: https://github.com/acme/fetcher/pull/7"
+gh = "gh pr create --base main --title t --body Adds `delays`, doubling the wait before each retry, because retrying at once hammered a server that was already failing.\n\nt\nAdds `delays`, doubling the wait before each retry, because retrying at once hammered a server that was already failing.\n"

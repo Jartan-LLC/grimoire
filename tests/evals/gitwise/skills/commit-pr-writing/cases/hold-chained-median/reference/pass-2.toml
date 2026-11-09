@@ -1,0 +1,2 @@
+commits = ["feat(stats): add median\n\nThe response-time report needs a middle value that one slow\nrequest cannot drag; mean cannot give one."]
+final = "I made the change, added a test, ran `python3 -m pytest -q` (all pass) and committed it."

@@ -1,0 +1,2 @@
+commits = ["fix(wordstats): count a run of spaces as one gap\n\nsplit(\" \") yields an empty string between two spaces, and each\nwas counted as a word. Splitting on any whitespace drops them."]
+final = "I made the change, added a test, ran `python3 -m pytest -q` (all pass) and committed it."

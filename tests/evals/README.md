@@ -74,7 +74,8 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
 - `cases/<id>/fixture/` and an optional `build.py`: the repository the session starts in.
 - `cases/<id>/key.toml`: the split, the kind, the checks, and the facts, plants and baseline counts
   the checks rely on; for a task that pushes or calls `gh`, its remote and `gh` replies; for a
-  conversation, its later `turns`; and any plugins its sessions run `without`.
+  conversation, its later `turns`; any plugins its sessions run `without`; and whether they write
+  their `transcript`.
 - `cases/<id>/fix/`: the files that fix the case's planted problems, laid over the fixture by the lint.
 - `cases/<id>/reference/`: outputs that pass every check, and outputs that fail the case's target check.
 
@@ -187,6 +188,13 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
 - **A case that runs without some plugins,** such as a skill measured where praxis's hook cannot help,
   lists them in its key: `without = ["praxis"]`. Its sessions load every other plugin of the arm. The
   list counts in the case hash, like the fixture, and the lint fails a name that is no plugin.
+- **A case whose session must write its transcript,** such as one measuring a hook that reads it,
+  sets `transcript = true` in its key; no other session writes one. Claude Code writes transcripts
+  only under its configuration directory, so that session gets a directory of its own in its
+  sandbox, deleted with it. A login that `/login` stored in your own directory does not reach it:
+  run with a login in the environment, such as `CLAUDE_CODE_OAUTH_TOKEN` from `claude setup-token`,
+  or its samples are excluded, the session ending "Not logged in". The setting counts in the case
+  hash, like `without`.
 - **A suite that needs Claude Code configured** sets the variables in an `[env]` table of `suite.toml`,
   such as `CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS = "0"`. It may set only the variables `SUITE_ENV` in
   `scripts/evals/suite.py` lists, none a credential; add one there when a suite needs it. They are set

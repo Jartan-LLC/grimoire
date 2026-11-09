@@ -82,6 +82,27 @@ def test_claude_args_load_every_arm_plugin_and_switch_off_the_builtins() -> None
     ]
 
 
+def test_a_transcript_case_keeps_its_transcript_in_its_own_config_directory(
+    tmp_path: pathlib.Path,
+) -> None:
+    arm = Arm("old", "h", {"gitwise": "/a/gitwise"})
+    log = pathlib.Path("/s/debug.log")
+    assert "--no-session-persistence" not in session.claude_args(
+        "Do it.", arm, "m", 1.0, log, transcript=True
+    )
+    assert session.claude_args("Do it.", arm, "m", 1.0, log, transcript=False) == (
+        session.claude_args("Do it.", arm, "m", 1.0, log)
+    )
+    base = {"CLAUDE_CONFIG_DIR": "/home/u/.claude-work", "HOME": "/home/u"}
+    sandbox = tmp_path / "sandbox"
+    kept = session.sample_env(base, tmp_path / "checkout", sandbox, tmp_path / "store")
+    assert kept["CLAUDE_CONFIG_DIR"] == "/home/u/.claude-work"
+    own = session.sample_env(
+        base, tmp_path / "checkout", sandbox, tmp_path / "store", transcript=True
+    )
+    assert own["CLAUDE_CONFIG_DIR"] == str(sandbox / session.CONFIG_DIR)
+
+
 def test_preloads_reads_only_the_skills_the_debug_log_says_an_agent_preloaded() -> None:
     log = (
         "2026-10-26T23:34:59.090Z [DEBUG] [Agent: praxis:general-reviewer] Preloaded skill "

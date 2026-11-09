@@ -501,3 +501,17 @@ def test_turns_load_and_count_in_a_case_hash_with_without(tmp_path: pathlib.Path
     key.write_text('turns = [" "]\n' + KEY)
     with pytest.raises(SuiteError, match="a turn in 'turns' is empty"):
         load_suite(root)
+
+
+def test_transcript_counts_in_a_case_hash_only_when_set(tmp_path: pathlib.Path) -> None:
+    root = write_suite(tmp_path)
+    plain = load_suite(root).cases[0]
+    key = root / "cases" / "c1" / "key.toml"
+    key.write_text("transcript = false\n" + KEY)
+    assert load_suite(root).cases[0].hash() == plain.hash()
+    key.write_text("transcript = true\n" + KEY)
+    kept = load_suite(root).cases[0]
+    assert (kept.transcript, kept.hash() != plain.hash()) == (True, True)
+    key.write_text('transcript = "yes"\n' + KEY)
+    with pytest.raises(SuiteError, match="'transcript' must be true or false"):
+        load_suite(root)

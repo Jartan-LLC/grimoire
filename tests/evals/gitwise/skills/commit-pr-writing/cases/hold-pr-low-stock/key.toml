@@ -1,0 +1,54 @@
+split = "screen"
+kind = "regression"
+hints = ["message body", "explain why", "checkbox", "commit-pr-writing"]
+without = ["claudivis", "praxis", "pythonica", "recursio"]
+transcript = true
+remote = true
+
+[[check]]
+metric = "kept"
+artifact = "gh"
+absent = '''(?m)^\s*[-*]\s+\[[ xX]\]'''
+
+[[check]]
+metric = "delivered"
+artifact = "delivery"
+skill = "gitwise:commit-pr-writing"
+write = "pr"
+state = "in-context"
+
+[[gh]]
+match = '''(^|\s)pr create\b'''
+stdout = "https://github.com/acme/inventory/pull/7\n"
+
+[[gh]]
+match = '''(^|\s)pr (view|status|checks)\b'''
+exit = 1
+
+[[gh]]
+match = '''(^|\s)pr list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)pr list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "{\"name\": \"inventory\", \"nameWithOwner\": \"acme/inventory\", \"url\": \"https://github.com/acme/inventory\", \"defaultBranchRef\": {\"name\": \"main\"}, \"visibility\": \"PRIVATE\"}\n"
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3

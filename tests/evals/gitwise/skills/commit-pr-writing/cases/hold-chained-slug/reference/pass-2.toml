@@ -1,0 +1,2 @@
+commits = ["fix(slugs): drop the trailing hyphen from slugs\n\nslugify only stripped leading hyphens, so a title ending in\npunctuation gave a slug ending in '-'. It now strips both ends."]
+final = "I made the change, added a test, ran `python3 -m pytest -q` (all pass) and committed it."

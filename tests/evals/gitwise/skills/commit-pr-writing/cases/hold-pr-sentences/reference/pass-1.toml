@@ -1,0 +1,3 @@
+commits = []
+final = "I opened the pull request: https://github.com/acme/textstats/pull/7"
+gh = "gh pr create --title feat(textstats): count sentences --body-file /tmp/pr-body.md\n\nfeat(textstats): count sentences\nAdds `sentence_count`, because readability scores need a sentence count beside the word count.\n\nAbbreviations split as sentence ends: `Dr. Smith` counts as 2.\n\nStart reading at `sentence_count` in `textstats/sentences.py`.\n\n`python3 -m pytest -q` passes; only the two-sentence case has a test.\n"

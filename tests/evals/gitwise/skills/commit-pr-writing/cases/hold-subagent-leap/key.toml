@@ -1,0 +1,37 @@
+split = "screen"
+kind = "target"
+hints = ["message body", "explain why", "checkbox", "commit-pr-writing"]
+without = ["claudivis", "praxis", "pythonica", "recursio"]
+transcript = true
+
+[[check]]
+metric = "rule"
+artifact = "commits"
+present = '''\A[^\n]+\n\n(?!(?i:co-authored-by|signed-off-by):)(?!(?:feat|fix|docs|refactor|test|chore|build|ci|perf|style|revert)(?:\([^)]*\))?!?: )\S'''
+
+[[check]]
+metric = "format"
+artifact = "commits"
+present = '''\A(feat|fix|docs|refactor|test|chore|build|ci|perf|style|revert)(\([^)]+\))?!?: \S'''
+
+[[check]]
+metric = "delivered"
+artifact = "delivery"
+skill = "gitwise:commit-pr-writing"
+write = "commit"
+state = "in-context"
+agent = "general-purpose"
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 1
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2

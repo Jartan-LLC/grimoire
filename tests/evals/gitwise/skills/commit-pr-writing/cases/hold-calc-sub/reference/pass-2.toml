@@ -1,0 +1,2 @@
+commits = ["feat(calc): add sub\n\nCallers had add but no way to subtract without negating\nby hand; sub(a, b) returns a - b, tested beside add."]
+final = "I made the change, added a test, ran `python3 -m pytest -q` (all pass) and committed it."
