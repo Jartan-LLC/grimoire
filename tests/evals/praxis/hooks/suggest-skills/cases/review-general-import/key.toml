@@ -8,3 +8,10 @@ artifact = "delivery"
 skill = "pythonica:python-anti-patterns"
 state = "loaded"
 agent = "praxis:general-reviewer"
+
+[[check]]
+metric = "any-pythonica"
+artifact = "delivery"
+skill = "pythonica:*"
+state = "loaded"
+agent = "praxis:general-reviewer"

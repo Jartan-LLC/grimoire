@@ -75,7 +75,8 @@ class Check:
     thread sent that agent type, but for a call that ended in error)) and a `present` or
     `absent` regex, or a `judge` (a suite `[[judge]]` id) and the `reference` that judge
     reads beside the artifact, with `yes_ratings` when this case's silver labels accept
-    other ratings than the judge's. A delivery check names a `skill` and a `state`: with a
+    other ratings than the judge's. A delivery check names a `skill` (`<plugin>:*` for any
+    skill of that plugin) and a `state`: with a
     `write` kind, the state the skill must be in at every such write; without one, `loaded`
     or `not-loaded` over the whole session (trigger cases). It reads the main thread's
     deliveries and writes, or with an `agent`, that subagent's. A spawn check reads the

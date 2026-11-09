@@ -77,6 +77,12 @@ direction = "higher"
 # Reported, guard cases: the main thread started the subagent the prompt asked for, so a
 # `quiet` pass is not only for want of a subagent.
 
+[[metric]]
+id = "any-pythonica"
+direction = "higher"
+# Reported, general-review cases: the reviewer loaded any pythonica skill. A general review fits
+# several of them, and `recall` accepts python-anti-patterns alone.
+
 [pass_rule]
 primary = "recall"
 rule = "better"

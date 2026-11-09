@@ -243,7 +243,8 @@ the PR how many versions you screened.
   session's final tree and environment, and holds when it exits 0 within 60 seconds. It is not graded
   on references.
 - **Whether a skill was in context when the agent wrote** is a guard or a diagnostic, not a primary
-  metric, except in trigger cases, where loading the skill is the behaviour under test.
+  metric, except in trigger cases, where loading the skill is the behaviour under test. A delivery
+  check's `skill = "<plugin>:*"` counts any skill of that plugin.
 - **A file write** (`write = "file"`, and what `overlap` and `barrier` below read) is a Write or Edit
   call, or a file a Bash command writes through the shell: a redirect such as `>` or `>>`, on a
   heredoc's command line too (`cat > a.md <<'EOF'`), `tee`, or `sed -i` or `perl -i`. Its path is the
