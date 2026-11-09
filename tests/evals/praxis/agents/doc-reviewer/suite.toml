@@ -25,10 +25,13 @@ budget_usd = 3.0
 [[metric]]
 id = "rare"
 direction = "higher"
-# Lean cases: no finding asks to add a rare case. Bloat cases: a Critical or Important finding
-# names the rare passage. A finding's text runs to the next rating, heading, table row or verdict
-# line, so a note inside a finding that says a rare case was left out on purpose counts as asking
-# to add it; a note under its own heading does not.
+# Lean cases: no finding that names the doc's path asks to add a rare case, so a finding on a
+# commit or the code that only sits near a rare-case word and an ask word does not count. Bloat
+# cases: a Critical or Important finding names the rare passage. In every check, a finding's text
+# runs to the next rating, heading, table row, verdict line or bold numbered item (`**2.`), and a
+# bold numbered item under a heading that names a rating takes that rating. So a note inside a
+# finding that says a rare case was left out on purpose counts as asking to add it; a note under
+# its own heading does not.
 
 [[metric]]
 id = "kept"

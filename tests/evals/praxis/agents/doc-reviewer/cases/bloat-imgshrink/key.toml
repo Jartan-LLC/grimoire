@@ -12,7 +12,7 @@ verify = "python3 -c \"import pathlib,sys; sys.exit('it defaults to 75' in pathl
 [[check]]
 metric = "rare"
 artifact = "report:praxis:doc-reviewer"
-present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,1500}?(?:CMYK|EXIF|orientation|100 ?MB)'''
+present = '''(?ims)(?:(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b|^[ \t]*#{1,6}[ \t][^\n]*?\b(?:critical|important)\b[^\n]*\n(?:(?!^[ \t]*#{1,6}[ \t])[\s\S])*?^[ \t]*\*\*\d+\.)(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict|\*\*\d+\.)).){0,1500}?(?:CMYK|EXIF|orientation|100 ?MB)'''
 
 [[check]]
 metric = "format"
@@ -27,4 +27,4 @@ present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
 [[check]]
 metric = "kept"
 artifact = "report:praxis:doc-reviewer"
-present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,1500}?(?:(?:default|quality)[^\n]{0,40}(?<![:\-.\d])(?<!line )(?<!lines )\b(?:75|80)\b(?![-:.]?\d)|(?<![:\-.\d])(?<!line )(?<!lines )\b(?:75|80)\b(?![-:.]?\d)[^\n]{0,40}(?:default|quality))'''
+present = '''(?ims)(?:(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b|^[ \t]*#{1,6}[ \t][^\n]*?\b(?:critical|important)\b[^\n]*\n(?:(?!^[ \t]*#{1,6}[ \t])[\s\S])*?^[ \t]*\*\*\d+\.)(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict|\*\*\d+\.)).){0,1500}?(?:(?:default|quality)[^\n]{0,40}(?<![:\-.\d])(?<!line )(?<!lines )\b(?:75|80)\b(?![-:.]?\d)|(?<![:\-.\d])(?<!line )(?<!lines )\b(?:75|80)\b(?![-:.]?\d)[^\n]{0,40}(?:default|quality))'''

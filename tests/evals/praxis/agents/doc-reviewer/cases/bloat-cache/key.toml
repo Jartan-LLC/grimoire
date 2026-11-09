@@ -12,7 +12,7 @@ verify = "python3 -c \"import pathlib,sys; sys.exit('`--cache DIR` keeps' in pat
 [[check]]
 metric = "rare"
 artifact = "report:praxis:doc-reviewer"
-present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,1500}?(?:NFS|flock|\b260\b|MAX_PATH|clock)'''
+present = '''(?ims)(?:(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b|^[ \t]*#{1,6}[ \t][^\n]*?\b(?:critical|important)\b[^\n]*\n(?:(?!^[ \t]*#{1,6}[ \t])[\s\S])*?^[ \t]*\*\*\d+\.)(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict|\*\*\d+\.)).){0,1500}?(?:NFS|flock|\b260\b|MAX_PATH|clock)'''
 
 [[check]]
 metric = "format"
@@ -27,4 +27,4 @@ present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
 [[check]]
 metric = "kept"
 artifact = "report:praxis:doc-reviewer"
-present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,1500}?(?:--cache(?!-dir))'''
+present = '''(?ims)(?:(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b|^[ \t]*#{1,6}[ \t][^\n]*?\b(?:critical|important)\b[^\n]*\n(?:(?!^[ \t]*#{1,6}[ \t])[\s\S])*?^[ \t]*\*\*\d+\.)(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict|\*\*\d+\.)).){0,1500}?(?:--cache(?!-dir))'''
