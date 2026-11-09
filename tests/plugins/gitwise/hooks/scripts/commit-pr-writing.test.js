@@ -110,6 +110,10 @@ describe('writesText', () => {
     'SKIP=ruff git commit -m x',
     'GIT_AUTHOR_NAME="A B" git commit -m x',
     'if true; then git commit -m x; fi',
+    'if git commit -m x; then :; fi',
+    'if false; then :; elif git commit -m x; then :; fi',
+    'while git commit -m x; do :; done',
+    'until git commit -m x; do :; done',
     'for f in a; do git commit -m x; done',
     'time git commit -m x',
     'env FOO=1 git commit -m x',
@@ -119,6 +123,7 @@ describe('writesText', () => {
     '{ git commit -m x; }',
     'git commit -m "docs: document the -h flag"',
     "gh pr create --title 'add --help text'",
+    'git commit -m "fix: accept -h\n\nBody."',
   ]) {
     test(`true for ${command}`, () => assert.equal(writesText(command), true));
   }
