@@ -32,6 +32,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 2
 
       # No pip cache: the Verify block is stdlib-only, so there is nothing to
       # install and nothing to key a cache on.
@@ -39,8 +40,13 @@ jobs:
         with:
           python-version-file: .python-version
 
+      # A PR's merge commit has its base as first parent, so each plugin the PR changes
+      # needs a version its base lacks. Other runs have no PR to check and compare HEAD
+      # with itself: a run on a branch other than main has no local `main`.
       - name: Verify
-        run: make verify
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && 'HEAD^1' || 'HEAD' }}
+        run: make verify BASE="$BASE"
 
   lint:
     runs-on: ubuntu-24.04
