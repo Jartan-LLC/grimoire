@@ -34,17 +34,25 @@ const PR_TEXT_FLAG = /\s(?:--title|--body|--body-file|-[tbF])(?:[\s=]|$)/;
 const HELP = /\s(?:--help|-h)(?:\s|$)/;
 const NO_EDIT = /\s--no-edit(?:\s|$)/;
 const MESSAGE_FLAG = /\s(?:-[a-zA-Z]*[mF]|--message\b|--file\b)/;
+// Words that run the command after them: assignments such as `SKIP=x`, keywords, wrappers.
+const PREFIX = /^(?:[A-Za-z_]\w*=(?:"[^"]*"|'[^']*'|\S*)|then|do|else|time|env|command|exec|!|\{)\s+/;
 const SKILL_NAME = 'commit-pr-writing';
 const SKILL_BODY_PREFIX = 'Base directory for this skill: ';
 const SKILL_BODY = /^Base directory for this skill: .*[\\/]commit-pr-writing\s*$/m;
 
 /**
- * The simple commands in shell `command`, split at control operators, so that a phrase
- * inside an argument (`rg "git commit"`) is not taken for a command. Quotes are not
- * parsed: a line of a quoted message or heredoc counts as a command of its own.
+ * The simple commands in shell `command`, split at control operators and stripped of
+ * leading `PREFIX` words, so that a phrase inside an argument (`rg "git commit"`) is not
+ * taken for a command. The split does not parse quotes: a line of a quoted message or
+ * heredoc counts as a command of its own, and a command run as a string, as in
+ * `bash -c "git commit -m x"`, is not seen.
  */
 function commands(command) {
-  return command.split(/[;&|\n(`]/).map(part => part.trim());
+  return command.split(/[;&|\n(`]/).map(part => {
+    let rest = part.trim();
+    while (PREFIX.test(rest)) rest = rest.replace(PREFIX, '');
+    return rest;
+  });
 }
 
 /** Whether simple command `part` writes a commit message or a PR title or body. */

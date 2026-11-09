@@ -107,6 +107,16 @@ describe('writesText', () => {
     'gh pr edit 5 --body-file b.md',
     'gh pr edit 5 -t "fix: y"',
     'gh pr edit 5 --title="fix: y"',
+    'SKIP=ruff git commit -m x',
+    'GIT_AUTHOR_NAME="A B" git commit -m x',
+    'if true; then git commit -m x; fi',
+    'for f in a; do git commit -m x; done',
+    'time git commit -m x',
+    'env FOO=1 git commit -m x',
+    'command git commit -m x',
+    'exec git commit -m x',
+    '! git commit -m x',
+    '{ git commit -m x; }',
   ]) {
     test(`true for ${command}`, () => assert.equal(writesText(command), true));
   }
@@ -123,6 +133,8 @@ describe('writesText', () => {
     'gh pr edit 5 --add-label bug',
     'gh pr view 5',
     'echo commit',
+    'FOO="git commit -m x" rg y',
+    'domain git commit -m x',
   ]) {
     test(`false for ${command}`, () => assert.equal(writesText(command), false));
   }
@@ -154,6 +166,7 @@ describe('decide', () => {
     assert.deepEqual(decide(input('git commit --amend --no-edit'), read), HINTED);
     assert.deepEqual(decide(input('gh pr create --help'), read), HINTED);
     assert.deepEqual(decide(input('gh pr edit 3 --add-label bug'), read), HINTED);
+    assert.deepEqual(decide(input('env git push'), read), HINTED);
   });
 
   test('allows once the Skill tool has injected the skill', () => {
