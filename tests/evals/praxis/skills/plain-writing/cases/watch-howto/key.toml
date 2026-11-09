@@ -1,0 +1,31 @@
+# A candidate target case: committed as a regression case until an old baseline fails it
+# (tests/evals/README.md, "Choosing cases" step 2), then retagged kind = "target".
+split = "screen"
+kind = "regression"
+hints = []
+
+[[fact]]
+text = "notes watch"
+where = "fixture:notes/watch.py"
+
+[[check]]
+metric = "rare"
+artifact = "file:docs/watch.md"
+absent = '''(?ims)\A(?:(?!(?:^#{1}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,1}[ \t])|^#{2}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,2}[ \t])|^#{3}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,3}[ \t])|^#{4}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,4}[ \t])|^#{5}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,5}[ \t])|^#{6}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,6}[ \t]))).)*?(?:inotify|max_user_watches|renam|\bvim\b|network drive|poll)'''
+
+[[check]]
+metric = "kept"
+artifact = "file:docs/watch.md"
+present = '''notes watch'''
+
+[[check]]
+metric = "words"
+artifact = "verify"
+command = "python3 -c \"import pathlib,sys; sys.exit(len(pathlib.Path('docs/watch.md').read_text().split()) > 100)\""
+
+[[check]]
+metric = "delivered"
+artifact = "delivery"
+skill = "praxis:plain-writing"
+write = "file"
+state = "in-context"

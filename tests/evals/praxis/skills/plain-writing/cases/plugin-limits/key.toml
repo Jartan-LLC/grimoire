@@ -1,0 +1,32 @@
+# A candidate target case: committed as a regression case until an old baseline fails it
+# (tests/evals/README.md, "Choosing cases" step 2), then retagged kind = "target".
+# A second rebuild of grimoire #170's README limits.
+split = "confirm"
+kind = "regression"
+hints = []
+
+[[fact]]
+text = "NOTES.md"
+where = "fixture:commands/draft.md"
+
+[[check]]
+metric = "rare"
+artifact = "file:README.md"
+absent = '''(?ims)\A(?:(?!(?:^#{1}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,1}[ \t])|^#{2}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,2}[ \t])|^#{3}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,3}[ \t])|^#{4}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,4}[ \t])|^#{5}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,5}[ \t])|^#{6}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,6}[ \t]))).)*?(?:\b200\b|rate.?limit|5000|\bbots?\b)'''
+
+[[check]]
+metric = "kept"
+artifact = "file:README.md"
+present = '''/relnotes:draft'''
+
+[[check]]
+metric = "words"
+artifact = "verify"
+command = "python3 -c \"import pathlib,sys; sys.exit(len(pathlib.Path('README.md').read_text().split()) > 110)\""
+
+[[check]]
+metric = "delivered"
+artifact = "delivery"
+skill = "praxis:plain-writing"
+write = "file"
+state = "in-context"

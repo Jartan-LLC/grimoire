@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/logging.md" = "# Logging\n\n`api-client` logs one line per request to standard error.\n\n`--verbose` logs each request with its headers, including the `Authorization` header with your API\ntoken. Remove it before you share a log.\n"

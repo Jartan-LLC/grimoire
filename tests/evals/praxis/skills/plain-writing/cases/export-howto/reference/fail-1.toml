@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/export.md" = "# Export your ledger\n\nRun `ledger export --format csv --out ledger.csv` to write every entry to `ledger.csv`. Use\n`--format json` for JSON. Without `--out`, the entries go to standard output.\n\nIn a Turkish locale (`tr_TR`), the dotless i is kept as is. An hour repeated when daylight saving\ntime ends is written twice. Amounts above 2^53 are written as strings.\n"

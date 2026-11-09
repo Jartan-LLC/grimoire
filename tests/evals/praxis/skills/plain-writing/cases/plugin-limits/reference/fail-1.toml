@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"README.md" = "# relnotes\n\nA Claude Code plugin for release chores.\n\n## Install\n\n```text\n/plugin install relnotes@acme\n```\n\n## Commands\n\n- `/relnotes:draft` -- drafts release notes from the PRs merged since the last tag into `NOTES.md`.\n  It never posts anything. Label a PR `no-notes` to leave it out.\n  It reads at most 200 PRs, leaves out PRs opened by bots, and stops with `gh: rate limited` after\n  5000 API calls.\n"

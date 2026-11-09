@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says \"the default is 5\" where the code has \"the default is 7\".\nFile: docs/rotate.md:5\nIssue: The doc says \"the default is 5\" where the code has \"the default is 7\".\nFix: Change it.\nStatus: confirmed\n\n[IMPORTANT] Bloat: An empty log is left as it is, not rotated. On NFS, a rename is not atomic. A named pipe given\nFile: docs/rotate.md:12\nIssue: Bloat: An empty log is left as it is, not rotated. On NFS, a rename is not atomic. A named pipe given\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 2 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

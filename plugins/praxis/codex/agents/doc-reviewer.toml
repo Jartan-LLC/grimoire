@@ -33,9 +33,9 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 - Unsupported claims -- anything the sources do not state, including inflated, borrowed or guessed claims
 - Code examples that won't run
 - Broken cross-references and dead external links -- internal, reference-style, or URLs to nonexistent targets (flag obviously-dead on read)
-- Bloat -- passages no reader needs (`plain-writing`'s Cut list); length alone only where the type's reference sets a limit
+- Bloat -- passages `plain-writing`'s Cut list names, a rare case in a document for people included; length alone only where the type's reference sets a limit
 - Redundancy -- repeating information documented elsewhere instead of linking
-- Missing critical information that comparable docs include and this page's reader needs
+- Missing critical information that comparable docs include and this page's reader needs, but not a rare case `plain-writing` leaves out
 - Structure inconsistent with similar docs in the same category, unless that structure breaks a `docs-patterns`, `plain-writing` or `information-placement` rule
 - Diataxis doc-type fit -- the doc's shape matches its type
 - Two-audience register -- use-it vs navigate/change-it, with claims tracing to docstrings/types

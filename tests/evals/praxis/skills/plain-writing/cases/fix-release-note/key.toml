@@ -1,0 +1,16 @@
+# Release notes still name each change, a fix for a rare case included.
+split = "screen"
+kind = "regression"
+hints = []
+
+[[check]]
+metric = "kept"
+artifact = "file:CHANGELOG.md"
+present = '''(?i)clock|newest|date in (its|the) name'''
+
+[[check]]
+metric = "delivered"
+artifact = "delivery"
+skill = "praxis:plain-writing"
+write = "file"
+state = "in-context"

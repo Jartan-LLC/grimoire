@@ -1,0 +1,30 @@
+# A candidate target case: committed as a regression case until an old baseline fails it
+# (tests/evals/README.md, "Choosing cases" step 2), then retagged kind = "target".
+# The same doc with the rare cases its fix commits handled in the main path.
+split = "confirm"
+kind = "regression"
+hints = []
+
+[[plant]]
+id = "wrong-fact"
+verify = "python3 -c \"import pathlib,sys; sys.exit('it defaults to 75' in pathlib.Path('README.md').read_text())\""
+
+[[check]]
+metric = "rare"
+artifact = "report:praxis:doc-reviewer"
+present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,1500}?(?:CMYK|EXIF|orientation|100 ?MB)'''
+
+[[check]]
+metric = "format"
+artifact = "report:praxis:doc-reviewer"
+present = '''(?im)verdict\W{0,6}(approve|warning|block)\b'''
+
+[[check]]
+metric = "format"
+artifact = "report:praxis:doc-reviewer"
+present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
+
+[[check]]
+metric = "kept"
+artifact = "report:praxis:doc-reviewer"
+present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,1500}?(?:(?:default|quality)[^\n]{0,40}(?<![:\-.\d])(?<!line )(?<!lines )\b(?:75|80)\b(?![-:.]?\d)|(?<![:\-.\d])(?<!line )(?<!lines )\b(?:75|80)\b(?![-:.]?\d)[^\n]{0,40}(?:default|quality))'''

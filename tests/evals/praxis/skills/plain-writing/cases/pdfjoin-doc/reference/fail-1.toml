@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"README.md" = "# pdfjoin\n\nJoin PDF files into one.\n\n## Usage\n\n`pdfjoin out.pdf a.pdf b.pdf` joins `a.pdf` and `b.pdf`, in the order given, into `out.pdf`.\n\nAn encrypted PDF with an empty owner password is opened. Bookmarks nested deeper than 10 levels\nare flattened. A file with a broken xref table is rebuilt first.\n"

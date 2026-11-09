@@ -1,0 +1,22 @@
+# A candidate target case: committed as a regression case until an old baseline fails it
+# (tests/evals/README.md, "Choosing cases" step 2), then retagged kind = "target".
+# The ratchet itself: a review round found a rare case, its fix commit is the last on the branch.
+split = "screen"
+kind = "regression"
+hints = []
+
+[[check]]
+metric = "rare"
+artifact = "file:docs/usage.md"
+absent = '''(?ims)\A(?:(?!(?:^#{1}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,1}[ \t])|^#{2}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,2}[ \t])|^#{3}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,3}[ \t])|^#{4}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,4}[ \t])|^#{5}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,5}[ \t])|^#{6}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,6}[ \t]))).)*?(?:\block|killed|an hour|stale)'''
+
+[[check]]
+metric = "kept"
+artifact = "file:docs/usage.md"
+present = '''sync run'''
+
+[[check]]
+metric = "delivered"
+artifact = "delivery"
+skill = "praxis:plain-writing"
+state = "loaded"

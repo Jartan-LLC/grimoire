@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says \"`--format xml`\" where the code has \"`--format json`\".\nFile: docs/export.md:5\nIssue: The doc says \"`--format xml`\" where the code has \"`--format json`\".\nFix: Change it.\nStatus: confirmed\n\n### Not raised\n\nThe how-to does not mention that the repeated hour at the end of DST is written twice. Rare, so it stays out of a doc for people.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

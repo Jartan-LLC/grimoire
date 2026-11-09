@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[MINOR] Bloat: the expiry, gpg-agent and rpm 4.14 sentences cover cases few readers meet.\nFile: docs/signing-key.md:12\nIssue: Bloat: the expiry, gpg-agent and rpm 4.14 sentences cover cases few readers meet.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 0 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: APPROVE"

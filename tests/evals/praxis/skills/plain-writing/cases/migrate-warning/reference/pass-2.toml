@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/migrations.md" = "# Migrations\n\nRun `db migrate` to apply pending migrations.\n\n**Warning:** `db migrate --drop-unused` deletes unused tables and all their rows. There is no undo.\n"

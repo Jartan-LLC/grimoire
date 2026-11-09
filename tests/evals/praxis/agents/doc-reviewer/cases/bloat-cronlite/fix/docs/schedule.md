@@ -1,0 +1,8 @@
+# Schedule jobs
+
+Add a job with `cronlite add "0 9 * * 1" ./report.sh`; the schedule is a five-field cron
+expression in local time. `cronlite list` shows each job with its ID, and `cronlite remove ID`
+removes one.
+
+A job still running at its next start is skipped. A container without `/etc/localtime` runs jobs
+in UTC. A schedule for February 29 runs only in leap years.

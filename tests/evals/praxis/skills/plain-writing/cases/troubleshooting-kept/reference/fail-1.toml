@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/releasing.md" = "# Releasing\n\nRun `scripts/release.sh [--dry-run] <version>` from `main`.\n"

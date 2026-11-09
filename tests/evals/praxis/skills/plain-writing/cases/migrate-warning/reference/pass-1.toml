@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/migrations.md" = "# Migrations\n\nRun `db migrate` to apply pending migrations.\n\n`db migrate --drop-unused` also drops every table the schema no longer names, with its data. This\ncannot be undone: take a backup first.\n"

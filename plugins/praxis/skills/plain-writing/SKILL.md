@@ -50,8 +50,16 @@ Cut:
 - alternatives when one default works (keep a named fallback for when it cannot run);
 - future plans in task and reference documents;
 - an intro that repeats its heading, and empty sections;
+- in a document for people (a README, a contributor or release procedure, a docs page, release
+  notes, which still name each fix), a case few of its readers meet;
 - in a reply, the background, diagnosis and proof the reader already has: lead with the answer
   and keep the one fact they lack.
+
+Aim a document for people at its readers' normal use: the common path, with recovery from a
+rare failure in a short troubleshooting part at the end. A warning about data loss, security or a
+step that cannot be undone stays where the reader acts, however rare the case, and the recovery
+after such a step stays in the troubleshooting part. Any other rare case left out is no review
+finding.
 
 In an existing file, apply these lists to the text your change writes or makes false, unless you
 were asked to make the file itself clearer.

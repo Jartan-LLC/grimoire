@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"RELEASING.md" = "# Releasing\n\nEach package carries its version in `pyproject.toml`. Bump it in the PR that changes the package,\nwith an entry in its `CHANGELOG.md`.\n\n## Tag a release\n\nAfter the PR merges, run `make verify`, then `scripts/tag-release.sh` from `main`. It tags each\npackage whose version is not tagged yet, as `<name>--v<version>`, and pushes the tags. If the push\nfails with HTTP 403 after a workflow file changed, run `gh auth refresh -s workflow` and run it\nagain. Versions from before per-package changelogs (1.5.0 and earlier) are skipped. `make verify`\naccepts `^`, `~`, `=` and exact dependency ranges. The script does not wait for the dev container\nbuild.\n"

@@ -1,0 +1,19 @@
+# Rare recovery in a troubleshooting part at the end is where it belongs: no Important finding.
+split = "screen"
+kind = "regression"
+hints = []
+
+[[check]]
+metric = "kept"
+artifact = "report:praxis:doc-reviewer"
+absent = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,1500}?(?:\b403\b|troubleshoot)'''
+
+[[check]]
+metric = "format"
+artifact = "report:praxis:doc-reviewer"
+present = '''(?im)verdict\W{0,6}(approve|warning|block)\b'''
+
+[[check]]
+metric = "format"
+artifact = "report:praxis:doc-reviewer"
+present = '''(?im)^\|\s*critical\s*\|\s*\d+'''

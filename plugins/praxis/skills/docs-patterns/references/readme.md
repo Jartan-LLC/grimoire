@@ -37,7 +37,7 @@ list what the diff removes, then read the opening, feature list and comparison t
 
 **Limits carried from the change.** When the change adds or alters an option or path, its README
 text keeps each limit stated in the PR description or the help text that decides which value or
-path a user picks, and claims nothing beyond it; else users pick a value that does not do what
+path most users pick, and claims nothing beyond it; else users pick a value that does not do what
 they expect. Verify: read the PR description and the option's `--help` text, then the new text.
 
 - Bad: a `--sanitize=auto|always|never` paragraph that never says `auto` keeps the plain-text

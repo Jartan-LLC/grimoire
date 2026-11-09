@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/schedule.md" = "# Schedule jobs\n\nAdd a job with `cronlite add \"0 9 * * 1\" ./report.sh`; the schedule is a five-field cron\nexpression in local time. `cronlite list` shows each job with its ID, and `cronlite remove ID`\nremoves one.\n"

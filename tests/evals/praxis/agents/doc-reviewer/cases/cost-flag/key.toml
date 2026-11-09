@@ -1,0 +1,29 @@
+# Cost: a doc that names a flag the code does not have must still be caught.
+# Its branch also fixes a rare case the doc rightly leaves out: asking to add it is the failure.
+split = "confirm"
+kind = "regression"
+hints = []
+
+[[plant]]
+id = "wrong-flag"
+verify = "python3 -c \"import pathlib,sys; sys.exit('--out-dir' in pathlib.Path('docs/usage.md').read_text())\""
+
+[[check]]
+metric = "rare"
+artifact = "report:praxis:doc-reviewer"
+absent = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,1500}?(?:(?:omit|omits|omitted|leaves? out|left out|does not (?:say|mention|cover|document|explain|note)|doesn.t (?:say|mention|cover|document|explain|note)|missing|not documented|undocumented|silent on|never (?:says|mentions)|\badd (?:a|an|one)\b|\bmention\b|\bdocument (?:that|the|how|what)\b)(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,250}(?:Turkish|tr_TR|dotless)|(?:Turkish|tr_TR|dotless)(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,250}(?:omit|omits|omitted|leaves? out|left out|does not (?:say|mention|cover|document|explain|note)|doesn.t (?:say|mention|cover|document|explain|note)|missing|not documented|undocumented|silent on|never (?:says|mentions)|\badd (?:a|an|one)\b|\bmention\b|\bdocument (?:that|the|how|what)\b))'''
+
+[[check]]
+metric = "kept"
+artifact = "report:praxis:doc-reviewer"
+present = '''(?ims)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict)).){0,1500}?(?:out-dir|--out\b)'''
+
+[[check]]
+metric = "format"
+artifact = "report:praxis:doc-reviewer"
+present = '''(?im)verdict\W{0,6}(approve|warning|block)\b'''
+
+[[check]]
+metric = "format"
+artifact = "report:praxis:doc-reviewer"
+present = '''(?im)^\|\s*critical\s*\|\s*\d+'''

@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n- `vault restore` picks the newest archive by the date in its name, so an archive written while\n  the clock ran ahead is no longer passed over.\n\n## 0.4.0\n\n- `vault status` lists removed files too.\n"

@@ -72,8 +72,10 @@ the tree does not show: check `gh api repos/OWNER/REPO/rules/branches/BRANCH` or
 ## Traps
 
 **Missing or wrong warnings.** Look for a command or habit that damages real data or shared state, or fails confusingly
-here, with no warning saying what happens and the safe way. Verify: read test fixtures, scripts and hooks for writes
-outside the checkout (Docker volumes, a shared daemon, real config).
+here, with no warning saying what happens and the safe way. A warning about damage stays where the contributor acts,
+however rare the case; a confusing failure few contributors meet gets at most its recovery, in the troubleshooting
+part at the end. Verify: read test fixtures, scripts and hooks for writes outside the checkout (Docker volumes, a shared
+daemon, real config).
 
 - Better (attrs): uncheck "Copy the main branch only" when forking, or the tests fail for want of Git tags.
 

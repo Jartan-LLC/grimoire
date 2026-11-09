@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/usage.md" = "# Usage\n\n## snap take\n\n`snap take` saves a snapshot of the current directory.\n\n## snap list\n\n`snap list` lists snapshots, newest first.\n\n## snap prune\n\n**Warning:** `snap prune --all` permanently deletes every snapshot, including the latest.\n\nUse `snap prune --keep N` to keep the newest `N`.\n"

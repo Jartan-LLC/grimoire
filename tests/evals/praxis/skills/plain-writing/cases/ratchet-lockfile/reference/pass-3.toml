@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/usage.md" = "# Usage\n\n## sync run\n\n`sync run` copies new and changed files from `SOURCE` to `TARGET`, then prints what it copied.\n\n## Troubleshooting\n\nA run that was killed leaves `.sync.lock`. To remove it at once:\n\n```bash\nls -l .sync.lock\n\n# then remove it\nrm .sync.lock\n```\n"
