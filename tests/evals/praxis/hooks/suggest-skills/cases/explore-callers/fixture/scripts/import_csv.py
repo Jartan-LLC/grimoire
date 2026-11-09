@@ -5,5 +5,6 @@ import sys
 
 from billing.money import parse_amount
 
-for row in csv.reader(open(sys.argv[1])):
-    print(row[0], parse_amount(row[2]))
+with open(sys.argv[1], newline="") as payments:
+    for row in csv.reader(payments):
+        print(row[0], parse_amount(row[2]))
