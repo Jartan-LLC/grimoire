@@ -47,7 +47,8 @@ CODEX_MARKETPLACE = ROOT / ".agents" / "plugins" / "marketplace.json"
 # Codex's own migrator (external-agent-migration/src/subagents.rs) maps only
 # `acceptEdits` and `readOnly`, returning None for `plan`. Emitting nothing
 # there would let a plan-mode reviewer inherit a writable sandbox, so `plan` is
-# mapped to the mode that actually matches its intent.
+# mapped to the mode that actually matches its intent, and any mode missing here
+# is rejected rather than left to inherit one.
 PERMISSION_MODE_TO_SANDBOX = {
     "plan": "read-only",
     "readOnly": "read-only",
@@ -73,10 +74,10 @@ def parse_frontmatter(text: str, path: pathlib.Path) -> tuple[Frontmatter, str]:
 
     Deliberately minimal: our agent frontmatter is single-line scalars plus a
     `skills:` list, so a YAML dependency would buy nothing. A quoted, block or
-    flow value, or a line that is not a key, list item or comment, raises rather
-    than being misread. `path` is carried only so a malformed file names itself
-    -- otherwise a bare ValueError from here points a reader at the generator
-    rather than the file to fix.
+    flow value or list item, an inline comment, or a line that is not a key,
+    list item or comment, raises rather than being misread. `path` is carried
+    only so a malformed file names itself -- otherwise a bare ValueError from
+    here points a reader at the generator rather than the file to fix.
     """
     lines = text.split("\n")
     if lines[0].strip() != "---":
@@ -94,19 +95,31 @@ def parse_frontmatter(text: str, path: pathlib.Path) -> tuple[Frontmatter, str]:
             values = fields[key]
             if isinstance(values, str):
                 raise ValueError(f"{path}: frontmatter {key!r} has both a value and list items")
-            values.append(item.group(1).strip())
+            values.append(plain(item.group(1).strip(), f"{key!r} list item", path))
             continue
         match = re.match(r"([A-Za-z_-]+):\s*(.*)$", line)
         if not match:
             if line.strip() and not line.lstrip().startswith("#"):
                 raise ValueError(f"{path}: unsupported frontmatter line {line!r}")
             continue
-        key, value = match.group(1), match.group(2).strip()
-        if value[:1] in ('"', "'", ">", "|", "[", "{"):
-            raise ValueError(f"{path}: frontmatter {key!r} must be a plain unquoted value")
-        fields[key] = value or []
+        key = match.group(1)
+        fields[key] = plain(match.group(2).strip(), repr(key), path) or []
 
     return fields, "\n".join(lines[end + 1 :]).strip()
+
+
+def plain(value: str, what: str, path: pathlib.Path) -> str:
+    """Return `value`, raising on the quoted, block, flow and comment forms YAML reads differently.
+
+    The checks are a leading quote, block or flow indicator, and a comment -- a
+    `#` at the start or after whitespace, so `C#` is still a value. Each would make
+    this parser's string differ from the one Claude Code reads.
+    """
+    if value[:1] in ('"', "'", ">", "|", "[", "{"):
+        raise ValueError(f"{path}: frontmatter {what} must be a plain unquoted value")
+    if re.search(r"(^|\s)#", value):
+        raise ValueError(f"{path}: frontmatter {what} has an inline comment")
+    return value
 
 
 def scalar(fields: Frontmatter, key: str) -> str:
@@ -166,11 +179,13 @@ def render_agent_toml(fields: Frontmatter, body: str, plugin: str) -> str:
         f"description = {basic_string(scalar(fields, 'description'))}",
     ]
     if "permissionMode" in fields:
-        sandbox = PERMISSION_MODE_TO_SANDBOX.get(scalar(fields, "permissionMode"))
-    else:
-        sandbox = None
-    if sandbox:
-        lines.append(f'sandbox_mode = "{sandbox}"')
+        mode = scalar(fields, "permissionMode")
+        if mode not in PERMISSION_MODE_TO_SANDBOX:
+            raise ValueError(
+                f"frontmatter 'permissionMode' {mode!r} has no Codex sandbox; "
+                f"use one of {', '.join(PERMISSION_MODE_TO_SANDBOX)}"
+            )
+        lines.append(f'sandbox_mode = "{PERMISSION_MODE_TO_SANDBOX[mode]}"')
     lines.append(f"developer_instructions = '''\n{instructions}\n'''")
     return "\n".join(lines) + "\n"
 
