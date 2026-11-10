@@ -1,5 +1,5 @@
 # The project's own privacy page already answers what looks like a product question.
-# Written for the committed suite after the smoke; it has never run.
+# Written for the committed suite after the smoke, so no smoke result shaped it.
 split = "confirm"
 kind = "regression"
 hints = ["privacy", "consent", "cookie", "track"]

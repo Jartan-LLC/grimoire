@@ -1,5 +1,5 @@
 # A format change for clients that ship on their own schedule and stay installed: a decision the mobile team owns.
-# Written for the committed suite after the smoke; it has never run.
+# Written for the committed suite after the smoke, so no smoke result shaped it.
 split = "screen"
 kind = "regression"
 hints = ["old app", "version", "both", "mobile team", "break"]

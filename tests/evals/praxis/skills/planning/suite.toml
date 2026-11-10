@@ -10,8 +10,9 @@
 # rollback are required content. Trigger cases ask to review, revise or talk through a plan (the
 # skill should load) or share its words but need something else (it should not).
 #
-# The dev cases are the 19 cases of the scratch smoke the PR reports, with the smoke's prompts and
-# repositories, plus three trigger cases: the smoke's results are known, so its cases stay on dev.
+# The dev cases are the 19 cases of the scratch smoke for #193, whose results PR #204 reports, with
+# the smoke's prompts and repositories, plus three trigger cases: the smoke's results are known, so
+# its cases stay on dev.
 # No screen or confirm case ran in the smoke. No baselines yet: until `make eval-run ... RECORD=1`
 # draws them, every behaviour case is committed as a regression case.
 #
@@ -31,7 +32,9 @@ id = "recall"
 direction = "higher"
 # Should load: every planning case, behaviour and trigger alike, loaded praxis:planning in the
 # main thread (`state = "loaded"`), through plan-issue's step 5 or by itself. The dev case where
-# the user asks for the work, not a plan (headless-irreversible), does not carry it.
+# the user asks for the work, not a plan (headless-irreversible), does not carry it. Behaviour
+# cases count as should-load trigger cases: each is a planning request, so the skill should load on
+# it too.
 
 [[metric]]
 id = "quiet"

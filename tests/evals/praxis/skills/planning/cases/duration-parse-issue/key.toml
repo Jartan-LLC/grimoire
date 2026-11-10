@@ -1,5 +1,5 @@
 # Over-planning control at the light size, through plan-issue: a well-specified function.
-# Written for the committed suite after the smoke; it has never run.
+# Written for the committed suite after the smoke, so no smoke result shaped it.
 split = "confirm"
 kind = "regression"
 hints = []
