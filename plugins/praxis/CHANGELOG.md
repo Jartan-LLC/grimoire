@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.0
+
+- `find-duplicate-comments.js` from `comment-hygiene` takes two new flags. `--worktree` also checks the comments your uncommitted changes, staged or not, and your untracked files add, and checks them against the files as they are now, so a duplicate you have fixed stops reporting before you commit the fix. `--all` checks every comment in the repo, not only the ones a diff adds. Without them, the script checks what it checked before. It now works the same from any directory in the repo: run from a subdirectory, it used to find nothing and report clean.
+
 ## 2.3.0
 
 - `plan-issue` and `implement-issue` assign the issue to the account `gh` is logged in as when they start on it and it has no assignee. When someone else holds the issue, or the account cannot assign it, your agent tells you and leaves the assignees as they are.

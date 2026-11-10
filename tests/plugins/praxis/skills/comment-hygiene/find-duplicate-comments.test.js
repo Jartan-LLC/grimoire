@@ -1,5 +1,6 @@
 const assert = require('node:assert/strict');
 const { spawnSync } = require('node:child_process');
+const fs = require('node:fs');
 const path = require('node:path');
 const { describe, test } = require('node:test');
 
@@ -45,13 +46,30 @@ function inDir(dir, fn) {
 
 describe('parseArgs', () => {
   test('defaults the base to origin/main with no skips', () => {
-    assert.deepEqual(parseArgs([]), { base: 'origin/main', skips: [] });
+    assert.deepEqual(parseArgs([]), { base: 'origin/main', skips: [], worktree: false, all: false });
   });
 
   test('takes one base and collects both --skip spellings in order', () => {
     assert.deepEqual(parseArgs(['--skip', 'dist', 'main', '--skip=build']), {
       base: 'main',
       skips: ['dist', 'build'],
+      worktree: false,
+      all: false,
+    });
+  });
+
+  test('takes --worktree and --all in any position', () => {
+    assert.deepEqual(parseArgs(['main', '--worktree']), {
+      base: 'main',
+      skips: [],
+      worktree: true,
+      all: false,
+    });
+    assert.deepEqual(parseArgs(['--all', '--skip', 'dist', '--worktree']), {
+      base: null,
+      skips: ['dist'],
+      worktree: true,
+      all: true,
     });
   });
 
@@ -63,6 +81,7 @@ describe('parseArgs', () => {
     [['--skip'], '--skip needs a pattern'],
     [['--frobnicate'], "unknown option '--frobnicate'"],
     [['main', 'extra'], "unexpected argument 'extra'"],
+    [['--all', 'main'], '--all checks every comment and takes no base ref'],
   ]) {
     test(`rejects ${JSON.stringify(args)} with exit 2`, t => {
       const result = runCli(tempDir(t), ...args);
@@ -303,5 +322,185 @@ describe('command line', () => {
     assert.equal(result.status, 2);
     assert.match(result.stderr, /base ref 'no-such-ref' does not resolve/);
     assert.equal(result.stdout, '');
+  });
+
+  test('lists a conflicted file\'s site once, not once per merge stage', t => {
+    const dir = initRepo(t, { 'a.js': `// ${RETOLD}\nx();\n` });
+    git(dir, 'branch', 'base');
+    git(dir, 'checkout', '-q', '-b', 'feature');
+    writeFiles(dir, { 'a.js': `// ${RETOLD}\nfeature();\n` });
+    commitAll(dir, 'feature');
+    git(dir, 'checkout', '-q', 'main');
+    writeFiles(dir, { 'a.js': `// ${RETOLD}\nmain();\n`, 'b.js': `// ${RETOLD}\n` });
+    commitAll(dir, 'main');
+    const merge = spawnSync('git', ['merge', '-q', 'feature'], { cwd: dir, encoding: 'utf8', env: gitEnv() });
+    assert.equal(merge.status, 1, merge.stderr);
+    const result = runCli(dir, 'base');
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /^ {2}b\.js:1\n {4}".*"\n {4}also at: a\.js:1\n/m);
+  });
+});
+
+describe('--worktree', () => {
+  /** `base` committed on `main`, checked out on a new `feature` branch with no commits of its own. */
+  function featureRepo(t, base) {
+    const dir = initRepo(t, base);
+    git(dir, 'checkout', '-q', '-b', 'feature');
+    return dir;
+  }
+
+  for (const [name, change] of [
+    ['a staged change', dir => git(dir, 'add', 'new.js')],
+    ['an unstaged change to a tracked file', () => {}],
+  ]) {
+    test(`checks a comment added by ${name}`, t => {
+      const dir = featureRepo(t, { 'old.js': `// ${RETOLD}\n`, 'new.js': 'x();\n' });
+      writeFiles(dir, { 'new.js': `x();\n// ${RETOLD}\n` });
+      change(dir);
+      assert.match(runCli(dir, 'main').stdout, /No changed files to check\./);
+      const result = runCli(dir, 'main', '--worktree');
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(result.stdout, /new\.js:2\n/);
+      assert.match(result.stdout, /also at: old\.js:1\n/);
+    });
+  }
+
+  test('checks a comment in an untracked file, and indexes untracked files', t => {
+    const dir = featureRepo(t, { 'old.js': `// ${RETOLD}\n` });
+    writeFiles(dir, { 'new.py': `x = 1\n# ${RETOLD}\n`, 'also-new.sh': `# ${RETOLD}\n` });
+    assert.match(runCli(dir, 'main').stdout, /No changed files to check\./);
+    const result = runCli(dir, 'main', '--worktree');
+    assert.equal(result.status, 0, result.stderr);
+    // Both untracked sites find each other, so the pair reports once.
+    assert.match(result.stdout, /^1 added comment line/);
+    assert.match(result.stdout, /^ {2}also-new\.sh:1\n {4}".*"\n {4}also at: old\.js:1, new\.py:2\n/m);
+  });
+
+  test('leaves out an untracked file git ignores', t => {
+    const dir = featureRepo(t, { '.gitignore': 'build/\n', 'old.js': `// ${RETOLD}\n` });
+    writeFiles(dir, { 'build/out.js': `// ${RETOLD}\n` });
+    const result = runCli(dir, 'main', '--worktree');
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /No changed files to check\./);
+  });
+
+  test('stops reporting a duplicate fixed at the other site before the commit', t => {
+    const dir = featureRepo(t, { 'old.js': `x();\n// ${RETOLD}\n` });
+    writeFiles(dir, { 'new.js': `// ${RETOLD}\n` });
+    commitAll(dir, 'feature');
+    writeFiles(dir, { 'old.js': 'x();\n// cache rules: new.js\n' });
+    assert.match(runCli(dir, 'main').stdout, /also at: old\.js:2\n/);
+    const result = runCli(dir, 'main', '--worktree');
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /No retold comments found in the diff or untracked files\./);
+  });
+
+  test('stops reporting a duplicate fixed at the added site before the commit', t => {
+    const dir = featureRepo(t, { 'old.js': `// ${RETOLD}\n` });
+    writeFiles(dir, { 'new.js': `// ${RETOLD}\n` });
+    commitAll(dir, 'feature');
+    writeFiles(dir, { 'new.js': '// cache rules: old.js\n' });
+    assert.match(runCli(dir, 'main').stdout, /new\.js:1\n/);
+    const result = runCli(dir, 'main', '--worktree');
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /No retold comments found in the diff or untracked files\./);
+  });
+
+  test('fails rather than reporting clean when a file cannot be read', {
+    skip: process.getuid?.() === 0 && 'root reads a file whatever its mode',
+  }, t => {
+    const dir = featureRepo(t, { 'old.js': `// ${RETOLD}\n`, 'locked.js': `// ${RETOLD}\n` });
+    writeFiles(dir, { 'new.js': 'x();\n' });
+    fs.chmodSync(path.join(dir, 'locked.js'), 0o000);
+    const result = runCli(dir, 'main', '--worktree');
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, /reading the working tree failed/);
+    assert.equal(result.stdout, '');
+  });
+});
+
+describe('--all', () => {
+  test('reports every comment told at more than one site, with no diff to scope it', t => {
+    const dir = initRepo(t, {
+      'a.js': `x();\n// ${RETOLD}\n`,
+      'lib/b.py': `# ${RETOLD}\n`,
+      'c.sh': `# ${RETOLD}\n`,
+      'unique.js': '// a comment told only once in the whole repository\n',
+    });
+    assert.match(runCli(dir, 'main').stdout, /No changed files to check\./);
+    const result = runCli(dir, '--all');
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /^1 comment\(s\) told at more than one site:\n/);
+    assert.match(result.stdout, /^ {2}a\.js:2\n {4}".*"\n {4}also at: c\.sh:1, lib\/b\.py:1\n/m);
+    assert.ok(!result.stdout.includes('unique.js'), result.stdout);
+  });
+
+  test('reports a clean repository as clean', t => {
+    const dir = initRepo(t, { 'a.js': `// ${RETOLD}\n` });
+    const result = runCli(dir, '--all');
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /^No retold comments found\.\n/);
+  });
+
+  test('leaves out a skipped tree', t => {
+    const dir = initRepo(t, { 'a.js': `// ${RETOLD}\n`, 'dist/a.js': `// ${RETOLD}\n` });
+    const result = runCli(dir, '--all', '--skip', 'dist');
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /^No retold comments found\.\n/);
+  });
+
+  for (const args of [['--all'], ['--all', '--worktree']]) {
+    test(`${args.join(' ')} reads a conflicted file once, not once per merge stage`, t => {
+      const dir = initRepo(t, { 'a.js': `// ${RETOLD}\nx();\n` });
+      git(dir, 'checkout', '-q', '-b', 'feature');
+      writeFiles(dir, { 'a.js': `// ${RETOLD}\nfeature();\n` });
+      commitAll(dir, 'feature');
+      git(dir, 'checkout', '-q', 'main');
+      writeFiles(dir, { 'a.js': `// ${RETOLD}\nmain();\n` });
+      commitAll(dir, 'main');
+      const merge = spawnSync('git', ['merge', '-q', 'feature'], { cwd: dir, encoding: 'utf8', env: gitEnv() });
+      assert.equal(merge.status, 1, merge.stderr);
+      assert.match(git(dir, 'ls-files', '-s'), /^100644 \S+ 3\ta\.js$/m);
+      const result = runCli(dir, ...args);
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(result.stdout, /^No retold comments found\.\n/);
+    });
+  }
+
+  test('with --worktree, reads uncommitted and untracked files instead of HEAD', t => {
+    const dir = initRepo(t, { 'a.js': `// ${RETOLD}\n`, 'b.js': `// ${RETOLD}\n` });
+    writeFiles(dir, { 'b.js': '// cache rules: a.js\n', 'c.py': `# ${RETOLD}\n` });
+    assert.match(runCli(dir, '--all').stdout, /also at: b\.js:1\n/);
+    const result = runCli(dir, '--all', '--worktree');
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /^ {2}a\.js:1\n {4}".*"\n {4}also at: c\.py:1\n/m);
+  });
+});
+
+describe('run from a subdirectory', () => {
+  test('the default scope checks the diff from the top level', t => {
+    const dir = initRepo(t, { 'src/old.js': `// ${RETOLD}\n` });
+    git(dir, 'checkout', '-q', '-b', 'feature');
+    writeFiles(dir, { 'src/new.js': `// ${RETOLD}\n` });
+    commitAll(dir, 'feature');
+    const result = runCli(path.join(dir, 'src'), 'main');
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /^ {2}src\/new\.js:1\n {4}".*"\n {4}also at: src\/old\.js:1\n/m);
+  });
+
+  test('--worktree checks an unstaged change from the top level', t => {
+    const dir = initRepo(t, { 'src/old.js': `// ${RETOLD}\n`, 'src/new.js': 'x();\n' });
+    git(dir, 'checkout', '-q', '-b', 'feature');
+    writeFiles(dir, { 'src/new.js': `x();\n// ${RETOLD}\n` });
+    const result = runCli(path.join(dir, 'src'), 'main', '--worktree');
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /^ {2}src\/new\.js:2\n {4}".*"\n {4}also at: src\/old\.js:1\n/m);
+  });
+
+  test('--all sweeps the whole repository', t => {
+    const dir = initRepo(t, { 'src/a.js': `// ${RETOLD}\n`, 'src/b.js': `// ${RETOLD}\n`, 'top.js': `// ${RETOLD}\n` });
+    const result = runCli(path.join(dir, 'src'), '--all');
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /^ {2}src\/a\.js:1\n {4}".*"\n {4}also at: src\/b\.js:1, top\.js:1\n/m);
   });
 });
