@@ -4,7 +4,8 @@ One section per eval case. A grader reads the doc the writer produced (the targe
 final text, or the diff to it), checks it against the items below, and gives one label.
 These specs come from each case's prompt.md, fixture/ and build.py, and the rule (the
 plain-writing paragraph "Write for what the reader does" and its "Always keep" list). They
-were written without seeing any model output or the case keys.
+were written without seeing any model output or the case keys, except walkaway-readme's M4
+and B3, which were set after the dev smoke to follow the last "Always keep" item.
 
 Case paths below are relative to
 `tests/evals/praxis/skills/plain-writing/cases/<case>/`. "commit N" means the Nth entry of
@@ -341,12 +342,10 @@ The final code is build.py commit 5's `vault/backup.py`; the CLI is fixture/vaul
   clean, then stops. Source: fixture/commands/walkaway.md line 5.
 - M3. Hard constraints the reader relies on while away: never pushes to `main`, never
   merges, never force-pushes. Source: fixture/commands/walkaway.md line 9.
-- M4. The whole Limits list, or a pointer to `commands/walkaway.md` for it, or, if only
-  some limits are listed, a statement that the list is partial. The five limits are:
-  never pushes to main / merges / force-pushes; stops after 8 rounds; does not run on a
-  PR from a fork; skips the run when `gh` is logged out; ignores draft PRs older than 30
-  days. Source: fixture/commands/walkaway.md lines 7-13. A silently partial list is a
-  MUST failure.
+- M4. A pointer to `commands/walkaway.md` for the full list of limits, or the whole list
+  (which names B3's skip cases). A doc that lists some limits without the pointer says its
+  list is partial; a silently partial list is a MUST failure. Source: fixture/commands/walkaway.md lines 7-13; the rule's last "Always
+  keep" item.
 
 ### UNSURE (each could be MUST or BLOAT)
 
@@ -354,46 +353,33 @@ The final code is build.py commit 5's `vault/backup.py`; the CLI is fixture/vaul
   calls "a case it skips" something that needs no line, but this one is a prerequisite
   the reader must meet before leaving, and the reader is away when the skip happens. Leans
   MUST as a prerequisite; graders should not mark under for its absence if M4's pointer
-  or full list covers it.
+  is given.
 - U2. Stops after 8 rounds (the reader may come back to an unfinished review). Source:
-  walkaway.md line 10. Covered by M4 if the full list or a pointer is given.
-- U3. Does not run on a PR from a fork. Source: walkaway.md line 11. A condition the
-  reader checks; covered by M4.
-- U4. Ignores draft PRs older than 30 days. Source: walkaway.md line 13. Rare and the
-  reader takes little action; leans NEUTRAL. Listing it as part of the whole list is not
-  bloat.
+  walkaway.md line 10. Covered by M4's pointer when absent.
 
 ### BLOAT
 
 - B1. Explaining how review rounds work internally, what "clean" means beyond the source,
   or which reviewers run: none of it is in the sources.
 - B2. Restating the Install section or the plugin intro.
+- B3. Naming a case the command skips on its own: a PR from a fork, or draft PRs older
+  than 30 days, in prose or as items of a copied Limits list. Source: the rule, "a case it
+  skips ... needs no line", and the last "Always keep" item: a whole list is kept when the
+  reader acts on it, and for cases the program handles on its own a pointer to where they
+  are listed is enough.
 
 ### NEUTRAL
 
 - N1. A `## Commands` or `## walkaway` heading.
-- U5 (reviewer's fix: was NEUTRAL). Copying the whole Limits list verbatim. The rule's
-  keep list allows "a whole list, or a pointer to where the whole list is", so it
-  satisfies M4; but three of the five limits (fork PRs, `gh` logged out, old drafts) are
-  cases the command skips, which the rule says "need no line". So the list alone does not
-  decide the label either way; record it as U5. Prose that explains or expands the skip
-  cases beyond the list's own one-line items is BLOAT (B3).
-
-### BLOAT (added by the reviewer)
-
-- B3. Explanation of the skip cases beyond a one-line list item each (why forks are
-  skipped, what happens to old drafts, what the reader sees when `gh` is logged out).
-  Source: the rule, "a case it skips ... needs no line".
 
 ### Label guidance
 
 - Right-sized: a short section, roughly 3 to 10 lines: invocation, what it does, the
-  never-push/merge/force-push guarantees, and either the full Limits list or a pointer to
-  commands/walkaway.md.
+  never-push/merge/force-push guarantees, and a pointer to commands/walkaway.md.
 - Bloated: M1-M4 present plus invented internals, padding, or B3.
-- Under: M1, M2 or M3 missing, or a partial limits list with no "partial" note and no
-  pointer.
-- Mis-sized: invented internals present with M3 or M4 missing.
+- Under: M1, M2, M3 or M4 missing (a partial limits list with no "partial" note and no
+  pointer is M4 missing), and no BLOAT item.
+- Mis-sized: a BLOAT item present with M1, M2, M3 or M4 missing.
 
 ---
 
