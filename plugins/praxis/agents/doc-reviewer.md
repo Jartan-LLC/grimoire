@@ -43,7 +43,7 @@ Guidance, not an exhaustive checklist -- tier each finding with the `review-seve
 - Unsupported claims -- anything the sources do not state, including inflated, borrowed or guessed claims
 - Code examples that won't run
 - Broken cross-references and dead external links -- internal, reference-style, or URLs to nonexistent targets (flag obviously-dead on read)
-- Bloat -- passages `plain-writing`'s Cut list names, and in a document for people a line on a case the program skips, fixes or reports with its own remedy (`plain-writing`'s "Write for what the reader does"); length alone only where the type's reference sets a limit
+- Bloat -- passages `plain-writing`'s Cut list names, and in a document for people a line on a case the program skips, fixes or reports with its own remedy (`plain-writing`'s "Write for what the reader does"; release notes still name each fix); length alone only where the type's reference sets a limit
 - Redundancy -- repeating information documented elsewhere instead of linking
 - Missing critical information that comparable docs include and this page's reader needs; a case `plain-writing`'s "Write for what the reader does" leaves out of a document for people is no finding
 - Structure inconsistent with similar docs in the same category, unless that structure breaks a `docs-patterns`, `plain-writing` or `information-placement` rule
