@@ -177,6 +177,10 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
 - **Keep tool configuration out of a fixture.** A fixture whose `pyproject.toml` has a `[tool.ruff]`
   table gets a `.ruff_cache/` written into it by the commit hooks, and the case hash counts every file in
   the fixture, so each hook run would redraw the case's samples.
+- **Commit the files a fixture's `.gitignore` matches.** Git applies a fixture's own `.gitignore` in this
+  checkout too, so a file it matches, such as a saved plan under `.claude/`, is on disk when the suite
+  runs but missing from a clone. Add such a file with `git add -f`; the lint fails any file under a suite
+  that git ignores, other than a Python cache, and names the rule.
 - **A conversation** gives the user's later messages in the key, `turns = ["...", "..."]`, after
   `prompt.md`'s first one. Each is sent once the turn before has ended. Under `-p` the main thread's
   subagents run in the background, and a turn that starts a background task (a subagent or a

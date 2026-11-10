@@ -7,10 +7,11 @@ problem fails its `verify` command and passes once fixed, the passing references
 every check and each failing reference fails one, each target case records a baseline
 failure, no baseline was drawn under another RUNNER or, for a remote case, another
 REMOTE_RUNNER, no baseline of a case without a remote records a remote_runner, a `gh`
-check reads a case whose session records its gh calls, and a judge's tracked stamp and
+check reads a case whose session records its gh calls, a judge's tracked stamp and
 labels parse and the stamp still describes the judge (its version, labels and
-references). It cannot tell that every check can fail, only that some check fails on
-each failing reference; judged checks are not run on references.
+references), and git ignores no file a suite's plan pin or sessions read, so the committed
+suite is the one that ran. It cannot tell that every check can fail, only that some check
+fails on each failing reference; judged checks are not run on references.
 """
 
 import fnmatch
@@ -22,8 +23,9 @@ import tomllib
 
 from . import calibrate, jury
 from .grade import reference_scores
+from .proc import GIT, run
 from .session import REMOTE_RUNNER, RUNNER, build_fixture, git_env, verify
-from .suite import SESSION_ARTIFACTS, Case, Suite, SuiteError, load_suite
+from .suite import SESSION_ARTIFACTS, Case, Suite, SuiteError, load_suite, python_cache
 
 
 def _verify(case: Case, command: str, fixed: bool) -> int | None:
@@ -124,13 +126,26 @@ def case_problems(case: Case) -> list[str]:
     return found
 
 
-def suite_problems(suite: Suite, root: pathlib.Path, tracked: list[str]) -> list[str]:
-    """One message per rule the suite or one of its cases breaks."""
+def suite_problems(
+    suite: Suite, root: pathlib.Path, tracked: list[str], ignored: dict[str, str]
+) -> list[str]:
+    """One message per rule the suite or one of its cases breaks.
+
+    `ignored` maps each file git ignores to the rule that ignores it, as `git_ignored` returns.
+    """
     where = suite.path / "suite.toml"
     found = [
         f"{where}: covers {glob!r} matches no tracked file"
         for glob in suite.covers
         if not any(fnmatch.fnmatch(f, glob) for f in tracked)
+    ]
+    # The plan pin hashes every file under the suite but Python caches, so a file git
+    # ignores there makes a clone's run differ from the one that ran here.
+    found += [
+        f"{path}: git ignores it ({rule}), so the committed suite lacks it; "
+        "force-add it with git add -f or delete it"
+        for name, rule in sorted(ignored.items())
+        if (path := root / name).is_relative_to(suite.path) and not python_cache(path)
     ]
     plugin, _, name = suite.target.partition(":")
     base = root / "plugins" / plugin
@@ -181,8 +196,41 @@ def judge_problems(suite: Suite) -> list[str]:
     return found
 
 
-def lint(root: pathlib.Path, tracked: list[str]) -> list[str]:
-    """Every problem in every suite under tests/evals/."""
+def git_ignored(root: pathlib.Path) -> dict[str, str]:
+    """Each file under tests/evals/ that git ignores, with the rule that does, as `<source>:<line>:<pattern>`.
+
+    A file force-added past its rule is tracked, so it is not listed.
+    """
+    listed = run(
+        [GIT, "ls-files", "-z", "--others", "--ignored", "--exclude-standard", "--", "tests/evals"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+    if not listed:
+        return {}
+    fields = run(
+        [GIT, "check-ignore", "-z", "--verbose", "--stdin"],
+        cwd=root,
+        input=listed,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.split("\0")
+    # Four fields per file: the ignore file, the line in it, the pattern, the file.
+    return {
+        fields[i + 3]: f"{fields[i]}:{fields[i + 1]}:{fields[i + 2]}"
+        for i in range(0, len(fields) - 1, 4)
+    }
+
+
+def lint(root: pathlib.Path, tracked: list[str], ignored: dict[str, str]) -> list[str]:
+    """Every problem in every suite under tests/evals/.
+
+    `tracked` is every file git tracks and `ignored` each file under tests/evals/ it
+    ignores, with the rule, as `git_ignored` returns; both name files relative to `root`.
+    """
     found: list[str] = []
     for config in sorted((root / "tests" / "evals").glob("**/suite.toml")):
         try:
@@ -190,5 +238,5 @@ def lint(root: pathlib.Path, tracked: list[str]) -> list[str]:
         except SuiteError as error:
             found.append(str(error))
             continue
-        found += suite_problems(suite, root, tracked)
+        found += suite_problems(suite, root, tracked, ignored)
     return found
