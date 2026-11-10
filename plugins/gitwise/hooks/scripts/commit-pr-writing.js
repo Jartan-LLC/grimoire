@@ -39,6 +39,8 @@ const HINTED = [COMMIT, PUSH, PR_CREATE, PR_EDIT];
 const PR_TEXT_FLAG = /\s(?:--title|--body|--body-file|-[tbF])(?:[\s=]|$)/;
 const HELP = /\s(?:--help|-h)(?:\s|$)/;
 const NO_EDIT = /\s--no-edit(?:\s|$)/;
+// Options that take an earlier commit's message; `--fixup=amend:` and `reword:` write a new one.
+const REUSED_MESSAGE = /\s(?:-[a-zA-Z]*C|--reuse-message\b|--fixup(?![=\s](?:amend|reword):)(?:[=\s]|$))/;
 const MESSAGE_FLAG = /\s(?:-[a-zA-Z]*[mF]|--message\b|--file\b)/;
 // Words that run the command after them: assignments such as `SKIP=x`, keywords, wrappers.
 const PREFIX = /^(?:[A-Za-z_]\w*=(?:"[^"]*"|'[^']*'|\S*)|if|elif|while|until|then|do|else|time|env|command|exec|!|\{)\s+/;
@@ -70,7 +72,11 @@ function writes(part) {
   // Flags are read outside quotes, so a message that names `-h` is no help call.
   const flags = part.replace(QUOTED, '""');
   if (HELP.test(flags)) return false;
-  if (COMMIT.test(part)) return !NO_EDIT.test(flags) || MESSAGE_FLAG.test(flags);
+  if (COMMIT.test(part)) {
+    // Read past `commit`, as a global `git -C <dir>` sits before it.
+    const options = flags.replace(COMMIT, ' ');
+    return MESSAGE_FLAG.test(options) || !(NO_EDIT.test(options) || REUSED_MESSAGE.test(options));
+  }
   if (PR_CREATE.test(part)) return true;
   return PR_EDIT.test(part) && PR_TEXT_FLAG.test(flags);
 }

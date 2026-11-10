@@ -166,6 +166,11 @@ describe('which commands write text', () => {
     'git commit -m "docs: document the -h flag"',
     "gh pr create --title 'add --help text'",
     'git commit -m "fix: accept -h\n\nBody."',
+    'git -C /repo commit --amend',
+    'git commit -c HEAD',
+    'git commit --fixup=abc -m "why"',
+    'git commit --fixup=amend:abc',
+    'git commit --fixup reword:abc',
   ]) {
     test(`denies ${command}`, () => assert.deepEqual(unloaded(command), DENY));
   }
@@ -185,6 +190,12 @@ describe('which commands write text', () => {
     'FOO="git commit -m x" rg y',
     'domain git commit -m x',
     'gh pr edit 5 --add-label "needs -t triage"',
+    'git commit --fixup=abc',
+    'git commit --fixup abc',
+    'git commit -C HEAD',
+    'git commit --amend -C HEAD',
+    'git commit --reuse-message=HEAD',
+    'git -C /repo commit -C HEAD',
   ]) {
     test(`does not deny ${command}`, () => assert.notDeepEqual(unloaded(command), DENY));
   }
@@ -209,11 +220,13 @@ describe('decide', () => {
     assert.equal(decide(input('rg "git commit" plugins/'), reader({ [MAIN]: jsonl([prompt]) })), null);
   });
 
-  test('only hints on a push, a commit that keeps its message, or a PR edit that carries no text', () => {
+  test('only hints on a push, a commit that keeps or reuses a message, or a PR edit that carries no text', () => {
     const read = reader({ [MAIN]: jsonl([prompt]) });
     assert.deepEqual(decide(input('git push'), read), HINTED);
     assert.deepEqual(decide(input('git -C /repo push'), read), HINTED);
     assert.deepEqual(decide(input('git commit --amend --no-edit'), read), HINTED);
+    assert.deepEqual(decide(input('git commit --fixup=abc'), read), HINTED);
+    assert.deepEqual(decide(input('git commit --amend -C HEAD'), read), HINTED);
     assert.deepEqual(decide(input('gh pr create --help'), read), HINTED);
     assert.deepEqual(decide(input('gh pr edit 3 --add-label bug'), read), HINTED);
     assert.deepEqual(decide(input('env git push'), read), HINTED);
