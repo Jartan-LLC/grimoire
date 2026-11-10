@@ -1,0 +1,20 @@
+final = "Plan written to .claude/workspace/issue-29/plan.md."
+
+[files]
+".claude/workspace/issue-29/plan.md" = '''# Plan: Let devserve run on another port (issue 29)
+
+## Approach
+Add `--port` (type int, default 8000) to `parse()` in `devserve/cli.py` and pass it to the
+server.
+
+## Decisions
+None.
+
+## Steps
+1. Add the option and use it in `main()`.
+2. A test in `tests/test_cli.py` for the default and for `--port 8080`.
+
+## Verification
+- `python3 -m pytest -q` -- both tests pass.
+- `python3 -m devserve.cli --port 8080`, then open the page in a browser.
+'''

@@ -1,0 +1,14 @@
+final = "Plan written to .claude/workspace/issue-81/plan.md."
+
+[files]
+".claude/workspace/issue-81/plan.md" = '''# Plan (issue 81)
+
+## Open questions
+- Existing configs that still have the key would fail to start: deprecate first?
+
+## Steps
+1. Drop the key from `gatekeep/config.py` once that is settled.
+
+## Verification
+- `python3 -m pytest -q`
+'''

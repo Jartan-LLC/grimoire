@@ -1,0 +1,11 @@
+final = "Plan written to .claude/workspace/issue-15/plan.md."
+
+[files]
+".claude/workspace/issue-15/plan.md" = '''# Plan (issue 15)
+
+## Steps
+1. `--keep N` on `prune` in `backupctl/cli.py`, at least 1.
+
+## Verification
+- `python3 -m pytest -q` -- a negative `--keep` is rejected.
+'''

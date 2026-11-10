@@ -1,0 +1,11 @@
+final = "Plan written to .claude/workspace/issue-29/plan.md."
+
+[files]
+".claude/workspace/issue-29/plan.md" = '''# Plan (issue 29)
+
+## Steps
+1. `--port` with `type=int` in `devserve/cli.py`.
+
+## Verification
+- `python3 -m devserve.cli --port 70000` -- rejected with an error.
+'''

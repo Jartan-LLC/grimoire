@@ -1,0 +1,22 @@
+final = "Plan written to .claude/workspace/issue-37/plan.md."
+
+[files]
+".claude/workspace/issue-37/plan.md" = '''# Plan: Every post shows up twice (issue 37)
+
+## Approach
+Last week's commit "read my blog over https" added `https://blog.example.com/feed` to
+`feeds.txt` without removing the `http://` line, so the blog is listed twice. Drop the
+http line, and have `feedlet/reader.py` skip a URL already read after normalising the
+scheme.
+Rejected: dedupe by title -- two different posts can share a title.
+
+## Decisions
+None.
+
+## Steps
+1. Remove `http://blog.example.com/feed` from `feeds.txt`.
+2. In `newest()`, drop a URL whose host and path were seen.
+
+## Verification
+- `python3 -m pytest -q` -- a test passes the same feed by http and https and gets each post once.
+'''

@@ -1,0 +1,110 @@
+# A change to a published interface: the compatibility call is the maintainer's.
+# Added with the planning skill (#193), after its smoke; it has never run.
+split = "confirm"
+kind = "regression"
+hints = ["deprecat", "warn", "unknown", "customer", "major"]
+
+# A Verification section (or Testing, Validation...) with a backticked command or a fenced block. A
+# command holds a space, `::` or a known tool's name (`ruff`), or is a script path (`./check.sh`); a
+# heading inside Steps is not the Verification section.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-81/plan.md"
+present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:[^`\n]*`[^`\n]*`)*?[^`\n]*`(?:[^`\n]*?[^`\s][ \t]+[^`\s][^`\n]*?|[^`\n]*::[^`\n]*|pytest|tox|make|jest|vitest|ruff|mypy|pyright|eslint|prettier|black|flake8|pylint|shellcheck|tsc|\.{1,2}/[^`\s]+|[\w./-]+\.(?:sh|bash))`|[ \t]*```)'''
+
+# No Complexity line or heading.
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-81/plan.md"
+absent = '''(?im)^(?:\#{1,6}[ \t]*complexity\b|[ \t>*_-]*complexity[ \t*_]*:)'''
+
+# No placeholder phases (Foundation / Core implementation / Integration).
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-81/plan.md"
+absent = '''(?i)phase[ \t]*\d+\W{0,4}(?:foundation|core\b|integration)|\b(?:core implementation|integration[ \t]*(?:/|and|&)[ \t]*cleanup)\b'''
+
+# At least one backticked path that exists in the fixture.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-81/plan.md"
+present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|config\.example\.toml|gatekeep/__init__\.py|gatekeep/config\.py|pyproject\.toml|tests/test_config\.py|gatekeep/?|tests/?)(?:[:#][^`\n]*)?`'''
+
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; a list
+# or range of lines and a `:col` are read too. The path must end in a source or text extension or
+# be a known extensionless file such as `Makefile`, so a `host:port` is not read as one.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-81/plan.md"
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?::\d+)?(?:[-,][ \t]*(?:2|1)(?::\d+)?)*|AGENTS\.md:(?:8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1)(?::\d+)?)*|CLAUDE\.md:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|config\.example\.toml:(?:3|2|1)(?::\d+)?(?:[-,][ \t]*(?:3|2|1)(?::\d+)?)*|(?:gatekeep/)?__init__\.py:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|(?:gatekeep/)?config\.py:(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|pyproject\.toml:(?:4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:4|3|2|1)(?::\d+)?)*|(?:tests/)?test_config\.py:(?:5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:5|4|3|2|1)(?::\d+)?)*)`)(?:[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock)|(?:[\w./-]*/)?(?:Makefile|Dockerfile|LICENSE|\.gitignore|\.npmignore|\.dockerignore|\.editorconfig)):\d+(?::\d+)?(?:[-,][ \t]*\d+(?::\d+)?)*`'''
+
+# No section but Decisions that holds only None / N/A, a reason after it or not (a padded section).
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-81/plan.md"
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned|else))?|nothing to (?:add|note|report)|no changes?(?: needed)?|no (?:[\w-]+[ \t]+){1,2}items?)\)?(?:[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?|[.;](?:\*\*|_)?[ \t]+[^\n]*)[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+
+# A change to a published interface: a Decisions item raises the compatibility choice, which
+# is the maintainer's. The new format gives each decision an owner and a default.
+# Target: a Decisions item raises customers' files that still set the key, which an unknown
+# key stops at start-up.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-81/plan.md"
+present = '''(?im)^(?:\#{1,2}(?!\#)[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#{1,2}(?!\#))[^\n]*)*?\n(?!\#{1,2}(?!\#))|\#{3,4}(?!\#)[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#))[^\n]*?(?:deprecat|warn|ignor|unknown key|existing (?:configs?|config files|deployments|installs|customers)|customers?'? (?:configs?|files|deployments)|self-hosted|major|5\.0|breaking|fail(?:s)? to start|stop(?:s)? (?:the )?start|refuse|tolerat|still (?:set|have|contain))'''
+
+[[fact]]
+text = "ask before removing one"
+where = "fixture:AGENTS.md"
+
+[[fact]]
+text = "An unknown key stops the start-up"
+where = "fixture:gatekeep/config.py"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--comments'''
+stdout = "title:\tRemove the legacy_auth setting\nstate:\tOPEN\nauthor:\tnoor\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t81\n--\nNothing reads `legacy_auth` any more since the auth rewrite. Remove it from the config.\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 81, \"title\": \"Remove the legacy_auth setting\", \"body\": \"Nothing reads `legacy_auth` any more since the auth rewrite. Remove it from the config.\", \"state\": \"OPEN\", \"author\": {\"login\": \"noor\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/gatekeep/issues/81\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tRemove the legacy_auth setting\nstate:\tOPEN\nauthor:\tnoor\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t81\n--\nNothing reads `legacy_auth` any more since the auth rewrite. Remove it from the config.\n"
+
+[[gh]]
+match = '''(^|\s)issue edit\b'''
+stdout = "https://github.com/acme/gatekeep/issues/81\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "{\"name\": \"gatekeep\", \"nameWithOwner\": \"acme/gatekeep\", \"defaultBranchRef\": {\"name\": \"main\"}}\n"
+
+[[gh]]
+match = '''(^|\s)api user\b'''
+stdout = "{\"login\": \"dev\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/81/comments\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/81\b'''
+stdout = "{\"number\": 81, \"title\": \"Remove the legacy_auth setting\", \"body\": \"Nothing reads `legacy_auth` any more since the auth rewrite. Remove it from the config.\", \"state\": \"OPEN\", \"author\": {\"login\": \"noor\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/gatekeep/issues/81\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"
