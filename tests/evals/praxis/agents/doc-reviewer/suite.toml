@@ -108,8 +108,9 @@ margin = 0.2
 # doc-reviewer goes ahead when the screen and confirm SHIP and, on each gate model, new has more
 # right reports than old, with no significance bar beyond "more", and loses no planted error or
 # harm warning old raises; its PR reports the panel's labels per model and arm. panel-specs.md
-# covers the dev, screen and confirm cases: a case added later gets its spec written the same way
-# before grading, from its prompt, fixture, build.py and the rule, never from its key or a sample.
+# covers the screen and confirm cases and the dev cases in `BURNED`: a held-out case added later
+# gets its spec written the same way before grading, from its prompt, fixture, build.py and the
+# rule, never from its key or a sample.
 primary = "kept"
 rule = "no-regression"
 guards = ["format"]
