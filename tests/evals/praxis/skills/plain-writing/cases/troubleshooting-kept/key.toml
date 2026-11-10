@@ -27,5 +27,4 @@ present = '''--dry-run'''
 metric = "delivered"
 artifact = "delivery"
 skill = "praxis:plain-writing"
-write = "file"
-state = "in-context"
+state = "loaded"

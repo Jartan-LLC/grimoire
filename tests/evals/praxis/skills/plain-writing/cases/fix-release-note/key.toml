@@ -12,5 +12,4 @@ present = '''(?i)clock|newest|date in (its|the) name'''
 metric = "delivered"
 artifact = "delivery"
 skill = "praxis:plain-writing"
-write = "file"
-state = "in-context"
+state = "loaded"
