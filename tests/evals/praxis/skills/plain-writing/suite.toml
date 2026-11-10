@@ -71,9 +71,10 @@ direction = "higher"
 # right-sized, bloated, under or mis-sized against panel-specs.md, two of three deciding. A change
 # to plain-writing goes ahead when the screen and confirm SHIP and, on each gate model, new has more
 # right-sized docs than old, with no significance bar beyond "more", and loses no warning old keeps;
-# its PR reports the panel's labels per model and arm. panel-specs.md covers the dev cases: a screen
-# or confirm case gets its spec written the same way before grading, from its prompt, fixture,
-# build.py and the rule, never from its key or a sample.
+# its PR reports the panel's labels per model and arm. panel-specs.md covers the dev, screen and
+# confirm cases, each spec written blind before its docs were graded, from the case's prompt,
+# fixture, build.py and the rule, never from its key or a sample; a case added later gets its spec
+# written the same way.
 primary = "kept"
 rule = "no-regression"
 guards = ["delivered"]
