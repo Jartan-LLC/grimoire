@@ -1,6 +1,8 @@
 # A candidate target case: committed as a regression case until an old baseline fails it
 # (tests/evals/README.md, "Choosing cases" step 2), then retagged kind = "target".
 # A lean doc for code with rare cases (claude-sync #49): asking to add one is the failure.
+# Needed lines: a finding of any rating that rates the doc's tar prerequisite or its recovery from
+# a tar error as Bloat, or asks to cut either, fails `kept`.
 split = "dev"
 kind = "regression"
 hints = []
@@ -28,3 +30,8 @@ present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
 metric = "kept"
 artifact = "report:praxis:doc-reviewer"
 present = '''(?ims)(?:(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b|^[ \t]*#{1,6}[ \t][^\n]*?\b(?:critical|important)\b[^\n]*\n(?:(?!^[ \t]*#{1,6}[ \t])[\s\S])*?^[ \t]*\*\*\d+\.)(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict|\*\*\d+\.)).){0,1500}?(?:\bzip\b)'''
+
+[[check]]
+metric = "kept"
+artifact = "report:praxis:doc-reviewer"
+absent = '''(?ims)(?:(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*#{1,6}[ \t][^\n]*?\b(?:critical|important|minor)\b[^\n]*\n(?:(?!^[ \t]*#{1,6}[ \t])[\s\S])*?^[ \t]*\*\*\d+\.)(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict|\*\*\d+\.)).){0,1500}?(?:(?:\bbloat\w*|\bcut\b|\bremove\b|\bdrop\b|\bdelete\b|\bunnecessary\b|\bnot needed\b|\bneedless\b|\bredundant\b|\bsuperfluous\b|\bneeds no line\b|\bcan go\b|\bcould go\b|\bshould go\b|\bhandles? (?:it |this |that )?(?:itself|on its own)|\breports? (?:it |this |that )?(?:itself|on its own))(?:[^.\n]|\.(?=\S)){0,80}?(?:GNU|BusyBox|prerequisite|requirement|tar reports|reports an error|tar errors?|fix the cause|run it again|recovery)|(?:GNU|BusyBox|prerequisite|requirement|tar reports|reports an error|tar errors?|fix the cause|run it again|recovery)(?:[^.\n]|\.(?=\S)){0,80}?(?:\bbloat\w*|\bcut\b|\bremove\b|\bdrop\b|\bdelete\b|\bunnecessary\b|\bnot needed\b|\bneedless\b|\bredundant\b|\bsuperfluous\b|\bneeds no line\b|\bcan go\b|\bcould go\b|\bshould go\b|\bhandles? (?:it |this |that )?(?:itself|on its own)|\breports? (?:it |this |that )?(?:itself|on its own))|(?:GNU|BusyBox|prerequisite|requirement|tar reports|reports an error|tar errors?|fix the cause|run it again|recovery)(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict|\*\*\d+\.)).){0,1500}?fix\W{0,6}(?:cut|remove|drop|delete)\s+(?:(?:it|them|both)\b|(?:the|this|that|these|those|both)\s+(?:[\w`'\"-]+\s+)?(?:sentences?|lines?|clauses?|passages?|paragraphs?)\b))'''

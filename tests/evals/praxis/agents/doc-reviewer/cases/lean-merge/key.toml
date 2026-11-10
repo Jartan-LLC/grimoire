@@ -1,6 +1,8 @@
 # A candidate target case: committed as a regression case until an old baseline fails it
 # (tests/evals/README.md, "Choosing cases" step 2), then retagged kind = "target".
 # A lean README for a merge with rare cases (enchantments #103).
+# A needed line: a finding of any rating that rates the doc's recovery (copy
+# `settings.json.pre-dotmerge` back to undo the merge) as Bloat, or asks to cut it, fails `kept`.
 split = "screen"
 kind = "regression"
 hints = []
@@ -28,3 +30,8 @@ present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
 metric = "kept"
 artifact = "report:praxis:doc-reviewer"
 present = '''(?ims)(?:(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b|^[ \t]*#{1,6}[ \t][^\n]*?\b(?:critical|important)\b[^\n]*\n(?:(?!^[ \t]*#{1,6}[ \t])[\s\S])*?^[ \t]*\*\*\d+\.)(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict|\*\*\d+\.)).){0,1500}?(?:values win|team.s values|own values)'''
+
+[[check]]
+metric = "kept"
+artifact = "report:praxis:doc-reviewer"
+absent = '''(?ims)(?:(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*#{1,6}[ \t][^\n]*?\b(?:critical|important|minor)\b[^\n]*\n(?:(?!^[ \t]*#{1,6}[ \t])[\s\S])*?^[ \t]*\*\*\d+\.)(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict|\*\*\d+\.)).){0,1500}?(?:(?:\bbloat\w*|\bcut\b|\bremove\b|\bdrop\b|\bdelete\b|\bunnecessary\b|\bnot needed\b|\bneedless\b|\bredundant\b|\bsuperfluous\b|\bneeds no line\b|\bcan go\b|\bcould go\b|\bshould go\b|\bhandles? (?:it |this |that )?(?:itself|on its own)|\breports? (?:it |this |that )?(?:itself|on its own))(?:[^.\n]|\.(?=\S)){0,80}?(?:pre-dotmerge|copy it back|undo the merge|to undo|original file|recovery)|(?:pre-dotmerge|copy it back|undo the merge|to undo|original file|recovery)(?:[^.\n]|\.(?=\S)){0,80}?(?:\bbloat\w*|\bcut\b|\bremove\b|\bdrop\b|\bdelete\b|\bunnecessary\b|\bnot needed\b|\bneedless\b|\bredundant\b|\bsuperfluous\b|\bneeds no line\b|\bcan go\b|\bcould go\b|\bshould go\b|\bhandles? (?:it |this |that )?(?:itself|on its own)|\breports? (?:it |this |that )?(?:itself|on its own))|(?:pre-dotmerge|copy it back|undo the merge|to undo|original file|recovery)(?:(?!(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict|\*\*\d+\.)).){0,1500}?fix\W{0,6}(?:cut|remove|drop|delete)\s+(?:(?:it|them|both)\b|(?:the|this|that|these|those|both)\s+(?:[\w`'\"-]+\s+)?(?:sentences?|lines?|clauses?|passages?|paragraphs?)\b))'''
