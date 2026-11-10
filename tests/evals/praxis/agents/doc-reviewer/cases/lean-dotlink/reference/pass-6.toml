@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The README says a replaced file is kept as `<file>.bak`; install.sh keeps it as `<file>.orig`. The fix commits add cases the script handles on its own; an existing .orig being kept needs no line.\nFile: src/dotlink/README.md:16\nIssue: The README says a replaced file is kept as `<file>.bak`; install.sh keeps it as `<file>.orig`. The fix commits add cases the script handles on its own; an existing .orig being kept needs no line.\nFix: Write `<file>.orig`.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

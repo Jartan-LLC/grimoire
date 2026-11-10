@@ -5,8 +5,8 @@
 # same pattern); bloat cases give the doc as those fix commits grew it. Guards: the reviewer still
 # catches the wrong fact planted in each lean and bloat doc and a wrong default, a dead link and a
 # wrong flag in the cost cases, and leaves alone a troubleshooting part at the end and the
-# prerequisite and recovery lines of lean-backup and lean-merge. Must hold: it still raises a
-# missing data-loss warning.
+# prerequisite and recovery lines of lean-backup, lean-merge and lean-dotlink. Must hold: it still
+# raises a missing data-loss warning.
 # tests/evals/README.md says how the suite is run. No baselines yet: until `make eval-run ...
 # RECORD=1` draws them, every case is committed as a regression case.
 target = "praxis:doc-reviewer"
@@ -65,12 +65,15 @@ id = "kept"
 direction = "higher"
 margin = 0.2
 # The wrong fact planted in each lean and bloat doc, and the cost cases' wrong default, dead link
-# and wrong flag, raised at Important or above; a troubleshooting part at the end not raised at
-# Important or above; in lean-backup and lean-merge, no finding that rates the doc's prerequisite
+# and wrong flag, raised at Important or above; no Critical or Important finding that rates a
+# troubleshooting part at the end as Bloat or asks to cut it, so one that asks to verify or move it
+# passes; in lean-backup, lean-merge and lean-dotlink, no finding that rates the doc's prerequisite
 # or recovery as Bloat or asks to cut it, at any rating, as `rare` counts an ask to add at any
 # rating, because a fix round applies a Minor finding too. Each pattern is the planted error's own
 # wording, and a stated value is not read from a line number, so a Bloat finding that does not
-# raise the error fails; a failing reference per case holds one.
+# raise the error fails; a failing reference per case holds one. A word for the prerequisite or
+# recovery names only that line, never the planted error (`.bak`) or a rare case (an existing
+# `<file>.orig` that is never overwritten).
 
 [[metric]]
 id = "harm"
