@@ -43,7 +43,8 @@ const NO_EDIT = /\s--no-edit(?:\s|$)/;
 const REUSED_MESSAGE = /\s(?:-[a-zA-Z]*C|--reuse-message\b|--fixup(?![=\s](?:amend|reword):)(?:[=\s]|$))/;
 const MESSAGE_FLAG = /\s(?:-[a-zA-Z]*[mF]|--message\b|--file\b)/;
 // Words that run the command after them: assignments such as `SKIP=x`, keywords, wrappers.
-const PREFIX = /^(?:[A-Za-z_]\w*=\S*|if|elif|while|until|then|do|else|time|env|command|exec|!|\{)\s+/;
+const PREFIX =
+  /^(?:[A-Za-z_]\w*=\S*|if|elif|while|until|then|do|else|time|env|command|exec|sudo|nohup|nice|timeout\s+\S+|!|\{)\s+/;
 // A quoted string, or an unclosed one running to the end of a line of a multi-line message.
 const QUOTED = /"[^"]*(?:"|$)|'[^']*(?:'|$)/g;
 const SKILL_NAME = 'commit-pr-writing';

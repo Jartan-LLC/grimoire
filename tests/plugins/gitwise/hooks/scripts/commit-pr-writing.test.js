@@ -164,6 +164,10 @@ describe('which commands write text', () => {
     'env FOO=1 git commit -m x',
     'command git commit -m x',
     'exec git commit -m x',
+    'sudo git commit -m x',
+    'nohup git commit -m x',
+    'nice git commit -m x',
+    'timeout 60 git commit -m x',
     '! git commit -m x',
     '{ git commit -m x; }',
     'git commit -m "docs: document the -h flag"',
@@ -199,6 +203,7 @@ describe('which commands write text', () => {
     'git commit --amend -C HEAD',
     'git commit --reuse-message=HEAD',
     'git -C /repo commit -C HEAD',
+    'timeout 60 rg "git commit" plugins/',
   ]) {
     test(`does not deny ${command}`, () => assert.notDeepEqual(unloaded(command), DENY));
   }
@@ -233,6 +238,8 @@ describe('decide', () => {
     assert.deepEqual(decide(input('gh pr create --help'), read), HINTED);
     assert.deepEqual(decide(input('gh pr edit 3 --add-label bug'), read), HINTED);
     assert.deepEqual(decide(input('env git push'), read), HINTED);
+    assert.deepEqual(decide(input('sudo git push'), read), HINTED);
+    assert.deepEqual(decide(input('timeout 60 git push'), read), HINTED);
     assert.deepEqual(decide(input('git -C "/a b" push'), read), HINTED);
     assert.deepEqual(decide(input('git -C "/a b" commit -C HEAD'), read), HINTED);
   });
