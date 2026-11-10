@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n**1. README.md:7, \"into `photos/thumbs/`\" - Important**\n\nThe code writes `photos/.thumbs/`.\nFix: write `.thumbs/`.\n\n**2. README.md:7, animated PNGs use their first frame - Minor**\n\nFix: mention it in the README.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"
