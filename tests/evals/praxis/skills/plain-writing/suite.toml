@@ -13,7 +13,12 @@
 target = "praxis:plain-writing"
 # Cases moved off a held-out split, each with its reason in a comment.
 BURNED = []
-covers = ["plugins/praxis/skills/plain-writing/**"]
+# The README cases run with docs-patterns' README writer line, which says what of a change a README
+# adds, and their sessions read it.
+covers = [
+  "plugins/praxis/skills/plain-writing/**",
+  "plugins/praxis/skills/docs-patterns/readme.md",
+]
 models = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]
 budget_usd = 2.0
 
