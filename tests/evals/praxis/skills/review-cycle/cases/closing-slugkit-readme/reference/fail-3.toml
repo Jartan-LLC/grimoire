@@ -1,0 +1,6 @@
+commits = []
+final = ""
+gh = "gh pr create --draft --title t --body-file /tmp/b.md\n\nbody\n"
+
+[files]
+"README.md" = "# slugkit\n\n`slugify('Hello, World!')` returns `hello-world`. Pass `{ maxLength: n }` to cut the slug to n characters, and `{ maxWords: n }` to keep the first n words. A `maxWords` of 0 means no limit.\n"
