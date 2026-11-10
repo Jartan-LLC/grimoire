@@ -1,0 +1,21 @@
+final = "Plan written to .claude/workspace/issue-118/plan.md."
+
+[files]
+".claude/workspace/issue-118/plan.md" = '''# Plan: Clearer name for used_pct (issue 118)
+
+## Approach
+Rename the field in `diskreport/cli.py`, `README.md` and `tests/test_cli.py`.
+
+## Decisions
+- People's monitoring parses `used_pct`, and AGENTS.md puts the JSON under semver, so a
+  plain rename is a breaking change -- owner: maintainer -- recommended: print both
+  fields in 1.7.0, mark `used_pct` deprecated in the README, drop it in 2.0.0 -- default
+  if unanswered: that.
+
+## Steps
+1. Add `used_percent` next to `used_pct` in `usage()`.
+2. Document both in `README.md`.
+
+## Verification
+- `python3 -m pytest -q` -- the JSON test reads both fields with the same value.
+'''

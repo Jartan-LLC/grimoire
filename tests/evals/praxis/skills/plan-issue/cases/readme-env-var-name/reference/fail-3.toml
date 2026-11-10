@@ -1,0 +1,17 @@
+final = "Plan written to .claude/workspace/issue-105/plan.md."
+
+[files]
+".claude/workspace/issue-105/plan.md" = '''# Plan: Setting PODCAST_DIR has no effect (issue 105)
+
+## Approach
+
+The code reads `PODFETCH_DIR` (`podfetch/settings.py:9`), like the other two settings; the
+README lists it as `PODCAST_DIR`. Fix the README's name.
+
+## Steps
+
+1. In `README.md`, rename `PODCAST_DIR` to `PODFETCH_DIR` in the settings list.
+## Verification
+
+Not needed: only the README changes.
+'''

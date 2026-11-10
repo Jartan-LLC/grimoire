@@ -1,0 +1,21 @@
+final = "Plan written to .claude/workspace/issue-105/plan.md."
+
+[files]
+".claude/workspace/issue-105/plan.md" = '''# Plan: README names the wrong download-folder variable (issue 105)
+
+## Decisions for the user
+
+- Whether to also accept `PODCAST_DIR` for people who set it already -- default if
+  unanswered: no, the docs fix alone, since the code never read that name.
+
+## Steps
+
+1. `README.md`: `PODCAST_DIR` -> `PODFETCH_DIR`.
+
+## Verification
+
+```bash
+grep -o 'PODFETCH_[A-Z]*' README.md podfetch/settings.py
+```
+The README and the code list the same three names.
+'''

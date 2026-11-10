@@ -1,0 +1,1 @@
+"""Split a shared bill."""

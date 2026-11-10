@@ -1,0 +1,33 @@
+final = "Plan written to .claude/workspace/issue-92/plan.md."
+
+[files]
+".claude/workspace/issue-92/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+A line exactly `--width` long is wrapped.
+
+### Patterns & Conventions Found
+- Pattern: `src/wrap.js:7` -- the break test.
+
+### Chosen Approach
+- **What**: Use `>`.
+- **Why**: Off by one.
+- **How**: One character.
+
+### Alternatives Considered
+1. Count the space differently.
+
+### Files to Create/Modify
+- `src/wrap.js` -- the fix
+
+### Documentation Plan
+- None.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- test
+- [ ] Phase 2: Core implementation -- fix
+- [ ] Phase 3: Integration/cleanup -- run tests
+
+### Complexity
+Simple
+'''

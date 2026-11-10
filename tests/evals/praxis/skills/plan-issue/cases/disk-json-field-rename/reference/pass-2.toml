@@ -1,0 +1,14 @@
+final = "Plan written to .claude/workspace/issue-118/plan.md."
+
+[files]
+".claude/workspace/issue-118/plan.md" = '''# Plan (issue 118)
+
+## Open questions
+- Rename outright in 2.0 (breaking), or keep the old field as an alias for a release?
+
+## Steps
+1. Rename in `diskreport/cli.py`.
+
+## Verification
+- `python3 -m pytest -q`
+'''

@@ -1,0 +1,110 @@
+# A bug fix whose issue names a fix for a cause it has not tested.
+# No session's output shaped it.
+split = "screen"
+kind = "regression"
+hints = ["low_stock", "threshold", "settings.json", "cause", "key"]
+
+# A Verification section (or Testing, Validation...) with a backticked command or a fenced block. A
+# command holds a space, `::` or a known tool's name (`ruff`), or is a script path (`./check.sh`); a
+# heading inside Steps is not the Verification section.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-58/plan.md"
+present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:[^`\n]*`[^`\n]*`)*?[^`\n]*`(?:[^`\n]*?[^`\s][ \t]+[^`\s][^`\n]*?|[^`\n]*::[^`\n]*|pytest|tox|make|jest|vitest|ruff|mypy|pyright|eslint|prettier|black|flake8|pylint|shellcheck|tsc|\.{1,2}/[^`\s]+|[\w./-]+\.(?:sh|bash))`|[ \t]*```)'''
+
+# No Complexity line or heading.
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-58/plan.md"
+absent = '''(?im)^(?:\#{1,6}[ \t]*complexity\b|[ \t>*_-]*complexity[ \t*_]*:)'''
+
+# No placeholder phases (Foundation / Core implementation / Integration).
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-58/plan.md"
+absent = '''(?i)phase[ \t]*\d+\W{0,4}(?:foundation|core\b|integration)|\b(?:core implementation|integration[ \t]*(?:/|and|&)[ \t]*cleanup)\b'''
+
+# At least one backticked path that exists in the fixture.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-58/plan.md"
+present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|pyproject\.toml|settings\.json|stock\.csv|stocktake/__init__\.py|stocktake/__main__\.py|stocktake/alerts\.py|stocktake/settings\.py|tests/test_alerts\.py|stocktake/?|tests/?)(?:[:#][^`\n]*)?`'''
+
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; a list
+# or range of lines and a `:col` are read too. The path must end in a source or text extension or
+# be a known extensionless file such as `Makefile`, so a `host:port` is not read as one.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-58/plan.md"
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?::\d+)?(?:[-,][ \t]*(?:2|1)(?::\d+)?)*|AGENTS\.md:(?:8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1)(?::\d+)?)*|CLAUDE\.md:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|pyproject\.toml:(?:4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:4|3|2|1)(?::\d+)?)*|settings\.json:(?:5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:5|4|3|2|1)(?::\d+)?)*|stock\.csv:(?:4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:4|3|2|1)(?::\d+)?)*|(?:stocktake/)?__init__\.py:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|(?:stocktake/)?__main__\.py:(?:11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:stocktake/)?alerts\.py:(?:20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:stocktake/)?settings\.py:(?:8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:tests/)?test_alerts\.py:(?:6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:6|5|4|3|2|1)(?::\d+)?)*)`)(?:[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock)|(?:[\w./-]*/)?(?:Makefile|Dockerfile|LICENSE|\.gitignore|\.npmignore|\.dockerignore|\.editorconfig)):\d+(?::\d+)?(?:[-,][ \t]*\d+(?::\d+)?)*`'''
+
+# No section but Decisions that holds only None / N/A, a reason after it or not (a padded section).
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-58/plan.md"
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned|else))?|nothing to (?:add|note|report)|no changes?(?: needed)?|no (?:[\w-]+[ \t]+){1,2}items?)\)?(?:[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?|[.;](?:\*\*|_)?[ \t]+[^\n]*)[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+
+# A bug fix whose issue names a fix for a cause it has not tested: the plan names the cause
+# the history shows, as the planning skill's premise check asks.
+# Target: the plan ties the silence to Thursday's refactor, which reads a `low_stock` key
+# settings.json does not have, so the threshold falls back to 0 and no item is ever low.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-58/plan.md"
+present = '''(?is)(?:`low_stock`|"low_stock"|'low_stock'|\blow_stock\b|\.get\(\s*["']low_stock|cfg\.get\b|(?:threshold|it) (?:of |is |becomes |became |falls back to |defaults? to |is now )?(?:0|zero)\b|(?:0|zero) threshold|key (?:mismatch|rename)|renamed (?:the )?(?:settings )?key|wrong (?:settings )?key|reads? (?:the |a )?(?:wrong|different|missing) key|never (?:flag|match|find)s? (?:an?y? )?(?:item|anything)|no item is (?:ever )?(?:under|below|flagged)|nothing is (?:ever )?(?:under|below|flagged|low))'''
+
+[[plant]]
+id = "threshold-key"
+verify = "python3 -c \"import sys; from stocktake.alerts import low_items; from stocktake.settings import load; sys.exit(low_items({'tape': 2}, load()) != ['tape'])\""
+
+[[fact]]
+text = "low_stock_threshold"
+where = "fixture:settings.json"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--comments'''
+stdout = "title:\tLow-stock emails stopped arriving\nstate:\tOPEN\nauthor:\tnoor\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t58\n--\nWe haven't had a single low-stock email since Thursday, and the packing tape ran out on Friday. Our SMTP relay must be dropping them. Please switch `send_alert()` over to the SendGrid API so the emails actually get through.\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 58, \"title\": \"Low-stock emails stopped arriving\", \"body\": \"We haven't had a single low-stock email since Thursday, and the packing tape ran out on Friday. Our SMTP relay must be dropping them. Please switch `send_alert()` over to the SendGrid API so the emails actually get through.\", \"state\": \"OPEN\", \"author\": {\"login\": \"noor\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/stocktake/issues/58\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tLow-stock emails stopped arriving\nstate:\tOPEN\nauthor:\tnoor\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t58\n--\nWe haven't had a single low-stock email since Thursday, and the packing tape ran out on Friday. Our SMTP relay must be dropping them. Please switch `send_alert()` over to the SendGrid API so the emails actually get through.\n"
+
+[[gh]]
+match = '''(^|\s)issue edit\b'''
+stdout = "https://github.com/acme/stocktake/issues/58\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "{\"name\": \"stocktake\", \"nameWithOwner\": \"acme/stocktake\", \"defaultBranchRef\": {\"name\": \"main\"}}\n"
+
+[[gh]]
+match = '''(^|\s)api user\b'''
+stdout = "{\"login\": \"dev\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/58/comments\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/58\b'''
+stdout = "{\"number\": 58, \"title\": \"Low-stock emails stopped arriving\", \"body\": \"We haven't had a single low-stock email since Thursday, and the packing tape ran out on Friday. Our SMTP relay must be dropping them. Please switch `send_alert()` over to the SendGrid API so the emails actually get through.\", \"state\": \"OPEN\", \"author\": {\"login\": \"noor\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/stocktake/issues/58\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"

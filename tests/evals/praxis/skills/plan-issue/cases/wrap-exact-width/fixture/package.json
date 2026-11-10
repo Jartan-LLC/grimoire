@@ -1,0 +1,6 @@
+{
+  "name": "rewrap",
+  "version": "1.2.0",
+  "bin": { "rewrap": "bin/rewrap.js" },
+  "scripts": { "test": "node --test" }
+}

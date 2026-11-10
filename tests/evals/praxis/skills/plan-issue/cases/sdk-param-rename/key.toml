@@ -1,6 +1,6 @@
 # A change to a published interface: the compatibility call is the maintainer's.
 # Added with the planning skill (#193) after its smoke, so no smoke result shaped it.
-split = "screen"
+split = "dev"
 kind = "regression"
 hints = ["deprecat", "alias", "major", "breaking", "keyword"]
 

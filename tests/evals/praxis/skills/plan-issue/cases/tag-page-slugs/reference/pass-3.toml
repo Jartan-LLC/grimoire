@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-83/plan.md."
+
+[files]
+".claude/workspace/issue-83/plan.md" = '''# Plan: Link tags to tag pages (issue 83)
+
+## Steps
+
+1. Factor `slugify` out of `src/posts.js` into `src/slug.js`.
+2. `src/build.js`: collect the posts of each tag, newest first, and write `/tags/<slug>/`.
+3. `src/html.js`: a tag page, and links from each post's tag list.
+4. `test/posts.test.js`: `Node.js` and `Year in review` give `node-js` and `year-in-review`.
+
+## Decisions for the user
+
+- Whether to add a page listing every tag -- default if unanswered: no, the issue asks only for
+  the per-tag pages.
+
+## Verification
+
+- `npm test` -- the new tag tests pass with the existing ones.
+- `npm run build`, then open `public/tags/node-js/index.html`: it lists the year-in-review post,
+  and that post's page links its tags there.
+'''

@@ -1,6 +1,6 @@
 # A new option with inputs to refuse.
 # Added with the planning skill (#193) after its smoke, so no smoke result shaped it.
-split = "screen"
+split = "dev"
 kind = "regression"
 hints = ["invalid", "in use", "error", "65535", "reject"]
 

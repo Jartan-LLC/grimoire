@@ -4,11 +4,10 @@
 # come from the research of the template rebuild (#120): a bug fix with an obvious test command, a
 # feature with a tempting adjacent refactor, a feature whose name clashes with an existing public
 # command, a feature where an abstraction is tempting but has one use, one where a second caller
-# already exists, and a docs-only change. Three kinds came with the planning skill (#193), each
-# with one screen and one confirm case written after its smoke: a bug fix whose issue names a fix
-# for a cause it has not tested, a change to a published name or key whose compatibility is the
-# maintainer's call, and a new option with inputs to refuse. tests/evals/README.md says how the
-# suite is run.
+# already exists, and a docs-only change. Three kinds came with the planning skill (#193): a bug
+# fix whose issue names a fix for a cause it has not tested, a change to a published name or key
+# whose compatibility is the maintainer's call, and a new option with inputs to refuse.
+# tests/evals/README.md says how the suite is run.
 target = "praxis:plan-issue"
 # Cases moved off a held-out split, each with its reason in a comment.
 BURNED = [
@@ -23,6 +22,23 @@ BURNED = [
   "relnotes-html",
   # Its issue says "CSV is all anyone has asked for", which states the single use.
   "sales-csv-export",
+  # The screen split the planning skill's Opus screen (#193) ran: todo-due-flag's out-of-scope
+  # check was broken, which voids that screen, and the pass rule changed after it.
+  "cart-price-format",
+  "due-date-weekend",
+  "export-timeout-cause",
+  "frost-sms-alert",
+  "liftlog-markdown",
+  "notes-sync-clash",
+  "port-option-errors",
+  "readme-config-key",
+  "readme-port-default",
+  "recipe-scale",
+  "report-output-flag",
+  "sdk-param-rename",
+  "slug-digits",
+  "thumb-retry",
+  "todo-due-flag",
 ]
 # Beside plan-issue's own files, the suite covers any skill's plan-format.md, any praxis Markdown
 # file with "plan" in its path, and github-conventions, so a change that moves the plan template or

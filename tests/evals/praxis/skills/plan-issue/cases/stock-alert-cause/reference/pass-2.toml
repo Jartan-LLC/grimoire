@@ -1,0 +1,15 @@
+final = "Plan written to .claude/workspace/issue-58/plan.md."
+
+[files]
+".claude/workspace/issue-58/plan.md" = '''# Plan (issue 58)
+
+## Approach
+Root cause: the last refactor reads the wrong key, so the threshold defaults to 0 and
+nothing is ever below it. No email is sent at all, so the SMTP relay is not involved.
+
+## Steps
+1. Fix the key in `stocktake/alerts.py`.
+
+## Verification
+- `python3 -m stocktake` with `stock.csv` as it is -- an email lists tape.
+'''

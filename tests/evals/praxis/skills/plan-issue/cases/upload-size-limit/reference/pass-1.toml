@@ -1,0 +1,34 @@
+final = "Plan written to .claude/workspace/issue-58/plan.md."
+
+[files]
+".claude/workspace/issue-58/plan.md" = '''# Plan: Refuse uploads over 25 MB (issue 58)
+
+## Approach
+
+Add `MAX_UPLOAD_BYTES = 25 * 1024 * 1024` to `snapbox/store.py`. `save_upload` raises
+`UploadRefused` when `len(data)` is over it, beside the type check at
+`snapbox/store.py:16`. The server also checks `Content-Length` before
+`self.rfile.read`, so a 900 MB body is refused without being read into memory.
+Rejected: a list of validator objects -- two checks read fine as two `if`s.
+
+## Decisions for the user
+
+- The limit -- default if unanswered: 25 MB, the issue's figure.
+- The status for an oversized upload -- default if unanswered: 413, which the share sheet shows
+  like the 400 it gets for a refused type.
+
+## Steps
+
+1. `snapbox/store.py`: the constant and the size check, with a message such as
+   "uploads over 25 MB are not accepted".
+2. `snapbox/server.py`: compare `Content-Length` with the constant before reading the body and
+   answer with the same message.
+3. `tests/test_store.py`: an upload one byte over the limit is refused; one at the limit is
+   saved.
+
+## Verification
+
+- `python3 -m pytest -q` -- the new size tests pass with the existing ones.
+- With the server running locally, `curl -X POST --data-binary @big.jpg -H 'X-Filename: big.jpg'
+  localhost:8420/upload` on a 30 MB file answers with the refusal message and saves nothing.
+'''

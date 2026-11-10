@@ -1,0 +1,33 @@
+final = "Plan written to .claude/workspace/issue-58/plan.md."
+
+[files]
+".claude/workspace/issue-58/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Refuse uploads over 25 MB.
+
+### Patterns & Conventions Found
+- Pattern: `snapbox/store.py` -- `save_upload` checks the type.
+
+### Chosen Approach
+- **What**: A size check.
+- **Why**: The disk filled up.
+- **How**: Compare `len(data)` with a limit.
+
+### Alternatives Considered
+1. A disk quota -- outside the app.
+
+### Files to Create/Modify
+- `snapbox/store.py` -- change it
+
+### Documentation Plan
+- None.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- constant
+- [ ] Phase 2: Core implementation -- check
+- [ ] Phase 3: Integration/cleanup -- tests
+
+### Complexity
+Simple
+'''

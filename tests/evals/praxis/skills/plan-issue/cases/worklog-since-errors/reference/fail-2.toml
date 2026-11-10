@@ -1,0 +1,14 @@
+final = "Plan written to .claude/workspace/issue-74/plan.md."
+
+[files]
+".claude/workspace/issue-74/plan.md" = '''# Plan: Report only recent hours (issue 74)
+
+## Approach
+Filter by date string in `src/report.js`, so `--since 2026-11-01` keeps November.
+
+## Steps
+1. Add the option and the filter.
+
+## Verification
+- `npm test`
+'''

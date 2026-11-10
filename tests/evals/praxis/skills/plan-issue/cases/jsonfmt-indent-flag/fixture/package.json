@@ -1,0 +1,6 @@
+{
+  "name": "jsonfmt",
+  "version": "2.1.0",
+  "bin": { "jsonfmt": "bin/jsonfmt.js" },
+  "scripts": { "test": "node --test" }
+}

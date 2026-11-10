@@ -1,0 +1,6 @@
+{
+  "name": "inkpress",
+  "version": "1.4.2",
+  "private": true,
+  "scripts": { "build": "node src/build.js", "test": "node --test" }
+}

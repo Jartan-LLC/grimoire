@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-58/plan.md."
+
+[files]
+".claude/workspace/issue-58/plan.md" = '''# Plan: Low-stock emails stopped arriving (issue 58)
+
+## Approach
+The relay is not the problem: Thursday's commit "read settings with defaults so a missing
+key cannot crash the nightly run" made `low_items()` in `stocktake/alerts.py` read
+`cfg.get("low_stock", 0)`, but `settings.json` still calls the key `low_stock_threshold`.
+The threshold is 0, no count is under it, and `send_alert()` is never called. Read the
+key `settings.json` has again.
+Rejected: SendGrid -- it would send nothing too, and adds an API key to manage.
+
+## Decisions
+None.
+
+## Steps
+1. Read `cfg["low_stock_threshold"]` in `low_items()`.
+2. Put the real key back in `tests/test_alerts.py`, and add a test that loads `settings.json`.
+
+## Verification
+- `python3 -m pytest -q` -- the test on the real settings file lists `tape`.
+'''

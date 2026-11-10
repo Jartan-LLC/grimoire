@@ -1,0 +1,33 @@
+final = "Plan written to .claude/workspace/issue-53/plan.md."
+
+[files]
+".claude/workspace/issue-53/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Let `marks list` show only bookmarks with a tag.
+
+### Patterns & Conventions Found
+- Pattern: `bin/marks.js:8` -- options go through `parseArgs`.
+- Pattern: `src/store.js:6` -- the store takes callbacks.
+### Chosen Approach
+- **What**: Reuse `--tag` in `list` and filter.
+- **Why**: Smallest change.
+- **How**: Follow the existing code.
+
+### Alternatives Considered
+1. A config file setting -- more to document.
+
+### Files to Create/Modify
+- `bin/marks.js` -- the filter
+- `README.md` -- the example
+### Documentation Plan
+- README: add the new usage.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- parse the input
+- [ ] Phase 2: Core implementation -- the change
+- [ ] Phase 3: Integration/cleanup -- tests and README
+
+### Complexity
+Simple
+'''

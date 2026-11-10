@@ -1,0 +1,114 @@
+# Fixture 1's kind: a bug fix with an obvious test command.
+# No session's output shaped it.
+split = "screen"
+kind = "regression"
+hints = ["verification", "verify", "pytest", "test command"]
+
+# A Verification section (or Testing, Validation...) with a backticked command or a fenced block. A
+# command holds a space, `::` or a known tool's name (`ruff`), or is a script path (`./check.sh`); a
+# heading inside Steps is not the Verification section.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-84/plan.md"
+present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:[^`\n]*`[^`\n]*`)*?[^`\n]*`(?:[^`\n]*?[^`\s][ \t]+[^`\s][^`\n]*?|[^`\n]*::[^`\n]*|pytest|tox|make|jest|vitest|ruff|mypy|pyright|eslint|prettier|black|flake8|pylint|shellcheck|tsc|\.{1,2}/[^`\s]+|[\w./-]+\.(?:sh|bash))`|[ \t]*```)'''
+
+# No Complexity line or heading.
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-84/plan.md"
+absent = '''(?im)^(?:\#{1,6}[ \t]*complexity\b|[ \t>*_-]*complexity[ \t*_]*:)'''
+
+# No placeholder phases (Foundation / Core implementation / Integration).
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-84/plan.md"
+absent = '''(?i)phase[ \t]*\d+\W{0,4}(?:foundation|core\b|integration)|\b(?:core implementation|integration[ \t]*(?:/|and|&)[ \t]*cleanup)\b'''
+
+# At least one backticked path that exists in the fixture.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-84/plan.md"
+present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|README\.md|pyproject\.toml|tabsplit/__init__\.py|tabsplit/__main__\.py|tabsplit/money\.py|tabsplit/split\.py|tests/test_money\.py|tests/test_split\.py|tabsplit/?|tests/?)(?:[:#][^`\n]*)?`'''
+
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; a list
+# or range of lines and a `:col` are read too. The path must end in a source or text extension or
+# be a known extensionless file such as `Makefile`, so a `host:port` is not read as one.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-84/plan.md"
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?::\d+)?(?:[-,][ \t]*(?:2|1)(?::\d+)?)*|AGENTS\.md:(?:6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:6|5|4|3|2|1)(?::\d+)?)*|CLAUDE\.md:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|README\.md:(?:7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:7|6|5|4|3|2|1)(?::\d+)?)*|pyproject\.toml:(?:4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:4|3|2|1)(?::\d+)?)*|(?:tabsplit/)?__init__\.py:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|(?:tabsplit/)?__main__\.py:(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:tabsplit/)?money\.py:(?:12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:tabsplit/)?split\.py:(?:7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:7|6|5|4|3|2|1)(?::\d+)?)*|(?:tests/)?test_money\.py:(?:10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:tests/)?test_split\.py:(?:9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:9|8|7|6|5|4|3|2|1)(?::\d+)?)*)`)(?:[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock)|(?:[\w./-]*/)?(?:Makefile|Dockerfile|LICENSE|\.gitignore|\.npmignore|\.dockerignore|\.editorconfig)):\d+(?::\d+)?(?:[-,][ \t]*\d+(?::\d+)?)*`'''
+
+# No section but Decisions that holds only None / N/A, a reason after it or not (a padded section).
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-84/plan.md"
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned|else))?|nothing to (?:add|note|report)|no changes?(?: needed)?|no (?:[\w-]+[ \t]+){1,2}items?)\)?(?:[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?|[.;](?:\*\*|_)?[ \t]+[^\n]*)[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+
+# Target: the Verification section names the project's test run or the test file of the bug; a
+# line starting with `#` inside a fenced block, such as a shell comment, does not end the section,
+# and a heading inside Steps is not the Verification section. A command that only reproduces the
+# bug fails: a test that fails without the fix is the strongest evidence these fixtures allow.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-84/plan.md"
+present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?![ \t]*```)(?!\#)[^\n]*|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*\n[ \t]*```[^\n]*)*?(?:\n(?![ \t]*```)(?!\#)[^\n]*(?:\bpytest\b|test_split)|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*?\n(?![ \t]*```)[^\n]*(?:\bpytest\b|test_split))'''
+
+[[fact]]
+text = "python3 -m pytest -q"
+where = "fixture:AGENTS.md"
+
+[[fact]]
+text = "def test_even_split"
+where = "fixture:tests/test_split.py"
+
+[[plant]]
+id = "shares-miss-total"
+verify = "python3 -c \"from tabsplit.split import split; assert all(sum(split(t, n)) == t for t in (1000, 2000) for n in (3, 7))\""
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--comments'''
+stdout = "title:\tThree-way split comes to a cent less than the bill\nstate:\tOPEN\nauthor:\tinez\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t84\n--\nSplitting a 10.00 bill between three people shows 3.33 each, which adds up to 9.99, so somebody always ends up chasing the last cent. With 20.00 it shows 6.67 each, which is 20.01. The shares should add up to the bill exactly.\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 84, \"title\": \"Three-way split comes to a cent less than the bill\", \"body\": \"Splitting a 10.00 bill between three people shows 3.33 each, which adds up to 9.99, so somebody always ends up chasing the last cent. With 20.00 it shows 6.67 each, which is 20.01. The shares should add up to the bill exactly.\", \"state\": \"OPEN\", \"author\": {\"login\": \"inez\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/tabsplit/issues/84\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tThree-way split comes to a cent less than the bill\nstate:\tOPEN\nauthor:\tinez\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t84\n--\nSplitting a 10.00 bill between three people shows 3.33 each, which adds up to 9.99, so somebody always ends up chasing the last cent. With 20.00 it shows 6.67 each, which is 20.01. The shares should add up to the bill exactly.\n"
+
+[[gh]]
+match = '''(^|\s)issue edit\b'''
+stdout = "https://github.com/acme/tabsplit/issues/84\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "{\"name\": \"tabsplit\", \"nameWithOwner\": \"acme/tabsplit\", \"defaultBranchRef\": {\"name\": \"main\"}}\n"
+
+[[gh]]
+match = '''(^|\s)api user\b'''
+stdout = "{\"login\": \"dev\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/84/comments\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/84\b'''
+stdout = "{\"number\": 84, \"title\": \"Three-way split comes to a cent less than the bill\", \"body\": \"Splitting a 10.00 bill between three people shows 3.33 each, which adds up to 9.99, so somebody always ends up chasing the last cent. With 20.00 it shows 6.67 each, which is 20.01. The shares should add up to the bill exactly.\", \"state\": \"OPEN\", \"author\": {\"login\": \"inez\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/tabsplit/issues/84\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"

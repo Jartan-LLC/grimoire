@@ -1,0 +1,19 @@
+final = "Plan written to .claude/workspace/issue-118/plan.md."
+
+[files]
+".claude/workspace/issue-118/plan.md" = '''# Plan: Clearer name for used_pct (issue 118)
+
+## Approach
+Rename `used_pct` to `used_percent` in `usage()` in `diskreport/cli.py`, in the table
+code that reads it, in the README example and in the test.
+
+## Decisions
+None.
+
+## Steps
+1. Rename the key in `diskreport/cli.py`.
+2. Update `README.md` and `tests/test_cli.py`.
+
+## Verification
+- `python3 -m pytest -q`
+'''

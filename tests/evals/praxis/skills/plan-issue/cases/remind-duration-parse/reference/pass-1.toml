@@ -1,0 +1,31 @@
+final = "Plan written to .claude/workspace/issue-76/plan.md."
+
+[files]
+".claude/workspace/issue-76/plan.md" = '''# Plan: Let `remindme add --in` take hours (issue 76)
+
+## Approach
+
+`snooze` already parses `10m`, `1h30m` and `2d` in `_parse_duration`
+(`remindme/snooze.py:13`), but keeps it private. Move it into `remindme/duration.py` as
+`parse_duration`, used by both `snooze` and `add`, so the two commands accept the same
+durations. A bare number still means minutes for `add`, so `--in 90` keeps working.
+
+## Decisions for the user
+
+- A bare number for `--in` stays minutes -- default if unanswered: yes, so existing scripts
+  keep working.
+
+## Steps
+
+1. Create `remindme/duration.py` with `parse_duration`, moved from `remindme/snooze.py`;
+   `snooze` imports it, and `tests/test_snooze.py` follows it.
+2. In `remindme/__main__.py`, make `--in` a string; `add_reminder` takes a `timedelta`, from
+   `parse_duration`, or minutes when the text is all digits.
+3. Tests in `tests/test_add.py` for `1h30m`, `2d` and `90`.
+
+## Verification
+
+- `python3 -m pytest -q` -- the new `add` tests pass, and `tests/test_snooze.py` still does.
+- `python3 -m remindme add "Call the dentist" --in 1h30m` then `python3 -m remindme list` shows it
+  due ninety minutes from now.
+'''

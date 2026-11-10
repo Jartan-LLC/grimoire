@@ -1,0 +1,34 @@
+final = "Plan written to .claude/workspace/issue-46/plan.md."
+
+[files]
+".claude/workspace/issue-46/plan.md" = '''# Plan: Count only recent check-ins in the report (issue 46)
+
+## Approach
+
+Add `--since YYYY-MM-DD` to `habits report`. Parse it with the existing `parse_day` and count
+only entries on or after that day; without it the report counts every check-in, as now.
+
+## Decisions for the user
+
+- A habit with no check-ins since the day is left out of the report rather than printed with
+  0 -- default if unanswered: left out, as today's report never prints a 0.
+
+## Out of scope
+
+- Streaks -- not planned.
+
+## Steps
+
+1. Rewrite `parse_day` on `date.fromisoformat`.
+2. Add `--since` to the `report` parser at `habits/cli.py:16`, with `type=parse_day`, so a bad
+   day gets argparse's usage error with `parse_day`'s message.
+2. Filter `log.entries()` by `day >= args.since` before the `Counter` at `habits/cli.py:22`.
+3. Tests in `tests/test_report.py`, following `tests/test_report.py:4-9`: with `--since
+   2026-10-02`, run counts 1 and read 1.
+
+## Verification
+
+- `python3 -m pytest -q` -- the new `--since` tests pass with the existing ones.
+- `HABITS_LOG=/tmp/h.log python3 -c "from habits.cli import main; main(['report', '--since', '2026-10-02'])"`
+  -- counts only the check-ins from that day on.
+'''

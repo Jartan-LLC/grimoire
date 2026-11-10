@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-118/plan.md."
+
+[files]
+".claude/workspace/issue-118/plan.md" = '''# Plan: README says Node 16, npm says otherwise (issue 118)
+
+## Approach
+
+`package.json` declares `"node": ">=20"`; the README's Requirements line (`README.md:13`) still
+says Node 16. Change it to Node 20.
+
+## Steps
+
+1. In `README.md`, change "Node 16 or later" to "Node 20 or later".
+## Decisions for the user
+
+- Lower `engines` to 16 instead? Default if unanswered: no -- the code is tested on 20 only.
+
+## Verification
+
+```
+grep -n "Node 20" README.md
+```
+'''

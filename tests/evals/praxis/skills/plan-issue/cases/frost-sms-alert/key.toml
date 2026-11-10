@@ -1,6 +1,6 @@
 # Fixture 4's kind: an abstraction is tempting but has one use. Reported per model.
 
-split = "screen"
+split = "dev"
 kind = "target"
 hints = ["abstraction", "interface", "notifier", "registry", "simple"]
 
