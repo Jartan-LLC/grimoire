@@ -6,13 +6,13 @@
 # catches the wrong fact planted in each lean and bloat doc and a wrong default, a dead link and a
 # wrong flag in the cost cases, and leaves alone a troubleshooting part at the end and the
 # prerequisite and recovery lines of lean-backup, lean-merge and lean-dotlink. Must hold: it still
-# raises a missing data-loss warning.
+# raises a missing data-loss warning. The gain is graded by a blind panel (under [pass_rule]).
 # tests/evals/README.md says how the suite is run. No baselines yet: until `make eval-run ...
 # RECORD=1` draws them, every case is committed as a regression case.
 target = "praxis:doc-reviewer"
 # Cases moved off a held-out split, each with its reason in a comment.
 BURNED = [
-  # The Opus screen of 817148f spent these, and its regex checks misgraded some of their samples.
+  # An Opus screen for PR 200 spent these, and its regex checks misgraded some of their samples.
   "bloat-envcheck",
   "bloat-logrot",
   "bloat-pdfjoin",
@@ -43,14 +43,15 @@ budget_usd = 3.0
 [[metric]]
 id = "rare"
 direction = "higher"
-# Lean cases: no finding that names the doc (by path, by file name, a README as "README", or as
-# "the docs") asks to add a rare case ("leaves out", "add a line", "add the", "should also say",
-# "include one", "note in"), so a finding on a commit or the code that only sits near a rare-case
-# word and an ask word does not count, nor does an ask to add code, a check or tests, or one whose
-# fix line asks only for a pointer to the full list or for a partial list to say it is partial.
-# Bloat cases: a Critical or Important finding rates the rare passage as Bloat or asks to cut it,
-# with a Bloat word or a cut aimed at doc text ("drop the claim", "cut the bullet", "delete all
-# three") within 250 characters of a rare-case word, or a fix line that cuts after one, the cut
+# Reported only: whether the report keeps to the rule is the blind panel's question, not this
+# regex's. Lean cases: no finding that names the doc (by path, by file name, a README as "README",
+# or as "the docs") asks to add a rare case ("leaves out", "add a line", "add the", "should also
+# say", "include one", "note in"), so a finding on a commit or the code that only sits near a
+# rare-case word and an ask word does not count, nor does an ask to add code, a check or tests, or
+# one whose fix line asks only for a pointer to the full list or for a partial list to say it is
+# partial. Bloat cases: a Critical or Important finding rates the rare passage as Bloat or asks to
+# cut it, with a Bloat word or a cut aimed at doc text ("drop the claim", "cut the bullet", "delete
+# all three") within 250 characters of a rare-case word, or a fix line that cuts after one, the cut
 # anywhere on that line unless negated, or a cut whose object names the rare case ("drop the
 # zero-padding detail"), so a finding on the passage's accuracy alone does not count, and one whose
 # fix offers a cut as one option does. A rare-case word names the rare case only, never text the
@@ -100,8 +101,16 @@ direction = "higher"
 margin = 0.2
 
 [pass_rule]
-primary = "rare"
-rule = "better"
-guards = ["kept", "format"]
-min_effect = 0.4  # read only under a `better` rule
+# The regex rule holds the guards only: `kept` (the primary, as the rule needs one) and `format`
+# are tested for non-inferiority, and `harm` holds on its own. The gain is graded by a blind panel
+# of three agents, who see neither the arm nor the model, each labelling every report right,
+# over-cuts, under-cuts or misses-error against panel-specs.md, two of three deciding. A change to
+# doc-reviewer goes ahead when the screen and confirm SHIP and, on each gate model, new has more
+# right reports than old, with no significance bar beyond "more", and loses no planted error or
+# harm warning old raises; its PR reports the panel's labels per model and arm. panel-specs.md
+# covers the dev, screen and confirm cases: a case added later gets its spec written the same way
+# before grading, from its prompt, fixture, build.py and the rule, never from its key or a sample.
+primary = "kept"
+rule = "no-regression"
+guards = ["format"]
 min_samples = 3
