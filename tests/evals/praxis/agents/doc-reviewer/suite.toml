@@ -30,12 +30,13 @@ direction = "higher"
 # or the code that only sits near a rare-case word and an ask word does not count. Bloat cases: a
 # Critical or Important finding rates the rare passage as Bloat or asks to cut it, with a Bloat word
 # or a cut aimed at doc text ("drop the claim", "cut the sentence") within 250 characters of a
-# rare-case word, or a fix line that cuts it after one, so a finding on the passage's accuracy alone
-# does not count, and one whose fix offers a cut as one option does. In every check, a finding's
-# text runs to the next rating, heading, table row, verdict line or bold numbered item (`**2.`), and
-# a bold numbered item under a heading that names a rating takes that rating. So a note inside a
-# finding that says a rare case was left out on purpose counts as asking to add it; a note under its
-# own heading does not.
+# rare-case word, or a fix line that cuts it after one, or a cut whose object names the rare case
+# ("drop the zero-padding detail"), so a finding on the passage's accuracy alone does not count,
+# and one whose fix offers a cut as one option does. In every check, a finding's text runs to the
+# next rating, heading, table row, verdict line or bold numbered item (`**2.`), and a bold numbered
+# item under a heading that names a rating takes that rating. So a note inside a finding that says
+# a rare case was left out on purpose counts as asking to add it; a note under its own heading does
+# not.
 
 [[metric]]
 id = "kept"
