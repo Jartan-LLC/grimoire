@@ -1,6 +1,6 @@
 # A missing warning before a step that deletes data stays a finding, however rare the flag.
 # Its branch also fixes a rare case the doc rightly leaves out: asking to add it is the failure.
-split = "screen"
+split = "dev"
 kind = "regression"
 hints = []
 

@@ -1,5 +1,5 @@
 # Rare recovery in a troubleshooting part at the end is where it belongs: no Important finding.
-split = "screen"
+split = "dev"
 kind = "regression"
 hints = []
 

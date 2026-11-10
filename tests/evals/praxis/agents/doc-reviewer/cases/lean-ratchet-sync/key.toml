@@ -1,7 +1,7 @@
 # A candidate target case: committed as a regression case until an old baseline fails it
 # (tests/evals/README.md, "Choosing cases" step 2), then retagged kind = "target".
 # The ratchet's input: a rare fix lands after the doc; asking the doc to follow is the failure.
-split = "screen"
+split = "dev"
 kind = "regression"
 hints = []
 

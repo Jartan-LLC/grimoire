@@ -1,0 +1,2 @@
+ship:
+	scripts/deploy.sh

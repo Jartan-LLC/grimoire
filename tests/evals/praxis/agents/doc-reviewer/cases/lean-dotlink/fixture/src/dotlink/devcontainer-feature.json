@@ -1,0 +1,6 @@
+{
+  "id": "dotlink",
+  "version": "1.0.0",
+  "name": "dotlink",
+  "description": "Links each file in /opt/dotfiles into $HOME and keeps the file it replaces as <file>.orig."
+}

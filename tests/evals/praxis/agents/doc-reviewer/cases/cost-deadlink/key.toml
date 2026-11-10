@@ -1,6 +1,6 @@
 # Cost: a dead link must still be caught.
 # Its branch also fixes a rare case the doc rightly leaves out: asking to add it is the failure.
-split = "screen"
+split = "dev"
 kind = "regression"
 hints = []
 
