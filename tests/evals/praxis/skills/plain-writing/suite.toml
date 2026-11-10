@@ -20,8 +20,9 @@ budget_usd = 2.0
 [[metric]]
 id = "rare"
 direction = "higher"
-# Target cases: no planted rare case in the doc before a troubleshooting heading that no heading
-# of its level or higher follows (a `#` line inside a fenced code block is no heading).
+# Reported only: no planted rare case in the doc before a troubleshooting heading that no heading
+# of its level or higher follows (a `#` line inside a fenced code block is no heading). Whether the
+# doc keeps to normal use is the blind panel's question (under [pass_rule]), not this regex's.
 
 [[metric]]
 id = "kept"
@@ -57,8 +58,15 @@ direction = "higher"
 # length target.
 
 [pass_rule]
-primary = "rare"
-rule = "better"
-guards = ["kept", "delivered"]
-min_effect = 0.4  # read only under a `better` rule
+# The regex rule holds the guards only: `kept` (the primary, as the rule needs one) and `delivered`
+# are tested for non-inferiority, and `harm` holds on its own. The gain is graded by a blind panel
+# of three agents, who see neither the arm nor the model, each labelling every doc right-sized,
+# bloated, under or mis-sized against panel-specs.md, two of three deciding. A change to
+# plain-writing goes ahead when, on each gate model, new has more right-sized docs than old and
+# loses no warning old keeps; its PR reports the panel's labels per model and arm. panel-specs.md
+# covers the dev cases: a screen or confirm case gets its spec written the same way before grading,
+# from its prompt, fixture, build.py and the rule, never from its key or a sample.
+primary = "kept"
+rule = "no-regression"
+guards = ["delivered"]
 min_samples = 3
