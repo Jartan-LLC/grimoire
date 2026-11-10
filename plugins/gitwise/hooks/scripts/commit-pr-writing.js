@@ -43,7 +43,7 @@ const NO_EDIT = /\s--no-edit(?:\s|$)/;
 const REUSED_MESSAGE = /\s(?:-[a-zA-Z]*C|--reuse-message\b|--fixup(?![=\s](?:amend|reword):)(?:[=\s]|$))/;
 const MESSAGE_FLAG = /\s(?:-[a-zA-Z]*[mF]|--message\b|--file\b)/;
 // Words that run the command after them: assignments such as `SKIP=x`, keywords, wrappers.
-const PREFIX = /^(?:[A-Za-z_]\w*=(?:"[^"]*"|'[^']*'|\S*)|if|elif|while|until|then|do|else|time|env|command|exec|!|\{)\s+/;
+const PREFIX = /^(?:[A-Za-z_]\w*=\S*|if|elif|while|until|then|do|else|time|env|command|exec|!|\{)\s+/;
 // A quoted string, or an unclosed one running to the end of a line of a multi-line message.
 const QUOTED = /"[^"]*(?:"|$)|'[^']*(?:'|$)/g;
 const SKILL_NAME = 'commit-pr-writing';
@@ -53,32 +53,31 @@ const REINJECTED_NAME = /(?:^|:)commit-pr-writing$/;
 const COMPACT_BOUNDARY = '"subtype":"compact_boundary"';
 
 /**
- * The simple commands in shell `command`, split at control operators and stripped of
- * leading `PREFIX` words, so that a phrase inside an argument (`rg "git commit"`) is not
- * taken for a command. The split does not parse quotes: a line of a quoted message or
- * heredoc counts as a command of its own, and a command run as a string, as in
- * `bash -c "git commit -m x"`, is not seen.
+ * The simple commands in shell `command`, split at control operators, with quoted text
+ * blanked to `""` and leading `PREFIX` words stripped, so that a phrase inside an
+ * argument (`rg "git commit"`) is not taken for a command. Blanking lets `git -C "/a b"`
+ * read as one option, and a message that names `-h` read as no help call. The split does
+ * not parse quotes: a line of a quoted message or heredoc counts as a command of its own,
+ * and a command run as a string, as in `bash -c "git commit -m x"`, is not seen.
  */
 function commands(command) {
   return command.split(/[;&|\n(`]/).map(part => {
-    let rest = part.trim();
+    let rest = part.trim().replace(QUOTED, '""');
     while (PREFIX.test(rest)) rest = rest.replace(PREFIX, '');
     return rest;
   });
 }
 
-/** Whether simple command `part` writes a commit message or a PR title or body. */
+/** Whether simple command `part`, from `commands`, writes a commit message or a PR title or body. */
 function writes(part) {
-  // Flags are read outside quotes, so a message that names `-h` is no help call.
-  const flags = part.replace(QUOTED, '""');
-  if (HELP.test(flags)) return false;
+  if (HELP.test(part)) return false;
   if (COMMIT.test(part)) {
     // Read past `commit`, as a global `git -C <dir>` sits before it.
-    const options = flags.replace(COMMIT, ' ');
+    const options = part.replace(COMMIT, ' ');
     return MESSAGE_FLAG.test(options) || !(NO_EDIT.test(options) || REUSED_MESSAGE.test(options));
   }
   if (PR_CREATE.test(part)) return true;
-  return PR_EDIT.test(part) && PR_TEXT_FLAG.test(flags);
+  return PR_EDIT.test(part) && PR_TEXT_FLAG.test(part);
 }
 
 function textBlocks(content) {

@@ -144,6 +144,9 @@ describe('which commands write text', () => {
     'git -c user.name=t commit -m x',
     'git --no-pager commit --amend',
     'git --git-dir /repo/.git commit -m x',
+    'git -C "/a b" commit -m x',
+    'git -c user.name="A B" commit -m x',
+    'git --git-dir="/a b/.git" commit -m x',
     'printf "x\\n" | git commit -F -',
     'gh pr create --draft --title t --body-file b.md',
     'gh pr edit 5 --body-file b.md',
@@ -230,6 +233,8 @@ describe('decide', () => {
     assert.deepEqual(decide(input('gh pr create --help'), read), HINTED);
     assert.deepEqual(decide(input('gh pr edit 3 --add-label bug'), read), HINTED);
     assert.deepEqual(decide(input('env git push'), read), HINTED);
+    assert.deepEqual(decide(input('git -C "/a b" push'), read), HINTED);
+    assert.deepEqual(decide(input('git -C "/a b" commit -C HEAD'), read), HINTED);
   });
 
   test('allows once the Skill tool has injected the skill', () => {
