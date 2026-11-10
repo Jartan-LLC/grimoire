@@ -56,8 +56,7 @@ id = "delivered"
 direction = "higher"
 margin = 0.2
 # Whether plain-writing reached the main thread at all in the session (`state = "loaded"`), not
-# whether it was in context when the doc was written: the runner counts only Write and Edit calls
-# as file writes, and a writer that writes the doc through Bash would read as undelivered.
+# whether it was in context at the doc's write, so it does not depend on how the doc was written.
 
 [[metric]]
 id = "words"
