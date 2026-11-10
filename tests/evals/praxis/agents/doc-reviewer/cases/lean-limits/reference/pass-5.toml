@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The README states a round limit that contradicts the command: 5 rounds against 8. It leaves out the fork, logged-out gh and 30-day draft rules, so the copy has drifted.\nFile: README.md:13\nIssue: The README states a round limit that contradicts the command: 5 rounds against 8. It leaves out the fork, logged-out gh and 30-day draft rules, so the copy has drifted.\nFix: Don't restate the limits in the README. Keep the one-line purpose and the pointer to commands/walkaway.md.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The README says walkaway stops after 5 rounds; the command stops after 8.\nFile: README.md:13\nIssue: The README says walkaway stops after 5 rounds; the command stops after 8.\nFix: Change it.\nStatus: confirmed\n\n[MINOR] The README lists some limits and leaves out others: fork PRs and drafts older than 30 days. A reader deciding whether to run it on a fork PR gets no hint.\nFile: README.md:14\nIssue: The README lists some limits and leaves out others: fork PRs and drafts older than 30 days. A reader deciding whether to run it on a fork PR gets no hint.\nFix: Either point to the command file for the limits, or state a partial list as partial.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"
