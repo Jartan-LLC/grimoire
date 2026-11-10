@@ -65,8 +65,8 @@ Cut:
 - in a reply, the background, diagnosis and proof the reader already has: lead with the answer
   and keep the one fact they lack.
 
-In an existing file, apply these lists to the text your change writes or makes false, unless you
-were asked to make the file itself clearer.
+In an existing file, apply these lists and "Write for what the reader does" to the text your change
+writes or makes false, unless you were asked to make the file itself clearer.
 
 Defaults for the calls in between: keep a short reason for a project rule and cut reasons that
 repeat; put brief content the reader needs on the spot inline and link background; there is no
