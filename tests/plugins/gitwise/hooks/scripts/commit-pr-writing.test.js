@@ -324,6 +324,36 @@ describe('decide', () => {
       assert.deepEqual(decide(sub('git commit -m x'), reader({ [MAIN]: main, [own]: forkedAfterLoad })), HINTED);
       assert.deepEqual(decide(sub('git commit -m x'), reader({ [MAIN]: main, [own]: forkedBeforeLoad })), DENY);
     });
+
+    describe('a fork after a compaction', () => {
+      const fork = { type: 'fork-context-ref', agentId: 'a052e03751cd6f62f', parentSessionId: SESSION };
+      const later = { ...prompt, uuid: 'u-later', message: { role: 'user', content: 'Now fork.' } };
+      const sidechain = record => ({ ...record, isSidechain: true, agentId: 'a052e03751cd6f62f' });
+
+      test('stops at its own compaction, not reaching back to the parent\'s load', () => {
+        const read = reader({
+          [MAIN]: jsonl([prompt, skillBody]),
+          [own]: jsonl([{ ...fork, parentLastUuid: 'u-body' }, ...[prompt, boundary, summary, prompt].map(sidechain)]),
+        });
+        assert.deepEqual(decide(sub('git commit -m x'), read), DENY);
+      });
+
+      test("counts the parent's history only after the parent's last compaction", () => {
+        const read = reader({
+          [MAIN]: jsonl([prompt, skillBody, boundary, summary, later]),
+          [own]: jsonl([{ ...fork, parentLastUuid: 'u-later' }, prompt]),
+        });
+        assert.deepEqual(decide(sub('git commit -m x'), read), DENY);
+      });
+
+      test("counts a parent's load made after the parent's compaction", () => {
+        const read = reader({
+          [MAIN]: jsonl([prompt, boundary, summary, skillBody]),
+          [own]: jsonl([{ ...fork, parentLastUuid: 'u-body' }, prompt]),
+        });
+        assert.deepEqual(decide(sub('git commit -m x'), read), HINTED);
+      });
+    });
   });
 });
 
