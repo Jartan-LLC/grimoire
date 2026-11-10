@@ -17,8 +17,17 @@ Where the project's own rules say otherwise, follow them.
 Determine the issue number from the user's request, which may carry context beyond the number. Fetch the issue and any plan comments:
 
 ```bash
+gh issue view <issue-number>
 gh issue view <issue-number> --comments
 ```
+
+If the issue has no assignee, assign it to the account `gh` is logged in as:
+
+```bash
+gh issue edit <issue-number> --add-assignee @me
+```
+
+If it is assigned, but not to you (`gh api user --jq .login` prints your login), tell the user and leave the assignees as they are. If assigning fails, for example because the account cannot assign issues in this repository, tell the user and carry on; do not comment on the issue instead.
 
 Also load the `praxis:workspace-patterns` skill and read the issue's plan, `.claude/workspace/issue-<issue-number>/plan.md`, or any other plan file in the workspace for this issue. If no plan exists for a complex issue, suggest running `/praxis:plan-issue` first.
 
