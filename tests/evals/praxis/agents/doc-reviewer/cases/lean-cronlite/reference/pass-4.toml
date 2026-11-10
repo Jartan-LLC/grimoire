@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says `cronlite rm ID`; the command is `cronlite remove ID`.\nFile: docs/schedule.md:4\nIssue: The doc says `cronlite rm ID`; the command is `cronlite remove ID`.\nFix: Write `remove`.\nStatus: confirmed\n\n[MINOR] Without /etc/localtime the program uses UTC, so \"in local time\" in docs/schedule.md is false there.\nFile: docs/schedule.md:3\nIssue: Without /etc/localtime the program uses UTC, so \"in local time\" in docs/schedule.md is false there.\nFix: Qualify it: add that the schedule is in UTC when /etc/localtime is missing.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"
