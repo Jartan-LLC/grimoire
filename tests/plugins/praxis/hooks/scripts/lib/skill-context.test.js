@@ -21,7 +21,7 @@ describe('contextFor', () => {
     assert.notEqual(SUBAGENT_IMPERATIVE, IMPERATIVE);
   });
 
-  test('re-arms the main thread after a compact, and stays silent on any other session start', () => {
+  test('re-arms after a compact, and stays silent on any other session start', () => {
     assert.deepEqual(contextFor({ hook_event_name: 'SessionStart', source: 'compact' }), output('SessionStart', IMPERATIVE));
     for (const source of ['startup', 'resume', 'clear', undefined]) {
       assert.equal(contextFor({ hook_event_name: 'SessionStart', source }), null, `source ${source}`);
