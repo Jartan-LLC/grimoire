@@ -1,9 +1,11 @@
+import os
 import pathlib
 
 import pytest
-from evals import calibrate, jury
+from evals import calibrate, jury, session
 from evals import lint as lint_module
-from evals.lint import lint
+from evals.lint import git_ignored, lint
+from evals.proc import GIT, run
 from evals.suite import load_suite
 from helpers import JUDGE, JUDGED, KEY, SUITE, write_suite
 from test_suite import SPAWN_CHECKS
@@ -39,7 +41,7 @@ def suite_at(root: pathlib.Path, suite: str = SUITE, key: str = KEY) -> pathlib.
 
 def test_a_well_formed_suite_passes(root: pathlib.Path) -> None:
     suite_at(root)
-    assert lint(root, TRACKED) == []
+    assert lint(root, TRACKED, {}) == []
 
 
 def test_lint_names_a_hint_in_the_prompt_and_a_fact_the_writer_cannot_find(
@@ -47,7 +49,7 @@ def test_lint_names_a_hint_in_the_prompt_and_a_fact_the_writer_cannot_find(
 ) -> None:
     case = suite_at(root, key=KEY.replace('text = "42"', 'text = "43"'))
     (case / "prompt.md").write_text("Fix it and keep the issue number.\n")
-    found = lint(root, TRACKED)
+    found = lint(root, TRACKED, {})
     assert any("gives away 'issue number'" in f for f in found)
     assert any("fact '43' is not in prompt" in f for f in found)
 
@@ -58,7 +60,7 @@ def test_lint_requires_references_that_pass_and_fail(root: pathlib.Path) -> None
     (case / "reference" / "fail-1.toml").write_text(
         'commits = ["fix: y\\n\\n#42"]\nfinal = "Done."\n'
     )
-    found = lint(root, TRACKED)
+    found = lint(root, TRACKED, {})
     assert any("reference pass-1 fails kept" in f for f in found)
     assert any("reference fail-1 passes every check" in f for f in found)
 
@@ -69,9 +71,9 @@ def test_lint_grades_a_report_check_on_a_references_reports(root: pathlib.Path) 
     (case / "reference" / "pass-1.toml").write_text(
         'final = "Done."\n[reports]\n"praxis:general-reviewer" = "Closes #42"\n'
     )
-    assert lint(root, TRACKED) == []
+    assert lint(root, TRACKED, {}) == []
     (case / "reference" / "pass-1.toml").write_text('commits = ["Closes #42"]\nfinal = "Done."\n')
-    assert any("reference pass-1 fails kept" in f for f in lint(root, TRACKED))
+    assert any("reference pass-1 fails kept" in f for f in lint(root, TRACKED, {}))
 
 
 def test_lint_grades_gh_and_brief_checks_and_wants_a_remote_for_gh(root: pathlib.Path) -> None:
@@ -82,12 +84,12 @@ def test_lint_grades_gh_and_brief_checks_and_wants_a_remote_for_gh(root: pathlib
         'gh = "gh pr create --draft\\n\\nCloses #42"\n'
         '[briefs]\n"praxis:general-reviewer" = "Review the fix."\n'
     )
-    assert any("a gh check needs remote = true" in f for f in lint(root, TRACKED))
+    assert any("a gh check needs remote = true" in f for f in lint(root, TRACKED, {}))
     remote = f"remote = true\n{key}remote_runner = {lint_module.REMOTE_RUNNER}\n"
     (case / "key.toml").write_text(remote)
-    assert lint(root, TRACKED) == []
+    assert lint(root, TRACKED, {}) == []
     (case / "reference" / "pass-1.toml").write_text('gh = "gh pr create --draft"\n')
-    found = lint(root, TRACKED)
+    found = lint(root, TRACKED, {})
     assert any("reference pass-1 fails kept" in f for f in found)
 
 
@@ -98,17 +100,19 @@ def test_lint_wants_no_reference_for_a_case_of_delivery_and_spawn_checks_only(
     case = suite_at(root, key=key)
     for reference in (case / "reference").iterdir():
         reference.unlink()
-    assert lint(root, TRACKED) == []
+    assert lint(root, TRACKED, {}) == []
 
 
 def test_lint_requires_a_recorded_baseline_failure_on_a_target_case(root: pathlib.Path) -> None:
     suite_at(root, key=KEY.replace("failures = 2", "failures = 0"))
-    assert any("needs a [[baseline]] that failed at least once" in f for f in lint(root, TRACKED))
+    assert any(
+        "needs a [[baseline]] that failed at least once" in f for f in lint(root, TRACKED, {})
+    )
 
 
 def test_lint_names_a_baseline_drawn_under_an_older_runner(root: pathlib.Path) -> None:
     suite_at(root, key=KEY.replace("runner = 2", "runner = 1"))
-    assert any("drawn under runner 1, not 2; redraw it" in f for f in lint(root, TRACKED))
+    assert any("drawn under runner 1, not 2; redraw it" in f for f in lint(root, TRACKED, {}))
 
 
 def test_lint_names_a_remote_baseline_drawn_under_another_remote_runner(
@@ -116,37 +120,37 @@ def test_lint_names_a_remote_baseline_drawn_under_another_remote_runner(
 ) -> None:
     monkeypatch.setattr(lint_module, "REMOTE_RUNNER", 2)
     case = suite_at(root, key="remote = true\n" + KEY)
-    found = lint(root, TRACKED)
+    found = lint(root, TRACKED, {})
     assert any("drawn under remote_runner 0, not 2; redraw it" in f for f in found)
     (case / "key.toml").write_text("remote = true\n" + KEY + "remote_runner = 3\n")
-    found = lint(root, TRACKED)
+    found = lint(root, TRACKED, {})
     assert any("drawn under remote_runner 3, not 2; redraw it" in f for f in found)
     (case / "key.toml").write_text("remote = true\n" + KEY + "remote_runner = 2\n")
-    assert lint(root, TRACKED) == []
+    assert lint(root, TRACKED, {}) == []
     (case / "key.toml").write_text(KEY)
-    assert lint(root, TRACKED) == []
+    assert lint(root, TRACKED, {}) == []
 
 
 def test_lint_names_a_baseline_drawn_while_a_case_without_a_remote_had_one(
     root: pathlib.Path,
 ) -> None:
     case = suite_at(root, key=KEY + "remote_runner = 3\n")
-    assert lint(root, TRACKED) == [
+    assert lint(root, TRACKED, {}) == [
         f"{case}: the claude-opus-5-5 old baseline was drawn under remote_runner 3, "
         "while the case had a remote; redraw it"
     ]
     (case / "key.toml").write_text(KEY + "remote_runner = 0\n")
-    assert lint(root, TRACKED) == []
+    assert lint(root, TRACKED, {}) == []
 
 
 def test_lint_runs_a_plant_both_ways(root: pathlib.Path) -> None:
     case = suite_at(root, key=KEY + VERIFY)
     (case / "fixture" / "check.py").write_text("import sys\nsys.exit(0)\n")
-    found = lint(root, TRACKED)
+    found = lint(root, TRACKED, {})
     assert any("has no fix/" in f for f in found)
     (case / "fix").mkdir()
     (case / "fix" / "check.py").write_text("import sys\nsys.exit(1)\n")
-    found = lint(root, TRACKED)
+    found = lint(root, TRACKED, {})
     assert any("verify passes on the fixture" in f for f in found)
     assert any("verify fails with fix/ applied (exit 1)" in f for f in found)
 
@@ -156,14 +160,14 @@ def test_a_real_plant_passes(root: pathlib.Path) -> None:
     (case / "fixture" / "check.py").write_text("import sys\nsys.exit(1)\n")
     (case / "fix").mkdir()
     (case / "fix" / "check.py").write_text("import sys\nsys.exit(0)\n")
-    assert lint(root, TRACKED) == []
+    assert lint(root, TRACKED, {}) == []
 
 
 def test_lint_names_suite_level_problems(root: pathlib.Path) -> None:
     suite = SUITE.replace('target = "gitwise:commit-pr-writing"', 'target = "gitwise:missing"')
     suite = 'BURNED = ["c1", "c9"]\n' + suite.replace("commit-pr-writing/**", "nowhere/**")
     suite_at(root, suite=suite, key=KEY.replace('split = "dev"', 'split = "screen"'))
-    found = lint(root, TRACKED)
+    found = lint(root, TRACKED, {})
     assert any(
         "covers 'plugins/gitwise/skills/nowhere/**' matches no tracked file" in f for f in found
     )
@@ -174,7 +178,7 @@ def test_lint_names_suite_level_problems(root: pathlib.Path) -> None:
 
 def test_lint_reports_a_suite_that_does_not_load(root: pathlib.Path) -> None:
     suite_at(root, suite=SUITE.replace("[pass_rule]", "[rule]"))
-    assert any("no [pass_rule]" in f for f in lint(root, TRACKED))
+    assert any("no [pass_rule]" in f for f in lint(root, TRACKED, {}))
 
 
 def test_lint_names_a_stamp_the_judge_or_its_reference_moved_away_from(root: pathlib.Path) -> None:
@@ -193,14 +197,14 @@ def test_lint_names_a_stamp_the_judge_or_its_reference_moved_away_from(root: pat
         references={"c1": calibrate.text_hash("Issue 42.")},
     )
     calibrate.write_stamp(folder / "stamp.toml", stamp)
-    assert lint(root, TRACKED) == []  # a stamp that missed the bar is current, not a problem
+    assert lint(root, TRACKED, {}) == []  # a stamp that missed the bar is current, not a problem
     (case / "key.toml").write_text(KEY + JUDGED.replace("Issue 42.", "Issue 42, named."))
-    assert any("reference of c1 changed" in f for f in lint(root, TRACKED))
+    assert any("reference of c1 changed" in f for f in lint(root, TRACKED, {}))
     (case / "key.toml").write_text(KEY + JUDGED)
     (case.parent.parent / "suite.toml").write_text(SUITE + JUDGE.replace("name the", "cite the"))
-    assert any("another version of the judge" in f for f in lint(root, TRACKED))
+    assert any("another version of the judge" in f for f in lint(root, TRACKED, {}))
     (folder / "stamp.toml").write_text("judge = [\n")
-    assert any("not a stamp" in f for f in lint(root, TRACKED))
+    assert any("not a stamp" in f for f in lint(root, TRACKED, {}))
 
 
 def test_lint_names_labels_that_do_not_parse(root: pathlib.Path) -> None:
@@ -208,14 +212,14 @@ def test_lint_names_labels_that_do_not_parse(root: pathlib.Path) -> None:
     labels = calibrate.judge_dir(case.parent.parent, "flags") / "labels"
     labels.mkdir(parents=True)
     (labels / "c1.toml").write_text('[[item]]\nid = "k"\n')
-    assert any("labels do not parse" in f for f in lint(root, TRACKED))
+    assert any("labels do not parse" in f for f in lint(root, TRACKED, {}))
 
 
 def test_lint_names_a_without_that_is_no_plugin(root: pathlib.Path) -> None:
     (root / "plugins" / "gitwise" / ".claude-plugin").mkdir()
     (root / "plugins" / "gitwise" / ".claude-plugin" / "plugin.json").write_text("{}\n")
     suite_at(root, key='without = ["gitwise", "praxsi"]\n' + KEY)
-    assert [f.split(": ", 1)[1] for f in lint(root, TRACKED)] == [
+    assert [f.split(": ", 1)[1] for f in lint(root, TRACKED, {})] == [
         "without names 'praxsi', which is no plugin"
     ]
 
@@ -224,6 +228,47 @@ def test_lint_reads_the_later_turns_for_hints_and_prompt_facts(root: pathlib.Pat
     key = 'turns = ["Keep the issue number."]\n' + KEY.replace('text = "42"', 'text = "number"')
     case = suite_at(root, key=key)
     (case / "prompt.md").write_text("Fix it and commit.\n")
-    assert [f.split(": ", 1)[1] for f in lint(root, TRACKED)] == [
+    assert [f.split(": ", 1)[1] for f in lint(root, TRACKED, {})] == [
         "a turn gives away 'issue number'"
     ]
+
+
+def test_lint_names_a_suite_file_git_ignores_and_its_rule(root: pathlib.Path) -> None:
+    case = suite_at(root)
+    fixture = case.relative_to(root) / "fixture"
+    ignored = {
+        f"{fixture}/.claude/workspace/review.md": f"{fixture}/.gitignore:1:.claude/",
+        f"{fixture}/__pycache__/app.cpython-313.pyc": ".gitignore:3:__pycache__/",
+        "tests/evals/elsewhere/notes.md": ".gitignore:4:notes.md",
+    }
+    assert [f.split(": ", 1) for f in lint(root, TRACKED, ignored)] == [
+        [
+            f"{root / fixture}/.claude/workspace/review.md",
+            f"git ignores it ({fixture}/.gitignore:1:.claude/), so the committed suite lacks "
+            "it; force-add it with git add -f or delete it",
+        ]
+    ]
+
+
+def test_git_ignored_names_each_ignored_file_and_its_rule_but_no_tracked_one(
+    tmp_path: pathlib.Path,
+) -> None:
+    def git(*args: str) -> None:
+        env = session.git_env(dict(os.environ))
+        run([GIT, *args], cwd=tmp_path, env=env, check=True, capture_output=True)
+
+    fixture = tmp_path / "tests" / "evals" / "s" / "cases" / "c1" / "fixture"
+    (fixture / ".claude" / "workspace").mkdir(parents=True)
+    (fixture / ".gitignore").write_text("*.log\n.claude/\n")
+    (fixture / ".claude" / "workspace" / "review.md").write_text("saved review\n")
+    (fixture / ".claude" / "workspace" / "forced.md").write_text("force-added\n")
+    (fixture / "new.md").write_text("untracked, not ignored\n")
+    (tmp_path / "notes.log").write_text("ignored, outside tests/evals\n")
+    git("init", "-q")
+    git("add", "-f", str(fixture / ".claude" / "workspace" / "forced.md"))
+    rule = "tests/evals/s/cases/c1/fixture/.gitignore:2:.claude/"
+    assert git_ignored(tmp_path) == {
+        "tests/evals/s/cases/c1/fixture/.claude/workspace/review.md": rule
+    }
+    (fixture / ".gitignore").write_text("*.log\n")
+    assert git_ignored(tmp_path) == {}

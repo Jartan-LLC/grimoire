@@ -72,10 +72,13 @@ test:  ## Run the Node and Python tests (git-tracked files: `git add` new ones f
 	$(call run_tracked,:(glob)tests/**/*.test.js,'node'$(comma)'--test')
 	$(call run_tracked,:(glob)tests/**/test_*.py,sys.executable$(comma)'-m'$(comma)'pytest')
 
+# verify and the eval targets compare this checkout with where it left BASE.
+BASE ?= main
+
 # `git grep -l` exits 1 on no match, so `|| true` would turn the ASCII gate into
 # a permanent no-op and any other non-zero means the invocation itself failed.
 # One logical line because Make gives each recipe line its own shell.
-verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift, changelogs, plugin names and dependencies, skill pointers, eval suites)
+verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift, changelogs, plugin names and dependencies, version bumps since BASE (default main), skill pointers, eval suites)
 	@echo "Checking for non-ASCII characters..."
 	@set +e; git grep -lP '[^\x00-\x7F]'; rc=$$?; set -e; \
 	case "$$rc" in \
@@ -89,6 +92,8 @@ verify:  ## Run the correctness gate (ASCII, JSON parses, Codex drift, changelog
 	@python3 scripts/generate-codex.py --check
 	@echo "Checking each plugin's changelog entry, name and dependencies..."
 	@python3 scripts/check-changelogs.py
+	@echo "Checking that every plugin changed since $(BASE) has a new version..."
+	@python3 scripts/check-version-bumps.py --base '$(BASE)'
 	@echo "Checking that every skill, agent and command pointer resolves within declared dependencies..."
 	@python3 scripts/check-wiring.py
 	@echo "Checking every eval suite..."
@@ -99,7 +104,6 @@ check: lint typecheck test verify  ## Run CI's lint, typecheck, test and verify 
 # The eval targets run locally on your own `claude` login and are never part of check:
 # CI holds no inference token. eval-plan is free; eval-run and eval-screen start sessions, and
 # call the judges only with JUDGE=1.
-BASE ?= main
 eval-plan:  ## List the eval suites this change reaches against BASE (default main); TIER=<n> prints that testing tier's steps
 	python3 scripts/eval.py plan --base $(BASE) $(if $(TIER),--tier $(TIER))
 

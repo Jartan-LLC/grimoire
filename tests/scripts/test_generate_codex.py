@@ -60,6 +60,22 @@ def test_parse_frontmatter_reads_scalars_lists_and_body() -> None:
             "unsupported frontmatter line '  - orphan item'",
         ),
         (frontmatter("name: demo", "  - extra"), "'name' has both a value and list items"),
+        (frontmatter("name: demo # the reviewer"), "'name' has an inline comment"),
+        (frontmatter("name:\tdemo\t# tabbed"), "'name' has an inline comment"),
+        (frontmatter("name: # nothing"), "'name' has an inline comment"),
+        (
+            frontmatter("skills:", '  - "code-hygiene"'),
+            "'skills' list item must be a plain unquoted value",
+        ),
+        (
+            frontmatter("skills:", "  - 'code-hygiene'"),
+            "'skills' list item must be a plain unquoted value",
+        ),
+        (frontmatter("skills:", "  - [a, b]"), "'skills' list item must be a plain unquoted value"),
+        (
+            frontmatter("skills:", "  - code-hygiene # why"),
+            "'skills' list item has an inline comment",
+        ),
     ],
 )
 def test_parse_frontmatter_rejects_what_it_would_misread(text: str, message: str) -> None:
@@ -67,30 +83,11 @@ def test_parse_frontmatter_rejects_what_it_would_misread(text: str, message: str
         gc.parse_frontmatter(text, PATH)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="grimoire#79: a trailing ' # comment' is kept as part of the value; YAML, which Claude Code reads, drops it",
-)
-def test_parse_frontmatter_does_not_keep_an_inline_comment_in_the_value() -> None:
-    try:
-        fields, _ = gc.parse_frontmatter(frontmatter("name: demo # the reviewer"), PATH)
-    except ValueError:
-        return
-    assert fields["name"] == "demo"
-
-
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="grimoire#80: quoting is rejected on key values but not on list items, which keep their quotes",
-)
-def test_parse_frontmatter_does_not_keep_quotes_on_a_list_item() -> None:
-    try:
-        fields, _ = gc.parse_frontmatter(frontmatter("skills:", '  - "code-hygiene"'), PATH)
-    except ValueError:
-        return
-    assert fields["skills"] == ["code-hygiene"]
+def test_parse_frontmatter_keeps_a_hash_that_does_not_start_a_comment() -> None:
+    fields, _ = gc.parse_frontmatter(
+        frontmatter("description: Reviews C# and F#", "skills:", "  - issue#7"), PATH
+    )
+    assert fields == {"description": "Reviews C# and F#", "skills": ["issue#7"]}
 
 
 @pytest.mark.parametrize(
@@ -150,9 +147,31 @@ def test_render_agent_toml_maps_permission_mode_to_sandbox(mode: str, sandbox: s
     assert role["sandbox_mode"] == sandbox
 
 
-@pytest.mark.parametrize("lines", [(), ("permissionMode: default",), ("permissionMode: bypass",)])
-def test_render_agent_toml_emits_no_sandbox_for_an_unmapped_mode(lines: tuple[str, ...]) -> None:
-    assert "sandbox_mode" not in render("name: demo", "description: d", *lines)
+def test_render_agent_toml_emits_no_sandbox_without_a_permission_mode() -> None:
+    assert "sandbox_mode" not in render("name: demo", "description: d")
+
+
+@pytest.mark.parametrize("mode", ["default", "bypassPermissions", "plna"])
+def test_render_agent_toml_rejects_an_unmapped_permission_mode(mode: str) -> None:
+    fields, body = gc.parse_frontmatter(
+        frontmatter("name: demo", "description: d", f"permissionMode: {mode}"), PATH
+    )
+    with pytest.raises(
+        ValueError, match=re.escape(f"'permissionMode' {mode!r} has no Codex sandbox")
+    ):
+        gc.render_agent_toml(fields, body, "praxis")
+
+
+def test_agent_targets_names_the_agent_with_an_unmapped_permission_mode(
+    tmp_path: pathlib.Path,
+) -> None:
+    touch(
+        tmp_path,
+        "agents/demo.md",
+        contents=frontmatter("name: demo", "description: d", "permissionMode: plna"),
+    )
+    with pytest.raises(ValueError, match=rf"^{re.escape(str(tmp_path / 'agents/demo.md'))}: "):
+        gc.agent_targets(tmp_path, "praxis")
 
 
 def test_render_agent_toml_drops_fields_codex_would_reject() -> None:
