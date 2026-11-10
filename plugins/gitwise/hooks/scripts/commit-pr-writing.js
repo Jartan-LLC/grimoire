@@ -103,6 +103,12 @@ function isOwnDeny(record) {
   });
 }
 
+/** Where the line of `buf` holding byte `at` starts and ends, its newline left out. */
+function lineAt(buf, at) {
+  const newline = buf.indexOf(0x0a, at);
+  return { start: buf.lastIndexOf(0x0a, at) + 1, end: newline < 0 ? buf.length : newline };
+}
+
 /** The record on the line of JSONL `buf` from `start` to `end`, or null. */
 function parseLine(buf, start, end) {
   try {
@@ -121,15 +127,13 @@ function parseLine(buf, start, end) {
  */
 function cleared(buf) {
   for (let at = buf.indexOf(SKILL_NAME); at >= 0; ) {
-    const start = buf.lastIndexOf(0x0a, at) + 1;
-    const newline = buf.indexOf(0x0a, at);
-    const end = newline < 0 ? buf.length : newline;
+    const { start, end } = lineAt(buf, at);
     const line = buf.toString('utf8', start, end);
     if (line.includes(SKILL_BODY_PREFIX) || line.includes(DENY_MARKER) || line.includes('"invoked_skills"')) {
       const record = parseLine(buf, start, end);
       if (record && (isSkillLoad(record) || isReinjection(record) || isOwnDeny(record))) return true;
     }
-    at = newline < 0 ? -1 : buf.indexOf(SKILL_NAME, newline);
+    at = buf.indexOf(SKILL_NAME, end);
   }
   return false;
 }
@@ -139,9 +143,8 @@ function sinceLastCompaction(buf) {
   for (let from = buf.length; from > 0; ) {
     const at = buf.lastIndexOf(COMPACT_BOUNDARY, from - 1);
     if (at < 0) return null;
-    const start = buf.lastIndexOf(0x0a, at) + 1;
-    const newline = buf.indexOf(0x0a, at);
-    const record = parseLine(buf, start, newline < 0 ? buf.length : newline);
+    const { start, end } = lineAt(buf, at);
+    const record = parseLine(buf, start, end);
     if (record?.type === 'system' && record.subtype === 'compact_boundary') return buf.subarray(start);
     from = at;
   }
@@ -169,19 +172,12 @@ function isSessionTranscript(buf, sessionId) {
 /** `buf` up to the end of the record with `uuid`, or an empty Buffer when absent. */
 function historyUpTo(buf, uuid) {
   const at = typeof uuid === 'string' && uuid !== '' ? buf.indexOf(`"uuid":${JSON.stringify(uuid)}`) : -1;
-  if (at < 0) return Buffer.alloc(0);
-  const newline = buf.indexOf(0x0a, at);
-  return newline < 0 ? buf : buf.subarray(0, newline);
+  return at < 0 ? Buffer.alloc(0) : buf.subarray(0, lineAt(buf, at).end);
 }
 
 /** The first record of JSONL `buf`, or null. */
 function firstRecord(buf) {
-  const newline = buf.indexOf(0x0a);
-  try {
-    return JSON.parse(buf.toString('utf8', 0, newline < 0 ? buf.length : newline));
-  } catch {
-    return null;
-  }
+  return parseLine(buf, 0, lineAt(buf, 0).end);
 }
 
 /**
