@@ -3,7 +3,7 @@
 ## 2.6.0
 
 - New `planning` skill: wherever your agent plans, in conversation, in a plan file or for an issue, it sizes the plan to what a mistake would cost and settles each gap with whoever owns it. When no one can answer, your agent records an assumption and carries on, holding back only steps that cannot be undone.
-- `plan-issue` plans with the `planning` skill in place of its design checklist, which asked for maximum abstraction where reuse was likely. In its plans, Decisions for the user becomes Decisions: each item names who owns it and the option your agent recommends, and a premise your agent could check while planning is checked rather than listed. Steps carry each failure path the plan found and, where a mistake would cost more than a revert, how the change reaches where it runs, its cost with a ceiling and how it is undone; Verification covers the error cases, seen where the change runs.
+- `plan-issue` plans with the `planning` skill in place of its design checklist, which asked for maximum abstraction where reuse was likely. In its plans, Decisions for the user becomes Decisions: each item names who owns it and the option your agent recommends, and a premise your agent could check while planning is checked rather than listed. Approach records each review finding your agent declines, with why, so a later review sees it answered. Steps carry each failure path the plan found and, where a mistake would cost more than a revert, how the change reaches where it runs, its cost with a ceiling and how it is undone; Verification covers the error cases, seen where the change runs.
 
 ## 2.5.0
 
