@@ -5,8 +5,8 @@
 # same pattern); bloat cases give the doc as those fix commits grew it. Guards: the reviewer still
 # catches the wrong fact planted in each lean and bloat doc and a wrong default, a dead link and a
 # wrong flag in the cost cases, and leaves alone a troubleshooting part at the end and the
-# prerequisite and recovery lines of two lean docs. Must hold: it still raises a missing data-loss
-# warning.
+# prerequisite and recovery lines of lean-backup and lean-merge. Must hold: it still raises a
+# missing data-loss warning.
 # tests/evals/README.md says how the suite is run. No baselines yet: until `make eval-run ...
 # RECORD=1` draws them, every case is committed as a regression case.
 target = "praxis:doc-reviewer"
