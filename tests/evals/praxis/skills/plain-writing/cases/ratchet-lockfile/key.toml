@@ -1,8 +1,8 @@
-# A candidate target case: committed as a regression case until an old baseline fails it
-# (tests/evals/README.md, "Choosing cases" step 2), then retagged kind = "target".
+# A target case, retagged from regression because its Sonnet old baseline fails it
+# (tests/evals/README.md, "Choosing cases" step 2).
 # The ratchet itself: a review round found a rare case, its fix commit is the last on the branch.
 split = "screen"
-kind = "regression"
+kind = "target"
 hints = []
 
 [[check]]

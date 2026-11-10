@@ -1,8 +1,8 @@
-# A candidate target case: committed as a regression case until an old baseline fails it
-# (tests/evals/README.md, "Choosing cases" step 2), then retagged kind = "target".
+# A target case, retagged from regression because its Opus and Sonnet old baselines fail it
+# (tests/evals/README.md, "Choosing cases" step 2).
 # A second rebuild of grimoire #170's README limits.
 split = "confirm"
-kind = "regression"
+kind = "target"
 hints = []
 
 [[fact]]
