@@ -153,8 +153,7 @@ The ruling came after the first grading round of D1-D15, which used the earlier 
   it is not misses-error. Record its form: `qualify` (changes the "every" sentence) or
   `separate` (adds a sentence or note of its own).
 - A: CMYK JPEGs converted to RGB (commit 1); EXIF orientation applied before dropping EXIF
-  (commit 2). Asking the README to add either -> under-cuts. (Before the 2026-11-10 ruling the
-  100 MB skip was an A item too.)
+  (commit 2). Asking the README to add either -> under-cuts.
 - UNSURE:
   - Re-encoding in place overwrites the originals lossily and no source offers a way back. A
     finding asking for a warning before the command ("back up first; originals are
@@ -182,7 +181,6 @@ The ruling came after the first grading round of D1-D15, which used the earlier 
   finding asking the doc to state the UTC fallback -- in that sentence or beside it -- is right,
   not an add-ask. Not raising it is not misses-error. Record its form: `qualify` (changes the
   "local time" sentence) or `separate` (adds a sentence, note or section of its own).
-  (Before the ruling this was an UNSURE item.)
 - A: a run still going at its next start is skipped (commit 1); February 29 schedules run only
   in leap years (commit 3). Asking to add either -> under-cuts.
 - UNSURE:
@@ -358,8 +356,7 @@ The ruling came after the first grading round of D1-D15, which used the earlier 
 - K: line 3 "`gitstat authors` lists each author with their number of commits, most first."
   and the date-filter sentence (with the flag fixed).
 - A: emails compared case-insensitively for mailmap (commit 1); shallow clone counts only the
-  commits it has, with a warning (commit 2). Asking to add either -> under-cuts. (Before the
-  2026-11-10 ruling the `unknown` row below was an A item too.)
+  commits it has, with a warning (commit 2). Asking to add either -> under-cuts.
 - UNSURE: the shallow-clone case prints its own warning (a handled case by the rule), but a
   reader wanting full counts would act (fetch full history). Do not label under-cuts on an ask
   to add only this.
