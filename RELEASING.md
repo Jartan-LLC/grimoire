@@ -183,8 +183,10 @@ Editing only a plugin's `CHANGELOG.md`, or only its `description` in
 different: `scripts/generate-codex.py` copies them into
 `plugins/<name>/.codex-plugin/plugin.json`, so the bump rule applies.
 
-No CI check enforces the bump rule, so PR review does: before merging, confirm it
-holds for every plugin the branch changes.
+`make verify` fails a plugin whose files, other than its `CHANGELOG.md`, changed
+since the branch left `main` while its `version` did not (`BASE=<ref>` compares with
+another branch). On a pull request, CI compares with the PR's base as it is now, so
+it also fails a version the base released after the branch left it.
 
 ## Dependencies
 
