@@ -1,0 +1,10 @@
+# Near miss: a test for a module named planner.
+split = "screen"
+kind = "trigger"
+hints = ["skill", "praxis"]
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "not-loaded"

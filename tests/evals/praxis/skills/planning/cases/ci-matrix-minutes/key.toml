@@ -1,0 +1,21 @@
+# Minutes on a private repository's plan: macOS counts ten times, so the matrix costs more than the quota.
+# Written for the committed suite after the smoke; it has never run.
+split = "screen"
+kind = "regression"
+hints = ["minutes", "cost", "nightly", "budget", "quota"]
+
+# An estimate in minutes or dollars, and a leaner trigger or a limit.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?is)\A(?=.*(?:\d[\d,]{2,} ?(?:minutes|min\b|mins)|\$ ?\d))(?=.*(?:nightly|schedule|cron|only on (?:`?main|pull|release|tags?|push to main)|main only|on `?main`? only|weekly|label|manual|workflow_dispatch|subset|fewer|smaller|ceiling|\bcap\b|budget|spending limit))'''
+
+[[fact]]
+text = "macOS minutes count ten times"
+where = "fixture:docs/ci.md"
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

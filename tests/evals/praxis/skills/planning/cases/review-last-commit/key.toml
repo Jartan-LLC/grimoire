@@ -1,0 +1,10 @@
+# Near miss: a code review of a commit, not of a plan.
+split = "screen"
+kind = "trigger"
+hints = ["skill", "praxis"]
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "not-loaded"

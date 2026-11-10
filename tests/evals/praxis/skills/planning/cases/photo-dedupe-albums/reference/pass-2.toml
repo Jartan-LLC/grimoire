@@ -1,0 +1,6 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''Keep the copy an album references; if two albums use different copies, rewrite the album
+paths to the kept one.
+'''

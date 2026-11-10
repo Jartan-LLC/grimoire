@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+1. Rename `tmp` to `subtotal` in `billing/invoice.py`.
+2. Rollback: revert the commit if anything breaks.
+'''

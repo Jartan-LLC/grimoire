@@ -1,0 +1,5 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''Make the handler idempotent: mark paid only if not already paid, send the receipt once.
+'''

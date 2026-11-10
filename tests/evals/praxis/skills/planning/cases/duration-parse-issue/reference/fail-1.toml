@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+".claude/workspace/issue-8/plan.md" = '''# Plan (issue 8)
+
+Add `parse_duration` to `timeutil.py` with tests in `tests/test_timeutil.py` for the valid
+forms; run pytest.
+'''

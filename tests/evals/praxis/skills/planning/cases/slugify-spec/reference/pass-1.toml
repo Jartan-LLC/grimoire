@@ -1,0 +1,12 @@
+final = "Plan written to plan.md."
+
+[files]
+".claude/workspace/issue-12/plan.md" = '''# Plan: Add slugify to utils (issue 12)
+
+## Steps
+1. `slugify` in `utils.py`: lowercase, runs of spaces to `-`, then drop the rest.
+2. Tests in `tests/test_utils.py`: `"Hello  World!"` gives `hello-world`.
+
+## Verification
+- `python3 -m pytest -q`
+'''

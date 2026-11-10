@@ -1,0 +1,9 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+`docs/privacy.md` says the site sets no cookies and does not track visitors, and most readers
+are in the EU. Owner decision: a cookieless, aggregate counter that keeps that promise, or
+change the page and ask for consent.
+'''

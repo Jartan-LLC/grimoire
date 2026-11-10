@@ -1,0 +1,22 @@
+# Deleting duplicates breaks what points at them: albums list photo paths.
+# Written for the committed suite after the smoke; it has never run.
+split = "screen"
+kind = "regression"
+hints = ["album", "dry run", "trash"]
+
+# Albums point at photo paths: the plan repoints them at the kept copy, or keeps a copy any
+# album uses.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?is)(?:update|rewrite|repoint|re-point|redirect|remap|fix up|replace|adjust|point)[^\n]{0,120}albums?|albums?[^\n]{0,160}(?:update|rewrite|repoint|re-point|remap|broken|dangling|point (?:to|at) the (?:kept|surviving)|(?:kept|surviving) (?:copy|file|path)|still (?:point|refer|reference))'''
+
+[[fact]]
+text = "lists each album's photos by path"
+where = "fixture:README.md"
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

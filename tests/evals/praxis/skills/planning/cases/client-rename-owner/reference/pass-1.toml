@@ -1,0 +1,10 @@
+final = "Plan written to plan.md."
+
+[files]
+".claude/workspace/issue-57/plan.md" = '''# Plan: Rename Client.get_items to Client.list_items (issue 57)
+
+## Decisions
+- `get_items` is public API of a package on PyPI -- owner: maintainer -- recommended: keep
+  it as a deprecated alias in 1.5.0 -- default if unanswered: the alias -- if wrong: drop
+  it in 2.0.0 instead.
+'''

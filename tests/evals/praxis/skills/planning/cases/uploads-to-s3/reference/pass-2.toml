@@ -1,0 +1,6 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''Phase 1 copy existing uploads; phase 2 serve old URLs from either store; phase 3 cut over.
+Each phase can revert by a config switch.
+'''

@@ -1,0 +1,10 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+On first run, if `~/.toolrc` is INI, write the TOML to a temporary file and `os.replace`
+it, so a crash never leaves it half-written. Users run several commands at once, so take a
+lock file first; a second process waits, then sees TOML and skips. Keep the INI as
+`~/.toolrc.v2.bak`.
+'''

@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Put Redis in front of `get_report(customer_id, month)` with a one-hour TTL, keyed by
+customer and month.
+'''

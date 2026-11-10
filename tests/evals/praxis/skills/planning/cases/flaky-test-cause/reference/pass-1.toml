@@ -1,0 +1,9 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+`month_total` caches by month in `_CACHE`, so whichever test runs first fixes the answer;
+pytest-randomly shuffles the order. Drop the cache (or key it on the orders) instead of
+retrying. Check: `python3 -m pytest -q tests/test_refunds.py tests/test_totals.py` passes.
+'''

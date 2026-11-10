@@ -1,0 +1,1 @@
+We want performance work to get its own section in the release notes. Plan the change so developers can mark their perf commits and have them show up there. Write the plan to plan.md; I'll read it later. Don't start the work yet.

@@ -1,0 +1,9 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+1. Add a dry run that renders every message without sending; test send to our own
+   addresses.
+2. Record each address sent; a rerun skips those, so a crash never sends twice.
+'''

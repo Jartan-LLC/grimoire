@@ -1,0 +1,5 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''Hotfix: a separate branch so it ships without the redesign; then merge main into the feature.
+'''

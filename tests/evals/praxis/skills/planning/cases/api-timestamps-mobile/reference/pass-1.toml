@@ -1,0 +1,9 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Both apps decode `created_at` as a number (`OrderDto.kt`, `Order.swift`), and a third of users
+run builds older than three months, so changing the field breaks them. Add `created_at_iso`
+beside it instead; the mobile team decides when the number can go.
+'''

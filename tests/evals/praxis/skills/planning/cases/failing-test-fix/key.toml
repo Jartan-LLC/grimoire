@@ -1,0 +1,10 @@
+# Near miss: make a failing test pass.
+split = "confirm"
+kind = "trigger"
+hints = ["skill", "praxis"]
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "not-loaded"

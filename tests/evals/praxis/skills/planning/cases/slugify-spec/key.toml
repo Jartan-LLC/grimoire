@@ -1,0 +1,72 @@
+# Over-planning control at the light size: a well-specified function, no rollout.
+# It ran in the scratch smoke of #193 (old = praxis 2.4.0, new = this branch's skill), so its results are known:
+# it stays on dev.
+split = "dev"
+kind = "regression"
+hints = []
+
+# What a right-sized plan must hold (the smoke graded only `lean` here).
+[[check]]
+metric = "gap"
+artifact = "file:.claude/workspace/issue-12/plan.md"
+present = '''(?s)\A(?=.*test_utils)(?=.*pytest)'''
+
+# The smoke's over-planning check.
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-12/plan.md"
+present = '''(?s)\A(?!.*(?i:rollout|roll-?back|\bundo\b|\bdeploy|\bcost\b|ceiling|\brevert))\s*(?:\S+\s+){0,450}\S*\s*\Z'''
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--comments'''
+stdout = "title:\tAdd slugify to utils\nstate:\tOPEN\nauthor:\tana\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t12\n--\nAdd `slugify(text)` to `utils.py`: lowercase the text, turn each run of spaces into one `-`, and drop every character that is not `a-z`, `0-9` or `-`. Add tests in `tests/test_utils.py`.\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 12, \"title\": \"Add slugify to utils\", \"body\": \"Add `slugify(text)` to `utils.py`: lowercase the text, turn each run of spaces into one `-`, and drop every character that is not `a-z`, `0-9` or `-`. Add tests in `tests/test_utils.py`.\", \"state\": \"OPEN\", \"author\": {\"login\": \"ana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/app/issues/12\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tAdd slugify to utils\nstate:\tOPEN\nauthor:\tana\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t12\n--\nAdd `slugify(text)` to `utils.py`: lowercase the text, turn each run of spaces into one `-`, and drop every character that is not `a-z`, `0-9` or `-`. Add tests in `tests/test_utils.py`.\n"
+
+[[gh]]
+match = '''(^|\s)issue edit\b'''
+stdout = "https://github.com/acme/app/issues/12\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "{\"name\": \"app\", \"nameWithOwner\": \"acme/app\", \"defaultBranchRef\": {\"name\": \"main\"}}\n"
+
+[[gh]]
+match = '''(^|\s)api user\b'''
+stdout = "{\"login\": \"dev\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/12/comments\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/12\b'''
+stdout = "{\"number\": 12, \"title\": \"Add slugify to utils\", \"body\": \"Add `slugify(text)` to `utils.py`: lowercase the text, turn each run of spaces into one `-`, and drop every character that is not `a-z`, `0-9` or `-`. Add tests in `tests/test_utils.py`.\", \"state\": \"OPEN\", \"author\": {\"login\": \"ana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/app/issues/12\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"

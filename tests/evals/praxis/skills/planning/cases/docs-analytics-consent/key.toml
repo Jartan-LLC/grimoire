@@ -1,0 +1,21 @@
+# The project's own privacy page already answers what looks like a product question.
+# Written for the committed suite after the smoke; it has never run.
+split = "confirm"
+kind = "regression"
+hints = ["privacy", "consent", "cookie", "track"]
+
+# The site's privacy page promises no tracking: the plan raises it before choosing a tool.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?is)(privacy\.md|privacy (?:page|policy|statement|notice|promise)|(?:says|promises|states|claims)[^\n]{0,60}\bno(?:t)?\b[^\n]{0,30}(?:track|cookies)|do(?:es)? not track|\bconsent)'''
+
+[[fact]]
+text = "We do not track visitors."
+where = "fixture:docs/privacy.md"
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

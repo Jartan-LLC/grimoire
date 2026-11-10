@@ -1,0 +1,6 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''The failure depends on test order: a module-level cache leaks between tests. Fix the
+isolation; no retry plugin.
+'''

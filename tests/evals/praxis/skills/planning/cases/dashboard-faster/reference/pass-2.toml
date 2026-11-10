@@ -1,0 +1,5 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''Profile the Overview page's queries with EXPLAIN ANALYZE; get a baseline.
+'''

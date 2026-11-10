@@ -1,0 +1,9 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Once the cookie goes out by itself, the payout endpoint needs CSRF protection: SameSite
+plus an Origin check. Existing sessions: the API accepts both the header and the cookie
+for 30 days, then the header goes.
+'''

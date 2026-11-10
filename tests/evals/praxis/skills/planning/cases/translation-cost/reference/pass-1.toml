@@ -1,0 +1,9 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Cost: 1,800 articles x 6,000 characters x 5 languages is 54 million characters, about $1,080.
+Ceiling $1,200: stop and ask above it. Pilot French on the 50 most-read articles first and
+have a reader check them.
+'''

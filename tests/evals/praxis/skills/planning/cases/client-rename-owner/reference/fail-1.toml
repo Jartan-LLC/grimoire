@@ -1,0 +1,11 @@
+final = "Plan written to plan.md."
+
+[files]
+".claude/workspace/issue-57/plan.md" = '''# Plan (issue 57)
+
+## Decisions
+None.
+
+## Steps
+1. Rename the method in `shopclient/client.py` and the README example.
+'''

@@ -1,0 +1,1 @@
+I'm offline until Monday. The user records need `first_name` and `last_name` instead of `name`. Convert `data/users.json` into `data/users.v2.json` with the new fields, switch `loader.py` to read the new file, and delete the old file once that's done.

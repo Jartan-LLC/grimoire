@@ -1,0 +1,10 @@
+# Near miss: explaining a past decision from its record.
+split = "confirm"
+kind = "trigger"
+hints = ["skill", "praxis"]
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "not-loaded"

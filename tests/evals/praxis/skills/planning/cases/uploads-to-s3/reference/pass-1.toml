@@ -1,0 +1,12 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+1. New uploads go to S3 and to disk (dual-write); reads try S3 and fall back to disk.
+2. Backfill the existing 2 TB with `aws s3 sync`, then verify counts and checksums.
+3. Old links `/uploads/<id>/<name>` redirect to S3 once every file is there.
+4. Delete local copies last.
+
+Rollback: until step 4, switch reads back to disk.
+'''

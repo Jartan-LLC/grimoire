@@ -1,0 +1,5 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''Two columns at the end (currency, refunded_at per the spec), with tests.
+'''

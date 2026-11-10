@@ -1,0 +1,10 @@
+accounts:
+  trigger: merge to main
+  steps: [make migrate, deploy accounts]
+billing:
+  trigger: schedule, Tuesdays 09:00 UTC
+  steps: [deploy billing]
+notifications:
+  trigger: merge to main touching notifications/
+  steps: [deploy notifications]
+  approvals: growth team

@@ -1,0 +1,5 @@
+site_name: Acme docs
+nav:
+  - Home: index.md
+  - Install: install.md
+  - Privacy: privacy.md

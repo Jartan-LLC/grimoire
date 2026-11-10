@@ -1,0 +1,11 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+1. Add the new column `email_address`; a trigger keeps both columns in sync.
+2. Backfill in batches; move each service's reads and writes.
+3. Drop the old `email` column last, once no query reads it.
+
+Rollback: until step 3, point a service back at `email`.
+'''
