@@ -8,8 +8,7 @@
  *
  * Codex-only, keyed on the bare PLUGIN_ROOT: Codex sets it alongside
  * CLAUDE_PLUGIN_ROOT, Claude Code sets only the prefixed name, so it is a
- * reliable discriminator. Reading paths from it also means a version bump
- * moves the source directory without stranding a stale copy.
+ * reliable discriminator.
  *
  * hooks.json reads PLUGIN_ROOT inside node rather than shell-interpolating it,
  * so every non-Codex session -- where the variable is unset -- is a clean no-op
@@ -18,6 +17,16 @@
  *
  * Roles nest under `grimoire/<plugin>/` because Codex discovers them
  * recursively; that keeps the namespace ours and cannot clobber a user's own.
+ * `<plugin>` is the manifest's name, not PLUGIN_ROOT's basename: Codex installs
+ * into `<marketplace>/<plugin>/<version>`, and a folder named after the version
+ * would leave each old version's roles installed beside the new ones.
+ *
+ * Earlier releases did name the folder after the version, or `local` for a
+ * manifest without one, so the sync also removes every folder in `grimoire/`
+ * with such a name. Codex keeps the first role of a name in sorted path order,
+ * and a version name starts with a digit, so it sorts before any plugin's and
+ * its stale roles would otherwise win over ours. A `local` folder holds roles
+ * no plugin owns any more: every plugin installed without a version shared it.
  */
 
 const fs = require('fs');
@@ -26,13 +35,20 @@ const path = require('path');
 
 const NAMESPACE = 'grimoire';
 
-function codexAgentsDir() {
-  const home = process.env.CODEX_HOME || path.join(os.homedir(), '.codex');
-  // Resolve before taking the basename: a PLUGIN_ROOT ending in `..` would
-  // otherwise yield ".." and point the target at the agents directory itself,
-  // putting roles this plugin does not own within reach of the sweep below.
-  const plugin = path.basename(path.resolve(process.env.PLUGIN_ROOT));
-  return path.join(home, 'agents', NAMESPACE, plugin);
+// Folder names earlier releases installed into (see the header): X.Y.Z with
+// any suffix Codex allows in a version folder, or "local".
+const LEFTOVER_FOLDER = /^(\d+\.\d+\.\d+([-+][\w.+-]*)?|local)$/;
+
+function readPluginName(pluginRoot) {
+  const manifest = path.join(pluginRoot, '.codex-plugin', 'plugin.json');
+  const plugin = JSON.parse(fs.readFileSync(manifest, 'utf8')).name;
+  // The plugin-name rule Codex installs by. A name it would refuse, such as
+  // "..", could point the target outside our namespace, putting roles this
+  // plugin does not own within reach of the sweep below.
+  if (typeof plugin !== 'string' || !/^[\w-]+(\.[\w-]+)*$/.test(plugin)) {
+    throw new Error(`${manifest} has no usable plugin name`);
+  }
+  return plugin;
 }
 
 /**
@@ -74,16 +90,44 @@ function syncRoles(sourceDir, targetDir) {
   return changed;
 }
 
+/**
+ * Remove the folders earlier releases installed roles into, other than
+ * `keep`. Returns how many were removed; a folder that cannot be removed is
+ * reported and skipped.
+ */
+function sweepLeftovers(namespaceDir, keep) {
+  let swept = 0;
+  for (const entry of fs.readdirSync(namespaceDir, { withFileTypes: true })) {
+    if (!entry.isDirectory() || entry.name === keep || !LEFTOVER_FOLDER.test(entry.name)) continue;
+    const leftover = path.join(namespaceDir, entry.name);
+    try {
+      fs.rmSync(leftover, { recursive: true });
+      swept++;
+    } catch (err) {
+      console.error(`[Hook] Could not remove old Codex roles in ${leftover}: ${err.message}`);
+    }
+  }
+  return swept;
+}
+
 // Never block a session start: any failure here costs the user some agent
 // roles, which is not worth refusing to start over.
 try {
-  if (process.env.PLUGIN_ROOT) {
-    const sourceDir = path.join(process.env.PLUGIN_ROOT, 'codex', 'agents');
+  const pluginRoot = process.env.PLUGIN_ROOT;
+  if (pluginRoot) {
+    const sourceDir = path.join(pluginRoot, 'codex', 'agents');
     if (fs.existsSync(sourceDir)) {
-      const targetDir = codexAgentsDir();
+      const plugin = readPluginName(pluginRoot);
+      const home = process.env.CODEX_HOME || path.join(os.homedir(), '.codex');
+      const namespaceDir = path.join(home, 'agents', NAMESPACE);
+      const targetDir = path.join(namespaceDir, plugin);
       const changed = syncRoles(sourceDir, targetDir);
       if (changed > 0) {
         console.error(`[Hook] Synced ${changed} Codex agent role(s) to ${targetDir}`);
+      }
+      const swept = sweepLeftovers(namespaceDir, plugin);
+      if (swept > 0) {
+        console.error(`[Hook] Removed ${swept} old Codex role folder(s) from ${namespaceDir}`);
       }
     }
   }

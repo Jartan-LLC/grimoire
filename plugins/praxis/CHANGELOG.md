@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.2
+
+- In Codex, praxis installs its agent roles in `~/.codex/agents/grimoire/praxis/` (`$CODEX_HOME/agents/grimoire/praxis/` if you set `CODEX_HOME`), and an update replaces them there. Before, each version added a folder named after the version, such as `2.2.1/`, and left the older ones behind, so Codex kept using an old copy of each role. At session start, praxis now deletes every folder in `~/.codex/agents/grimoire/` named after a version, such as `1.12.0` or `2.0.0-rc.1`, or named `local`, with everything in it, recursio's old roles included. It leaves folders with any other name alone.
+
 ## 2.2.1
 
 - `comment-hygiene` says that `find-duplicate-comments.js` reads committed files only: a comment you have not committed is not checked, and a duplicate you have fixed keeps reporting until you commit the fix.
