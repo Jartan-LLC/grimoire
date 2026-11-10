@@ -71,7 +71,9 @@ Narrates the **change** that produced the code (what was removed, moved, renamed
   name the topic and point (`# config ownership: entrypoint.sh`), though a warning at its own
   point of danger stays. Grep the phrase before ruling, or run
   [find-duplicate-comments.js](find-duplicate-comments.js), which indexes every tracked
-  comment and reports the ones a diff adds that are already told elsewhere.
+  comment and reports the ones a diff adds that are already told elsewhere. The script reads
+  committed files only: a comment you have not committed is not checked, and a duplicate you
+  have fixed keeps reporting until you commit the fix.
 
 ## Keep vs. delete
 

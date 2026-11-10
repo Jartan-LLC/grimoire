@@ -110,6 +110,30 @@ def test_parse_classifies_writes_by_command_and_tool() -> None:
     ]  # fmt: skip
 
 
+def bash_result(call_id: str, output: str, *, error: bool) -> trace.Event:
+    block = {"type": "tool_result", "tool_use_id": call_id, "is_error": error, "content": output}
+    return {"type": "user", "parent_tool_use_id": None, "message": {"content": [block]}}
+
+
+def test_parse_counts_a_file_the_shell_writes_by_its_path_and_judges_it_by_its_own_error() -> None:
+    doc = "cat >> README.md <<'EOF'\n## Usage\nEOF\ngit add README.md && git commit -m 'docs: x'"
+    events = [
+        call("b1", "Bash", command=doc), result_of("b1"),
+        call("b2", "Bash", command="cat > RELEASING.md <<'EOF'\nx\nEOF\nmake test"),
+        bash_result("b2", "Exit code 2\nmake: *** No rule to make target 'test'.  Stop.", error=True),
+        call("b3", "Bash", command="echo x > gone/a.md; ls"),
+        bash_result("b3", "/bin/bash: line 1: gone/a.md: No such file or directory\nREADME.md", error=False),
+        call("b4", "Bash", command="python3 -m pytest -q 2>&1 | tail -3"), result_of("b4"),
+        call("b5", "Bash", command="cat > NOTES.md <<'EOF'\nx\nEOF"),
+        bash_result("b5", "Permission to use Bash has been denied.", error=True),
+    ]  # fmt: skip
+    writes = trace.parse(events, PLUGINS).writes
+    assert [(w.kind, w.ok, w.text if w.kind == "file" else "") for w in writes] == [
+        ("file", True, "README.md"), ("commit", True, ""), ("file", True, "RELEASING.md"),
+        ("file", False, "gone/a.md"), ("file", False, "NOTES.md"),
+    ]  # fmt: skip
+
+
 def test_parse_leaves_out_an_event_whose_parent_is_no_agent_call() -> None:
     event = call("c1", "Bash", command="git commit -m x") | {"parent_tool_use_id": "agent-1"}
     assert trace.parse([event, result_of("c1")], PLUGINS).writes == []

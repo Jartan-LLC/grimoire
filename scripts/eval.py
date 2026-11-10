@@ -40,7 +40,7 @@ from typing import cast
 
 from evals import cache, calibrate, gh_stub, grade, jury, labeller, session, trace
 from evals.arms import Arm, merge_base, new_arm, none_arm, old_arm
-from evals.lint import lint
+from evals.lint import git_ignored, lint
 from evals.plan import Listed, first_gate, make_plan
 from evals.proc import CLAUDE, GIT, run
 from evals.suite import (
@@ -1431,7 +1431,7 @@ def main() -> int:
     if args.command == "plan":
         return plan_command(args.base, args.tier)
     if args.command == "lint":
-        found = lint(ROOT, git("ls-files").split())
+        found = lint(ROOT, git("ls-files").split(), git_ignored(ROOT))
         print("\n".join(found) if found else "every eval suite passes its lint")
         return 1 if found else 0
     if args.command in ("show", "judge-probe", "judge-label", "judge-align"):

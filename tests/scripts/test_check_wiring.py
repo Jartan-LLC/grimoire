@@ -129,6 +129,47 @@ def test_problems_checks_frontmatter_values_and_hooks(tree: pathlib.Path) -> Non
     ]
 
 
+def test_problems_checks_a_skills_support_files_and_every_hook_file(tree: pathlib.Path) -> None:
+    lib = tree / "plugins" / "lib"
+    (lib / "skills" / "conventions" / "references").mkdir()
+    (lib / "skills" / "conventions" / "references" / "details.md").write_text(
+        "Then load `lib:conventions` again, or `lib:convention`."
+    )
+    (lib / "skills" / "conventions" / "template.txt").write_text("Pairs well with app.")
+    (lib / "skills" / "conventions" / "logo.png").write_bytes(b"\x89PNG app:helper")
+    (lib / "hooks" / "scripts").mkdir(parents=True)
+    (lib / "hooks" / "scripts" / "remind.js").write_text("const say = 'Load app:helper first.';")
+    assert cw.problems() == [
+        "plugins/lib/skills/conventions/references/details.md: lib:convention names no skill, agent or command",
+        "plugins/lib/skills/conventions/template.txt: names app, which lib does not declare",
+        "plugins/lib/hooks/scripts/remind.js: app:helper is in app, which lib does not declare",
+    ]
+
+
+def test_problems_skips_local_tool_and_editor_state(tree: pathlib.Path) -> None:
+    lib = tree / "plugins" / "lib"
+    broken = "Load `lib:convention`."
+    (lib / "skills" / "conventions" / "SKILL.md~").write_text(broken)
+    (lib / "skills" / "conventions" / ".notes.md.swp").write_text(broken)
+    (lib / "hooks" / "node_modules" / "dep").mkdir(parents=True)
+    (lib / "hooks" / "node_modules" / "dep" / "index.js").write_text(broken)
+    (lib / "hooks" / ".venv").mkdir()
+    (lib / "hooks" / ".venv" / "readme.txt").write_text(broken)
+    assert cw.problems() == []
+
+
+def test_references_lists_the_pointers_in_a_skills_support_files_and_hook_scripts(
+    tree: pathlib.Path,
+) -> None:
+    app = tree / "plugins" / "app"
+    (app / "skills" / "helper" / "brief-template.md").write_text("Load `lib:conventions`.")
+    (app / "hooks" / "scripts").mkdir(parents=True)
+    (app / "hooks" / "scripts" / "remind.js").write_text("const say = 'Load app:helper.';")
+    found = {str(path.relative_to(tree)): pairs for path, pairs in cw.references().items()}
+    assert found["plugins/app/skills/helper/brief-template.md"] == {("lib", "conventions")}
+    assert found["plugins/app/hooks/scripts/remind.js"] == {("app", "helper")}
+
+
 def test_problems_names_a_mismatched_name_and_a_missing_description(tree: pathlib.Path) -> None:
     lib = tree / "plugins" / "lib"
     skill(lib, "notes", frontmatter="name: note\ndescription: Notes.")

@@ -32,6 +32,8 @@ from collections.abc import Iterator, Sequence
 from dataclasses import dataclass, field
 from typing import cast
 
+from . import shell
+
 SKILL_TEXT = "Base directory for this skill: "
 AGENT = "Agent"
 DEFAULT_AGENT = "general-purpose"  # the agent an Agent call without `subagent_type` starts
@@ -202,17 +204,33 @@ def _hook_context(output: str) -> str:
     return ""
 
 
-def _write(name: str, tool_input: dict[str, object]) -> tuple[str, str] | None:
+def _writes(name: str, tool_input: dict[str, object]) -> list[tuple[str, str]]:
+    """The (kind, text) writes of one tool call: a file write's text is its path.
+
+    A Bash command makes a file write for each file the shell writes, and at most one
+    write of another kind, the first of WRITES its text matches.
+    """
     if name in ("Write", "Edit"):
-        return "file", str(tool_input.get("file_path", ""))
+        return [("file", str(tool_input.get("file_path", "")))]
     if name == AGENT:
-        return SPAWN, str(tool_input.get("prompt", ""))
+        return [(SPAWN, str(tool_input.get("prompt", "")))]
     command = tool_input.get("command")
-    if name == "Bash" and isinstance(command, str):
-        for kind, pattern in WRITES:
-            if pattern.search(command):
-                return kind, command
-    return None
+    if name != "Bash" or not isinstance(command, str):
+        return []
+    found = [("file", path) for path in shell.file_writes(command)]
+    kind = next((kind for kind, pattern in WRITES if pattern.search(command)), None)
+    return found + ([(kind, command)] if kind else [])
+
+
+def _output(block: dict[str, object]) -> str:
+    """The text of a tool result: a string, or a list of text blocks."""
+    content = block.get("content")
+    if isinstance(content, str):
+        return content
+    blocks = cast("list[object]", content) if isinstance(content, list) else []
+    return "\n".join(
+        str(cast("dict[str, object]", b).get("text", "")) for b in blocks if isinstance(b, dict)
+    )
 
 
 def _system(trace: Trace, index: int, event: Event) -> None:
@@ -252,8 +270,16 @@ def _result(
 ) -> None:
     at, name, tool_input, agent, spawn = call
     ok = block.get("is_error") is not True
-    if (write := _write(name, tool_input)) is not None:
-        trace.writes.append(Write(at, write[0], ok, write[1], agent, spawn))
+    output = _output(block)
+    # A Bash error that does not start with its exit code is a hook's or Claude Code's
+    # own block: the command never ran.
+    ran = ok or output.startswith("Exit code")
+    for kind, text in _writes(name, tool_input):
+        if name == "Bash" and kind == "file":
+            done = ran and not shell.write_failed(text, output)
+        else:
+            done = ok
+        trace.writes.append(Write(at, kind, done, text, agent, spawn))
     path = tool_input.get("file_path")
     if name == "Read" and ok and isinstance(path, str) and (skill := skill_of(path, plugin_dirs)):
         trace.deliveries.append(Delivery(index, skill, path, agent, spawn))
