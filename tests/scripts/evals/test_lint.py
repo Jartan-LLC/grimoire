@@ -182,10 +182,10 @@ def test_lint_takes_a_hook_script_as_a_target(root: pathlib.Path) -> None:
     script.write_text("// nudge\n")
     hook = 'target = "gitwise:hooks/scripts/nudge.js"'
     case = suite_at(root, suite=SUITE.replace('target = "gitwise:commit-pr-writing"', hook))
-    assert lint(root, TRACKED) == []
+    assert lint(root, TRACKED, {}) == []
     config = case.parent.parent / "suite.toml"
     config.write_text(config.read_text().replace("nudge.js", "gone.js"))
-    assert any("is no skill, agent, command or hook script" in f for f in lint(root, TRACKED))
+    assert any("is no skill, agent, command or hook script" in f for f in lint(root, TRACKED, {}))
 
 
 def test_lint_reports_a_suite_that_does_not_load(root: pathlib.Path) -> None:
