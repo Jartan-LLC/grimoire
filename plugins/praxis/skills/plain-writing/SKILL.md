@@ -18,6 +18,16 @@ Name the reader and the job they came to do, decide or understand. Keep a passag
 would leave that reader with a wrong action, a wrong result, or a stop for a missing fact. On an
 explanation page, understanding is the job.
 
+Write for what the reader does. A document for people (a README, a contributor or release
+procedure, a docs page, release notes) says what its reader runs, chooses and must avoid, and how
+to recover from a failure they have to act on, with recovery from a rare failure in a short
+troubleshooting part at the end. What the program handles on its own -- a case it skips, fixes or
+reports with its own remedy -- needs no line: the code, its message and the commit hold it. A
+branch's commits are not the document's content list, though release notes still name each fix.
+Every line costs every reader, and lines no reader acts on bury the warnings the document must
+keep: a warning before data loss, a leaked secret or a step that cannot be undone stays where the
+reader acts, however rare.
+
 When rules pull apart, the earlier one wins: hard constraints, warnings, exact commands and
 validation; words that prevent ambiguity; context for a reader who lands mid-page; brevity.
 
@@ -25,8 +35,8 @@ Always keep:
 
 - prerequisites, before the steps they serve;
 - warnings, before the step that can cause harm or cannot be undone;
-- conditions and decision points: which option fits which case;
-- signs that something went wrong, and how to recover;
+- conditions the reader chooses between: which option fits which case;
+- signs of a failure the reader must act on, and how to recover;
 - how to tell a step worked;
 - exact commands, unchanged;
 - a short reason where a reader would otherwise skip a rule;
@@ -50,16 +60,8 @@ Cut:
 - alternatives when one default works (keep a named fallback for when it cannot run);
 - future plans in task and reference documents;
 - an intro that repeats its heading, and empty sections;
-- in a document for people (a README, a contributor or release procedure, a docs page, release
-  notes, which still name each fix), a case few of its readers meet;
 - in a reply, the background, diagnosis and proof the reader already has: lead with the answer
   and keep the one fact they lack.
-
-Aim a document for people at its readers' normal use: the common path, with recovery from a
-rare failure in a short troubleshooting part at the end. A warning about data loss, security or a
-step that cannot be undone stays where the reader acts, however rare the case, and the recovery
-after such a step stays in the troubleshooting part. Any other rare case left out is no review
-finding.
 
 In an existing file, apply these lists to the text your change writes or makes false, unless you
 were asked to make the file itself clearer.

@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"README.md" = "# autopilot\n\nA Claude Code plugin that keeps work moving while you are away.\n\n## Install\n\n```text\n/plugin install autopilot@acme\n```\n\n## Commands\n\nThe commands need `gh` logged in (`gh auth login`).\n\n- `/autopilot:walkaway` -- runs review rounds on the current PR until two come back clean. It\n  never merges, never pushes to `main` and stops after 8 rounds.\n"

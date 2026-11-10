@@ -1,6 +1,7 @@
-# Whether a doc written for people covers normal use (#182): a case few readers meet stays out of
-# the main path, recovery from a rare failure goes to a troubleshooting part at the end, and
-# warnings about data loss, secrets and steps that cannot be undone stay before their step.
+# Whether a doc written for people covers what its reader does (#182): a case the program handles
+# on its own stays out of the main path, recovery from a rare failure goes to a troubleshooting
+# part at the end, and warnings about data loss, secrets and steps that cannot be undone stay
+# before their step.
 # Target candidates are rebuilt from docs that grew one rare case per fix commit (claude-sync #49,
 # enchantments #103, grimoire #97 and #170, scaffold #275) or invented on the same pattern, and
 # from the ratchet itself: a fix commit for a rare case, then a request to bring the docs in line.
