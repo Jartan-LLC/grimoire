@@ -1,7 +1,8 @@
 # Grading specs: plain-writing sizing cases (issue 182)
 
-One section per eval case. A grader reads the doc the writer produced (the target file's
-final text, or the diff to it), checks it against the items below, and gives one label.
+One section per dev case; a screen or confirm case gets its section before its docs are
+graded (suite.toml). A grader reads the doc the writer produced (the target file's final
+text, or the diff to it), checks it against the items below, and gives one label.
 These specs come from each case's prompt.md, fixture/ and build.py, and the rule (the
 plain-writing paragraph "Write for what the reader does" and its "Always keep" list). They
 were written without seeing any model output or the case keys, except walkaway-readme's M4
