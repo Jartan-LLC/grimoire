@@ -3,7 +3,7 @@
 ## 2.5.0
 
 - Your agent writes a README, a contributor or release procedure, a docs page or release notes for what its reader does: what they run, choose and must avoid, and how to recover from a failure they have to act on, with recovery from a rare failure in a short troubleshooting part at the end. It leaves out what the program handles on its own, a case it skips, fixes or reports with its own remedy (release notes still name each fix, and an explanation or architecture page can describe how the program handles a case), and keeps a warning about data loss, a leaked secret or a step that cannot be undone where the reader acts, however rare the case. Skill, agent and command text is not covered.
-- `doc-reviewer` rates a line in such a document on what the program handles on its own as bloat (Important), and raises no finding for a case the rule leaves out.
+- `doc-reviewer` rates as bloat (Important) a line the rule above leaves out, and raises no finding when a document leaves such a case out.
 - Of the capabilities a change adds, your agent adds to a README only those that change what a user runs, picks or sees. It still adds each command, option, setting, default, requirement or component the change adds to every README list, table and example that should carry it.
 - `/praxis:review-cycle`'s closing round weighs each document's growth against its version at the base.
 
