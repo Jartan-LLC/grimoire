@@ -62,10 +62,11 @@ direction = "higher"
 # are tested for non-inferiority, and `harm` holds on its own. The gain is graded by a blind panel
 # of three agents, who see neither the arm nor the model, each labelling every doc right-sized,
 # bloated, under or mis-sized against panel-specs.md, two of three deciding. A change to
-# plain-writing goes ahead when, on each gate model, new has more right-sized docs than old and
-# loses no warning old keeps; its PR reports the panel's labels per model and arm. panel-specs.md
-# covers the dev cases: a screen or confirm case gets its spec written the same way before grading,
-# from its prompt, fixture, build.py and the rule, never from its key or a sample.
+# plain-writing goes ahead when, on each gate model, new has more right-sized docs than old, with no
+# significance bar beyond "more", and loses no warning old keeps; its PR reports the panel's labels
+# per model and arm. panel-specs.md covers the dev cases: a screen or confirm case gets its spec
+# written the same way before grading, from its prompt, fixture, build.py and the rule, never from
+# its key or a sample.
 primary = "kept"
 rule = "no-regression"
 guards = ["delivered"]
