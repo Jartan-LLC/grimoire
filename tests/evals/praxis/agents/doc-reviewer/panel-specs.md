@@ -1,8 +1,10 @@
 # Grading specs: doc-reviewer cases (issue 182)
 
-One section per case, dev, screen and confirm; a case added later gets its section before its
-reports are graded (suite.toml). A grader reads one doc-reviewer report on the case's branch,
-checks it against the items below, and gives one label. These specs come from each case's
+One section per screen and confirm case, and per dev case in suite.toml's `BURNED` (D1-D15),
+which were screen cases first. The panel grades held-out cases only, so the other dev cases have
+no section. A held-out case added later gets its section before its reports are graded
+(suite.toml). A grader reads one doc-reviewer report on the case's branch, checks it against the
+items below, and gives one label. These specs come from each case's
 `prompt.md`, `fixture/` and `build.py` (its COMMITS list, the branch the reviewer reviews) and
 the rule (`plugins/praxis/agents/doc-reviewer.md` and plain-writing's "Write for what the reader
 does"). They were written without seeing any model output or the case keys. The dev sections
