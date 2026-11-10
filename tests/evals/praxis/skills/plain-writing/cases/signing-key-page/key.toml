@@ -1,8 +1,7 @@
-# A candidate target case: committed as a regression case until an old baseline fails it
-# (tests/evals/README.md, "Choosing cases" step 2), then retagged kind = "target".
+# A target case: its old baselines fail it (tests/evals/README.md, "Choosing cases" step 2).
 # Rebuilt from scaffold #275 (docs/signing-key.md grew 11% across its fix commits). Its secret warning is must-hold.
 split = "screen"
-kind = "regression"
+kind = "target"
 hints = []
 
 [[fact]]

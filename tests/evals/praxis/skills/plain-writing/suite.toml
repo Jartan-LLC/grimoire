@@ -8,8 +8,8 @@
 # Regression cases: a warning that must stay, a common failure, a whole settings table, a release
 # note for a rare fix, an existing troubleshooting part. tests/evals/README.md says how the suite
 # is run.
-# The dev split is the smoke subset: run old and new on it before the full suite. No baselines yet:
-# until `make eval-run ... RECORD=1` draws them, every case is committed as a regression case.
+# The dev split is the smoke subset: run old and new on it before the full suite. A candidate target
+# is committed as a regression case until its old baselines fail it, as its key comment says.
 target = "praxis:plain-writing"
 # Cases moved off a held-out split, each with its reason in a comment.
 BURNED = []
