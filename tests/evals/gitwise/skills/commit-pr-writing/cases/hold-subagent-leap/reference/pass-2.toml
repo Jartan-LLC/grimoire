@@ -1,0 +1,2 @@
+commits = ["feat(dates): tell leap years apart\n\ndays_in_year took the leap flag from its caller, and each caller\nworked it out its own way; is_leap_year applies the Gregorian rule\nonce, centuries included."]
+final = "I made the change, added a test, ran `python3 -m pytest -q` (all pass) and committed it."

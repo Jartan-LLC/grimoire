@@ -11,6 +11,12 @@ its own: a bare `pip install` reaches the base interpreter, which later samples 
 From probe runs on 2.1.311: `--forward-subagent-text` sends a subagent's skill text, which
 the stream holds back by default, and the debug log names each skill an agent's
 frontmatter preloads; only those lines are kept, as the sample's `preloads`.
+
+Sessions write no transcript (`--no-session-persistence`), except a `transcript` case's,
+for a hook that reads it: Claude Code writes transcripts only under its configuration
+directory, so that session gets its own, CONFIG_DIR in its sandbox, deleted with the
+sandbox. A login that `/login` stored in the caller's directory does not reach it (probe
+on 2.1.321: "Not logged in", an excluded sample); one in the environment does.
 """
 
 import contextlib
@@ -68,6 +74,8 @@ SSH_AGENT = ("SSH_AUTH_SOCK", "SSH_AGENT_PID")
 STUB_TOKEN = "grimoire-eval-stub"  # noqa: S105 -- a dummy that authenticates nothing
 # A temp directory the stub reads besides the runner's, which TMPDIR can move elsewhere.
 SHARED_TMP = pathlib.Path("/tmp")  # noqa: S108 -- read for a body file, never written
+# A `transcript` case's Claude Code configuration directory, in its sandbox.
+CONFIG_DIR = "claude-config"
 VERIFY_TIMEOUT_S = 60
 NOT_STARTED = 127  # a shell's exit code for a command it cannot find
 
@@ -119,6 +127,7 @@ def sample_env(  # noqa: PLR0913 -- `suite_env` is apart from `base`: it is set 
     *,
     gh_stub: bool = False,
     suite_env: dict[str, str] | None = None,
+    transcript: bool = False,
 ) -> dict[str, str]:
     """The session's environment: git isolated, this checkout off PATH, the sample's own venv and TMPDIR.
 
@@ -140,7 +149,8 @@ def sample_env(  # noqa: PLR0913 -- `suite_env` is apart from `base`: it is set 
     reaches no https, ssh or git URL, and the SSH agent's variables are dropped. These
     controls hold only while the session keeps this environment: one that unsets
     GIT_ALLOW_PROTOCOL can reach the network with a key under HOME, as one that unsets
-    the gh variables reaches the user's gh login.
+    the gh variables reaches the user's gh login. With `transcript`, CLAUDE_CONFIG_DIR is
+    the sandbox's CONFIG_DIR, in place of any the caller set.
     """
     env = claude_env(git_env(base)) | (suite_env or {})
     for name in ("VIRTUAL_ENV", "PYTHONPATH", "PYTHONHOME", cache.STORE):
@@ -154,6 +164,8 @@ def sample_env(  # noqa: PLR0913 -- `suite_env` is apart from `base`: it is set 
     env["ENABLE_CLAUDEAI_MCP_SERVERS"] = "false"
     env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] = "1"
     env["GIT_CEILING_DIRECTORIES"] = str(store)
+    if transcript:
+        env["CLAUDE_CONFIG_DIR"] = str(sandbox / CONFIG_DIR)
     if gh_stub:
         for name in (*GH_LOGIN, *SSH_AGENT):
             env.pop(name, None)
@@ -166,12 +178,19 @@ def sample_env(  # noqa: PLR0913 -- `suite_env` is apart from `base`: it is set 
     return env
 
 
-def claude_args(
-    prompt: str | None, arm: Arm, model: str, budget_usd: float, debug_log: pathlib.Path
+def claude_args(  # noqa: PLR0913 -- `transcript` is apart: a case's, not the run's
+    prompt: str | None,
+    arm: Arm,
+    model: str,
+    budget_usd: float,
+    debug_log: pathlib.Path,
+    *,
+    transcript: bool = False,
 ) -> list[str]:
     """The `claude` command line for one sample, writing its debug log to `debug_log`.
 
     With no `prompt`, the session reads its messages from stdin as stream-json (`converse`).
+    The session writes no transcript unless `transcript`.
     """
     args = [
         CLAUDE, "-p", *([] if prompt is None else [prompt]),
@@ -181,7 +200,7 @@ def claude_args(
         "--setting-sources", "project",
         "--settings", json.dumps(BUILTINS_OFF),
         "--strict-mcp-config",
-        "--no-session-persistence",
+        *([] if transcript else ["--no-session-persistence"]),
         "--dangerously-skip-permissions",
         "--disallowedTools", *SCHEDULERS,
         "--max-budget-usd", f"{budget_usd:g}",
@@ -484,6 +503,8 @@ def _session(
     sandbox = pathlib.Path(tempfile.mkdtemp(prefix="grimoire-eval-"))
     try:
         (sandbox / "tmp").mkdir()
+        if case.transcript:
+            (sandbox / CONFIG_DIR).mkdir()
         repo = sandbox / "repo"
         env = git_env(dict(os.environ))
         heads = build_fixture(case, repo, env)
@@ -509,11 +530,15 @@ def _session(
             spec.store,
             gh_stub=case.remote,
             suite_env=spec.env,
+            transcript=case.transcript,
         )
         cut_short = ""
+        args = claude_args(
+            None if case.turns else case.prompt, arm, spec.model, spec.budget_usd, debug_log,
+            transcript=case.transcript,
+        )  # fmt: skip
         with out.open("w") as handle:
             if case.turns:
-                args = claude_args(None, arm, spec.model, spec.budget_usd, debug_log)
                 timed_out, cut_short = converse(
                     args, (case.prompt, *case.turns),
                     cwd=repo, env=session_env, out=handle, timeout_s=spec.timeout_s,
@@ -521,7 +546,7 @@ def _session(
             else:
                 try:
                     run(
-                        claude_args(case.prompt, arm, spec.model, spec.budget_usd, debug_log),
+                        args,
                         cwd=repo, env=session_env, stdout=handle, stderr=subprocess.STDOUT,
                         timeout=spec.timeout_s, check=False,
                     )  # fmt: skip

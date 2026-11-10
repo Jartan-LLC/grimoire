@@ -1,0 +1,2 @@
+commits = ["feat(stats): add median", "test: cover it\n\nCo-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>"]
+final = "I made the change, added a test, ran `python3 -m pytest -q` (all pass) and committed it."

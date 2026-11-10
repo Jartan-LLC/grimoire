@@ -64,6 +64,20 @@ def test_a_delivery_check_fails_when_nothing_of_its_kind_was_written() -> None:
     assert grade.delivery_score(check, trace.parse(load_skill("s1", "x", CPW), PLUGINS)) == 0.0
 
 
+def test_a_delivery_check_skips_a_failed_write_before_the_load() -> None:
+    check = Check(
+        "delivered",
+        "delivery",
+        skill="gitwise:commit-pr-writing",
+        write="commit",
+        state="in-context",
+    )
+    denied = [call("c1", "Bash", command='git commit -m "feat: x"'), result_of("c1", error=True)]
+    held = trace.parse([*denied, *load_skill("s1", "x", CPW), *commit("c2")], PLUGINS)
+    assert grade.delivery_score(check, held) == 1.0
+    assert grade.delivery_score(check, trace.parse(denied, PLUGINS)) == 0.0
+
+
 def test_a_file_delivery_check_reads_a_doc_written_through_bash() -> None:
     check = Check(
         "delivered", "delivery", skill="gitwise:commit-pr-writing", write="file", state="in-context"

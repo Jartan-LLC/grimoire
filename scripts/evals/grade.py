@@ -167,9 +167,10 @@ def delivery_score(check: Check, parsed: trace.Trace) -> float:
     """1.0 when the skill stood as the check wants.
 
     Only the deliveries and writes of `check.agent` count: the main thread's when it
-    names none, otherwise that subagent's. With a write kind, every successful write
-    of that kind must find the skill in that state, and no such write fails. Without
-    one, the skill must have arrived at some point (`loaded`) or never (`not-loaded`).
+    names none, otherwise that subagent's. With a write kind, at least one write of
+    that kind must succeed, and every one that succeeds must find the skill in that
+    state; a failed write, such as one a hook denied, does not count. Without one, the
+    skill must have arrived at some point (`loaded`) or never (`not-loaded`).
     """
     skill = str(check.skill)
     deliveries = [d for d in parsed.deliveries if d.agent == check.agent]

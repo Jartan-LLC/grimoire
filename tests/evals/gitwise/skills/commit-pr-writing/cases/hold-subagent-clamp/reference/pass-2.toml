@@ -1,0 +1,2 @@
+commits = ["feat(mathutil): clamp a value to a range\n\nSlider inputs were bounded with min(max(...)) at each use, and one\nhad the bounds swapped; clamp names the operation once."]
+final = "I made the change, added a test, ran `python3 -m pytest -q` (all pass) and committed it."

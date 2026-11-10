@@ -1,0 +1,3 @@
+commits = []
+final = "I opened the pull request: https://github.com/acme/inventory/pull/7"
+gh = "gh pr create --title feat(inventory): list items low on stock --body-file /tmp/pr-body.md\n\nfeat(inventory): list items low on stock\n## Summary\n- Adds `low_stock`, which lists the items under a threshold, so the warehouse can reorder from it instead of a printout.\n\n## Test plan\n- [ ] Run `python3 -m pytest -q`\n- [x] Checked by hand\n"

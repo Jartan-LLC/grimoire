@@ -1,0 +1,3 @@
+commits = []
+final = "I opened the pull request: https://github.com/acme/textstats/pull/7"
+gh = "gh pr create --base main --title t --body Adds `sentence_count`, because readability scores need a sentence count beside the word count.\n\nt\nAdds `sentence_count`, because readability scores need a sentence count beside the word count.\n"
