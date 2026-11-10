@@ -232,6 +232,22 @@ the PR how many versions you screened.
   on references.
 - **Whether a skill was in context when the agent wrote** is a guard or a diagnostic, not a primary
   metric, except in trigger cases, where loading the skill is the behaviour under test.
+- **A file write** (`write = "file"`, and what `overlap` and `barrier` below read) is a Write or Edit
+  call, or a file a Bash command writes through the shell: a redirect such as `>` or `>>`, on a
+  heredoc's command line too (`cat > a.md <<'EOF'`), `tee`, or `sed -i` or `perl -i`. Its path is the
+  one the command names, joined to a `cd` earlier in the same command and not in a subshell that has
+  ended. A file that a program the command runs writes itself is not seen, such as one
+  `python3 - <<EOF` opens for writing, or `cp` or `mv`, and neither is a write in a command run as a
+  string or through `find -exec` or `xargs`. A `pushd` is not read as a `cd`, and a path written
+  inside backticks keeps the closing backtick; `scripts/evals/shell.py`'s module docstring lists the
+  rest of what the reading gets wrong, such as a path with an unquoted `$(...)` in it, which is
+  recorded only up to the `$`. A Bash call's exit code is its last command's, so its file write
+  counts as failed only when the call was blocked before it ran, by a hook or by Claude Code itself,
+  or when the shell, `tee`, `sed` or `perl` reports that it could not write that file. A delivery
+  check, unlike `overlap` and `barrier` below, counts a file outside the session's working directory,
+  because that is often the text the skill governs, such as a PR description drafted in
+  `/tmp/pr-body.md` for `gh pr create --body-file`. So a scratch file written before the skill
+  arrives, such as `make test > /tmp/t.log`, fails a check that wants the skill in context.
 - **A subagent's work:** `report:<agent>` is every report that agent handed back, `brief:<agent>` every
   Agent-call prompt the main thread sent that agent type (a call that ended in error aside), and a
   delivery check with `agent = "<plugin>:<agent>"` reads that subagent's skill loads and writes instead
@@ -248,10 +264,13 @@ the PR how many versions you screened.
   `artifact = "barrier"` when the main thread made no commit and wrote no file outside
   `.claude/workspace/` (where it keeps notes such as the parts' statuses), nor tried to, between an
   Agent call and the end of every spawn out with it, at its report or at the notice that it failed.
-  `overlap` and `barrier` see a file written by a Write or Edit call only, not one written through
-  Bash, such as with `sed -i`. A delivery check's `write = "spawn"` is an Agent call: with
-  `state = "in-context"` the skill arrived before every Agent call of the main thread, or with an
-  `agent`, of that subagent. None of these is graded on references.
+  Neither `overlap` nor `barrier` counts a file outside the session's working directory, such as a
+  scratch log a command writes with `> /tmp/test.log` or a path under `~`, since it is not the parts'
+  work. `overlap` also skips a path with a `$` in it, such as `$d/src/a.js`, because two spawns with
+  their own `d` write two files under that one text.
+  A delivery check's `write = "spawn"` is an Agent call: with `state = "in-context"` the skill
+  arrived before every Agent call of the main thread, or with an `agent`, of that subagent. None of
+  these is graded on references.
 - **What the agent sent to GitHub:** `gh` is every call the stub recorded but Claude Code's own (below),
   one `gh <arguments>` line each with newlines written as `\n`, then a blank line, then every text the
   calls passed, newlines kept: each argument and its tails (past each leading letter of a short flag or a

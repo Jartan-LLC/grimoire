@@ -13,7 +13,8 @@
 # is listed with no baselines, and Haiku is a watch model, never screened. Each case stays a
 # regression case until a recorded baseline shows its failure.
 #
-# What the graders cannot see: `barrier` misses a file written through Bash. `contract` cannot tell
+# What the graders cannot see: `barrier` misses a file a program run from Bash writes, such as
+# `python3` or `cp` (tests/evals/README.md, "A file write"). `contract` cannot tell
 # the root extending the contract before a wave, which the skill allows, from a part editing it, so
 # it is reported only. `resplit` reads every general-purpose spawn as one, so a sibling part's skill
 # load counts for the part that split, and no check sees a part three levels down.
