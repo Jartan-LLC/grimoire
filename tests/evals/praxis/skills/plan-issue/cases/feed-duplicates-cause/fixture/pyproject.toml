@@ -1,0 +1,4 @@
+[project]
+name = "feedlet"
+version = "0.7.0"
+requires-python = ">=3.12"

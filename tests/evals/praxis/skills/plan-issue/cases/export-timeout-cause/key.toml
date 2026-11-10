@@ -1,0 +1,110 @@
+# A bug fix whose issue names a fix for a cause it has not tested.
+# Added with the planning skill (#193), after its smoke; it has never run.
+split = "screen"
+kind = "regression"
+hints = ["TIMEOUT", "0.3", "health", "cause"]
+
+# A Verification section (or Testing, Validation...) with a backticked command or a fenced block. A
+# command holds a space, `::` or a known tool's name (`ruff`), or is a script path (`./check.sh`); a
+# heading inside Steps is not the Verification section.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-44/plan.md"
+present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:[^`\n]*`[^`\n]*`)*?[^`\n]*`(?:[^`\n]*?[^`\s][ \t]+[^`\s][^`\n]*?|[^`\n]*::[^`\n]*|pytest|tox|make|jest|vitest|ruff|mypy|pyright|eslint|prettier|black|flake8|pylint|shellcheck|tsc|\.{1,2}/[^`\s]+|[\w./-]+\.(?:sh|bash))`|[ \t]*```)'''
+
+# No Complexity line or heading.
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-44/plan.md"
+absent = '''(?im)^(?:\#{1,6}[ \t]*complexity\b|[ \t>*_-]*complexity[ \t*_]*:)'''
+
+# No placeholder phases (Foundation / Core implementation / Integration).
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-44/plan.md"
+absent = '''(?i)phase[ \t]*\d+\W{0,4}(?:foundation|core\b|integration)|\b(?:core implementation|integration[ \t]*(?:/|and|&)[ \t]*cleanup)\b'''
+
+# At least one backticked path that exists in the fixture.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-44/plan.md"
+present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|ledgerpush/__init__\.py|ledgerpush/config\.py|ledgerpush/health\.py|ledgerpush/upload\.py|pyproject\.toml|tests/test_upload\.py|ledgerpush/?|tests/?)(?:[:#][^`\n]*)?`'''
+
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; a list
+# or range of lines and a `:col` are read too. The path must end in a source or text extension or
+# be a known extensionless file such as `Makefile`, so a `host:port` is not read as one.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-44/plan.md"
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?::\d+)?(?:[-,][ \t]*(?:2|1)(?::\d+)?)*|AGENTS\.md:(?:6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:6|5|4|3|2|1)(?::\d+)?)*|CLAUDE\.md:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|(?:ledgerpush/)?__init__\.py:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|(?:ledgerpush/)?config\.py:(?:4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:4|3|2|1)(?::\d+)?)*|(?:ledgerpush/)?health\.py:(?:13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:ledgerpush/)?upload\.py:(?:10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|pyproject\.toml:(?:4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:4|3|2|1)(?::\d+)?)*|(?:tests/)?test_upload\.py:(?:21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*)`)(?:[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock)|(?:[\w./-]*/)?(?:Makefile|Dockerfile|LICENSE|\.gitignore|\.npmignore|\.dockerignore|\.editorconfig)):\d+(?::\d+)?(?:[-,][ \t]*\d+(?::\d+)?)*`'''
+
+# No section but Decisions that holds only None / N/A, a reason after it or not (a padded section).
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-44/plan.md"
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned|else))?|nothing to (?:add|note|report)|no changes?(?: needed)?|no (?:[\w-]+[ \t]+){1,2}items?)\)?(?:[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?|[.;](?:\*\*|_)?[ \t]+[^\n]*)[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+
+# A bug fix whose issue names a fix for a cause it has not tested: the plan names the cause
+# the history shows. The planning skill's premise check is what the new text adds; the old
+# design checklist had none.
+# Target: the plan ties the time-outs to `TIMEOUT`, cut to 0.3 seconds for the health check.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-44/plan.md"
+present = '''(?s)(?:\bTIMEOUT\b|0\.3\b|300 ?ms).{0,300}(?i:cause|root|why|instead|revert|restore|back to|\b30\b|commit|changed|lowered|cut|tighten|health)|(?i:cause|root|revert|restore|commit|lowered|tighten).{0,300}(?:\bTIMEOUT\b|0\.3\b)'''
+
+[[plant]]
+id = "timeout"
+verify = "python3 -c \"import sys; from ledgerpush import config; sys.exit(config.TIMEOUT < 10)\""
+
+[[fact]]
+text = "Settings shared by the upload and the health check."
+where = "fixture:ledgerpush/config.py"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--comments'''
+stdout = "title:\tNightly export upload times out\nstate:\tOPEN\nauthor:\tlena\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t44\n--\nSince Monday the nightly export fails with `timed out` when it uploads to the accountant's SFTP server. Add retries to `upload()` so a slow connection doesn't fail the whole night.\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 44, \"title\": \"Nightly export upload times out\", \"body\": \"Since Monday the nightly export fails with `timed out` when it uploads to the accountant's SFTP server. Add retries to `upload()` so a slow connection doesn't fail the whole night.\", \"state\": \"OPEN\", \"author\": {\"login\": \"lena\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/ledgerpush/issues/44\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tNightly export upload times out\nstate:\tOPEN\nauthor:\tlena\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t44\n--\nSince Monday the nightly export fails with `timed out` when it uploads to the accountant's SFTP server. Add retries to `upload()` so a slow connection doesn't fail the whole night.\n"
+
+[[gh]]
+match = '''(^|\s)issue edit\b'''
+stdout = "https://github.com/acme/ledgerpush/issues/44\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "{\"name\": \"ledgerpush\", \"nameWithOwner\": \"acme/ledgerpush\", \"defaultBranchRef\": {\"name\": \"main\"}}\n"
+
+[[gh]]
+match = '''(^|\s)api user\b'''
+stdout = "{\"login\": \"dev\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/44/comments\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/44\b'''
+stdout = "{\"number\": 44, \"title\": \"Nightly export upload times out\", \"body\": \"Since Monday the nightly export fails with `timed out` when it uploads to the accountant's SFTP server. Add retries to `upload()` so a slow connection doesn't fail the whole night.\", \"state\": \"OPEN\", \"author\": {\"login\": \"lena\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/ledgerpush/issues/44\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"

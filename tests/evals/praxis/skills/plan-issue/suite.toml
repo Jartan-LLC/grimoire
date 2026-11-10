@@ -4,7 +4,11 @@
 # come from the research of the template rebuild (#120): a bug fix with an obvious test command, a
 # feature with a tempting adjacent refactor, a feature whose name clashes with an existing public
 # command, a feature where an abstraction is tempting but has one use, one where a second caller
-# already exists, and a docs-only change. tests/evals/README.md says how the suite is run.
+# already exists, and a docs-only change. Three kinds came with the planning skill (#193), each
+# with one screen and one confirm case written after its smoke: a bug fix whose issue names a fix
+# for a cause it has not tested, a change to a published name or key whose compatibility is the
+# maintainer's call, and a new option with inputs to refuse. tests/evals/README.md says how the
+# suite is run.
 target = "praxis:plan-issue"
 # Cases moved off a held-out split, each with its reason in a comment.
 BURNED = [
@@ -41,7 +45,9 @@ direction = "higher"
 # clash cases also: the bug's test run under Verification, the adjacent refactor under Out of scope,
 # or an item under Decisions that names the requested command or flag. The clash check
 # is structural: whether that item raises the clash with what the name already means is graded like
-# the abstraction questions below, by a blind panel of three agents, two of three deciding.
+# the abstraction questions below, by a blind panel of three agents, two of three deciding. The
+# #193 cases also: the cause the history shows, named anywhere in the plan; an item under
+# Decisions on keeping the published name or key working; or an error case under Verification.
 
 [[metric]]
 id = "grounded"

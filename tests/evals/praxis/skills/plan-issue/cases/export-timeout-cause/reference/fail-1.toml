@@ -1,0 +1,18 @@
+final = "Plan written to .claude/workspace/issue-44/plan.md."
+
+[files]
+".claude/workspace/issue-44/plan.md" = '''# Plan: Nightly export upload times out (issue 44)
+
+## Approach
+Wrap the connection in `ledgerpush/upload.py` in a loop of three tries with exponential
+backoff (1, 2, 4 seconds).
+
+## Decisions
+None.
+
+## Steps
+1. Add the retry loop to `upload()`.
+
+## Verification
+- `python3 -m pytest -q` -- a test makes the first two connections raise `socket.timeout`.
+'''

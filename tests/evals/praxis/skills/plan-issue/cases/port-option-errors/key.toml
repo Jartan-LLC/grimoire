@@ -1,0 +1,101 @@
+# A new option with inputs to refuse.
+# Added with the planning skill (#193), after its smoke; it has never run.
+split = "screen"
+kind = "regression"
+hints = ["invalid", "in use", "error", "65535", "reject"]
+
+# A Verification section (or Testing, Validation...) with a backticked command or a fenced block. A
+# command holds a space, `::` or a known tool's name (`ruff`), or is a script path (`./check.sh`); a
+# heading inside Steps is not the Verification section.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-29/plan.md"
+present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:[^`\n]*`[^`\n]*`)*?[^`\n]*`(?:[^`\n]*?[^`\s][ \t]+[^`\s][^`\n]*?|[^`\n]*::[^`\n]*|pytest|tox|make|jest|vitest|ruff|mypy|pyright|eslint|prettier|black|flake8|pylint|shellcheck|tsc|\.{1,2}/[^`\s]+|[\w./-]+\.(?:sh|bash))`|[ \t]*```)'''
+
+# No Complexity line or heading.
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-29/plan.md"
+absent = '''(?im)^(?:\#{1,6}[ \t]*complexity\b|[ \t>*_-]*complexity[ \t*_]*:)'''
+
+# No placeholder phases (Foundation / Core implementation / Integration).
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-29/plan.md"
+absent = '''(?i)phase[ \t]*\d+\W{0,4}(?:foundation|core\b|integration)|\b(?:core implementation|integration[ \t]*(?:/|and|&)[ \t]*cleanup)\b'''
+
+# At least one backticked path that exists in the fixture.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-29/plan.md"
+present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|devserve/__init__\.py|devserve/cli\.py|pyproject\.toml|tests/test_cli\.py|devserve/?|tests/?)(?:[:#][^`\n]*)?`'''
+
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; a list
+# or range of lines and a `:col` are read too. The path must end in a source or text extension or
+# be a known extensionless file such as `Makefile`, so a `host:port` is not read as one.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-29/plan.md"
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?::\d+)?(?:[-,][ \t]*(?:2|1)(?::\d+)?)*|AGENTS\.md:(?:6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:6|5|4|3|2|1)(?::\d+)?)*|CLAUDE\.md:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|(?:devserve/)?__init__\.py:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|(?:devserve/)?cli\.py:(?:15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|pyproject\.toml:(?:4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:4|3|2|1)(?::\d+)?)*|(?:tests/)?test_cli\.py:(?:5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:5|4|3|2|1)(?::\d+)?)*)`)(?:[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock)|(?:[\w./-]*/)?(?:Makefile|Dockerfile|LICENSE|\.gitignore|\.npmignore|\.dockerignore|\.editorconfig)):\d+(?::\d+)?(?:[-,][ \t]*\d+(?::\d+)?)*`'''
+
+# No section but Decisions that holds only None / N/A, a reason after it or not (a padded section).
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-29/plan.md"
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned|else))?|nothing to (?:add|note|report)|no changes?(?: needed)?|no (?:[\w-]+[ \t]+){1,2}items?)\)?(?:[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?|[.;](?:\*\*|_)?[ \t]+[^\n]*)[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+
+# A new option with inputs to refuse: Verification checks an error case, as the new format
+# asks ("the error cases too"); the old one asked only for what passing shows.
+# Target: Verification checks a port that is refused (out of range, not a number, or in use).
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-29/plan.md"
+present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?![ \t]*```)(?!\#)[^\n]*|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*\n[ \t]*```[^\n]*)*?(?:\n(?![ \t]*```)(?!\#)[^\n]*(?:invalid|reject|refus|error|out of range|in use|already (?:in use|taken|bound)|exit(?:s)? (?:code |status |with )?[12]\b|non-?zero|fails? (?:with|for|on)|usage:|--port[ =](?:0|-1|65536|70000|99999|abc|x)\b)|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*?\n(?![ \t]*```)[^\n]*(?:invalid|reject|refus|error|out of range|in use|already (?:in use|taken|bound)|exit(?:s)? (?:code |status |with )?[12]\b|non-?zero|fails? (?:with|for|on)|usage:|--port[ =](?:0|-1|65536|70000|99999|abc|x)\b))'''
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--comments'''
+stdout = "title:\tLet devserve run on another port\nstate:\tOPEN\nauthor:\tkim\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t29\n--\n`devserve` always listens on 8000, so I can't run two projects at once. Add a `--port` option, defaulting to 8000.\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 29, \"title\": \"Let devserve run on another port\", \"body\": \"`devserve` always listens on 8000, so I can't run two projects at once. Add a `--port` option, defaulting to 8000.\", \"state\": \"OPEN\", \"author\": {\"login\": \"kim\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/devserve/issues/29\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tLet devserve run on another port\nstate:\tOPEN\nauthor:\tkim\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t29\n--\n`devserve` always listens on 8000, so I can't run two projects at once. Add a `--port` option, defaulting to 8000.\n"
+
+[[gh]]
+match = '''(^|\s)issue edit\b'''
+stdout = "https://github.com/acme/devserve/issues/29\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "{\"name\": \"devserve\", \"nameWithOwner\": \"acme/devserve\", \"defaultBranchRef\": {\"name\": \"main\"}}\n"
+
+[[gh]]
+match = '''(^|\s)api user\b'''
+stdout = "{\"login\": \"dev\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/29/comments\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/29\b'''
+stdout = "{\"number\": 29, \"title\": \"Let devserve run on another port\", \"body\": \"`devserve` always listens on 8000, so I can't run two projects at once. Add a `--port` option, defaulting to 8000.\", \"state\": \"OPEN\", \"author\": {\"login\": \"kim\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/devserve/issues/29\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"

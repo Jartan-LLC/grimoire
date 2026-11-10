@@ -1,0 +1,18 @@
+final = "Plan written to .claude/workspace/issue-15/plan.md."
+
+[files]
+".claude/workspace/issue-15/plan.md" = '''# Plan: Choose how many backups prune keeps (issue 15)
+
+## Approach
+Add `--keep` (type int, default 7) to the `prune` subcommand in `backupctl/cli.py`.
+
+## Decisions
+None.
+
+## Steps
+1. Add the option and pass it to `prune(keep=...)`.
+2. A test in `tests/test_store.py` that `prune(keep=3)` leaves three.
+
+## Verification
+- `python3 -m pytest -q` -- the new test passes.
+'''

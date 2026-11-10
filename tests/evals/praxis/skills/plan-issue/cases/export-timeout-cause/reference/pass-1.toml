@@ -1,0 +1,22 @@
+final = "Plan written to .claude/workspace/issue-44/plan.md."
+
+[files]
+".claude/workspace/issue-44/plan.md" = '''# Plan: Nightly export upload times out (issue 44)
+
+## Approach
+The time-outs started with Monday's commit "tighten timeouts so the health check fails
+fast", which cut the shared `TIMEOUT` in `ledgerpush/config.py` to 0.3 seconds, too short
+for an upload. Give the upload its own 30 second time-out and keep the short one for
+`ledgerpush/health.py`.
+Rejected: retries -- each would time out after 0.3 seconds as well.
+
+## Decisions
+None.
+
+## Steps
+1. Add `UPLOAD_TIMEOUT = 30` and `HEALTH_TIMEOUT = 0.3` in `ledgerpush/config.py`.
+2. Use them in `ledgerpush/upload.py` and `ledgerpush/health.py`.
+
+## Verification
+- `python3 -m pytest -q` -- a new test checks `upload()` passes a 30 second time-out.
+'''

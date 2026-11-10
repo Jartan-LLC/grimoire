@@ -1,0 +1,18 @@
+final = "Plan written to .claude/workspace/issue-63/plan.md."
+
+[files]
+".claude/workspace/issue-63/plan.md" = '''# Plan: Rename subscribe's cb parameter to callback (issue 63)
+
+## Approach
+Rename `cb` to `callback` in `pubsubby/client.py`, the README example and the test.
+
+## Decisions
+None.
+
+## Steps
+1. Rename the parameter and its docstring in `pubsubby/client.py`.
+2. Update `README.md` and `tests/test_client.py`.
+
+## Verification
+- `python3 -m pytest -q`
+'''
