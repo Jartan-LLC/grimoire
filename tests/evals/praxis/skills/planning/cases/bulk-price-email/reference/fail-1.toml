@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Run `make export`, then `python3 scripts/mailer.py customers.csv templates/price_change.txt`
+from a server.
+'''

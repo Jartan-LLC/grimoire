@@ -1,0 +1,18 @@
+# An unclear goal with nothing measured: the plan is mostly finding out.
+# It ran in the scratch smoke of #193 (old = praxis 2.4.0, new = this branch's skill), so its results are known:
+# it stays on dev.
+split = "dev"
+kind = "regression"
+hints = ["measure", "profile", "baseline", "timing"]
+
+# The planted gap, as the smoke graded it.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?i)measur|profil|timing|time (each|every|the|how long)|lighthouse|devtools|baseline|benchmark|EXPLAIN|pg_stat_statements|slow[- ]query log'''
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

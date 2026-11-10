@@ -1,0 +1,6 @@
+final = "Plan written to plan.md."
+
+[files]
+".claude/workspace/issue-57/plan.md" = '''## Open questions
+1. Break in a major release, or keep the old name with a DeprecationWarning?
+'''

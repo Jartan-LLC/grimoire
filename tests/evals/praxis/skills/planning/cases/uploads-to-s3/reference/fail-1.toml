@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Change `app/storage.py` to write uploads to S3 with boto3 and return a pre-signed URL;
+update nginx to stop serving `/uploads/`.
+'''

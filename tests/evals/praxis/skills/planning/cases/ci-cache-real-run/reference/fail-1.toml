@@ -1,0 +1,7 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Add `cache: pip` to the setup-python step and check the YAML with actionlint.
+'''

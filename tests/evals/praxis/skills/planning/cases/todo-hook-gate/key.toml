@@ -1,0 +1,28 @@
+# Done is a real commit the hook rejects, not the script run by hand.
+# It ran in the scratch smoke of #193 (old = praxis 2.4.0, new = this branch's skill), so its results are known:
+# it stays on dev.
+split = "dev"
+kind = "regression"
+hints = ["git commit", "reject"]
+
+# The planted gap, as the smoke graded it.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?is)git commit.{0,300}(reject|block|fail|abort|non-?zero|refus|exit)|(reject|block|fail|abort|refus).{0,300}git commit'''
+
+[[fact]]
+text = "make hooks"
+where = "fixture:CONTRIBUTING.md"
+
+# An easy-to-undo, clear change: nothing on rollout or undo.
+[[check]]
+metric = "lean"
+artifact = "files:**/plan.md"
+absent = '''(?i)\b(?:roll-?outs?|roll(?:ed|ing)?[ -]?backs?|undo(?:ne|ing)?|revert(?:s|ed|ing)?)\b'''
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

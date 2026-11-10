@@ -1,0 +1,11 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+## Steps
+1. Change the year in LICENSE to 2026.
+
+## Questions
+Should the README carry a copyright line as well?
+'''

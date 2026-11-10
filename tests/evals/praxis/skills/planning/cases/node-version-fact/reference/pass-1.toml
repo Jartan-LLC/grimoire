@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+`package.json` says `"node": ">=18"`, so plain `JSON.stringify` and `process.argv` are
+fine. `todo list --json` prints the stored array, `[]` when empty. Test with `node --test`.
+'''

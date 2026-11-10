@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+On first run, read `~/.toolrc` with configparser and write it back as TOML. Tests cover
+sample files.
+'''

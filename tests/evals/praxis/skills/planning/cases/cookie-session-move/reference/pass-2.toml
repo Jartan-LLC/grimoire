@@ -1,0 +1,6 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''- XSRF token on state-changing routes.
+- Tokens already in localStorage: migrate on the next request.
+'''

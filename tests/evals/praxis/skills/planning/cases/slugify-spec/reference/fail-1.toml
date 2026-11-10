@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+".claude/workspace/issue-12/plan.md" = '''# Plan (issue 12)
+
+Add `slugify` to `utils.py` with tests in `tests/test_utils.py`; run pytest. Rollout: none
+needed, a revert undoes it.
+'''

@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+In `api/orders.py`, return `order["created_at"].isoformat()` and update `tests/test_orders.py`
+to expect `2026-01-01T00:00:00+00:00`.
+'''

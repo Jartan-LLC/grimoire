@@ -1,0 +1,5 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''Dry-run first, then a send log so a resumed run does not double-send.
+'''

@@ -1,0 +1,22 @@
+# Deep positive control: live uploads on three servers move to S3 while users keep uploading and old links keep working.
+# Written for the committed suite after the smoke; it has never run.
+split = "screen"
+kind = "regression"
+hints = ["backfill", "fallback", "dual", "rollback", "phase"]
+
+# A phased move: the existing files copied over, old links and reads served while both stores
+# exist, and a way back.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?is)\A(?=.*(?:backfill|copy (?:the |all )?existing|existing (?:files|uploads|objects)|migrate (?:the )?existing|aws s3 sync|s3 sync|rclone))(?=.*(?:fall ?back|both (?:stores|places|locations)|dual[- ]?(?:write|read)|either (?:store|location)|old (?:urls?|links)|existing (?:urls?|links)|redirect))(?=.*(?:roll ?back|revert|undo|switch back))'''
+
+[[fact]]
+text = "users add about 20,000 files a day"
+where = "fixture:README.md"
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

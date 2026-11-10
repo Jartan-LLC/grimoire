@@ -1,0 +1,24 @@
+# Over-planning control at the trivial size: a few lines, no questions.
+# It ran in the scratch smoke of #193 (old = praxis 2.4.0, new = this branch's skill), so its results are known:
+# it stays on dev.
+split = "dev"
+kind = "regression"
+hints = []
+
+# What a right-sized plan must hold (the smoke graded only `lean` here).
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?s)README.{0,300}receive|receive.{0,300}README'''
+
+# The smoke's over-planning check.
+[[check]]
+metric = "lean"
+artifact = "files:**/plan.md"
+present = '''(?s)\A(?!.*\?)\s*(?:\S+\s+){0,160}\S*\s*\Z'''
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

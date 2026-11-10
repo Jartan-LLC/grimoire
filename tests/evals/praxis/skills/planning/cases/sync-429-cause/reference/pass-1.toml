@@ -1,0 +1,13 @@
+final = "Plan written to plan.md."
+
+[files]
+".claude/workspace/issue-31/plan.md" = '''# Plan: Nightly order sync fails with HTTP 429 (issue 31)
+
+## Approach
+The 429s started with commit "debug: one order per page", which set `PAGE_SIZE` to 1 in
+`sync.py`: 5,000 orders became 5,000 requests against a 120 a minute limit. Restore 100.
+Rejected: backoff in `fetch_page` -- it would hide the cause and still take 40 minutes.
+
+## Verification
+- `python3 -m pytest -q` with a fake `fetch_page` counting calls: 50 for 5,000 orders.
+'''

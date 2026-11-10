@@ -1,0 +1,5 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''In `LICENSE`, change `Copyright (c) 2025 Acme` to `Copyright (c) 2026 Acme`.
+'''

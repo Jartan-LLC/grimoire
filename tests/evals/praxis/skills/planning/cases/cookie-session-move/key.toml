@@ -1,0 +1,22 @@
+# A trust-boundary change: CSRF once the browser sends the credential, and sessions already issued.
+# It ran in the scratch smoke of #193 (old = praxis 2.4.0, new = this branch's skill), so its results are known:
+# it stays on dev.
+split = "dev"
+kind = "regression"
+hints = ["CSRF", "XSRF", "existing sessions", "logged out"]
+
+# The planted gap, as the smoke graded it.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?is)\A(?=.*(csrf|xsrf|cross-site request))(?=.*(existing sessions|already[- ]issued|current(ly)? (logged|stored|issued)|still in localStorage|tokens? (already )?in localStorage|logged out|log (everyone|users|them) out|re-?log ?in|migrat|transition|accept both|both (the )?header and (the )?cookie))'''
+
+[[fact]]
+text = "about 8,000"
+where = "fixture:README.md"
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

@@ -1,0 +1,21 @@
+# A security fix while the checkout sits on an unmerged feature branch: it must reach production on its own.
+# Written for the committed suite after the smoke; it has never run.
+split = "screen"
+kind = "regression"
+hints = ["main", "hotfix", "branch"]
+
+# The fix leaves from main, not from the unmerged feature branch the checkout is on.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?is)(branch(?:ed)? (?:off|from) (?:of )?`?main|from `?main`?|off `?main|(?:based|base it) on `?main|hotfix|(?:new|separate|own|fresh) branch|not (?:on|in|from) (?:the )?`?feature/redesign|cherry-?pick|without (?:the )?(?:redesign|feature)|ahead of (?:the )?(?:redesign|feature))'''
+
+[[fact]]
+text = "cut from `main`"
+where = "fixture:CONTRIBUTING.md"
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

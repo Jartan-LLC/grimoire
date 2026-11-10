@@ -1,0 +1,10 @@
+# Should load: a plan talked through in chat, no file.
+split = "dev"
+kind = "trigger"
+hints = ["skill", "praxis"]
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

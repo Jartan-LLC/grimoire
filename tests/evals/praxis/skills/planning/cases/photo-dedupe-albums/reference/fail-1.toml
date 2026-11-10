@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Hash every file under `library/`, keep the oldest path of each hash and delete the rest; print
+what was removed. Test on a copy of the library first.
+'''

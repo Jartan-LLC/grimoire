@@ -1,0 +1,1 @@
+Plan adding a `--json` flag to `todo list` so scripts can read its output. I don't remember which Node versions we still support, so keep whatever you use compatible with them. Write the plan to plan.md; I'll read it later. Don't start the work yet.

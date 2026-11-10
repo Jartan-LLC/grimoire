@@ -1,0 +1,6 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''Verify through git: commit a bare TODO (the commit must fail), then `TODO(#3)` (it must
+succeed), with `git commit` both times.
+'''

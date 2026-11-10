@@ -1,0 +1,72 @@
+# Whether praxis:planning (#193) sizes a plan to what a mistake would cost: whether it finds the gap
+# a plan most often leaves where a mistake is expensive, and leaves rollout, cost and undo out where
+# one is cheap. Each planning case is a small repository and a request to plan a change, in chat
+# (the plan written to plan.md) or through /praxis:plan-issue. Target candidates hide one gap
+# rebuilt from the corpus research of #193: an untested cause, a premise the code contradicts, a
+# fact the repository answers, an owner's decision or the project's own rules, a supported release
+# line or other work in flight, failure paths of user state, done seen where it runs, a paid run's
+# cost, a request that names only a solution, an absent owner. Size controls: a trivial edit, a
+# well-specified function, an agreed spec at standard size, and a deep migration where rollout and
+# rollback are required content. Trigger cases ask to review, revise or talk through a plan (the
+# skill should load) or share its words but need something else (it should not).
+#
+# The dev cases are the 19 cases of the scratch smoke the PR reports, with the smoke's prompts and
+# repositories, plus three trigger cases: the smoke's results are known, so its cases stay on dev.
+# No screen or confirm case ran in the smoke. No baselines yet: until `make eval-run ... RECORD=1`
+# draws them, every behaviour case is committed as a regression case.
+#
+# What the graders cannot see: each `gap` regex reads one planted item, not the plan's size or
+# whether its other content is right; that is the blind panel's (under [pass_rule]).
+# tests/evals/README.md says how the suite is run.
+target = "praxis:planning"
+# Cases moved off a held-out split, each with its reason in a comment.
+BURNED = []
+covers = ["plugins/praxis/skills/planning/**"]
+models = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]
+# A planning session reads the repository and writes one file.
+budget_usd = 2.0
+
+[[metric]]
+id = "recall"
+direction = "higher"
+# Should load: every planning case, behaviour and trigger alike, loaded praxis:planning in the
+# main thread (`state = "loaded"`), through plan-issue's step 5 or by itself. The dev case where
+# the user asks for the work, not a plan (headless-irreversible), does not carry it.
+
+[[metric]]
+id = "quiet"
+direction = "higher"
+margin = 0.1
+# Near misses: praxis:planning not loaded, on a request that shares the skill's words (a plan
+# file, a `plan` field, `terraform plan`, a roadmap) but asks for something else.
+
+[[metric]]
+id = "gap"
+direction = "higher"
+margin = 0.2
+# Behaviour cases: the plan holds the case's planted gap, or for a size control what a
+# right-sized plan must hold (the typo and its file, the spec's fields). Old finds many of these
+# without the skill, so it guards that the skill does not crowd them out.
+
+[[metric]]
+id = "lean"
+direction = "higher"
+# Reported only: on an easy-to-undo, clear change no word on rollout, rollback, undo or revert,
+# as the skill asks; on the trivial and size controls also a word ceiling, and no question on the
+# trivial ones. Too few cases carry it for a guard to pass, and the panel's "over" label grades
+# over-planning on every case.
+
+[pass_rule]
+# The regex rule: the skill loads where it should (BETTER, as old has no such skill), stays out of
+# the near misses, and does not lose the gaps old finds. Whether plans got better sized is graded
+# by a blind panel of three agents, who see neither the arm nor the model, each labelling every
+# behaviour case's plan right-sized, under, over or mis-sized against panel-specs.md, two of three
+# deciding. A change to the skill goes ahead when the screen and confirm SHIP and, on each gate
+# model, new has more right-sized plans than old, with no significance bar beyond "more"; its PR
+# reports the panel's labels per model and arm. panel-specs.md covers every behaviour case; each
+# spec was written from the case's prompt, fixture, build.py and the skill, never from a sample.
+primary = "recall"
+rule = "better"
+guards = ["quiet", "gap"]
+min_effect = 0.5
+min_samples = 3

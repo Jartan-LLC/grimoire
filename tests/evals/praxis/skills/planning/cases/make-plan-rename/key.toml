@@ -1,0 +1,10 @@
+# Near miss: a mechanical rename of a function named make_plan.
+split = "confirm"
+kind = "trigger"
+hints = ["skill", "praxis"]
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "not-loaded"

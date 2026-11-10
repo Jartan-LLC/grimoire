@@ -1,0 +1,12 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Add `"perf": "Performance"` to `SECTIONS` in `scripts/release_notes.py`. Pull requests are
+squash-merged with the default message, so the subject on main is the PR title: the marker
+goes in the PR title (`perf: ...`), and CONTRIBUTING.md says so.
+
+Check: a scratch repo whose first-parent log has `perf: faster load` lists it under
+Performance.
+'''

@@ -1,0 +1,10 @@
+# Near miss: a question about functions named plan and apply.
+split = "dev"
+kind = "trigger"
+hints = ["skill", "praxis"]
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "not-loaded"

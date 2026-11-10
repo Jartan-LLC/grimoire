@@ -1,0 +1,6 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''Write the merged records to a new file and keep the original intact until you have checked
+it on Monday.
+'''

@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Add `perf` to `SECTIONS` and ask developers to start their commit messages with `perf:`;
+add a commit-msg hook that checks the format.
+'''

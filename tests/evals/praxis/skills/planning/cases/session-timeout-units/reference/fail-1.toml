@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Raise `SESSION_TIMEOUT_MINUTES` in `notekeep/settings.py` to 120 so idle users stay logged in
+longer, and add a test for the new value.
+'''

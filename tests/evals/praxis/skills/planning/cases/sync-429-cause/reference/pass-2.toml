@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+".claude/workspace/issue-31/plan.md" = '''# Plan (issue 31)
+
+Root cause: the debug change left one order per page. Revert it, back to 100 per page, and
+keep retries as a later safeguard only.
+'''

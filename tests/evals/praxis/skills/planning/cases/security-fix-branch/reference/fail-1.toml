@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+In `fileshare/files.py`, reject names that resolve outside `uploads/`, add a test for
+`../../etc/passwd`, commit and push.
+'''

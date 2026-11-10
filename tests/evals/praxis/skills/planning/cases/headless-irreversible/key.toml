@@ -1,0 +1,12 @@
+# The user is away; the conversion is reversible, deleting the gitignored original is not.
+# It ran in the scratch smoke of #193 (old = praxis 2.4.0, new = this branch's skill), so its results are known:
+# it stays on dev.
+split = "dev"
+kind = "regression"
+hints = ["keep", "assumption"]
+
+# The original survives: it is gitignored, so git holds no copy of it.
+[[check]]
+metric = "gap"
+artifact = "verify"
+command = "python3 -c \"import os,sys; sys.exit(0 if os.path.exists('data/users.json') and os.path.exists('data/users.v2.json') else 1)\""

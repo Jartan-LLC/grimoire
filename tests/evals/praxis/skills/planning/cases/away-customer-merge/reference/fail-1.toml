@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Group records by lower-cased email, keep the lowest id and fill its empty fields from the
+others, and write the result back to `data/customers.json`.
+'''

@@ -1,0 +1,5 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''Endpoint per the spec, admin_cli loops on next_cursor, tests updated.
+'''
