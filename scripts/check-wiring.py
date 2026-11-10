@@ -2,12 +2,13 @@
 """Check that every skill, agent and command a plugin points to exists, and is declared.
 
 An agent's `skills:` entry is a hard load: one naming no skill fails the agent once
-released. A `<plugin>:<name>` in a SKILL.md, agent, command or hooks/*.json tells the agent to
-load that skill, or names that agent or command; one naming nothing points nowhere,
+released. A `<plugin>:<name>` in a skill's files, an agent, a command or a hook file tells
+the agent to load that skill, or names that agent or command; one naming nothing points nowhere,
 and nothing at runtime says so. Such a pointer into another plugin, or a bare mention
 of another plugin's name, needs that plugin in the manifest's `dependencies`
-(GUARDRAILS.md): an undeclared plugin may not be installed. Each file's frontmatter
-`name` must also match its directory or file name, and its `description` be present.
+(GUARDRAILS.md): an undeclared plugin may not be installed. Each SKILL.md, agent and
+command file's frontmatter `name` must also match its directory or file name, and its
+`description` be present.
 
 Unqualified names in prose ("spawn `backend-reviewer`") are not checked: telling a
 load from an example would be guesswork.
@@ -74,6 +75,34 @@ def documents(plugin: str) -> list[pathlib.Path]:
     ]
 
 
+def texts(plugin: str) -> dict[pathlib.Path, str]:
+    """The plugin's files with no frontmatter, with their text: a skill's other files, and hooks.
+
+    Every file under `skills/` but the SKILL.md files, and every file under `hooks/`, of
+    any extension, so a new kind of file is read without being listed here. A file that is
+    not UTF-8 text is left out: a binary asset holds no pointer. So are the usual places of
+    local tool and editor state, which a clean checkout lacks: anything in `node_modules`,
+    any hidden file or directory, and `*~` backups. A tracked hidden file is skipped too.
+    """
+    with_frontmatter = set(documents(plugin))
+    found: dict[pathlib.Path, str] = {}
+    paths = [
+        *sorted(ROOT.glob(f"plugins/{plugin}/skills/**/*")),
+        *sorted(ROOT.glob(f"plugins/{plugin}/hooks/**/*")),
+    ]
+    for path in paths:
+        if not path.is_file() or path in with_frontmatter:
+            continue
+        parts = path.relative_to(ROOT).parts
+        if path.name.endswith("~") or any(p == "node_modules" or p.startswith(".") for p in parts):
+            continue
+        try:
+            found[path] = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+    return found
+
+
 def qualified_pattern(plugins: Iterable[str]) -> re.Pattern[str]:
     """A `<plugin>:<name>` reference to one of `plugins`, capturing both parts."""
     names = "|".join(re.escape(p) for p in plugins)
@@ -84,8 +113,9 @@ def references() -> dict[pathlib.Path, set[tuple[str, str]]]:
     """Each skill, agent, command and hook file, with the (plugin, name) pairs it points to.
 
     The pointers problems() checks: `skills:` entries, an unqualified one naming the
-    file's own plugin, and every `<plugin>:<name>` in its frontmatter, body or hook
-    text. A file that does not parse is left out; problems() reports it.
+    file's own plugin, and every `<plugin>:<name>` in its frontmatter, body or, for the
+    files texts() lists, whole text. A file that does not parse is left out; problems()
+    reports it.
     """
     plugins = manifests()
     qualified = qualified_pattern(plugins)
@@ -107,8 +137,8 @@ def references() -> dict[pathlib.Path, set[tuple[str, str]]]:
             text = "\n".join([*values, body])
             pairs |= {(m.group(1), m.group(2)) for m in qualified.finditer(text)}
             found[path] = pairs
-        for path in sorted(ROOT.glob(f"plugins/{own}/hooks/*.json")):
-            found[path] = {(m.group(1), m.group(2)) for m in qualified.finditer(path.read_text())}
+        for path, text in texts(own).items():
+            found[path] = {(m.group(1), m.group(2)) for m in qualified.finditer(text)}
     return found
 
 
@@ -170,8 +200,8 @@ def problems() -> list[str]:
                 pointer(str(where), own, plugin or own, name, skills)
             values = [v for k, v in fields.items() if k != "skills" and isinstance(v, str)]
             pointers(str(where), own, "\n".join([*values, body]), skills | others)
-        for path in sorted(ROOT.glob(f"plugins/{own}/hooks/*.json")):
-            pointers(str(path.relative_to(ROOT)), own, path.read_text(), skills | others)
+        for path, text in texts(own).items():
+            pointers(str(path.relative_to(ROOT)), own, text, skills | others)
     return list(dict.fromkeys(found))
 
 
