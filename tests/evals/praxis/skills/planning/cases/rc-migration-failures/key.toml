@@ -1,6 +1,6 @@
 # A first-run migration of user state, run by several commands at once.
-# It ran in the scratch smoke of #193 (old = praxis 2.4.0, new = this branch's skill), so its results are known:
-# it stays on dev.
+# It ran in the scratch smoke of #193 (old = praxis 2.4.0, new = a draft of the planning skill), so
+# its results are known: it stays on dev.
 split = "dev"
 kind = "regression"
 hints = ["atomic", "concurrent", "lock"]

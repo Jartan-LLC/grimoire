@@ -1,6 +1,6 @@
 # A paid run: estimate from the last run's cost, a ceiling and a leaner first step.
-# It ran in the scratch smoke of #193 (old = praxis 2.4.0, new = this branch's skill), so its results are known:
-# it stays on dev.
+# It ran in the scratch smoke of #193 (old = praxis 2.4.0, new = a draft of the planning skill), so
+# its results are known: it stays on dev.
 split = "dev"
 kind = "regression"
 hints = ["$", "cost", "budget", "ceiling"]

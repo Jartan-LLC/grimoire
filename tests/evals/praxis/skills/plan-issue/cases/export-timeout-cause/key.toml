@@ -1,5 +1,5 @@
 # A bug fix whose issue names a fix for a cause it has not tested.
-# Added with the planning skill (#193), after its smoke; it has never run.
+# Added with the planning skill (#193) after its smoke, so no smoke result shaped it.
 split = "screen"
 kind = "regression"
 hints = ["TIMEOUT", "0.3", "health", "cause"]
@@ -45,8 +45,7 @@ artifact = "file:.claude/workspace/issue-44/plan.md"
 absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned|else))?|nothing to (?:add|note|report)|no changes?(?: needed)?|no (?:[\w-]+[ \t]+){1,2}items?)\)?(?:[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?|[.;](?:\*\*|_)?[ \t]+[^\n]*)[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
 
 # A bug fix whose issue names a fix for a cause it has not tested: the plan names the cause
-# the history shows. The planning skill's premise check is what the new text adds; the old
-# design checklist had none.
+# the history shows, as the planning skill's premise check asks.
 # Target: the plan ties the time-outs to `TIMEOUT`, cut to 0.3 seconds for the health check.
 [[check]]
 metric = "reader"

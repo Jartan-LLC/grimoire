@@ -1,5 +1,5 @@
 # A change to a published interface: the compatibility call is the maintainer's.
-# Added with the planning skill (#193), after its smoke; it has never run.
+# Added with the planning skill (#193) after its smoke, so no smoke result shaped it.
 split = "confirm"
 kind = "regression"
 hints = ["deprecat", "warn", "unknown", "customer", "major"]
@@ -45,7 +45,7 @@ artifact = "file:.claude/workspace/issue-81/plan.md"
 absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned|else))?|nothing to (?:add|note|report)|no changes?(?: needed)?|no (?:[\w-]+[ \t]+){1,2}items?)\)?(?:[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?|[.;](?:\*\*|_)?[ \t]+[^\n]*)[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
 
 # A change to a published interface: a Decisions item raises the compatibility choice, which
-# is the maintainer's. The new format gives each decision an owner and a default.
+# is the maintainer's. plan-format gives each decision an owner and a default.
 # Target: a Decisions item raises customers' files that still set the key, which an unknown
 # key stops at start-up.
 [[check]]

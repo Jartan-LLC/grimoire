@@ -1,5 +1,5 @@
 # A security fix while the checkout sits on an unmerged feature branch: it must reach production on its own.
-# Written for the committed suite after the smoke; it has never run.
+# Written for the committed suite after the smoke, so no smoke result shaped it.
 split = "screen"
 kind = "regression"
 hints = ["main", "hotfix", "branch"]

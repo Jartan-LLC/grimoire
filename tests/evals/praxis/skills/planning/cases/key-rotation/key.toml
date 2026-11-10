@@ -1,5 +1,5 @@
 # Deep positive control: a leaked encryption key, two million encrypted rows and three readers deployed apart.
-# Written for the committed suite after the smoke; it has never run.
+# Written for the committed suite after the smoke, so no smoke result shaped it.
 split = "confirm"
 kind = "regression"
 hints = ["MultiFernet", "re-encrypt", "both keys", "batch"]
