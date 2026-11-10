@@ -21,7 +21,7 @@
             "statusMessage": "Checking commit and PR writing..."
           }
         ],
-        "description": "Load commit-pr-writing on commit and PR text writes (git commit/push, gh pr create/edit); hold an agent's first commit or PR text write until it is loaded"
+        "description": "Load commit-pr-writing on commit and PR text writes (git commit/push, gh pr create/edit)"
       }
     ]
   }
