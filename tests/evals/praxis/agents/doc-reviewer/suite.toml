@@ -61,9 +61,10 @@ direction = "higher"
 # that explains output the reader sees (an `unknown` row), an ask the owner ruled borderline. In
 # every check, a finding's text runs to the next rating, heading, table row, verdict line, bold
 # numbered item (`**2.`) or line that is only a bold label (`**Commit messages**`, not a field such
-# as `**Suggested text:**`), and a bold numbered item under a heading that names a rating takes
-# that rating. So a note inside a finding that says a rare case was left out on purpose counts as
-# asking to add it; a note under its own heading does not.
+# as `**Suggested text:**`); a bold line that ends in its rating (`**4. RELEASING.md:12 -
+# Important**`) starts its finding at its first `**`, and a bold numbered item under a heading that
+# names a rating takes that rating. So a note inside a finding that says a rare case was left out
+# on purpose counts as asking to add it; a note under its own heading does not.
 
 [[metric]]
 id = "kept"

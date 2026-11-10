@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n**1. RELEASING.md:8, \"run `make test`, then\" - Important**\n\n`make test` does not exist: the Makefile has only `verify`, and the script runs `make verify` itself.\nFix: drop `make test`.\n\n**2. RELEASING.md lines 11-13, \"The script does not wait for the dev container build.\" - Important**\n\nNo reader acts on it.\nFix: cut it.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 2 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"
