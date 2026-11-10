@@ -64,7 +64,8 @@ direction = "higher"
 # deciding. A change to the skill goes ahead when the screen and confirm SHIP and, on each gate
 # model, new has more right-sized plans than old, with no significance bar beyond "more"; its PR
 # reports the panel's labels per model and arm. panel-specs.md covers every behaviour case; each
-# spec was written from the case's prompt, fixture, build.py and the skill, never from a sample.
+# screen and confirm spec was written from the case's prompt, fixture, build.py and the skill,
+# never from a key or a sample; the dev specs are the smoke's.
 primary = "recall"
 rule = "better"
 guards = ["quiet", "gap"]
