@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The page says `--format xml` gives JSON; the flag is `--format json`.\nFile: docs/export.md:4\nIssue: The page says `--format xml` gives JSON; the flag is `--format json`.\nFix: Write `--format json`.\nStatus: confirmed\n\n[MINOR] The page does not mention that amounts above 2^53 are written as strings in JSON.\nFile: docs/export.md:4\nIssue: The page does not mention that amounts above 2^53 are written as strings in JSON.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

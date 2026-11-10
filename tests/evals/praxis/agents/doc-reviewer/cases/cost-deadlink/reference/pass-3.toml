@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The link to docs/setup.md is broken: the file does not exist.\nFile: README.md:3\nIssue: The link to docs/setup.md is broken: the file does not exist.\nFix: Change it.\nStatus: confirmed\n\n[MINOR] The module docstring says a Content-Length larger than the body ends at the body, but neither the README nor the module holds code for it.\nFile: fetchy/body.py:1\nIssue: The module docstring says a Content-Length larger than the body ends at the body, but neither the README nor the module holds code for it.\nFix: Add the implementation, with a test.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

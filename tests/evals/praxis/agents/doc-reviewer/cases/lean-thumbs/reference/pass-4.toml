@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The README says `photos/thumbs/`; the code writes `photos/.thumbs/`.\nFile: README.md:7\nIssue: The README says `photos/thumbs/`; the code writes `photos/.thumbs/`.\nFix: Write `.thumbs/`.\nStatus: confirmed\n\n[MINOR] The README says every JPEG and PNG, but a file whose name holds a newline is skipped.\nFile: README.md:7\nIssue: The README says every JPEG and PNG, but a file whose name holds a newline is skipped.\nFix: Qualify \"every\": add a clause saying a file whose name holds a newline is skipped.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"
