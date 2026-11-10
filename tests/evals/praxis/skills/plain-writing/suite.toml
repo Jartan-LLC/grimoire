@@ -9,7 +9,7 @@
 # note for a rare fix, an existing troubleshooting part. tests/evals/README.md says how the suite
 # is run.
 # The dev split is the smoke subset: run old and new on it before the full suite. A candidate target
-# is committed as a regression case until its old baselines fail it, as its key comment says.
+# is committed as a regression case until an old baseline fails it, as its key comment says.
 target = "praxis:plain-writing"
 # Cases moved off a held-out split, each with its reason in a comment.
 BURNED = []
