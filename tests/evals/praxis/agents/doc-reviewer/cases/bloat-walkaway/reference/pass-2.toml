@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The README says it stops after 5 rounds; the command stops after 8.\nFile: README.md:14\nIssue: The README says it stops after 5 rounds; the command stops after 8.\nFix: Change it.\nStatus: confirmed\n\n[IMPORTANT] The README bullet is long. The fork, logged-out gh and 30-day draft lines describe cases the command skips on its own.\nFile: README.md:15\nIssue: The README bullet is long. The fork, logged-out gh and 30-day draft lines describe cases the command skips on its own.\nFix: Cut the bullet to what the user needs.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 2 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

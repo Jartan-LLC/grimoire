@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says `--keep` defaults to 5; the code's default is 7.\nFile: docs/rotate.md:4\nIssue: The doc says `--keep` defaults to 5; the code's default is 7.\nFix: Change it.\nStatus: confirmed\n\n**Not raised**\n\nThe empty-log, NFS and named-pipe sentences could go: the program handles them on its own.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"
