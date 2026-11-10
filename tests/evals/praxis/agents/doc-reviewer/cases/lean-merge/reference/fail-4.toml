@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says \"The team's values win\" where the code has \"Your own values win\".\nFile: src/dotmerge/README.md:16\nIssue: The doc says \"The team's values win\" where the code has \"Your own values win\".\nFix: Change it.\nStatus: confirmed\n\n[IMPORTANT] Bloat: the sentence on `settings.json.pre-dotmerge` covers a backup the program makes on its own.\nFile: src/dotmerge/README.md:16\nIssue: Bloat: the sentence on `settings.json.pre-dotmerge` covers a backup the program makes on its own.\nFix: Cut it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 2 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

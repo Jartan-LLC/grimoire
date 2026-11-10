@@ -4,8 +4,9 @@
 # claude-sync #49, enchantments #103, grimoire #97 and #170 and scaffold #275, or invented on the
 # same pattern); bloat cases give the doc as those fix commits grew it. Guards: the reviewer still
 # catches the wrong fact planted in each lean and bloat doc and a wrong default, a dead link and a
-# wrong flag in the cost cases, and leaves a troubleshooting part at the end alone. Must hold: it
-# still raises a missing data-loss warning.
+# wrong flag in the cost cases, and leaves alone a troubleshooting part at the end and the
+# prerequisite and recovery lines of two lean docs. Must hold: it still raises a missing data-loss
+# warning.
 # tests/evals/README.md says how the suite is run. No baselines yet: until `make eval-run ...
 # RECORD=1` draws them, every case is committed as a regression case.
 target = "praxis:doc-reviewer"
@@ -39,7 +40,9 @@ direction = "higher"
 margin = 0.2
 # The wrong fact planted in each lean and bloat doc, and the cost cases' wrong default, dead link
 # and wrong flag, raised at Important or above; a troubleshooting part at the end not raised at
-# Important or above. Each pattern is the planted error's own
+# Important or above; in lean-backup and lean-merge, no finding that rates the doc's prerequisite
+# or recovery as Bloat or asks to cut it, at any rating, as `rare` counts an ask to add at any
+# rating, because a fix round applies a Minor finding too. Each pattern is the planted error's own
 # wording, and a stated value is not read from a line number, so a Bloat finding that does not
 # raise the error fails; a failing reference per case holds one.
 
