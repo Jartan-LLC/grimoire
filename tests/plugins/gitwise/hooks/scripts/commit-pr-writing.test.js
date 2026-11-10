@@ -7,7 +7,7 @@ const { describe, test } = require('node:test');
 const { REPO_ROOT, tempDir } = require('../../../../helpers/fixture');
 
 const SCRIPT = path.join(REPO_ROOT, 'plugins/gitwise/hooks/scripts/commit-pr-writing.js');
-const { DENY_REASON, HINT, decide, writesText } = require(SCRIPT);
+const { DENY_REASON, HINT, decide } = require(SCRIPT);
 
 const SESSION = '30fcfb46-0dc1-4f2d-bf35-839e340d1630';
 const MAIN = `/home/u/.claude/projects/-repo/${SESSION}.jsonl`;
@@ -130,7 +130,9 @@ const DENY = {
 };
 const HINTED = { hookSpecificOutput: { hookEventName: 'PreToolUse', additionalContext: HINT } };
 
-describe('writesText', () => {
+describe('which commands write text', () => {
+  // With no load of the skill in the transcript, decide denies exactly the commands that write text.
+  const unloaded = command => decide(input(command), reader({ [MAIN]: jsonl([prompt]) }));
   for (const command of [
     'git commit -m "feat: x"',
     'git add notes.txt && git commit -m "add notes"',
@@ -165,7 +167,7 @@ describe('writesText', () => {
     "gh pr create --title 'add --help text'",
     'git commit -m "fix: accept -h\n\nBody."',
   ]) {
-    test(`true for ${command}`, () => assert.equal(writesText(command), true));
+    test(`denies ${command}`, () => assert.deepEqual(unloaded(command), DENY));
   }
   for (const command of [
     'git push -u origin feature/x',
@@ -184,7 +186,7 @@ describe('writesText', () => {
     'domain git commit -m x',
     'gh pr edit 5 --add-label "needs -t triage"',
   ]) {
-    test(`false for ${command}`, () => assert.equal(writesText(command), false));
+    test(`does not deny ${command}`, () => assert.notDeepEqual(unloaded(command), DENY));
   }
 });
 

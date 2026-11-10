@@ -75,11 +75,6 @@ function writes(part) {
   return PR_EDIT.test(part) && PR_TEXT_FLAG.test(flags);
 }
 
-/** Whether `command` writes a commit message or a PR title or body. */
-function writesText(command) {
-  return commands(command).some(writes);
-}
-
 function textBlocks(content) {
   if (typeof content === 'string') return [content];
   if (!Array.isArray(content)) return [];
@@ -258,4 +253,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { DENY_REASON, HINT, decide, writesText };
+module.exports = { DENY_REASON, HINT, decide };
