@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.1
+
+- `comment-hygiene` says that `find-duplicate-comments.js` reads committed files only: a comment you have not committed is not checked, and a duplicate you have fixed keeps reporting until you commit the fix.
+
 ## 2.2.0
 
 - `implement-issue` has your agent load the installed skills the work calls for before it writes code, such as one on building work with several modules.
