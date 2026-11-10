@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] Three sentences describe cases the worker handles on its own: a job with no payload, SIGTERM and MOVED replies.\nFile: docs/worker.md:12\nIssue: Three sentences describe cases the worker handles on its own: a job with no payload, SIGTERM and MOVED replies.\nFix: Delete all three.\nStatus: confirmed\n\n[IMPORTANT] The doc says \"4 at a time\" where the code has \"8 at a time\".\nFile: docs/worker.md:5\nIssue: The doc says \"4 at a time\" where the code has \"8 at a time\".\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 2 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

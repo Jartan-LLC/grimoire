@@ -1,7 +1,7 @@
 # A candidate target case: committed as a regression case until an old baseline fails it
 # (tests/evals/README.md, "Choosing cases" step 2), then retagged kind = "target".
 # A lean doc for code whose fix commits handled rare cases.
-split = "screen"
+split = "dev"
 kind = "regression"
 hints = []
 

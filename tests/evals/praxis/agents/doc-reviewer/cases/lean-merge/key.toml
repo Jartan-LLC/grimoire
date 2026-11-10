@@ -3,7 +3,7 @@
 # A lean README for a merge with rare cases (enchantments #103).
 # A needed line: a finding of any rating that rates the doc's recovery (copy
 # `settings.json.pre-dotmerge` back to undo the merge) as Bloat, or asks to cut it, fails `kept`.
-split = "screen"
+split = "dev"
 kind = "regression"
 hints = []
 

@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says \"`photos.tar`\" where the code has \"`photos.zip`\".\nFile: docs/usage.md:5\nIssue: The doc says \"`photos.tar`\" where the code has \"`photos.zip`\".\nFix: Change it.\nStatus: confirmed\n\n### Not raised\n\nThe usage doc does not mention that a file over 4 GiB is written with zip64 records. Rare, so it stays out of a doc for people.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

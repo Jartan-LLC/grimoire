@@ -11,7 +11,24 @@
 # RECORD=1` draws them, every case is committed as a regression case.
 target = "praxis:doc-reviewer"
 # Cases moved off a held-out split, each with its reason in a comment.
-BURNED = []
+BURNED = [
+  # The Opus screen of 817148f spent these, and its regex checks misgraded some of their samples.
+  "bloat-envcheck",
+  "bloat-logrot",
+  "bloat-pdfjoin",
+  "bloat-release",
+  "bloat-walkaway",
+  "cost-deadlink",
+  "harm-mirror",
+  "lean-cronlite",
+  "lean-gitstat",
+  "lean-imgshrink",
+  "lean-limits",
+  "lean-merge",
+  "lean-ratchet-sync",
+  "lean-watch",
+  "troubleshoot-ok",
+]
 # The agent preloads plain-writing, which holds the rule; `none` cuts the agent's body only, so a
 # positive control for the rule is a copy of plain-writing without it, screened as `new`.
 covers = [
