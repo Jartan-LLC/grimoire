@@ -10,7 +10,13 @@
  * The deny fails open: with no readable Claude Code transcript (Codex, a moved file, a
  * changed format) the hook only adds the hint. A gate that fired on a read error would
  * block every commit with no way out but disabling the plugin. One deny per agent at
- * most, so a transcript that lags the conversation costs a turn, never a lockout.
+ * most between compactions, so a transcript that lags the conversation costs a turn,
+ * never a lockout.
+ *
+ * A compaction drops the skill from context unless Claude Code re-injects it, which it
+ * does not in a process started with `--resume`, or when newer skills fill the budget
+ * for re-injected skills. So only a load, a re-injection or a deny since the agent's
+ * last compaction counts.
  */
 
 const fs = require('fs');
@@ -41,6 +47,8 @@ const QUOTED = /"[^"]*(?:"|$)|'[^']*(?:'|$)/g;
 const SKILL_NAME = 'commit-pr-writing';
 const SKILL_BODY_PREFIX = 'Base directory for this skill: ';
 const SKILL_BODY = /^Base directory for this skill: .*[\\/]commit-pr-writing\s*$/m;
+const REINJECTED_NAME = /(?:^|:)commit-pr-writing$/;
+const COMPACT_BOUNDARY = '"subtype":"compact_boundary"';
 
 /**
  * The simple commands in shell `command`, split at control operators and stripped of
@@ -84,6 +92,13 @@ function isSkillLoad(record) {
   return textBlocks(record.message?.content).some(text => SKILL_BODY.test(text));
 }
 
+/** Claude Code's re-injection of invoked skills after a compaction, when it names this skill. */
+function isReinjection(record) {
+  if (record.type !== 'attachment' || record.attachment?.type !== 'invoked_skills') return false;
+  const skills = record.attachment.skills;
+  return Array.isArray(skills) && skills.some(skill => typeof skill?.name === 'string' && REINJECTED_NAME.test(skill.name));
+}
+
 function isOwnDeny(record) {
   const content = record.type === 'user' ? record.message?.content : null;
   if (!Array.isArray(content)) return false;
@@ -93,8 +108,19 @@ function isOwnDeny(record) {
   });
 }
 
+/** The record on the line of JSONL `buf` from `start` to `end`, or null. */
+function parseLine(buf, start, end) {
+  try {
+    const record = JSON.parse(buf.toString('utf8', start, end));
+    return record && typeof record === 'object' ? record : null;
+  } catch {
+    // A partial last line: the transcript is written while the session runs.
+    return null;
+  }
+}
+
 /**
- * Whether transcript JSONL `buf` shows a load of the skill or this hook's earlier deny.
+ * Whether transcript JSONL `buf` shows a load or re-injection of the skill or this hook's earlier deny.
  * Transcripts run to hundreds of megabytes, past the longest string Node can hold, so
  * the search stays on the Buffer and parses only the lines that name the skill.
  */
@@ -104,15 +130,38 @@ function cleared(buf) {
     const newline = buf.indexOf(0x0a, at);
     const end = newline < 0 ? buf.length : newline;
     const line = buf.toString('utf8', start, end);
-    if (line.includes(SKILL_BODY_PREFIX) || line.includes(DENY_MARKER)) {
-      try {
-        const record = JSON.parse(line);
-        if (record && typeof record === 'object' && (isSkillLoad(record) || isOwnDeny(record))) return true;
-      } catch {
-        // A partial last line: the transcript is written while the session runs.
-      }
+    if (line.includes(SKILL_BODY_PREFIX) || line.includes(DENY_MARKER) || line.includes('"invoked_skills"')) {
+      const record = parseLine(buf, start, end);
+      if (record && (isSkillLoad(record) || isReinjection(record) || isOwnDeny(record))) return true;
     }
     at = newline < 0 ? -1 : buf.indexOf(SKILL_NAME, newline);
+  }
+  return false;
+}
+
+/** `buf` from its last compaction boundary on, or null when it has none. */
+function sinceLastCompaction(buf) {
+  for (let from = buf.length; from > 0; ) {
+    const at = buf.lastIndexOf(COMPACT_BOUNDARY, from - 1);
+    if (at < 0) return null;
+    const start = buf.lastIndexOf(0x0a, at) + 1;
+    const newline = buf.indexOf(0x0a, at);
+    const record = parseLine(buf, start, newline < 0 ? buf.length : newline);
+    if (record?.type === 'system' && record.subtype === 'compact_boundary') return buf.subarray(start);
+    from = at;
+  }
+  return null;
+}
+
+/**
+ * Whether the agent's context, from `transcripts` read in order, has cleared the write
+ * since its last compaction, which may sit in any of them.
+ */
+function clearedSinceCompaction(transcripts) {
+  for (let i = transcripts.length - 1; i >= 0; i--) {
+    const since = sinceLastCompaction(transcripts[i]);
+    if (cleared(since ?? transcripts[i])) return true;
+    if (since !== null) return false;
   }
   return false;
 }
@@ -169,7 +218,7 @@ function decide(input, read) {
   const textWrite = parts.some(writes);
   if (!textWrite && !parts.some(part => HINTED.some(pattern => pattern.test(part)))) return null;
   const transcripts = textWrite ? agentTranscripts(input, read) : null;
-  if (transcripts !== null && !transcripts.some(cleared)) {
+  if (transcripts !== null && !clearedSinceCompaction(transcripts)) {
     return {
       hookSpecificOutput: {
         hookEventName: 'PreToolUse',

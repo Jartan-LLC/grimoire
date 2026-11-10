@@ -2,7 +2,7 @@
 
 ## 2.1.0
 
-- In Claude Code, your agent's first commit that writes a message, or first PR create, or PR edit that sets a title or body, is blocked until it has loaded `commit-pr-writing`, so the message is written under the skill, not before it. The reason tells the agent to load the skill, rewrite the message and rerun the whole command: nothing in a blocked command runs, a `git add` chained before the commit included. Each agent and subagent is blocked at most once. In Codex, or where the hook cannot read the session transcript, it only prompts the agent to load the skill. The prompt now fires only on a commit, push, PR create or PR edit command itself, not on those words inside another command's argument or a `bash -c` string. In Codex, re-trust gitwise's hooks under `/hooks` after updating.
+- In Claude Code, your agent's first commit that writes a message, or first PR create, or PR edit that sets a title or body, is blocked until it has loaded `commit-pr-writing`, so the message is written under the skill, not before it. The reason tells the agent to load the skill, rewrite the message and rerun the whole command: nothing in a blocked command runs, a `git add` chained before the commit included. Each agent and subagent is blocked at most once, and once more after each compaction that leaves the skill out of its context. In Codex, or where the hook cannot read the session transcript, it only prompts the agent to load the skill. The prompt now fires only on a commit, push, PR create or PR edit command itself, not on those words inside another command's argument or a `bash -c` string. In Codex, re-trust gitwise's hooks under `/hooks` after updating.
 
 ## 2.0.0
 

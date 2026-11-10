@@ -73,6 +73,46 @@ const earlierDeny = {
   },
   permissionDecision: { decision: 'reject', source: 'hook', reasonType: 'hook', reasonCode: 'hook:PreToolUse' },
 };
+// A compaction as Claude Code 2.1.321 writes it: the boundary, the summary, then the
+// re-injection of the skills invoked before it, which a resumed process leaves out.
+const boundary = {
+  parentUuid: null,
+  logicalParentUuid: 'u-body',
+  isSidechain: false,
+  type: 'system',
+  subtype: 'compact_boundary',
+  content: 'Conversation compacted',
+  isMeta: false,
+  uuid: 'u-boundary',
+  level: 'info',
+  compactMetadata: { trigger: 'manual', preTokens: 22263, durationMs: 8311, postTokens: 6675 },
+  sessionId: SESSION,
+};
+const summary = {
+  parentUuid: 'u-boundary',
+  isSidechain: false,
+  type: 'user',
+  message: { role: 'user', content: 'This session is being continued from a previous conversation that ran out of context.' },
+  isVisibleInTranscriptOnly: true,
+  isCompactSummary: true,
+  uuid: 'u-summary',
+  sessionId: SESSION,
+};
+const reinjected = (...names) => ({
+  parentUuid: 'u-summary',
+  isSidechain: false,
+  attachment: {
+    type: 'invoked_skills',
+    skills: names.map(name => ({
+      name,
+      path: `plugin:${name}`,
+      content: `Base directory for this skill: /home/u/.claude/plugins/cache/grimoire/${name.replace(':', '/')}\n\n# Body\n`,
+    })),
+  },
+  type: 'attachment',
+  uuid: 'u-reinjected',
+  sessionId: SESSION,
+});
 
 const jsonl = records => `${records.map(r => JSON.stringify(r)).join('\n')}\n`;
 const reader = files => file => (file in files ? Buffer.from(files[file]) : null);
@@ -207,6 +247,45 @@ describe('decide', () => {
     assert.deepEqual(decide(input('git commit -m x'), reader({ [MAIN]: other })), HINTED);
   });
 
+  describe('after a compaction', () => {
+    const loadedThenCompacted = [prompt, skillCall, skillLaunched, skillBody, boundary, summary];
+
+    test('allows when Claude Code re-injected the skill', () => {
+      const read = reader({ [MAIN]: jsonl([...loadedThenCompacted, reinjected('gitwise:commit-pr-writing')]) });
+      assert.deepEqual(decide(input('git commit -m x'), read), HINTED);
+    });
+
+    test('denies when nothing was re-injected, as after a --resume', () => {
+      assert.deepEqual(decide(input('git commit -m x'), reader({ [MAIN]: jsonl([...loadedThenCompacted, prompt]) })), DENY);
+    });
+
+    test('denies when the re-injection dropped the skill for newer ones', () => {
+      const read = reader({
+        [MAIN]: jsonl([...loadedThenCompacted, reinjected('praxis:comment-hygiene', 'pythonica:pydantic'), prompt]),
+      });
+      assert.deepEqual(decide(input('git commit -m x'), read), DENY);
+    });
+
+    test('allows once the skill is loaded again after it', () => {
+      const read = reader({ [MAIN]: jsonl([...loadedThenCompacted, prompt, skillCall, skillLaunched, skillBody]) });
+      assert.deepEqual(decide(input('git commit -m x'), read), HINTED);
+    });
+
+    test('denies once more, since a deny before the compaction no longer counts', () => {
+      const deniedThenCompacted = [prompt, earlierDeny, boundary, summary, prompt];
+      assert.deepEqual(decide(input('git commit -m x'), reader({ [MAIN]: jsonl(deniedThenCompacted) })), DENY);
+      const deniedAgain = reader({ [MAIN]: jsonl([...deniedThenCompacted, earlierDeny]) });
+      assert.deepEqual(decide(input('git commit -m x'), deniedAgain), HINTED);
+    });
+  });
+
+  test('without a compaction, a load or deny anywhere in the transcript still counts', () => {
+    const later = { ...prompt, uuid: 'u-later', message: { role: 'user', content: 'Now push it.' } };
+    const loaded = reader({ [MAIN]: jsonl([prompt, skillCall, skillLaunched, skillBody, later]) });
+    assert.deepEqual(decide(input('git commit -m x'), loaded), HINTED);
+    assert.deepEqual(decide(input('git commit -m x'), reader({ [MAIN]: jsonl([prompt, earlierDeny, later]) })), HINTED);
+  });
+
   describe('in a subagent', () => {
     const own = `/home/u/.claude/projects/-repo/${SESSION}/subagents/agent-a052e03751cd6f62f.jsonl`;
     const sub = command => input(command, { agent_id: 'a052e03751cd6f62f', agent_type: 'general-purpose' });
@@ -225,6 +304,16 @@ describe('decide', () => {
       const read = reader({ [MAIN]: jsonl([prompt]) });
       assert.deepEqual(decide(sub('git commit -m x'), read), HINTED);
       assert.deepEqual(decide(input('git commit -m x', { agent_id: '../../etc' }), read), HINTED);
+    });
+
+    test('counts only what follows its own last compaction, not the main session\'s', () => {
+      const sidechain = record => ({ ...record, isSidechain: true, agentId: 'a052e03751cd6f62f' });
+      const compacted = [prompt, skillBody, boundary, summary].map(sidechain);
+      assert.deepEqual(decide(sub('git commit -m x'), reader({ [MAIN]: jsonl([prompt]), [own]: jsonl(compacted) })), DENY);
+      const kept = jsonl([...compacted, sidechain(reinjected('gitwise:commit-pr-writing'))]);
+      assert.deepEqual(decide(sub('git commit -m x'), reader({ [MAIN]: jsonl([prompt]), [own]: kept })), HINTED);
+      const mainCompacted = jsonl([prompt, boundary, summary]);
+      assert.deepEqual(decide(sub('git commit -m x'), reader({ [MAIN]: mainCompacted, [own]: jsonl([prompt, skillBody]) })), HINTED);
     });
 
     test("a fork counts the main session's loads up to where it forked", () => {

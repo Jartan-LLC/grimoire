@@ -29,7 +29,7 @@ codex plugin add gitwise@grimoire
 
 - **PreToolUse**, two hooks that prompt the model to load a skill when it makes a GitHub write. Where a hook only prompts, the prompt arrives with that command's result, so it shapes the next write, not the one that fired it. Read-only commands (`gh pr view`, `gh pr list`, `git status`) pass through.
   - `github-conventions` on `gh pr`/`gh issue` `create`/`comment`/`edit`, `gh pr review` and `git commit`/`push`/`tag`.
-  - `commit-pr-writing` on `git commit`, `git push`, `gh pr create` and `gh pr edit`. In Claude Code it also blocks a commit that writes a message, a PR create, or a PR edit that sets a title or body, until the agent has loaded the skill: the reason tells it to load the skill, rewrite the message and rerun the whole command. It blocks each agent and subagent at most once. In Codex, or where it cannot read the session transcript, it only prompts.
+  - `commit-pr-writing` on `git commit`, `git push`, `gh pr create` and `gh pr edit`. In Claude Code it also blocks a commit that writes a message, a PR create, or a PR edit that sets a title or body, until the agent has loaded the skill: the reason tells it to load the skill, rewrite the message and rerun the whole command. It blocks each agent and subagent at most once, and once more after each compaction that leaves the skill out of its context. In Codex, or where it cannot read the session transcript, it only prompts.
 
 ## License
 
