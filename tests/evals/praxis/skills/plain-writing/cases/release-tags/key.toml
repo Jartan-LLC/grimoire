@@ -32,5 +32,4 @@ command = "python3 -c \"import pathlib,sys; sys.exit(len(pathlib.Path('RELEASING
 metric = "delivered"
 artifact = "delivery"
 skill = "praxis:plain-writing"
-write = "file"
-state = "in-context"
+state = "loaded"
