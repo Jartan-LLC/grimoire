@@ -22,11 +22,12 @@ Write for what the reader does. A document for people (a README, a contributor o
 procedure, a docs page, release notes) says what its reader runs, chooses and must avoid, and how
 to recover from a failure they have to act on, with recovery from a rare failure in a short
 troubleshooting part at the end. What the program handles on its own -- a case it skips, fixes or
-reports with its own remedy -- needs no line: the code, its message and the commit hold it. A
-branch's commits are not the document's content list, though release notes still name each fix.
-Every line costs every reader, and lines no reader acts on bury the warnings the document must
-keep: a warning before data loss, a leaked secret or a step that cannot be undone stays where the
-reader acts, however rare.
+reports with its own remedy -- needs no line: the code, its message and the commit hold it. On an
+explanation or architecture page, how the program handles a case can be the content. A branch's
+commits are not the document's content list, though release notes still name each fix. Every line
+costs every reader, and lines no reader acts on bury the warnings the document must keep: a warning
+before data loss, a leaked secret or a step that cannot be undone stays where the reader acts,
+however rare.
 
 When rules pull apart, the earlier one wins: hard constraints, warnings, exact commands and
 validation; words that prevent ambiguity; context for a reader who lands mid-page; brevity.
