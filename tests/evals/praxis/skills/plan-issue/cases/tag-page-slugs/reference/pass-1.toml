@@ -1,0 +1,30 @@
+final = "Plan written to .claude/workspace/issue-83/plan.md."
+
+[files]
+".claude/workspace/issue-83/plan.md" = '''# Plan: Tag pages (issue 83)
+
+## Approach
+
+Post addresses already come from `slugify` (`src/posts.js:7`), which turns `Node.js` into `node-js`.
+Reuse `slugify` for tag addresses: export it from `src/posts.js` and add `tagPath(tag)` beside
+`postPath`, so a tag and a post title clean up the same way. `src/build.js` writes one page per
+tag, newest post first, and `postPage` links each tag.
+
+## Decisions for the user
+
+- Two tags that clean up to the same address (`Node.js`, `node js`) share one page -- default if
+  unanswered: yes.
+
+## Steps
+
+1. `src/posts.js`: export `slugify`; add `tagPath(tag)` returning `/tags/<slug>/`.
+2. `src/html.js`: `tagPage(tag, posts, pathOf)`, and tag links in `postPage`.
+3. `src/build.js`: group posts by tag and write each tag page.
+4. Tests in `test/posts.test.js` for `tagPath("Node.js")` and the grouping.
+
+## Verification
+
+- `npm test` -- the new tag tests pass with the existing ones.
+- `npm run build`, then open `public/tags/node-js/index.html`: it lists the year-in-review post,
+  and that post's page links its tags there.
+'''

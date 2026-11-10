@@ -1,0 +1,29 @@
+final = "Plan written to .claude/workspace/issue-92/plan.md."
+
+[files]
+".claude/workspace/issue-92/plan.md" = '''# Plan: Let me pick the indent (issue 92)
+
+## Approach
+
+Add `--indent <n>` with `-i` as its short form, and move `--in-place` to `-w`.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. `src/format.js`: take an `indent` option, default 2, and pass it to `JSON.stringify` at
+   `src/format.js:12`.
+2. `bin/jsonfmt.js`: change `in-place`'s short flag to `w`, add
+   `indent` with short `i`,, reject a value that is not a whole number from 0 to
+   10, and pass it to `format`.
+3. Tests in `test/format.test.js` for 4 spaces and for the default.
+4. `README.md`: document it.
+
+## Verification
+
+- `npm test` -- the new indent tests pass with the existing ones.
+- `echo '{"a":1}' > /tmp/a.json && node bin/jsonfmt.js --indent 4 /tmp/a.json` -- prints the
+  object with four spaces.
+'''

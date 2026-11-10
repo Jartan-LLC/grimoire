@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-58/plan.md."
+
+[files]
+".claude/workspace/issue-58/plan.md" = '''# Plan: Stop oversized uploads filling the NAS (issue 58)
+
+## Steps
+
+1. `snapbox/server.py`: read `Content-Length` first; over 25 MB, reply with an error the app
+   shows and do not read the body.
+2. `snapbox/store.py`: refuse `data` over the same limit in `save_upload`, for callers that do
+   not come through the server.
+3. `tests/test_store.py`: over the limit is refused, at the limit is saved.
+
+## Decisions for the user
+
+- Whether 25 MB is right for videos from the newer phones -- default if unanswered: 25 MB.
+
+## Verification
+
+- `python3 -m pytest -q` -- the new size tests pass with the existing ones.
+- With the server running locally, `curl -X POST --data-binary @big.jpg -H 'X-Filename: big.jpg'
+  localhost:8420/upload` on a 30 MB file answers with the refusal message and saves nothing.
+'''

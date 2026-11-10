@@ -1,0 +1,26 @@
+final = "Plan written to .claude/workspace/issue-47/plan.md."
+
+[files]
+".claude/workspace/issue-47/plan.md" = '''# Plan: Scores as JSON (issue 47)
+
+## Approach
+
+Introduce an `OutputFormatter` base class with `TableFormatter` and `JsonFormatter`, picked
+from a registry by a `--format` option, so CSV or HTML can be added later.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Add `src/formatters/index.js` with the registry keyed by format name.
+2. Move `formatTable` from `src/table.js` into `TableFormatter`; add `JsonFormatter`.
+3. Read `--format` in `bin/quizmark.js` and look the formatter up.
+
+## Verification
+
+- `npm test` -- the new JSON test passes with the existing ones.
+- `node bin/quizmark.js grade answers.csv key.txt --json` on a small sheet prints an array that
+  `JSON.parse` reads back, one object per student.
+'''

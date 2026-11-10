@@ -1,0 +1,7 @@
+[project]
+name = "dots"
+version = "1.4.0"
+requires-python = ">=3.12"
+
+[project.scripts]
+dots = "dots.cli:main"

@@ -1,0 +1,26 @@
+final = "Plan written to .claude/workspace/issue-83/plan.md."
+
+[files]
+".claude/workspace/issue-83/plan.md" = '''# Plan: Tag pages (issue 83)
+
+## Approach
+
+Move `slugify` into `src/slug.js` and use it from both `postPath` and a new `tagPath`; then add
+a tag page template and write the tag pages in the build.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. `src/slug.js` with `slugify`, moved from `src/posts.js`.
+2. `tagPath`, `tagPage` and the build loop.
+3. Tests for tag addresses.
+
+## Verification
+
+- `npm test` -- the new tag tests pass with the existing ones.
+- `npm run build`, then open `public/tags/node-js/index.html`: it lists the year-in-review post,
+  and that post's page links its tags there.
+'''

@@ -1,0 +1,25 @@
+final = "Plan written to .claude/workspace/issue-92/plan.md."
+
+[files]
+".claude/workspace/issue-92/plan.md" = '''# Plan: lines of exactly --width (issue 92)
+
+## Verification
+
+```bash
+node --test test/wrap.test.js
+```
+
+## Approach
+
+Wrap only when the next word would push the line past the width; today it wraps when the line
+would equal it.
+
+## Decisions for the user
+
+- None needed: the README already says "at most `--width` characters a line".
+
+## Steps
+
+1. Fix the comparison in `src/wrap.js`.
+2. Cover widths 10, 11 and 12 for `hello world` in `test/wrap.test.js`.
+'''

@@ -1,0 +1,7 @@
+{
+  "name": "icsmerge",
+  "version": "3.1.0",
+  "bin": { "icsmerge": "bin/icsmerge.js" },
+  "engines": { "node": ">=20" },
+  "scripts": { "test": "node --test" }
+}

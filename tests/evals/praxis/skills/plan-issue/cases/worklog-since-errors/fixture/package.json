@@ -1,0 +1,7 @@
+{
+  "name": "worklog",
+  "version": "0.9.0",
+  "private": true,
+  "bin": { "worklog": "bin/worklog.js" },
+  "scripts": { "test": "node --test" }
+}

@@ -1,0 +1,34 @@
+final = "Plan written to .claude/workspace/issue-53/plan.md."
+
+[files]
+".claude/workspace/issue-53/plan.md" = '''# Plan: Show only the bookmarks with a tag (issue 53)
+
+## Approach
+
+Let `marks list` take the `--tag` option `add` already parses. With it, print only the
+bookmarks carrying every given tag, each with the number it has in the full list.
+
+## Decisions for the user
+
+- With two `--tag` options, a bookmark must carry both -- default if unanswered: both, since
+  each tag narrows the list.
+
+## Out of scope
+
+- Moving `src/store.js` to `fs/promises` -- open an issue.
+
+## Steps
+
+1. In the `list` branch at `bin/marks.js:17-21`, number every bookmark first, then skip those
+   missing a requested tag, so the numbers match the full list.
+2. Add `list [--tag <tag>...]` to the usage line at `bin/marks.js:23`.
+3. Add the example to `README.md`.
+4. Tests: a new `test/list.test.js` that runs `bin/marks.js` on a temp `MARKS_FILE` with and
+   without `--tag`.
+
+## Verification
+
+- `npm test` -- the new list tests pass with the existing ones.
+- `MARKS_FILE=/tmp/m.json node bin/marks.js list --tag reading` -- prints only the tagged
+  bookmarks, with their full-list numbers.
+'''

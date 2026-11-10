@@ -1,0 +1,25 @@
+final = "Plan written to .claude/workspace/issue-47/plan.md."
+
+[files]
+".claude/workspace/issue-47/plan.md" = '''# Plan: Scores as JSON (issue 47)
+
+## Approach
+
+Make output pluggable: each format is a strategy module in `src/formats/` exporting
+`render(rows)`, and `bin/quizmark.js` loads the one `--format` names.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. `src/formats/table.js` wraps `formatTable`; `src/formats/json.js` prints JSON.
+2. `bin/quizmark.js` reads `--format` (default `table`) and requires that module.
+
+## Verification
+
+- `npm test` -- the new JSON test passes with the existing ones.
+- `node bin/quizmark.js grade answers.csv key.txt --json` on a small sheet prints an array that
+  `JSON.parse` reads back, one object per student.
+'''

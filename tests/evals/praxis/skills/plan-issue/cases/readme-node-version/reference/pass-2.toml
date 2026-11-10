@@ -1,0 +1,14 @@
+final = "Plan written to .claude/workspace/issue-118/plan.md."
+
+[files]
+".claude/workspace/issue-118/plan.md" = '''# Plan: Node version in the README (issue 118)
+
+## Steps
+
+1. `README.md`, Requirements: Node 20 or later, matching `engines` in `package.json`.
+
+## Verification
+
+`node -p "require('./package.json').engines.node"` prints `>=20`, the version the README now
+names.
+'''

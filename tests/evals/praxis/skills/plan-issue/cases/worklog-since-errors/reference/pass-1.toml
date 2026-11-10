@@ -1,0 +1,21 @@
+final = "Plan written to .claude/workspace/issue-74/plan.md."
+
+[files]
+".claude/workspace/issue-74/plan.md" = '''# Plan: Report only recent hours (issue 74)
+
+## Approach
+`--since YYYY-MM-DD` in `bin/worklog.js`; `totals()` gets only the entries on or after
+that day. Dates in the file are ISO strings, so they compare as text. A value that is not
+a real date prints `worklog: --since wants YYYY-MM-DD` and exits 2, like the usage error.
+
+## Decisions
+None.
+
+## Steps
+1. Read `--since` in `bin/worklog.js` and check it with a regex and `Date.parse`.
+2. Add `since(entries, day)` to `src/report.js`.
+
+## Verification
+- `npm test` -- a test for the filter; a test that `--since 2026-02-30` and `--since nov`
+  exit 2 with the message.
+'''

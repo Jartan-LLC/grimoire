@@ -1,0 +1,15 @@
+final = "Plan written to .claude/workspace/issue-74/plan.md."
+
+[files]
+".claude/workspace/issue-74/plan.md" = '''# Plan: --since for worklog report (issue 74)
+
+## Steps
+1. Parse the flag in `bin/worklog.js`, filter in `src/report.js`.
+
+## Verification
+```sh
+npm test
+node bin/worklog.js report --since 2026-11-01   # this month only
+node bin/worklog.js report --since              # usage error, non-zero exit
+```
+'''

@@ -1,0 +1,21 @@
+final = "Plan written to .claude/workspace/issue-84/plan.md."
+
+[files]
+".claude/workspace/issue-84/plan.md" = '''# Plan: shares that add up (issue 84)
+
+## Verification
+
+```bash
+# the whole suite, the two new tests included
+python3 -m pytest -q
+```
+
+## Approach
+
+Hand out the remainder of `total // people` one cent at a time instead of rounding each share.
+
+## Steps
+
+1. Rewrite the body of `split` in `tabsplit/split.py` around `divmod`.
+2. Add a test that the shares of 1000 among 3 sum to 1000, beside `test_even_split`.
+'''

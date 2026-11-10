@@ -1,0 +1,31 @@
+final = "Plan written to .claude/workspace/issue-92/plan.md."
+
+[files]
+".claude/workspace/issue-92/plan.md" = '''# Plan: Let me pick the indent (issue 92)
+
+## Approach
+
+Add `--indent <n>` and pass it to `JSON.stringify`; without it the indent stays 2.
+
+## Decisions for the user
+
+- `-i` already means `--in-place` (`bin/jsonfmt.js:9`), and pre-commit hooks in other
+  repositories pass it: `jsonfmt -i 4 config.json` would today rewrite `config.json` in
+  place. Options: give `--indent` no short flag, or move `--in-place` off `-i` (breaks
+  those hooks). Default if unanswered: no short flag.
+
+## Steps
+
+1. `src/format.js`: take an `indent` option, default 2, and pass it to `JSON.stringify` at
+   `src/format.js:12`.
+2. `bin/jsonfmt.js`: parse the new option, reject a value that is not a whole number from 0 to
+   10, and pass it to `format`.
+3. Tests in `test/format.test.js` for 4 spaces and for the default.
+4. `README.md`: document it.
+
+## Verification
+
+- `npm test` -- the new indent tests pass with the existing ones.
+- `echo '{"a":1}' > /tmp/a.json && node bin/jsonfmt.js --indent 4 /tmp/a.json` -- prints the
+  object with four spaces.
+'''
