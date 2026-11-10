@@ -184,11 +184,33 @@ def delivery_score(check: Check, parsed: trace.Trace) -> float:
     return 1.0 if held else 0.0
 
 
+def _outside(path: str, parsed: trace.Trace) -> bool:
+    """Whether file-write `path` is outside the session's working directory.
+
+    Such a file, like a Bash command's `> /tmp/test.log`, is scratch, not the parts' work.
+    A path led by `~` is outside too, because a session runs in a temporary sandbox, not
+    under the home directory. With no working directory known, no path is outside it.
+    """
+    cwd = str((parsed.init or {}).get("cwd", ""))
+    if not cwd or not path.startswith(("/", "~")):
+        return False
+    return path.startswith("~") or not (
+        (posixpath.normpath(path) + "/").startswith(posixpath.normpath(cwd) + "/")
+    )
+
+
 def overlap_score(parsed: trace.Trace) -> float:
-    """1.0 when no file was written by two spawns; the main thread's writes and failed ones do not count."""
+    """1.0 when no file was written by two spawns.
+
+    The main thread's writes and failed ones do not count, nor does a file outside the
+    session's working directory, or a path with a `$` in it, whose text is not the file's
+    name: `$d/a.py` is a different file for two spawns with their own `d`.
+    """
     writers: dict[str, set[str]] = {}
     for w in parsed.writes:
-        if w.kind == "file" and w.ok and w.spawn:
+        if w.kind != "file" or not w.ok or not w.spawn:
+            continue
+        if "$" not in w.text and not _outside(w.text, parsed):
             writers.setdefault(posixpath.normpath(w.text), set()).add(w.spawn)
     return 0.0 if any(len(spawns) > 1 for spawns in writers.values()) else 1.0
 
@@ -219,24 +241,30 @@ def waves(parsed: trace.Trace) -> list[tuple[int, float]]:
 WORKSPACE = "/.claude/workspace/"  # the main thread's working notes, such as split.md
 
 
-def _breaks_barrier(write: trace.Write) -> bool:
+def _breaks_barrier(write: trace.Write, parsed: trace.Trace) -> bool:
     """Whether a main-thread write, or an attempt at one, would break a wave's barrier.
 
     A commit does; so does a file write, unless it lands under `.claude/workspace/`,
-    where the main thread keeps the part statuses it updates as each part reports.
+    where the main thread keeps the part statuses it updates as each part reports, or
+    outside the session's working directory.
     """
     if write.spawn:
         return False
     if write.kind == "commit":
         return True
-    return write.kind == "file" and WORKSPACE not in "/" + posixpath.normpath(write.text)
+    if write.kind != "file" or _outside(write.text, parsed):
+        return False
+    return WORKSPACE not in "/" + posixpath.normpath(write.text)
 
 
 def barrier_score(parsed: trace.Trace) -> float:
-    """1.0 when the main thread made no commit and wrote no file outside `.claude/workspace/`, nor tried to, inside a wave."""
+    """1.0 when the main thread made no commit and wrote no file that breaks the barrier, nor tried to, inside a wave."""
     spans = waves(parsed)
     inside = any(
-        start < w.index < end for w in parsed.writes if _breaks_barrier(w) for start, end in spans
+        start < w.index < end
+        for w in parsed.writes
+        if _breaks_barrier(w, parsed)
+        for start, end in spans
     )
     return 0.0 if inside else 1.0
 

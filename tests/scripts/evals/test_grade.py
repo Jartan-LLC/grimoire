@@ -14,6 +14,7 @@ from test_trace import (
     call,
     commit,
     handed_back,
+    init,
     inside,
     launched,
     load_skill,
@@ -61,6 +62,16 @@ def test_a_delivery_check_fails_when_nothing_of_its_kind_was_written() -> None:
         state="in-context",
     )
     assert grade.delivery_score(check, trace.parse(load_skill("s1", "x", CPW), PLUGINS)) == 0.0
+
+
+def test_a_file_delivery_check_reads_a_doc_written_through_bash() -> None:
+    check = Check(
+        "delivered", "delivery", skill="gitwise:commit-pr-writing", write="file", state="in-context"
+    )
+    doc = [call("b1", "Bash", command="cat > docs/a.md <<'EOF'\n# A\nEOF"), result_of("b1")]
+    loaded = load_skill("s1", "gitwise:commit-pr-writing", CPW)
+    assert grade.delivery_score(check, trace.parse([*loaded, *doc], PLUGINS)) == 1.0
+    assert grade.delivery_score(check, trace.parse([*doc, *loaded], PLUGINS)) == 0.0
 
 
 def test_a_trigger_check_asks_only_whether_the_skill_ever_loaded() -> None:
@@ -125,6 +136,22 @@ def test_an_overlap_check_fails_when_two_spawns_wrote_one_file() -> None:
     assert overlap([*apart, spawn("a3"), *inside("a3", failed)]) == 1.0
 
 
+def test_an_overlap_check_skips_scratch_files_and_variable_paths() -> None:
+    def both(command: str) -> list[trace.Event]:
+        def run(call_id: str) -> list[trace.Event]:
+            return [call(call_id, "Bash", command=command), result_of(call_id)]
+
+        return [spawn("a1"), *inside("a1", run("b1")), spawn("a2"), *inside("a2", run("b2"))]
+
+    def overlap(events: list[trace.Event]) -> float:
+        return grade.overlap_score(trace.parse([init(cwd="/repo"), *events], PLUGINS))
+
+    assert overlap(both("npm test > /tmp/npmtest.log 2>&1")) == 1.0
+    assert overlap(both("echo x >> ~/notes.md")) == 1.0
+    assert overlap(both("d=$(mktemp -d) && cat > $d/src/a.js <<'EOF'\nx\nEOF")) == 1.0
+    assert overlap(both("cd /repo && echo x >> src/a.js")) == 0.0
+
+
 def test_a_spawn_writes_check_fails_on_any_spawns_attempt_at_any_depth() -> None:
     check = Check("isolated", "spawn-writes", write="commit")
     nested = [call("n1", "Agent", prompt="Commit it."), *inside("n1", commit("c1"))]
@@ -174,6 +201,34 @@ def test_a_barrier_check_lets_the_main_thread_update_its_workspace_notes_mid_wav
     climbed = wrote("w2", "/repo/.claude/workspace/../src/x.py")
     parsed = trace.parse([*wave, *climbed, notification("a1", "done")], PLUGINS)
     assert grade.barrier_score(parsed) == 0.0
+
+
+def test_a_barrier_check_sees_a_main_thread_write_through_bash() -> None:
+    wave = [spawn("a1"), launched("a1")]
+    glue = [call("b1", "Bash", command="sed -i 's/a/b/' src/glue.py"), result_of("b1")]
+    parsed = trace.parse([*wave, *glue, notification("a1", "done")], PLUGINS)
+    assert grade.barrier_score(parsed) == 0.0
+    notes = "cd /repo/.claude/workspace/issue-52 && cat > split.md <<'EOF'\n- a: out\nEOF"
+    status = [call("b2", "Bash", command=notes), result_of("b2")]
+    parsed = trace.parse([*wave, *status, notification("a1", "done")], PLUGINS)
+    assert grade.barrier_score(parsed) == 1.0
+
+
+def test_a_barrier_check_skips_a_main_thread_scratch_file_outside_the_working_directory() -> None:
+    def barrier(*events: trace.Event) -> float:
+        wave = [spawn("a1"), launched("a1")]
+        return grade.barrier_score(
+            trace.parse([init(cwd="/repo"), *wave, *events, notification("a1", "done")], PLUGINS)
+        )
+
+    assert barrier(call("b1", "Bash", command="pytest > /tmp/x.log 2>&1"), result_of("b1")) == 1.0
+    assert barrier(*wrote("w1", "/home/u/check.js")) == 1.0
+    assert barrier(*wrote("w2", "/repo/../repo2/a.py")) == 1.0
+    assert barrier(call("b3", "Bash", command="cd ~ && echo x > b"), result_of("b3")) == 1.0
+    assert barrier(*wrote("w3", "/repo/src/a.py")) == 0.0
+    assert (
+        barrier(call("b2", "Bash", command="cat > $d/a.py <<'EOF'\nx\nEOF"), result_of("b2")) == 0.0
+    )
 
 
 def test_a_session_check_with_no_grader_refuses_rather_than_scores() -> None:
