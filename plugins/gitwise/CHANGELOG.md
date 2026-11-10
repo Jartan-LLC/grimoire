@@ -2,7 +2,7 @@
 
 ## 2.1.0
 
-- In Codex, re-trust gitwise's hooks under `/hooks` after updating.
+- In Codex, re-trust gitwise's hooks under `/hooks` after updating; until you do, Codex skips the changed commit-pr-writing hook.
 - In Claude Code, your agent's first commit that writes a message, or first PR create, or PR edit that sets a title or body, is blocked until it has loaded `commit-pr-writing`, so the message is written under the skill, not before it. The reason tells the agent to load the skill, rewrite the message and rerun the whole command: nothing in a blocked command runs, a `git add` chained before the commit included. Each agent and subagent is blocked at most once, and once more after each compaction that leaves the skill out of its context. In Codex, or where the hook cannot read the session transcript, it only prompts the agent to load the skill.
 - The prompt to load `commit-pr-writing` now fires only on a commit, push, PR create or PR edit command itself, not on those words inside another command's argument or a `bash -c` string. Behind a wrapper it fires only when the wrapper is `sudo`, `nohup`, `nice`, `timeout <duration>`, `env`, `command`, `exec` or `time` given no options of its own, so not on `sudo -u root git commit` or `xargs git commit`.
 
