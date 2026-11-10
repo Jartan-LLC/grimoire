@@ -42,8 +42,9 @@ Always keep:
 - a short reason where a reader would otherwise skip a rule;
 - hard constraints: must, never, ask first;
 - project facts the reader cannot infer;
-- a whole list, or a pointer to where the whole list is, after checking it is there; a partial
-  list says it is partial where it stands.
+- a whole list the reader acts on (options, commands, steps, valid values), or a pointer to where
+  the whole list is, after checking it is there; for cases the program handles on its own, a
+  pointer to where they are listed is enough; a partial list says it is partial where it stands.
 
 Cut:
 
