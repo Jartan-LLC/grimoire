@@ -10,11 +10,9 @@
 # rollback are required content. Trigger cases ask to review, revise or talk through a plan (the
 # skill should load) or share its words but need something else (it should not).
 #
-# The dev cases are the 19 cases of the scratch smoke for #193, whose results PR #204 reports, with
-# the smoke's prompts and repositories, plus three trigger cases: the smoke's results are known, so
-# its cases stay on dev.
-# No screen or confirm case ran in the smoke. Only Opus has baselines, `none` on the screen and
-# confirm behaviour cases; every behaviour case is committed as a regression case.
+# The cases of the scratch smoke for #193, whose results PR #204 reports, are on dev with the
+# smoke's prompts and repositories, as are three trigger cases: the smoke's results are known, so
+# its cases stay on dev. No screen or confirm case ran in the smoke.
 #
 # What the graders cannot see: each `gap` regex reads one planted item, not the plan's size or
 # whether its other content is right; that is the blind panel's (under [pass_rule]).
