@@ -56,29 +56,29 @@ A yes passes.
 
 ## Cases
 
-| Case | Split | Question |
-|---|---|---|
-| authors-paging | dev | Second caller |
-| cart-price-format | dev | Second caller |
-| thumb-retry | dev | Second caller |
-| remind-duration-parse | screen | Second caller |
-| tag-page-slugs | screen | Second caller |
-| invoice-date-range | confirm | Second caller |
-| signup-email-check | confirm | Second caller |
-| backup-slack-alert | dev | One use |
-| frost-sms-alert | dev | One use |
-| liftlog-markdown | dev | One use |
-| loan-reminder-email | dev | One use |
-| relnotes-html | dev | One use |
-| sales-csv-export | dev | One use |
-| quiz-results-json | screen | One use |
-| upload-size-limit | screen | One use |
-| paste-rate-limit | confirm | One use |
-| rates-cache | confirm | One use |
-| notes-sync-clash | dev | Clash |
-| report-output-flag | dev | Clash |
-| timer-flag-clash | dev | Clash |
-| dotfiles-link-clash | screen | Clash |
-| jsonfmt-indent-flag | screen | Clash |
-| docs-check-clash | confirm | Clash |
-| shelf-search-clash | confirm | Clash |
+| Case | Question |
+|---|---|
+| authors-paging | Second caller |
+| cart-price-format | Second caller |
+| thumb-retry | Second caller |
+| remind-duration-parse | Second caller |
+| tag-page-slugs | Second caller |
+| invoice-date-range | Second caller |
+| signup-email-check | Second caller |
+| backup-slack-alert | One use |
+| frost-sms-alert | One use |
+| liftlog-markdown | One use |
+| loan-reminder-email | One use |
+| relnotes-html | One use |
+| sales-csv-export | One use |
+| quiz-results-json | One use |
+| upload-size-limit | One use |
+| paste-rate-limit | One use |
+| rates-cache | One use |
+| notes-sync-clash | Clash |
+| report-output-flag | Clash |
+| timer-flag-clash | Clash |
+| dotfiles-link-clash | Clash |
+| jsonfmt-indent-flag | Clash |
+| docs-check-clash | Clash |
+| shelf-search-clash | Clash |
