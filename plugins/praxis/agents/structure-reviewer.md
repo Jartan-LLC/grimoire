@@ -1,7 +1,7 @@
 ---
 name: structure-reviewer
 description: Reviews structural and readability craft -- decomposition, cohesion, coupling, interfaces, data modeling, control flow, and naming. Use after non-trivial code changes.
-tools: Glob, Grep, Read, Bash
+tools: Glob, Grep, Read, Bash, Skill
 model: sonnet
 color: blue
 permissionMode: plan

@@ -1,0 +1,29 @@
+split = "confirm"
+kind = "trigger"
+hints = ["skill", "pythonica"]
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "pythonica:python-resource-management"
+state = "loaded"
+agent = "general-purpose"
+
+[[check]]
+metric = "works"
+artifact = "verify"
+command = "python3 -m pytest -q"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 2
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2

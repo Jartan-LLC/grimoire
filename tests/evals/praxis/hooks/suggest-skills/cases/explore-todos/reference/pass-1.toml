@@ -1,0 +1,4 @@
+final = "Three, one per file: fetch.py has a TODO to round to the grid, cache.py a FIXME that the cache never evicts, units.py a TODO for kelvin."
+
+[briefs]
+"Explore" = "The task, as the main thread handed it over."

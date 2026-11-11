@@ -1,0 +1,1 @@
+From production we can't tell what jobs/runner.py is doing. Have a subagent replace its prints so each job's name, how long it took and whether it failed land on one machine-readable line we can search.

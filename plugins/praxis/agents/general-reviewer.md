@@ -1,7 +1,7 @@
 ---
 name: general-reviewer
 description: Reviews code for general quality, naming, organization, cleanup, and project standards. Use after any code changes.
-tools: Glob, Grep, Read, Bash
+tools: Glob, Grep, Read, Bash, Skill
 model: sonnet
 color: blue
 permissionMode: plan

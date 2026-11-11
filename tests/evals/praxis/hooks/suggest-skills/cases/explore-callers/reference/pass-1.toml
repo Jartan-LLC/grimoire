@@ -1,0 +1,4 @@
+final = "parse_amount is called in billing/invoice.py (total), billing/refund.py (refund, as money.parse_amount) and scripts/import_csv.py. billing/report.py only mentions it in its docstring."
+
+[briefs]
+"Explore" = "The task, as the main thread handed it over."

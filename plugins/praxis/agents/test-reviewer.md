@@ -1,7 +1,7 @@
 ---
 name: test-reviewer
 description: Reviews test coverage and CI/CD correctness. Use after test or workflow changes.
-tools: Glob, Grep, Read, Bash
+tools: Glob, Grep, Read, Bash, Skill
 model: sonnet
 color: blue
 permissionMode: plan

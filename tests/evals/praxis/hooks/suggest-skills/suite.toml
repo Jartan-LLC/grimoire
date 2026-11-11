@@ -1,0 +1,87 @@
+# Whether praxis's skill imperative reaches subagents (#59, #56): a subagent handed Python to
+# write or review loads the pythonica skill its task is squarely about; whether a subagent the
+# imperative should leave alone is burdened by it is reported. Each case's prompt has the main
+# thread start one subagent: a general-purpose one to write code, a praxis reviewer to review a
+# branch, or Explore to search. Every case runs with every plugin, pythonica included, as users
+# run them.
+#
+# `recall`: the subagent loaded the case's skill (retry -> python-resilience, concurrency ->
+# async-python-patterns, settings from the environment -> python-configuration, a test suite or
+# a test review -> python-testing, cleanup -> python-resource-management, annotations ->
+# python-type-safety, per-row errors -> python-error-handling, timing logs ->
+# python-observability, packaging -> python-packaging, moving to uv -> uv-package-manager, a
+# general review -> python-anti-patterns, an async review -> async-python-patterns, a slow loop
+# -> python-performance-optimization). A delivery check with an `agent` counts the skill's text
+# arriving inside that subagent, which Claude Code sends only once its Skill call returned, or a
+# read of the skill's files there; a failed call never counts.
+# Old reaches a subagent only through the brief, or through the compact re-arm if the subagent
+# auto-compacts, so recall measures the hook.
+# `quiet`, reported only: Explore searches in Python repositories load none of the pythonica
+# skills their words touch. "Not burdened" is no skill load in the search subagent (a screen
+# reports tokens and cost per arm, so the cost of a needless load shows there). It gates nothing
+# and cannot show harm either: a held-out split has too few Explore units to reach p < 0.05, so
+# it could neither pass as a guard nor come out WORSE as a reported metric.
+# Whether a subagent splits its work is recursio's to test, not this suite's.
+#
+# What the graders cannot see: a delivery check with an `agent` reads every spawn of that agent
+# type as one, so a second general-purpose spawn's load counts for the first. `spawned` shows a
+# `quiet` pass that came only because no subagent ran. tests/evals/README.md says how the suite
+# is run.
+target = "praxis:hooks/scripts/suggest-skills.js"
+# The reviewer cases measure whether these reviewers load skills, which their Skill tool allows;
+# no case dispatches doc-reviewer, frontend-reviewer or structure-reviewer.
+covers = [
+  "plugins/praxis/hooks/hooks.json",
+  "plugins/praxis/hooks/scripts/suggest-skills.js",
+  "plugins/praxis/hooks/scripts/lib/skill-context.js",
+  "plugins/praxis/agents/general-reviewer.md",
+  "plugins/praxis/agents/test-reviewer.md",
+  "plugins/praxis/agents/backend-reviewer.md",
+]
+models = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]
+# Haiku is a watch model, as in recursio's splitting-implementation suite, where it never loaded
+# the skill in the smoke runs.
+watch = ["claude-haiku-5-5"]
+# SubagentStart's additionalContext reaches the subagent on this version (the 2.1.319 CLI's
+# hook help text and the Claude Code hooks docs).
+claude_code = "2.1.319"
+# One subagent writes a module and its tests, or a reviewer reads a small branch.
+budget_usd = 4.0
+
+[[metric]]
+id = "recall"
+direction = "higher"
+# Trigger cases: the subagent loaded the pythonica skill its task is about.
+
+[[metric]]
+id = "quiet"
+direction = "higher"
+# Reported, Explore cases: no pythonica skill the search's words touch was loaded by Explore.
+
+[[metric]]
+id = "works"
+direction = "higher"
+# Reported: the tests pass in the final tree, the subagent's own included.
+
+[[metric]]
+id = "answer"
+direction = "higher"
+# Reported, Explore cases: the final reply names what the search had to find.
+
+[[metric]]
+id = "spawned"
+direction = "higher"
+# Reported, Explore cases: the main thread started the subagent the prompt asked for, so a
+# `quiet` pass is not only for want of a subagent.
+
+[[metric]]
+id = "any-pythonica"
+direction = "higher"
+# Reported, general-review cases: the reviewer loaded any pythonica skill. A general review fits
+# several of them, and `recall` accepts python-anti-patterns alone.
+
+[pass_rule]
+primary = "recall"
+rule = "better"
+min_effect = 0.5
+min_samples = 3

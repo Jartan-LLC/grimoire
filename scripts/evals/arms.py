@@ -2,15 +2,17 @@
 
 import hashlib
 import io
+import json
 import pathlib
 import shutil
 import tarfile
 import tempfile
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import cast
 
 from .proc import GIT, run
-from .suite import tree_hash
+from .suite import HOOKS, target_files, tree_hash
 
 # Names the cached `none` arm: bump it when what none_arm removes changes, so it is rebuilt.
 NONE_REVISION = 2
@@ -125,16 +127,36 @@ def _cut_body(document: pathlib.Path) -> None:
 def _holds(arm: Arm, target: str) -> bool:
     plugin, _, name = target.partition(":")
     return plugin in arm.plugins and any(
-        (pathlib.Path(arm.plugins[plugin]) / part).exists()
-        for part in (f"skills/{name}", f"agents/{name}.md", f"commands/{name}.md")
+        (pathlib.Path(arm.plugins[plugin]) / part).is_file() for part in target_files(name)
     )
+
+
+def _drop_hook(root: pathlib.Path, script: str) -> None:
+    """Drop every command in `root`'s hooks.json that runs `script`, and what that leaves empty.
+
+    A command runs `script` when it holds its path anywhere, so a `node -e "require(...)"` entry
+    goes too, not only a quoted path.
+    """
+    manifest = root / "hooks" / "hooks.json"
+    data = json.loads(manifest.read_text())
+    events: dict[str, list[dict[str, object]]] = data["hooks"]
+    for event, groups in list(events.items()):
+        for group in groups:
+            hooks = cast("list[dict[str, object]]", group["hooks"])
+            group["hooks"] = [h for h in hooks if script not in str(h.get("command", ""))]
+        events[event] = [g for g in groups if g["hooks"]]
+        if not events[event]:
+            del events[event]
+    manifest.write_text(json.dumps(data, indent=2) + "\n")
 
 
 def _remove(plugins: pathlib.Path, target: str) -> None:
     """Remove `target` from the plugin tree `plugins`, as `none_arm` says."""
     plugin, _, name = target.partition(":")
     root = plugins / plugin
-    if (root / "skills" / name).is_dir():
+    if name.startswith(HOOKS):
+        _drop_hook(root, name)
+    elif (root / "skills" / name).is_dir():
         shutil.rmtree(root / "skills" / name)
         for agent in plugins.glob("*/agents/*.md"):
             names = {f"{plugin}:{name}"} | (
@@ -152,7 +174,8 @@ def none_arm(old: Arm, target: str, store: pathlib.Path, replaces: Sequence[str]
 
     A skill's directory is deleted and every agent's preload of it dropped, so the
     agent starts without it; an agent's or command's body is cut to its first line,
-    keeping its frontmatter so callers still find it. Pointers to a deleted skill in
+    keeping its frontmatter so callers still find it; a hook script stays, but every
+    hooks.json command that runs it goes. Pointers to a deleted skill in
     other files stay: an agent told to load it finds nothing, as with no skill at all.
     A text `old` does not hold, such as a new target, is left out; when `old` holds none
     of them, `none` is `old` as it is.
@@ -162,7 +185,7 @@ def none_arm(old: Arm, target: str, store: pathlib.Path, replaces: Sequence[str]
         return Arm("none", old.hash, old.plugins)
     source = pathlib.Path(old.root)
     # Several texts go by a digest: their names joined could pass a file name's 255 bytes.
-    joined = "+".join(t.replace(":", "-") for t in held)
+    joined = "+".join(t.replace(":", "-").replace("/", "-") for t in held)
     removed = joined if len(held) == 1 else hashlib.sha256(joined.encode()).hexdigest()[:16]
     target_dir = store / f"none-r{NONE_REVISION}-{old.hash[:16]}-{removed}"
     if target_dir.is_dir():
