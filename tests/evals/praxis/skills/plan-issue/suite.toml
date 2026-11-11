@@ -22,8 +22,9 @@ BURNED = [
   "relnotes-html",
   # Its issue says "CSV is all anyone has asked for", which states the single use.
   "sales-csv-export",
-  # The screen split the planning skill's Opus screen (#193) ran: todo-due-flag's out-of-scope
-  # check was broken, which voids that screen, and the pass rule changed after it.
+  # The screen split that plan-issue's Opus screen for the planning skill (#193) ran:
+  # todo-due-flag's out-of-scope check was broken, which voids that screen, and the pass rule
+  # changed after it.
   "cart-price-format",
   "due-date-weekend",
   "export-timeout-cause",
