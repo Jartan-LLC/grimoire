@@ -1,4 +1,4 @@
-# Over-planning control at the standard size: an agreed spec settles every decision.
+# Over-planning control at the light size: an agreed spec settles every decision.
 # Written for the committed suite after the smoke, so no smoke result shaped it.
 split = "screen"
 kind = "regression"
@@ -10,11 +10,12 @@ metric = "gap"
 artifact = "files:**/plan.md"
 present = '''(?s)\A(?=.*currency)(?=.*refunded_at)'''
 
-# A size control at the standard size: the dev control's check (internal-pagination-lean).
+# A size control at the light size: nothing on rollout, undo or cost, and at most 450 words,
+# the light controls' ceiling.
 [[check]]
 metric = "lean"
 artifact = "files:**/plan.md"
-present = '''(?is)\A(?!.*(roll-?out|roll-?back|\bundo\b|\bcost\b|ceiling|\brevert|canary|feature[- ]flag))\s*(?:\S+\s+){0,650}\S*\s*\Z'''
+present = '''(?is)\A(?!.*(roll-?out|roll-?back|\bundo\b|\bcost\b|ceiling|\brevert|canary|feature[- ]flag))\s*(?:\S+\s+){0,450}\S*\s*\Z'''
 
 [[check]]
 metric = "recall"
