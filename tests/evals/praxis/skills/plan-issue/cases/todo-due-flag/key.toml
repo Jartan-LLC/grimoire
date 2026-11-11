@@ -47,7 +47,8 @@ absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:d
 # (a bullet or paragraph): its topic with a change word, what it moves to with a deferral word, or
 # its topic leading the item with a deferral word; or its file with a change word on one line. A
 # line on another bug in that file, one that only mentions the topic, or one that names it in
-# passing with a deferral word, fails. `TODO` counts only in capitals.
+# passing with a deferral word, fails. `TODO` counts only in capitals. A move word may take a
+# backticked object ("Moving `x.js` to ..."), and "open an issue" or "file an issue" is a deferral.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-57/plan.md"
