@@ -6,8 +6,8 @@
 # fact the repository answers, an owner's decision or the project's own rules, a supported release
 # line or other work in flight, failure paths of user state, done seen where it runs, a paid run's
 # cost, a request that names only a solution, an absent owner. Size controls: a trivial edit, a
-# well-specified function, an agreed spec at standard size, and a deep migration where rollout and
-# rollback are required content. Trigger cases ask to review, revise or talk through a plan (the
+# well-specified function, an agreed spec (light or standard), and a deep migration where rollout
+# and rollback are required content. Trigger cases ask to review, revise or talk through a plan (the
 # skill should load) or share its words but need something else (it should not).
 #
 # The cases of the scratch smoke for #193, whose results PR #204 reports, are on dev with the
