@@ -14,7 +14,8 @@
 # -> python-performance-optimization). A delivery check with an `agent` counts the skill's text
 # arriving inside that subagent, which Claude Code sends only once its Skill call returned, or a
 # read of the skill's files there; a failed call never counts.
-# Old cannot reach a subagent except through the brief, so recall measures the hook.
+# Old reaches a subagent only through the brief, or through the compact re-arm if the subagent
+# auto-compacts, so recall measures the hook.
 # `quiet`, reported only: Explore searches in Python repositories load none of the pythonica
 # skills their words touch. "Not burdened" is no skill load in the search subagent (a screen
 # reports tokens and cost per arm, so the cost of a needless load shows there). It gates nothing

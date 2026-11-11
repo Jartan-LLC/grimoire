@@ -17,9 +17,8 @@
  * The SessionStart entry in hooks.json reads CLAUDE_PLUGIN_ROOT inside node
  * rather than shell-interpolating it, so an unset value is a clean no-op instead
  * of a `node /hooks/scripts/...` ENOENT -- defensive across Claude Code versions.
- * That entry re-arms after a compact evicts loaded skills; every other
- * SessionStart is followed by a user prompt, which the UserPromptSubmit
- * registration covers.
+ * That entry re-arms skill activation after a compact (lib/skill-context.js
+ * says why).
  */
 
 const { readHookInput, output } = require('./lib/utils');
