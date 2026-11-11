@@ -28,3 +28,17 @@ present = '''(?im)^\|\s*critical\s*\|\s*\d+'''
 metric = "kept"
 artifact = "report:praxis:doc-reviewer"
 present = '''(?ims)(?:(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important)\b|^[ \t]*#{1,6}[ \t][^\n]*?\b(?:critical|important)\b[^\n]*\n(?:(?!^[ \t]*#{1,6}[ \t])[\s\S])*?^[ \t]*\*\*\d+\.|^[ \t>*\-\d.]*?\*\*(?:\d+\.)?(?=[^\n]*?(?:[ \t]-[ \t]+|[:\u2013\u2014][ \t]*|\(|\[)[ \t]*\[?[ \t]*(?:critical|important)\b[\])]?\*\*[ \t]*$))(?:(?!(?!(?:[ \t]-[ \t]+|[:\u2013\u2014][ \t]*|\(|\[)[ \t]*\[?[ \t]*(?:critical|important|minor)\b[\])]?\*\*[ \t]*$)(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\-\d.]*)[ \t]*\[?[ \t]*(?:critical|important|minor)\b|^[ \t]*(?:#{1,6}[ \t]|\||\**verdict|\*\*\d+\.|\*\*(?!(?:file|issue|fix|status|where|why|location|problem|evidence|suggest|propos|recommend|replace|rewrit|reword|example|current|before|after|quote|change|text|line))[^*\n]{1,80}\*\*:?[ \t]*$|(?:[>*\-\d.][ \t]*)*\*\*[^\n]*?(?:[ \t]-[ \t]+|[:\u2013\u2014][ \t]*|\(|\[)[ \t]*\[?[ \t]*(?:critical|important|minor)\b[\])]?\*\*[ \t]*$)).){0,1500}?(?:\b(?:20|25) issues|(?:twenty|twenty-five) issues|(?:issues?\b)[^\n]{0,30}(?<![:\-.\d])(?<!line )(?<!lines )\b(?:20|25)\b(?![-:.]?\d)|(?<![:\-.\d])(?<!line )(?<!lines )\b(?:20|25)\b(?![-:.]?\d)[^\n]{0,30}(?:issues?\b))'''
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 1
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
