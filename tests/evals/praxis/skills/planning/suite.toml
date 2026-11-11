@@ -53,9 +53,9 @@ margin = 0.2
 id = "lean"
 direction = "higher"
 # Reported only: on an easy-to-undo, clear change no word on rollout, rollback, undo or revert,
-# as the skill asks; on the trivial and size controls also a word ceiling, and no question on the
-# trivial ones. Too few cases carry it for a guard to pass, and the panel's "over" label grades
-# over-planning on every case.
+# as the skill asks; on the trivial, light and standard size controls also a word ceiling, and no
+# question on the trivial ones. Too few cases carry it for a guard to pass, and the panel's "over"
+# label grades over-planning on every case.
 
 [pass_rule]
 # The regex rule: the skill loads where it should (BETTER, as old has no such skill), stays out of
