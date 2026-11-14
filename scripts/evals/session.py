@@ -643,14 +643,21 @@ class Budget:
         self.unknown = 0
         self.refused = 0
 
+    def admits(self, cap_usd: float) -> bool:
+        """Whether a session whose budget is `cap_usd` would start now, reserving nothing."""
+        with self._lock:
+            return self._admits(cap_usd)
+
+    def _admits(self, cap_usd: float) -> bool:
+        expected = self._known_usd / self._known if self._known else cap_usd
+        return (
+            self.max_usd is None or self.spent_usd + expected * (self._running + 1) <= self.max_usd
+        )
+
     def start(self, cap_usd: float) -> bool:
         """Reserve a session whose budget is `cap_usd`; False, counted as refused, past the ceiling."""
         with self._lock:
-            expected = self._known_usd / self._known if self._known else cap_usd
-            if (
-                self.max_usd is not None
-                and self.spent_usd + expected * (self._running + 1) > self.max_usd
-            ):
+            if not self._admits(cap_usd):
                 self.refused += 1
                 return False
             self._running += 1
@@ -776,7 +783,7 @@ def run_sample(  # noqa: PLR0913 -- `breaker` and `budget` are the run's, shared
     for attempt in range(RETRIES):
         if sample.valid:
             break
-        if limited(sample):
+        if limited(sample) and (budget is None or budget.admits(spec.budget_usd)):
             time.sleep(BACKOFF_S * 2**attempt)
         if (retried := _budgeted(case, arm, index, spec, sample_key, budget=budget)) is None:
             break
