@@ -70,10 +70,12 @@ Narrates the **change** that produced the code (what was removed, moved, renamed
   rest read as lies. The site whose own change would falsify it KEEPs the telling; the others
   name the topic and point (`# config ownership: entrypoint.sh`), though a warning at its own
   point of danger stays. Grep the phrase before ruling, or run
-  [find-duplicate-comments.js](find-duplicate-comments.js), which indexes every tracked
-  comment and reports the ones a diff adds that are already told elsewhere. The script reads
+  [find-duplicate-comments.js](find-duplicate-comments.js), which indexes every comment in
+  the repo and reports the ones a diff adds that are already told elsewhere. By default it reads
   committed files only: a comment you have not committed is not checked, and a duplicate you
-  have fixed keeps reporting until you commit the fix.
+  have fixed keeps reporting until you commit the fix. With `--worktree` it also checks the
+  comments your uncommitted changes and untracked files add, against the files as they are
+  now; `--all` checks every comment in the repo, not only the ones a diff adds.
 
 ## Keep vs. delete
 

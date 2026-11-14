@@ -9,18 +9,30 @@
  * The Retold fact rule cannot be applied from one file: judging a comment as a
  * retelling means knowing whether the same fact is told elsewhere, which
  * per-file review structurally cannot see. This supplies that whole-repo view,
- * scoped to the diff -- comment lines ADDED by the change whose prose already
- * appears somewhere tracked, naming both sites so the reviewer picks a keeper.
+ * scoped by default to the diff -- comment lines ADDED by the change whose prose
+ * already appears somewhere in the repo, naming both sites so the reviewer picks
+ * a keeper.
  *
  * Usage:
- *   node find-duplicate-comments.js [base-ref] [--skip <segment>]...
+ *   node find-duplicate-comments.js [base-ref] [--worktree] [--skip <segment>]...
+ *   node find-duplicate-comments.js --all [--worktree] [--skip <segment>]...
  *
- *   base-ref  defaults to origin/main
- *   --skip    extra path segments to ignore, repeatable and matched literally.
- *             node_modules is always skipped; add generated trees here, e.g.
- *             --skip dist --skip build
+ *   base-ref    defaults to origin/main. Without --worktree, the comment lines
+ *               committed since it (git diff base-ref...HEAD) are checked against
+ *               every tracked file as committed at HEAD.
+ *   --worktree  read the working tree instead of HEAD: also check the comment
+ *               lines added by uncommitted changes, staged or not, and by
+ *               untracked files git does not ignore, and match them against
+ *               every file there, untracked ones included. A duplicate fixed but
+ *               not yet committed stops reporting.
+ *   --all       check every comment line, not only those added since a base, for
+ *               a whole-repo sweep. Takes no base-ref.
+ *   --skip      extra path segments to ignore, repeatable and matched literally.
+ *               node_modules is always skipped; add generated trees here, e.g.
+ *               --skip dist --skip build
  */
 
+const fs = require('fs');
 const { spawnSync } = require('child_process');
 
 const MIN_PROSE_CHARS = 25;
@@ -63,10 +75,16 @@ function buildSkipMatcher(extra) {
 function parseArgs(argv) {
   const skips = [];
   let base = null;
+  let worktree = false;
+  let all = false;
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
-    if (arg === '--skip') {
+    if (arg === '--worktree') {
+      worktree = true;
+    } else if (arg === '--all') {
+      all = true;
+    } else if (arg === '--skip') {
       const value = argv[++i];
       if (!value) return die('--skip needs a pattern');
       skips.push(value);
@@ -81,7 +99,9 @@ function parseArgs(argv) {
     }
   }
 
-  return { base: base || 'origin/main', skips };
+  // A base beside --all would be silently ignored, and the run read as scoped to it.
+  if (all && base !== null) return die('--all checks every comment and takes no base ref');
+  return { base: all ? null : base || 'origin/main', skips, worktree, all };
 }
 
 
@@ -168,8 +188,8 @@ function prose(line) {
 }
 
 /**
- * Tracked paths at HEAD, minus submodule gitlinks and skipped trees, or null
- * when git failed.
+ * Paths git tracks, each once, minus submodule gitlinks and skipped trees, or
+ * null when git failed.
  *
  * `-z` turns off the quoting `ls-files` otherwise applies to non-ASCII or
  * special-character paths; re-feeding a quoted display string as a spec would
@@ -182,7 +202,8 @@ function trackedPaths(skipMatcher) {
   const raw = git(['ls-files', '-s', '-z']);
   if (raw === null) return null;
 
-  const paths = [];
+  // A Set, because an unresolved merge lists a conflicted path once per stage.
+  const paths = new Set();
   for (const record of raw.split('\0')) {
     if (!record) continue;
     // `<mode> <sha> <stage>\t<path>`; a path may itself hold spaces or tabs, so
@@ -190,29 +211,70 @@ function trackedPaths(skipMatcher) {
     const path = record.slice(record.indexOf('\t') + 1);
     const mode = record.slice(0, record.indexOf(' '));
     if (mode === '160000' || skipMatcher.test(path)) continue;
-    paths.push(path);
+    paths.add(path);
   }
-  return paths;
+  return [...paths];
 }
 
 /**
- * Map every comment's prose to the sites that carry it, across the whole tree at
- * HEAD -- a retelling counts whether or not the other site was touched here.
- * Null when git failed.
+ * Untracked paths git does not ignore, minus skipped trees, or null when git
+ * failed. A nested repository is listed as its directory, which the worktree
+ * reader passes over.
+ */
+function untrackedPaths(skipMatcher) {
+  const raw = git(['ls-files', '--others', '--exclude-standard', '-z']);
+  if (raw === null) return null;
+  return raw.split('\0').filter(path => path && !skipMatcher.test(path));
+}
+
+/**
+ * Contents of `files` at HEAD, positionally, with null for a path missing there;
+ * null overall when git failed.
  *
  * One `git cat-file --batch` rather than a `git show` per file: this runs
  * against arbitrary repos, where per-file spawns scale with the checkout.
  */
-function buildCommentIndex(files) {
+function readAtHead(files) {
+  return gitBatch(files.map(f => `HEAD:${f}`));
+}
+
+/**
+ * Contents of `files` in the working tree, positionally, with null for a path
+ * deleted there or that is not a regular file -- at HEAD a symlink's blob is its
+ * target path, never comments. Null overall on any other read error: a file
+ * dropped from the index unseen would make a clean result false.
+ */
+function readWorktree(files) {
+  const contents = [];
+  for (const file of files) {
+    try {
+      contents.push(fs.lstatSync(file).isFile() ? fs.readFileSync(file, 'utf8') : null);
+    } catch (err) {
+      if (err.code !== 'ENOENT' && err.code !== 'ENOTDIR') return null;
+      contents.push(null);
+    }
+  }
+  return contents;
+}
+
+/**
+ * Map every comment's prose to the sites that carry it, across the whole tree as
+ * `read` sees it -- a retelling counts whether or not the other site was touched
+ * here. Null when reading failed.
+ */
+function buildCommentIndex(files, read = readAtHead) {
   if (files.length === 0) return new Map();
 
-  const batch = gitBatch(files.map(f => `HEAD:${f}`));
-  if (batch === null) return null;
+  const contents = read(files);
+  return contents === null ? null : addToIndex(new Map(), files, contents);
+}
 
-  const index = new Map();
+/** Add the comments of `contents`, positional with `files`, to `index` and return it. */
+function addToIndex(index, files, contents) {
   files.forEach((file, i) => {
-    const content = batch[i];
-    // Missing at HEAD (newly added) is normal -- nothing to index either way.
+    const content = contents[i];
+    // No content where read (added since HEAD, deleted, or not a regular file) is
+    // normal -- nothing to index.
     if (!content) return;
     content.split('\n').forEach((line, n) => {
       const text = prose(line);
@@ -255,6 +317,20 @@ function findRetoldInDiff(diffText, file, index) {
   return findings;
 }
 
+/** A whole new file as the diff that adds it, for findRetoldInDiff. */
+function addedFileDiff(content) {
+  return '@@ -0,0 +1 @@\n' + content.split('\n').map(line => `+${line}`).join('\n');
+}
+
+/** Every prose told at more than one site, reported once from its first site. */
+function findRepeated(index) {
+  const findings = [];
+  for (const [text, sites] of index) {
+    if (sites.length > 1) findings.push({ here: sites[0], text, elsewhere: sites.slice(1) });
+  }
+  return findings;
+}
+
 /**
  * Drop the mirror image of a retelling whose sides were both added here: each
  * side finds the other, and without this the reviewer reads every pair twice.
@@ -269,13 +345,16 @@ function dedupePairs(findings) {
   });
 }
 
-function report(findings) {
+function report(findings, { all, worktree }) {
   if (findings.length === 0) {
-    console.log('No retold comments found in the diff.');
+    const scope = all ? '' : worktree ? ' in the diff or untracked files' : ' in the diff';
+    console.log(`No retold comments found${scope}.`);
     return;
   }
 
-  console.log(`${findings.length} added comment line(s) already told elsewhere:\n`);
+  console.log(all
+    ? `${findings.length} comment(s) told at more than one site:\n`
+    : `${findings.length} added comment line(s) already told elsewhere:\n`);
   for (const f of findings) {
     console.log(`  ${f.here}`);
     console.log(`    "${f.text}"`);
@@ -286,18 +365,43 @@ function report(findings) {
 }
 
 function main() {
-  const { base, skips } = parseArgs(process.argv.slice(2));
+  const { base, skips, worktree, all } = parseArgs(process.argv.slice(2));
   const skipMatcher = buildSkipMatcher(skips);
 
-  if (git(['rev-parse', '--verify', `${base}^{commit}`]) === null) {
-    return die(`base ref '${base}' does not resolve. Pass one explicitly, or fetch it first.`);
+  // `ls-files` lists paths and `diff` reads pathspecs from the current directory,
+  // while `HEAD:<path>` and `diff --name-only` work from the top level. Run from a
+  // subdirectory, the lookups at HEAD and the per-file diffs would miss, and a run
+  // would report clean or cover only that subtree.
+  const top = git(['rev-parse', '--show-toplevel']);
+  if (top === null) return die('not inside a git working tree.');
+  process.chdir(top.replace(/\n$/, ''));
+
+  // Without --all, resolve the diff first: no changed files means no index to build.
+  let range = null;
+  let changed = [];
+  if (!all) {
+    if (git(['rev-parse', '--verify', `${base}^{commit}`]) === null) {
+      return die(`base ref '${base}' does not resolve. Pass one explicitly, or fetch it first.`);
+    }
+
+    // `base...HEAD` diffs two commits; the working tree is reached only by
+    // naming the merge base alone, which compares it with the working tree.
+    if (worktree) {
+      const mergeBase = git(['merge-base', base, 'HEAD']);
+      if (mergeBase === null) return die(`'${base}' and HEAD share no merge base.`);
+      range = mergeBase.trim();
+    } else {
+      range = `${base}...HEAD`;
+    }
+
+    const diffNames = git(['diff', '--name-only', '-z', range]);
+    if (diffNames === null) return die(`git diff against '${base}' failed.`);
+    changed = diffNames.split('\0').filter(f => f && !skipMatcher.test(f));
   }
 
-  const diffNames = git(['diff', '--name-only', '-z', `${base}...HEAD`]);
-  if (diffNames === null) return die(`git diff against '${base}' failed.`);
-
-  const changed = diffNames.split('\0').filter(f => f && !skipMatcher.test(f));
-  if (changed.length === 0) {
+  const untracked = worktree ? untrackedPaths(skipMatcher) : [];
+  if (untracked === null) return die('git ls-files --others failed.');
+  if (!all && changed.length === 0 && untracked.length === 0) {
     console.log('No changed files to check.');
     return;
   }
@@ -305,17 +409,31 @@ function main() {
   const tracked = trackedPaths(skipMatcher);
   if (tracked === null) return die('git ls-files failed.');
 
-  const index = buildCommentIndex(tracked);
-  if (index === null) return die('git cat-file --batch failed.');
+  const index = buildCommentIndex(tracked, worktree ? readWorktree : readAtHead);
+  const untrackedContents = index === null ? null : readWorktree(untracked);
+  if (untrackedContents === null) {
+    return die(worktree ? 'reading the working tree failed.' : 'git cat-file --batch failed.');
+  }
+  addToIndex(index, untracked, untrackedContents);
+
+  if (all) {
+    report(findRepeated(index), { all, worktree });
+    return;
+  }
 
   const findings = [];
   for (const file of changed) {
-    const diff = git(['diff', `${base}...HEAD`, '--', file]);
+    const diff = git(['diff', range, '--', file]);
     if (diff === null) return die(`git diff of '${file}' failed.`);
     findings.push(...findRetoldInDiff(diff, file, index));
   }
+  untracked.forEach((file, i) => {
+    if (untrackedContents[i] !== null) {
+      findings.push(...findRetoldInDiff(addedFileDiff(untrackedContents[i]), file, index));
+    }
+  });
 
-  report(dedupePairs(findings));
+  report(dedupePairs(findings), { all, worktree });
 }
 
 module.exports = { parseArgs, buildSkipMatcher, prose, buildCommentIndex, findRetoldInDiff, dedupePairs };
