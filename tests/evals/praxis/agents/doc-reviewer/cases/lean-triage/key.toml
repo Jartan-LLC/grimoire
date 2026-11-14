@@ -1,8 +1,7 @@
-# A candidate target case: committed as a regression case until an old baseline fails it
-# (tests/evals/README.md, "Choosing cases" step 2), then retagged kind = "target".
+# A target case: its old baselines fail it (tests/evals/README.md, "Choosing cases" step 2).
 # A README that names a command's main limits and points to the command for the rest (invented on lean-limits' pattern, from grimoire #170): asking it to add the rare limits is the failure.
 split = "screen"
-kind = "regression"
+kind = "target"
 hints = []
 
 [[plant]]

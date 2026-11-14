@@ -1,8 +1,7 @@
-# A candidate target case: committed as a regression case until an old baseline fails it
-# (tests/evals/README.md, "Choosing cases" step 2), then retagged kind = "target".
+# A target case: its old baselines fail it (tests/evals/README.md, "Choosing cases" step 2).
 # The key-rotation page as scaffold #275 grew it.
 split = "confirm"
-kind = "regression"
+kind = "target"
 hints = []
 
 [[plant]]

@@ -7,8 +7,8 @@
 # wrong flag in the cost cases, and leaves alone a troubleshooting part at the end and the
 # prerequisite and recovery lines of lean-backup, lean-merge, lean-dotlink and lean-migrate. Must
 # hold: it still raises a missing data-loss warning. The gain is graded by a blind panel (under
-# [pass_rule]). tests/evals/README.md says how the suite is run. No baselines yet: until `make
-# eval-run ... RECORD=1` draws them, every case is committed as a regression case.
+# [pass_rule]). tests/evals/README.md says how the suite is run. A candidate target is committed as
+# a regression case until an old baseline fails it, as its key comment says.
 target = "praxis:doc-reviewer"
 # Cases moved off a held-out split, each with its reason in a comment.
 BURNED = [

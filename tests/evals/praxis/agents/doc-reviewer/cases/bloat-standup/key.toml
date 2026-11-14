@@ -1,8 +1,7 @@
-# A candidate target case: committed as a regression case until an old baseline fails it
-# (tests/evals/README.md, "Choosing cases" step 2), then retagged kind = "target".
+# A target case: its old baselines fail it (tests/evals/README.md, "Choosing cases" step 2).
 # A README bullet that copies a command's rare limits (invented on bloat-walkaway's pattern, from grimoire #170).
 split = "screen"
-kind = "regression"
+kind = "target"
 hints = []
 
 [[plant]]
