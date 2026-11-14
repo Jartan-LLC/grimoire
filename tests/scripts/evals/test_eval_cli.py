@@ -928,6 +928,30 @@ def test_a_run_or_screen_calls_no_judge_unless_asked_to(
         assert "not judged" not in out
 
 
+@pytest.mark.parametrize("command", ["run", "screen"])
+def test_a_run_or_screen_hands_its_spend_ceiling_to_the_sessions(
+    command: str, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    suite, _, _ = judged_store(tmp_path, monkeypatch)
+    stubbed = cli.run_samples
+    ceilings: list[float | None] = []
+
+    def run(work: list[cli.Work], jobs: int, max_usd: float | None = None) -> list[cache.Sample]:
+        ceilings.append(max_usd)
+        return stubbed(work, jobs, max_usd)
+
+    def nothing(*_: object) -> None:
+        return None
+
+    monkeypatch.setattr(cli, "run_samples", run)
+    monkeypatch.setattr(cli, "decide", nothing)
+    argv = ["eval.py", command, str(suite.path), "--samples", "1", "--split", "dev"]
+    argv += ["--arm", "old"] if command == "run" else []
+    monkeypatch.setattr(sys, "argv", [*argv, "--max-usd", "7.5"])
+    assert cli.main() == 0
+    assert ceilings == [7.5]
+
+
 def test_a_gating_judged_metric_with_no_answers_is_not_judged_and_never_ships(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:

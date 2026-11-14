@@ -532,6 +532,24 @@ def test_a_budget_refusing_a_limited_samples_retry_neither_waits_nor_trips_the_b
     assert not breaker.tripped.is_set()
 
 
+def test_a_session_that_raises_counts_at_its_budget_and_frees_its_reservation(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case = load_suite(write_suite(tmp_path / "suite")).cases[0]
+    spec = session.Spec("m", "v", 4.0, tmp_path, tmp_path / "store")
+
+    def crashed(*_: object) -> None:
+        raise OSError("sandbox gone")
+
+    monkeypatch.setattr(session, "_session", crashed)
+    budget = session.Budget(10.0)
+    with pytest.raises(OSError, match="sandbox gone"):
+        session.run_sample(case, Arm("new", "h", {}), 0, spec, budget=budget)
+    assert (budget.spent_usd, budget.sessions, budget.unknown) == (4.0, 1, 1)
+    assert budget.start(4.0)  # 4 spent + 1 session x 4: none still reserved for the crash
+    assert not budget.start(4.0)
+
+
 def test_preflight_stops_when_the_sample_venv_cannot_import_pytest(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
