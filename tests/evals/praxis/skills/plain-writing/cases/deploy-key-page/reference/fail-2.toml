@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/deploy-key.md" = "# Making a new deploy key\n\n1. Run `scripts/new-deploy-key.sh`. It writes `deploy_key` and `deploy_key.pub`.\n2. Add `deploy_key.pub` to `/home/deploy/.ssh/authorized_keys` on shop.acme.dev.\n3. Paste `deploy_key` into the CI secret `DEPLOY_KEY`, which GitHub shows under Settings > Secrets and variables > Actions.\n"

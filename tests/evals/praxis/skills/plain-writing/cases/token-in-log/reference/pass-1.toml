@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/logging.md" = "# Logging\n\n`api-client` logs one line per request to standard error.\n\n`--verbose` logs each request with its headers, the API token included. Do not share or commit a\nverbose log.\n"

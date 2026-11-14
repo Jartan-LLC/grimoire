@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/deploy-key.md" = "# Rotating the CI deploy key\n\n1. Run `sh scripts/new-deploy-key.sh` outside the repository, so the key files never land in your\n   working tree.\n2. Append `deploy_key.pub` to `/home/deploy/.ssh/authorized_keys` on shop.acme.dev.\n3. Copy `deploy_key` into the `DEPLOY_KEY` CI secret, then remove `deploy_key` from your disk.\n   It must never go into git.\n"

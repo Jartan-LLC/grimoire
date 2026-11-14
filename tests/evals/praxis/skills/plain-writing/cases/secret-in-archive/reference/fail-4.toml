@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/backup.md" = "# Backup\n\n`relay backup` writes `~/.config/relay`, including `credentials.json`, to `relay-backup.tar.gz`. Make sure you have room on disk.\n\nRestore it with `relay restore relay-backup.tar.gz`.\n"

@@ -18,6 +18,18 @@ Name the reader and the job they came to do, decide or understand. Keep a passag
 would leave that reader with a wrong action, a wrong result, or a stop for a missing fact. On an
 explanation page, understanding is the job.
 
+Write for what the reader does. A document for people (a README, a contributor or release
+procedure, a docs page, release notes) says what its reader runs, chooses and must avoid, and how
+to recover from a failure they have to act on, with recovery from a rare failure in a short
+troubleshooting part at the end. What the program handles on its own -- a case it skips, fixes or
+reports with its own remedy -- needs no line: the code, its message and the commit hold it. On an
+explanation or architecture page, how the program handles a case can be the content. A branch's
+commits are not the document's content list, though release notes still name each fix. Every line
+costs every reader, and lines no reader acts on bury the warnings the document must keep. A warning
+before data loss, a leaked secret or a step that cannot be undone stays at the step where the
+reader acts, however rare: the step that creates, handles or could leak what is at risk, even when
+no step names the risky action, never only in a section after the steps.
+
 When rules pull apart, the earlier one wins: hard constraints, warnings, exact commands and
 validation; words that prevent ambiguity; context for a reader who lands mid-page; brevity.
 
@@ -25,15 +37,16 @@ Always keep:
 
 - prerequisites, before the steps they serve;
 - warnings, before the step that can cause harm or cannot be undone;
-- conditions and decision points: which option fits which case;
-- signs that something went wrong, and how to recover;
+- conditions the reader chooses between: which option fits which case;
+- signs of a failure the reader must act on, and how to recover;
 - how to tell a step worked;
 - exact commands, unchanged;
 - a short reason where a reader would otherwise skip a rule;
 - hard constraints: must, never, ask first;
 - project facts the reader cannot infer;
-- a whole list, or a pointer to where the whole list is, after checking it is there; a partial
-  list says it is partial where it stands.
+- a whole list the reader acts on (options, commands, steps, valid values), or a pointer to where
+  the whole list is, after checking it is there; for cases the program handles on its own, a
+  pointer to where they are listed is enough; a partial list says it is partial where it stands.
 
 Cut:
 
@@ -53,8 +66,8 @@ Cut:
 - in a reply, the background, diagnosis and proof the reader already has: lead with the answer
   and keep the one fact they lack.
 
-In an existing file, apply these lists to the text your change writes or makes false, unless you
-were asked to make the file itself clearer.
+In an existing file, apply these lists and "Write for what the reader does" to the text your change
+writes or makes false, unless you were asked to make the file itself clearer.
 
 Defaults for the calls in between: keep a short reason for a project rule and cut reasons that
 repeat; put brief content the reader needs on the spot inline and link background; there is no

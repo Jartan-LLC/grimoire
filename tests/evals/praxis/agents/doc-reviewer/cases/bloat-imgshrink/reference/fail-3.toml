@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] Bloat: CMYK JPEGs are converted to RGB. An EXIF orientation is applied before the EXIF data is dropped. Lines 5-7 cover an edge case most readers never hit.\nFile: README.md:5\nIssue: Bloat: CMYK JPEGs are converted to RGB. An EXIF orientation is applied before the EXIF data is dropped. Lines 5-7 cover an edge case most readers never hit.\nFix: Remove it, or move it to a short troubleshooting part at the end.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc names `--since`, an unknown option: the command takes `--after DATE`.\nFile: docs/authors.md:4\nIssue: The doc names `--since`, an unknown option: the command takes `--after DATE`.\nFix: Document the `--after` flag instead of `--since`.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

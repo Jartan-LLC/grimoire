@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[CRITICAL] `--mirror` deletes every local bookmark the server lacks and cannot be undone; the doc gives no warning.\nFile: docs/sync.md:5\nIssue: `--mirror` deletes every local bookmark the server lacks and cannot be undone; the doc gives no warning.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 1 |\n| Important | 0 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: BLOCK"

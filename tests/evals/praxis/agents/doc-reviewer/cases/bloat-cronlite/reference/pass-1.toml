@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says \"`cronlite rm ID`\" where the code has \"`cronlite remove ID`\".\nFile: docs/schedule.md:5\nIssue: The doc says \"`cronlite rm ID`\" where the code has \"`cronlite remove ID`\".\nFix: Change it.\nStatus: confirmed\n\n[IMPORTANT] Bloat: A job still running at its next start is skipped. A container without `/etc/localtime` runs jobs\nFile: docs/schedule.md:12\nIssue: Bloat: A job still running at its next start is skipped. A container without `/etc/localtime` runs jobs\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 2 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

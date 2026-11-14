@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says \"`db/migrations/`\" where the code reads \"`migrations/`\".\nFile: README.md:9\nIssue: The doc says \"`db/migrations/`\" where the code reads \"`migrations/`\".\nFix: Change it.\nStatus: confirmed\n\n[MINOR] The doc does not mention that a file named in upper case (3_tags.SQL) is applied too.\nFile: README.md:9\nIssue: The doc does not mention that a file named in upper case (3_tags.SQL) is applied too.\nFix: Add one sentence.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

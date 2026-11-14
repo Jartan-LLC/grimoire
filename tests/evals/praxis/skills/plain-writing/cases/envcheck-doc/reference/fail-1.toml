@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"README.md" = "# envcheck\n\nCheck a `.env` file against its example.\n\n## Usage\n\nRun `envcheck` in the project. It lists each variable `.env.example` names that `.env` lacks, and\nexits 1 when any are missing, so it can gate CI.\n\nA byte order mark at the start of a file is ignored, and so are CRLF line endings. A variable\ndefined twice keeps its last value. Keys containing spaces are ignored.\n"

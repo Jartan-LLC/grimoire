@@ -98,5 +98,5 @@ When a diff narrates in its comments, read its docs for narration too. Rationale
 ## What to Avoid
 
 - Verbose explanations where a table or code block would be clearer
-- Anything `plain-writing`'s Cut list names
+- Anything `plain-writing`'s Cut list names, and the lines its "Write for what the reader does" leaves out of a document for people
 - Documentation that doesn't match the actual code

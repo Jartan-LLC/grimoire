@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/authors.md" = "# Commits per author\n\n`gitstat authors` lists each author with their number of commits, most first. Add\n`--after 2026-01-01` to count only commits after that date.\n\nMailmap entries whose emails differ only in case are merged. A shallow clone prints a warning and\ncounts only the commits it has. Commits with no author email count as `unknown`.\n"

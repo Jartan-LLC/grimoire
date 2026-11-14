@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says \"exits 2\" where the code has \"exits 1\".\nFile: docs/verify.md:5\nIssue: The doc says \"exits 2\" where the code has \"exits 1\".\nFix: Change it.\nStatus: confirmed\n\n[IMPORTANT] Bloat: the CRLF, BSD-style and missing-file sentences cover cases the program handles on its own.\nFile: docs/verify.md:12\nIssue: Bloat: the CRLF, BSD-style and missing-file sentences cover cases the program handles on its own.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 2 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

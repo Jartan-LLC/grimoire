@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n## Important\n\n**1. The doc calls the archive a zip archive**\n- File: `docs/commands.md:13`\n- Problem: The doc says \"zip archive of the vault into `DEST`\", but `vault backup` writes a `.tar.gz`.\n- Fix: Drop \"zip\".\n\n## Minor\n\n**2. The backup section is silent on leftovers**\n- File: `docs/commands.md:13`\n- Problem: The page does not say that an interrupted backup leaves a `.part` file in `DEST`.\n- Fix: Add a sentence on it.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says \"`--since 2026-01-01`\" where the code has \"`--after 2026-01-01`\".\nFile: docs/authors.md:5\nIssue: The doc says \"`--since 2026-01-01`\" where the code has \"`--after 2026-01-01`\".\nFix: Change it.\nStatus: confirmed\n\n[IMPORTANT] Bloat: Mailmap entries whose emails differ only in case are merged. A shallow clone prints a warning and\nFile: docs/authors.md:12\nIssue: Bloat: Mailmap entries whose emails differ only in case are merged. A shallow clone prints a warning and\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 2 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

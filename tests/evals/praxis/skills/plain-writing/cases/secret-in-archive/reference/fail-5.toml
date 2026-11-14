@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/backup.md" = "# Backup\n\n`relay backup` writes `~/.config/relay`, including `credentials.json`, to `relay-backup.tar.gz`. It is important to back up before you upgrade.\n\nRestore it with `relay restore relay-backup.tar.gz`.\n"

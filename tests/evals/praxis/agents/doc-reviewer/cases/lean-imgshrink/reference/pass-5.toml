@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The README says --quality defaults to 75; the code's default is 80.\nFile: README.md:8\nIssue: The README says --quality defaults to 75; the code's default is 80.\nFix: Change it.\nStatus: confirmed\n\n[IMPORTANT] Comments narrate the changes, and the README omits the user-facing behaviour.\nFile: imgshrink/cli.py:2\nIssue: Comments narrate the changes, and the README omits the user-facing behaviour.\nFix: Cut the narrating comments and add one README sentence naming the 100 MB skip.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 2 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

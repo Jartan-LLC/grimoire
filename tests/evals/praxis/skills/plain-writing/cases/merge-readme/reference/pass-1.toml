@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"src/dotmerge/README.md" = "# dotmerge\n\nA Dev Container Feature that gives every container the team's tool settings.\n\n## Install\n\n```json\n\"features\": {\n  \"ghcr.io/acme/features/dotmerge:1\": {}\n}\n```\n\n## What it changes\n\nWhen the container starts, dotmerge merges the team's settings into\n`~/.config/tool/settings.json`. Your own values win where both set a key. Your original file is\nkept as `settings.json.pre-dotmerge`; copy it back to undo the merge.\n"

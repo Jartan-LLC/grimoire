@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The 413 advice is unverified: scripts/publish.sh parses no `--chunk` option, so the documented recovery fails.\nFile: docs/publishing.md:7\nIssue: The 413 advice is unverified: scripts/publish.sh parses no `--chunk` option, so the documented recovery fails.\nFix: Implement `--chunk` in the script, then keep the troubleshooting text where it is.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n## Important\n\n**1. The doc calls the archive a zip archive**\n- File: `docs/commands.md:13`\n- Problem: The doc says \"zip archive of the vault into `DEST`\", but `vault backup` writes a `.tar.gz`.\n- Fix: Drop \"zip\".\n\n**2. The `.part` commit has no body worth the name**\n- File: commit 51d50ac, `vault/backup.py:20`\n- Problem: The message does not say why a day is the cut-off for a `.part` file.\n- Fix: Add a sentence on the cut-off.\n\n## Minor\n\n**3. `sweep()` has a thin docstring**\n- File: `vault/backup.py:40`\n- Problem: It does not say what happens to a `.part` file younger than a day.\n- Fix: Add one line.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 2 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

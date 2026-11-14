@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[CRITICAL] The doc sends the reader to `db/migrations/`; the runner reads `migrations/`, so a new file put there is never applied.\nFile: README.md:9\nIssue: The doc sends the reader to `db/migrations/`; the runner reads `migrations/`, so a new file put there is never applied.\nFix: Change `db/migrations/` to `migrations/`.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 1 |\n| Important | 0 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: BLOCK"

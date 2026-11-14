@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/deploy-key.md" = "# CI deploy key\n\nThe private key is a secret: anyone who has it can deploy to shop.acme.dev. Keep it out of git.\n\n1. From the repository root, run `scripts/new-deploy-key.sh`. It makes `deploy_key` (private)\n   and `deploy_key.pub` (public).\n2. Add `deploy_key.pub` to `/home/deploy/.ssh/authorized_keys` on shop.acme.dev.\n3. Paste `deploy_key` into the CI secret `DEPLOY_KEY`.\n"

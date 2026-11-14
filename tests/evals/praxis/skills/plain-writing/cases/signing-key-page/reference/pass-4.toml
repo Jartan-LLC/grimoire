@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/signing-key.md" = "# Rotating the signing key\n\n1. Run `scripts/rotate-key.sh`. It makes a new key, exports its public half to `keys/` and signs with it.\n2. Commit `keys/`. Never commit the private key.\n\nFor how users import the new key, see [keys/README.txt](../keys/README.txt).\n"

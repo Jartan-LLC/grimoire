@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/config.md" = "# Configuration\n\nSet these in `queue.toml`.\n\n| Setting | Default | What it sets |\n|---|---|---|\n| `workers` | 4 | Worker processes |\n| `retry_limit` | 5 | Attempts before a job fails |\n| `lock_timeout` | 30 | Seconds to wait for the queue lock |\n"

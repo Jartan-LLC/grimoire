@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[CRITICAL] `--purge` deletes every snapshot and cannot be undone, but the doc gives no warning before it.\nFile: docs/usage.md:5\nIssue: `--purge` deletes every snapshot and cannot be undone, but the doc gives no warning before it.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 1 |\n| Important | 0 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: BLOCK"

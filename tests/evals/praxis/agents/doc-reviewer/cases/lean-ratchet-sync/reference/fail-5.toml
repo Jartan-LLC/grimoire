@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says \"`sync push` copies\" where the command is `sync run`.\nFile: docs/usage.md:5\nIssue: The doc says \"`sync push` copies\" where the command is `sync run`.\nFix: Change it.\nStatus: confirmed\n\n[MINOR] A lock a killed run left behind is removed after an hour. The page should carry that in one line.\nFile: docs/usage.md:5\nIssue: A lock a killed run left behind is removed after an hour. The page should carry that in one line.\nFix: Add that line.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

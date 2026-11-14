@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n**1. docs/pdf.md:8-10 - Critical**\nThe WebP note is not needed: no page in `site/` links a WebP image.\nFix: Remove the section.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 1 |\n| Important | 0 |\n| Minor | 0 |\n\n**References applied**: `docs-pages.md`\n\n**Verdict**: BLOCK"

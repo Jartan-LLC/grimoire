@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.6.0
+
+- Your agent writes a README, a contributor or release procedure, a docs page or release notes for what its reader does: what they run, choose and must avoid, and how to recover from a failure they have to act on. Recovery from a rare failure goes in a short troubleshooting part at the end. It leaves out what the program handles on its own: a case it skips, fixes or reports with its own remedy.
+- A warning about data loss, a leaked secret or a step that cannot be undone stays at the step where the reader acts, however rare the case: the step that creates, handles or could leak what is at risk, never only in a section after the steps.
+- Release notes still name each fix, and an explanation or architecture page can describe how the program handles a case. The rule does not cover skill, agent and command text.
+- `doc-reviewer` rates as bloat (Important) a line the rule above leaves out, and raises no finding when a document leaves such a case out.
+- Of the capabilities a change adds, your agent adds to a README only those that change what a user runs, picks or sees. It still adds each command, option, setting, default, requirement or component the change adds to every README list, table and example that should carry it.
+- `/praxis:review-cycle`'s closing round weighs each document's growth against its version at the base.
+
 ## 2.5.0
 
 - `find-duplicate-comments.js` from `comment-hygiene` takes two new flags. `--worktree` also checks the comments your uncommitted changes, staged or not, and your untracked files add, and checks them against the files as they are now, so a duplicate you have fixed stops reporting before you commit the fix. `--all` checks every comment in the repo, not only the ones a diff adds. Without them, the script checks what it checked before. It now works the same from any directory in the repo: run from a subdirectory, it used to find nothing and report clean.

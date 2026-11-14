@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/deploy-key.md" = "# Making a new deploy key\n\n1. Run `scripts/new-deploy-key.sh`. Never commit `deploy_key`. If `deploy_key` already exists, the\n   script stops: move it away first. On Windows, run it from Git Bash.\n2. Add `deploy_key.pub` to `/home/deploy/.ssh/authorized_keys` on shop.acme.dev.\n3. Paste `deploy_key` into the CI secret `DEPLOY_KEY`.\n"
