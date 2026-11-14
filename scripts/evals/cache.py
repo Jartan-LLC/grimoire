@@ -86,8 +86,9 @@ class Sample:
     # in samples drawn before it was kept.
     verified: dict[str, int | None] | None = None
     # Each earlier attempt at this key, oldest first, those of earlier runs included: its
-    # `reasons` and `usage`, so what the key cost is this sample's `cost_usd` plus theirs. None
-    # in samples drawn before attempts were kept.
+    # `reasons` and `usage`, so what the key cost is this sample's `cost_usd` plus theirs, where
+    # a session cut off before it reported its cost has a `cost_usd` of None. None in samples
+    # drawn before attempts were kept.
     attempts: list[dict[str, object]] | None = None
 
 

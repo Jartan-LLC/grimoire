@@ -456,14 +456,16 @@ for nothing; between rounds, `make check` is enough.
    them and a larger `SAMPLES=` draws only the extra ones. Run `make check` on an edited case before
    drawing on it: a lint fix after the draw changes what the sessions saw.
 5. **Count every sample.** A sample that fails for a reason outside the agent (an API error, a usage
-   limit, a leak of user settings into the session, the session reaching the suite's files or another
-   arm's plugins) is excluded and retried up to three times, and the stored sample keeps each earlier
-   attempt's reasons and usage in `attempts`, so a sample's cost is its `cost_usd` plus its attempts';
-   when the API is limiting requests, each retry waits first, and once limits persist the run stops
-   starting sessions and reports the rest as not run, so rerun it later to resume. While any sample is still excluded, the screen cannot SHIP,
-   though harm it already shows still comes out HURT; its summary counts excluded and spoiled samples
-   per arm. A sample the agent itself spoiled (a timeout, the budget or turn cap) counts as failing
-   every check. A session times out after 30 minutes; a suite whose sessions run longer sets
+   limit, a leak of user settings into the session, the session reaching the suite's files or
+   another arm's plugins) is excluded and retried up to three times, and the stored sample keeps
+   each earlier attempt's reasons and usage in `attempts`, so a sample's cost is its `cost_usd` plus
+   its attempts'. A session cut off before it reported its cost has a `cost_usd` of None, and the
+   run's spend line counts it at the suite's `budget_usd`. When the API is limiting requests, each
+   retry waits first, and once limits persist the run stops starting sessions and reports the rest
+   as not run, so rerun it later to resume. While any sample is still excluded, the screen cannot
+   SHIP, though harm it already shows still comes out HURT; its summary counts excluded and spoiled
+   samples per arm. A sample the agent itself spoiled (a timeout, the budget or turn cap) counts as
+   failing every check. A session times out after 30 minutes; a suite whose sessions run longer sets
    `timeout_s` in `suite.toml`, and changing it draws new samples.
 6. **The verdict compares the arms task by task:** `new`'s mean minus `old`'s, per unit.
    - Under a `better` rule the primary metric is BETTER when an exact one-sided paired permutation test
