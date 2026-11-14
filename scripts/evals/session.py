@@ -57,6 +57,8 @@ RETRIES = 3
 BACKOFF_S = 30  # the first wait after the API limits requests; it doubles per retry
 BREAKER = 3  # samples in a row still limited after every retry stop the run
 LIMITED = re.compile(r"(?i)limiting requests|usage limit|rate limit|overloaded|\b(429|529)\b")
+# The reason of a sample whose case changed on disk after loading: no session ran for it.
+CASE_CHANGED = "the case changed on disk during the run; rerun once the checkout is settled"
 # Part of every sample's key: bump it when a change to the session setup could change how a
 # session does a task under test, so no sample drawn under the old setup is reused.
 RUNNER = 2
@@ -509,11 +511,10 @@ def _session(
         env = git_env(dict(os.environ))
         heads = build_fixture(case, repo, env)
         if case.hash() != case.pinned():
-            reason = "the case changed on disk during the run; rerun once the checkout is settled"
             no_session: dict[str, object] = {"cost_usd": 0.0}
             sample = cache.Sample(
-                sample_key, case.id, arm.name, index, arm.plugins, False, [reason], [], "", {},
-                no_session,
+                sample_key, case.id, arm.name, index, arm.plugins, False, [CASE_CHANGED], [], "",
+                {}, no_session,
             )  # fmt: skip
             return sample, ""
         if case.remote:
@@ -655,6 +656,11 @@ class Budget:
             self._running += 1
             return True
 
+    def release(self) -> None:
+        """Free a reservation whose session never ran, counting nothing as spent."""
+        with self._lock:
+            self._running -= 1
+
     def finish(self, cost_usd: float | None, cap_usd: float) -> None:
         """Count a started session as spent: `cost_usd`, or `cap_usd` when its cost is unknown."""
         with self._lock:
@@ -795,7 +801,10 @@ def _budgeted(  # noqa: PLR0913 -- `_session`'s arguments and the run's budget
     try:
         drawn = _session(case, arm, index, spec, sample_key)
     finally:
-        budget.finish(None if drawn is None else cost(drawn[0]), spec.budget_usd)
+        if drawn is not None and drawn[0].reasons == [CASE_CHANGED]:
+            budget.release()
+        else:
+            budget.finish(None if drawn is None else cost(drawn[0]), spec.budget_usd)
     return drawn
 
 

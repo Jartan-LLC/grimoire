@@ -630,6 +630,22 @@ def test_a_case_changed_on_disk_after_loading_is_excluded_before_its_session(
     assert "changed on disk" in sample.reasons[0]
 
 
+def test_a_case_changed_on_disk_counts_no_session_in_the_budget(tmp_path: pathlib.Path) -> None:
+    root = write_suite(tmp_path / "suite")
+    case = load_suite(root).cases[0]
+    (root / "cases" / "c1" / "fixture" / "app.py").write_text("x = 2\n")
+    spec = session.Spec("m", "v", 4.0, tmp_path, tmp_path / "store")
+    budget = session.Budget(10.0)
+    assert budget.start(4.0)
+    budget.finish(2.0, 4.0)
+    sample = session.run_sample(case, Arm("old", "h", {}), 0, spec, budget=budget)
+    assert sample.reasons == [session.CASE_CHANGED]
+    assert (budget.spent_usd, budget.sessions) == (2.0, 1)
+    for _ in range(4):  # 2 spent + 4 sessions x the mean of 2, which no draw of it lowered
+        assert budget.start(4.0)
+    assert not budget.start(4.0)
+
+
 def test_collect_reads_named_files_and_every_file_a_glob_matches_outside_git(
     tmp_path: pathlib.Path,
 ) -> None:
