@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"README.md" = "# pkgsync\n\nMirror packages from a registry into a local directory.\n\n## Install\n\n```bash\npipx install pkgsync\n```\n\nBehind a company proxy, if you see `SSL: CERTIFICATE_VERIFY_FAILED`, set `REQUESTS_CA_BUNDLE` to\nyour company's CA file.\n"

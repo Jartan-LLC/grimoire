@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"README.md" = "# imgshrink\n\nShrink images for the web.\n\n## Usage\n\n`imgshrink photos/` re-encodes every JPEG and PNG in `photos/` in place. `--quality N` sets the\nJPEG quality; it defaults to 80.\n\nCMYK JPEGs are converted to RGB. An EXIF orientation is applied before the EXIF data is dropped.\nFiles over 100 MB are skipped with a message.\n"

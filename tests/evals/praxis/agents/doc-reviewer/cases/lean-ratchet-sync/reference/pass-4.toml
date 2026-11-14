@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says \"`sync push` copies\" where the command is `sync run`.\nFile: docs/usage.md:5\nIssue: The doc says \"`sync push` copies\" where the command is `sync run`.\nFix: Change it.\nStatus: confirmed\n\n[MINOR] The fix commit that removes a stale lock a killed run left has no body; the docs page needs nothing.\nFile: commit 3f2a1bc\nIssue: The fix commit that removes a stale lock a killed run left has no body; the docs page needs nothing.\nFix: If the lock logic is added, the body should say why an hour.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

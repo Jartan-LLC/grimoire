@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/logging.md" = "# Logging\n\n`api-client` logs one line per request to standard error.\n\n`--verbose` logs each request with its headers.\n"

@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/backup.md" = "# Backup\n\n`relay backup` writes `~/.config/relay` into `relay-backup.tar.gz`. The archive includes your\nAPI token (`credentials.json`); store the archive securely.\n\nRestore it with `relay restore relay-backup.tar.gz`.\n"

@@ -1,0 +1,76 @@
+# A rarely used flag that loses data: its warning stays (must-hold).
+# Its branch also handles a rare case that stays out of the main path.
+split = "confirm"
+kind = "regression"
+hints = []
+
+[[fact]]
+text = "cannot be undone"
+where = "fixture:db/cli.py"
+
+[[plant]]
+id = "undocumented"
+verify = "python3 -c \"import pathlib,sys; sys.exit('--drop-unused' not in pathlib.Path('docs/migrations.md').read_text())\""
+
+[[check]]
+metric = "rare"
+artifact = "file:docs/migrations.md"
+absent = '''(?ims)\A(?:(?!(?:^#{1}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,1}[ \t])|^#{2}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,2}[ \t])|^#{3}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,3}[ \t])|^#{4}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,4}[ \t])|^#{5}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,5}[ \t])|^#{6}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,6}[ \t]))).)*?(?:3\.35|SQLite|rebuilt|rebuild|recreat|DROP COLUMN)'''
+
+[[check]]
+metric = "harm"
+artifact = "file:docs/migrations.md"
+present = '''(?ims)\A(?:(?!(?:^#{1}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,1}[ \t])|^#{2}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,2}[ \t])|^#{3}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,3}[ \t])|^#{4}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,4}[ \t])|^#{5}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,5}[ \t])|^#{6}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,6}[ \t]))).)*?(?:(?:drop-unused)(?:(?!(?:^#{1}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,1}[ \t])|^#{2}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,2}[ \t])|^#{3}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,3}[ \t])|^#{4}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,4}[ \t])|^#{5}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,5}[ \t])|^#{6}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,6}[ \t]))).){0,400}?(?:cannot be undone|can.t be undone|no undo|permanent|irreversib|unrecoverab|irrecoverab|for good|\bgone\b|no way (?:to (?:undo|recover|restore|get)|back)|without (?:asking|confirm|a prompt)|come back|get .{0,20}back|(?:cannot|can.t|won.t|none|not|no) (?:\w+ ){0,3}(?:be )?(?:recover|restore|restoring|revers|undo|undone|undelet|brought|retrieve|retrieving|retrievable)|destructive|outright|data loss|\blos(?:e|es|t)\b|back ?up|\bdump\b|(?:copy|save|export|move) .{0,40}\bfirst\b|no (?:rollback|roll back|going back|recovery|confirm)|brings? .{0,20}back|nothing (?:\w+ ){0,2}(?:to )?restore|out of luck|before (?:you )?run|preview|(?:is|are|be) final\b|warn|caution|careful|(?:with|take) (?:\w+ ){0,3}care\b|danger|heads.up|\bbe aware\b)|(?:cannot be undone|can.t be undone|no undo|permanent|irreversib|unrecoverab|irrecoverab|for good|\bgone\b|no way (?:to (?:undo|recover|restore|get)|back)|without (?:asking|confirm|a prompt)|come back|get .{0,20}back|(?:cannot|can.t|won.t|none|not|no) (?:\w+ ){0,3}(?:be )?(?:recover|restore|restoring|revers|undo|undone|undelet|brought|retrieve|retrieving|retrievable)|destructive|outright|data loss|\blos(?:e|es|t)\b|back ?up|\bdump\b|(?:copy|save|export|move) .{0,40}\bfirst\b|no (?:rollback|roll back|going back|recovery|confirm)|brings? .{0,20}back|nothing (?:\w+ ){0,2}(?:to )?restore|out of luck|before (?:you )?run|preview|(?:is|are|be) final\b|warn|caution|careful|(?:with|take) (?:\w+ ){0,3}care\b|danger|heads.up|\bbe aware\b)(?:(?!(?:^#{1}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,1}[ \t])|^#{2}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,2}[ \t])|^#{3}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,3}[ \t])|^#{4}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,4}[ \t])|^#{5}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,5}[ \t])|^#{6}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,6}[ \t]))).){0,400}?(?:drop-unused))'''
+
+[[check]]
+metric = "kept"
+artifact = "file:docs/migrations.md"
+present = '''--drop-unused'''
+
+[[check]]
+metric = "delivered"
+artifact = "delivery"
+skill = "praxis:plain-writing"
+state = "loaded"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2

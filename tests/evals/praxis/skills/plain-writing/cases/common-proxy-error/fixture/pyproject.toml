@@ -1,0 +1,6 @@
+[project]
+name = "pkgsync"
+version = "1.0.0"
+
+[project.scripts]
+pkgsync = "pkgsync.cli:main"

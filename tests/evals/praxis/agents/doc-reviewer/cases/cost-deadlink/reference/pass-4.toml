@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The link to docs/setup.md is broken: the file does not exist.\nFile: README.md:3\nIssue: The link to docs/setup.md is broken: the file does not exist.\nFix: Change it.\nStatus: confirmed\n\n[MINOR] The README's Usage line and the Content-Length docstring describe code the branch does not hold.\nFile: README.md:3\nIssue: The README's Usage line and the Content-Length docstring describe code the branch does not hold.\nFix: If the README is a preview, the README should say so; otherwise add the code.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

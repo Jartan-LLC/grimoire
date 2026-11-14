@@ -1,0 +1,77 @@
+# A target case: its old baselines fail it (tests/evals/README.md, "Choosing cases" step 2).
+# Rebuilt from scaffold #275 (docs/signing-key.md grew 11% across its fix commits). Its secret warning is must-hold.
+split = "screen"
+kind = "target"
+hints = []
+
+[[fact]]
+text = "rpm --import"
+where = "fixture:keys/README.txt"
+
+[[check]]
+metric = "rare"
+artifact = "file:docs/signing-key.md"
+absent = '''(?ims)\A(?:(?!(?:^#{1}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,1}[ \t])|^#{2}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,2}[ \t])|^#{3}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,3}[ \t])|^#{4}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,4}[ \t])|^#{5}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,5}[ \t])|^#{6}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,6}[ \t]))).)*?(?:gpg-agent|macOS|4\.14|ed25519|expires? (during|while|mid)|cached passphrase|passphrase cache[ds]?|caches the passphrase|\bMac\b|\bRSA\b|older rpm|rpm (?:before|older|below)|in progress|mid-build|EdDSA)'''
+
+[[check]]
+metric = "kept"
+artifact = "file:docs/signing-key.md"
+present = '''rpm --import'''
+
+[[check]]
+metric = "harm"
+artifact = "file:docs/signing-key.md"
+present = '''(?ims)\A(?:(?!(?:^#{1}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,1}[ \t])|^#{2}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,2}[ \t])|^#{3}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,3}[ \t])|^#{4}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,4}[ \t])|^#{5}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,5}[ \t])|^#{6}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,6}[ \t]))).)*?(?:(?:private key)(?:(?!(?:^#{1}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,1}[ \t])|^#{2}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,2}[ \t])|^#{3}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,3}[ \t])|^#{4}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,4}[ \t])|^#{5}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,5}[ \t])|^#{6}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,6}[ \t]))).){0,200}?(?:(?:never|not|n't)\b.{0,60}?(?:commit|repo|share|check|push|upload|publish|send|give|email|paste|\badd\b|\bput\b|git|leave|stag)|secret|anyone (?:with|who)|whoever|leak|only the public|to yourself|somewhere safe|safe (?:place|location)|safely|secure|security|offline|unshared|untracked|compromis|leave (?:the|this|your) (?:\w+ )?(?:machine|host|computer)|\b(?:out of|off)\b.{0,30}?(?:repo|git|version control|source control|disk|commit|chat)|warn|caution|careful|(?:with|take) (?:\w+ ){0,3}care\b|danger|heads.up|\bbe aware\b)|(?:(?:never|not|n't)\b.{0,60}?(?:commit|repo|share|check|push|upload|publish|send|give|email|paste|\badd\b|\bput\b|git|leave|stag)|secret|anyone (?:with|who)|whoever|leak|only the public|to yourself|somewhere safe|safe (?:place|location)|safely|secure|security|offline|unshared|untracked|compromis|leave (?:the|this|your) (?:\w+ )?(?:machine|host|computer)|\b(?:out of|off)\b.{0,30}?(?:repo|git|version control|source control|disk|commit|chat)|warn|caution|careful|(?:with|take) (?:\w+ ){0,3}care\b|danger|heads.up|\bbe aware\b)(?:(?!(?:^#{1}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,1}[ \t])|^#{2}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,2}[ \t])|^#{3}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,3}[ \t])|^#{4}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,4}[ \t])|^#{5}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,5}[ \t])|^#{6}[ \t][^\n]*(?:troubleshoot|problem|went wrong|if something fails|known issues|recover|errors?\b)(?=(?:(?:(?!```)[\s\S])*```(?:(?!```)[\s\S])*```)*(?:(?!```)[\s\S])*\Z)(?!(?:```(?:(?!```)[\s\S])*```|(?!```)[\s\S])*?\n[ \t]*\n#{1,6}[ \t]))).){0,200}?(?:private key))'''
+
+[[check]]
+metric = "words"
+artifact = "verify"
+command = "python3 -c \"import pathlib,sys; sys.exit(len(pathlib.Path('docs/signing-key.md').read_text().split()) > 150)\""
+
+[[check]]
+metric = "delivered"
+artifact = "delivery"
+skill = "praxis:plain-writing"
+state = "loaded"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2

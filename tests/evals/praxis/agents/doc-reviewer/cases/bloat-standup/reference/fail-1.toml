@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[MINOR] Bloat: the weekend, holiday and bot limits cover cases the command handles on its own.\nFile: README.md:12\nIssue: Bloat: the weekend, holiday and bot limits cover cases the command handles on its own.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 0 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: APPROVE"

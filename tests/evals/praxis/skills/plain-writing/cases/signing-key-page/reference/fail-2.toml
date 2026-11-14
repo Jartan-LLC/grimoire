@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/signing-key.md" = "# Rotating the signing key\n\n1. Run `scripts/rotate-key.sh`. It makes a new key and writes its public half to `keys/`.\n2. Commit `keys/`.\n3. Users import the new key with `rpm --import keys/RPM-GPG-KEY-acme`.\n\n## Troubleshooting\n\nNever commit the private key.\n"

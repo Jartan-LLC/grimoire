@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says it exits after 30 seconds; the default timeout is 60.\nFile: docs/wait.md:4\nIssue: The doc says it exits after 30 seconds; the default timeout is 60.\nFix: Say 60 seconds.\nStatus: confirmed\n\n[MINOR] The doc says it returns once db:5432 accepts a connection, but a reset right after accept counts as not ready.\nFile: docs/wait.md:3\nIssue: The doc says it returns once db:5432 accepts a connection, but a reset right after accept counts as not ready.\nFix: Mention the reset in that sentence.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

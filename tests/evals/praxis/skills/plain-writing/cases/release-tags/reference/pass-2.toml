@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"RELEASING.md" = "# Releasing\n\nEach package carries its version in `pyproject.toml`. Bump it in the PR that changes the package,\nwith an entry in its `CHANGELOG.md`.\n\n## Tag a release\n\nOnce the PR is on `main`, run `make verify` and then `scripts/tag-release.sh`, which tags and pushes every untagged package version.\n"

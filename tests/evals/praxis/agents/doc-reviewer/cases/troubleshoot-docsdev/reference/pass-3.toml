@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[MINOR] The troubleshooting part could name the error's source.\nFile: docs/preview.md:7\nIssue: The troubleshooting part could name the error's source.\nFix: Keep it at the end.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 0 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: APPROVE"

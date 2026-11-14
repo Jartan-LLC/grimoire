@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The README says a replaced file is kept as `<file>.bak`; install.sh keeps it as `<file>.orig`.\nFile: src/dotlink/README.md:16\nIssue: The README says a replaced file is kept as `<file>.bak`; install.sh keeps it as `<file>.orig`.\nFix: Write `<file>.orig`.\nStatus: confirmed\n\n[MINOR] The README says dotlink links each file, but a target that is a directory is skipped, with a message.\nFile: src/dotlink/README.md:16\nIssue: The README says dotlink links each file, but a target that is a directory is skipped, with a message.\nFix: Add a clause: a directory target is skipped.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

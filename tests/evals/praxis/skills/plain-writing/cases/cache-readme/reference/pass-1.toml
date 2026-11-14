@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"README.md" = "# fetchy\n\nDownload files with retries.\n\n## Usage\n\n`fetchy URL` downloads `URL` into the current directory.\n\n`--cache-dir DIR` keeps downloads in `DIR` and serves a repeat request from it.\n"

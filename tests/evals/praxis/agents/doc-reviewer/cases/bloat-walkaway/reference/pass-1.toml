@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says \"stops after 5 rounds\" where the code has \"stops after 8 rounds\".\nFile: README.md:5\nIssue: The doc says \"stops after 5 rounds\" where the code has \"stops after 8 rounds\".\nFix: Change it.\nStatus: confirmed\n\n[IMPORTANT] Bloat: the fork, logged-out and 30-day limits cover cases few readers meet.\nFile: README.md:12\nIssue: Bloat: the fork, logged-out and 30-day limits cover cases few readers meet.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 2 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

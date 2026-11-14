@@ -1,0 +1,24 @@
+"""Build this case's history: run by the eval runner inside the fixture repository."""
+
+import json
+import pathlib
+import subprocess
+
+BRANCH = "feature/issue-64"
+COMMITS = json.loads(
+    "[{\"subject\": \"feat(slug): let callers keep the first n words\", \"body\": \"Closes #64.\", \"files\": {\"src/slug.js\": \"'use strict';\\n\\n// Lowercase ASCII letters and digits, with each run of anything else turned into one dash.\\nfunction toSlug(text) {\\n  return text\\n    .toLowerCase()\\n    .replace(/[^a-z0-9]+/g, '-')\\n    .replace(/^-+|-+$/g, '');\\n}\\n\\n// The slug cut to at most `max` characters.\\nfunction trimToLength(slug, max) {\\n  return slug.slice(0, max);\\n}\\n\\n// The first `max` words of the text.\\nfunction firstWords(text, max) {\\n  return text.split(/[^A-Za-z0-9]+/).filter(Boolean).slice(0, max).join(' ');\\n}\\n\\nfunction slugify(text, options = {}) {\\n  const words = options.maxWords ? firstWords(text, options.maxWords) : text;\\n  const slug = toSlug(words);\\n  return options.maxLength ? trimToLength(slug, options.maxLength) : slug;\\n}\\n\\nmodule.exports = { slugify, toSlug, trimToLength };\\n\", \"test/slug.test.js\": \"'use strict';\\n\\nconst test = require('node:test');\\nconst assert = require('node:assert');\\nconst { slugify } = require('../src/slug');\\n\\ntest('joins words with a dash', () => {\\n  assert.strictEqual(slugify('Hello, World!'), 'hello-world');\\n});\\n\\ntest('cuts the slug to maxLength', () => {\\n  assert.strictEqual(slugify('Hello World', { maxLength: 5 }), 'hello');\\n});\\n\\ntest('keeps the first maxWords words', () => {\\n  assert.strictEqual(slugify('One two three', { maxWords: 2 }), 'one-two');\\n});\\n\", \"README.md\": \"# slugkit\\n\\n`slugify('Hello, World!')` returns `hello-world`. Pass `{ maxLength: n }` to cut the slug to n characters, and `{ maxWords: n }` to keep the first n words.\\n\\n## Development\\n\\nRun the tests with `npm test`.\\n\"}}, {\"subject\": \"fix(slug): treat a maxWords of 0 as no limit\", \"body\": \"0 is falsy, so it already skipped the cut; the README now says so.\", \"files\": {\"README.md\": \"# slugkit\\n\\n`slugify('Hello, World!')` returns `hello-world`. Pass `{ maxLength: n }` to cut the slug to n characters, and `{ maxWords: n }` to keep the first n words. A `maxWords` of 0 means no limit.\\n\\n## Development\\n\\nRun the tests with `npm test`.\\n\"}}, {\"subject\": \"fix(slug): cut inputs over 10,000 characters before slugging\", \"body\": \"A pasted document made the regex replace slow.\", \"files\": {\"src/slug.js\": \"'use strict';\\n\\n// Lowercase ASCII letters and digits, with each run of anything else turned into one dash.\\nfunction toSlug(text) {\\n  return text\\n    .toLowerCase()\\n    .replace(/[^a-z0-9]+/g, '-')\\n    .replace(/^-+|-+$/g, '');\\n}\\n\\n// The slug cut to at most `max` characters.\\nfunction trimToLength(slug, max) {\\n  return slug.slice(0, max);\\n}\\n\\n// The first `max` words of the text.\\nfunction firstWords(text, max) {\\n  return text.split(/[^A-Za-z0-9]+/).filter(Boolean).slice(0, max).join(' ');\\n}\\n\\nconst MAX_INPUT = 10000;\\n\\nfunction slugify(text, options = {}) {\\n  text = text.slice(0, MAX_INPUT);\\n  const words = options.maxWords ? firstWords(text, options.maxWords) : text;\\n  const slug = toSlug(words);\\n  return options.maxLength ? trimToLength(slug, options.maxLength) : slug;\\n}\\n\\nmodule.exports = { slugify, toSlug, trimToLength };\\n\", \"test/slug.test.js\": \"'use strict';\\n\\nconst test = require('node:test');\\nconst assert = require('node:assert');\\nconst { slugify } = require('../src/slug');\\n\\ntest('joins words with a dash', () => {\\n  assert.strictEqual(slugify('Hello, World!'), 'hello-world');\\n});\\n\\ntest('cuts the slug to maxLength', () => {\\n  assert.strictEqual(slugify('Hello World', { maxLength: 5 }), 'hello');\\n});\\n\\ntest('keeps the first maxWords words', () => {\\n  assert.strictEqual(slugify('One two three', { maxWords: 2 }), 'one-two');\\n});\\n\\ntest('cuts very long input', () => {\\n  assert.strictEqual(slugify('a'.repeat(20000)).length, 10000);\\n});\\n\", \"README.md\": \"# slugkit\\n\\n`slugify('Hello, World!')` returns `hello-world`. Pass `{ maxLength: n }` to cut the slug to n characters, and `{ maxWords: n }` to keep the first n words. A `maxWords` of 0 means no limit. Inputs over 10,000 characters are cut to 10,000 before the slug is built.\\n\\n## Development\\n\\nRun the tests with `npm test`.\\n\"}}]"
+)
+
+
+def git(*args: str) -> None:
+    subprocess.run(["git", *args], check=True, capture_output=True)
+
+
+git("checkout", "-q", "-b", BRANCH)
+for commit in COMMITS:
+    for path, text in commit["files"].items():
+        target = pathlib.Path(path)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text)
+    git("add", "-A")
+    git("commit", "-q", "-m", commit["subject"], "-m", commit["body"])

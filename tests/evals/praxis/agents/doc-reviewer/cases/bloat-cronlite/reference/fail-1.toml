@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[MINOR] Bloat: A job still running at its next start is skipped. A container without `/etc/localtime` runs jobs\nFile: docs/schedule.md:12\nIssue: Bloat: A job still running at its next start is skipped. A container without `/etc/localtime` runs jobs\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 0 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: APPROVE"

@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says \"The team's values win\" where the code has \"Your own values win\".\nFile: src/dotmerge/README.md:5\nIssue: The doc says \"The team's values win\" where the code has \"Your own values win\".\nFix: Change it.\nStatus: confirmed\n\n### Not raised\n\nThe README leaves out that a symlinked settings.json is followed. Rare, so it stays out of a doc for people.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

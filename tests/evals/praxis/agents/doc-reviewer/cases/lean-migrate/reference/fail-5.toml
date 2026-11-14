@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says \"`db/migrations/`\" where the code reads \"`migrations/`\".\nFile: README.md:9\nIssue: The doc says \"`db/migrations/`\" where the code reads \"`migrations/`\".\nFix: Change it.\nStatus: confirmed\n\n[IMPORTANT] Bloat: stopping the dev server first is something a reader already knows.\nFile: README.md:8\nIssue: Bloat: stopping the dev server first is something a reader already knows.\nFix: Remove the sentence.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 2 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

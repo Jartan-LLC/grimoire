@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says \"run `make test`, then\" where the code has \"run `make verify`, then\".\nFile: RELEASING.md:5\nIssue: The doc says \"run `make test`, then\" where the code has \"run `make verify`, then\".\nFix: Change it.\nStatus: confirmed\n\n[IMPORTANT] Bloat: the pre-1.5.0 tags, the accepted range forms and the dev container build are cases few readers meet.\nFile: RELEASING.md:12\nIssue: Bloat: the pre-1.5.0 tags, the accepted range forms and the dev container build are cases few readers meet.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 2 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

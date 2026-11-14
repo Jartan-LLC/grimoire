@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says \"`sync push` copies\" where the code has \"`sync run` copies\".\nFile: docs/usage.md:5\nIssue: The doc says \"`sync push` copies\" where the code has \"`sync run` copies\".\nFix: Change it.\nStatus: confirmed\n\n[MINOR] The opening sentence repeats the heading.\nFile: docs/usage.md:3\nIssue: The opening sentence repeats the heading.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

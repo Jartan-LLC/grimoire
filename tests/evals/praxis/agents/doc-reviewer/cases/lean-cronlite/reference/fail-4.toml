@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says `cronlite rm ID`; the command is `cronlite remove ID`.\nFile: docs/schedule.md:4\nIssue: The doc says `cronlite rm ID`; the command is `cronlite remove ID`.\nFix: Write `remove`.\nStatus: confirmed\n\n[MINOR] Behaviour from the fix commits is not on the page.\nFile: docs/schedule.md:4\nIssue: Behaviour from the fix commits is not on the page.\nFix: Add the overlap skip and the February 29 rule to `docs/schedule.md`.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

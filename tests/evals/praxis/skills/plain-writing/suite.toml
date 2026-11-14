@@ -1,0 +1,81 @@
+# Whether a doc written for people covers what its reader does (#182): a case the program handles
+# on its own stays out of the main path, recovery from a rare failure goes to a troubleshooting
+# part at the end, and warnings about data loss, secrets and steps that cannot be undone stay
+# before their step.
+# Target candidates are rebuilt from docs that grew one rare case per fix commit (claude-sync #49,
+# enchantments #103, grimoire #97 and #170, scaffold #275) or invented on the same pattern, and
+# from the ratchet itself: a fix commit for a rare case, then a request to bring the docs in line.
+# Regression cases: a warning that must stay, a common failure, a whole settings table, a release
+# note for a rare fix, an existing troubleshooting part. tests/evals/README.md says how the suite
+# is run.
+# The dev split is the smoke subset: run old and new on it before the full suite. A candidate target
+# is committed as a regression case until an old baseline fails it, as its key comment says.
+target = "praxis:plain-writing"
+# Cases moved off a held-out split, each with its reason in a comment.
+BURNED = []
+# The README cases run with docs-patterns' README writer line, which says what of a change a README
+# adds, and their sessions read it.
+covers = [
+  "plugins/praxis/skills/plain-writing/**",
+  "plugins/praxis/skills/docs-patterns/readme.md",
+]
+models = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]
+budget_usd = 2.0
+
+[[metric]]
+id = "rare"
+direction = "higher"
+# Reported only: no planted rare case in the doc before a troubleshooting heading that no heading
+# of its level or higher follows (a `#` line inside a fenced code block is no heading). Whether the
+# doc keeps to normal use is the blind panel's question (under [pass_rule]), not this regex's.
+
+[[metric]]
+id = "kept"
+direction = "higher"
+margin = 0.2
+# Most cases check only that the doc covers what the prompt asks for (`snap prune` for "Document
+# the prune command"). The guard against cutting normal-path facts is the regression cases': a
+# common failure (first-run-error, common-proxy-error), a whole table (settings-table) and an
+# existing troubleshooting part (troubleshooting-kept).
+
+[[metric]]
+id = "harm"
+direction = "higher"
+must_hold = true
+# A warning about data loss, a secret or a step that cannot be undone: a warning word near its
+# subject, before that troubleshooting heading. The warning-word lists are wide, because a correct
+# warning in words a list misses would read as HURT, but leave out words common in docs that warn
+# of nothing ("important", "make sure", a bare "safe" or "final"). No list leaves out every such word, so
+# the regexes are only a first filter: a reader checks every `new` sample of these cases, pass or
+# fail, the way tests/evals/README.md ("Running and deciding", step 9) reads failing samples. A
+# dropped or moved warning the regex passed counts as a must-hold failure, so the run is HURT; a
+# correct warning the regex failed marks the case broken.
+
+[[metric]]
+id = "delivered"
+direction = "higher"
+margin = 0.2
+# Whether plain-writing reached the main thread at all in the session (`state = "loaded"`), not
+# whether it was in context at the doc's write, so it does not depend on how the doc was written.
+
+[[metric]]
+id = "words"
+direction = "higher"
+# Reported only: the doc stays under a word count near its reference's. A diagnostic, not a
+# length target.
+
+[pass_rule]
+# The regex rule holds the guards only: `kept` (the primary, as the rule needs one) and `delivered`
+# (the skill loaded) are tested for non-inferiority, and `harm` holds on its own. The gain is graded
+# by a blind panel of three agents, who see neither the arm nor the model, each labelling every doc
+# right-sized, bloated, under or mis-sized against panel-specs.md, two of three deciding. A change
+# to plain-writing goes ahead when the screen and confirm SHIP and, on each gate model, new has more
+# right-sized docs than old, with no significance bar beyond "more", and loses no warning old keeps;
+# its PR reports the panel's labels per model and arm. panel-specs.md covers the dev, screen and
+# confirm cases, each spec written blind before its docs were graded, from the case's prompt,
+# fixture, build.py and the rule, never from its key or a sample; a case added later gets its spec
+# written the same way.
+primary = "kept"
+rule = "no-regression"
+guards = ["delivered"]
+min_samples = 3

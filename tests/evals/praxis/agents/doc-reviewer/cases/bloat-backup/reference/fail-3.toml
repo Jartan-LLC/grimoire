@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] Bloat: the clock, power-cut, zero-padding and mtime sentences cover cases few readers meet; cut them. Lines 5-7 cover an edge case most readers never hit.\nFile: docs/commands.md:5\nIssue: Bloat: the clock, power-cut, zero-padding and mtime sentences cover cases few readers meet; cut them. Lines 5-7 cover an edge case most readers never hit.\nFix: Remove it, or move it to a short troubleshooting part at the end.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

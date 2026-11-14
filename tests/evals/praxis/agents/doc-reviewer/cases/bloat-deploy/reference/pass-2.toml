@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The 502, no-migration and shallow-clone sentences are things the script handles on its own.\nFile: DEPLOYING.md:12\nIssue: The 502, no-migration and shallow-clone sentences are things the script handles on its own.\nFix: Keep the three steps. Cut the 502, migration-skip and shallow-clone sentences.\nStatus: confirmed\n\n[IMPORTANT] The doc says \"`make deploy`\" where the code has \"`make ship`\".\nFile: DEPLOYING.md:5\nIssue: The doc says \"`make deploy`\" where the code has \"`make ship`\".\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 2 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

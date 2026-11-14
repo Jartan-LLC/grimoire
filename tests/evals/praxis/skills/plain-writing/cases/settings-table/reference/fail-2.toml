@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/config.md" = "# Configuration\n\nSet these in `queue.toml`.\n\n| Setting | Default | What it sets |\n|---|---|---|\n| `workers` | 4 | Worker processes |\n| `retry_limit` | 5 | Attempts before a job fails |\n| `lock_timeout` | 30 | Seconds to wait for the queue lock; raise it on slow network disks |\n| `fsync_every` | 0 | Fsync the journal every N jobs; 0 leaves it to the OS |\n\nA `queue.toml` saved with a byte order mark, as Notepad does, is read as usual.\n"

@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[MINOR] Bloat: the daylight saving sentence covers a case few readers meet.\nFile: README.md:12\nIssue: Bloat: the daylight saving sentence covers a case few readers meet.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 0 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: APPROVE"

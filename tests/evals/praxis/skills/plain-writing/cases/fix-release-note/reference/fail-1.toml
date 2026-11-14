@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"CHANGELOG.md" = "# Changelog\n\n## Unreleased\n\n## 0.4.0\n\n- `vault status` lists removed files too.\n"

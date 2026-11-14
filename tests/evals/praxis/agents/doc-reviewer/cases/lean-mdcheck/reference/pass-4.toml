@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The page says it exits 2; the code exits 1 when it finds a broken link.\nFile: docs/check.md:4\nIssue: The page says it exits 2; the code exits 1 when it finds a broken link.\nFix: Say it exits 1.\nStatus: confirmed\n\n[MINOR] The page says mdcheck checks every link, but links inside fenced code blocks are skipped.\nFile: docs/check.md:3\nIssue: The page says mdcheck checks every link, but links inside fenced code blocks are skipped.\nFix: Qualify \"every link\": add a clause that links in fenced code blocks are skipped.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

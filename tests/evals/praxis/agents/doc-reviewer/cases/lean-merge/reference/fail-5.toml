@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says the team's values win; the commit says your own values win.\nFile: src/dotmerge/README.md:16\nIssue: The doc says the team's values win; the commit says your own values win.\nFix: Say your own values win.\nStatus: confirmed\n\n[MINOR] The README should also say that a settings.json that is not valid JSON is left untouched and reported.\nFile: src/dotmerge/README.md:16\nIssue: The README should also say that a settings.json that is not valid JSON is left untouched and reported.\nFix: Change it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

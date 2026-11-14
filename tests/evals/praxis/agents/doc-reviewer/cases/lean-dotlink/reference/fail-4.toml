@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The doc says \"`<file>.bak`\" where the code has \"`<file>.orig`\".\nFile: src/dotlink/README.md:16\nIssue: The doc says \"`<file>.bak`\" where the code has \"`<file>.orig`\".\nFix: Change it.\nStatus: confirmed\n\n[MINOR] Bloat: the sentence on `<file>.orig` covers a backup the program makes on its own.\nFile: src/dotlink/README.md:16\nIssue: Bloat: the sentence on `<file>.orig` covers a backup the program makes on its own.\nFix: Cut it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

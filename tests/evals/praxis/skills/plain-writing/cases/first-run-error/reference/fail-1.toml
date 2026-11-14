@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"README.md" = "# tally\n\nTrack hours against projects from the command line.\n\n## Getting started\n\nRun `tally init`, then `tally add 1h \"note\"`.\n"
