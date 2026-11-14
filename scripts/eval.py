@@ -10,7 +10,8 @@
   screen SUITE        run old and new side by side, then print the verdict (spends inference)
                       run and screen call no judge without --judge: a judged metric that
                       lacks a kept answer on any sample is reported as not judged. With
-                      --max-usd, run and screen start no session expected to pass that spend
+                      --max-usd, run and screen start no session expected to take the run's
+                      spend past it
   show KEY            print one stored sample: its commits, final reply, every gh call logged
                       and the gh text graded, deliveries and writes by agent, and subagents'
                       briefs and reports
