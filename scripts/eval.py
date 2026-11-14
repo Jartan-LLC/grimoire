@@ -10,7 +10,7 @@
   screen SUITE        run old and new side by side, then print the verdict (spends inference)
                       run and screen call no judge without --judge: a judged metric that
                       lacks a kept answer on any sample is reported as not judged; with
-                      --max-usd they start no session that could pass that spend
+                      --max-usd they start no session expected to pass that spend
   show KEY            print one stored sample: its commits, final reply, every gh call logged
                       and the gh text graded, deliveries and writes by agent, and subagents'
                       briefs and reports
@@ -162,7 +162,7 @@ type Work = tuple[Case, Arm, int, session.Spec]
 def run_samples(work: list[Work], jobs: int, max_usd: float | None = None) -> list[cache.Sample]:
     """Every (case, arm, index, spec) sample, in order, running the missing ones `jobs` at a time.
 
-    Starts no session that could take the run's spend past `max_usd` (`session.Budget`),
+    Starts no session expected to take the run's spend past `max_usd` (`session.Budget`),
     and prints what the run's sessions spent.
     """
     session.preflight()
@@ -1120,8 +1120,9 @@ def _parser() -> argparse.ArgumentParser:
             "--max-usd",
             type=positive_usd,
             default=None,
-            help="start no session, a retry included, that could take this run's spend past "
-            "it; the rest are not run, and a rerun resumes (judge calls are not counted)",
+            help="start no session, a retry included, expected to take this run's spend past "
+            "it (an estimate: sessions running at the ceiling can pass it); the rest are not "
+            "run, and a rerun resumes (judge calls are not counted)",
         )
         cmd.add_argument(
             "--judge",
