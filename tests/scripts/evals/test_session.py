@@ -451,13 +451,13 @@ def test_a_budget_expects_the_cap_until_a_session_finishes_then_the_mean() -> No
     budget = session.Budget(10.0)
     assert budget.start(4.0)
     assert budget.start(4.0)  # 0 spent + 2 sessions x 4 expected
-    assert not budget.admits(4.0)  # 3 x 4 would pass 10
+    assert budget.verdict(4.0) == "wait"  # 3 x 4 would pass 10
     budget.finish(1.0, 4.0)
     budget.finish(3.0, 4.0)
     assert budget.spent_usd == 4.0
     for _ in range(3):  # 4 spent + 3 sessions x the mean of 2
         assert budget.start(4.0)
-    assert not budget.admits(4.0)
+    assert budget.verdict(4.0) == "wait"
 
 
 def test_a_budget_counts_a_session_of_unknown_cost_at_its_cap() -> None:
@@ -614,7 +614,7 @@ def test_a_session_that_raises_counts_at_its_budget_and_frees_its_reservation(
         session.run_sample(case, Arm("new", "h", {}), 0, spec, budget=budget)
     assert (budget.spent_usd, budget.sessions, budget.unknown) == (4.0, 1, 1)
     assert budget.start(4.0)  # 4 spent + 1 session x 4: none still reserved for the crash
-    assert not budget.admits(4.0)
+    assert budget.verdict(4.0) == "wait"
 
 
 def test_preflight_stops_when_the_sample_venv_cannot_import_pytest(
@@ -755,7 +755,7 @@ def test_a_case_changed_on_disk_counts_no_session_in_the_budget(tmp_path: pathli
     assert (budget.spent_usd, budget.sessions) == (2.0, 1)
     for _ in range(4):  # 2 spent + 4 sessions x the mean of 2, which no draw of it lowered
         assert budget.start(4.0)
-    assert not budget.admits(4.0)
+    assert budget.verdict(4.0) == "wait"
 
 
 def test_collect_reads_named_files_and_every_file_a_glob_matches_outside_git(

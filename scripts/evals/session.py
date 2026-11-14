@@ -34,7 +34,7 @@ import threading
 import time
 from collections.abc import Sequence
 from dataclasses import asdict, dataclass, field, replace
-from typing import TextIO, cast
+from typing import Literal, TextIO, cast
 
 from . import cache, trace
 from .arms import Arm
@@ -617,6 +617,9 @@ class Breaker:
                 self.tripped.set()
 
 
+type Verdict = Literal["start", "wait", "refuse"]
+
+
 class Budget:
     """What a run's sessions spent, and the spend ceiling past which it starts none.
 
@@ -646,21 +649,16 @@ class Budget:
         self.unknown = 0
         self.refused = 0
 
-    def admits(self, cap_usd: float) -> bool:
-        """Whether a session whose budget is `cap_usd` would start now, reserving nothing."""
+    def verdict(self, cap_usd: float) -> Verdict:
+        """What `start` would do now with a session whose budget is `cap_usd`, reserving nothing."""
         with self._lock:
-            return self._admits(cap_usd)
+            return self._verdict(cap_usd)
 
-    def _admits(self, cap_usd: float) -> bool:
+    def _verdict(self, cap_usd: float) -> Verdict:
         expected = self._known_usd / self._known if self._known else cap_usd
-        return (
-            self.max_usd is None or self.spent_usd + expected * (self._running + 1) <= self.max_usd
-        )
-
-    def refuses(self, cap_usd: float) -> bool:
-        """Whether `start` would refuse a session whose budget is `cap_usd` without waiting."""
-        with self._lock:
-            return not self._admits(cap_usd) and not self._running
+        if self.max_usd is None or self.spent_usd + expected * (self._running + 1) <= self.max_usd:
+            return "start"
+        return "wait" if self._running else "refuse"
 
     def start(self, cap_usd: float) -> bool:
         """Reserve a session whose budget is `cap_usd`, waiting while it is past the ceiling.
@@ -669,9 +667,9 @@ class Budget:
         still past the ceiling once none is running.
         """
         with self._changed:
-            while not self._admits(cap_usd) and self._running:
+            while (verdict := self._verdict(cap_usd)) == "wait":
                 self._changed.wait()
-            if not self._admits(cap_usd):
+            if verdict == "refuse":
                 self.refused += 1
                 return False
             self._running += 1
@@ -801,7 +799,7 @@ def run_sample(  # noqa: PLR0913 -- `breaker` and `budget` are the run's, shared
     for attempt in range(RETRIES):
         if sample.valid:
             break
-        if limited(sample) and (budget is None or not budget.refuses(spec.budget_usd)):
+        if limited(sample) and (budget is None or budget.verdict(spec.budget_usd) != "refuse"):
             time.sleep(BACKOFF_S * 2**attempt)
         if (retried := _budgeted(case, arm, index, spec, sample_key, budget=budget)) is None:
             refused = True
