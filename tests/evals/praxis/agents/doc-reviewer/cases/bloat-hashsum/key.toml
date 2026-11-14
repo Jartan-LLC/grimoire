@@ -1,7 +1,8 @@
-# A target case: its old baselines fail it (tests/evals/README.md, "Choosing cases" step 2).
+# A candidate target case: committed as a regression case until an old baseline fails it
+# (tests/evals/README.md, "Choosing cases" step 2), then retagged kind = "target".
 # A docs page whose fix commits' rare cases sit in its main path (invented on bloat-logrot's pattern).
 split = "screen"
-kind = "target"
+kind = "regression"
 hints = []
 
 [[plant]]
@@ -31,13 +32,13 @@ present = '''(?ims)(?:(?:\[|\*\*|\(|[:\u2013\u2014][ \t]*|[ \t]-[ \t]+|^[ \t>#*\
 [[baseline]]
 model = "claude-opus-5-5"
 arm = "none"
-failures = 2
+failures = 3
 runs = 3
 runner = 2
 
 [[baseline]]
 model = "claude-opus-5-5"
 arm = "old"
-failures = 3
+failures = 0
 runs = 3
 runner = 2
