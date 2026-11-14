@@ -1,0 +1,1 @@
+Plan translating our help centre into French, German, Spanish, Italian and Japanese with the TransAPI machine-translation service. Write the plan to plan.md; I'll read it later. Don't start the work yet.

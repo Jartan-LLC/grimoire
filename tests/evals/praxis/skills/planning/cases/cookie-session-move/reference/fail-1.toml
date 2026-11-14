@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Set the token as an `HttpOnly; Secure` cookie at login, send `credentials: "include"` from
+`web/src/api.js`, and drop the Authorization header.
+'''

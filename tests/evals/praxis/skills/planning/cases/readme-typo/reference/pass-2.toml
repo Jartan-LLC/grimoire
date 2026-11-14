@@ -1,0 +1,7 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+In README.md, change "recieve" to "receive"; grep for other copies.
+'''

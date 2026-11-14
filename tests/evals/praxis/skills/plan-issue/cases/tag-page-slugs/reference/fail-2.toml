@@ -1,0 +1,25 @@
+final = "Plan written to .claude/workspace/issue-83/plan.md."
+
+[files]
+".claude/workspace/issue-83/plan.md" = '''# Plan: Tag pages (issue 83)
+
+## Approach
+
+Add `tagSlug(tag)` to a new `src/tags.js`: lowercase, spaces and dots to `-`. The build writes
+`/tags/<tagSlug>/` for each tag and the post page links them.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. `src/tags.js` with `tagSlug` and `postsByTag`.
+2. `src/html.js` and `src/build.js` for the tag pages.
+
+## Verification
+
+- `npm test` -- the new tag tests pass with the existing ones.
+- `npm run build`, then open `public/tags/node-js/index.html`: it lists the year-in-review post,
+  and that post's page links its tags there.
+'''

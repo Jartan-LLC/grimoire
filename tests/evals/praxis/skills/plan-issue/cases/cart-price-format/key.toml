@@ -1,6 +1,6 @@
 # Fixture 5's kind: a second caller of the money format already exists. Reported per model.
 
-split = "screen"
+split = "dev"
 kind = "target"
 hints = ["extract", "shared", "reuse", "receipt.js", "money", "duplicate"]
 

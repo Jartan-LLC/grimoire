@@ -1,0 +1,6 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''Every push on three systems would cost about $230 a month past the plan. Run the extra
+systems on a schedule, with a spending limit set on the account.
+'''

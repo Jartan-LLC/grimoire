@@ -1,0 +1,9 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Group photos by content hash. `albums.json` lists paths, so before deleting a copy, update
+every album entry that names it to the kept copy. Dry run first; move duplicates to a trash
+folder rather than deleting.
+'''

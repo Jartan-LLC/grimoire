@@ -1,0 +1,29 @@
+# A format change for clients that ship on their own schedule and stay installed: a decision the mobile team owns.
+# Written for the committed suite after the smoke, so no smoke result shaped it.
+split = "screen"
+kind = "regression"
+hints = ["old app", "version", "both", "mobile team", "break"]
+
+# Apps already installed parse a number: the plan keeps them working or puts the choice to the
+# mobile team.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?is)(old(?:er)? (?:app )?(?:versions?|builds?|releases?|clients?)|app versions?|existing (?:app|client|install)s?|installed (?:app|client)s?|(?:new|separate|additional|extra|second) (?:field|key)|created_at_iso|both (?:formats|fields|keys)|keep (?:the )?(?:old|existing|epoch|numeric|number|millisecond)|version(?:ed)? (?:the )?(?:api|endpoint|response)|/v2\b|mobile team|break(?:s|ing)? (?:the |every |older )?(?:apps?|clients?))'''
+
+[[fact]]
+text = "older than three months"
+where = "fixture:README.md"
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2

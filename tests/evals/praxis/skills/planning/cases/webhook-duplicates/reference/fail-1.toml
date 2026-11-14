@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Add `POST /webhooks/payfast` in `shop/app.py`: check the signature, then for
+`payment.succeeded` call `mark_paid(reference)` and `send_receipt(order)`, and answer 200.
+'''

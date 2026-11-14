@@ -1,0 +1,1 @@
+I'm away until Monday with no signal, so don't wait on me: make the calls you'd ask me about and write them down. Plan merging the duplicate customer records (same email) in `data/customers.json`, ready to run first thing Monday. Write the plan to plan.md; I'll read it later. Don't start the work yet.

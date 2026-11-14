@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Add `cache: pip` to `actions/setup-python`. Push twice; the second run's log should show
+the cache restored and a shorter install step.
+'''

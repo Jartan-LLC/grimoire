@@ -1,0 +1,5 @@
+{
+  "low_stock_threshold": 5,
+  "alert_to": "manager@shop.example.com",
+  "smtp_host": "mail.shop.example.com"
+}

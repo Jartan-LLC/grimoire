@@ -1,0 +1,6 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''Supported: Node 18 and later (engines). Add the flag in `bin/todo.js`; tests cover both
+outputs.
+'''

@@ -1,0 +1,7 @@
+{
+  "name": "todo-cli",
+  "version": "2.3.0",
+  "bin": { "todo": "bin/todo.js" },
+  "engines": { "node": ">=18" },
+  "scripts": { "test": "node --test" }
+}

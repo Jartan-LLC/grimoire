@@ -1,0 +1,13 @@
+final = "Plan written to plan.md."
+
+[files]
+".claude/workspace/issue-8/plan.md" = '''# Plan: Add parse_duration to timeutil (issue 8)
+
+## Steps
+1. `parse_duration` in `timeutil.py` with a full-match regex `(\d+h)?(\d+m)?(\d+s)?`;
+   anything else raises `ValueError`.
+2. Tests in `tests/test_timeutil.py`: each unit, `1h30m`, and `""`, `5d`, `1.5h` raising.
+
+## Verification
+- `python3 -m pytest -q`
+'''

@@ -1,0 +1,10 @@
+# Should load: a release planned in chat.
+split = "screen"
+kind = "trigger"
+hints = ["skill", "praxis"]
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

@@ -1,0 +1,70 @@
+# A rename of a published library's public method: the compatibility call is the owner's.
+# It ran in the scratch smoke of #193 (old = praxis 2.4.0, new = a draft of the planning skill), so
+# its results are known: it stays on dev.
+split = "dev"
+kind = "regression"
+hints = ["deprecat", "alias", "major", "breaking"]
+
+# The planted gap, as the smoke graded it.
+[[check]]
+metric = "gap"
+artifact = "file:.claude/workspace/issue-57/plan.md"
+present = '''(?ims)^\#{1,4}[^\n]*(decision|question|ask|owner|for the user|for you)[^\n]*\n(?:(?!\#{1,2}\s)[^\n]*\n)*?[^\n]*(deprecat|alias|major|2\.0|breaking|semver|compatib)'''
+
+[[fact]]
+text = "published on PyPI"
+where = "fixture:pyproject.toml"
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--comments'''
+stdout = "title:\tRename Client.get_items to Client.list_items\nstate:\tOPEN\nauthor:\tana\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t57\n--\nThe Shop API calls this endpoint `list items`. Rename `Client.get_items` to `Client.list_items` to match the API's naming.\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 57, \"title\": \"Rename Client.get_items to Client.list_items\", \"body\": \"The Shop API calls this endpoint `list items`. Rename `Client.get_items` to `Client.list_items` to match the API's naming.\", \"state\": \"OPEN\", \"author\": {\"login\": \"ana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/app/issues/57\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tRename Client.get_items to Client.list_items\nstate:\tOPEN\nauthor:\tana\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t57\n--\nThe Shop API calls this endpoint `list items`. Rename `Client.get_items` to `Client.list_items` to match the API's naming.\n"
+
+[[gh]]
+match = '''(^|\s)issue edit\b'''
+stdout = "https://github.com/acme/app/issues/57\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "{\"name\": \"app\", \"nameWithOwner\": \"acme/app\", \"defaultBranchRef\": {\"name\": \"main\"}}\n"
+
+[[gh]]
+match = '''(^|\s)api user\b'''
+stdout = "{\"login\": \"dev\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/57/comments\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/57\b'''
+stdout = "{\"number\": 57, \"title\": \"Rename Client.get_items to Client.list_items\", \"body\": \"The Shop API calls this endpoint `list items`. Rename `Client.get_items` to `Client.list_items` to match the API's naming.\", \"state\": \"OPEN\", \"author\": {\"login\": \"ana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/app/issues/57\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"

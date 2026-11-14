@@ -1,0 +1,1 @@
+Plan a `docs/style.md` for our contributors. Base its heading and list rules on Wikipedia's Manual of Style -- adapt their wording, it's well thought out. Write the plan to plan.md; I'll read it later. Don't start the work yet.

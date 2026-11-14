@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Write 50 more cases in `evals/cases/`, then run `python evals/run.py` on each model and
+compare pass rates.
+'''

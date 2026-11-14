@@ -1,0 +1,9 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+`scripts/hooks/pre-commit` checks the added lines of `git diff --cached` for `TODO` not
+followed by `(#<n>)`. Check in a scratch repo after `make hooks`: a `git commit` adding a
+bare TODO is rejected, one adding `TODO(#12)` goes through.
+'''

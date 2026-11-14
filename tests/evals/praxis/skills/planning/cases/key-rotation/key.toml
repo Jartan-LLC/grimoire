@@ -1,0 +1,29 @@
+# Deep positive control: a leaked encryption key, two million encrypted rows and three readers deployed apart.
+# Written for the committed suite after the smoke, so no smoke result shaped it.
+split = "confirm"
+kind = "regression"
+hints = ["MultiFernet", "re-encrypt", "both keys", "batch"]
+
+# A phased rotation: readers accept both keys, the existing rows are re-encrypted, and the
+# old key goes only after that.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?is)\A(?=.*(?:multifernet|both keys|old and new keys?|new and old keys?|two keys|key ?list|keyring|either key|decrypts? with (?:the )?(?:old|either|both)))(?=.*(?:re-?encrypt|rotate (?:the )?(?:existing|rows|tokens)|backfill|rewrite (?:the )?(?:existing|rows|tokens)|in batches))(?=.*(?:remove|retire|drop|delete|revoke|destroy)[^\n]{0,30}(?:old|compromised|leaked|previous|lost) key)'''
+
+[[fact]]
+text = "about 2 million rows"
+where = "fixture:README.md"
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2

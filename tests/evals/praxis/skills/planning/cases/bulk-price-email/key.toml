@@ -1,0 +1,22 @@
+# A bulk send that cannot be unsent, through a script with no dry run or send log.
+# It ran in the scratch smoke of #193 (old = praxis 2.4.0, new = a draft of the planning skill), so
+# its results are known: it stays on dev.
+split = "dev"
+kind = "regression"
+hints = ["dry run", "dry-run", "idempot", "resume", "twice"]
+
+# The planted gap, as the smoke graded it.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?is)\A(?=.*(dry[- ]?run|without sending|render(ing)? (every|each|all)|test send|send (it |one |them )?to (ourselves|us|an internal|a test|our own)|internal (list|address|recipients)|seed list))(?=.*(already[- ]sent|sent[- ]log|send log|ledger|resum|idempot|skip (anyone|addresses|customers|rows|those)|double[- ]send|twice|record (each|every) (send|address|recipient)))'''
+
+[[fact]]
+text = "500 messages a minute"
+where = "fixture:README.md"
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

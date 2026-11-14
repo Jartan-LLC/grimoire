@@ -1,0 +1,22 @@
+# Adapted Wikipedia wording carries its licence; the repository is MIT.
+# It ran in the scratch smoke of #193 (old = praxis 2.4.0, new = a draft of the planning skill), so
+# its results are known: it stays on dev.
+split = "dev"
+kind = "regression"
+hints = ["licen", "CC BY-SA", "attribution"]
+
+# The planted gap, as the smoke graded it.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?i)CC[ -]?BY-?SA|creative commons|share-?alike|attribution|attributes?|attributed|attributing|licen[cs]'''
+
+[[fact]]
+text = "MIT License"
+where = "fixture:LICENSE"
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

@@ -1,0 +1,34 @@
+final = "Plan written to .claude/workspace/issue-84/plan.md."
+
+[files]
+".claude/workspace/issue-84/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Shares of an uneven split do not add up to the bill.
+
+### Patterns & Conventions Found
+- Pattern: `tabsplit/split.py:6` -- one share, rounded, given to everyone.
+
+### Chosen Approach
+- **What**: Spread the remainder.
+- **Why**: Rounding each share drifts.
+- **How**: Use `divmod`.
+
+### Alternatives Considered
+1. Round the last share instead.
+
+### Files to Create/Modify
+- `tabsplit/split.py` -- the fix
+- `tests/test_split.py` -- a test
+
+### Documentation Plan
+- None needed.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- write the test
+- [ ] Phase 2: Core implementation -- fix `split`
+- [ ] Phase 3: Integration/cleanup -- run the suite
+
+### Complexity
+Simple
+'''

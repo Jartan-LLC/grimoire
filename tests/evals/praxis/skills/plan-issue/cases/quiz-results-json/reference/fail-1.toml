@@ -1,0 +1,33 @@
+final = "Plan written to .claude/workspace/issue-47/plan.md."
+
+[files]
+".claude/workspace/issue-47/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Print scores as JSON.
+
+### Patterns & Conventions Found
+- Pattern: `bin/quizmark.js` -- prints the table.
+
+### Chosen Approach
+- **What**: A `--json` flag.
+- **Why**: The gradebook takes JSON.
+- **How**: `JSON.stringify` the rows.
+
+### Alternatives Considered
+1. A CSV export -- not asked for.
+
+### Files to Create/Modify
+- `bin/quizmark.js` -- change it
+
+### Documentation Plan
+- None.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- flag
+- [ ] Phase 2: Core implementation -- JSON output
+- [ ] Phase 3: Integration/cleanup -- tests
+
+### Complexity
+Simple
+'''

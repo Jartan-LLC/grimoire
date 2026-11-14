@@ -1,0 +1,2 @@
+http://blog.example.com/feed
+https://news.example.org/rss

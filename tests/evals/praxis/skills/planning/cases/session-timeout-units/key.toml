@@ -1,0 +1,38 @@
+# A premise the code contradicts: the timeout is already an hour, but Max-Age gets it in seconds.
+# Written for the committed suite after the smoke, so no smoke result shaped it.
+split = "screen"
+kind = "regression"
+hints = ["seconds", "max-age", "unit"]
+
+# The cause: the setting is already 60 minutes, and Max-Age reads it as 60 seconds.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?is)max[-_ ]?age.{0,250}(seconds|\* ?60|3600|unit)|(seconds|\bunits?\b).{0,250}max[-_ ]?age'''
+
+[[fact]]
+text = "SESSION_TIMEOUT_MINUTES = 60"
+where = "fixture:notekeep/settings.py"
+
+[[plant]]
+id = "max-age-seconds"
+verify = "python3 -c \"import sys; from notekeep.session import session_cookie; sys.exit('Max-Age=3600' not in session_cookie('t'))\""
+
+# An easy-to-undo, clear change: nothing on rollout or undo.
+[[check]]
+metric = "lean"
+artifact = "files:**/plan.md"
+absent = '''(?i)\b(?:roll-?outs?|roll(?:ed|ing)?[ -]?backs?|undo(?:ne|ing)?|revert(?:s|ed|ing)?)\b'''
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2

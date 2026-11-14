@@ -1,0 +1,25 @@
+final = "Plan written to .claude/workspace/issue-84/plan.md."
+
+[files]
+".claude/workspace/issue-84/plan.md" = '''# Plan: Three-way split comes to a cent less than the bill (issue 84)
+
+## Approach
+
+`split` rounds `total / people` once and hands everyone that share, so the shares drift a cent
+above or below the total whenever it does not divide evenly. Use `divmod` instead: everyone gets
+the floor, and the first `remainder` people get one cent more.
+Rejected: giving the whole remainder to the last person -- with seven people that can be six
+cents on one share.
+
+## Decisions for the user
+
+- Who pays the extra cents: default if unanswered, the first people in the list, one cent each.
+
+## Steps
+
+1. Replace the rounding in `tabsplit/split.py:40` with `divmod(total, people)`.
+2. Add tests to `tests/test_split.py` for 1000 among 3 (`[334, 333, 333]`) and 2000 among 3.
+## Verification
+
+- `python3 -m pytest -q` -- the new tests pass.
+'''

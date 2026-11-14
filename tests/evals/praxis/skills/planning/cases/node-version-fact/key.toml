@@ -1,0 +1,28 @@
+# The supported Node floor is in package.json's engines; the user does not remember it.
+# It ran in the scratch smoke of #193 (old = praxis 2.4.0, new = a draft of the planning skill), so
+# its results are known: it stays on dev.
+split = "dev"
+kind = "regression"
+hints = ["18", "engines"]
+
+# The planted gap, as the smoke graded it.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?s)\A(?=.*(?:>= ?18|\b18\b))(?!.*(?i:which (?:node(?:\.js)? )?versions?[^.\n]{0,80}\?))'''
+
+[[fact]]
+text = "\"node\": \">=18\""
+where = "fixture:package.json"
+
+# An easy-to-undo, clear change: nothing on rollout or undo.
+[[check]]
+metric = "lean"
+artifact = "files:**/plan.md"
+absent = '''(?i)\b(?:roll-?outs?|roll(?:ed|ing)?[ -]?backs?|undo(?:ne|ing)?|revert(?:s|ed|ing)?)\b'''
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

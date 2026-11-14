@@ -1,4 +1,4 @@
-split = "screen"
+split = "dev"
 kind = "target"
 hints = ["out of scope", "Fraction", "refactor", "quantity.py", "rewrite"]
 

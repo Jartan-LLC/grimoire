@@ -1,0 +1,5 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''The privacy policy rules out tracking; any analytics needs the owner to choose.
+'''

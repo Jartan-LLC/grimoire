@@ -1,6 +1,6 @@
 # Fixture 6's kind: a docs-only change. The new sections must not pad a trivial plan.
 
-split = "screen"
+split = "dev"
 kind = "target"
 hints = ["short", "brief", "padding", "trivial"]
 

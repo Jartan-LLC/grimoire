@@ -1,0 +1,22 @@
+# A first-run migration of user state, run by several commands at once.
+# It ran in the scratch smoke of #193 (old = praxis 2.4.0, new = a draft of the planning skill), so
+# its results are known: it stays on dev.
+split = "dev"
+kind = "regression"
+hints = ["atomic", "concurrent", "lock"]
+
+# The planted gap, as the smoke graded it.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?is)\A(?=.*(atomic|temp(orary)? file|os\.replace|interrupt|crash|half-?written|partial))(?=.*(concurren|at once|same time|simultaneous|\block|race|two (processes|instances|runs)))'''
+
+[[fact]]
+text = "several `tool` commands at once"
+where = "fixture:README.md"
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

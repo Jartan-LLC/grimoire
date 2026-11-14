@@ -1,0 +1,7 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''- SECTIONS gains perf.
+- Developers put `perf:` in the pull request title, since only that reaches main.
+- Test with a fake log.
+'''

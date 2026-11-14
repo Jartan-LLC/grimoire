@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+A script sends each article in `help/en/` to TransAPI for the five languages and writes
+`help/<lang>/`; `make build` renders them.
+'''

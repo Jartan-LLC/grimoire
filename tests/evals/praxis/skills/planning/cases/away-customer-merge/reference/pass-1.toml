@@ -1,0 +1,9 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+`data/` is not in git, so copy `data/customers.json` to `data/customers.orig.json` first.
+Decided for you (change if wrong): emails match case-insensitively; the newest record wins
+each field, and an empty field never overwrites a filled one.
+'''

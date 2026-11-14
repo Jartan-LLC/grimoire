@@ -1,0 +1,14 @@
+final = "Plan written to .claude/workspace/issue-63/plan.md."
+
+[files]
+".claude/workspace/issue-63/plan.md" = '''# Plan (issue 63)
+
+## Open questions
+- Breaking change for keyword callers: major release, or a deprecated alias?
+
+## Steps
+1. Rename in `pubsubby/client.py`.
+
+## Verification
+- `python3 -m pytest -q`
+'''

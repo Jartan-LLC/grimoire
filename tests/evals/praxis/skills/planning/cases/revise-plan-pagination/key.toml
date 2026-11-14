@@ -1,0 +1,10 @@
+# Should load: revising a plan the work contradicted.
+split = "confirm"
+kind = "trigger"
+hints = ["skill", "praxis"]
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

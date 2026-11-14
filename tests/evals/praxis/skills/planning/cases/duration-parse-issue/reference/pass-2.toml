@@ -1,0 +1,5 @@
+final = "Plan written to plan.md."
+
+[files]
+".claude/workspace/issue-8/plan.md" = '''Add the parser and its tests in tests/test_timeutil.py, including the ValueError cases.
+'''

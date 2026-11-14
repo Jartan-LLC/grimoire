@@ -1,0 +1,25 @@
+final = "Plan written to .claude/workspace/issue-76/plan.md."
+
+[files]
+".claude/workspace/issue-76/plan.md" = '''# Plan: Durations for `add --in` (issue 76)
+
+## Approach
+
+Write a small parser for `--in` in `remindme/add.py` now; reusing the snooze parser is a
+separate refactor.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. The parser in `remindme/add.py`, with `90` still minutes.
+2. Tests in `tests/test_add.py`.
+
+## Verification
+
+- `python3 -m pytest -q` -- the new `add` tests pass, and `tests/test_snooze.py` still does.
+- `python3 -m remindme add "Call the dentist" --in 1h30m` then `python3 -m remindme list` shows it
+  due ninety minutes from now.
+'''

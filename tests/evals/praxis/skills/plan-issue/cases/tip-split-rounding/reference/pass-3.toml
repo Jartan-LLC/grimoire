@@ -1,0 +1,20 @@
+final = "Plan written to .claude/workspace/issue-84/plan.md."
+
+[files]
+".claude/workspace/issue-84/plan.md" = '''# Plan: Three-way split comes to a cent less than the bill (issue 84)
+
+## Approach
+
+Spread the leftover cents over the first shares, so `sum(split(total, n)) == total` always.
+
+## Steps
+
+1. `tabsplit/split.py`: compute `base, extra = divmod(total, people)`.
+2. `tests/test_split.py`: a test that every split of 1 to 10000 cents among 1 to 9 people adds
+   up to the total.
+
+## Testing
+
+Run `test_split.py` with the rest of the suite (`python3 -m pytest -q`); the new test fails on
+the current code.
+'''

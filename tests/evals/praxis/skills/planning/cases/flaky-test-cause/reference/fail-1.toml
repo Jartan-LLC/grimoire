@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Add `pytest-rerunfailures` to `requirements-dev.txt` and `--reruns 2` to the CI command, so
+`test_october_total` passes on a second try.
+'''

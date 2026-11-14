@@ -1,0 +1,1 @@
+Version 3 of `tool` reads its settings as TOML. Plan a step that converts each user's existing `~/.toolrc` from INI to TOML the first time v3 runs. Write the plan to plan.md; I'll read it later. Don't start the work yet.

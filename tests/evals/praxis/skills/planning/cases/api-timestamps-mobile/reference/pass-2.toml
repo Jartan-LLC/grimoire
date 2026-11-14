@@ -1,0 +1,6 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''## Decisions
+- Old app versions crash on a string: keep the number and add a new field? Owner: mobile team.
+'''

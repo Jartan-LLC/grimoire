@@ -1,0 +1,8 @@
+Subject: Changes to your Acme plan price
+
+Hi $name,
+
+From 1 January the price of the $plan plan changes. The new prices are at
+https://acme.example/pricing.
+
+The Acme team

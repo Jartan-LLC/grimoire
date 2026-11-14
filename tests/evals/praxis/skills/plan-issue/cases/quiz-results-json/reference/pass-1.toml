@@ -1,0 +1,31 @@
+final = "Plan written to .claude/workspace/issue-47/plan.md."
+
+[files]
+".claude/workspace/issue-47/plan.md" = '''# Plan: Scores as JSON for the gradebook upload (issue 47)
+
+## Approach
+
+`gradeAll` in `src/grade.js` already returns one `{ student, score, outOf }` object per student,
+the fields the issue asks for. With `--json`, `bin/quizmark.js` prints
+`JSON.stringify(rows, null, 2)` of those rows instead of `formatTable(rows)`; the table stays the
+default.
+Rejected: a pluggable output layer -- the gradebook's JSON is the only new output asked for.
+
+## Decisions for the user
+
+- The JSON is an array of `{ "student", "score", "outOf" }` objects, as the issue names them --
+  default if unanswered: that shape, pretty-printed.
+
+## Steps
+
+1. In `bin/quizmark.js:9`, accept `--json` after the two paths and print the
+   rows as JSON when it is given; add it to the usage line.
+2. Add a test to `test/grade.test.js` that the JSON of the sample rows parses back to them.
+3. Mention `--json` in the usage text.
+
+## Verification
+
+- `npm test` -- the new JSON test passes with the existing ones.
+- `node bin/quizmark.js grade answers.csv key.txt --json` on a small sheet prints an array that
+  `JSON.parse` reads back, one object per student.
+'''

@@ -1,0 +1,6 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''Expand (ADD COLUMN, dual-write), migrate, contract (DROP COLUMN). Each phase has its
+rollback; the drop is the point of no return.
+'''

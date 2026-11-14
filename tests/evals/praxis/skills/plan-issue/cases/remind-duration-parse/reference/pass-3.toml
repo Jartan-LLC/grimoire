@@ -1,0 +1,22 @@
+final = "Plan written to .claude/workspace/issue-76/plan.md."
+
+[files]
+".claude/workspace/issue-76/plan.md" = '''# Plan: remindme add --in 1h30m (issue 76)
+
+## Steps
+
+1. Extract the duration parsing into a shared helper in `remindme/duration.py` and call it from
+   `add` and `snooze`.
+2. Keep `--in 90` as ninety minutes: digits alone are minutes.
+3. `tests/test_add.py`: `1h30m`, `2d`, `90`, and a bad value that argparse reports.
+
+## Decisions for the user
+
+- None needed beyond keeping bare minutes, which the issue's example uses.
+
+## Verification
+
+- `python3 -m pytest -q` -- the new `add` tests pass, and `tests/test_snooze.py` still does.
+- `python3 -m remindme add "Call the dentist" --in 1h30m` then `python3 -m remindme list` shows it
+  due ninety minutes from now.
+'''

@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+`get_report` runs one query per order (N+1): thousands for a big customer. Replace it with
+one query that sums items per order, measure before and after, and only then decide on Redis.
+'''

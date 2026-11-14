@@ -1,0 +1,22 @@
+# A paid run: estimate from the last run's cost, a ceiling and a leaner first step.
+# It ran in the scratch smoke of #193 (old = praxis 2.4.0, new = a draft of the planning skill), so
+# its results are known: it stays on dev.
+split = "dev"
+kind = "regression"
+hints = ["$", "cost", "budget", "ceiling"]
+
+# The planted gap, as the smoke graded it.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?is)\A(?=.*\$ ?\d)(?=.*(ceiling|\bcap\b|capped|budget|at most|no more than|stop (if|at|once|when)|spend limit|limit of))(?=.*(lean|cheaper|smaller|subset|fewer|pilot|start with|first run|one model first|before the full))'''
+
+[[fact]]
+text = "$4.10"
+where = "fixture:evals/README.md"
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

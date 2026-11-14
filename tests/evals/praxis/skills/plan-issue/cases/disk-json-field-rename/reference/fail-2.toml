@@ -1,0 +1,18 @@
+final = "Plan written to .claude/workspace/issue-118/plan.md."
+
+[files]
+".claude/workspace/issue-118/plan.md" = '''# Plan: Clearer name for used_pct (issue 118)
+
+## Approach
+Rename the field. Users of the JSON output will need to update their scripts, so the
+changelog gets a line about it.
+
+## Decisions
+- The new field name -- default if unanswered: `used_percent`, from the issue.
+
+## Steps
+1. Rename it in `diskreport/cli.py`, `README.md` and `tests/test_cli.py`.
+
+## Verification
+- `python3 -m pytest -q`
+'''

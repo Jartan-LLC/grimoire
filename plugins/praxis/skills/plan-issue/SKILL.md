@@ -43,14 +43,9 @@ Evaluate whether the issue should be broken into sub-issues. Not every multi-par
 
 If sub-issues are warranted, use `/praxis:create-issue` to file them, referencing the parent issue. Sub-issue branches are created from the parent feature branch, or from another sub-issue's branch when they stack (`stacks.md` in `gitwise:github-conventions`), and merge into the parent feature branch, not directly to main.
 
-### 5. Design Considerations
+### 5. Work Out the Plan
 
-Before creating the plan, think through:
-
-- **Flexibility** -- Will this be used by other modules or downstream consumers? Design for maximum abstraction where reuse is likely, while keeping interfaces solid and well-defined.
-- **Robustness** -- Clear models, explicit types, proper error handling. Flexible internals, rigid contracts.
-- **Future-proofing** -- Consider how this might need to evolve without requiring breaking changes.
-- **Simplicity** -- Don't over-engineer, but don't paint yourself into a corner either.
+Load the `praxis:planning` skill and plan the change as it says, sized to what a mistake would cost.
 
 ### 6. Create Plan
 

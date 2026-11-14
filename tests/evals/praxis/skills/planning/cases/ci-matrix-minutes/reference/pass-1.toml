@@ -1,0 +1,9 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Cost: 200 runs x 12 minutes on macOS count 24,000 minutes and Windows 4,800, against 600
+left in the plan: about $230 a month in overage (2,400 macOS minutes at $0.08, 2,400 Windows
+at $0.016). Run macOS and Windows nightly on `main` instead; ask before going further.
+'''

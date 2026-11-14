@@ -1,0 +1,28 @@
+# A provider that retries: the same event can arrive twice, and a slow handler makes it retry.
+# Written for the committed suite after the smoke, so no smoke result shaped it.
+split = "confirm"
+kind = "regression"
+hints = ["idempot", "duplicate", "twice", "event id"]
+
+# The same event arrives again: the plan sends one receipt per payment.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?is)(idempot|de-?dup|duplicate|more than once|twice|already (?:been )?(?:processed|handled|seen|paid|sent)|event[ _-]?ids?\b|processed[_ ]events)'''
+
+[[fact]]
+text = "can therefore arrive more than once"
+where = "fixture:docs/payfast-webhooks.md"
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2

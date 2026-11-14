@@ -4,7 +4,10 @@
 # come from the research of the template rebuild (#120): a bug fix with an obvious test command, a
 # feature with a tempting adjacent refactor, a feature whose name clashes with an existing public
 # command, a feature where an abstraction is tempting but has one use, one where a second caller
-# already exists, and a docs-only change. tests/evals/README.md says how the suite is run.
+# already exists, and a docs-only change. Three kinds came with the planning skill (#193): a bug
+# fix whose issue names a fix for a cause it has not tested, a change to a published name or key
+# whose compatibility is the maintainer's call, and a new option with inputs to refuse.
+# panel-specs.md holds the blind panel's questions. tests/evals/README.md says how the suite is run.
 target = "praxis:plan-issue"
 # Cases moved off a held-out split, each with its reason in a comment.
 BURNED = [
@@ -19,6 +22,24 @@ BURNED = [
   "relnotes-html",
   # Its issue says "CSV is all anyone has asked for", which states the single use.
   "sales-csv-export",
+  # The screen split that plan-issue's Opus screen for the planning skill (#193) ran:
+  # todo-due-flag's out-of-scope check was broken, which voids that screen, and the pass rule
+  # changed after it.
+  "cart-price-format",
+  "due-date-weekend",
+  "export-timeout-cause",
+  "frost-sms-alert",
+  "liftlog-markdown",
+  "notes-sync-clash",
+  "port-option-errors",
+  "readme-config-key",
+  "readme-port-default",
+  "recipe-scale",
+  "report-output-flag",
+  "sdk-param-rename",
+  "slug-digits",
+  "thumb-retry",
+  "todo-due-flag",
 ]
 # Beside plan-issue's own files, the suite covers any skill's plan-format.md, any praxis Markdown
 # file with "plan" in its path, and github-conventions, so a change that moves the plan template or
@@ -37,11 +58,14 @@ budget_usd = 2.0
 [[metric]]
 id = "reader"
 direction = "higher"
+margin = 0.2
 # Every case: a Verification section with a command (a docs case: any check). Bug-fix, refactor and
 # clash cases also: the bug's test run under Verification, the adjacent refactor under Out of scope,
-# or an item under Decisions for the user that names the requested command or flag. The clash check
+# or an item under Decisions that names the requested command or flag. The clash check
 # is structural: whether that item raises the clash with what the name already means is graded like
-# the abstraction questions below, by a blind panel of three agents, two of three deciding.
+# the abstraction questions below, by a blind panel of three agents, two of three deciding. The
+# #193 cases also: the cause the history shows, named anywhere in the plan; an item under
+# Decisions on keeping the published name or key working; or an error case under Verification.
 
 [[metric]]
 id = "grounded"
@@ -66,18 +90,23 @@ direction = "higher"
 id = "abstraction"
 direction = "higher"
 # Reported only, per model, as the maintainer asked: on a one-use case the plan adds no abstraction,
-# on a second-caller case it shares the existing code. Only those cases carry it, too few for a guard
-# to pass, and plan-issue's design step that drives it is not what the rebuild changed. Its regexes
-# are only a coarse signal: they can read a plan that copies the code as one that shares it, and a
-# negation earlier on the line as no abstraction. Until judges exist (#137), a change to plan-issue
-# has these two questions, and the clash question under `reader`, graded by a blind panel of three
-# agents reading the plans, two of three deciding, and its PR reports the panel's result.
+# on a second-caller case it shares the existing code. Only those cases carry it, too few for a
+# guard to pass. Its regexes are only a coarse signal: they can read a plan that copies the code as
+# one that shares it, and a negation earlier on the line as no abstraction. The plan format and the
+# `praxis:planning` skill that plan-issue's step 5 loads drive it. Until judges exist (#137), these
+# two questions and the clash question under `reader` are the blind panel's, the bar under
+# [pass_rule].
 
 [pass_rule]
+# The regex rule holds the guards only: `reader` (the primary, as the rule needs one), `grounded`
+# and `lean` are tested for non-inferiority. Old plans with the same rebuilt template, so it passes
+# `reader` on nearly every sample and a gain there cannot show. The bar is the blind panel's: three
+# agents, who see neither the arm nor the model, answer the second-caller, one-use or clash
+# question in panel-specs.md for each plan of those cases, two of three deciding. A change to
+# plan-issue or to the `praxis:planning` skill goes ahead when the regex rule SHIPs and, on each
+# gate model, new passes no fewer of those questions than old; its PR reports the panel's answers
+# per model and arm. panel-specs.md says how a case the panel has not graded gets its question.
 primary = "reader"
-rule = "better"
+rule = "no-regression"
 guards = ["grounded", "lean"]
-# Old's template has none of the sections `reader` checks, so the gain it claims is near new's pass
-# rate; a split that cannot see a gain of 0.5, well below that, is too small for this change.
-min_effect = 0.5
 min_samples = 3

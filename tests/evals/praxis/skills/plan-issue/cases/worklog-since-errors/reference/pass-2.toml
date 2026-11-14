@@ -1,0 +1,11 @@
+final = "Plan written to .claude/workspace/issue-74/plan.md."
+
+[files]
+".claude/workspace/issue-74/plan.md" = '''# Plan (issue 74)
+
+## Steps
+1. Filter entries by `--since` in `src/report.js`.
+
+## Verification
+- `node bin/worklog.js report --since 11/01/2026` -- rejected: prints an error, exits 2.
+'''

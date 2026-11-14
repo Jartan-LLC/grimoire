@@ -1,0 +1,33 @@
+final = "Plan written to .claude/workspace/issue-77/plan.md."
+
+[files]
+".claude/workspace/issue-77/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Add `dots link <file>` to share a dotfile as a gist.
+
+### Patterns & Conventions Found
+- Pattern: `dots/cli.py:13` -- subcommands are argparse subparsers.
+- Pattern: `dots/files.py:7` -- the dotfiles folder.
+### Chosen Approach
+- **What**: A gist upload under `dots link <file>`; with no file, `link` symlinks as before.
+- **Why**: Smallest change.
+- **How**: Follow the existing code.
+
+### Alternatives Considered
+1. A config file setting -- more to document.
+
+### Files to Create/Modify
+- `dots/gist.py` -- new
+- `dots/cli.py` -- the file argument
+### Documentation Plan
+- README: add the new usage.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- parse the input
+- [ ] Phase 2: Core implementation -- the change
+- [ ] Phase 3: Integration/cleanup -- tests and README
+
+### Complexity
+Simple
+'''

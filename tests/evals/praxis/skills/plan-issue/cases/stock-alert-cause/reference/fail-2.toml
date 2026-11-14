@@ -1,0 +1,15 @@
+final = "Plan written to .claude/workspace/issue-58/plan.md."
+
+[files]
+".claude/workspace/issue-58/plan.md" = '''# Plan: Low-stock emails stopped arriving (issue 58)
+
+## Approach
+Log every SMTP exchange in `send_alert()` and retry a failed send three times, so a relay
+that drops mail shows up in the cron log and a passing hiccup does not lose the email.
+
+## Steps
+1. Wrap `smtp.send_message()` in a retry loop with a log line per try.
+
+## Verification
+- `python3 -m pytest -q` -- a test makes the first send raise `smtplib.SMTPException`.
+'''

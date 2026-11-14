@@ -1,0 +1,5 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''Check the workflow run after the next push for a cache hit.
+'''

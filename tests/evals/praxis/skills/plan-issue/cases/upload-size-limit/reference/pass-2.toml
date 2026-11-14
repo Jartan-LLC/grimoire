@@ -1,0 +1,26 @@
+final = "Plan written to .claude/workspace/issue-58/plan.md."
+
+[files]
+".claude/workspace/issue-58/plan.md" = '''# Plan: Size limit for uploads (issue 58)
+
+## Approach
+
+One size check next to the existing type check in `save_upload`, raising the same
+`UploadRefused`. A validator framework is overkill for two checks.
+
+## Decisions for the user
+
+- Limit: 25 MB unless you want another figure.
+
+## Steps
+
+1. Add the check and a `MAX_UPLOAD_BYTES` constant in `snapbox/store.py`.
+2. In `snapbox/server.py`, refuse a `Content-Length` over the limit before reading the body.
+3. Tests in `tests/test_store.py`.
+
+## Verification
+
+- `python3 -m pytest -q` -- the new size tests pass with the existing ones.
+- With the server running locally, `curl -X POST --data-binary @big.jpg -H 'X-Filename: big.jpg'
+  localhost:8420/upload` on a 30 MB file answers with the refusal message and saves nothing.
+'''

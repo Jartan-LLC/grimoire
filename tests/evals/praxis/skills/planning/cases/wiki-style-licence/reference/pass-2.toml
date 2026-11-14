@@ -1,0 +1,5 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''Note the licence: share-alike applies to copied wording.
+'''
