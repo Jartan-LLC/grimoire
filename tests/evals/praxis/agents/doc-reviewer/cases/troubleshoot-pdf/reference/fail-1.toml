@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] Bloat: the Troubleshooting section covers a failure few readers meet.\nFile: docs/pdf.md:6-10\nFix: Cut it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 0 |\n\n**References applied**: `docs-pages.md`\n\n**Verdict**: WARNING"

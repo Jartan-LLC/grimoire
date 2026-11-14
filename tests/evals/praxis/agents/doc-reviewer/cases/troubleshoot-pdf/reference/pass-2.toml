@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n**1. docs/pdf.md:9 - Important**\n`magick` is ImageMagick 7; the page does not say so, and ImageMagick 6 names it `convert`.\nFix: Name ImageMagick in the troubleshooting entry and keep the entry where it is.\nStatus: suspected\n\n**2. docs/pdf.md:3 - Minor**\nThe page does not say pages join in file-name order.\nFix: Leave it; no reader acts on it.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: `docs-pages.md`\n\n**Verdict**: WARNING"

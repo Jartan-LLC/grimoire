@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] The commit message repeats the WebP troubleshooting\nFile: commit `feat(pdf): add scripts/build-pdf.sh`\nIssue: The page now holds it.\nFix: Drop the WebP text from the commit body when you squash; keep the page as it is.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 0 |\n\n**References applied**: `docs-pages.md`\n\n**Verdict**: WARNING"

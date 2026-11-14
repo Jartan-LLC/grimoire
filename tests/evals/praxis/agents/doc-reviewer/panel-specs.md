@@ -1,6 +1,6 @@
 # Grading specs: doc-reviewer cases (issue 182)
 
-One section per screen and confirm case, and per dev case in suite.toml's `BURNED` (D1-D17),
+One section per screen and confirm case, and per dev case in suite.toml's `BURNED` (D1-D18),
 which were screen cases first. The panel grades held-out cases only, so the other dev cases have
 no section. A held-out case added later gets its section before its reports are graded
 (suite.toml). A grader reads one doc-reviewer report on the case's branch, checks it against the
@@ -9,8 +9,8 @@ items below, and gives one label. These specs come from each case's
 the rule (`plugins/praxis/agents/doc-reviewer.md` and plain-writing's "Write for what the reader
 does"). They were written without seeing any model output or the case keys. The dev sections
 (D1-D15) are the earlier panel's specs, copied because those cases have not changed since; the
-owner's ruling below changed D3, D4 and D11. D16 and D17 are screen specs S9 and S15 as graded,
-from before their cases were fixed; each says what its fix changed.
+owner's ruling below changed D3, D4 and D11. D16, D17 and D18 are screen specs S9, S15 and S17 as
+graded, from before their cases were burned; each says what its fix changed.
 
 Case paths below are relative to `tests/evals/praxis/agents/doc-reviewer/cases/<case>/`. Line
 numbers are of the file at the branch tip (fixture plus all commits); "main" means the fixture
@@ -550,6 +550,47 @@ describes. It now builds the site and uploads it, in parts with `--chunk`.
 - Right: no Important finding on content (an APPROVE or only Minor/NEUTRAL findings); the
   troubleshooting part kept. Common wrong: over-cuts on the troubleshooting part.
 
+### D18. troubleshoot-docsdev
+
+Screen spec S17 as graded. The case did not change: its fix changed only the key's `kept`
+check, which had failed a finding that cuts the script header's copy of the troubleshooting
+text and keeps the page's.
+
+- Doc: new file `docs/preview.md` (commit 2 "docs: add how to preview the site"), a docs page for
+  people; all lines branch-written. Source: `scripts/docs-dev.sh` (commit 1), lines 2-4 "serve the
+  site at `http://localhost:5173` and rebuild each page on save. / On Linux, "ENOSPC: System limit
+  for number of file watchers reached": run / sudo sysctl fs.inotify.max_user_watches=524288, then
+  run the script again.", line 6 `[ -d node_modules ] || npm install`, line 7
+  `exec npx vitepress dev site --port 5173`.
+- Reader: a team member editing the handbook who wants to preview their changes locally.
+- E: none found. Line 3 "Run `scripts/docs-dev.sh` and open `http://localhost:5173`. Each page
+  rebuilds when you save it." matches `docs-dev.sh:2` and `:7`; lines 7-8 match `docs-dev.sh:3-4`.
+- H: none. B: none.
+- K: line 3 (the command, where to look, and how to tell it works); lines 5-8 "## Troubleshooting"
+  / "If the script stops with "ENOSPC: System limit for number of file watchers reached" (Linux),
+  run `sudo sysctl fs.inotify.max_user_watches=524288` and run the script again." -- recovery from
+  a rare failure the reader must act on, in a short troubleshooting part at the end, the rule's
+  shape. The script does not print or apply the remedy (it is only a comment). Cutting it, or
+  calling it bloat or redundant because the script's comment holds it -> over-cuts. Dropping
+  "(Linux)" is cutting a condition the reader chooses by.
+- A: the script runs `npm install` itself when `node_modules` is missing (`docs-dev.sh:6`).
+  Asking the page to state that, or to add an `npm install` step before the command ->
+  under-cuts.
+- UNSURE:
+  - "stops with" is not in `docs-dev.sh:3`, which names only the error; a finding on the wording
+    decides no label.
+  - An ask to state a prerequisite the sources do not name (Node.js and npm installed;
+    `package.json` holds only `vitepress`) is not an A item; decide no label.
+  - Findings that the `sysctl` setting does not survive a reboot, or that `sudo` changes a system
+    setting and wants a warning, rest on outside knowledge. Do not label on them.
+- NEUTRAL: the page lives in `docs/`, while the handbook is built from `site/` (`AGENTS.md:3`), so
+  it is not part of the built site and no nav links it (placement, orphan page); no docs CI gate;
+  no Makefile for `make check`; commit messages; the script's comments.
+- Right: no Important finding on content (an APPROVE or only Minor/NEUTRAL findings); the
+  troubleshooting part kept; no ask to document the automatic `npm install`. Common wrong:
+  over-cuts on the troubleshooting part (as a copy of the script's comment); under-cuts by asking
+  for an `npm install` step.
+
 ---
 
 ## Screen cases
@@ -1005,42 +1046,59 @@ describes. It now builds the site and uploads it, in parts with `--chunk`.
   copy or undo sentence redundant with the script's docstring, or by cutting "Stop the dev server
   first" because the script's docstring says it.
 
-### S17. troubleshoot-docsdev
+### S18. troubleshoot-pdf
 
-- Doc: new file `docs/preview.md` (commit 2 "docs: add how to preview the site"), a docs page for
-  people; all lines branch-written. Source: `scripts/docs-dev.sh` (commit 1), lines 2-4 "serve the
-  site at `http://localhost:5173` and rebuild each page on save. / On Linux, "ENOSPC: System limit
-  for number of file watchers reached": run / sudo sysctl fs.inotify.max_user_watches=524288, then
-  run the script again.", line 6 `[ -d node_modules ] || npm install`, line 7
-  `exec npx vitepress dev site --port 5173`.
-- Reader: a team member editing the handbook who wants to preview their changes locally.
-- E: none found. Line 3 "Run `scripts/docs-dev.sh` and open `http://localhost:5173`. Each page
-  rebuilds when you save it." matches `docs-dev.sh:2` and `:7`; lines 7-8 match `docs-dev.sh:3-4`.
-- H: none. B: none.
-- K: line 3 (the command, where to look, and how to tell it works); lines 5-8 "## Troubleshooting"
-  / "If the script stops with "ENOSPC: System limit for number of file watchers reached" (Linux),
-  run `sudo sysctl fs.inotify.max_user_watches=524288` and run the script again." -- recovery from
-  a rare failure the reader must act on, in a short troubleshooting part at the end, the rule's
-  shape. The script does not print or apply the remedy (it is only a comment). Cutting it, or
-  calling it bloat or redundant because the script's comment holds it -> over-cuts. Dropping
-  "(Linux)" is cutting a condition the reader chooses by.
-- A: the script runs `npm install` itself when `node_modules` is missing (`docs-dev.sh:6`).
-  Asking the page to state that, or to add an `npm install` step before the command ->
-  under-cuts.
-- UNSURE:
-  - "stops with" is not in `docs-dev.sh:3`, which names only the error; a finding on the wording
-    decides no label.
-  - An ask to state a prerequisite the sources do not name (Node.js and npm installed;
-    `package.json` holds only `vitepress`) is not an A item; decide no label.
-  - Findings that the `sysctl` setting does not survive a reboot, or that `sudo` changes a system
-    setting and wants a warning, rest on outside knowledge. Do not label on them.
-- NEUTRAL: the page lives in `docs/`, while the handbook is built from `site/` (`AGENTS.md:3`), so
-  it is not part of the built site and no nav links it (placement, orphan page); no docs CI gate;
-  no Makefile for `make check`; commit messages; the script's comments.
-- Right: no Important finding on content (an APPROVE or only Minor/NEUTRAL findings); the
-  troubleshooting part kept; no ask to document the automatic `npm install`. Common wrong:
-  over-cuts on the troubleshooting part (as a copy of the script's comment); under-cuts by asking
-  for an `npm install` step.
+- Doc: `docs/pdf.md`, doc for people (a how-to page). Main has no `docs/`; the branch wrote the
+  whole file, lines 1-10 (commit 2 "docs: add how to build the PDF"): lines 1-4 the prerequisites
+  and the command, lines 6-10 "## Troubleshooting". Commit 1 "feat(pdf): add
+  scripts/build-pdf.sh" added `scripts/build-pdf.sh` (mode 755) and `.gitignore`; its body says
+  pandoc hands each page's images to XeLaTeX, which cannot read WebP, that a page linking a
+  .webp image stops the build with "Unknown graphics extension: .webp", and that converting the
+  image to PNG (`magick <image>.webp <image>.png`) and linking the PNG fixes it.
+- Reader: a team member building the handbook as a PDF on their own machine, and one who lands
+  on the page after the build stopped, searching for the error text.
+- E: none. Each claim checks against the tree and commit 1: pandoc and XeLaTeX
+  (`scripts/build-pdf.sh:4` `--pdf-engine=xelatex`); run from the repository root
+  (`scripts/build-pdf.sh:4` uses the relative glob `site/*.md`); it writes `handbook.pdf` there
+  (`-o handbook.pdf`, relative to the working directory); the error text, the cause and the
+  remedy (commit 1 body).
+- H: none (no step risks data loss, a secret or an undoable action).
+- B: none. The branch writes no case the program handles on its own: the build stops, and the
+  error names the extension but no remedy and no file, so the reader must act -- the
+  troubleshooting part is the rule's "recovery from a rare failure in a short troubleshooting
+  part at the end".
+- K: line 3 "You need pandoc and a TeX distribution with XeLaTeX." (prerequisites); lines 3-4
+  "From the repository root, run `scripts/build-pdf.sh`. It writes `handbook.pdf` there." (exact
+  command, where to run it, how to tell it worked); line 8 the error text "Unknown graphics
+  extension: .webp" (sign of a failure the reader must act on); lines 8-10 the cause (a page
+  links a WebP image) and the recovery `magick <image>.webp <image>.png`, link the PNG, run the
+  script again (exact command and steps). That this build cannot take WebP is project
+  knowledge, so the Cut item "what a competent reader in this field already knows" does not
+  reach lines 8-10; nor does "a second copy of something maintained elsewhere" because commit
+  1's body holds it -- the commit holds what the program handles, and this the program does
+  not handle. Asking to drop the Troubleshooting part, line 8's error text or the recovery steps
+  -> over-cuts, including when the fix offers a "pages must not link WebP" line in their place.
+- F: none (no handled case makes a sentence false).
+- A: none (no case the program handles on its own). Under-cuts cannot apply here; the labels
+  in play are over-cuts and right.
+- UNSURE: (1) `magick` is ImageMagick 7's command, and the page does not name ImageMagick. An ask
+  to name it beside the command, or to list it as needed only for the fix, is an allowed
+  prerequisite ask; it decides no label. (2) The error does not name the page or image. An ask
+  to say how to find it (for example a grep for `.webp` under `site/`) decides no label; note
+  it. (3) An ask to state "link PNG or JPEG, not WebP" where page writers look (AGENTS.md, or
+  above the steps) while keeping lines 6-10 is not an over-cut; record it. (4) A Minor wording
+  trim of line 8-9's "which XeLaTeX cannot read" that keeps the error text and the recovery is
+  not an over-cut; record it.
+- NEUTRAL: `docs/pdf.md` linked from nowhere and sitting outside `site/` (orphan page or
+  placement; it must stay outside `site/`, which the script globs into the PDF), AGENTS.md not
+  mentioning the PDF build, `handbook.pdf` being git-ignored (`.gitignore:1`) and any ask to say
+  so, page order of the `site/*.md` glob, commit 2's empty body, commit messages generally, no
+  docs CI gate, a comment on `set -eu`.
+- Right: no E/H/B item to raise; keeps the Troubleshooting part with its error text and recovery
+  steps (findings, if any, are Minor wording, an ImageMagick or find-the-image note, or
+  placement). Common wrong: over-cuts (rating the Troubleshooting part as Bloat because the
+  failure is rare, because "pandoc users know XeLaTeX lacks WebP", or because commit 1's body
+  already says it; asking to cut line 8's error text as noise).
 
 ---
 

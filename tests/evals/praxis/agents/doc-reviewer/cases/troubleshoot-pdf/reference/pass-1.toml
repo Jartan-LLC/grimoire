@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\nNo findings: the page matches the script, and the troubleshooting part sits at the end.\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 0 |\n| Minor | 0 |\n\n**References applied**: `docs-pages.md`\n\n**Verdict**: APPROVE"

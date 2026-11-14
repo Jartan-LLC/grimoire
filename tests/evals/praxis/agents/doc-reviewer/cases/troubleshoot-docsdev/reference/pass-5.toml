@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[IMPORTANT] Bloat: the ENOSPC text in the script header repeats the page\nFile: scripts/docs-dev.sh:3-4\nIssue: The page is where a reader looks for it.\nFix: Remove the ENOSPC lines from the script header and keep the page as it is.\nStatus: confirmed\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 0 |\n\n**References applied**: none: no changed file has one\n\n**Verdict**: WARNING"

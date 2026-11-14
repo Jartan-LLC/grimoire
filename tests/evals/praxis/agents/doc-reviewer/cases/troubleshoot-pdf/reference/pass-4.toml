@@ -1,0 +1,4 @@
+final = "Done."
+
+[reports]
+"praxis:doc-reviewer" = "I reviewed the branch's documentation against main.\n\n[MINOR] The troubleshooting part could go once the script converts WebP images itself.\nFile: docs/pdf.md:6-10\nFix: Cut it then.\nStatus: suspected\n\n[IMPORTANT] The WebP entry belongs where page authors look, too\nFile: docs/pdf.md:8-10\nFix: Move it to the contributor guide or link it from there; keep its text.\nStatus: suspected\n\n| Severity | Count |\n|----------|-------|\n| Critical | 0 |\n| Important | 1 |\n| Minor | 1 |\n\n**References applied**: `docs-pages.md`\n\n**Verdict**: WARNING"
