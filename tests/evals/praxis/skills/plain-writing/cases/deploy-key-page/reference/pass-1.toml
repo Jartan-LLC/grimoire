@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/deploy-key.md" = "# Making a new deploy key\n\nCI deploys `main` to shop.acme.dev over SSH with a key that `scripts/new-deploy-key.sh` makes.\n\n1. Run `scripts/new-deploy-key.sh`. It writes the private key `deploy_key` and the public key\n   `deploy_key.pub` in the current directory. Never commit `deploy_key`.\n2. Add `deploy_key.pub` to `/home/deploy/.ssh/authorized_keys` on shop.acme.dev.\n3. Paste `deploy_key` into the CI secret `DEPLOY_KEY`, then delete the file.\n"

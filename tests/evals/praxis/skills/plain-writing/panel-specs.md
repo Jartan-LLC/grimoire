@@ -1,9 +1,9 @@
 # Grading specs: plain-writing sizing cases (issue 182)
 
-One section per case: dev (1-8), screen (S1-S10) and confirm (C1-C9). A case added later gets
-its section before its docs are graded (suite.toml). A grader reads the doc the writer produced
-(the target file's final text, or the diff to it), checks it against the items below, and gives
-one label.
+One section per case: dev (1-9), screen (S1-S7, S9-S11) and confirm (C1-C9). Section 9 was
+screen spec S8 until its case was burned. A case added later gets its section before its
+docs are graded (suite.toml). A grader reads the doc the writer produced (the target file's
+final text, or the diff to it), checks it against the items below, and gives one label.
 
 Each spec was written blind, before any doc of its case was graded, from the case's prompt.md,
 fixture/ and build.py and the rule (the plain-writing paragraph "Write for what the reader does"
@@ -17,7 +17,7 @@ Case paths below are relative to `tests/evals/praxis/skills/plain-writing/cases/
 "commit N" means the Nth entry of the COMMITS list in that case's build.py (the branch the writer
 worked on). "SKILL.md:N" is a line of plain-writing's SKILL.md as these specs were graded against
 it, before its warning sentence gained a line: from line 31 on, the same text now sits one line
-later. Two rule lines decide most screen and confirm items: SKILL.md:24-25 ("What the program handles on its own
+later. S11, written after that, cites the current file. Two rule lines decide most screen and confirm items: SKILL.md:24-25 ("What the program handles on its own
 -- a case it skips, fixes or reports with its own remedy -- needs no line") and SKILL.md:28-30 (a
 warning before data loss, a leaked secret or a step that cannot be undone "stays where the reader
 acts, however rare").
@@ -513,6 +513,66 @@ The final script is build.py commit 5's `scripts/tag-release.sh`.
 
 ---
 
+## 9. signing-key-page
+
+Screen spec S8 as graded. The case did not change: its fix changed only the key's `kept`
+check, which had demanded `rpm --import` though U1 lets a doc point to keys/README.txt for it.
+
+- **Target doc**: `docs/signing-key.md` (new file; the fixture has no `docs/` folder).
+- **Request** (prompt.md): "Write docs/signing-key.md: how to rotate the package signing
+  key with the new script."
+- **Reader and normal job**: a maintainer of acme-rpms rotating the RPM signing key with
+  the new script.
+
+### MUST
+
+- M1. The exact command: `scripts/rotate-key.sh` (or `sh scripts/rotate-key.sh`). Source:
+  commit 1 (file path).
+- M2. What it does: makes a new key, exports the public half to `keys/`, signs with it.
+  Source: commit 1 script comment, line 2.
+- M3 (W). The private key never goes in the repository. Stated at or before the step
+  (where the reader runs the script or commits its output), not only in a closing note.
+  Source: commit 1 script comment, line 3; SKILL.md:28-30 (warning before a leaked
+  secret), SKILL.md:44 (hard constraints: never).
+
+### BLOAT
+
+- B1. A key that expires mid-build still signs that build. The program handles it.
+  Source: commit 2.
+- B2. macOS gpg-agent passphrase caching / the script reloading the agent. The program
+  handles it. Source: commit 3.
+- B3. The RSA subkey for rpm before 4.14 / ed25519 subkeys. The program handles it.
+  Source: commit 4.
+- B4. Branch or fix-commit narration.
+
+### UNSURE
+
+- U1. That the new public key in `keys/` is committed, and that users re-import it with
+  `rpm --import keys/RPM-GPG-KEY-acme` (fixture/keys/README.txt:1). The script comment
+  says only that the public half goes to `keys/`; that the file name stays the same and
+  that users must re-import are inferences. One line pointing to keys/README.txt is
+  defensible; a procedure with invented file names is an accuracy note. Absent is not
+  under.
+- U2. Prerequisites such as gpg and access to the current key. No source names them.
+  Leans NEUTRAL; invented specifics are an accuracy note.
+
+### NEUTRAL
+
+- N1. Running `make check` after the change (fixture/AGENTS.md:5). It applies to code
+  changes; a one-line mention is neutral.
+- N2. A title and one-line intro.
+
+### Label guidance
+
+- Right-sized: a short page, roughly 3 to 8 lines: the command, what it does, and the
+  private-key warning at the step.
+- Bloated: M1-M3 present plus any of B1-B3.
+- Under: M3 missing (the most serious form), or M1 or M2 missing.
+- Mis-sized: M3 only in a trailing "Notes" or "Security" section; or B items present with
+  M3 missing.
+
+---
+
 ## S1. cronlite-doc
 
 - **Target doc**: `docs/schedule.md` (new file; the fixture has no `docs/` folder).
@@ -863,63 +923,6 @@ writes or makes false"). The right outcome is no change to the doc, or at most U
 
 ---
 
-## S8. signing-key-page
-
-- **Target doc**: `docs/signing-key.md` (new file; the fixture has no `docs/` folder).
-- **Request** (prompt.md): "Write docs/signing-key.md: how to rotate the package signing
-  key with the new script."
-- **Reader and normal job**: a maintainer of acme-rpms rotating the RPM signing key with
-  the new script.
-
-### MUST
-
-- M1. The exact command: `scripts/rotate-key.sh` (or `sh scripts/rotate-key.sh`). Source:
-  commit 1 (file path).
-- M2. What it does: makes a new key, exports the public half to `keys/`, signs with it.
-  Source: commit 1 script comment, line 2.
-- M3 (W). The private key never goes in the repository. Stated at or before the step
-  (where the reader runs the script or commits its output), not only in a closing note.
-  Source: commit 1 script comment, line 3; SKILL.md:28-30 (warning before a leaked
-  secret), SKILL.md:44 (hard constraints: never).
-
-### BLOAT
-
-- B1. A key that expires mid-build still signs that build. The program handles it.
-  Source: commit 2.
-- B2. macOS gpg-agent passphrase caching / the script reloading the agent. The program
-  handles it. Source: commit 3.
-- B3. The RSA subkey for rpm before 4.14 / ed25519 subkeys. The program handles it.
-  Source: commit 4.
-- B4. Branch or fix-commit narration.
-
-### UNSURE
-
-- U1. That the new public key in `keys/` is committed, and that users re-import it with
-  `rpm --import keys/RPM-GPG-KEY-acme` (fixture/keys/README.txt:1). The script comment
-  says only that the public half goes to `keys/`; that the file name stays the same and
-  that users must re-import are inferences. One line pointing to keys/README.txt is
-  defensible; a procedure with invented file names is an accuracy note. Absent is not
-  under.
-- U2. Prerequisites such as gpg and access to the current key. No source names them.
-  Leans NEUTRAL; invented specifics are an accuracy note.
-
-### NEUTRAL
-
-- N1. Running `make check` after the change (fixture/AGENTS.md:5). It applies to code
-  changes; a one-line mention is neutral.
-- N2. A title and one-line intro.
-
-### Label guidance
-
-- Right-sized: a short page, roughly 3 to 8 lines: the command, what it does, and the
-  private-key warning at the step.
-- Bloated: M1-M3 present plus any of B1-B3.
-- Under: M3 missing (the most serious form), or M1 or M2 missing.
-- Mis-sized: M3 only in a trailing "Notes" or "Security" section; or B items present with
-  M3 missing.
-
----
-
 ## S9. troubleshooting-kept
 
 - **Target doc**: `docs/releasing.md` (existing; one run paragraph and a
@@ -1020,6 +1023,121 @@ writes or makes false"). The right outcome is no change to the doc, or at most U
 - Bloated: M1-M3 present plus B1 or B2, or U1 at paragraph length.
 - Under: M3 missing, or the command without DIR.
 - Mis-sized: B items present with a MUST missing.
+
+---
+
+## S11. deploy-key-page
+
+- **Target doc**: `docs/deploy-key.md` (new; the fixture has no `docs/` directory).
+- **Request** (prompt.md): "Add docs/deploy-key.md: how to make a new CI deploy key with
+  scripts/new-deploy-key.sh."
+- **Reader and normal job**: a maintainer of acme-shop who must make a new SSH key for CI
+  deploys (first setup or replacing a key) and install it: run the script, put the public
+  key on the server, put the private key into CI. CI deploys `main` to shop.acme.dev over
+  SSH (fixture/AGENTS.md:3). A how-to page: numbered steps for one task.
+
+Script lines below are `scripts/new-deploy-key.sh` at the branch tip (after commit 4).
+
+### MUST
+
+- M1. The exact command that runs the script: `scripts/new-deploy-key.sh` (or
+  `./scripts/new-deploy-key.sh`, or `sh scripts/new-deploy-key.sh`; any form that runs it
+  counts). Source: prompt.md; commit 1; SKILL.md:43.
+- M2. What it makes: a key pair, `deploy_key` (the private key) and `deploy_key.pub` (the
+  public key). The next steps act on both names, and the reader must know which file is
+  the secret. Source: script:2-3, 10; SKILL.md:46.
+- M3. Add `deploy_key.pub` to `/home/deploy/.ssh/authorized_keys` on shop.acme.dev, with
+  host and path exact. Source: script:11; SKILL.md:46-47.
+- M4. Paste `deploy_key` into the CI secret `DEPLOY_KEY`, with the secret name exact.
+  Source: script:12; SKILL.md:46-47.
+  M3 and M4 are steps the reader acts on, and the page is where the reader learns, before
+  running anything, that the task needs access to the server and to the CI secrets. The
+  script prints both lines, but only after the key exists, so "follow what the script
+  prints" in place of M3 and M4 does not satisfy them (SKILL.md:47-49 allows a pointer only
+  to a list the reader can read where it is).
+- M5 (W). `deploy_key` is the private key: it goes only into the CI secret `DEPLOY_KEY`,
+  never into git (never commit it). Source: script:3 (commit 1); SKILL.md:28-31, 39, 45.
+  This is the case's central warning: a leaked secret. The script writes the key into the
+  current directory (script:2, 10), so a reader who runs it from the checkout root, as the
+  M1 command invites, has the private key in the working tree, and the fixture has no
+  `.gitignore`. No step names committing, so per SKILL.md:29-31 the warning sits at the
+  step that creates or handles the key.
+  Placement: before the steps, at the step that runs the script (preferred: that step
+  creates the file that could leak), or at the step that pastes `deploy_key` into
+  `DEPLOY_KEY` (that step handles it). Any of these is placed right. Stated only in a
+  section after the steps (Notes, Security, Troubleshooting) is a moved W: mis-sized. A
+  missing M5 is the most serious failure. A line that only says to keep the key "safe" or
+  "secret" without saying it must not go into git is too vague to act on: count M5 as
+  missing.
+
+### BLOAT
+
+- B1. The script refuses to run when `deploy_key` already exists in the current directory
+  and says to move it away. The script handles this and reports it with its own remedy
+  (script:5-8, commit 2), so it needs no line (SKILL.md:24-25), in the steps or in a
+  troubleshooting part.
+- B2. The key comment `deploy@acme-shop`, or why the script sets it (ssh-keygen's default
+  names the maker's machine). The script handles it (script:10, commit 3 and its body).
+- B3. How the script finds `ssh-keygen` on Windows: the `/c/Windows/System32/OpenSSH`
+  PATH fallback, or that it adds anything to PATH. The script handles it (script:9,
+  commit 4). (Saying Git Bash works on Windows is N3, not B3.)
+- B4. Branch or fix-commit narration: "now stops instead of overwriting", "no longer uses
+  your user@host", a list of the branch's commits or fixes (SKILL.md:27; docs-patterns
+  SKILL.md:88-96).
+- B5. Background at the top beyond one line of purpose: what a deploy key is, how SSH key
+  authentication works, why CI needs one (SKILL.md:59-61).
+
+### UNSURE
+
+- U1. Where the files land ("in the current directory"). Stated by script:2, and it is
+  what lets the key end up in the checkout. A clause saying so is fine, and stating it at
+  M5 strengthens the warning; absent is not under, since the script prints the bare file
+  names and a competent reader looks in the current directory.
+- U2. How to tell it worked. SKILL.md:42 keeps this, but no source gives a check. A one-line
+  check (the next CI deploy of `main` succeeds; or an `ssh -i deploy_key` login to
+  shop.acme.dev) is fine; absent is not under. An invented login user or command is an
+  accuracy note, not bloat, unless it runs to a paragraph.
+- U3. Removing the old public key from `authorized_keys` when replacing a key, or deleting
+  the local `deploy_key` after pasting it. No source states either. One line each is fine
+  and absent is not under. Neither replaces M5: a doc that says only "delete deploy_key
+  afterwards" without the never-into-git rule still lacks M5.
+
+### NEUTRAL
+
+- N1. One opening line of purpose (CI deploys `main` to shop.acme.dev over SSH with this
+  key). An intro that only repeats the title is a wording note (SKILL.md:65).
+- N2. A prerequisites line: shell access to shop.acme.dev able to edit the deploy user's
+  `authorized_keys`, and permission to set CI secrets; `ssh-keygen` (OpenSSH) installed.
+  One line before the steps is fine.
+- N3. A clause that on Windows the script runs in Git Bash (commit 4's subject). Fine as a
+  clause; the mechanism is B3.
+- N4. Key type and options (ed25519, no passphrase) in a clause. Explained at length, it
+  pads the page: bloat by the general rule.
+- N5. Advice to run the script outside the checkout (from a temporary directory) so the
+  key never lands in the repository. Not stated by the sources but a sound way to act on
+  M5; one line is fine. It satisfies M5 only if it also says the private key must not go
+  into git.
+- N6. The order of M3 and M4 (the script prints M3 first; either order works).
+- N7. CI-provider specifics (where in a settings UI the secret is set). No source names the
+  CI system; invented detail is an accuracy note, bloat if a paragraph or more.
+- N8. A claim that git ignores `deploy_key`, or a suggestion to add it to `.gitignore`.
+  The fixture has no `.gitignore`, so the first is false: an accuracy note, and if it
+  stands in place of M5 the doc lacks M5. Editing files other than the target is not
+  graded here.
+
+### Label guidance
+
+- Right-sized: a title, at most one line of purpose, and three short numbered steps (run
+  the script; add `deploy_key.pub` to the server's `authorized_keys`; paste `deploy_key`
+  into `DEPLOY_KEY`), with the never-into-git warning before or at the run or paste step.
+  Roughly 6 to 15 lines.
+- Bloated: M1-M5 present and placed right, plus any of B1-B5 (most likely B1, the
+  existing-file refusal, often as a troubleshooting entry; or B2/B3 from the fix commits).
+- Under: M5 missing (the most serious form); or M3/M4 missing, wrong (host, path or
+  secret name changed), or replaced by "follow the script's output"; or M2 missing so the
+  reader cannot tell which file is the private key.
+- Mis-sized: M5 only in a section after the steps; or any B item present with a MUST
+  missing (for example B1-B3 described while M5 is absent).
 
 ---
 

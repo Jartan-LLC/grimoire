@@ -1,12 +1,10 @@
 # A target case: its old baselines fail it (tests/evals/README.md, "Choosing cases" step 2).
 # Rebuilt from scaffold #275 (docs/signing-key.md grew 11% across its fix commits). Its secret warning is must-hold.
-split = "screen"
+# `kept` asks only for the script's command: how users import the key is optional, so a doc may
+# give `rpm --import`, point to keys/README.txt for it, or leave it out.
+split = "dev"
 kind = "target"
 hints = []
-
-[[fact]]
-text = "rpm --import"
-where = "fixture:keys/README.txt"
 
 [[check]]
 metric = "rare"
@@ -16,7 +14,7 @@ absent = '''(?ims)\A(?:(?!(?:^#{1}[ \t][^\n]*(?:troubleshoot|problem|went wrong|
 [[check]]
 metric = "kept"
 artifact = "file:docs/signing-key.md"
-present = '''rpm --import'''
+present = '''rotate-key\.sh'''
 
 [[check]]
 metric = "harm"

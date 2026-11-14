@@ -1,0 +1,4 @@
+final = "Done."
+
+[files]
+"docs/signing-key.md" = "# Rotating the signing key\n\n1. Run the rotation script in `scripts/`. It makes a new key and writes its public half to `keys/`.\n2. Commit `keys/`. Never commit the private key.\n"
