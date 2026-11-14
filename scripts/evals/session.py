@@ -810,7 +810,7 @@ def _budgeted(  # noqa: PLR0913 -- `_session`'s arguments and the run's budget
     try:
         drawn = _session(case, arm, index, spec, sample_key)
     finally:
-        if drawn is not None and drawn[0].reasons == [CASE_CHANGED]:
+        if drawn is not None and CASE_CHANGED in drawn[0].reasons:
             budget.release()
         else:
             budget.finish(None if drawn is None else cost(drawn[0]), spec.budget_usd)
