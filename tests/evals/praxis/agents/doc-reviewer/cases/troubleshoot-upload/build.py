@@ -6,7 +6,7 @@ import subprocess
 
 BRANCH = "docs/publishing"
 COMMITS = json.loads(
-    '[{"subject": "feat(publish): add scripts/publish.sh", "body": "", "files": {"scripts/publish.sh": "#!/bin/sh\\n# publish.sh [--chunk SIZE]: build the site and upload it. On HTTP 413 from the CDN: rerun with --chunk 50M.\\nset -eu\\n"}}, {"subject": "docs: add the publishing procedure", "body": "", "files": {"docs/publishing.md": "# Publishing the site\\n\\nRun `scripts/publish.sh` from `main`. It builds the site and uploads it to the CDN.\\n\\n## Troubleshooting\\n\\nIf the upload stops with HTTP 413, run `scripts/publish.sh --chunk 50M` to send it in parts.\\n"}}]'
+    '[{"subject": "feat(publish): add scripts/publish.sh", "body": "", "files": {"scripts/publish.sh": "#!/bin/sh\\n# publish.sh [--chunk SIZE]: build the site and upload it. On HTTP 413 from the CDN: rerun with --chunk 50M.\\nset -eu\\nurl=https://upload.cdn.example.com/acme-site\\ntrap \'rm -f site.tar.gz site.tar.gz.part-*\' EXIT\\nnpx @11ty/eleventy --input=site --output=dist\\ntar -czf site.tar.gz -C dist .\\nif [ \\"${1:-}\\" = \\"--chunk\\" ]; then\\n  split -b \\"${2:?--chunk needs a size, such as 50M}\\" site.tar.gz site.tar.gz.part-\\n  for part in site.tar.gz.part-*; do\\n    curl --fail --silent --show-error -T \\"$part\\" \\"$url/$part\\"\\n  done\\nelse\\n  curl --fail --silent --show-error -T site.tar.gz \\"$url/site.tar.gz\\"\\nfi\\n"}}, {"subject": "docs: add the publishing procedure", "body": "", "files": {"docs/publishing.md": "# Publishing the site\\n\\nRun `scripts/publish.sh` from `main`. It builds the site and uploads it to the CDN.\\n\\n## Troubleshooting\\n\\nIf the upload stops with HTTP 413, run `scripts/publish.sh --chunk 50M` to send it in parts.\\n"}}]'
 )
 
 

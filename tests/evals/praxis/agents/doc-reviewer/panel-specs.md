@@ -1,6 +1,6 @@
 # Grading specs: doc-reviewer cases (issue 182)
 
-One section per screen and confirm case, and per dev case in suite.toml's `BURNED` (D1-D15),
+One section per screen and confirm case, and per dev case in suite.toml's `BURNED` (D1-D17),
 which were screen cases first. The panel grades held-out cases only, so the other dev cases have
 no section. A held-out case added later gets its section before its reports are graded
 (suite.toml). A grader reads one doc-reviewer report on the case's branch, checks it against the
@@ -9,7 +9,8 @@ items below, and gives one label. These specs come from each case's
 the rule (`plugins/praxis/agents/doc-reviewer.md` and plain-writing's "Write for what the reader
 does"). They were written without seeing any model output or the case keys. The dev sections
 (D1-D15) are the earlier panel's specs, copied because those cases have not changed since; the
-owner's ruling below changed D3, D4 and D11.
+owner's ruling below changed D3, D4 and D11. D16 and D17 are screen specs S9 and S15 as graded,
+from before their cases were fixed; each says what its fix changed.
 
 Case paths below are relative to `tests/evals/praxis/agents/doc-reviewer/cases/<case>/`. Line
 numbers are of the file at the branch tip (fixture plus all commits); "main" means the fixture
@@ -469,6 +470,86 @@ The ruling came after the first grading round of D1-D15, which used the earlier 
   misses-error (heading/command mismatch not caught); under-cuts asking to document stale-lock
   removal.
 
+### D16. lean-dotlink
+
+Written for the case before its fix: `install.sh` then moved an existing target over
+`<file>.orig` whatever was there, and its line numbers have moved. Its `install.sh` now leaves a
+target as is, with a message, when `<file>.orig` exists, which settles the first UNSURE item.
+
+- Doc: `src/dotlink/README.md`, a README for people. Main had lines 1-11. Branch (commit 5 "docs:
+  document the command") wrote lines 13-17 "## What it changes". Not a doc for people:
+  `src/dotlink/install.sh` (script plus comments) and `devcontainer-feature.json` (main).
+- Reader: a developer adding the feature to a dev container and wanting to know what it does to
+  their home directory and how to undo it.
+- E1: `README.md:16` "A file it replaces is kept as `<file>.bak`" vs `install.sh:2` "keep a file it
+  replaces as `<file>.orig`", `install.sh:6` `mv "$t" "$t.orig"` and `devcontainer-feature.json:5`
+  "keeps the file it replaces as `<file>.orig`". Wrong backup name in the undo step -- Important (an
+  ordinary doc-code mismatch; the original is still kept as `.orig`, so following the wrong name
+  fails without losing data). Critical is defensible as a wrong rollback step; record it.
+- H: none. The README already says replaced files are kept and how to undo; E1 covers the wrong
+  name.
+- B: none (the branch wrote no handled case).
+- K:
+  - line 15 "Mount your dotfiles repository at `/opt/dotfiles` first." (prerequisite);
+  - lines 15-16 "When the container starts, dotlink links each file in it into your home
+    directory." (what it changes);
+  - lines 16-17 "A file it replaces is kept as `<file>.[orig]`; move it back to undo the link."
+    (what happens to the reader's files, and the undo the reader must run). Cutting it ->
+    over-cuts; fixing `.bak` -> `.orig` is not a cut.
+  - main's Install block (lines 5-11).
+- F1: a dotfile whose target is a directory is skipped, with a message (commit 4), so "links each
+  file in it into your home directory" is false for it. A finding asking the README to say so,
+  qualifying "each file" or in a sentence beside it, is right, not an add-ask. Not raising it is
+  not misses-error. Record its form: `qualify` or `separate`.
+- A: a target that already links to its dotfile is left as is (commit 2). Asking the README to
+  state it -> under-cuts.
+- UNSURE:
+  - "An existing `<file>.orig` is never overwritten" (commit 3): the sources do not say what then
+    happens to the file being replaced -- left in place (the README stays true) or replaced
+    without a backup (data loss the README would have to warn about). A finding asking the README
+    to state this case, or to warn, is defensible; do not label on it either way.
+  - The glob `/opt/dotfiles/.[!.]*` (`install.sh:4`) links only names that start with a dot, so
+    "each file in it" may be false for other files (a repository's own README). A finding saying
+    so is fine; not raising it is not misses-error.
+  - "When the container starts": commit 1's subject says "at container start"; a finding that a
+    Feature's `install.sh` runs at image build, not at start, rests on outside knowledge. Do not
+    label on it.
+- NEUTRAL: commit messages; no version bump of `devcontainer-feature.json`; no changelog; `make
+  check` (no Makefile in the fixture).
+- Right: raises `.bak` -> `.orig`, keeps the prerequisite and the undo line, and does not ask to
+  document the already-linked case; asking for F1 is fine. Common wrong: under-cuts by asking to
+  list the already-linked case; over-cuts by calling the undo line or the "kept as" sentence
+  bloat because the script handles the backup itself.
+
+### D17. troubleshoot-upload
+
+Written for the case before its fix: `publish.sh` was then the stub the second UNSURE item
+describes. It now builds the site and uploads it, in parts with `--chunk`.
+
+- Doc: new file `docs/publishing.md` (commit 2 "docs: add the publishing procedure"), a publishing
+  procedure for people; all lines branch-written. Source: `scripts/publish.sh` (commit 1), line 2
+  "publish.sh [--chunk SIZE]: build the site and upload it. On HTTP 413 from the CDN: rerun with
+  --chunk 50M."
+- Reader: a maintainer publishing the site.
+- E: none found. Line 3 "Run `scripts/publish.sh` from `main`. It builds the site and uploads it to
+  the CDN." and line 7 match `publish.sh:2`.
+- H: none. B: none.
+- K: line 3 (the command); lines 5-7 "## Troubleshooting" / "If the upload stops with HTTP 413, run
+  `scripts/publish.sh --chunk 50M` to send it in parts." -- recovery from a rare failure the reader
+  must act on, in a short troubleshooting part at the end, the rule's shape. The script does not
+  print or apply the remedy (it is only a comment). Cutting it, or calling it bloat because the
+  script's comment holds it -> over-cuts.
+- A: none.
+- UNSURE:
+  - "from `main`" and "to send it in parts" are not in `publish.sh:2`; a finding calling them
+    unsupported is fine, asking to cut the whole troubleshooting part for it is over-cuts.
+  - `publish.sh` holds only the shebang, the comment and `set -eu`, so it builds and uploads
+    nothing yet. A finding that line 3 describes behaviour the script lacks decides no label (code
+    that is only comments).
+- NEUTRAL: no README/nav linking the page; no Makefile for `make check`; commit messages.
+- Right: no Important finding on content (an APPROVE or only Minor/NEUTRAL findings); the
+  troubleshooting part kept. Common wrong: over-cuts on the troubleshooting part.
+
 ---
 
 ## Screen cases
@@ -727,53 +808,6 @@ The ruling came after the first grading round of D1-D15, which used the earlier 
 - Right: raises 10000 -> 1000 and asks to add none of the three handled cases. Common wrong:
   under-cuts by asking to document the quoted-line-break, BOM or empty-last-line handling.
 
-### S9. lean-dotlink
-
-- Doc: `src/dotlink/README.md`, a README for people. Main had lines 1-11. Branch (commit 5 "docs:
-  document the command") wrote lines 13-17 "## What it changes". Not a doc for people:
-  `src/dotlink/install.sh` (script plus comments) and `devcontainer-feature.json` (main).
-- Reader: a developer adding the feature to a dev container and wanting to know what it does to
-  their home directory and how to undo it.
-- E1: `README.md:16` "A file it replaces is kept as `<file>.bak`" vs `install.sh:2` "keep a file it
-  replaces as `<file>.orig`", `install.sh:6` `mv "$t" "$t.orig"` and `devcontainer-feature.json:5`
-  "keeps the file it replaces as `<file>.orig`". Wrong backup name in the undo step -- Important (an
-  ordinary doc-code mismatch; the original is still kept as `.orig`, so following the wrong name
-  fails without losing data). Critical is defensible as a wrong rollback step; record it.
-- H: none. The README already says replaced files are kept and how to undo; E1 covers the wrong
-  name.
-- B: none (the branch wrote no handled case).
-- K:
-  - line 15 "Mount your dotfiles repository at `/opt/dotfiles` first." (prerequisite);
-  - lines 15-16 "When the container starts, dotlink links each file in it into your home
-    directory." (what it changes);
-  - lines 16-17 "A file it replaces is kept as `<file>.[orig]`; move it back to undo the link."
-    (what happens to the reader's files, and the undo the reader must run). Cutting it ->
-    over-cuts; fixing `.bak` -> `.orig` is not a cut.
-  - main's Install block (lines 5-11).
-- F1: a dotfile whose target is a directory is skipped, with a message (commit 4), so "links each
-  file in it into your home directory" is false for it. A finding asking the README to say so,
-  qualifying "each file" or in a sentence beside it, is right, not an add-ask. Not raising it is
-  not misses-error. Record its form: `qualify` or `separate`.
-- A: a target that already links to its dotfile is left as is (commit 2). Asking the README to
-  state it -> under-cuts.
-- UNSURE:
-  - "An existing `<file>.orig` is never overwritten" (commit 3): the sources do not say what then
-    happens to the file being replaced -- left in place (the README stays true) or replaced
-    without a backup (data loss the README would have to warn about). A finding asking the README
-    to state this case, or to warn, is defensible; do not label on it either way.
-  - The glob `/opt/dotfiles/.[!.]*` (`install.sh:4`) links only names that start with a dot, so
-    "each file in it" may be false for other files (a repository's own README). A finding saying
-    so is fine; not raising it is not misses-error.
-  - "When the container starts": commit 1's subject says "at container start"; a finding that a
-    Feature's `install.sh` runs at image build, not at start, rests on outside knowledge. Do not
-    label on it.
-- NEUTRAL: commit messages; no version bump of `devcontainer-feature.json`; no changelog; `make
-  check` (no Makefile in the fixture).
-- Right: raises `.bak` -> `.orig`, keeps the prerequisite and the undo line, and does not ask to
-  document the already-linked case; asking for F1 is fine. Common wrong: under-cuts by asking to
-  list the already-linked case; over-cuts by calling the undo line or the "kept as" sentence
-  bloat because the script handles the backup itself.
-
 ### S10. lean-mdcheck
 
 - Doc: new file `docs/check.md` (commit 4 "docs: document the command"), a docs page for people;
@@ -908,31 +942,105 @@ The ruling came after the first grading round of D1-D15, which used the earlier 
   the locked / bot / 90-day limits; over-cuts calling the pointer or the command file's limits
   bloat.
 
-### S15. troubleshoot-upload
+### S16. lean-migrate
 
-- Doc: new file `docs/publishing.md` (commit 2 "docs: add the publishing procedure"), a publishing
-  procedure for people; all lines branch-written. Source: `scripts/publish.sh` (commit 1), line 2
-  "publish.sh [--chunk SIZE]: build the site and upload it. On HTTP 413 from the CDN: rerun with
-  --chunk 50M."
-- Reader: a maintainer publishing the site.
-- E: none found. Line 3 "Run `scripts/publish.sh` from `main`. It builds the site and uploads it to
-  the CDN." and line 7 match `publish.sh:2`.
-- H: none. B: none.
-- K: line 3 (the command); lines 5-7 "## Troubleshooting" / "If the upload stops with HTTP 413, run
-  `scripts/publish.sh --chunk 50M` to send it in parts." -- recovery from a rare failure the reader
-  must act on, in a short troubleshooting part at the end, the rule's shape. The script does not
-  print or apply the remedy (it is only a comment). Cutting it, or calling it bloat because the
-  script's comment holds it -> over-cuts.
-- A: none.
+- Doc: `README.md`, a README for people. Main had lines 1-4. Branch (commit 5 "docs: document
+  migrations") wrote lines 6-10 "## Database migrations". Not a doc for people:
+  `scripts/migrate.py` (script, docstring and comments), `migrations/*.sql`, `AGENTS.md`.
+- Reader: a developer of the notes app who must bring their local `data/app.db` up to date, and
+  undo the run if it goes wrong.
+- E1: `README.md:9` "each new `.sql` file in `db/migrations/`" vs `migrate.py:15`
+  `MIGRATIONS = pathlib.Path("migrations")`, `migrate.py:2` "Apply each SQL file in migrations/",
+  and the files `migrations/1_notes.sql` (main) and `migrations/2_pinned.sql` (commit 1). Wrong
+  directory -- Important (an ordinary doc-code mismatch; a migration put in `db/migrations/` is
+  not applied, and nothing is lost). Critical is defensible as a wrong step in a migration doc;
+  record it.
+- H: none. Line 8 already gives the warning ("Stop the dev server first.") before the step, and
+  lines 9-10 give the undo.
+- B: none (the branch wrote no handled case).
+- K:
+  - line 8 "Stop the dev server first." (the warning before the step: `migrate.py:4-5` "it writes
+    to data/app.db, and a copy taken while it writes can be torn");
+  - line 8 "Then run `python3 scripts/migrate.py`" (the exact command);
+  - lines 8-9 "it copies `data/app.db` to `data/app.db.before`" (what it does to the reader's
+    file, and where the undo copy is; `migrate.py:26-27`);
+  - line 9 "and applies, in order, each new `.sql` file in `[migrations/]`" (what it does).
+    Fixing `db/migrations/` -> `migrations/` is not a cut;
+  - lines 9-10 "To undo a run, copy `data/app.db.before` back over `data/app.db`." (recovery the
+    reader must act on; `migrate.py:5-6`).
+  - Cutting any of these, or calling them bloat or redundant because the script copies the
+    database itself or its docstring holds the same text -> over-cuts.
+  - main's lines 3-4 (the dev server and where it keeps the notes).
+- F: none. "each new `.sql` file" stays true under all three handled cases: the README does not
+  say "only", backup and swap files (`3_tags.sql~`, `.3_tags.sql.swp`) are not `.sql` files, and
+  "in order" holds for the numeric sort.
+- A (asking the README to state any of these -> under-cuts):
+  - A1: `10_*.sql` is applied after `9_*.sql` -- names sort by their leading number, not as text
+    (commit 2, `migrate.py:18-21`);
+  - A2: editor backup and swap files are skipped (commit 3, `migrate.py:31-33`);
+  - A3: a migration named in upper case (`3_tags.SQL`) is also applied (commit 4,
+    `migrate.py:31-33`);
+  - A4: when there is no `data/app.db` yet, no copy is made (`migrate.py:26`).
 - UNSURE:
-  - "from `main`" and "to send it in parts" are not in `publish.sh:2`; a finding calling them
-    unsupported is fine, asking to cut the whole troubleshooting part for it is over-cuts.
-  - `publish.sh` holds only the shebang, the comment and `set -eu`, so it builds and uploads
-    nothing yet. A finding that line 3 describes behaviour the script lacks decides no label (code
-    that is only comments).
-- NEUTRAL: no README/nav linking the page; no Makefile for `make check`; commit messages.
+  - Each run overwrites `data/app.db.before` (`migrate.py:26-27`), a run that applies nothing
+    included, so only the last run can be undone. A finding that says so, or asks the undo line
+    to warn of it, is source-grounded and fine (it is the loss of the rollback copy, not a
+    handled case, so not an add-ask); not raising it is not misses-error.
+  - An ask to say how to name a new migration so it runs in order (a leading number; a name
+    without one sorts first, `migrate.py:21`) addresses someone writing migrations, whom the
+    section does not cover. Decide no label on it; an ask framed as A1 ("say 10 runs after 9")
+    is still under-cuts.
+  - Line 8 gives no reason for stopping the dev server; an ask to add the short reason
+    (`migrate.py:4-5`, torn copy) is fine and decides no label.
+  - `migrate.py` uses paths relative to the working directory (lines 14-15), so it must run from
+    the repository root; the README does not say so. A finding on it decides no label.
+  - What to do when a migration fails partway (`executescript` raises; earlier migrations stay
+    applied) is not in the sources. An ask to point to the undo line for it decides no label.
+- NEUTRAL: commit messages (empty bodies); comments and docstring in `migrate.py`;
+  `migrations/2_pinned.sql`; no changelog; `make check` (no Makefile in the fixture).
+- Right: raises `db/migrations/` -> `migrations/`, keeps the stop-the-server warning, the command,
+  the `.before` copy and the undo line, and asks to add none of the numeric order, the skipped
+  backup and swap files, the upper-case suffix or the no-database case. Common wrong: under-cuts
+  by asking to list the `.SQL`, backup-file or `10_`-after-`9_` handling; over-cuts by calling the
+  copy or undo sentence redundant with the script's docstring, or by cutting "Stop the dev server
+  first" because the script's docstring says it.
+
+### S17. troubleshoot-docsdev
+
+- Doc: new file `docs/preview.md` (commit 2 "docs: add how to preview the site"), a docs page for
+  people; all lines branch-written. Source: `scripts/docs-dev.sh` (commit 1), lines 2-4 "serve the
+  site at `http://localhost:5173` and rebuild each page on save. / On Linux, "ENOSPC: System limit
+  for number of file watchers reached": run / sudo sysctl fs.inotify.max_user_watches=524288, then
+  run the script again.", line 6 `[ -d node_modules ] || npm install`, line 7
+  `exec npx vitepress dev site --port 5173`.
+- Reader: a team member editing the handbook who wants to preview their changes locally.
+- E: none found. Line 3 "Run `scripts/docs-dev.sh` and open `http://localhost:5173`. Each page
+  rebuilds when you save it." matches `docs-dev.sh:2` and `:7`; lines 7-8 match `docs-dev.sh:3-4`.
+- H: none. B: none.
+- K: line 3 (the command, where to look, and how to tell it works); lines 5-8 "## Troubleshooting"
+  / "If the script stops with "ENOSPC: System limit for number of file watchers reached" (Linux),
+  run `sudo sysctl fs.inotify.max_user_watches=524288` and run the script again." -- recovery from
+  a rare failure the reader must act on, in a short troubleshooting part at the end, the rule's
+  shape. The script does not print or apply the remedy (it is only a comment). Cutting it, or
+  calling it bloat or redundant because the script's comment holds it -> over-cuts. Dropping
+  "(Linux)" is cutting a condition the reader chooses by.
+- A: the script runs `npm install` itself when `node_modules` is missing (`docs-dev.sh:6`).
+  Asking the page to state that, or to add an `npm install` step before the command ->
+  under-cuts.
+- UNSURE:
+  - "stops with" is not in `docs-dev.sh:3`, which names only the error; a finding on the wording
+    decides no label.
+  - An ask to state a prerequisite the sources do not name (Node.js and npm installed;
+    `package.json` holds only `vitepress`) is not an A item; decide no label.
+  - Findings that the `sysctl` setting does not survive a reboot, or that `sudo` changes a system
+    setting and wants a warning, rest on outside knowledge. Do not label on them.
+- NEUTRAL: the page lives in `docs/`, while the handbook is built from `site/` (`AGENTS.md:3`), so
+  it is not part of the built site and no nav links it (placement, orphan page); no docs CI gate;
+  no Makefile for `make check`; commit messages; the script's comments.
 - Right: no Important finding on content (an APPROVE or only Minor/NEUTRAL findings); the
-  troubleshooting part kept. Common wrong: over-cuts on the troubleshooting part.
+  troubleshooting part kept; no ask to document the automatic `npm install`. Common wrong:
+  over-cuts on the troubleshooting part (as a copy of the script's comment); under-cuts by asking
+  for an `npm install` step.
 
 ---
 

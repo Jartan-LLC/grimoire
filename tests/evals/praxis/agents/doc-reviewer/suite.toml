@@ -5,10 +5,10 @@
 # same pattern); bloat cases give the doc as those fix commits grew it. Guards: the reviewer still
 # catches the wrong fact planted in each lean and bloat doc and a wrong default, a dead link and a
 # wrong flag in the cost cases, and leaves alone a troubleshooting part at the end and the
-# prerequisite and recovery lines of lean-backup, lean-merge and lean-dotlink. Must hold: it still
-# raises a missing data-loss warning. The gain is graded by a blind panel (under [pass_rule]).
-# tests/evals/README.md says how the suite is run. No baselines yet: until `make eval-run ...
-# RECORD=1` draws them, every case is committed as a regression case.
+# prerequisite and recovery lines of lean-backup, lean-merge, lean-dotlink and lean-migrate. Must
+# hold: it still raises a missing data-loss warning. The gain is graded by a blind panel (under
+# [pass_rule]). tests/evals/README.md says how the suite is run. No baselines yet: until `make
+# eval-run ... RECORD=1` draws them, every case is committed as a regression case.
 target = "praxis:doc-reviewer"
 # Cases moved off a held-out split, each with its reason in a comment.
 BURNED = [
@@ -28,6 +28,10 @@ BURNED = [
   "lean-ratchet-sync",
   "lean-watch",
   "troubleshoot-ok",
+  # Broken on that screen: lean-dotlink's install.sh overwrote an existing <file>.orig, which its
+  # fix commits say it never does, and troubleshoot-upload's publish.sh was a stub. Fixed on dev.
+  "lean-dotlink",
+  "troubleshoot-upload",
 ]
 # The agent preloads plain-writing, which holds the rule; `none` cuts the agent's body only, so a
 # positive control for the rule is a copy of plain-writing without it, screened as `new`.
@@ -74,13 +78,13 @@ margin = 0.2
 # The wrong fact planted in each lean and bloat doc, and the cost cases' wrong default, dead link
 # and wrong flag, raised at Important or above; no Critical or Important finding that rates a
 # troubleshooting part at the end as Bloat or asks to cut it, so one that asks to verify or move it
-# passes; in lean-backup, lean-merge and lean-dotlink, no finding that rates the doc's prerequisite
-# or recovery as Bloat or asks to cut it, at any rating, as `rare` counts an ask to add at any
-# rating, because a fix round applies a Minor finding too. Each pattern is the planted error's own
-# wording, and a stated value is not read from a line number, so a Bloat finding that does not
-# raise the error fails; a failing reference per case holds one. A word for the prerequisite or
-# recovery names only that line, never the planted error (`.bak`) or a rare case (an existing
-# `<file>.orig` that is never overwritten).
+# passes; in lean-backup, lean-merge, lean-dotlink and lean-migrate, no finding that rates the
+# doc's prerequisite or recovery as Bloat or asks to cut it, at any rating, as `rare` counts an ask
+# to add at any rating, because a fix round applies a Minor finding too. Each pattern is the
+# planted error's own wording, and a stated value is not read from a line number, so a Bloat
+# finding that does not raise the error fails; a failing reference per case holds one. A word for
+# the prerequisite or recovery names only that line, never the planted error (`.bak`) or a rare
+# case (an existing `<file>.orig` that is never overwritten).
 
 [[metric]]
 id = "harm"
