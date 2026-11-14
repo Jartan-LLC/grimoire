@@ -505,7 +505,7 @@ def test_a_budget_stops_retries_and_counts_each_attempt_it_ran(
     assert [a["usage"] for a in stored.attempts or []] == [{"cost_usd": 2.0}]
 
 
-def test_a_budget_refusing_a_limited_samples_retry_does_not_wait_for_it(
+def test_a_budget_refusing_a_limited_samples_retry_neither_waits_nor_trips_the_breaker(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     case = load_suite(write_suite(tmp_path / "suite")).cases[0]
@@ -523,9 +523,13 @@ def test_a_budget_refusing_a_limited_samples_retry_does_not_wait_for_it(
     monkeypatch.setattr(session, "_session", limited)
     monkeypatch.setattr(session.time, "sleep", waits.append)
     budget = session.Budget(5.0)  # after 4.5, a retry expected at 4.5 passes it
-    session.run_sample(case, Arm("new", "h", {}), 0, spec, budget=budget)
+    breaker = session.Breaker()
+    for _ in range(session.BREAKER - 1):
+        breaker.record(limited=True)
+    session.run_sample(case, Arm("new", "h", {}), 0, spec, breaker, budget=budget)
     assert (budget.sessions, budget.refused) == (1, 1)
     assert waits == []
+    assert not breaker.tripped.is_set()
 
 
 def test_preflight_stops_when_the_sample_venv_cannot_import_pytest(

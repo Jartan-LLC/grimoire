@@ -751,13 +751,13 @@ def run_sample(  # noqa: PLR0913 -- `breaker` and `budget` are the run's, shared
     once limits persist; a sample not started then is returned as not run and not
     saved. `budget` counts each session's cost and starts none, a retry included, past
     its ceiling: a sample it does not start is returned as not run and not saved, and one
-    it does not retry is saved excluded. A sample the arm spoiled is valid and counts.
-    The arm's name is part of the key, so `new` never reuses `old`'s sessions even when
-    their plugins are identical, and `spec.screen` is too, so each screen draws fresh
-    samples for both arms while a rerun of the same screen resumes it. RUNNER is in
-    every key, REMOTE_RUNNER in a remote case's only, and a timeout other than TIMEOUT_S
-    or an `env` in its suite's only, so a changed timeout draws new samples instead of
-    reusing the ones it cut off.
+    it does not retry is saved excluded and not counted by `breaker`. A sample the arm
+    spoiled is valid and counts. The arm's name is part of the key, so `new` never reuses
+    `old`'s sessions even when their plugins are identical, and `spec.screen` is too, so
+    each screen draws fresh samples for both arms while a rerun of the same screen resumes
+    it. RUNNER is in every key, REMOTE_RUNNER in a remote case's only, and a timeout other
+    than TIMEOUT_S or an `env` in its suite's only, so a changed timeout draws new samples
+    instead of reusing the ones it cut off.
 
     The saved sample keeps every earlier attempt at its key in `attempts`, a stored
     excluded sample's own and its attempts included, so the store holds the cost of
@@ -780,16 +780,18 @@ def run_sample(  # noqa: PLR0913 -- `breaker` and `budget` are the run's, shared
             {}, {},
         )  # fmt: skip
     sample, text = drawn
+    refused = False
     for attempt in range(RETRIES):
         if sample.valid:
             break
         if limited(sample) and (budget is None or budget.admits(spec.budget_usd)):
             time.sleep(BACKOFF_S * 2**attempt)
         if (retried := _budgeted(case, arm, index, spec, sample_key, budget=budget)) is None:
+            refused = True
             break
         earlier.append(attempt_of(sample))
         sample, text = retried
-    if breaker is not None:
+    if breaker is not None and not refused:
         breaker.record(limited(sample))
     sample = replace(sample, attempts=earlier)
     cache.save(spec.store, sample, text)
