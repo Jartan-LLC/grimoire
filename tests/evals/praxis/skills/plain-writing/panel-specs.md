@@ -15,8 +15,9 @@ after the dev smoke to follow the last "Always keep" item.
 
 Case paths below are relative to `tests/evals/praxis/skills/plain-writing/cases/<case>/`.
 "commit N" means the Nth entry of the COMMITS list in that case's build.py (the branch the writer
-worked on). "SKILL.md:N" is a line of plain-writing's SKILL.md at 3f2679c, the text these specs were graded against; later edits shift some lines and reword the warning sentence. Two rule
-lines decide most screen and confirm items: SKILL.md:24-25 ("What the program handles on its own
+worked on). "SKILL.md:N" is a line of plain-writing's SKILL.md as these specs were graded against
+it, before its warning sentence gained a line: from line 31 on, the same text now sits one line
+later. Two rule lines decide most screen and confirm items: SKILL.md:24-25 ("What the program handles on its own
 -- a case it skips, fixes or reports with its own remedy -- needs no line") and SKILL.md:28-30 (a
 warning before data loss, a leaked secret or a step that cannot be undone "stays where the reader
 acts, however rare").
