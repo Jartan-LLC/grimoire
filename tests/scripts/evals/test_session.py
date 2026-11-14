@@ -447,6 +447,64 @@ def test_a_rerun_carries_a_stored_excluded_samples_attempts_forward(
     assert costs == [{"cost_usd": 1.0}] * (session.RETRIES + 1)
 
 
+def test_a_budget_expects_the_cap_until_a_session_finishes_then_the_mean() -> None:
+    budget = session.Budget(10.0)
+    assert budget.start(4.0)
+    assert budget.start(4.0)  # 0 spent + 2 sessions x 4 expected
+    assert not budget.start(4.0)  # 3 x 4 would pass 10
+    budget.finish(1.0, 4.0)
+    budget.finish(3.0, 4.0)
+    assert budget.spent_usd == 4.0
+    for _ in range(3):  # 4 spent + 3 sessions x the mean of 2
+        assert budget.start(4.0)
+    assert not budget.start(4.0)
+    assert budget.refused == 2
+
+
+def test_a_budget_counts_a_session_of_unknown_cost_at_its_cap() -> None:
+    budget = session.Budget()
+    assert budget.start(4.0)
+    budget.finish(None, 4.0)
+    assert (budget.spent_usd, budget.sessions, budget.unknown) == (4.0, 1, 1)
+    for _ in range(100):  # no ceiling: every session starts
+        assert budget.start(4.0)
+
+
+def test_a_budget_refusing_a_sample_returns_it_not_run_without_a_session(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case = load_suite(write_suite(tmp_path / "suite")).cases[0]
+    spec = session.Spec("m", "v", 4.0, tmp_path, tmp_path / "store")
+
+    def no_session(*_: object) -> None:
+        raise AssertionError("a budget past its ceiling must not start a session")
+
+    monkeypatch.setattr(session, "_session", no_session)
+    budget = session.Budget(3.0)
+    sample = session.run_sample(case, Arm("new", "h", {}), 0, spec, budget=budget)
+    assert not sample.valid
+    assert sample.reasons == [session.Budget.REFUSED]
+    assert cache.load(spec.store, sample.key) is None
+    assert (budget.sessions, budget.refused) == (0, 1)
+
+
+def test_a_budget_stops_retries_and_counts_each_attempt_it_ran(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case = load_suite(write_suite(tmp_path / "suite")).cases[0]
+    spec = session.Spec("m", "v", 4.0, tmp_path, tmp_path / "store")
+    left = scripted_sessions(monkeypatch, [2.0, 2.5, 1.0], valid_last=False)
+    budget = session.Budget(5.0)  # after 2.0 then 2.5, a third session expected at 2.25 passes it
+    sample = session.run_sample(case, Arm("new", "h", {}), 0, spec, budget=budget)
+    assert left == [1.0]
+    assert (budget.spent_usd, budget.sessions, budget.refused) == (4.5, 2, 1)
+    stored = cache.load(spec.store, sample.key)
+    assert stored is not None
+    assert not stored.valid
+    assert stored.usage == {"cost_usd": 2.5}
+    assert [a["usage"] for a in stored.attempts or []] == [{"cost_usd": 2.0}]
+
+
 def test_preflight_stops_when_the_sample_venv_cannot_import_pytest(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

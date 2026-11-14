@@ -5,7 +5,8 @@ The recorded baselines and verdicts rest on its samples, so it is data, not a ca
 lives as long as the clone, out of reach of a container restart that clears `~/.cache`,
 and git neither tracks nor cleans it. Under `plans/` are each branch's fixed plans:
 deleting those drops the pin, so the next screen fixes whatever plan it runs. Rerunning
-after a usage-limit stop skips every valid sample already here; excluded ones are retried.
+after a usage-limit or spend-ceiling stop skips every valid sample already here; excluded
+ones are retried.
 Judges keep their answers under `judgments/` and labellers theirs under `labels/`
 (`jury.py`, `labeller.py`).
 """

@@ -510,9 +510,11 @@ def _session(
         heads = build_fixture(case, repo, env)
         if case.hash() != case.pinned():
             reason = "the case changed on disk during the run; rerun once the checkout is settled"
+            no_session: dict[str, object] = {"cost_usd": 0.0}
             sample = cache.Sample(
-                sample_key, case.id, arm.name, index, arm.plugins, False, [reason], [], "", {}, {}
-            )
+                sample_key, case.id, arm.name, index, arm.plugins, False, [reason], [], "", {},
+                no_session,
+            )  # fmt: skip
             return sample, ""
         if case.remote:
             heads += add_origin(repo, sandbox / "origin.git", env)
@@ -614,6 +616,65 @@ class Breaker:
                 self.tripped.set()
 
 
+class Budget:
+    """What a run's sessions spent, and the spend ceiling past which it starts none.
+
+    Shared by the run's worker threads. A session, a retry included, starts only while
+    the spend so far plus the expected cost of each session running and of the new one
+    stays within `max_usd`; with no `max_usd` every session starts. A session's expected
+    cost is the mean of those the run finished at a known cost, or its per-session budget
+    until one has. A session whose cost is unknown (killed at the timeout before its
+    `result` event) is counted at that budget. The ceiling rests on that estimate: the
+    sessions running when it is reached can pass it by what they cost above the mean.
+    """
+
+    REFUSED = "not run: starting it could pass the spend ceiling; rerun to resume"
+
+    def __init__(self, max_usd: float | None = None) -> None:
+        """A budget with nothing spent, whose ceiling is `max_usd`, if any."""
+        self.max_usd = max_usd
+        self._lock = threading.Lock()
+        self._running = 0
+        self._known_usd = 0.0
+        self._known = 0
+        self.spent_usd = 0.0
+        self.sessions = 0
+        self.unknown = 0
+        self.refused = 0
+
+    def start(self, cap_usd: float) -> bool:
+        """Reserve a session whose budget is `cap_usd`; False, counted as refused, past the ceiling."""
+        with self._lock:
+            expected = self._known_usd / self._known if self._known else cap_usd
+            if (
+                self.max_usd is not None
+                and self.spent_usd + expected * (self._running + 1) > self.max_usd
+            ):
+                self.refused += 1
+                return False
+            self._running += 1
+            return True
+
+    def finish(self, cost_usd: float | None, cap_usd: float) -> None:
+        """Count a started session as spent: `cost_usd`, or `cap_usd` when its cost is unknown."""
+        with self._lock:
+            self._running -= 1
+            self.sessions += 1
+            if cost_usd is None:
+                self.unknown += 1
+                self.spent_usd += cap_usd
+                return
+            self._known += 1
+            self._known_usd += cost_usd
+            self.spent_usd += cost_usd
+
+
+def cost(sample: cache.Sample) -> float | None:
+    """The sample's session cost, or None when its trace gave none."""
+    value = sample.usage.get("cost_usd")
+    return float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else None
+
+
 def limited(sample: cache.Sample) -> bool:
     """Whether the sample was excluded because the API limited requests."""
     return not sample.valid and any(LIMITED.search(reason) for reason in sample.reasons)
@@ -659,8 +720,14 @@ def key_of(case: Case, arm: Arm, index: int, spec: Spec) -> str:
     )
 
 
-def run_sample(
-    case: Case, arm: Arm, index: int, spec: Spec, breaker: Breaker | None = None
+def run_sample(  # noqa: PLR0913 -- `breaker` and `budget` are the run's, shared by its samples
+    case: Case,
+    arm: Arm,
+    index: int,
+    spec: Spec,
+    breaker: Breaker | None = None,
+    *,
+    budget: Budget | None = None,
 ) -> cache.Sample:
     """The stored sample for (case, arm, model, version, index), running the session if missing.
 
@@ -669,12 +736,15 @@ def run_sample(
     for its reasons, never reused: the next run retries it too. When the API limits
     requests, each retry first waits, BACKOFF_S doubling, and `breaker` stops the run
     once limits persist; a sample not started then is returned as not run and not
-    saved. A sample the arm spoiled is valid and counts. The arm's name is part of the
-    key, so `new` never reuses `old`'s sessions even when their plugins are identical,
-    and `spec.screen` is too, so each screen draws fresh samples for both arms while a
-    rerun of the same screen resumes it. RUNNER is in every key, REMOTE_RUNNER in a
-    remote case's only, and a timeout other than TIMEOUT_S or an `env` in its suite's
-    only, so a changed timeout draws new samples instead of reusing the ones it cut off.
+    saved. `budget` counts each session's cost and starts none, a retry included, past
+    its ceiling: a sample it does not start is returned as not run and not saved, and one
+    it does not retry is saved excluded. A sample the arm spoiled is valid and counts.
+    The arm's name is part of the key, so `new` never reuses `old`'s sessions even when
+    their plugins are identical, and `spec.screen` is too, so each screen draws fresh
+    samples for both arms while a rerun of the same screen resumes it. RUNNER is in
+    every key, REMOTE_RUNNER in a remote case's only, and a timeout other than TIMEOUT_S
+    or an `env` in its suite's only, so a changed timeout draws new samples instead of
+    reusing the ones it cut off.
 
     The saved sample keeps every earlier attempt at its key in `attempts`, a stored
     excluded sample's own and its attempts included, so the store holds the cost of
@@ -690,19 +760,43 @@ def run_sample(
             sample_key, case.id, arm.name, index, arm.plugins, False, [reason], [], "", {}, {}
         )
     earlier = [*(cached.attempts or []), attempt_of(cached)] if cached is not None else []
-    sample, text = _session(case, arm, index, spec, sample_key)
+    drawn = _budgeted(case, arm, index, spec, sample_key, budget=budget)
+    if drawn is None:
+        return cache.Sample(
+            sample_key, case.id, arm.name, index, arm.plugins, False, [Budget.REFUSED], [], "",
+            {}, {},
+        )  # fmt: skip
+    sample, text = drawn
     for attempt in range(RETRIES):
         if sample.valid:
             break
         if limited(sample):
             time.sleep(BACKOFF_S * 2**attempt)
+        if (retried := _budgeted(case, arm, index, spec, sample_key, budget=budget)) is None:
+            break
         earlier.append(attempt_of(sample))
-        sample, text = _session(case, arm, index, spec, sample_key)
+        sample, text = retried
     if breaker is not None:
         breaker.record(limited(sample))
     sample = replace(sample, attempts=earlier)
     cache.save(spec.store, sample, text)
     return sample
+
+
+def _budgeted(  # noqa: PLR0913 -- `_session`'s arguments and the run's budget
+    case: Case, arm: Arm, index: int, spec: Spec, sample_key: str, *, budget: Budget | None
+) -> tuple[cache.Sample, str] | None:
+    """One session at `sample_key`, counted in `budget`; None when the budget does not start it."""
+    if budget is None:
+        return _session(case, arm, index, spec, sample_key)
+    if not budget.start(spec.budget_usd):
+        return None
+    drawn = None
+    try:
+        drawn = _session(case, arm, index, spec, sample_key)
+    finally:
+        budget.finish(None if drawn is None else cost(drawn[0]), spec.budget_usd)
+    return drawn
 
 
 def attempt_of(sample: cache.Sample) -> dict[str, object]:

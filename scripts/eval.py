@@ -9,7 +9,8 @@
   run SUITE --arm A   run SUITE's cases on arm none, old or new (spends inference)
   screen SUITE        run old and new side by side, then print the verdict (spends inference)
                       run and screen call no judge without --judge: a judged metric that
-                      lacks a kept answer on any sample is reported as not judged
+                      lacks a kept answer on any sample is reported as not judged; with
+                      --max-usd they start no session that could pass that spend
   show KEY            print one stored sample: its commits, final reply, every gh call logged
                       and the gh text graded, deliveries and writes by agent, and subagents'
                       briefs and reports
@@ -22,7 +23,7 @@
                       gold items; on held-out, write its stamp (spends inference)
 
 Sessions use the caller's own `claude` login; nothing here runs in CI. Samples are kept
-(see scripts/evals/cache.py), so a rerun after a usage-limit stop resumes.
+(see scripts/evals/cache.py), so a rerun after a usage-limit or spend-ceiling stop resumes.
 """
 
 import argparse
@@ -158,21 +159,41 @@ def build_arm(name: str, suite: Suite, base: str, new_ref: str | None, store: pa
 type Work = tuple[Case, Arm, int, session.Spec]
 
 
-def run_samples(work: list[Work], jobs: int) -> list[cache.Sample]:
-    """Every (case, arm, index, spec) sample, in order, running the missing ones `jobs` at a time."""
+def run_samples(work: list[Work], jobs: int, max_usd: float | None = None) -> list[cache.Sample]:
+    """Every (case, arm, index, spec) sample, in order, running the missing ones `jobs` at a time.
+
+    Starts no session that could take the run's spend past `max_usd` (`session.Budget`),
+    and prints what the run's sessions spent.
+    """
     session.preflight()
     breaker = session.Breaker()
+    budget = session.Budget(max_usd)
 
     def one(item: Work) -> cache.Sample:
         case, arm, index, spec = item
-        sample = session.run_sample(case, arm, index, spec, breaker)
+        sample = session.run_sample(case, arm, index, spec, breaker, budget=budget)
         state = "ok" if sample.valid else "EXCLUDED " + "; ".join(sample.reasons)
         state += f" (spoiled: {sample.spoiled})" if sample.spoiled else ""
         print(f"  {arm.name} {case.id} #{index}: {state}: {sample.key}", flush=True)
         return sample
 
     with ThreadPoolExecutor(max_workers=jobs) as pool:
-        return list(pool.map(one, work))
+        done = list(pool.map(one, work))
+    print(spend_line(budget), flush=True)
+    return done
+
+
+def spend_line(budget: session.Budget) -> str:
+    """What a run's sessions spent, retries included, and the starts its ceiling refused."""
+    line = f"spent ${budget.spent_usd:.2f} on {budget.sessions} sessions, retries included"
+    if budget.unknown:
+        line += f"; {budget.unknown} of unknown cost, counted at the suite's budget_usd"
+    if budget.refused:
+        line += (
+            f"; {budget.refused} session starts refused by the ${budget.max_usd:g} ceiling, "
+            "rerun to resume"
+        )
+    return line
 
 
 def parsed_trace(store: pathlib.Path, sample: cache.Sample) -> trace.Trace:
@@ -545,7 +566,7 @@ def screen(args: argparse.Namespace, suite: Suite, spec: session.Spec, store: pa
             "Nothing was run. Fix a new plan with --new-plan (NEW_PLAN=1 with make) and say so in the PR."
         )
         return 1
-    done = run_samples(work, args.jobs)
+    done = run_samples(work, args.jobs, args.max_usd)
     if args.judge:
         fill_judgments(suite, done, store, args.jobs)
     for t in trials:
@@ -1049,6 +1070,17 @@ def record_baseline(  # noqa: PLR0913 -- `remote` adds a line to the entry the o
     key.write_text("\n\n".join([*kept, entry]) + "\n")
 
 
+def positive_usd(text: str) -> float:
+    """A dollar amount above 0, for --max-usd."""
+    try:
+        value = float(text)
+    except ValueError:
+        value = 0.0
+    if not value > 0:
+        raise argparse.ArgumentTypeError(f"needs a dollar amount above 0, not {text!r}")
+    return value
+
+
 def _parser() -> argparse.ArgumentParser:
     """The command line: one subcommand per make target."""
     parser = argparse.ArgumentParser(
@@ -1084,6 +1116,13 @@ def _parser() -> argparse.ArgumentParser:
         cmd.add_argument("--base", default="main")
         cmd.add_argument("--model", default=None)
         cmd.add_argument("--jobs", type=int, default=12, help="sessions at a time")
+        cmd.add_argument(
+            "--max-usd",
+            type=positive_usd,
+            default=None,
+            help="start no session, a retry included, that could take this run's spend past "
+            "it; the rest are not run, and a rerun resumes (judge calls are not counted)",
+        )
         cmd.add_argument(
             "--judge",
             action="store_true",
@@ -1132,7 +1171,8 @@ MISSES = 10  # indices in a row with no stored sample that end the search for mo
 def drawn_samples(store: pathlib.Path, key: Callable[[int], str]) -> list[cache.Sample]:
     """The stored samples at `key(0)`, `key(1)` and on, until MISSES indices in a row hold none.
 
-    A gap (a sample a usage-limit stop never ran) does not end the search early.
+    A gap (a sample a usage-limit or spend-ceiling stop never ran) does not end the search
+    early.
     """
     found: list[cache.Sample] = []
     index, missed = 0, 0
@@ -1463,7 +1503,8 @@ def main() -> int:
         raise SystemExit("--record writes baselines for none and old only")
     arm = build_arm(args.arm, suite, args.base, args.new_ref, store)
     cases = [c for c in suite.split(args.split) if not args.cases or c.id in args.cases.split(",")]
-    done = run_samples([(c, arm, i, spec) for i in range(args.samples) for c in cases], args.jobs)
+    work = [(c, arm, i, spec) for i in range(args.samples) for c in cases]
+    done = run_samples(work, args.jobs, args.max_usd)
     if args.judge:
         fill_judgments(suite, done, store, args.jobs)
     print(usage_line(arm.name, done))
