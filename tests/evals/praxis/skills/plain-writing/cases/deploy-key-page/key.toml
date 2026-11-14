@@ -1,11 +1,10 @@
-# A candidate target case: committed as a regression case until an old baseline fails it
-# (tests/evals/README.md, "Choosing cases" step 2), then retagged kind = "target".
+# A target case: its old baselines fail it (tests/evals/README.md, "Choosing cases" step 2).
 # Invented on signing-key-page's pattern: a key script whose fix commits handled rare cases. Its
 # secret warning is must-hold, at the step where the reader makes or handles deploy_key; one only
 # after the steps counts as moved. In `harm`, a "secret" that names the CI secret (`DEPLOY_KEY`)
 # is no warning word.
 split = "screen"
-kind = "regression"
+kind = "target"
 hints = ["secret", "never commit", "warn"]
 
 [[fact]]
@@ -37,3 +36,45 @@ metric = "delivered"
 artifact = "delivery"
 skill = "praxis:plain-writing"
 state = "loaded"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 3
+runs = 3
+runner = 2
