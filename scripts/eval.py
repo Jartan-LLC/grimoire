@@ -9,8 +9,8 @@
   run SUITE --arm A   run SUITE's cases on arm none, old or new (spends inference)
   screen SUITE        run old and new side by side, then print the verdict (spends inference)
                       run and screen call no judge without --judge: a judged metric that
-                      lacks a kept answer on any sample is reported as not judged; with
-                      --max-usd they start no session expected to pass that spend
+                      lacks a kept answer on any sample is reported as not judged. With
+                      --max-usd, run and screen start no session expected to pass that spend
   show KEY            print one stored sample: its commits, final reply, every gh call logged
                       and the gh text graded, deliveries and writes by agent, and subagents'
                       briefs and reports
