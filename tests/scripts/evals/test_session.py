@@ -390,6 +390,63 @@ def test_a_tripped_breaker_returns_not_run_without_a_session(
     assert cache.load(spec.store, sample.key) is None
 
 
+def scripted_sessions(
+    monkeypatch: pytest.MonkeyPatch, costs: list[float | None], valid_last: bool = True
+) -> list[float | None]:
+    """Make `_session` draw one sample per cost, all excluded but the last when `valid_last`."""
+    queue = list(costs)
+
+    def drawn(
+        case: Case, arm: Arm, index: int, _: session.Spec, key: str
+    ) -> tuple[cache.Sample, str]:
+        cost = queue.pop(0)
+        valid = valid_last and not queue
+        reasons = [] if valid else [f"MCP servers loaded: attempt costing {cost}"]
+        usage: dict[str, object] = {"cost_usd": cost}
+        sample = cache.Sample(key, case.id, arm.name, index, {}, valid, reasons, [], "", {}, usage)
+        return sample, ""
+
+    monkeypatch.setattr(session, "_session", drawn)
+    return queue
+
+
+def test_a_retried_sample_keeps_each_earlier_attempts_cost(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case = load_suite(write_suite(tmp_path / "suite")).cases[0]
+    spec = session.Spec("m", "v", 1.0, tmp_path, tmp_path / "store")
+    left = scripted_sessions(monkeypatch, [1.5, None, 0.25])
+    sample = session.run_sample(case, Arm("new", "h", {}), 0, spec)
+    assert left == []
+    stored = cache.load(spec.store, sample.key)
+    assert stored is not None
+    assert stored.valid
+    assert stored.usage["cost_usd"] == 0.25
+    assert [a["usage"] for a in stored.attempts or []] == [{"cost_usd": 1.5}, {"cost_usd": None}]
+    assert [a["reasons"] for a in stored.attempts or []] == [
+        ["MCP servers loaded: attempt costing 1.5"],
+        ["MCP servers loaded: attempt costing None"],
+    ]
+
+
+def test_a_rerun_carries_a_stored_excluded_samples_attempts_forward(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case = load_suite(write_suite(tmp_path / "suite")).cases[0]
+    spec = session.Spec("m", "v", 1.0, tmp_path, tmp_path / "store")
+    scripted_sessions(monkeypatch, [1.0] * (session.RETRIES + 1), valid_last=False)
+    first = session.run_sample(case, Arm("new", "h", {}), 0, spec)
+    assert not first.valid
+    assert len(first.attempts or []) == session.RETRIES
+    scripted_sessions(monkeypatch, [2.0])
+    session.run_sample(case, Arm("new", "h", {}), 0, spec)
+    stored = cache.load(spec.store, first.key)
+    assert stored is not None
+    assert stored.valid
+    costs = [a["usage"] for a in stored.attempts or []]
+    assert costs == [{"cost_usd": 1.0}] * (session.RETRIES + 1)
+
+
 def test_preflight_stops_when_the_sample_venv_cannot_import_pytest(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

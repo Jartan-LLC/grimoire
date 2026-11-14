@@ -84,6 +84,10 @@ class Sample:
     # Each `verify` command run on the final tree and its exit code, None for a timeout; None
     # in samples drawn before it was kept.
     verified: dict[str, int | None] | None = None
+    # Each earlier attempt at this key, oldest first, those of earlier runs included: its
+    # `reasons` and `usage`, so what the key cost is this sample's `cost_usd` plus theirs. None
+    # in samples drawn before attempts were kept.
+    attempts: list[dict[str, object]] | None = None
 
 
 def _paths(store: pathlib.Path, sample_key: str) -> tuple[pathlib.Path, pathlib.Path]:

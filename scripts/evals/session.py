@@ -675,23 +675,36 @@ def run_sample(
     rerun of the same screen resumes it. RUNNER is in every key, REMOTE_RUNNER in a
     remote case's only, and a timeout other than TIMEOUT_S or an `env` in its suite's
     only, so a changed timeout draws new samples instead of reusing the ones it cut off.
+
+    The saved sample keeps every earlier attempt at its key in `attempts`, a stored
+    excluded sample's own and its attempts included, so the store holds the cost of
+    every session drawn for the key.
     """
     sample_key = key_of(case, arm, index, spec)
-    if (cached := cache.load(spec.store, sample_key)) is not None and cached.valid:
+    cached = cache.load(spec.store, sample_key)
+    if cached is not None and cached.valid:
         return cached
     if breaker is not None and breaker.tripped.is_set():
         reason = "not run: the API kept limiting requests; rerun later to resume"
         return cache.Sample(
             sample_key, case.id, arm.name, index, arm.plugins, False, [reason], [], "", {}, {}
         )
+    earlier = [*(cached.attempts or []), attempt_of(cached)] if cached is not None else []
     sample, text = _session(case, arm, index, spec, sample_key)
     for attempt in range(RETRIES):
         if sample.valid:
             break
         if limited(sample):
             time.sleep(BACKOFF_S * 2**attempt)
+        earlier.append(attempt_of(sample))
         sample, text = _session(case, arm, index, spec, sample_key)
     if breaker is not None:
         breaker.record(limited(sample))
+    sample = replace(sample, attempts=earlier)
     cache.save(spec.store, sample, text)
     return sample
+
+
+def attempt_of(sample: cache.Sample) -> dict[str, object]:
+    """What a sample's `attempts` keeps of an attempt drawn before it."""
+    return {"reasons": sample.reasons, "usage": sample.usage}
