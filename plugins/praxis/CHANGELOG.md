@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.0
+
+- `find-duplicate-comments.js` from `comment-hygiene` takes two new flags. `--worktree` also checks the comments your uncommitted changes, staged or not, and your untracked files add, and checks them against the files as they are now, so a duplicate you have fixed stops reporting before you commit the fix. `--all` checks every comment in the repo, not only the ones a diff adds. Without them, the script checks what it checked before. It now works the same from any directory in the repo: run from a subdirectory, it used to find nothing and report clean.
+
 ## 2.4.0
 
 - Subagents are told to load the skills their task calls for before their first tool call, as the main thread already is: skills for the code's language and libraries and for the kind of work, beside any their brief names. Before, a subagent that wrote or reviewed Python almost never loaded a pythonica skill.
