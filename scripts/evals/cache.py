@@ -5,7 +5,8 @@ The recorded baselines and verdicts rest on its samples, so it is data, not a ca
 lives as long as the clone, out of reach of a container restart that clears `~/.cache`,
 and git neither tracks nor cleans it. Under `plans/` are each branch's fixed plans:
 deleting those drops the pin, so the next screen fixes whatever plan it runs. Rerunning
-after a usage-limit stop skips every valid sample already here; excluded ones are retried.
+after a usage-limit or spend-ceiling stop skips every valid sample already here; excluded
+ones are retried.
 Judges keep their answers under `judgments/` and labellers theirs under `labels/`
 (`jury.py`, `labeller.py`).
 """
@@ -84,6 +85,11 @@ class Sample:
     # Each `verify` command run on the final tree and its exit code, None for a timeout; None
     # in samples drawn before it was kept.
     verified: dict[str, int | None] | None = None
+    # Each earlier attempt at this key, oldest first, those of earlier runs included: its
+    # `reasons` and `usage`, so what the key cost is this sample's `cost_usd` plus theirs, where
+    # a session cut off before it reported its cost has a `cost_usd` of None. None in samples
+    # drawn before attempts were kept.
+    attempts: list[dict[str, object]] | None = None
 
 
 def _paths(store: pathlib.Path, sample_key: str) -> tuple[pathlib.Path, pathlib.Path]:
