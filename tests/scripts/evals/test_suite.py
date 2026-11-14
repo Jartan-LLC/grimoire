@@ -1,7 +1,7 @@
 import pathlib
 
 import pytest
-from evals.suite import Reply, SuiteError, glob_match, load_suite, older
+from evals.suite import Reply, SuiteError, glob_match, load_suite, older, target_files
 from helpers import JUDGE, JUDGED, KEY, SUITE, write_suite
 
 
@@ -476,6 +476,11 @@ def test_older_compares_versions_number_by_number() -> None:
     assert not older("2.1", "2.1.0")
     assert older("2.0", "2.0.1")
     assert older("no version", "2.1.0")
+
+
+def test_a_hook_script_target_is_its_own_path_and_any_other_a_skill_agent_or_command() -> None:
+    assert target_files("hooks/scripts/x.js") == ("hooks/scripts/x.js",)
+    assert target_files("x") == ("skills/x/SKILL.md", "agents/x.md", "commands/x.md")
 
 
 def test_without_counts_in_a_case_hash_only_when_set(tmp_path: pathlib.Path) -> None:

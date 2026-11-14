@@ -11,45 +11,22 @@
  * So this names no skill and ships no mapping -- relevance is judged by the
  * model at the moment it holds the task, the only place that information
  * exists. Praxis owns it alone: one instance, no cross-plugin coordination.
+ * The text per event lives in lib/skill-context.js; subagents, which never see
+ * UserPromptSubmit, get theirs through SubagentStart.
  *
  * The SessionStart entry in hooks.json reads CLAUDE_PLUGIN_ROOT inside node
  * rather than shell-interpolating it, so an unset value is a clean no-op instead
  * of a `node /hooks/scripts/...` ENOENT -- defensive across Claude Code versions.
- * That entry re-arms after a compact evicts loaded skills; every other
- * SessionStart is followed by a user prompt, which the UserPromptSubmit
- * registration covers.
+ * That entry re-arms skill activation after a compact (lib/skill-context.js
+ * says why).
  */
 
 const { readHookInput, output } = require('./lib/utils');
-
-const IMPERATIVE =
-  'BEFORE your first tool call: name the applicable skills and load them with Skill. If none, say so. When unsure, load.';
+const { contextFor } = require('./lib/skill-context');
 
 async function main() {
-  const input = await readHookInput();
-
-  const event = input.hook_event_name || '';
-  // An unread or unparsed payload leaves the event unknown. Saying nothing is
-  // right: guessing would both skip the compact-only gate below and label the
-  // output with an event that did not happen.
-  if (!event) process.exit(0);
-
-  const isSessionStart = event === 'SessionStart';
-
-  // A compact evicts loaded skill bodies while the session continues, and
-  // praxis ships a hook whose whole purpose is prompting more compaction.
-  // Re-arm there; every other SessionStart is followed by a user prompt anyway.
-  if (isSessionStart && input.source !== 'compact') {
-    process.exit(0);
-  }
-
-  output({
-    hookSpecificOutput: {
-      hookEventName: isSessionStart ? 'SessionStart' : 'UserPromptSubmit',
-      additionalContext: IMPERATIVE
-    }
-  });
-
+  const context = contextFor(await readHookInput());
+  if (context) output(context);
   process.exit(0);
 }
 

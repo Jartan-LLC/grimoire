@@ -25,7 +25,15 @@ from . import calibrate, jury
 from .grade import reference_scores
 from .proc import GIT, run
 from .session import REMOTE_RUNNER, RUNNER, build_fixture, git_env, verify
-from .suite import SESSION_ARTIFACTS, Case, Suite, SuiteError, load_suite, python_cache
+from .suite import (
+    SESSION_ARTIFACTS,
+    Case,
+    Suite,
+    SuiteError,
+    load_suite,
+    python_cache,
+    target_files,
+)
 
 
 def _verify(case: Case, command: str, fixed: bool) -> int | None:
@@ -149,15 +157,8 @@ def suite_problems(
     ]
     plugin, _, name = suite.target.partition(":")
     base = root / "plugins" / plugin
-    if not any(
-        p.is_file()
-        for p in (
-            base / "skills" / name / "SKILL.md",
-            base / "agents" / f"{name}.md",
-            base / "commands" / f"{name}.md",
-        )
-    ):
-        found.append(f"{where}: target {suite.target!r} is no skill, agent or command")
+    if not any((base / p).is_file() for p in target_files(name)):
+        found.append(f"{where}: target {suite.target!r} is no skill, agent, command or hook script")
     by_id = {c.id: c for c in suite.cases}
     for burned in suite.burned:
         if burned not in by_id:

@@ -175,7 +175,7 @@ def delivery_score(check: Check, parsed: trace.Trace) -> float:
     skill = str(check.skill)
     deliveries = [d for d in parsed.deliveries if d.agent == check.agent]
     if check.write is None:
-        loaded = any(d.skill == skill for d in deliveries)
+        loaded = any(trace.is_skill(skill, d.skill) for d in deliveries)
         return 1.0 if loaded == (check.state == "loaded") else 0.0
     own = dataclasses.replace(
         parsed, deliveries=deliveries, writes=[w for w in parsed.writes if w.agent == check.agent]

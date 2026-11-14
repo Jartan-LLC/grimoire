@@ -1,0 +1,1 @@
+One bad row in a 10,000-line orders file aborts the whole import in orders/importer.py. Ask a subagent to change import_batch so it imports the good rows and reports each bad one with its line number and what was wrong. Tests too.

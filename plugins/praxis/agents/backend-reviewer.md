@@ -1,7 +1,7 @@
 ---
 name: backend-reviewer
 description: Reviews backend code for patterns, async correctness, and security. Use after backend code changes.
-tools: Glob, Grep, Read, Bash
+tools: Glob, Grep, Read, Bash, Skill
 model: sonnet
 color: blue
 permissionMode: plan

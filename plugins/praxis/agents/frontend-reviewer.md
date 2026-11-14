@@ -1,7 +1,7 @@
 ---
 name: frontend-reviewer
 description: Reviews frontend code for design system compliance, accessibility, and responsive patterns. Use after frontend code changes.
-tools: Glob, Grep, Read, Bash
+tools: Glob, Grep, Read, Bash, Skill
 model: sonnet
 color: blue
 permissionMode: plan

@@ -1,0 +1,4 @@
+final = "Two: syncer/pull.py pull() tries three times with exponential backoff; syncer/push.py push() retries up to five times, one second apart."
+
+[briefs]
+"Explore" = "The task, as the main thread handed it over."

@@ -1,7 +1,7 @@
 ---
 name: doc-reviewer
 description: Reviews documentation for conciseness, accuracy, and consistency, and where information sits in the PR title, description and commit messages. Use on every PR.
-tools: Glob, Grep, Read, Bash
+tools: Glob, Grep, Read, Bash, Skill
 model: sonnet
 color: blue
 permissionMode: plan
