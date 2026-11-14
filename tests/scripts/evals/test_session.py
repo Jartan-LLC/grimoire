@@ -451,14 +451,13 @@ def test_a_budget_expects_the_cap_until_a_session_finishes_then_the_mean() -> No
     budget = session.Budget(10.0)
     assert budget.start(4.0)
     assert budget.start(4.0)  # 0 spent + 2 sessions x 4 expected
-    assert not budget.start(4.0)  # 3 x 4 would pass 10
+    assert not budget.admits(4.0)  # 3 x 4 would pass 10
     budget.finish(1.0, 4.0)
     budget.finish(3.0, 4.0)
     assert budget.spent_usd == 4.0
     for _ in range(3):  # 4 spent + 3 sessions x the mean of 2
         assert budget.start(4.0)
-    assert not budget.start(4.0)
-    assert budget.refused == 2
+    assert not budget.admits(4.0)
 
 
 def test_a_budget_counts_a_session_of_unknown_cost_at_its_cap() -> None:
@@ -468,6 +467,41 @@ def test_a_budget_counts_a_session_of_unknown_cost_at_its_cap() -> None:
     assert (budget.spent_usd, budget.sessions, budget.unknown) == (4.0, 1, 1)
     for _ in range(100):  # no ceiling: every session starts
         assert budget.start(4.0)
+
+
+def waiting_start(budget: session.Budget, cap_usd: float) -> tuple[threading.Thread, list[bool]]:
+    """Call `budget.start` in a thread; the list gets its answer once it returns."""
+    started: list[bool] = []
+    thread = threading.Thread(target=lambda: started.append(budget.start(cap_usd)), daemon=True)
+    thread.start()
+    thread.join(0.2)
+    return thread, started
+
+
+def test_a_start_past_the_ceiling_waits_for_a_running_session_and_starts_at_the_new_mean() -> None:
+    budget = session.Budget(10.0)
+    assert budget.start(4.0)
+    assert budget.start(4.0)
+    thread, started = waiting_start(budget, 4.0)
+    assert thread.is_alive()  # 3 x 4 would pass 10, and two sessions are running
+    budget.finish(1.0, 4.0)
+    thread.join(5)
+    assert started == [True]  # 1 spent + 2 sessions x the mean of 1
+    assert budget.refused == 0
+
+
+def test_a_waiting_start_is_refused_once_no_session_runs_and_the_ceiling_still_refuses() -> None:
+    budget = session.Budget(10.0)
+    assert budget.start(4.0)
+    assert budget.start(4.0)
+    thread, started = waiting_start(budget, 4.0)
+    budget.finish(None, 4.0)  # 4 spent + 2 sessions x 4 still passes 10, and one runs
+    thread.join(0.2)
+    assert thread.is_alive()
+    budget.finish(None, 4.0)  # 8 spent + 4 passes 10, and none runs
+    thread.join(5)
+    assert started == [False]
+    assert budget.refused == 1
 
 
 def test_a_budget_refusing_a_sample_returns_it_not_run_without_a_session(
@@ -532,6 +566,39 @@ def test_a_budget_refusing_a_limited_samples_retry_neither_waits_nor_trips_the_b
     assert not breaker.tripped.is_set()
 
 
+def test_a_limited_samples_retry_the_ceiling_holds_back_while_a_session_runs_waits_then_runs(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case = load_suite(write_suite(tmp_path / "suite")).cases[0]
+    spec = session.Spec("m", "v", 4.0, tmp_path, tmp_path / "store")
+    drawn: list[list[str]] = [["API Error: 429 rate limit"], []]
+
+    def session_(
+        case: Case, arm: Arm, index: int, _: session.Spec, key: str
+    ) -> tuple[cache.Sample, str]:
+        reasons = drawn.pop(0)
+        usage: dict[str, object] = {"cost_usd": 4.5}
+        valid = not reasons
+        sample = cache.Sample(key, case.id, arm.name, index, {}, valid, reasons, [], "", {}, usage)
+        return sample, ""
+
+    budget = session.Budget(10.0)
+    assert budget.start(4.0)  # another sample's session, still running
+    waits: list[float] = []
+
+    def backoff(seconds: float) -> None:
+        waits.append(seconds)
+        budget.finish(0.5, 4.0)  # the other session ends during the wait
+
+    monkeypatch.setattr(session, "_session", session_)
+    monkeypatch.setattr(session.time, "sleep", backoff)
+    # after 4.5 spent, a retry expected at 4.5 passes 10 beside the running session
+    sample = session.run_sample(case, Arm("new", "h", {}), 0, spec, budget=budget)
+    assert sample.valid
+    assert waits == [session.BACKOFF_S]
+    assert (budget.sessions, budget.refused) == (3, 0)
+
+
 def test_a_session_that_raises_counts_at_its_budget_and_frees_its_reservation(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -547,7 +614,7 @@ def test_a_session_that_raises_counts_at_its_budget_and_frees_its_reservation(
         session.run_sample(case, Arm("new", "h", {}), 0, spec, budget=budget)
     assert (budget.spent_usd, budget.sessions, budget.unknown) == (4.0, 1, 1)
     assert budget.start(4.0)  # 4 spent + 1 session x 4: none still reserved for the crash
-    assert not budget.start(4.0)
+    assert not budget.admits(4.0)
 
 
 def test_preflight_stops_when_the_sample_venv_cannot_import_pytest(
@@ -688,7 +755,7 @@ def test_a_case_changed_on_disk_counts_no_session_in_the_budget(tmp_path: pathli
     assert (budget.spent_usd, budget.sessions) == (2.0, 1)
     for _ in range(4):  # 2 spent + 4 sessions x the mean of 2, which no draw of it lowered
         assert budget.start(4.0)
-    assert not budget.start(4.0)
+    assert not budget.admits(4.0)
 
 
 def test_collect_reads_named_files_and_every_file_a_glob_matches_outside_git(

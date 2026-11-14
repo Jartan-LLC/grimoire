@@ -622,9 +622,11 @@ class Budget:
 
     Shared by the run's worker threads. A session, a retry included, starts only while
     the spend so far plus the expected cost of each session running and of the new one
-    stays within `max_usd`; with no `max_usd` every session starts. A session's expected
-    cost is the mean of those the run finished at a known cost, or its per-session budget
-    until one has. A session whose cost is unknown (killed at the timeout before its
+    stays within `max_usd`; with no `max_usd` every session starts. A start past it waits
+    for a running session to finish, which can lower the expected cost, and checks again;
+    it is refused only when no session is running. A session's expected cost is the mean
+    of those the run finished at a known cost, or its per-session budget until one has.
+    A session whose cost is unknown (killed at the timeout before its
     `result` event) is counted at that budget. The ceiling rests on that estimate: the
     sessions running when it is reached can pass it by what they cost above the mean.
     """
@@ -635,6 +637,7 @@ class Budget:
         """A budget with nothing spent, whose ceiling is `max_usd`, if any."""
         self.max_usd = max_usd
         self._lock = threading.Lock()
+        self._changed = threading.Condition(self._lock)
         self._running = 0
         self._known_usd = 0.0
         self._known = 0
@@ -654,9 +657,20 @@ class Budget:
             self.max_usd is None or self.spent_usd + expected * (self._running + 1) <= self.max_usd
         )
 
-    def start(self, cap_usd: float) -> bool:
-        """Reserve a session whose budget is `cap_usd`; False, counted as refused, past the ceiling."""
+    def refuses(self, cap_usd: float) -> bool:
+        """Whether `start` would refuse a session whose budget is `cap_usd` without waiting."""
         with self._lock:
+            return not self._admits(cap_usd) and not self._running
+
+    def start(self, cap_usd: float) -> bool:
+        """Reserve a session whose budget is `cap_usd`, waiting while it is past the ceiling.
+
+        It waits only while another session runs: False, counted as refused, when it is
+        still past the ceiling once none is running.
+        """
+        with self._changed:
+            while not self._admits(cap_usd) and self._running:
+                self._changed.wait()
             if not self._admits(cap_usd):
                 self.refused += 1
                 return False
@@ -665,21 +679,23 @@ class Budget:
 
     def release(self) -> None:
         """Free a reservation whose session never ran, counting nothing as spent."""
-        with self._lock:
+        with self._changed:
             self._running -= 1
+            self._changed.notify_all()
 
     def finish(self, cost_usd: float | None, cap_usd: float) -> None:
         """Count a started session as spent: `cost_usd`, or `cap_usd` when its cost is unknown."""
-        with self._lock:
+        with self._changed:
             self._running -= 1
             self.sessions += 1
             if cost_usd is None:
                 self.unknown += 1
                 self.spent_usd += cap_usd
-                return
-            self._known += 1
-            self._known_usd += cost_usd
-            self.spent_usd += cost_usd
+            else:
+                self._known += 1
+                self._known_usd += cost_usd
+                self.spent_usd += cost_usd
+            self._changed.notify_all()
 
 
 def cost(sample: cache.Sample) -> float | None:
@@ -750,10 +766,11 @@ def run_sample(  # noqa: PLR0913 -- `breaker` and `budget` are the run's, shared
     requests, each retry first waits, BACKOFF_S doubling, and `breaker` stops the run
     once limits persist; a sample not started then is returned as not run and not
     saved. `budget` counts each session's cost and starts none, a retry included, past
-    its ceiling: a sample it does not start is returned as not run and not saved, and one
-    it does not retry is saved excluded and not counted by `breaker`. A sample the arm
-    spoiled is valid and counts. The arm's name is part of the key, so `new` never reuses
-    `old`'s sessions even when their plugins are identical, and `spec.screen` is too, so
+    its ceiling (a start past it waits while another session runs): a sample it does not
+    start is returned as not run and not saved, and one it does not retry is saved
+    excluded and not counted by `breaker`. A sample the arm spoiled is valid and counts.
+    The arm's name is part of the key, so `new` never reuses `old`'s sessions even when
+    their plugins are identical, and `spec.screen` is too, so
     each screen draws fresh samples for both arms while a rerun of the same screen resumes
     it. RUNNER is in every key, REMOTE_RUNNER in a remote case's only, and a timeout other
     than TIMEOUT_S or an `env` in its suite's only, so a changed timeout draws new samples
@@ -784,7 +801,7 @@ def run_sample(  # noqa: PLR0913 -- `breaker` and `budget` are the run's, shared
     for attempt in range(RETRIES):
         if sample.valid:
             break
-        if limited(sample) and (budget is None or budget.admits(spec.budget_usd)):
+        if limited(sample) and (budget is None or not budget.refuses(spec.budget_usd)):
             time.sleep(BACKOFF_S * 2**attempt)
         if (retried := _budgeted(case, arm, index, spec, sample_key, budget=budget)) is None:
             refused = True
