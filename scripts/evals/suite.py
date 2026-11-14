@@ -41,6 +41,7 @@ SESSION_KEYS: dict[str, frozenset[str]] = {
     "barrier": frozenset(),
 }
 ARMS = ("none", "old")
+HOOKS = "hooks/"  # starts the name of a hook-script target, such as `praxis:hooks/scripts/x.js`
 MAX_EXIT = 255
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
 JUDGE_MODEL = "claude-opus-5-5"
@@ -74,7 +75,8 @@ class Check:
     thread sent that agent type, but for a call that ended in error)) and a `present` or
     `absent` regex, or a `judge` (a suite `[[judge]]` id) and the `reference` that judge
     reads beside the artifact, with `yes_ratings` when this case's silver labels accept
-    other ratings than the judge's. A delivery check names a `skill` and a `state`: with a
+    other ratings than the judge's. A delivery check names a `skill` (`<plugin>:*` for any
+    skill of that plugin) and a `state`: with a
     `write` kind, the state the skill must be in at every such write; without one, `loaded`
     or `not-loaded` over the whole session (trigger cases). It reads the main thread's
     deliveries and writes, or with an `agent`, that subagent's. A spawn check reads the
@@ -335,6 +337,16 @@ class Suite:
     def unit(self, case_id: str) -> str:
         """The unit the verdict compares: the case's cluster, or the case itself."""
         return self.clusters.get(case_id, case_id)
+
+
+def target_files(name: str) -> tuple[str, ...]:
+    """The plugin-relative files that can hold a target, given its name after `plugin:`.
+
+    A hook script is its own path; any other name is a skill's, an agent's or a command's.
+    """
+    if name.startswith(HOOKS):
+        return (name,)
+    return (f"skills/{name}/SKILL.md", f"agents/{name}.md", f"commands/{name}.md")
 
 
 def glob_match(path: str, pattern: str) -> bool:

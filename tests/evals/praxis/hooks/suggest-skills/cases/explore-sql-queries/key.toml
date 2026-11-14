@@ -1,0 +1,50 @@
+split = "confirm"
+kind = "regression"
+hints = ["skill", "pythonica"]
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "pythonica:python-anti-patterns"
+state = "not-loaded"
+agent = "Explore"
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "pythonica:python-patterns"
+state = "not-loaded"
+agent = "Explore"
+
+[[check]]
+metric = "spawned"
+artifact = "brief:Explore"
+present = '''\S'''
+
+[[check]]
+metric = "answer"
+artifact = "final"
+present = '''books[.]py'''
+
+[[check]]
+metric = "answer"
+artifact = "final"
+present = '''loans[.]py'''
+
+[[fact]]
+text = "returned IS NULL"
+where = "fixture:library/loans.py"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 0
+runs = 3
+runner = 2

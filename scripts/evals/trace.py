@@ -556,6 +556,13 @@ def classify(  # noqa: PLR0913 -- `own` is apart from `private`: paths under it 
     return reasons, spoiled
 
 
+def is_skill(pattern: str, skill: str) -> bool:
+    """Whether `skill` is the one `pattern` names, or any skill of `<plugin>` for `<plugin>:*`."""
+    if pattern.endswith(":*"):
+        return skill.startswith(pattern.removesuffix("*"))
+    return skill == pattern
+
+
 def state(trace: Trace, write: Write, skill: str) -> tuple[str, bool]:
     """Where `skill` stood when `write` was made, and whether a later write of its kind followed.
 
@@ -564,7 +571,7 @@ def state(trace: Trace, write: Write, skill: str) -> tuple[str, bool]:
     whether a same-kind write succeeded after that delivery (an amend or a redo).
     absent: never delivered.
     """
-    times = [d.index for d in trace.deliveries if d.skill == skill]
+    times = [d.index for d in trace.deliveries if is_skill(skill, d.skill)]
     before = [t for t in times if t < write.index]
     if before:
         last_compact = max((c for c in trace.compacts if c < write.index), default=-1)

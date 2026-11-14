@@ -1,0 +1,1 @@
+fetch_price in stockroom/client.py gives up the first time the pricing service times out or answers 503, and the nightly sync dies with it. Hand this to a subagent: make it retry those failures with a growing wait between tries, give up after a few, and cover it with tests.

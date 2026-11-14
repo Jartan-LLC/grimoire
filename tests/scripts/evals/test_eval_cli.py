@@ -84,7 +84,7 @@ def test_screens_on_two_models_keep_their_own_plans_and_alternate_which_arm_star
     def arm(name: str, *_: object) -> Arm:
         return Arm(name, "h", {})
 
-    def run(work: list[cli.Work], _: int) -> list[cli.Work]:
+    def run(work: list[cli.Work], _: int, __: float | None) -> list[cli.Work]:
         orders.append([w[1].name for w in work])
         return work
 
@@ -107,6 +107,7 @@ def test_screens_on_two_models_keep_their_own_plans_and_alternate_which_arm_star
         new_plan=False,
         jobs=1,
         judge=False,
+        max_usd=None,
     )
     for model in ("claude-opus-5-5", "claude-sonnet-5-5", "claude-opus-5-5"):
         spec = session.Spec(model, "2.1.310", 1.0, tmp_path, store)
@@ -174,7 +175,9 @@ def test_each_drawn_sample_prints_its_key(
 ) -> None:
     (case,) = load_suite(write_suite(tmp_path)).cases
 
-    def drawn_sample(case: cli.Case, arm: Arm, index: int, *_: object) -> cache.Sample:
+    def drawn_sample(
+        case: cli.Case, arm: Arm, index: int, *_: object, **__: object
+    ) -> cache.Sample:
         return cache.Sample(
             "k" + str(index), case.id, arm.name, index, {}, True, [], [], "", {}, {}
         )
@@ -186,7 +189,47 @@ def test_each_drawn_sample_prints_its_key(
     monkeypatch.setattr(session, "run_sample", drawn_sample)
     spec = session.Spec("claude-opus-5-5", "2.1.310", 1.0, tmp_path, tmp_path / "store")
     cli.run_samples([(case, Arm("old", "h", {}), 3, spec)], 1)
-    assert capsys.readouterr().out == "  old c1 #3: ok: k3\n"
+    assert capsys.readouterr().out.startswith("  old c1 #3: ok: k3\n")
+
+
+def test_a_run_prints_its_spend_with_retries_and_the_starts_its_ceiling_refused(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    (case,) = load_suite(write_suite(tmp_path)).cases
+    # (cost, valid) of each session: #0 retried once, #1's retry refused at 4.0 + 1.0 expected
+    drawn: list[tuple[float | None, bool]] = [(None, False), (0.5, True), (1.5, False)]
+
+    def session_(
+        case: cli.Case, arm: Arm, index: int, _: session.Spec, key: str
+    ) -> tuple[cache.Sample, str]:
+        cost, valid = drawn.pop(0)
+        usage: dict[str, object] = {"cost_usd": cost}
+        reasons = [] if valid else ["MCP servers loaded: [...]"]
+        return cache.Sample(
+            key, case.id, arm.name, index, {}, valid, reasons, [], "", {}, usage
+        ), ""
+
+    def nothing() -> None:
+        return None
+
+    monkeypatch.setattr(session, "preflight", nothing)
+    monkeypatch.setattr(session, "_session", session_)
+    spec = session.Spec("claude-opus-5-5", "2.1.310", 2.0, tmp_path, tmp_path / "store")
+    work: list[cli.Work] = [(case, Arm("old", "h", {}), i, spec) for i in range(2)]
+    done = cli.run_samples(work, 1, 4.5)
+    assert drawn == []
+    assert [s.valid for s in done] == [True, False]
+    assert capsys.readouterr().out.splitlines()[-1] == (
+        "spent $4.00 on 3 sessions, retries included; 1 of unknown cost, counted at the "
+        "suite's budget_usd; 1 session starts refused by the $4.5 ceiling, rerun to resume"
+    )
+
+
+@pytest.mark.parametrize("amount", ["0", "-5", "nan", "ten"])
+def test_max_usd_takes_only_a_dollar_amount_above_zero(amount: str) -> None:
+    with pytest.raises(argparse.ArgumentTypeError, match="above 0"):
+        cli.positive_usd(amount)
+    assert cli.positive_usd("12.5") == 12.5
 
 
 def test_a_screen_under_a_changed_plan_runs_nothing_until_a_new_plan(
@@ -200,7 +243,7 @@ def test_a_screen_under_a_changed_plan_runs_nothing_until_a_new_plan(
     def arm(name: str, *_: object) -> Arm:
         return Arm(name, old_hash[0] if name == "old" else "n", {})
 
-    def run(work: list[cli.Work], _: int) -> list[cli.Work]:
+    def run(work: list[cli.Work], _: int, __: float | None) -> list[cli.Work]:
         ran.append(len(work))
         return work
 
@@ -219,7 +262,7 @@ def test_a_screen_under_a_changed_plan_runs_nothing_until_a_new_plan(
     def screen(samples: int, new_plan: bool = False) -> int:
         args = argparse.Namespace(
             split="dev", base="main", new_ref=None, samples=samples, trial="",
-            new_plan=new_plan, jobs=1, judge=False,
+            new_plan=new_plan, jobs=1, judge=False, max_usd=None,
         )  # fmt: skip
         return cli.screen(args, suite, spec, store)
 
@@ -831,7 +874,7 @@ def judged_store(
     def arm(name: str, *_: object) -> Arm:
         return Arm(name, "h", {})
 
-    def run(work: list[cli.Work], _: int) -> list[cache.Sample]:
+    def run(work: list[cli.Work], _: int, ___: float | None = None) -> list[cache.Sample]:
         done: list[cache.Sample] = []
         for case, a, index, __ in work:
             sample = cache.Sample(
@@ -883,6 +926,30 @@ def test_a_run_or_screen_calls_no_judge_unless_asked_to(
         out = capsys.readouterr().out
         assert "c1: failed in 0 of 1\n" in out
         assert "not judged" not in out
+
+
+@pytest.mark.parametrize("command", ["run", "screen"])
+def test_a_run_or_screen_hands_its_spend_ceiling_to_the_sessions(
+    command: str, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    suite, _, _ = judged_store(tmp_path, monkeypatch)
+    stubbed = cli.run_samples
+    ceilings: list[float | None] = []
+
+    def run(work: list[cli.Work], jobs: int, max_usd: float | None = None) -> list[cache.Sample]:
+        ceilings.append(max_usd)
+        return stubbed(work, jobs, max_usd)
+
+    def nothing(*_: object) -> None:
+        return None
+
+    monkeypatch.setattr(cli, "run_samples", run)
+    monkeypatch.setattr(cli, "decide", nothing)
+    argv = ["eval.py", command, str(suite.path), "--samples", "1", "--split", "dev"]
+    argv += ["--arm", "old"] if command == "run" else []
+    monkeypatch.setattr(sys, "argv", [*argv, "--max-usd", "7.5"])
+    assert cli.main() == 0
+    assert ceilings == [7.5]
 
 
 def test_a_gating_judged_metric_with_no_answers_is_not_judged_and_never_ships(

@@ -1,6 +1,7 @@
 # Eval suites
 
-An eval suite tests whether a change to a skill, agent or command makes the agent behave better or worse.
+An eval suite tests whether a change to a skill, agent, command or hook script makes the agent behave
+better or worse.
 Each case is a small fixture repository and a task. The runner runs the cases as headless `claude -p`
 sessions on two versions of the plugins, grades every session, and compares the two versions task by task.
 Everything runs locally on your own `claude` login.
@@ -65,7 +66,9 @@ right. Never commit the scratch suite; say in the PR what its cases showed.
 ## Layout
 
 A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a skill,
-`tests/evals/<plugin>/agents/<name>/` for an agent.
+`tests/evals/<plugin>/agents/<name>/` for an agent, `tests/evals/<plugin>/hooks/<name>/` for a
+hook script, named without its extension, whose `target` is its path in the plugin: the suite for
+`praxis:hooks/scripts/suggest-skills.js` is `tests/evals/praxis/hooks/suggest-skills/`.
 
 - `suite.toml`: what it covers, the models it runs on, its metrics, its pass rule and its clusters;
   when it needs them, what its target replaces, its sessions' `[env]` and the oldest Claude Code it runs
@@ -84,7 +87,8 @@ A suite mirrors its source path: `tests/evals/<plugin>/skills/<name>/` for a ski
 - `old`: the plugins at the merge base of your branch with `main`.
 - `new`: the plugins in your working tree.
 - `none`: `old` with the text under test removed: a skill's directory deleted and its preloads dropped,
-  or an agent's or command's body cut to its first line.
+  an agent's or command's body cut to its first line, or every `hooks.json` command that runs a hook
+  script dropped.
   A target that renames or replaces texts of `old` lists them in `suite.toml` as
   `replaces = ["<plugin>:<name>", ...]` (top-level, above the first `[table]`), and `none` removes them
   too, so it holds none of the texts the change replaces. `make eval-plan` names an entry the merge
@@ -239,7 +243,8 @@ the PR how many versions you screened.
   session's final tree and environment, and holds when it exits 0 within 60 seconds. It is not graded
   on references.
 - **Whether a skill was in context when the agent wrote** is a guard or a diagnostic, not a primary
-  metric, except in trigger cases, where loading the skill is the behaviour under test.
+  metric, except in trigger cases, where loading the skill is the behaviour under test. A delivery
+  check's `skill = "<plugin>:*"` counts any skill of that plugin.
 - **A file write** (`write = "file"`, and what `overlap` and `barrier` below read) is a Write or Edit
   call, or a file a Bash command writes through the shell: a redirect such as `>` or `>>`, on a
   heredoc's command line too (`cat > a.md <<'EOF'`), `tee`, or `sed -i` or `perl -i`. Its path is the
@@ -456,13 +461,16 @@ for nothing; between rounds, `make check` is enough.
    them and a larger `SAMPLES=` draws only the extra ones. Run `make check` on an edited case before
    drawing on it: a lint fix after the draw changes what the sessions saw.
 5. **Count every sample.** A sample that fails for a reason outside the agent (an API error, a usage
-   limit, a leak of user settings into the session, the session reaching the suite's files or another
-   arm's plugins) is excluded and retried up to three times; when the API is limiting requests, each
-   retry waits first, and once limits persist the run stops starting sessions and reports the rest as
-   not run, so rerun it later to resume. While any sample is still excluded, the screen cannot SHIP,
-   though harm it already shows still comes out HURT; its summary counts excluded and spoiled samples
-   per arm. A sample the agent itself spoiled (a timeout, the budget or turn cap) counts as failing
-   every check. A session times out after 30 minutes; a suite whose sessions run longer sets
+   limit, a leak of user settings into the session, the session reaching the suite's files or
+   another arm's plugins) is excluded and retried up to three times, and the stored sample keeps
+   each earlier attempt's reasons and usage in `attempts`, so a sample's cost is its `cost_usd` plus
+   its attempts'. A session cut off before it reported its cost has a `cost_usd` of None, and the
+   run's spend line counts it at the suite's `budget_usd`. When the API is limiting requests, each
+   retry waits first, and once limits persist the run stops starting sessions and reports the rest
+   as not run, so rerun it later to resume. While any sample is still excluded, the screen cannot
+   SHIP, though harm it already shows still comes out HURT; its summary counts excluded and spoiled
+   samples per arm. A sample the agent itself spoiled (a timeout, the budget or turn cap) counts as
+   failing every check. A session times out after 30 minutes; a suite whose sessions run longer sets
    `timeout_s` in `suite.toml`, and changing it draws new samples.
 6. **The verdict compares the arms task by task:** `new`'s mean minus `old`'s, per unit.
    - Under a `better` rule the primary metric is BETTER when an exact one-sided paired permutation test
@@ -510,6 +518,14 @@ for nothing; between rounds, `make check` is enough.
 - `make eval-screen SUITE=<path>`: run `old` and `new` on the `screen` split and print the result.
   `SPLIT=confirm` runs the confirm split, `NEW_PLAN=1` fixes a new plan, `JUDGE=1` calls the judges.
   The result and the samples to read are also written to `evidence/` in the store.
+- `MAX_USD=<dollars>` on `make eval-run` or `make eval-screen` (`--max-usd`) is a spend ceiling: the
+  run starts no session, a retry included, expected to take its spend past it, reports the samples
+  it did not start as not run, leaves a sample whose retry it refused saved as excluded, and resumes
+  on a rerun. It expects each session to cost the mean of those it has finished, or the suite's
+  `budget_usd` until one has, so the sessions running when it stops can pass the ceiling by what they
+  cost above that mean. The ceiling counts one invocation's sessions: two runs at once each have
+  their own, and judge calls are not counted. Every run prints what its sessions spent, retries
+  included.
 - The store holds every sample, plan and evidence file, and the judges' and labellers' answers:
   `grimoire-evals/` in the clone's git directory
   (`.git/grimoire-evals/` in the main checkout), shared by every worktree and never committed.

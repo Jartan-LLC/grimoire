@@ -1,0 +1,4 @@
+final = "Two: library/books.py (by_author, SELECT title FROM books) and library/loans.py (overdue, SELECT id FROM loans)."
+
+[briefs]
+"Explore" = "The task, as the main thread handed it over."

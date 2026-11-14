@@ -1,0 +1,32 @@
+split = "dev"
+kind = "regression"
+hints = ["skill", "pythonica"]
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "pythonica:python-patterns"
+state = "not-loaded"
+agent = "Explore"
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "pythonica:python-project-structure"
+state = "not-loaded"
+agent = "Explore"
+
+[[check]]
+metric = "spawned"
+artifact = "brief:Explore"
+present = '''\S'''
+
+[[check]]
+metric = "answer"
+artifact = "final"
+present = '''weather[.]py'''
+
+[[check]]
+metric = "answer"
+artifact = "final"
+present = '''rates[.]py'''

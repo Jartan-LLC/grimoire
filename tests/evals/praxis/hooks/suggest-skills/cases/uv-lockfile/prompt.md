@@ -1,0 +1,1 @@
+We install this project's dependencies from requirements.txt with pip, and every machine ends up with different versions. Get a subagent to move it to uv with a lockfile, and update the README's setup steps to match.

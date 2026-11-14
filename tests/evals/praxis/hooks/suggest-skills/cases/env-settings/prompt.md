@@ -1,0 +1,1 @@
+We deploy mailer to staging and production with different SMTP servers, but mailer/config.py hardcodes them. Have a subagent change it so every setting comes from the environment, the current values staying the defaults, with a clear error when a value can't be read. Add tests.

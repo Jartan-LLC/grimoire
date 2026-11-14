@@ -1,0 +1,4 @@
+final = "In tests/test_orders.py: test_full_refund, test_partial_refunds_add_up and test_over_refund_is_refused call Order.refund."
+
+[briefs]
+"Explore" = "The task, as the main thread handed it over."

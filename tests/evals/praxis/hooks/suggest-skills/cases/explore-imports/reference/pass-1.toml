@@ -1,0 +1,4 @@
+final = "fetchers/weather.py (import requests) and fetchers/rates.py (from requests import Session)."
+
+[briefs]
+"Explore" = "The task, as the main thread handed it over."

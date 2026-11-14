@@ -1,0 +1,4 @@
+final = "Three: NOTES_DB_PATH (app/db.py, default notes.db), NOTES_LOG_LEVEL (app/log.py, default INFO) and NOTES_SECRET_KEY (app/auth.py, required)."
+
+[briefs]
+"Explore" = "The task, as the main thread handed it over."

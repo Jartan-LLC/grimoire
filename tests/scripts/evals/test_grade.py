@@ -103,6 +103,17 @@ def test_a_trigger_check_asks_only_whether_the_skill_ever_loaded() -> None:
     ) == (0.0, 1.0)
 
 
+def test_a_plugin_wide_skill_counts_any_skill_of_that_plugin() -> None:
+    with_skill = trace.parse(load_skill("s1", "x", CPW), PLUGINS)
+    without = trace.parse(commit("c1"), PLUGINS)
+
+    def loaded(skill: str, parsed: trace.Trace) -> float:
+        return grade.delivery_score(Check("t", "delivery", skill=skill, state="loaded"), parsed)
+
+    assert (loaded("gitwise:*", with_skill), loaded("gitwise:*", without)) == (1.0, 0.0)
+    assert (loaded("praxis:*", with_skill), loaded("git:*", with_skill)) == (0.0, 0.0)
+
+
 def test_text_of_reads_commits_final_and_collected_files() -> None:
     outputs = grade.Outputs(["a", "b"], "end", {"notes.md": "kept #42"})
     assert grade.text_of(outputs, "commits") == "a\n\nb"
