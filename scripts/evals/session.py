@@ -805,7 +805,7 @@ def run_sample(  # noqa: PLR0913 -- `breaker` and `budget` are the run's, shared
             sample_key, case.id, arm.name, index, arm.plugins, False, [drawn], [], "", {}, {}
         )
     sample, text = drawn
-    refused = False
+    unstarted = False
     for attempt in range(RETRIES):
         if sample.valid:
             break
@@ -813,11 +813,11 @@ def run_sample(  # noqa: PLR0913 -- `breaker` and `budget` are the run's, shared
             time.sleep(BACKOFF_S * 2**attempt)
         retried = _budgeted(case, arm, index, spec, sample_key, budget=budget, breaker=breaker)
         if isinstance(retried, str):
-            refused = True
+            unstarted = True
             break
         earlier.append(attempt_of(sample))
         sample, text = retried
-    if breaker is not None and not refused:
+    if breaker is not None and not unstarted:
         breaker.record(limited(sample))
     sample = replace(sample, attempts=earlier)
     cache.save(spec.store, sample, text)
