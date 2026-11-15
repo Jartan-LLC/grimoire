@@ -1,0 +1,5 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''Fix the loop that calls `fetch_items` for each order with a single JOIN.
+'''

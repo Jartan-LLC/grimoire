@@ -1,0 +1,68 @@
+# The request names a retry plugin; the cause is a module-level cache shared between tests run in random order.
+# Written for the committed suite after the smoke, so no smoke result shaped it.
+split = "confirm"
+kind = "regression"
+hints = ["cache", "order", "random", "isolat", "shared"]
+
+# The cause: `_CACHE` keeps the first test's total, and pytest-randomly changes which test
+# runs first.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?is)(_CACHE|\bcach(?:e|ed|ing)\b|shared (?:module )?state|global state|module[- ]level|(?:test|run) order|order[- ]dependen|pytest-randomly|-p randomly|random order|\bleak|isolat)'''
+
+[[fact]]
+text = "pytest-randomly"
+where = "fixture:requirements-dev.txt"
+
+[[plant]]
+id = "shared-cache"
+verify = '''python3 -c "
+import importlib.util, sys
+sys.path.insert(0, '.')
+failed = 0
+for path in ('tests/test_refunds.py', 'tests/test_totals.py'):
+    spec = importlib.util.spec_from_file_location(path[:-3].replace('/', '.'), path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    for name, test in list(vars(module).items()):
+        if name.startswith('test_') and callable(test):
+            try:
+                test()
+            except Exception:
+                failed += 1
+sys.exit(1 if failed else 0)
+"'''
+
+# An easy-to-undo, clear change: nothing on rollout or undo.
+[[check]]
+metric = "lean"
+artifact = "files:**/plan.md"
+absent = '''(?i)\b(?:roll-?outs?|roll(?:ed|ing)?[ -]?backs?|undo(?:ne|ing)?|revert(?:s|ed|ing)?)\b'''
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2

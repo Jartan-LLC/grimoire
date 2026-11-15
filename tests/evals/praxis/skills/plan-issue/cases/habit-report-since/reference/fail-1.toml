@@ -1,0 +1,33 @@
+final = "Plan written to .claude/workspace/issue-46/plan.md."
+
+[files]
+".claude/workspace/issue-46/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Let `habits report` count only check-ins since a day.
+
+### Patterns & Conventions Found
+- Pattern: `habits/cli.py:16` -- subcommand options on the subparser.
+- Pattern: `habits/days.py:10` -- days parse by hand.
+### Chosen Approach
+- **What**: A `--since` option and a filter.
+- **Why**: Smallest change.
+- **How**: Follow the existing code.
+
+### Alternatives Considered
+1. A config file setting -- more to document.
+
+### Files to Create/Modify
+- `habits/cli.py` -- the option and the filter
+- `tests/test_report.py` -- tests
+### Documentation Plan
+- README: add the new usage.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- parse the input
+- [ ] Phase 2: Core implementation -- the change
+- [ ] Phase 3: Integration/cleanup -- tests and README
+
+### Complexity
+Simple
+'''

@@ -1,0 +1,20 @@
+final = "Plan written to .claude/workspace/issue-15/plan.md."
+
+[files]
+".claude/workspace/issue-15/plan.md" = '''# Plan: Choose how many backups prune keeps (issue 15)
+
+## Approach
+`--keep N` on `prune` in `backupctl/cli.py`, default 7, passed to `prune()`. `--keep 0`
+would delete every backup, so N must be at least 1.
+
+## Decisions
+None.
+
+## Steps
+1. Add the option with a check that N is at least 1 in `backupctl/cli.py`.
+2. Tests in `tests/test_store.py` and a new `tests/test_cli.py`.
+
+## Verification
+- `python3 -m pytest -q` -- `--keep 3` leaves three; `--keep 0` and `--keep abc` exit 2 with
+  a usage error and delete nothing.
+'''

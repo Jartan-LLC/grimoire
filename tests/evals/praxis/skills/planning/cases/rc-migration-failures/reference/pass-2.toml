@@ -1,0 +1,6 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''- Convert atomically (temp file plus rename).
+- Two processes at the same time: an exclusive lock around the conversion.
+'''

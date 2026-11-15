@@ -1,0 +1,26 @@
+final = "Plan written to .claude/workspace/issue-61/plan.md."
+
+[files]
+".claude/workspace/issue-61/plan.md" = '''# Plan: Keep the original gravity of each brew (issue 61)
+
+## Approach
+
+`storage.FIELDS` gains `og` as its last column, so a new row is `date,name,style,og` and an old
+three-column row still loads, without the key. `list` shows the gravity only where there is one.
+Rejected: a second file for gravities -- two files to keep in step for one number.
+
+## Steps
+
+1. `brewlog/storage.py`: append `og` to `FIELDS` and write `brew.get(k, "")` in `append`.
+2. `brewlog/cli.py`: `add` takes `--og` (default empty); `list` prints `(stout, OG 1.058)` when set.
+3. `tests/test_cli.py`: one test with a mixed log of old and new rows.
+
+## Non-goals
+
+- Fixing the comma bug in the hand-written parser -- separate issue.
+
+## Verification
+
+- `python3 -m pytest -q` passes, including the mixed-log test, which fails today because `--og` is
+  refused.
+'''

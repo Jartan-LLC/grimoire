@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Add the analytics snippet to the theme's `main.html` override, configure the site ID in
+`mkdocs.yml`, and check the dashboard after a day.
+'''

@@ -1,0 +1,16 @@
+final = "Plan written to .claude/workspace/issue-118/plan.md."
+
+[files]
+".claude/workspace/issue-118/plan.md" = '''# Plan: rename used_pct to used_percent (issue 118)
+
+## Decisions
+1. Compatibility. Scripts that read `used_pct` stop working the day it goes. Default if
+   unanswered: emit both keys until the next major version; the owner may prefer a
+   clean break.
+
+## Steps
+1. `usage()` in `diskreport/cli.py` returns `used_percent` too.
+
+## Verification
+- `diskreport --json` -- each object has `used_percent`.
+'''

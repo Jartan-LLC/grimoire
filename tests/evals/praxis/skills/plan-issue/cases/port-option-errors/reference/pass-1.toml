@@ -1,0 +1,21 @@
+final = "Plan written to .claude/workspace/issue-29/plan.md."
+
+[files]
+".claude/workspace/issue-29/plan.md" = '''# Plan: Let devserve run on another port (issue 29)
+
+## Approach
+`--port` in `devserve/cli.py`, an int from 1 to 65535, default 8000; a port in use prints
+one line and exits 1 instead of a traceback.
+
+## Decisions
+None.
+
+## Steps
+1. Add the option to `parse()` in `devserve/cli.py` with a range check.
+2. Catch `OSError` from the server in `main()`.
+
+## Verification
+- `python3 -m pytest -q` -- `parse(["--port", "8080"])` gives 8080; `--port 0` and
+  `--port abc` exit with a usage error.
+- Start two servers on 8000 -- the second prints "port 8000 is in use" and exits 1.
+'''

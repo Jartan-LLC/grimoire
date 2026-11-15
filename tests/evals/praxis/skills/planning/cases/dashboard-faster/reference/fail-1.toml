@@ -1,0 +1,7 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Cache the four widgets on the Overview page for five minutes and paginate the Orders page.
+'''

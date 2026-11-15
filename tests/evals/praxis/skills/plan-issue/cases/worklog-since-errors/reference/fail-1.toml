@@ -1,0 +1,20 @@
+final = "Plan written to .claude/workspace/issue-74/plan.md."
+
+[files]
+".claude/workspace/issue-74/plan.md" = '''# Plan: Report only recent hours (issue 74)
+
+## Approach
+Add `--since YYYY-MM-DD` to `bin/worklog.js` and keep the entries whose `date` is on or
+after it before calling `totals()`.
+
+## Decisions
+None.
+
+## Steps
+1. Read the flag in `bin/worklog.js`.
+2. A filter function in `src/report.js`, tested in `test/report.test.js`.
+
+## Verification
+- `npm test` -- the filter keeps 2026-11-01 and drops 2026-10-31.
+- `node bin/worklog.js report --since 2026-11-01` -- prints this month's hours.
+'''

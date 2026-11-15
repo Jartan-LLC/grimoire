@@ -1,0 +1,9 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Append `currency` and `refunded_at` to `COLUMNS` and to each row in `export/orders.py`;
+`refunded_at` formatted as `%Y-%m-%dT%H:%M:%SZ` in UTC, empty when None. Tests: a refunded and
+an unrefunded order; existing columns unchanged. `python3 -m pytest -q`.
+'''

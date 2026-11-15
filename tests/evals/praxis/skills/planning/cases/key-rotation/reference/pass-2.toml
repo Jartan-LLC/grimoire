@@ -1,0 +1,6 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''Deploy readers with both keys, backfill new tokens, then retire the leaked key; rollback is
+keeping the old key in the list.
+'''

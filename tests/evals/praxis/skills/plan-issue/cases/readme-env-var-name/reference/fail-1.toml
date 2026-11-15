@@ -1,0 +1,33 @@
+final = "Plan written to .claude/workspace/issue-105/plan.md."
+
+[files]
+".claude/workspace/issue-105/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+The README names `PODCAST_DIR`; the code reads `PODFETCH_DIR`.
+
+### Patterns & Conventions Found
+- Pattern: `podfetch/settings.py:9` -- the variable the code reads.
+
+### Chosen Approach
+- **What**: Fix the README.
+- **Why**: The code is right.
+- **How**: Rename in the README.
+
+### Alternatives Considered
+1. Read both names -- no one asked for it.
+
+### Files to Create/Modify
+- `README.md` -- the settings list
+
+### Documentation Plan
+- This is the documentation change.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- edit the README
+- [ ] Phase 2: Core implementation -- check the name
+- [ ] Phase 3: Integration/cleanup -- none
+
+### Complexity
+Simple
+'''

@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Wikipedia's text is CC BY-SA: adapted wording needs attribution and that licence on the
+file, while the repo is MIT. Default: write the rules in our own words.
+'''

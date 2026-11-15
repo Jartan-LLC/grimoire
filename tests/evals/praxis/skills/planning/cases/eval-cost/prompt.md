@@ -1,0 +1,1 @@
+Plan growing our eval set to 60 cases and running the whole set on all three models (small, medium and large) so we can compare them. Write the plan to plan.md; I'll read it later. Don't start the work yet.

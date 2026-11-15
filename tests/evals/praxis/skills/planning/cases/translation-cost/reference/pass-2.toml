@@ -1,0 +1,5 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''About $1,100 in all. Start with one language and cap the spend at $300 until it is reviewed.
+'''

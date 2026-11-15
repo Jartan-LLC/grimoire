@@ -1,0 +1,5 @@
+[project]
+name = "pubsubby"
+version = "2.3.1"
+description = "A small publish/subscribe client"
+requires-python = ">=3.10"

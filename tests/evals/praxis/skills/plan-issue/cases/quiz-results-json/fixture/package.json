@@ -1,0 +1,7 @@
+{
+  "name": "quizmark",
+  "version": "0.6.1",
+  "private": true,
+  "bin": { "quizmark": "bin/quizmark.js" },
+  "scripts": { "test": "node --test" }
+}

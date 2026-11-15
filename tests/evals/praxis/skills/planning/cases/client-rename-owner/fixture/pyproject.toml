@@ -1,0 +1,4 @@
+[project]
+name = "shopclient"
+version = "1.4.0"
+description = "Python client for the Shop API, published on PyPI"

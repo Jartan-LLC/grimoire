@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Add `strategy.matrix.os: [ubuntu-latest, macos-latest, windows-latest]` to `ci.yml`, set
+`runs-on: ${{ matrix.os }}`, and fix any path test that fails on Windows.
+'''

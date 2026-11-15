@@ -1,0 +1,26 @@
+final = "Plan written to .claude/workspace/issue-58/plan.md."
+
+[files]
+".claude/workspace/issue-58/plan.md" = '''# Plan: Size limit for uploads (issue 58)
+
+## Approach
+
+Add `snapbox/validators.py` with a `Validator` base class, `TypeValidator` and
+`SizeValidator`; `save_upload` runs each in turn, so later checks slot in.
+
+## Decisions for the user
+
+- Limit: 25 MB.
+
+## Steps
+
+1. Move the type check from `snapbox/store.py` into `TypeValidator`; add `SizeValidator`.
+2. `save_upload` takes the list of validators and runs them before writing.
+3. Tests in `tests/test_store.py`.
+
+## Verification
+
+- `python3 -m pytest -q` -- the new size tests pass with the existing ones.
+- With the server running locally, `curl -X POST --data-binary @big.jpg -H 'X-Filename: big.jpg'
+  localhost:8420/upload` on a 30 MB file answers with the refusal message and saves nothing.
+'''

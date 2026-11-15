@@ -1,0 +1,5 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''Replace `recieve` with `receive` in `README.md`.
+'''

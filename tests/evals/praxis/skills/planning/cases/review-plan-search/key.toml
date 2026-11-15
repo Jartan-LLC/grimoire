@@ -1,0 +1,10 @@
+# Should load: reviewing someone else's plan before the work starts.
+split = "screen"
+kind = "trigger"
+hints = ["skill", "praxis"]
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

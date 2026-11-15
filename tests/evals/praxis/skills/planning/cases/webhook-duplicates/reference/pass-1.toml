@@ -1,0 +1,9 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+PayFast retries, so an event can arrive twice: record each event `id` in a `processed_events`
+table and skip ids already there. Verify the signature first. Answer 200 at once and send the
+receipt in the background, since the SMTP send can pass the 10 second limit.
+'''

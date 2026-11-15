@@ -1,0 +1,5 @@
+id,email,name,plan,status
+1,ada@example.com,Ada,pro,active
+2,bo@example.com,Bo,basic,active
+3,cy@example.com,Cy,basic,closed
+4,di@example.com,Di,pro,active

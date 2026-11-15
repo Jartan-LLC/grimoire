@@ -1,0 +1,33 @@
+final = "Plan written to .claude/workspace/issue-61/plan.md."
+
+[files]
+".claude/workspace/issue-61/plan.md" = '''## Implementation Plan
+
+### Issue Summary
+Let `brewlog add` keep the original gravity.
+
+### Patterns & Conventions Found
+- Pattern: `brewlog/cli.py:11` -- subcommand options on the subparser.
+- Pattern: `brewlog/storage.py:7` -- the columns, joined by hand.
+### Chosen Approach
+- **What**: An `--og` option and a fourth column.
+- **Why**: Smallest change.
+- **How**: Follow the existing code.
+
+### Alternatives Considered
+1. A config file setting -- more to document.
+
+### Files to Create/Modify
+- `brewlog/storage.py` -- the column
+- `brewlog/cli.py` -- the option
+### Documentation Plan
+- README: add the new usage.
+
+### Implementation Checklist
+- [ ] Phase 1: Foundation -- parse the input
+- [ ] Phase 2: Core implementation -- the change
+- [ ] Phase 3: Integration/cleanup -- tests and README
+
+### Complexity
+Simple
+'''

@@ -1,0 +1,11 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+## Steps
+1. Fix the word in README.md.
+
+## Questions
+Should I also add a spell checker to CI?
+'''

@@ -1,0 +1,9 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+`limit` (default 50, at most 200) and `cursor` on `GET /internal/orders`, ascending `id`,
+response `{"orders": [...], "next_cursor": ...}`; bad values give 400. `tools/admin_cli.py`
+follows `next_cursor` until null. Tests: first page, last page, each 400; `pytest`.
+'''

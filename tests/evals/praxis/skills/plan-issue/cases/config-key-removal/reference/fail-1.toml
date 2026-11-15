@@ -1,0 +1,17 @@
+final = "Plan written to .claude/workspace/issue-81/plan.md."
+
+[files]
+".claude/workspace/issue-81/plan.md" = '''# Plan: Remove the legacy_auth setting (issue 81)
+
+## Approach
+Delete the key from `KEYS` in `gatekeep/config.py` and from `config.example.toml`.
+
+## Decisions
+None.
+
+## Steps
+1. Remove `legacy_auth` from both files.
+
+## Verification
+- `python3 -m pytest -q` -- the example still loads.
+'''

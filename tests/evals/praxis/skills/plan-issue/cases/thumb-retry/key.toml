@@ -1,7 +1,7 @@
 # Fixture 5 of the research: a second caller of the retry logic already exists, so the
 # abstraction is right. The metric is reported per model.
 
-split = "screen"
+split = "dev"
 kind = "target"
 hints = ["extract", "shared", "reuse", "fetch.py", "fetch_feed", "duplicate"]
 

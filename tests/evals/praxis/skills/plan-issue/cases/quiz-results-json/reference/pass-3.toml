@@ -1,0 +1,23 @@
+final = "Plan written to .claude/workspace/issue-47/plan.md."
+
+[files]
+".claude/workspace/issue-47/plan.md" = '''# Plan: quizmark grade --json (issue 47)
+
+## Steps
+
+1. Split the printing in `bin/quizmark.js` in two: the table, as now, or, with `--json`, the
+   rows `gradeAll` returns as a JSON array.
+2. Keep the flag position free: `--json` may come before or after the paths.
+3. Test both outputs in `test/grade.test.js`.
+
+## Decisions for the user
+
+- Whether the gradebook wants `outOf` or a percentage -- default if unanswered: `outOf`, as
+  the issue says.
+
+## Verification
+
+- `npm test` -- the new JSON test passes with the existing ones.
+- `node bin/quizmark.js grade answers.csv key.txt --json` on a small sheet prints an array that
+  `JSON.parse` reads back, one object per student.
+'''

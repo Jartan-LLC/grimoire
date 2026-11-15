@@ -1,0 +1,17 @@
+final = "Plan written to .claude/workspace/issue-37/plan.md."
+
+[files]
+".claude/workspace/issue-37/plan.md" = '''# Plan: Every post shows up twice (issue 37)
+
+## Approach
+In `feedlet/reader.py`, keep the first post of each title in `newest()`.
+
+## Decisions
+None.
+
+## Steps
+1. Dedupe by title in `newest()`.
+
+## Verification
+- `python3 -m pytest -q` -- a test with two posts of one title gets one.
+'''

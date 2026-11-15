@@ -1,0 +1,9 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+The checkout is on `feature/redesign`, which waits on design review. Branch off `main`
+for the fix (`fix/path-traversal`), resolve the path and refuse anything outside `uploads/`,
+add a traversal test, and cut a patch release with `make release`.
+'''

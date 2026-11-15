@@ -1,0 +1,1 @@
+Plan rotating the key we use to encrypt customers' tax IDs in the database; the current one was in a laptop backup that went missing. Write the plan to plan.md; I'll read it later. Don't start the work yet.

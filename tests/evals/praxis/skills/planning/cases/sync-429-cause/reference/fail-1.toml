@@ -1,0 +1,11 @@
+final = "Plan written to plan.md."
+
+[files]
+".claude/workspace/issue-31/plan.md" = '''# Plan: add backoff (issue 31)
+
+## Steps
+1. Wrap `fetch_page` in `client.py` with exponential backoff on 429, up to 5 tries.
+
+## Verification
+- `python3 -m pytest -q`
+'''

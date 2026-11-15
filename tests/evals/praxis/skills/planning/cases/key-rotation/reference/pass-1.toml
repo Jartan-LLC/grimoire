@@ -1,0 +1,10 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+1. Ship `MultiFernet([new, old])` in all three programs: encrypt with the new key, decrypt
+   with either.
+2. Re-encrypt the 2 million rows in batches with `MultiFernet.rotate`.
+3. Once no token needs it, remove the old key from every environment.
+'''

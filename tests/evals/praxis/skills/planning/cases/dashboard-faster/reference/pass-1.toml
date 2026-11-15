@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Measure first: time each page on the server and in the browser (DevTools), then ask which
+pages feel slow before choosing a fix.
+'''

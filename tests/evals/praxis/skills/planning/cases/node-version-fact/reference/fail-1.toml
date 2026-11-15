@@ -1,0 +1,9 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Add `--json` to `bin/todo.js`.
+
+Which Node versions do you still support? I'll wait before choosing an API.
+'''

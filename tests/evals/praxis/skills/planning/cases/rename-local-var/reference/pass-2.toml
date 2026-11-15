@@ -1,0 +1,7 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+In billing/invoice.py, replace the three uses of tmp with subtotal.
+'''

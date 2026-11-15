@@ -1,0 +1,24 @@
+final = "Plan written to .claude/workspace/issue-83/plan.md."
+
+[files]
+".claude/workspace/issue-83/plan.md" = '''# Plan: Tag pages (issue 83)
+
+## Approach
+
+Write `tagSlug` in `src/tags.js` now; moving `slugify` into a common module is a follow-up.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. `src/tags.js` with `tagSlug`.
+2. Tag pages in `src/build.js`.
+
+## Verification
+
+- `npm test` -- the new tag tests pass with the existing ones.
+- `npm run build`, then open `public/tags/node-js/index.html`: it lists the year-in-review post,
+  and that post's page links its tags there.
+'''

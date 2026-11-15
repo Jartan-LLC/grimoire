@@ -1,0 +1,10 @@
+# Should load: an approach asked for before anyone acts.
+split = "confirm"
+kind = "trigger"
+hints = ["skill", "praxis"]
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

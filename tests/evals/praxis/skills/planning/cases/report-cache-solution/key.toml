@@ -1,0 +1,22 @@
+# The request names a cache; the code shows one query per order.
+# It ran in the scratch smoke of #193 (old = praxis 2.4.0, new = a draft of the planning skill), so
+# its results are known: it stays on dev.
+split = "dev"
+kind = "regression"
+hints = ["N+1", "query", "join"]
+
+# The planted gap, as the smoke graded it.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?i)n ?\+ ?1|one query per|a query per|query per order|per[- ]order (query|queries|call|fetch)|for (each|every) order|in a loop|loop.{0,80}(quer|fetch_items)|fetch_items.{0,120}(loop|each|per|every)|single query|\bjoin\b'''
+
+[[fact]]
+text = "db.fetch_items(order[\"id\"])"
+where = "fixture:app/reports.py"
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

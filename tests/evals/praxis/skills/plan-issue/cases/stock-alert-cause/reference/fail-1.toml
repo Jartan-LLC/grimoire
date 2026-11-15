@@ -1,0 +1,19 @@
+final = "Plan written to .claude/workspace/issue-58/plan.md."
+
+[files]
+".claude/workspace/issue-58/plan.md" = '''# Plan: Low-stock emails stopped arriving (issue 58)
+
+## Approach
+Replace the `smtplib` code in `send_alert()` (`stocktake/alerts.py`) with a POST to the
+SendGrid v3 mail API, using a `SENDGRID_API_KEY` environment variable.
+
+## Decisions
+None.
+
+## Steps
+1. Build the JSON body from the items and `alert_to`, send it with `urllib.request`.
+2. Mock the request in a new test in `tests/test_alerts.py`.
+
+## Verification
+- `python3 -m pytest -q` -- the mocked SendGrid call gets the items under the threshold.
+'''

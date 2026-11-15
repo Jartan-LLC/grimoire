@@ -1,0 +1,10 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+`SESSION_TIMEOUT_MINUTES` is already 60, but `session_cookie` passes it to `max-age`, which
+is in seconds: the cookie lives 60 seconds. Multiply by 60 in `notekeep/session.py`.
+
+Check: a test that the cookie carries `Max-Age=3600`; `python3 -m pytest -q`.
+'''

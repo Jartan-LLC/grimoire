@@ -1,0 +1,24 @@
+# Done is a real CI run that hits the cache, not a reviewed YAML.
+# It ran in the scratch smoke of #193 (old = praxis 2.4.0, new = a draft of the planning skill), so
+# its results are known: it stays on dev.
+split = "dev"
+kind = "regression"
+hints = ["cache hit", "second run"]
+
+# The planted gap, as the smoke graded it.
+[[check]]
+metric = "gap"
+artifact = "files:**/plan.md"
+present = '''(?i)cache[- ]hit|cache (was )?restored|restored? (the |from )?cache|second (run|push)|re-?run|subsequent (run|push)|next (run|push)|(actions|run|job|workflow) logs?|workflow run'''
+
+# An easy-to-undo, clear change: nothing on rollout or undo.
+[[check]]
+metric = "lean"
+artifact = "files:**/plan.md"
+absent = '''(?i)\b(?:roll-?outs?|roll(?:ed|ing)?[ -]?backs?|undo(?:ne|ing)?|revert(?:s|ed|ing)?)\b'''
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "praxis:planning"
+state = "loaded"

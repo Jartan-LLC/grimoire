@@ -1,0 +1,21 @@
+final = "Plan written to .claude/workspace/issue-92/plan.md."
+
+[files]
+".claude/workspace/issue-92/plan.md" = '''# Plan: rewrap breaks lines that already fit (issue 92)
+
+## Approach
+
+The test at `src/wrap.js:7` wraps when the line would reach `width`, not when it would pass it,
+so a line of exactly `width` characters is split. Change `>=` to `>`.
+
+## Steps
+
+1. In `src/wrap.js:7`, compare with `> width`.
+2. Add a test to `test/wrap.test.js`: `wrap("hello world", 11)` is one line.
+## Testing
+
+```bash
+# every test, the new one included
+npm run test
+```
+'''

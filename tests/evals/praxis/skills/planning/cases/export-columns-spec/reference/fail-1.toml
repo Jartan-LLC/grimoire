@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Add the two columns per the spec, test them, and ship behind a feature flag so finance can
+try it before it reaches everyone.
+'''

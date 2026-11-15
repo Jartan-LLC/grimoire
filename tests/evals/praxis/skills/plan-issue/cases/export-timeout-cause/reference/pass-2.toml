@@ -1,0 +1,14 @@
+final = "Plan written to .claude/workspace/issue-44/plan.md."
+
+[files]
+".claude/workspace/issue-44/plan.md" = '''# Plan (issue 44)
+
+## Approach
+Root cause: `TIMEOUT` went from 30 to 0.3 in the last commit. Restore it for uploads.
+
+## Steps
+1. Separate the two time-outs in `ledgerpush/config.py`.
+
+## Verification
+- `python3 -m pytest -q`
+'''

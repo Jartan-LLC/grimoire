@@ -1,0 +1,8 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Generate a new Fernet key, decrypt every row with the old key and encrypt it with the new one
+in one migration, then set `TAX_ID_KEY` to the new key and redeploy.
+'''

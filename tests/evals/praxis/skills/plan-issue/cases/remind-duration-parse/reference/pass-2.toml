@@ -1,0 +1,27 @@
+final = "Plan written to .claude/workspace/issue-76/plan.md."
+
+[files]
+".claude/workspace/issue-76/plan.md" = '''# Plan: Durations for `add --in` (issue 76)
+
+## Approach
+
+Reuse the snooze parser for `add`: make `_parse_duration` public and call it for `--in`, with
+an all-digits value read as minutes as today.
+
+## Decisions for the user
+
+None.
+
+## Steps
+
+1. Rename `_parse_duration` to `parse_duration` in `remindme/snooze.py` and import it in
+   `remindme/__main__.py`.
+2. `--in` takes text; `add_reminder` gets a `timedelta`.
+3. Tests in `tests/test_add.py`.
+
+## Verification
+
+- `python3 -m pytest -q` -- the new `add` tests pass, and `tests/test_snooze.py` still does.
+- `python3 -m remindme add "Call the dentist" --in 1h30m` then `python3 -m remindme list` shows it
+  due ninety minutes from now.
+'''

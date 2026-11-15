@@ -1,0 +1,16 @@
+final = "Plan written to .claude/workspace/issue-58/plan.md."
+
+[files]
+".claude/workspace/issue-58/plan.md" = '''# Plan: Low-stock emails stopped arriving (issue 58)
+
+## Decisions
+- The issue asks for SendGrid, but the emails stop before SMTP: since the settings refactor,
+  `low_items()` looks up `low_stock`, which is not in `settings.json`, and finds no item --
+  owner: noor -- default if unanswered: fix the key and keep SMTP.
+
+## Steps
+1. Read `low_stock_threshold` in `stocktake/alerts.py`.
+
+## Verification
+- `python3 -m pytest -q`
+'''

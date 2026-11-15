@@ -1,0 +1,3 @@
+0 2 * * * /opt/app/bin/backup.sh
+*/15 * * * * /opt/app/bin/sync.sh
+30 6 * * 1 /opt/app/bin/report.sh

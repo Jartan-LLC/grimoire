@@ -1,0 +1,20 @@
+final = "Plan written to .claude/workspace/issue-81/plan.md."
+
+[files]
+".claude/workspace/issue-81/plan.md" = '''# Plan: Remove the legacy_auth setting (issue 81)
+
+## Approach
+Drop `legacy_auth` from `KEYS` in `gatekeep/config.py` and from `config.example.toml`.
+
+## Decisions
+- Customers' `config.toml` files may still set `legacy_auth`, and an unknown key stops the
+  start-up -- owner: maintainer -- recommended: ignore it with a warning in 4.3, reject it in
+  5.0 -- default if unanswered: warn and ignore -- if wrong: reject it now, in a major release.
+
+## Steps
+1. In `gatekeep/config.py`, warn on `legacy_auth` and drop it.
+2. Remove it from `config.example.toml`.
+
+## Verification
+- `python3 -m pytest -q` -- a config with `legacy_auth` loads with a warning.
+'''

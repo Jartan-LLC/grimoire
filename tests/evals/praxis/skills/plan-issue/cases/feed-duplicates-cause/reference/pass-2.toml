@@ -1,0 +1,11 @@
+final = "Plan written to .claude/workspace/issue-37/plan.md."
+
+[files]
+".claude/workspace/issue-37/plan.md" = '''# Plan (issue 37)
+
+## Approach
+Duplicate feed: the same URL is in `feeds.txt` under http and https. Keep one.
+
+## Verification
+- `python3 -m feedlet` -- each post once.
+'''

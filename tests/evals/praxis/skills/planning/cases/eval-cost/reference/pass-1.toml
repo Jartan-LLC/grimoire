@@ -1,0 +1,9 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Cost: the last run was $4.10 for 10 cases on large, so 60 cases is about $25 on large;
+measure small and medium on 5 cases first. Ceiling $60: stop and ask above it. Start with
+one model before the full set.
+'''

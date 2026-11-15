@@ -1,0 +1,7 @@
+final = "Plan written to plan.md."
+
+[files]
+"plan.md" = '''# Plan
+
+Edit the year in LICENSE to 2026.
+'''

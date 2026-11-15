@@ -1,0 +1,28 @@
+final = "Plan written to .claude/workspace/issue-77/plan.md."
+
+[files]
+".claude/workspace/issue-77/plan.md" = '''# Plan: Share a dotfile as a link (issue 77)
+
+## Approach
+
+Upload the file as a secret gist and print the URL.
+
+## Decisions for the user
+
+- Should `dots link <file>` refuse a file outside the dotfiles folder? -- default if
+  unanswered: yes.
+
+## Steps
+
+1. Add `dots/gist.py` with `share(path, token)`: POST the file as a secret gist with
+   `urllib.request` and return its `html_url`; fail with a clear message when `GITHUB_TOKEN` is
+   unset.
+2. Register the command in `dots/cli.py`, following the subparsers at `dots/cli.py:13-15`.
+3. Tests in `tests/test_gist.py` with `urlopen` patched, following `tests/test_cli.py:6-13`.
+4. Document the command and `GITHUB_TOKEN` in `README.md`.
+
+## Verification
+
+- `python3 -m pytest -q` -- the new gist tests pass with the existing ones.
+- `GITHUB_TOKEN=x python3 -c "from dots import gist"` -- the module imports with no network.
+'''
