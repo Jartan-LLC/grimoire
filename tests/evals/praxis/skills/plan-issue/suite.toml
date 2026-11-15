@@ -40,6 +40,10 @@ BURNED = [
   "slug-digits",
   "thumb-retry",
   "todo-due-flag",
+  # Its out-of-scope check graded "Moving `src/store.js` from callbacks to promises -- not
+  # planned" and "`src/store.js` stays on callbacks" as misses, which voids the second Opus
+  # screen of plan-issue for the planning skill (#193). It moved to dev with the check fixed.
+  "bookmarks-tag-filter",
 ]
 # Beside plan-issue's own files, the suite covers any skill's plan-format.md, any praxis Markdown
 # file with "plan" in its path, and github-conventions, so a change that moves the plan template or

@@ -1,6 +1,6 @@
 # Fixture 2's kind: a feature with a tempting adjacent refactor.
 # No session's output shaped it.
-split = "screen"
+split = "dev"
 kind = "regression"
 hints = ["out of scope", "fs/promises", "refactor", "store.js", "async"]
 
@@ -49,11 +49,12 @@ absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:d
 # its topic leading the item with a deferral word; or its file with a change word on one line. A
 # line on another bug in that file, one that only mentions the topic, or one that names it in
 # passing with a deferral word, fails. `TODO` counts only in capitals. A move word may take a
-# backticked object ("Moving `x.js` to ..."), and "open an issue" or "file an issue" is a deferral.
+# backticked object and a "from" ("Moving `x.js` from callbacks to ..."), "stays on" or "keeps
+# using" counts as a change word, and "open an issue" or "file an issue" is a deferral.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-53/plan.md"
-present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:out[ -]of[ -]scope|not in scope|non-goals?|not (?:doing|planned|changing|included)|left out|deferred|scope boundar\w*)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:fs/promises|fs\.promises|\bpromis\w*|async/await|\basync\b[ -]await|\bcallbacks?\b|callback-(?:style|based)))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:(?-i:TODO)|rewrit\w*|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them |`[^`\n]+` )?(?:to|onto)|hand-?rolled|rework\w*|port(?:s|ed|ing)?\b|convert\w*))|(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:fs/promises|fs\.promises))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:separate|own (?:issue|change|pr|ticket)|follow-?up|later|defer\w*|future|not planned|not (?:in|part of) this|instead|(?:open|file|rais)(?:e|es|ed|ing|s)? (?:an? |its own |a separate |a new )?(?:issue|ticket)))|[ \t]*(?:(?:[-*+]|\d+[.)])[ \t]+)?(?:\*\*|_)?`?(?:(?:the|its|our|a|any)[ \t]+)?(?:(?:hand-?(?:rolled|written)|custom|existing|current|own|json|proper|real)[ \t]+)?`?(?:fs/promises|fs\.promises|\bpromis\w*|async/await|\basync\b[ -]await|\bcallbacks?\b|callback-(?:style|based))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:separate|own (?:issue|change|pr|ticket)|follow-?up|later|defer\w*|future|not planned|not (?:in|part of) this|instead|(?:open|file|rais)(?:e|es|ed|ing|s)? (?:an? |its own |a separate |a new )?(?:issue|ticket))))|[^\n]*(?:(?:store\.js)[^\n]*\b(?:(?-i:TODO)|rewrit\w*|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them |`[^`\n]+` )?(?:to|onto)|hand-?rolled|rework\w*|port(?:s|ed|ing)?\b|convert\w*)|\b(?:(?-i:TODO)|rewrit\w*|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them |`[^`\n]+` )?(?:to|onto)|hand-?rolled|rework\w*|port(?:s|ed|ing)?\b|convert\w*)\b[^\n]*(?:store\.js)))'''
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:out[ -]of[ -]scope|not in scope|non-goals?|not (?:doing|planned|changing|included)|left out|deferred|scope boundar\w*)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:fs/promises|fs\.promises|\bpromis\w*|async/await|\basync\b[ -]await|\bcallbacks?\b|callback-(?:style|based)))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:(?-i:TODO)|rewrit\w*|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them |`[^`\n]+` )?(?:from [^\n]*?)?(?:to|onto)|(?:stay|stays|stayed|keep|keeps|kept|remains?|remained) (?:on|with|using)\b|hand-?rolled|rework\w*|port(?:s|ed|ing)?\b|convert\w*))|(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:fs/promises|fs\.promises))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:separate|own (?:issue|change|pr|ticket)|follow-?up|later|defer\w*|future|not planned|not (?:in|part of) this|instead|(?:open|file|rais)(?:e|es|ed|ing|s)? (?:an? |its own |a separate |a new )?(?:issue|ticket)))|[ \t]*(?:(?:[-*+]|\d+[.)])[ \t]+)?(?:\*\*|_)?`?(?:(?:the|its|our|a|any)[ \t]+)?(?:(?:hand-?(?:rolled|written)|custom|existing|current|own|json|proper|real)[ \t]+)?`?(?:fs/promises|fs\.promises|\bpromis\w*|async/await|\basync\b[ -]await|\bcallbacks?\b|callback-(?:style|based))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:separate|own (?:issue|change|pr|ticket)|follow-?up|later|defer\w*|future|not planned|not (?:in|part of) this|instead|(?:open|file|rais)(?:e|es|ed|ing|s)? (?:an? |its own |a separate |a new )?(?:issue|ticket))))|[^\n]*(?:(?:store\.js)[^\n]*\b(?:(?-i:TODO)|rewrit\w*|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them |`[^`\n]+` )?(?:from [^\n]*?)?(?:to|onto)|(?:stay|stays|stayed|keep|keeps|kept|remains?|remained) (?:on|with|using)\b|hand-?rolled|rework\w*|port(?:s|ed|ing)?\b|convert\w*)|\b(?:(?-i:TODO)|rewrit\w*|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them |`[^`\n]+` )?(?:from [^\n]*?)?(?:to|onto)|(?:stay|stays|stayed|keep|keeps|kept|remains?|remained) (?:on|with|using)\b|hand-?rolled|rework\w*|port(?:s|ed|ing)?\b|convert\w*)\b[^\n]*(?:store\.js)))'''
 
 [[fact]]
 text = "Written before fs/promises"
@@ -110,19 +111,3 @@ stdout = "[]\n"
 [[gh]]
 match = '''(^|\s)auth status\b'''
 stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"
-
-[[baseline]]
-model = "claude-opus-5-5"
-arm = "old"
-failures = 1
-runs = 3
-runner = 2
-remote_runner = 3
-
-[[baseline]]
-model = "claude-opus-5-5"
-arm = "none"
-failures = 2
-runs = 3
-runner = 2
-remote_runner = 3
