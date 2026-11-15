@@ -518,6 +518,18 @@ def test_a_waiting_start_is_refused_once_no_session_runs_and_the_ceiling_still_r
     thread.join(5)
     assert started == [False]
     assert budget.refused == 1
+    assert budget.verdict(2.0) == "start"  # 8 spent + 1 session x 2: the refusal reserved nothing
+
+
+def test_a_start_past_the_ceiling_waits_for_a_reservation_freed_unspent() -> None:
+    budget = session.Budget(10.0)
+    assert start_now(budget, 4.0)
+    assert start_now(budget, 4.0)
+    thread, started = waiting_start(budget, 4.0)
+    assert thread.is_alive()  # 3 x 4 would pass 10, and two sessions are running
+    budget.release()  # a session that never ran: 0 spent + 2 sessions x 4
+    thread.join(5)
+    assert started == [True]
 
 
 def test_a_budget_refusing_a_sample_returns_it_not_run_without_a_session(
