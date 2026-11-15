@@ -68,8 +68,13 @@ match = '''(^|\s)pr status\b'''
 stdout = "Current branch\n  There is no pull request associated with [feature/issue-52]\n"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 52, \"title\": \"Circulation: loans, fines, holds and the libcirc command\", \"body\": \"We need the circulation tools the README describes, built on the data model in `src/libcirc/model.py`:\\n\\n- loans, due dates and renewals (`libcirc.loans`)\\n- overdue fines and patron accounts (`libcirc.fines`)\\n- the holds queue (`libcirc.holds`)\\n- the `libcirc` command with its `overdue`, `account` and `queue` subcommands\\n\\nThe README has the rules for each part. Each part needs its own tests and an example in the README's Usage section. The planted tests in `tests/planted/` must pass.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/libcirc/issues/52\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

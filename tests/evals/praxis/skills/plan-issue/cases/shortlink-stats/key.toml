@@ -59,8 +59,13 @@ text = "move to SQLite before we grow"
 where = "fixture:src/store.js"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 45, \"title\": \"Count clicks on short links\", \"body\": \"Marketing wants to know which links people actually follow. Count one hit each time a short link redirects, and add `GET /stats/<code>` that answers `{\\\"url\\\": ..., \\\"hits\\\": n}` (404 for an unknown code).\", \"state\": \"OPEN\", \"author\": {\"login\": \"kim\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/shorty/issues/45\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

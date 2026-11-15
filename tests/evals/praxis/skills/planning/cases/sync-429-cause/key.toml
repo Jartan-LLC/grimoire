@@ -26,12 +26,13 @@ skill = "praxis:planning"
 state = "loaded"
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tNightly order sync fails with HTTP 429\nstate:\tOPEN\nauthor:\tana\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t31\n--\nSince last week the nightly sync dies partway through with `429 Too Many Requests` from the shop API. Add retries with exponential backoff to `fetch_page` so the sync gets through.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 31, \"title\": \"Nightly order sync fails with HTTP 429\", \"body\": \"Since last week the nightly sync dies partway through with `429 Too Many Requests` from the shop API. Add retries with exponential backoff to `fetch_page` so the sync gets through.\", \"state\": \"OPEN\", \"author\": {\"login\": \"ana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/app/issues/31\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

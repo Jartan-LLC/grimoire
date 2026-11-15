@@ -114,8 +114,13 @@ match = '''(^|\s)pr status\b'''
 stdout = "Current branch\n  There is no pull request associated with [feature/issue-31]\n"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 31, \"title\": \"Say how long until the next call is allowed\", \"body\": \"When allow() says no, callers have to guess when to try again. SlidingWindow should have a wait() method that returns the seconds until the next call would be allowed, and 0 when a call is allowed now.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/ratelimit/issues/31\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

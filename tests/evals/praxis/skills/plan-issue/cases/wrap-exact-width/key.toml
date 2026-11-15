@@ -62,12 +62,13 @@ id = "exact-width-split"
 verify = "node -e \"const {wrap}=require('./src/wrap'); process.exit(wrap('hello world', 11).length === 1 ? 0 : 1)\""
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\trewrap breaks lines that already fit\nstate:\tOPEN\nauthor:\totto\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t92\n--\n`echo 'hello world' | rewrap --width 11` prints `hello` and `world` on two lines, though `hello world` is 11 characters. Our changelog entries are kept to 72 columns and rewrap keeps splitting them one word early.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 92, \"title\": \"rewrap breaks lines that already fit\", \"body\": \"`echo 'hello world' | rewrap --width 11` prints `hello` and `world` on two lines, though `hello world` is 11 characters. Our changelog entries are kept to 72 columns and rewrap keeps splitting them one word early.\", \"state\": \"OPEN\", \"author\": {\"login\": \"otto\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/rewrap/issues/92\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

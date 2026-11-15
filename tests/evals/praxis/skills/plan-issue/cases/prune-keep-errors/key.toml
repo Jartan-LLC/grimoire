@@ -53,12 +53,13 @@ artifact = "file:.claude/workspace/issue-15/plan.md"
 present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?![ \t]*```)(?!\#)[^\n]*|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*\n[ \t]*```[^\n]*)*?(?:\n(?![ \t]*```)(?!\#)[^\n]*(?:invalid|reject|refus|error|out of range|negative|zero\b|exit(?:s)? (?:code |status |with )?[12]\b|non-?zero|fails? (?:with|for|on)|usage:|--keep (?:0|-1|-5|abc|x)\b|keep[ =](?:0|-1)\b)|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*?\n(?![ \t]*```)[^\n]*(?:invalid|reject|refus|error|out of range|negative|zero\b|exit(?:s)? (?:code |status |with )?[12]\b|non-?zero|fails? (?:with|for|on)|usage:|--keep (?:0|-1|-5|abc|x)\b|keep[ =](?:0|-1)\b))'''
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tChoose how many backups prune keeps\nstate:\tOPEN\nauthor:\tivo\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t15\n--\n`backupctl prune` always keeps the newest 7 backups. Let it take `--keep N` so we can keep more on the big server.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 15, \"title\": \"Choose how many backups prune keeps\", \"body\": \"`backupctl prune` always keeps the newest 7 backups. Let it take `--keep N` so we can keep more on the big server.\", \"state\": \"OPEN\", \"author\": {\"login\": \"ivo\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/backupctl/issues/15\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

@@ -62,8 +62,13 @@ text = "CI configs in other repositories pass them"
 where = "fixture:AGENTS.md"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 33, \"title\": \"Write the JSON report to a file\", \"body\": \"In CI we want to keep the size report as a build artifact. Add `--output <file>` (`-o <file>` for short) that writes the JSON report to that file, while the table still prints to the terminal.\", \"state\": \"OPEN\", \"author\": {\"login\": \"rui\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/sizecheck/issues/33\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

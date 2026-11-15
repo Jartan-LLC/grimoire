@@ -92,8 +92,13 @@ match = '''(^|\s)pr status\b'''
 stdout = "Current branch\n  There is no pull request associated with [feature/issue-58]\n"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 58, \"title\": \"Let callers set the delay between attempts\", \"body\": \"fetchWithRetry always waits 100 ms between attempts. Some callers want longer for a slow upstream, and tests want no wait at all. Take the delay as options.delayMs.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/fetchy/issues/58\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

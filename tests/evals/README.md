@@ -164,7 +164,9 @@ hook script, named without its extension, whose `target` is its path in the plug
   its `exit` (default 0). A call no reply matches fails with `gh stub: no reply for: <arguments>`, so
   script every call the task needs, reads (`gh pr view`, `gh api`) included. With `json = true`, the
   `stdout` is a JSON object and the stub prints only the fields the call's `--json` names, keys sorted
-  on one line, as gh does; it applies no `--jq` or `--template`. A `[[gh]]` table implies
+  on one line, as gh does; it applies no `--jq` or `--template`. Reply as gh does when its output is
+  piped, as in the Bash tool, or a skipped read goes unseen: `issue view --comments` prints only the
+  comments, and nothing for an issue without any. A `[[gh]]` table implies
   `remote = true`, and the replies count in the case hash, like the fixture.
 
   Write each `match` to accept every call the task could make at that step, keyed on the subcommand

@@ -64,12 +64,13 @@ text = "maintainer before renaming one"
 where = "fixture:AGENTS.md"
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tShare a dotfile as a link\nstate:\tOPEN\nauthor:\tkofi\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t77\n--\nI keep getting asked for my vim and tmux setup. Add `dots link <file>` that uploads that dotfile as a secret gist (POST https://api.github.com/gists with the token in GITHUB_TOKEN) and prints the gist's URL, so I can paste it in chat.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 77, \"title\": \"Share a dotfile as a link\", \"body\": \"I keep getting asked for my vim and tmux setup. Add `dots link <file>` that uploads that dotfile as a secret gist (POST https://api.github.com/gists with the token in GITHUB_TOKEN) and prints the gist's URL, so I can paste it in chat.\", \"state\": \"OPEN\", \"author\": {\"login\": \"kofi\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/dots/issues/77\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

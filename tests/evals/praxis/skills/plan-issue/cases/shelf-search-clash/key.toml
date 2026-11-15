@@ -62,8 +62,13 @@ text = "Ask before renaming a subcommand"
 where = "fixture:AGENTS.md"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 17, \"title\": \"Look books up online instead of typing them in\", \"body\": \"Typing the title and author of every book is slow. Add `shelf search <title or ISBN>` that looks the book up on Open Library (https://openlibrary.org/search.json?q=...), shows the top matches and adds the one I pick to the catalog.\", \"state\": \"OPEN\", \"author\": {\"login\": \"isabel\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/shelf/issues/17\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

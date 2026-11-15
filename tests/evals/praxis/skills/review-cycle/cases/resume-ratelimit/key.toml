@@ -114,8 +114,13 @@ match = '''(^|\s)pr status\b'''
 stdout = "Current branch\n  There is no pull request associated with [feature/issue-23]\n"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 23, \"title\": \"Accept hourly limits such as 100/h\", \"body\": \"Our API quota is per hour. parse_window should accept an `h` unit, so SlidingWindow(\\\"100/h\\\") allows 100 calls in any hour.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/ratelimit/issues/23\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

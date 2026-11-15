@@ -61,12 +61,13 @@ id = "readme-node-below-engines"
 verify = "node -e \"const fs=require('fs'); const m=/Node (\\d+) or later/.exec(fs.readFileSync('README.md','utf8')); const need=/(\\d+)/.exec(require('./package.json').engines.node)[1]; process.exit(m && m[1]===need ? 0 : 1)\""
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tREADME says Node 16, npm says otherwise\nstate:\tOPEN\nauthor:\tpriya\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t118\n--\nInstalling on our CI image gives `npm WARN EBADENGINE Unsupported engine { package: 'icsmerge@3.1.0', required: { node: '>=20' }, current: { node: 'v18.19.0' } }`. The README's Requirements section says Node 16 or later, which is why we picked that image.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 118, \"title\": \"README says Node 16, npm says otherwise\", \"body\": \"Installing on our CI image gives `npm WARN EBADENGINE Unsupported engine { package: 'icsmerge@3.1.0', required: { node: '>=20' }, current: { node: 'v18.19.0' } }`. The README's Requirements section says Node 16 or later, which is why we picked that image.\", \"state\": \"OPEN\", \"author\": {\"login\": \"priya\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/icsmerge/issues/118\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

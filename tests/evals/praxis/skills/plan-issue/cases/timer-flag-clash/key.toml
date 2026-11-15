@@ -61,8 +61,13 @@ text = "Ask before changing what a flag means"
 where = "fixture:AGENTS.md"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 48, \"title\": \"Add a quick 15-minute session\", \"body\": \"Add `pomo --quick` (`-q` for short) to start a 15-minute session without typing `-m 15`.\", \"state\": \"OPEN\", \"author\": {\"login\": \"ana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/pomo/issues/48\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

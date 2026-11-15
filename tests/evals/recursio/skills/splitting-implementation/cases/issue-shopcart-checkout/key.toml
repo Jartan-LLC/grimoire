@@ -41,8 +41,13 @@ match = '''(^|\s)pr status\b'''
 stdout = "Current branch\n  There is no pull request associated with [feature/issue-67]\n"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 67, \"title\": \"Checkout: pricing, stock, orders and shipping\", \"body\": \"We need checkout as the README describes. It has five parts, each a module with its own tests: pricing (`src/pricing.js`: the five promotion kinds, coupons, exclusivity, the best combination and rounding), inventory (`src/inventory.js`: stock per warehouse, reservations that expire, allocation by priority, backorders), orders (`src/orders.js`: the order state machine, cancellation, partial refunds and the event history), shipping (`src/shipping.js`: zones by country and postcode, weight tiers, dimensional weight, packing into parcels, free shipping), and `src/checkout.js`, which joins them. The README has the rules for each; `src/types.js` already holds the shared types.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/bookshop/issues/67\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

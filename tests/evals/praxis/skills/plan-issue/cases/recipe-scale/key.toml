@@ -58,8 +58,13 @@ text = "rebuilt on fractions.Fraction"
 where = "fixture:pantry/quantity.py"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 40, \"title\": \"Scale a recipe to a number of servings\", \"body\": \"When I cook for more people I do the sums in my head. I'd like `pantry show pancakes --servings 6` to print the ingredient amounts for 6 people instead of the 4 the recipe serves, so 1 1/2 cup flour becomes 2.25 cup flour.\", \"state\": \"OPEN\", \"author\": {\"login\": \"femi\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/pantry/issues/40\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

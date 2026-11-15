@@ -62,12 +62,13 @@ text = "An unknown key stops the start-up"
 where = "fixture:gatekeep/config.py"
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tRemove the legacy_auth setting\nstate:\tOPEN\nauthor:\tnoor\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t81\n--\nNothing reads `legacy_auth` any more since the auth rewrite. Remove it from the config.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 81, \"title\": \"Remove the legacy_auth setting\", \"body\": \"Nothing reads `legacy_auth` any more since the auth rewrite. Remove it from the config.\", \"state\": \"OPEN\", \"author\": {\"login\": \"noor\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/gatekeep/issues/81\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

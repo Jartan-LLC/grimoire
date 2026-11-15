@@ -123,8 +123,13 @@ match = '''(^|\s)pr status\b'''
 stdout = "Current branch\n  There is no pull request associated with [feature/issue-67]\n"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 67, \"title\": \"Don't end a cut slug halfway through a word\", \"body\": \"slugify('Hello big world', { maxLength: 10 }) returns 'hello-big-', with a trailing dash, and other inputs stop halfway through a word. A cut slug should end at the last whole word that fits.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/slugkit/issues/67\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

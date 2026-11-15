@@ -22,12 +22,13 @@ skill = "praxis:planning"
 state = "loaded"
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tRename Client.get_items to Client.list_items\nstate:\tOPEN\nauthor:\tana\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t57\n--\nThe Shop API calls this endpoint `list items`. Rename `Client.get_items` to `Client.list_items` to match the API's naming.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 57, \"title\": \"Rename Client.get_items to Client.list_items\", \"body\": \"The Shop API calls this endpoint `list items`. Rename `Client.get_items` to `Client.list_items` to match the API's naming.\", \"state\": \"OPEN\", \"author\": {\"login\": \"ana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/app/issues/57\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

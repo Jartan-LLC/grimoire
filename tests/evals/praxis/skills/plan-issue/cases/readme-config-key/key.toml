@@ -62,8 +62,13 @@ id = "readme-example-fails"
 verify = '''python3 -c "import re, pathlib; from pingmon.config import parse; parse(re.search(r'[\x60]{3}toml\n(.*?)[\x60]{3}', pathlib.Path('README.md').read_text(), re.S).group(1))"'''
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 43, \"title\": \"README config example fails with unknown key 'timeout'\", \"body\": \"Copying the example from the README and running `python3 -m pingmon pingmon.toml` stops with `ConfigError: unknown key 'timeout'`. The example needs updating.\", \"state\": \"OPEN\", \"author\": {\"login\": \"lee\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/pingmon/issues/43\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

@@ -63,12 +63,13 @@ text = "before changing what an existing flag does"
 where = "fixture:AGENTS.md"
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tLet me pick the indent\nstate:\tOPEN\nauthor:\tmei\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t92\n--\nOur other repos use 4-space JSON, so jsonfmt fights their editors. Add `--indent <n>` (`-i <n>` for short) so `jsonfmt -i 4 config.json` formats with 4 spaces. The default should stay 2.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 92, \"title\": \"Let me pick the indent\", \"body\": \"Our other repos use 4-space JSON, so jsonfmt fights their editors. Add `--indent <n>` (`-i <n>` for short) so `jsonfmt -i 4 config.json` formats with 4 spaces. The default should stay 2.\", \"state\": \"OPEN\", \"author\": {\"login\": \"mei\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/jsonfmt/issues/92\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''
