@@ -7,3 +7,6 @@ final = ""
 
 [briefs]
 "general-purpose" = "Run the praxis:review-pr skill on feature/issue-31 against main. Review the whole branch.\n\nYou are the addresser for round 3. An earlier round found The README does not mention wait(), now fixed.\n\nRun the praxis:address-review skill on 3.md."
+
+[reports]
+"praxis:general-reviewer" = "No Critical or Important findings."
