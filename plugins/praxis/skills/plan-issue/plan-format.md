@@ -47,7 +47,9 @@ Rejected: <alternative> -- <why not>. (omit when none)
   is checked, not listed. Write "None." when there are none.
 - Out of scope: only changes a reader would expect or an implementer be tempted to make, each with
   where it goes, and not work the change itself needs, such as sharing code with a caller that
-  already exists. Leave out the section when there are none.
+  already exists. Keep a change the code itself invites, such as a rewrite a comment or TODO
+  describes, even in a short plan: the implementer will read that code. Leave out the section when
+  there are none.
 - Steps: concrete and in order, each ending in a state that can be checked, with the file to change
   and the existing code to follow (`file:line`). The docs, changelog entry and version bump the
   change owes are steps too, and, where a mistake would cost more than a revert, how the change
