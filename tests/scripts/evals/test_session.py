@@ -1,6 +1,7 @@
 """Session setup: the parts that run no `claude` session."""
 
 import dataclasses
+import functools
 import io
 import json
 import os
@@ -10,6 +11,7 @@ import sys
 import tempfile
 import threading
 import time
+from collections.abc import Callable
 from typing import Any
 
 import pytest
@@ -447,27 +449,111 @@ def test_a_rerun_carries_a_stored_excluded_samples_attempts_forward(
     assert costs == [{"cost_usd": 1.0}] * (session.RETRIES + 1)
 
 
+def in_thread[T](call: Callable[[], T], wait_s: float) -> tuple[threading.Thread, list[T]]:
+    """Run `call` in a daemon thread joined for `wait_s`; the list gets its result once it returns.
+
+    A call that blocks for good then fails its test instead of hanging the run.
+    """
+    done: list[T] = []
+    thread = threading.Thread(target=lambda: done.append(call()), daemon=True)
+    thread.start()
+    thread.join(wait_s)
+    return thread, done
+
+
+def start_now(budget: session.Budget, cap_usd: float) -> session.Start:
+    """`budget.start(cap_usd)`, failing instead of hanging when the start waits."""
+    _, started = in_thread(functools.partial(budget.start, cap_usd), 5)
+    assert started, "the start still waits after 5 s"
+    return started[0]
+
+
+def waiting_start(
+    budget: session.Budget, cap_usd: float
+) -> tuple[threading.Thread, list[session.Start]]:
+    """Call `budget.start` in a thread; the list gets its answer once it returns."""
+    return in_thread(lambda: budget.start(cap_usd), 0.2)
+
+
 def test_a_budget_expects_the_cap_until_a_session_finishes_then_the_mean() -> None:
     budget = session.Budget(10.0)
-    assert budget.start(4.0)
-    assert budget.start(4.0)  # 0 spent + 2 sessions x 4 expected
-    assert not budget.start(4.0)  # 3 x 4 would pass 10
+    assert start_now(budget, 4.0) == "started"
+    assert start_now(budget, 4.0) == "started"  # 0 spent + 2 sessions x 4 expected
+    assert budget.verdict(4.0) == "wait"  # 3 x 4 would pass 10
     budget.finish(1.0, 4.0)
     budget.finish(3.0, 4.0)
     assert budget.spent_usd == 4.0
     for _ in range(3):  # 4 spent + 3 sessions x the mean of 2
-        assert budget.start(4.0)
-    assert not budget.start(4.0)
-    assert budget.refused == 2
+        assert start_now(budget, 4.0) == "started"
+    assert budget.verdict(4.0) == "wait"
 
 
 def test_a_budget_counts_a_session_of_unknown_cost_at_its_cap() -> None:
     budget = session.Budget()
-    assert budget.start(4.0)
+    assert budget.start(4.0) == "started"
     budget.finish(None, 4.0)
     assert (budget.spent_usd, budget.sessions, budget.unknown) == (4.0, 1, 1)
     for _ in range(100):  # no ceiling: every session starts
-        assert budget.start(4.0)
+        assert budget.start(4.0) == "started"
+
+
+def test_a_start_past_the_ceiling_waits_for_a_running_session_and_starts_at_the_new_mean() -> None:
+    budget = session.Budget(10.0)
+    assert start_now(budget, 4.0) == "started"
+    assert start_now(budget, 4.0) == "started"
+    thread, started = waiting_start(budget, 4.0)
+    assert thread.is_alive()  # 3 x 4 would pass 10, and two sessions are running
+    budget.finish(1.0, 4.0)
+    thread.join(5)
+    assert started == ["started"]  # 1 spent + 2 sessions x the mean of 1
+    assert budget.refused == 0
+
+
+def test_a_waiting_start_is_refused_once_no_session_runs_and_the_ceiling_still_refuses() -> None:
+    budget = session.Budget(10.0)
+    assert start_now(budget, 4.0) == "started"
+    assert start_now(budget, 4.0) == "started"
+    thread, started = waiting_start(budget, 4.0)
+    budget.finish(None, 4.0)  # 4 spent + 2 sessions x 4 still passes 10, and one runs
+    thread.join(0.2)
+    assert thread.is_alive()
+    budget.finish(None, 4.0)  # 8 spent + 4 passes 10, and none runs
+    thread.join(5)
+    assert started == ["refused"]
+    assert budget.refused == 1
+    assert budget.verdict(2.0) == "start"  # 8 spent + 1 session x 2: the refusal reserved nothing
+
+
+def test_a_start_past_the_ceiling_waits_for_a_reservation_freed_unspent() -> None:
+    budget = session.Budget(10.0)
+    assert start_now(budget, 4.0) == "started"
+    assert start_now(budget, 4.0) == "started"
+    thread, started = waiting_start(budget, 4.0)
+    assert thread.is_alive()  # 3 x 4 would pass 10, and two sessions are running
+    budget.release()  # a session that never ran: 0 spent + 2 sessions x 4
+    thread.join(5)
+    assert started == ["started"]
+
+
+@pytest.mark.parametrize("last", ["finished", "released"])
+def test_every_start_waiting_on_the_ceiling_is_refused_once_the_last_session_ends(
+    last: str,
+) -> None:
+    budget = session.Budget(10.0)
+    assert start_now(budget, 4.0) == "started"
+    assert start_now(budget, 4.0) == "started"
+    waiters = [waiting_start(budget, 4.0) for _ in range(2)]
+    budget.finish(9.0, 4.0)  # 9 spent + 2 sessions x the mean of 9 passes 10, and one runs
+    waiters[0][0].join(0.2)  # time for a woken waiter to wait again
+    assert all(thread.is_alive() for thread, _ in waiters)
+    if last == "finished":
+        budget.finish(None, 4.0)  # 13 spent, and none runs
+    else:
+        budget.release()  # 9 spent + 1 session x 9 passes 10, and none runs
+    for thread, _ in waiters:
+        thread.join(5)
+    assert [started for _, started in waiters] == [["refused"], ["refused"]]
+    assert budget.refused == 2
 
 
 def test_a_budget_refusing_a_sample_returns_it_not_run_without_a_session(
@@ -486,6 +572,31 @@ def test_a_budget_refusing_a_sample_returns_it_not_run_without_a_session(
     assert sample.reasons == [session.Budget.REFUSED]
     assert cache.load(spec.store, sample.key) is None
     assert (budget.sessions, budget.refused) == (0, 1)
+
+
+def test_a_start_the_ceiling_refused_is_reported_refused_when_the_breaker_trips_after_it(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case = load_suite(write_suite(tmp_path / "suite")).cases[0]
+    spec = session.Spec("m", "v", 4.0, tmp_path, tmp_path / "store")
+
+    def no_session(*_: object) -> None:
+        raise AssertionError("a budget past its ceiling must not start a session")
+
+    monkeypatch.setattr(session, "_session", no_session)
+    budget = session.Budget(3.0)
+    breaker = session.Breaker()
+    refuse = budget.start
+
+    def refuse_then_trip(cap_usd: float, stop: threading.Event | None = None) -> session.Start:
+        started = refuse(cap_usd, stop)
+        breaker.tripped.set()  # another worker's last limited sample, recorded meanwhile
+        return started
+
+    monkeypatch.setattr(budget, "start", refuse_then_trip)
+    sample = session.run_sample(case, Arm("new", "h", {}), 0, spec, breaker, budget=budget)
+    assert sample.reasons == [session.Budget.REFUSED]
+    assert budget.refused == 1
 
 
 def test_a_budget_stops_retries_and_counts_each_attempt_it_ran(
@@ -532,6 +643,102 @@ def test_a_budget_refusing_a_limited_samples_retry_neither_waits_nor_trips_the_b
     assert not breaker.tripped.is_set()
 
 
+def test_a_limited_samples_retry_the_ceiling_holds_back_while_a_session_runs_waits_then_runs(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case = load_suite(write_suite(tmp_path / "suite")).cases[0]
+    spec = session.Spec("m", "v", 4.0, tmp_path, tmp_path / "store")
+    drawn: list[list[str]] = [["API Error: 429 rate limit"], []]
+
+    def session_(
+        case: Case, arm: Arm, index: int, _: session.Spec, key: str
+    ) -> tuple[cache.Sample, str]:
+        reasons = drawn.pop(0)
+        usage: dict[str, object] = {"cost_usd": 4.5}
+        valid = not reasons
+        sample = cache.Sample(key, case.id, arm.name, index, {}, valid, reasons, [], "", {}, usage)
+        return sample, ""
+
+    budget = session.Budget(10.0)
+    assert start_now(budget, 4.0) == "started"  # another sample's session, still running
+    waits: list[float] = []
+
+    def backoff(seconds: float) -> None:
+        waits.append(seconds)
+        budget.finish(0.5, 4.0)  # the other session ends during the wait
+
+    monkeypatch.setattr(session, "_session", session_)
+    monkeypatch.setattr(session.time, "sleep", backoff)
+    # after 4.5 spent, a retry expected at 4.5 passes 10 beside the running session
+    _, returned = in_thread(
+        lambda: session.run_sample(case, Arm("new", "h", {}), 0, spec, budget=budget), 5
+    )
+    assert [sample.valid for sample in returned] == [True]
+    assert waits == [session.BACKOFF_S]
+    assert (budget.sessions, budget.refused) == (3, 0)
+
+
+def test_a_start_waiting_on_the_ceiling_when_the_breaker_trips_returns_not_run_unreserved(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case = load_suite(write_suite(tmp_path / "suite")).cases[0]
+    spec = session.Spec("m", "v", 4.0, tmp_path, tmp_path / "store")
+
+    def no_session(*_: object) -> None:
+        raise AssertionError("a tripped breaker must not start a session")
+
+    monkeypatch.setattr(session, "_session", no_session)
+    budget = session.Budget(10.0)
+    assert start_now(budget, 4.0) == "started"
+    assert start_now(budget, 4.0) == "started"
+    breaker = session.Breaker()
+    thread, returned = in_thread(
+        lambda: session.run_sample(case, Arm("new", "h", {}), 0, spec, breaker, budget=budget), 0.2
+    )
+    assert thread.is_alive()  # 3 x 4 would pass 10, and two sessions are running
+    breaker.tripped.set()
+    budget.finish(3.0, 4.0)  # 3 spent + 2 sessions x the mean of 3 would start it
+    thread.join(5)
+    assert [sample.reasons for sample in returned] == [[session.Breaker.STOPPED]]
+    assert cache.load(spec.store, returned[0].key) is None
+    assert budget.verdict(4.0) == "start"  # 3 spent + 2 sessions x 3: it reserved nothing
+    assert (budget.sessions, budget.refused) == (1, 0)
+
+
+def test_a_limited_samples_retry_the_ceiling_admits_at_once_runs_after_the_breaker_trips(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case = load_suite(write_suite(tmp_path / "suite")).cases[0]
+    spec = session.Spec("m", "v", 4.0, tmp_path, tmp_path / "store")
+    breaker = session.Breaker()
+    drawn: list[list[str]] = [["API Error: 429 rate limit"], []]
+
+    def session_(
+        case: Case, arm: Arm, index: int, _: session.Spec, key: str
+    ) -> tuple[cache.Sample, str]:
+        reasons = drawn.pop(0)
+        breaker.tripped.set()  # another worker's last limited sample, recorded meanwhile
+        usage: dict[str, object] = {"cost_usd": 1.0}
+        valid = not reasons
+        sample = cache.Sample(key, case.id, arm.name, index, {}, valid, reasons, [], "", {}, usage)
+        return sample, ""
+
+    monkeypatch.setattr(session, "_session", session_)
+    waits: list[float] = []
+    monkeypatch.setattr(session.time, "sleep", waits.append)
+    budget = session.Budget(10.0)  # 1 spent + 1 session x 1: the retry starts at once
+    _, returned = in_thread(
+        lambda: session.run_sample(case, Arm("new", "h", {}), 0, spec, breaker, budget=budget), 5
+    )
+    assert drawn == []
+    assert waits == [session.BACKOFF_S]
+    assert [sample.valid for sample in returned] == [True]
+    stored = cache.load(spec.store, returned[0].key)
+    assert stored is not None
+    assert stored.valid
+    assert (budget.sessions, budget.refused) == (2, 0)
+
+
 def test_a_session_that_raises_counts_at_its_budget_and_frees_its_reservation(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -546,8 +753,9 @@ def test_a_session_that_raises_counts_at_its_budget_and_frees_its_reservation(
     with pytest.raises(OSError, match="sandbox gone"):
         session.run_sample(case, Arm("new", "h", {}), 0, spec, budget=budget)
     assert (budget.spent_usd, budget.sessions, budget.unknown) == (4.0, 1, 1)
-    assert budget.start(4.0)  # 4 spent + 1 session x 4: none still reserved for the crash
-    assert not budget.start(4.0)
+    # 4 spent + 1 session x 4: none still reserved for the crash
+    assert start_now(budget, 4.0) == "started"
+    assert budget.verdict(4.0) == "wait"
 
 
 def test_preflight_stops_when_the_sample_venv_cannot_import_pytest(
@@ -681,14 +889,14 @@ def test_a_case_changed_on_disk_counts_no_session_in_the_budget(tmp_path: pathli
     (root / "cases" / "c1" / "fixture" / "app.py").write_text("x = 2\n")
     spec = session.Spec("m", "v", 4.0, tmp_path, tmp_path / "store")
     budget = session.Budget(10.0)
-    assert budget.start(4.0)
+    assert start_now(budget, 4.0) == "started"
     budget.finish(2.0, 4.0)
     sample = session.run_sample(case, Arm("old", "h", {}), 0, spec, budget=budget)
     assert sample.reasons == [session.CASE_CHANGED]
     assert (budget.spent_usd, budget.sessions) == (2.0, 1)
     for _ in range(4):  # 2 spent + 4 sessions x the mean of 2, which no draw of it lowered
-        assert budget.start(4.0)
-    assert not budget.start(4.0)
+        assert start_now(budget, 4.0) == "started"
+    assert budget.verdict(4.0) == "wait"
 
 
 def test_collect_reads_named_files_and_every_file_a_glob_matches_outside_git(
