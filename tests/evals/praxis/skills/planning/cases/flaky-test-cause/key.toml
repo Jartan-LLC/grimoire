@@ -17,7 +17,22 @@ where = "fixture:requirements-dev.txt"
 
 [[plant]]
 id = "shared-cache"
-verify = "python3 -m pytest -q -p no:cacheprovider -p no:randomly tests/test_refunds.py tests/test_totals.py"
+verify = '''python3 -c "
+import importlib.util, sys
+sys.path.insert(0, '.')
+failed = 0
+for path in ('tests/test_refunds.py', 'tests/test_totals.py'):
+    spec = importlib.util.spec_from_file_location(path[:-3].replace('/', '.'), path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    for name, test in list(vars(module).items()):
+        if name.startswith('test_') and callable(test):
+            try:
+                test()
+            except Exception:
+                failed += 1
+sys.exit(1 if failed else 0)
+"'''
 
 # An easy-to-undo, clear change: nothing on rollout or undo.
 [[check]]
