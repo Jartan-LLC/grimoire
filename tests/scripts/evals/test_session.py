@@ -532,6 +532,27 @@ def test_a_start_past_the_ceiling_waits_for_a_reservation_freed_unspent() -> Non
     assert started == [True]
 
 
+@pytest.mark.parametrize("last", ["finished", "released"])
+def test_every_start_waiting_on_the_ceiling_is_refused_once_the_last_session_ends(
+    last: str,
+) -> None:
+    budget = session.Budget(10.0)
+    assert start_now(budget, 4.0)
+    assert start_now(budget, 4.0)
+    waiters = [waiting_start(budget, 4.0) for _ in range(2)]
+    budget.finish(9.0, 4.0)  # 9 spent + 2 sessions x the mean of 9 passes 10, and one runs
+    waiters[0][0].join(0.2)  # time for a woken waiter to wait again
+    assert all(thread.is_alive() for thread, _ in waiters)
+    if last == "finished":
+        budget.finish(None, 4.0)  # 13 spent, and none runs
+    else:
+        budget.release()  # 9 spent + 1 session x 9 passes 10, and none runs
+    for thread, _ in waiters:
+        thread.join(5)
+    assert [started for _, started in waiters] == [[False], [False]]
+    assert budget.refused == 2
+
+
 def test_a_budget_refusing_a_sample_returns_it_not_run_without_a_session(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -643,6 +643,8 @@ class Budget:
         """A budget with nothing spent, whose ceiling is `max_usd`, if any."""
         self.max_usd = max_usd
         self._lock = threading.Lock()
+        # notify_all, never notify: a woken start can return without starting, and the
+        # one wakeup it took would leave the other waiters with no session to wake them.
         self._changed = threading.Condition(self._lock)
         self._running = 0
         self._known_usd = 0.0
