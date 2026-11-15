@@ -599,9 +599,12 @@ class Breaker:
     """Stops a run once the API keeps limiting requests, so the rest are not burned on failures.
 
     Shared by the run's worker threads: after BREAKER samples in a row are still
-    limited once their retries are spent, it trips, and every sample not yet started
-    returns at once as not run. A sample that succeeds resets the count.
+    limited once their retries are spent, it trips. Every sample not yet started then
+    returns as not run, and a session start that waited on `Budget`'s ceiling is not
+    made. A sample that succeeds resets the count.
     """
+
+    STOPPED = "not run: the API kept limiting requests; rerun later to resume"
 
     def __init__(self) -> None:
         """An untripped breaker with no limited samples counted."""
@@ -660,15 +663,20 @@ class Budget:
             return "start"
         return "wait" if self._running else "refuse"
 
-    def start(self, cap_usd: float) -> bool:
+    def start(self, cap_usd: float, stop: threading.Event | None = None) -> bool:
         """Reserve a session whose budget is `cap_usd`, waiting while it is past the ceiling.
 
         It waits only while another session runs: False, counted as refused, when it is
-        still past the ceiling once none is running.
+        still past the ceiling once none is running, and False, not counted, when `stop`
+        is set once it has waited.
         """
         with self._changed:
+            waited = False
             while (verdict := self._verdict(cap_usd)) == "wait":
                 self._changed.wait()
+                waited = True
+            if waited and stop is not None and stop.is_set():
+                return False
             if verdict == "refuse":
                 self.refused += 1
                 return False
@@ -764,7 +772,8 @@ def run_sample(  # noqa: PLR0913 -- `breaker` and `budget` are the run's, shared
     requests, each retry first waits, BACKOFF_S doubling, and `breaker` stops the run
     once limits persist; a sample not started then is returned as not run and not
     saved. `budget` counts each session's cost and starts none, a retry included, past
-    its ceiling (a start past it waits while another session runs): a sample it does not
+    its ceiling (a start past it waits while another session runs, and `breaker` tripping
+    meanwhile stops it): a sample it does not
     start is returned as not run and not saved, and one it does not retry is saved
     excluded and not counted by `breaker`. A sample the arm spoiled is valid and counts.
     The arm's name is part of the key, so `new` never reuses `old`'s sessions even when
@@ -783,17 +792,18 @@ def run_sample(  # noqa: PLR0913 -- `breaker` and `budget` are the run's, shared
     if cached is not None and cached.valid:
         return cached
     if breaker is not None and breaker.tripped.is_set():
-        reason = "not run: the API kept limiting requests; rerun later to resume"
+        reason = Breaker.STOPPED
         return cache.Sample(
             sample_key, case.id, arm.name, index, arm.plugins, False, [reason], [], "", {}, {}
         )
     earlier = [*(cached.attempts or []), attempt_of(cached)] if cached is not None else []
-    drawn = _budgeted(case, arm, index, spec, sample_key, budget=budget)
+    drawn = _budgeted(case, arm, index, spec, sample_key, budget=budget, breaker=breaker)
     if drawn is None:
+        stopped = breaker is not None and breaker.tripped.is_set()
+        reason = Breaker.STOPPED if stopped else Budget.REFUSED
         return cache.Sample(
-            sample_key, case.id, arm.name, index, arm.plugins, False, [Budget.REFUSED], [], "",
-            {}, {},
-        )  # fmt: skip
+            sample_key, case.id, arm.name, index, arm.plugins, False, [reason], [], "", {}, {}
+        )
     sample, text = drawn
     refused = False
     for attempt in range(RETRIES):
@@ -801,7 +811,8 @@ def run_sample(  # noqa: PLR0913 -- `breaker` and `budget` are the run's, shared
             break
         if limited(sample) and (budget is None or budget.verdict(spec.budget_usd) != "refuse"):
             time.sleep(BACKOFF_S * 2**attempt)
-        if (retried := _budgeted(case, arm, index, spec, sample_key, budget=budget)) is None:
+        retried = _budgeted(case, arm, index, spec, sample_key, budget=budget, breaker=breaker)
+        if retried is None:
             refused = True
             break
         earlier.append(attempt_of(sample))
@@ -813,13 +824,23 @@ def run_sample(  # noqa: PLR0913 -- `breaker` and `budget` are the run's, shared
     return sample
 
 
-def _budgeted(  # noqa: PLR0913 -- `_session`'s arguments and the run's budget
-    case: Case, arm: Arm, index: int, spec: Spec, sample_key: str, *, budget: Budget | None
+def _budgeted(  # noqa: PLR0913 -- `_session`'s arguments and the run's budget and breaker
+    case: Case,
+    arm: Arm,
+    index: int,
+    spec: Spec,
+    sample_key: str,
+    *,
+    budget: Budget | None,
+    breaker: Breaker | None = None,
 ) -> tuple[cache.Sample, str] | None:
-    """One session at `sample_key`, counted in `budget`; None when the budget does not start it."""
+    """One session at `sample_key`, counted in `budget`; None when the budget does not start it.
+
+    A start that waited on the budget's ceiling is not made once `breaker` has tripped.
+    """
     if budget is None:
         return _session(case, arm, index, spec, sample_key)
-    if not budget.start(spec.budget_usd):
+    if not budget.start(spec.budget_usd, None if breaker is None else breaker.tripped):
         return None
     drawn = None
     try:

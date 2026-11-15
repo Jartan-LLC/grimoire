@@ -629,6 +629,33 @@ def test_a_limited_samples_retry_the_ceiling_holds_back_while_a_session_runs_wai
     assert (budget.sessions, budget.refused) == (3, 0)
 
 
+def test_a_start_waiting_on_the_ceiling_when_the_breaker_trips_returns_not_run_unreserved(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case = load_suite(write_suite(tmp_path / "suite")).cases[0]
+    spec = session.Spec("m", "v", 4.0, tmp_path, tmp_path / "store")
+
+    def no_session(*_: object) -> None:
+        raise AssertionError("a tripped breaker must not start a session")
+
+    monkeypatch.setattr(session, "_session", no_session)
+    budget = session.Budget(10.0)
+    assert start_now(budget, 4.0)
+    assert start_now(budget, 4.0)
+    breaker = session.Breaker()
+    thread, returned = in_thread(
+        lambda: session.run_sample(case, Arm("new", "h", {}), 0, spec, breaker, budget=budget), 0.2
+    )
+    assert thread.is_alive()  # 3 x 4 would pass 10, and two sessions are running
+    breaker.tripped.set()
+    budget.finish(3.0, 4.0)  # 3 spent + 2 sessions x the mean of 3 would start it
+    thread.join(5)
+    assert [sample.reasons for sample in returned] == [[session.Breaker.STOPPED]]
+    assert cache.load(spec.store, returned[0].key) is None
+    assert budget.verdict(4.0) == "start"  # 3 spent + 2 sessions x 3: it reserved nothing
+    assert (budget.sessions, budget.refused) == (1, 0)
+
+
 def test_a_session_that_raises_counts_at_its_budget_and_frees_its_reservation(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
