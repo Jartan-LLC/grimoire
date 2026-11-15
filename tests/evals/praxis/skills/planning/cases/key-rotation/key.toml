@@ -27,3 +27,10 @@ arm = "none"
 failures = 3
 runs = 3
 runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
