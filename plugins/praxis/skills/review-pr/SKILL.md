@@ -26,7 +26,7 @@ For a branch with no open PR, the change is `git diff <base>...<branch>` and its
 
 ### 2. Categorize and Review
 
-Launch relevant reviewer agents based on changed files:
+Launch reviewer agents based on changed files, however small the change:
 
 - Backend changes -> `backend-reviewer`
 - Frontend changes -> `frontend-reviewer`
@@ -34,6 +34,8 @@ Launch relevant reviewer agents based on changed files:
 - Non-trivial code changes -> `structure-reviewer`
 - All changes -> `general-reviewer`
 - All changes -> `doc-reviewer`
+
+The reviewers do the review, each with review skills of its own: reading the diff yourself in their place skips those skills.
 
 Give each reviewer the change, the PR title and description, the commit messages and the project's rules. Tell it nothing about what to look for, beyond any limit the request sets, and nothing an earlier review found. When the request limits the review to part of the change, launch only the reviewers that own that part, and pass the limit on.
 
