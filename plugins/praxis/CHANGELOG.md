@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.8.0
+## 2.7.1
 
 - `review-pr` launches its reviewer agents however small the change. On Sonnet, and sometimes on Haiku, a review of a change a few lines long often skipped them: your agent wrote the review alone, without the review skills each reviewer brings.
 
