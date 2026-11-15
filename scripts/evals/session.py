@@ -628,13 +628,13 @@ class Budget:
 
     Shared by the run's worker threads. A session, a retry included, starts only while
     the spend so far plus the expected cost of each session running and of the new one
-    stays within `max_usd`; with no `max_usd` every session starts. A start past it waits
-    for a running session to finish, which can lower the expected cost, and checks again;
-    it is refused only when no session is running. A session's expected cost is the mean
-    of those the run finished at a known cost, or its per-session budget until one has.
-    A session whose cost is unknown (killed at the timeout before its
-    `result` event) is counted at that budget. The ceiling rests on that estimate: the
-    sessions running when it is reached can pass it by what they cost above the mean.
+    stays within `max_usd`; with no `max_usd` every session starts. A start past it
+    waits for a running session to finish, which can lower the expected cost, and checks
+    again; it is refused only when no session is running. A session's expected cost is
+    the mean of those the run finished at a known cost, or its per-session budget until
+    one has. A session whose cost is unknown (killed at the timeout before its `result`
+    event) is counted at that budget. The ceiling rests on that estimate: the sessions
+    running when it is reached can pass it by what they cost above the mean.
     """
 
     REFUSED = "not run: starting it could pass the spend ceiling; rerun to resume"
@@ -767,21 +767,20 @@ def run_sample(  # noqa: PLR0913 -- `breaker` and `budget` are the run's, shared
     """The stored sample for (case, arm, model, version, index), running the session if missing.
 
     An excluded sample (the infrastructure failed: a usage limit, a leaked setting, a
-    session that reached the suite's files) is retried up to RETRIES times and kept
-    for its reasons, never reused: the next run retries it too. When the API limits
+    session that reached the suite's files) is retried up to RETRIES times and kept for
+    its reasons, never reused: the next run retries it too. When the API limits
     requests, each retry first waits, BACKOFF_S doubling, and `breaker` stops the run
-    once limits persist; a sample not started then is returned as not run and not
-    saved. `budget` counts each session's cost and starts none, a retry included, past
-    its ceiling (a start past it waits while another session runs, and `breaker` tripping
-    meanwhile stops it): a sample it does not
-    start is returned as not run and not saved, and one it does not retry is saved
-    excluded and not counted by `breaker`. A sample the arm spoiled is valid and counts.
-    The arm's name is part of the key, so `new` never reuses `old`'s sessions even when
-    their plugins are identical, and `spec.screen` is too, so
-    each screen draws fresh samples for both arms while a rerun of the same screen resumes
-    it. RUNNER is in every key, REMOTE_RUNNER in a remote case's only, and a timeout other
-    than TIMEOUT_S or an `env` in its suite's only, so a changed timeout draws new samples
-    instead of reusing the ones it cut off.
+    once limits persist; a sample not started then is returned as not run and not saved.
+    `budget` counts each session's cost and starts none, a retry included, past its
+    ceiling (a start past it waits while another session runs, and `breaker` tripping
+    meanwhile stops it): a sample it does not start is returned as not run and not
+    saved, and one it does not retry is saved excluded and not counted by `breaker`. A
+    sample the arm spoiled is valid and counts. The arm's name is part of the key, so
+    `new` never reuses `old`'s sessions even when their plugins are identical, and
+    `spec.screen` is too, so each screen draws fresh samples for both arms while a rerun
+    of the same screen resumes it. RUNNER is in every key, REMOTE_RUNNER in a remote
+    case's only, and a timeout other than TIMEOUT_S or an `env` in its suite's only, so
+    a changed timeout draws new samples instead of reusing the ones it cut off.
 
     The saved sample keeps every earlier attempt at its key in `attempts`, a stored
     excluded sample's own and its attempts included, so the store holds the cost of
