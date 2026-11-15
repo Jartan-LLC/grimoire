@@ -1,0 +1,36 @@
+final = "Plan written to .claude/workspace/issue-61/plan.md."
+
+[files]
+".claude/workspace/issue-61/plan.md" = '''# Plan: Keep the original gravity of each brew (issue 61)
+
+## Approach
+
+Add an optional `--og` to `brewlog add`, store it as a fourth column, and have `brewlog list`
+print it after the style. Rows logged before have three columns; `zip` leaves `og` out of their
+dict, so they list as before.
+
+## Decisions
+
+- What `--og` accepts -- owner: tomas -- recommended: any number, stored as typed -- default if
+  unanswered: as typed -- if wrong: add a range check in `brewlog/cli.py`.
+
+## Out of scope
+
+- Adding a header row to the CSV file -- not planned.
+
+## Steps
+
+1. Add `"og"` to `FIELDS` at `brewlog/storage.py:7`, and write an empty value when a brew has none,
+   following `brewlog/storage.py:26-28`.
+2. Add `--og` to the `add` parser at `brewlog/cli.py:11-14`, and print ` OG <og>` in `list` when the
+   brew has one.
+3. Tests: `tests/test_storage.py` loads a three-column row with no `og`; `tests/test_cli.py`, following
+   `tests/test_cli.py:4-12`, lists a brew with and one without.
+4. Add the `--og` example to `README.md`.
+
+## Verification
+
+- `python3 -m pytest -q` -- the new tests pass with the existing ones.
+- `BREWLOG_FILE=/tmp/b.csv python3 -m brewlog.cli list` on a log with old and new rows -- old rows
+  print as before, new ones with their gravity.
+'''
