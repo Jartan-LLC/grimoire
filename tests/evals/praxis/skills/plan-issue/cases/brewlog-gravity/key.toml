@@ -1,0 +1,116 @@
+# Fixture 2's kind: a feature with a tempting adjacent refactor.
+# No session's output shaped it.
+split = "screen"
+kind = "regression"
+hints = ["out of scope", "csv module", "refactor", "storage.py", "rewrite", "csv.reader"]
+
+# A Verification section (or Testing, Validation...) with a backticked command or a fenced block. A
+# command holds a space, `::` or a known tool's name (`ruff`), or is a script path (`./check.sh`); a
+# heading inside Steps is not the Verification section.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-61/plan.md"
+present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?:(?:[^`\n]*`[^`\n]*`)*?[^`\n]*`(?:[^`\n]*?[^`\s][ \t]+[^`\s][^`\n]*?|[^`\n]*::[^`\n]*|pytest|tox|make|jest|vitest|ruff|mypy|pyright|eslint|prettier|black|flake8|pylint|shellcheck|tsc|\.{1,2}/[^`\s]+|[\w./-]+\.(?:sh|bash))`|[ \t]*```)'''
+
+# No Complexity line or heading.
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-61/plan.md"
+absent = '''(?im)^(?:\#{1,6}[ \t]*complexity\b|[ \t>*_-]*complexity[ \t*_]*:)'''
+
+# No placeholder phases (Foundation / Core implementation / Integration).
+[[check]]
+metric = "cut"
+artifact = "file:.claude/workspace/issue-61/plan.md"
+absent = '''(?i)phase[ \t]*\d+\W{0,4}(?:foundation|core\b|integration)|\b(?:core implementation|integration[ \t]*(?:/|and|&)[ \t]*cleanup)\b'''
+
+# At least one backticked path that exists in the fixture.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-61/plan.md"
+present = '''`(?:\./)?(?:\.gitignore|AGENTS\.md|CLAUDE\.md|README\.md|brewlog/__init__\.py|brewlog/cli\.py|brewlog/storage\.py|pyproject\.toml|tests/test_cli\.py|tests/test_storage\.py|brewlog/?|tests/?)(?:[:#][^`\n]*)?`'''
+
+# No backticked `path:line` whose path is not a fixture file or whose line is past its end; a list
+# or range of lines and a `:col` are read too. The path must end in a source or text extension or
+# be a known extensionless file such as `Makefile`, so a `host:port` is not read as one.
+[[check]]
+metric = "grounded"
+artifact = "file:.claude/workspace/issue-61/plan.md"
+absent = '''`(?:\./)?(?!(?:\.gitignore:(?:2|1)(?::\d+)?(?:[-,][ \t]*(?:2|1)(?::\d+)?)*|AGENTS\.md:(?:8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:8|7|6|5|4|3|2|1)(?::\d+)?)*|CLAUDE\.md:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|README\.md:(?:6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:6|5|4|3|2|1)(?::\d+)?)*|(?:brewlog/)?__init__\.py:(?:1)(?::\d+)?(?:[-,][ \t]*(?:1)(?::\d+)?)*|(?:brewlog/)?cli\.py:(?:27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:brewlog/)?storage\.py:(?:28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|pyproject\.toml:(?:7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:7|6|5|4|3|2|1)(?::\d+)?)*|(?:tests/)?test_cli\.py:(?:12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:12|11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*|(?:tests/)?test_storage\.py:(?:11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?(?:[-,][ \t]*(?:11|10|9|8|7|6|5|4|3|2|1)(?::\d+)?)*)`)(?:[\w./-]+\.(?:py|pyi|js|mjs|cjs|ts|tsx|jsx|json|md|rst|txt|toml|ya?ml|ini|cfg|sh|html?|css|csv|sql|lock)|(?:[\w./-]*/)?(?:Makefile|Dockerfile|LICENSE|\.gitignore|\.npmignore|\.dockerignore|\.editorconfig)):\d+(?::\d+)?(?:[-,][ \t]*\d+(?::\d+)?)*`'''
+
+# No section but Decisions that holds only None / N/A, a reason after it or not (a padded section).
+[[check]]
+metric = "lean"
+artifact = "file:.claude/workspace/issue-61/plan.md"
+absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:decisions?|open questions?|questions|ask[- ]first|needs? (?:your )?(?:decision|input|approval|sign-?off)|for (?:the user|you) to decide)\b)[^\n]*\n(?:[ \t]*\n)*[ \t]*(?:[-*+][ \t]+)?(?:\*\*|_)?\(?(?:none|n/?a|not applicable|(?:none|nothing)(?: (?:needed|required|planned|else))?|nothing to (?:add|note|report)|no changes?(?: needed)?|no (?:[\w-]+[ \t]+){1,2}items?)\)?(?:[.!]?(?:\*\*|_)?(?:[ \t]*(?:--|:|,)[^\n]*)?|[.;](?:\*\*|_)?[ \t]+[^\n]*)[ \t]*(?:\n[ \t]*)*(?:\n(?=\#)|\Z)'''
+
+# Target: an Out of scope section (or Non-goals...) names the tempting adjacent refactor, moving
+# `brewlog/storage.py` from its hand-written split and join to the csv module, in one item (a bullet
+# or paragraph): its topic (the csv module, or the hand-written parsing) with a change or keep word,
+# the csv module with a deferral word, its topic leading the item with a deferral word, "No csv
+# module" leading it; or its file with a change word on one line. A bare "CSV" (the log's format)
+# is not the topic. An item that says the switch is done here ("done in step 2", "(step 3)",
+# "needed for og") fails, as do the comma-in-name bug alone, another format such as SQLite, and the
+# file with a keep word alone ("left unchanged"). `TODO` counts only in capitals. A move word may take
+# a backticked object and a "from" ("Moving `x` from A to B"). It follows a spec written blind,
+# from the prompt, the issue, the fixture and the plan format's Out of scope rule only.
+[[check]]
+metric = "reader"
+artifact = "file:.claude/workspace/issue-61/plan.md"
+present = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:out[ -]of[ -]scope|not in scope|non-goals?|not (?:doing|planned|changing|included)|left out|deferred|scope boundar\w*)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?!(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:\b(?<!not )(?:done|handled|covered|included|made)[ \t]+(?:here|in this|in step)|\bin step \d|\(step \d+\)|\b(?<!not a )prerequisite\b|\b(?:required|needed|necessary)[ \t]+(?:for|by|to)[ \t]+(?:this|the feature|og|adding)\b))(?:(?:(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:\bcsv\.(?:reader|writer|DictReader|DictWriter)\b|\bDict(?:Reader|Writer)\b|\bcsv[- ](?:module|library|lib|package|reader|writer)s?\b|\b(?:standard[- ]library|stdlib)(?:'s)?[ \t]+`?csv\b|\b(?:to|onto|with|via|on)[ \t]+(?:the[ \t]+)?`?csv\b(?!`?[- ](?:file|row|line|format|column|header|data))|\bhand[- ]?(?:written|rolled|made|coded|built)\b|\bby hand\b|\bsplit[ \t]*/[ \t]*join\b|\bsplit[- ]and[- ]join\b|\bcsv[ -](?:pars\w*|handling|reading|writing)))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:(?-i:TODO)|rewrit\w*|rewrote|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them |`[^`\n]+` )?(?:from [^\n]*?)?(?:to|onto)|hand-?rolled|rework\w*|port(?:s|ed|ing)?\b|convert\w*|(?:stay|stays|stayed|keep|keeps|kept|remains?|remained) (?:on|with|using)\b|swap\w*|adopt\w*|moderni[sz]\w*|overhaul\w*|stay\w*|keep\w*|kept|remain\w*|leav\w+|left\b|unchanged|untouched|as[- ]is\b|still us\w+))|(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?(?:\bcsv\.(?:reader|writer|DictReader|DictWriter)\b|\bDict(?:Reader|Writer)\b|\bcsv[- ](?:module|library|lib|package|reader|writer)s?\b|\b(?:standard[- ]library|stdlib)(?:'s)?[ \t]+`?csv\b|\b(?:to|onto|with|via|on)[ \t]+(?:the[ \t]+)?`?csv\b(?!`?[- ](?:file|row|line|format|column|header|data))))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:separate|own (?:issue|change|pr|ticket)|follow-?up|later|defer\w*|future|not planned|not (?:in|part of) this|instead|(?:open|file|rais)(?:e|es|ed|ing|s)? (?:an? |its own |a separate |a new )?(?:issue|ticket)))|[ \t]*(?:(?:[-*+]|\d+[.)])[ \t]+)?(?:\*\*|_)?`?(?:(?:the|its|our|a|any)[ \t]+)?(?:(?:hand-?(?:rolled|written)|custom|existing|current|own|json|proper|real)[ \t]+)?`?(?:\bcsv\.(?:reader|writer|DictReader|DictWriter)\b|\bDict(?:Reader|Writer)\b|\bcsv[- ](?:module|library|lib|package|reader|writer)s?\b|\b(?:standard[- ]library|stdlib)(?:'s)?[ \t]+`?csv\b|\b(?:to|onto|with|via|on)[ \t]+(?:the[ \t]+)?`?csv\b(?!`?[- ](?:file|row|line|format|column|header|data))|\bhand[- ]?(?:written|rolled|made|coded|built)\b|\bby hand\b|\bsplit[ \t]*/[ \t]*join\b|\bsplit[- ]and[- ]join\b|\bcsv[ -](?:pars\w*|handling|reading|writing))(?=(?:[^\n]|\n(?=[ \t]*\S)(?![ \t]*(?:[-*+]|\d+[.)])[ \t])(?!\#))*?\b(?:separate|own (?:issue|change|pr|ticket)|follow-?up|later|defer\w*|future|not planned|not (?:in|part of) this|instead|(?:open|file|rais)(?:e|es|ed|ing|s)? (?:an? |its own |a separate |a new )?(?:issue|ticket)))|[ \t]*(?:(?:[-*+]|\d+[.)])[ \t]+)?(?:\*\*|_)?`?(?:(?:the|its|our|a|any)[ \t]+)?(?:(?:hand-?(?:rolled|written)|custom|existing|current|own|json|proper|real)[ \t]+)?`?(?:no|without)[ \t]+(?:the[ \t]+)?`?(?:\bcsv\.(?:reader|writer|DictReader|DictWriter)\b|\bDict(?:Reader|Writer)\b|\bcsv[- ](?:module|library|lib|package|reader|writer)s?\b|\b(?:standard[- ]library|stdlib)(?:'s)?[ \t]+`?csv\b|\b(?:to|onto|with|via|on)[ \t]+(?:the[ \t]+)?`?csv\b(?!`?[- ](?:file|row|line|format|column|header|data))|csv\b))|[^\n]*(?:(?:storage\.py|storage\.(?:load|append)\b|\bstorage module\b)[^\n]*\b(?:(?-i:TODO)|rewrit\w*|rewrote|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them |`[^`\n]+` )?(?:from [^\n]*?)?(?:to|onto)|hand-?rolled|rework\w*|port(?:s|ed|ing)?\b|convert\w*|(?:stay|stays|stayed|keep|keeps|kept|remains?|remained) (?:on|with|using)\b)|\b(?:(?-i:TODO)|rewrit\w*|rewrote|replac\w*|refactor\w*|rebuild\w*|rebuilt|restructur\w*|switch\w*|migrat\w*|mov(?:e|es|ed|ing) (?:it |them |`[^`\n]+` )?(?:from [^\n]*?)?(?:to|onto)|hand-?rolled|rework\w*|port(?:s|ed|ing)?\b|convert\w*|(?:stay|stays|stayed|keep|keeps|kept|remains?|remained) (?:on|with|using)\b)\b[^\n]*(?:storage\.py|storage\.(?:load|append)\b|\bstorage module\b)))'''
+
+[[fact]]
+text = "Written by hand before the project used the csv module"
+where = "fixture:brewlog/storage.py"
+
+[[fact]]
+text = "open an issue for anything else you spot"
+where = "fixture:AGENTS.md"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--comments'''
+stdout = "title:\tKeep the original gravity of each brew\nstate:\tOPEN\nauthor:\ttomas\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t61\n--\nI measure the original gravity of every batch and keep it in a notebook, which I never have with me. Let me run `brewlog add 2026-11-02 \"Oat Stout\" stout --og 1.058` and have `brewlog list` show the gravity next to the brew. The brews I've already logged have no gravity; they should still list as they do now.\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b.*--json'''
+stdout = "{\"number\": 61, \"title\": \"Keep the original gravity of each brew\", \"body\": \"I measure the original gravity of every batch and keep it in a notebook, which I never have with me. Let me run `brewlog add 2026-11-02 \\\"Oat Stout\\\" stout --og 1.058` and have `brewlog list` show the gravity next to the brew. The brews I've already logged have no gravity; they should still list as they do now.\", \"state\": \"OPEN\", \"author\": {\"login\": \"tomas\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/brewlog/issues/61\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)issue view\b'''
+stdout = "title:\tKeep the original gravity of each brew\nstate:\tOPEN\nauthor:\ttomas\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t61\n--\nI measure the original gravity of every batch and keep it in a notebook, which I never have with me. Let me run `brewlog add 2026-11-02 \"Oat Stout\" stout --og 1.058` and have `brewlog list` show the gravity next to the brew. The brews I've already logged have no gravity; they should still list as they do now.\n"
+
+[[gh]]
+match = '''(^|\s)issue edit\b'''
+stdout = "https://github.com/acme/brewlog/issues/61\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b.*--json'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)issue list\b'''
+stdout = ""
+
+[[gh]]
+match = '''(^|\s)repo view\b'''
+stdout = "{\"name\": \"brewlog\", \"nameWithOwner\": \"acme/brewlog\", \"defaultBranchRef\": {\"name\": \"main\"}}\n"
+
+[[gh]]
+match = '''(^|\s)api user\b'''
+stdout = "{\"login\": \"dev\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/61/comments\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)api\b.*issues/61\b'''
+stdout = "{\"number\": 61, \"title\": \"Keep the original gravity of each brew\", \"body\": \"I measure the original gravity of every batch and keep it in a notebook, which I never have with me. Let me run `brewlog add 2026-11-02 \\\"Oat Stout\\\" stout --og 1.058` and have `brewlog list` show the gravity next to the brew. The brews I've already logged have no gravity; they should still list as they do now.\", \"state\": \"OPEN\", \"author\": {\"login\": \"tomas\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/brewlog/issues/61\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+
+[[gh]]
+match = '''(^|\s)api\b'''
+stdout = "[]\n"
+
+[[gh]]
+match = '''(^|\s)auth status\b'''
+stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"

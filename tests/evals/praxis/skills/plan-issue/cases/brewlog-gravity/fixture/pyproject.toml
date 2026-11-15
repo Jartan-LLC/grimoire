@@ -1,0 +1,7 @@
+[project]
+name = "brewlog"
+version = "0.3.0"
+requires-python = ">=3.12"
+
+[project.scripts]
+brewlog = "brewlog.cli:main"
