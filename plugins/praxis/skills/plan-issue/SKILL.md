@@ -12,10 +12,11 @@ Create an implementation plan for a GitHub issue.
 
 ### 1. Load Issue
 
-Determine the issue number from the user's request, which may carry context beyond the number. Fetch the issue details:
+Determine the issue number from the user's request, which may carry context beyond the number. Fetch the issue and its comments:
 
 ```bash
 gh issue view <issue-number>
+gh issue view <issue-number> --comments
 ```
 
 If the issue has no assignee, assign it to the account `gh` is logged in as:
