@@ -314,8 +314,10 @@ def test_gh_replies_give_a_case_its_remote_and_count_in_its_hash(tmp_path: pathl
         (KEY + GH.replace('stdout = "', 'stdout = 3 #"'), "'stdout' must be a string"),
         (
             KEY + GH.replace("exit = 1", "exit_code = 1"),
-            "a [[gh]] takes only match, stdout and exit",
+            "a [[gh]] takes only match, stdout, exit and json",
         ),
+        (KEY + GH.replace("exit = 1", 'json = "yes"'), "'json' must be true or false"),
+        (KEY + GH.replace("exit = 1", "json = true"), "needs a JSON object as its 'stdout'"),
         (KEY.replace('artifact = "commits"', 'artifact = "brief:"'), "is not commits"),
     ],
 )
@@ -476,6 +478,19 @@ def test_older_compares_versions_number_by_number() -> None:
     assert not older("2.1", "2.1.0")
     assert older("2.0", "2.0.1")
     assert older("no version", "2.1.0")
+
+
+def test_a_json_reply_loads_and_counts_in_a_case_hash_only_when_set(tmp_path: pathlib.Path) -> None:
+    root = write_suite(tmp_path, key=KEY + GH)
+    plain = load_suite(root).cases[0]
+    key = root / "cases" / "c1" / "key.toml"
+    key.write_text(KEY + GH.replace("exit = 1", "exit = 1\njson = false"))
+    assert load_suite(root).cases[0].hash() == plain.hash()
+    issue = '[[gh]]\nmatch = "^issue view"\nstdout = "{\\"title\\": \\"T\\"}"\njson = true\n'
+    key.write_text(KEY + GH + issue)
+    cut = load_suite(root).cases[0]
+    assert cut.gh[-1] == Reply("^issue view", '{"title": "T"}', 0, json=True)
+    assert cut.hash() != plain.hash()
 
 
 def test_a_hook_script_target_is_its_own_path_and_any_other_a_skill_agent_or_command() -> None:
