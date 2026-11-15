@@ -1,5 +1,5 @@
 # Fixture 2's kind: a feature with a tempting adjacent refactor.
-# No session's output shaped it.
+# Its out-of-scope check was widened after a screen's old and none plans used phrasings it missed.
 split = "dev"
 kind = "regression"
 hints = ["out of scope", "fs/promises", "refactor", "store.js", "async"]
