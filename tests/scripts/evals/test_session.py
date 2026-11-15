@@ -10,6 +10,7 @@ import sys
 import tempfile
 import threading
 import time
+from collections.abc import Callable
 from typing import Any
 
 import pytest
@@ -447,16 +448,40 @@ def test_a_rerun_carries_a_stored_excluded_samples_attempts_forward(
     assert costs == [{"cost_usd": 1.0}] * (session.RETRIES + 1)
 
 
+def in_thread[T](call: Callable[[], T], wait_s: float) -> tuple[threading.Thread, list[T]]:
+    """Run `call` in a daemon thread joined for `wait_s`; the list gets its result once it returns.
+
+    A call that blocks for good then fails its test instead of hanging the run.
+    """
+    done: list[T] = []
+    thread = threading.Thread(target=lambda: done.append(call()), daemon=True)
+    thread.start()
+    thread.join(wait_s)
+    return thread, done
+
+
+def start_now(budget: session.Budget, cap_usd: float) -> bool:
+    """`budget.start(cap_usd)`, failing instead of hanging when the start waits."""
+    _, started = in_thread(lambda: budget.start(cap_usd), 5)
+    assert started, "the start still waits after 5 s"
+    return started[0]
+
+
+def waiting_start(budget: session.Budget, cap_usd: float) -> tuple[threading.Thread, list[bool]]:
+    """Call `budget.start` in a thread; the list gets its answer once it returns."""
+    return in_thread(lambda: budget.start(cap_usd), 0.2)
+
+
 def test_a_budget_expects_the_cap_until_a_session_finishes_then_the_mean() -> None:
     budget = session.Budget(10.0)
-    assert budget.start(4.0)
-    assert budget.start(4.0)  # 0 spent + 2 sessions x 4 expected
+    assert start_now(budget, 4.0)
+    assert start_now(budget, 4.0)  # 0 spent + 2 sessions x 4 expected
     assert budget.verdict(4.0) == "wait"  # 3 x 4 would pass 10
     budget.finish(1.0, 4.0)
     budget.finish(3.0, 4.0)
     assert budget.spent_usd == 4.0
     for _ in range(3):  # 4 spent + 3 sessions x the mean of 2
-        assert budget.start(4.0)
+        assert start_now(budget, 4.0)
     assert budget.verdict(4.0) == "wait"
 
 
@@ -469,19 +494,10 @@ def test_a_budget_counts_a_session_of_unknown_cost_at_its_cap() -> None:
         assert budget.start(4.0)
 
 
-def waiting_start(budget: session.Budget, cap_usd: float) -> tuple[threading.Thread, list[bool]]:
-    """Call `budget.start` in a thread; the list gets its answer once it returns."""
-    started: list[bool] = []
-    thread = threading.Thread(target=lambda: started.append(budget.start(cap_usd)), daemon=True)
-    thread.start()
-    thread.join(0.2)
-    return thread, started
-
-
 def test_a_start_past_the_ceiling_waits_for_a_running_session_and_starts_at_the_new_mean() -> None:
     budget = session.Budget(10.0)
-    assert budget.start(4.0)
-    assert budget.start(4.0)
+    assert start_now(budget, 4.0)
+    assert start_now(budget, 4.0)
     thread, started = waiting_start(budget, 4.0)
     assert thread.is_alive()  # 3 x 4 would pass 10, and two sessions are running
     budget.finish(1.0, 4.0)
@@ -492,8 +508,8 @@ def test_a_start_past_the_ceiling_waits_for_a_running_session_and_starts_at_the_
 
 def test_a_waiting_start_is_refused_once_no_session_runs_and_the_ceiling_still_refuses() -> None:
     budget = session.Budget(10.0)
-    assert budget.start(4.0)
-    assert budget.start(4.0)
+    assert start_now(budget, 4.0)
+    assert start_now(budget, 4.0)
     thread, started = waiting_start(budget, 4.0)
     budget.finish(None, 4.0)  # 4 spent + 2 sessions x 4 still passes 10, and one runs
     thread.join(0.2)
@@ -583,7 +599,7 @@ def test_a_limited_samples_retry_the_ceiling_holds_back_while_a_session_runs_wai
         return sample, ""
 
     budget = session.Budget(10.0)
-    assert budget.start(4.0)  # another sample's session, still running
+    assert start_now(budget, 4.0)  # another sample's session, still running
     waits: list[float] = []
 
     def backoff(seconds: float) -> None:
@@ -593,8 +609,10 @@ def test_a_limited_samples_retry_the_ceiling_holds_back_while_a_session_runs_wai
     monkeypatch.setattr(session, "_session", session_)
     monkeypatch.setattr(session.time, "sleep", backoff)
     # after 4.5 spent, a retry expected at 4.5 passes 10 beside the running session
-    sample = session.run_sample(case, Arm("new", "h", {}), 0, spec, budget=budget)
-    assert sample.valid
+    _, returned = in_thread(
+        lambda: session.run_sample(case, Arm("new", "h", {}), 0, spec, budget=budget), 5
+    )
+    assert [sample.valid for sample in returned] == [True]
     assert waits == [session.BACKOFF_S]
     assert (budget.sessions, budget.refused) == (3, 0)
 
@@ -613,7 +631,7 @@ def test_a_session_that_raises_counts_at_its_budget_and_frees_its_reservation(
     with pytest.raises(OSError, match="sandbox gone"):
         session.run_sample(case, Arm("new", "h", {}), 0, spec, budget=budget)
     assert (budget.spent_usd, budget.sessions, budget.unknown) == (4.0, 1, 1)
-    assert budget.start(4.0)  # 4 spent + 1 session x 4: none still reserved for the crash
+    assert start_now(budget, 4.0)  # 4 spent + 1 session x 4: none still reserved for the crash
     assert budget.verdict(4.0) == "wait"
 
 
@@ -748,13 +766,13 @@ def test_a_case_changed_on_disk_counts_no_session_in_the_budget(tmp_path: pathli
     (root / "cases" / "c1" / "fixture" / "app.py").write_text("x = 2\n")
     spec = session.Spec("m", "v", 4.0, tmp_path, tmp_path / "store")
     budget = session.Budget(10.0)
-    assert budget.start(4.0)
+    assert start_now(budget, 4.0)
     budget.finish(2.0, 4.0)
     sample = session.run_sample(case, Arm("old", "h", {}), 0, spec, budget=budget)
     assert sample.reasons == [session.CASE_CHANGED]
     assert (budget.spent_usd, budget.sessions) == (2.0, 1)
     for _ in range(4):  # 2 spent + 4 sessions x the mean of 2, which no draw of it lowered
-        assert budget.start(4.0)
+        assert start_now(budget, 4.0)
     assert budget.verdict(4.0) == "wait"
 
 
