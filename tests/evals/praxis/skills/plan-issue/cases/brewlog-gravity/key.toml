@@ -59,8 +59,10 @@ absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:d
 # keep word); or a keep word with the hand-written code (hand-written, split/join, by hand), or with
 # the file and a parser word; or a change word aimed at the file ("Rewriting storage.py", "a
 # storage.py rewrite"); or the topic within its first four words, after an article, and a deferral
-# word; or "No"/"Without" and TARGET leading it. The comma-in-name bug alone fails, as do the quote
-# behaviour alone, another fix for the bug, a bare CSV topic, and the file with a keep word only.
+# word; or "No"/"Without" and TARGET leading it. The comma-in-name bug alone fails unless the item
+# names the hand-written code in its first four words with a deferral (the spec passes that form, so
+# a read checks such a pass by hand), as do the quote behaviour alone, another fix for the bug, a bare
+# CSV topic, and the file with a keep word only.
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-61/plan.md"
