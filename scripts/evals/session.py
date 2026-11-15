@@ -621,6 +621,7 @@ class Breaker:
 
 
 type Verdict = Literal["start", "wait", "refuse"]
+type Start = Literal["started", "refused", "stopped"]
 
 
 class Budget:
@@ -665,12 +666,12 @@ class Budget:
             return "start"
         return "wait" if self._running else "refuse"
 
-    def start(self, cap_usd: float, stop: threading.Event | None = None) -> bool:
+    def start(self, cap_usd: float, stop: threading.Event | None = None) -> Start:
         """Reserve a session whose budget is `cap_usd`, waiting while it is past the ceiling.
 
-        It waits only while another session runs: False, counted as refused, when it is
-        still past the ceiling once none is running, and False, not counted, when `stop`
-        is set once it has waited.
+        It waits only while another session runs: "refused", counted, when it is still
+        past the ceiling once none is running, and "stopped", not counted, when `stop` is
+        set once it has waited.
         """
         with self._changed:
             waited = False
@@ -678,12 +679,12 @@ class Budget:
                 self._changed.wait()
                 waited = True
             if waited and stop is not None and stop.is_set():
-                return False
+                return "stopped"
             if verdict == "refuse":
                 self.refused += 1
-                return False
+                return "refused"
             self._running += 1
-            return True
+            return "started"
 
     def release(self) -> None:
         """Free a reservation whose session never ran, counting nothing as spent."""
@@ -799,11 +800,9 @@ def run_sample(  # noqa: PLR0913 -- `breaker` and `budget` are the run's, shared
         )
     earlier = [*(cached.attempts or []), attempt_of(cached)] if cached is not None else []
     drawn = _budgeted(case, arm, index, spec, sample_key, budget=budget, breaker=breaker)
-    if drawn is None:
-        stopped = breaker is not None and breaker.tripped.is_set()
-        reason = Breaker.STOPPED if stopped else Budget.REFUSED
+    if isinstance(drawn, str):
         return cache.Sample(
-            sample_key, case.id, arm.name, index, arm.plugins, False, [reason], [], "", {}, {}
+            sample_key, case.id, arm.name, index, arm.plugins, False, [drawn], [], "", {}, {}
         )
     sample, text = drawn
     refused = False
@@ -813,7 +812,7 @@ def run_sample(  # noqa: PLR0913 -- `breaker` and `budget` are the run's, shared
         if limited(sample) and (budget is None or budget.verdict(spec.budget_usd) != "refuse"):
             time.sleep(BACKOFF_S * 2**attempt)
         retried = _budgeted(case, arm, index, spec, sample_key, budget=budget, breaker=breaker)
-        if retried is None:
+        if isinstance(retried, str):
             refused = True
             break
         earlier.append(attempt_of(sample))
@@ -834,24 +833,27 @@ def _budgeted(  # noqa: PLR0913 -- `_session`'s arguments and the run's budget a
     *,
     budget: Budget | None,
     breaker: Breaker | None = None,
-) -> tuple[cache.Sample, str] | None:
-    """One session at `sample_key`, counted in `budget`; None when the budget does not start it.
+) -> tuple[cache.Sample, str] | str:
+    """One session at `sample_key`, counted in `budget`, or the reason the budget did not start it.
 
     A start that waited on the budget's ceiling is not made once `breaker` has tripped.
     """
     if budget is None:
         return _session(case, arm, index, spec, sample_key)
-    if not budget.start(spec.budget_usd, None if breaker is None else breaker.tripped):
-        return None
+    started = budget.start(spec.budget_usd, None if breaker is None else breaker.tripped)
+    if started == "refused":
+        return Budget.REFUSED
+    if started == "stopped":
+        return Breaker.STOPPED
     drawn = None
     try:
         drawn = _session(case, arm, index, spec, sample_key)
+        return drawn
     finally:
         if drawn is not None and CASE_CHANGED in drawn[0].reasons:
             budget.release()
         else:
             budget.finish(None if drawn is None else cost(drawn[0]), spec.budget_usd)
-    return drawn
 
 
 def attempt_of(sample: cache.Sample) -> dict[str, object]:
