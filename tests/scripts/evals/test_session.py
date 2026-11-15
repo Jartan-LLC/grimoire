@@ -753,9 +753,8 @@ def test_a_session_that_raises_counts_at_its_budget_and_frees_its_reservation(
     with pytest.raises(OSError, match="sandbox gone"):
         session.run_sample(case, Arm("new", "h", {}), 0, spec, budget=budget)
     assert (budget.spent_usd, budget.sessions, budget.unknown) == (4.0, 1, 1)
-    assert (
-        start_now(budget, 4.0) == "started"
-    )  # 4 spent + 1 session x 4: none still reserved for the crash
+    # 4 spent + 1 session x 4: none still reserved for the crash
+    assert start_now(budget, 4.0) == "started"
     assert budget.verdict(4.0) == "wait"
 
 
