@@ -705,6 +705,40 @@ def test_a_start_waiting_on_the_ceiling_when_the_breaker_trips_returns_not_run_u
     assert (budget.sessions, budget.refused) == (1, 0)
 
 
+def test_a_limited_samples_retry_the_ceiling_admits_at_once_runs_after_the_breaker_trips(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case = load_suite(write_suite(tmp_path / "suite")).cases[0]
+    spec = session.Spec("m", "v", 4.0, tmp_path, tmp_path / "store")
+    breaker = session.Breaker()
+    drawn: list[list[str]] = [["API Error: 429 rate limit"], []]
+
+    def session_(
+        case: Case, arm: Arm, index: int, _: session.Spec, key: str
+    ) -> tuple[cache.Sample, str]:
+        reasons = drawn.pop(0)
+        breaker.tripped.set()  # another worker's last limited sample, recorded meanwhile
+        usage: dict[str, object] = {"cost_usd": 1.0}
+        valid = not reasons
+        sample = cache.Sample(key, case.id, arm.name, index, {}, valid, reasons, [], "", {}, usage)
+        return sample, ""
+
+    monkeypatch.setattr(session, "_session", session_)
+    waits: list[float] = []
+    monkeypatch.setattr(session.time, "sleep", waits.append)
+    budget = session.Budget(10.0)  # 1 spent + 1 session x 1: the retry starts at once
+    _, returned = in_thread(
+        lambda: session.run_sample(case, Arm("new", "h", {}), 0, spec, breaker, budget=budget), 5
+    )
+    assert drawn == []
+    assert waits == [session.BACKOFF_S]
+    assert [sample.valid for sample in returned] == [True]
+    stored = cache.load(spec.store, returned[0].key)
+    assert stored is not None
+    assert stored.valid
+    assert (budget.sessions, budget.refused) == (2, 0)
+
+
 def test_a_session_that_raises_counts_at_its_budget_and_frees_its_reservation(
     tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
