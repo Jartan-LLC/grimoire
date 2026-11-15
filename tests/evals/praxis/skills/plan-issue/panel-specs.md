@@ -10,7 +10,7 @@ and body, from the key's `[[gh]]` reply), the path of the fixture the planner sa
 question below for the case's kind. A grader may read the fixture and `build.py` to check a
 claim, never the case's `key.toml` or `reference/`, which hold the expected answer.
 
-The questions are the ones a blind panel of the planning skill (#193) used on Opus plans of
+The questions are the ones plan-issue's blind panel for the planning skill (#193) used on Opus plans of
 six cases: cart-price-format, thumb-retry, frost-sms-alert, liftlog-markdown,
 notes-sync-clash and report-output-flag. Every other case takes the question of its kind
 unchanged, chosen from the case's kind alone, without seeing any plan for it.
