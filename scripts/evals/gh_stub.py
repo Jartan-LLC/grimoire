@@ -85,9 +85,10 @@ def call_line(argv: Sequence[str]) -> str:
 def json_fields(text: str, argv: Sequence[str]) -> str:
     """The JSON object `text` cut to the fields the call's `--json` names, as gh prints it.
 
-    gh prints only those fields, keys sorted, on one line. A call without `--json` gets
-    `text` unchanged, and a field the object lacks is left out. `--jq` and `--template`
-    are not applied.
+    gh prints only those fields, keys sorted, on one line. A call without a `--json` value
+    gets `text` unchanged, `--json` given last included, and a field the object lacks is
+    left out, where gh refuses both a missing value and a field it does not know. `--jq`
+    and `--template` are not applied.
     """
     names: str | None = None
     for i, arg in enumerate(argv):
