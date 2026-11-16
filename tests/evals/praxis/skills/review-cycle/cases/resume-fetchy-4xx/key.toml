@@ -5,6 +5,11 @@ remote = true
 
 [[check]]
 metric = "rule"
+artifact = "report:praxis:general-reviewer"
+present = '''\S'''
+
+[[check]]
+metric = "rule"
 artifact = "file:.claude/workspace/issue-52/feature--issue-52/3.md"
 present = '''(?m)^#{2,3} (?:Critical|Important)'''
 

@@ -8,3 +8,6 @@ gh = "gh pr create --draft --base main --title t --body-file /tmp/b.md\n\nbody\n
 
 [briefs]
 "general-purpose" = "Run the praxis:review-pr skill on feature/issue-67 against main. Review the whole branch."
+
+[reports]
+"praxis:general-reviewer" = "No Critical or Important findings."

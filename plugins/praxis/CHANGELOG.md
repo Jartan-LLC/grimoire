@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.7.1
+
+- `review-pr` launches its reviewer agents however small the change. On Sonnet, and sometimes on Haiku, a review of a change a few lines long often skipped them: your agent wrote the review alone, without the review skills each reviewer brings.
+
 ## 2.7.0
 
 - New `planning` skill: wherever your agent plans, in conversation, in a plan file or for an issue, it sizes the plan to what a mistake would cost and settles each gap with whoever owns it. When no one can answer, your agent records an assumption and carries on, holding back only steps that cannot be undone.
