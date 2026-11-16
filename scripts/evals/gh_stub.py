@@ -5,16 +5,17 @@ The runner installs this file as `bin/gh` in a sample's sandbox, beside
 (the log it appends to). It reaches no network and uses only the standard library. A
 call no reply matches fails, so a session never reads a success the case did not script.
 
-It does not parse gh's flags, whose arity varies by command (`pr create -f` takes no
-value, `api -f` does). It logs the argv as given, then the text of every regular file an
-argument or a part of one names (`candidates`) inside its roots, and stdin when one of
-those is `-`. The roots are the sandbox and the temp directories the runner names in the
-GRIMOIRE_GH_STUB_TEMP variable (TEMP_ROOTS holds the name), an `os.pathsep` list; without
-that variable, the sandbox alone. That can include a file no gh command would read, and
-stdin whenever any candidate is exactly `-`, a key's value included (`-f q=-`), which
-waits while stdin stays open. It misses a file outside the roots, any file or stdin of a
-call with a PRIVATE argument (`auth`, `secret` or `variable`), and the text of a file
-over MAX_BYTES, which it lists under `over_cap` unread.
+Apart from the value of `--json` (`json_fields`), it does not parse gh's flags, whose
+arity varies by command (`pr create -f` takes no value, `api -f` does). It logs the argv
+as given, then the text of every regular file an argument or a part of one names
+(`candidates`) inside its roots, and stdin when one of those is `-`. The roots are the
+sandbox and the temp directories the runner names in the GRIMOIRE_GH_STUB_TEMP variable
+(TEMP_ROOTS holds the name), an `os.pathsep` list; without that variable, the sandbox
+alone. That can include a file no gh command would read, and stdin whenever any
+candidate is exactly `-`, a key's value included (`-f q=-`), which waits while stdin
+stays open. It misses a file outside the roots, any file or stdin of a call with a
+PRIVATE argument (`auth`, `secret` or `variable`), and the text of a file over
+MAX_BYTES, which it lists under `over_cap` unread.
 
 A reply with `json` set holds a JSON object, and the stub prints it cut to the fields the
 call's `--json` names, as gh does (`json_fields`).
@@ -22,8 +23,8 @@ call's `--json` names, as gh does (`json_fields`).
 A change to what this stub answers, how it matches a call or what it logs, or to the
 remote setup in `session.py`, changes what a remote session can do: bump REMOTE_RUNNER
 there, so no remote sample drawn before it is reused. A new reply option that no case set
-before needs no bump: only the cases that set it answer differently, and setting it
-changes their hash.
+before needs no bump when `Case.hash` leaves it out while unset, as it does for `json`:
+only the cases that set it answer differently, and setting it changes their hash.
 """
 
 import json
