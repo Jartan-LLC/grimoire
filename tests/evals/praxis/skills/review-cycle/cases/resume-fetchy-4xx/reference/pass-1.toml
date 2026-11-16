@@ -7,3 +7,6 @@ final = ""
 
 [briefs]
 "general-purpose" = "Review the whole branch against main."
+
+[reports]
+"praxis:general-reviewer" = "No Critical or Important findings."

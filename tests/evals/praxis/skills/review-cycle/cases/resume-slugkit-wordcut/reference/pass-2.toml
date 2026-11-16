@@ -9,3 +9,6 @@ gh = "gh -R acme/slugkit pr create --title t --draft --body b\n\nb\n"
 [briefs]
 "praxis:general-reviewer" = "Review feature/issue-67 against main, never only the latest commit."
 "general-purpose" = "Run the praxis:review-pr skill on feature/issue-67.\n\nRun the praxis:address-review skill on 3.md. Context: round 1 found a slug with no dash within maxLength was not cut."
+
+[reports]
+"praxis:general-reviewer" = "No Critical or Important findings."
