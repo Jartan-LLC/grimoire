@@ -76,9 +76,13 @@ codex plugin add gitwise@grimoire
 - **SubagentStart** -- prompts each subagent the same way, in wording for a
   subagent's brief, to load the skills its task calls for
 - **SessionStart** -- installs this plugin's Codex agent roles (no-op outside
-  Codex); re-arms skill activation after a compact, which evicts loaded skills
+  Codex); re-arms skill activation after a compact, which evicts loaded skills,
+  and has the per-file-type prompt below ask about each type again
 - **PreToolUse** -- suggests `/compact` at logical intervals
-- **PostToolUse** -- checks changed files for stray `console.log`
+- **PostToolUse** -- checks changed files for stray `console.log`; prompts an
+  agent to load the skills that apply when it starts on a new type of file, so
+  work that turns from docs to code mid-turn is asked to load the skills for
+  the code
 
 The compact suggester reports absolute context size and does not know the
 model's context window -- a hook cannot determine it -- so on a large-window

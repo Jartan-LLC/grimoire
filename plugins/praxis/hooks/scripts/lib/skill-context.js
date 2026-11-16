@@ -1,5 +1,7 @@
 /**
- * The skill-activation imperative suggest-skills.js injects, per hook event.
+ * The skill-activation imperatives: the one suggest-skills.js injects per hook
+ * event, and the one suggest-skills-per-file-type.js adds when an agent starts
+ * on a new type of file.
  *
  * Kept out of suggest-skills.js because hooks.json's SessionStart entry runs
  * that script through `require`: the script cannot check `require.main` before
@@ -10,11 +12,18 @@
 const IMPERATIVE =
   'BEFORE your first tool call: name the applicable skills and load them with Skill. If none, say so. When unsure, load.';
 
+const LOAD_NOT_IN_CONTEXT = 'load with Skill those not already in your context. If none apply, say so. When unsure, load.';
+
 // A subagent gets this right after its brief.
 const SUBAGENT_IMPERATIVE =
   'BEFORE your first tool call: name the skills that apply to the work your task asks for ' +
-  '(its language, libraries and kind of work) besides any your task names, and load with Skill ' +
-  'those not already in your context. If none apply, say so. When unsure, load.';
+  `(its language, libraries and kind of work) besides any your task names, and ${LOAD_NOT_IN_CONTEXT}`;
+
+/** The imperative for an agent's first file of `type`, an extension such as `.py`, or of a type left unnamed when `type` is null. */
+function fileTypeImperative(type) {
+  const touches = type === null ? 'a new type of file' : `\`${type}\` files`;
+  return `This work now touches ${touches}: name the skills that apply to it and ${LOAD_NOT_IN_CONTEXT}`;
+}
 
 const TEXT_BY_EVENT = new Map([
   ['SessionStart', IMPERATIVE],
@@ -41,4 +50,4 @@ function contextFor(input) {
   return { hookSpecificOutput: { hookEventName: event, additionalContext: text } };
 }
 
-module.exports = { contextFor, IMPERATIVE, SUBAGENT_IMPERATIVE };
+module.exports = { contextFor, fileTypeImperative, IMPERATIVE, SUBAGENT_IMPERATIVE };

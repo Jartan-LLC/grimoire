@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.8.0
+
+- When a turn moves on to a new type of file, such as from a plan in Markdown to Python code, your agent is asked to load the skills that apply to it. Before, a turn that began with planning or docs and went on to code was not asked again, so the skills for the code could go unloaded. The reminder comes once per file type for the main thread and for each subagent, whatever skills that agent has already loaded, and again for each type after a compact.
+
 ## 2.7.0
 
 - New `planning` skill: wherever your agent plans, in conversation, in a plan file or for an issue, it sizes the plan to what a mistake would cost and settles each gap with whoever owns it. When no one can answer, your agent records an assumption and carries on, holding back only steps that cannot be undone.

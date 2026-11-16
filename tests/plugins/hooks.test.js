@@ -27,6 +27,7 @@ const SPEAKS_ON_LARGE_CONTEXT = new Set([
   'praxis Prompt each subagent to load the skills relevant to its task',
   'praxis Suggest manual compaction at logical intervals',
   'praxis Check for console.log in changed files after an edit',
+  'praxis Prompt an agent to load the skills for a type of file it starts on',
 ]);
 
 function hookEntries() {
@@ -54,7 +55,7 @@ function payloads(event, transcript) {
     hook_event_name: event,
     source: 'compact',
     tool_name: 'Bash',
-    tool_input: { command: 'git commit -m x && git push' },
+    tool_input: { command: 'git commit -m x && git push', file_path: '/repo/src/app.py' },
   };
   return {
     'malformed JSON': '{"session_id": ',
