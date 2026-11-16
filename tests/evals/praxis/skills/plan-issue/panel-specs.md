@@ -1,9 +1,10 @@
 # Grading specs: plan-issue panel cases
 
-The blind panel's questions for plan-issue's abstraction, clash and refused-input cases. Three
-agents grade each plan, seeing neither the arm nor the model, and answer its case's one question
-yes or no; two of three decide. The panel is the bar for a change to plan-issue or to the
-`praxis:planning` skill (the suite's `[pass_rule]` comment says how).
+The blind panel's questions for plan-issue's abstraction and clash cases. Three agents grade
+each plan, seeing neither the arm nor the model, and answer its case's one question yes or no; two
+of three decide. The panel is the bar for a change to plan-issue or to the `praxis:planning` skill
+(the suite's `[pass_rule]` comment says how). The refused-input question is a reference for one
+case's check, not part of the bar.
 
 Each grader gets, per case, the prompt (prompt.md), the issue the gh stub serves (its title
 and body, from the key's `[[gh]]` reply), the path of the fixture the planner saw, and the
@@ -105,4 +106,4 @@ A yes passes.
 | jsonfmt-indent-flag | Clash |
 | docs-check-clash | Clash |
 | shelf-search-clash | Clash |
-| colcut-fields-errors | Refused input |
+| colcut-fields-errors | Refused input (check reference, not the bar) |
