@@ -617,7 +617,7 @@ def _replies(key: Table, where: pathlib.Path) -> tuple[Reply, ...]:
     for table in _tables(key, "gh", where):
         if set(table) - {"match", "stdout", "exit", "json"}:
             raise SuiteError(f"{where}: a [[gh]] takes only match, stdout, exit and json")
-        stdout, code, fields = (
+        stdout, code, as_json = (
             table.get("stdout", ""),
             table.get("exit", 0),
             table.get("json", False),
@@ -626,9 +626,9 @@ def _replies(key: Table, where: pathlib.Path) -> tuple[Reply, ...]:
             raise SuiteError(f"{where}: a [[gh]]'s 'stdout' must be a string")
         if isinstance(code, bool) or not isinstance(code, int) or not 0 <= code <= MAX_EXIT:
             raise SuiteError(f"{where}: a [[gh]]'s 'exit' must be an integer from 0 to {MAX_EXIT}")
-        if not isinstance(fields, bool):
+        if not isinstance(as_json, bool):
             raise SuiteError(f"{where}: a [[gh]]'s 'json' must be true or false")
-        if fields and not _json_object(stdout):
+        if as_json and not _json_object(stdout):
             raise SuiteError(
                 f"{where}: a [[gh]] with json = true needs a JSON object as its 'stdout'"
             )
@@ -637,7 +637,7 @@ def _replies(key: Table, where: pathlib.Path) -> tuple[Reply, ...]:
                 _regex(table.get("match"), where, "a [[gh]] needs a 'match' string"),
                 stdout,
                 code,
-                fields,
+                json=as_json,
             )
         )
     return tuple(found)
