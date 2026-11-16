@@ -1,0 +1,1 @@
+final = "fetch_price makes at most 4 attempts (ATTEMPTS). It tries again only after a Timeout or a 503, waiting 0.5s, then 1s, then 2s. Any other non-200 status raises PriceUnavailable at once, and after the fourth failed attempt it re-raises the Timeout or raises PriceUnavailable."

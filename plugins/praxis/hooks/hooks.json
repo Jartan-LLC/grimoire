@@ -20,6 +20,16 @@
           }
         ],
         "description": "Re-arm skill activation after a compact (see the script header)"
+      },
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const r = process.env.CLAUDE_PLUGIN_ROOT; if (r) require(r + '/hooks/scripts/suggest-skills-per-file-type.js').cli()\""
+          }
+        ],
+        "description": "Ask again about each type of file after a compact"
       }
     ],
     "UserPromptSubmit": [
@@ -66,6 +76,16 @@
           }
         ],
         "description": "Check for console.log in changed files after an edit"
+      },
+      {
+        "matcher": "Read|Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/suggest-skills-per-file-type.js\""
+          }
+        ],
+        "description": "Prompt an agent to load the skills for a type of file it starts on"
       }
     ]
   }

@@ -1,0 +1,18 @@
+sync outage 3 nov - my notes, tidy up later
+
+02:14 nightly price sync died. pricing service answered 503 once for sku B-220 (their deploy
+window, lasted ~20s per their status page). fetch_price raised PriceUnavailable on that one
+answer and sync_prices doesn't catch it, so the whole run stopped at sku 1,412 of 9,800.
+nobody noticed until 08:30 when the shop showed yesterday's prices on everything after that.
+reran by hand 08:50, done 09:05.
+
+impact: ~8,400 skus had stale prices for ~6.5h. 3 customer complaints about B-series prices.
+no wrong charges, checkout reprices.
+
+we've also seen it die on a timeout from pricing twice in october, same thing.
+
+follow-ups:
+1. fetch_price should cope with a blip: on a timeout or a 503, try again, waiting a bit
+   longer each time, and give up after a few tries. other errors (404 etc) should still
+   fail straight away.
+2. alert when the sync stops early instead of finding out from the shop. (ops ticket OPS-311)

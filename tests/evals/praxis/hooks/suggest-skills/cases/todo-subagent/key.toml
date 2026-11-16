@@ -1,0 +1,68 @@
+split = "screen"
+kind = "trigger"
+hints = ["skill", "pythonica", "error", "exception"]
+
+[[plant]]
+id = "stops-at-first-bad-line"
+verify = '''python3 -c "
+import sys
+from members.load import load_members
+try:
+    load_members(['Ann Lee,ann@example.org,2019', 'Bo Ek,bo-at-example.org,2021', 'Cy Fox,cy@example.org,2020'])
+except ValueError:
+    sys.exit(1)
+"'''
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "pythonica:python-error-handling"
+state = "loaded"
+agent = "general-purpose"
+
+[[check]]
+metric = "works"
+artifact = "verify"
+command = "python3 -m pytest -q"
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-opus-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 1
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 1
+runs = 3
+runner = 2
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2

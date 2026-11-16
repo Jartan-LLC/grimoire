@@ -1,0 +1,1 @@
+final = "It gives up in two cases:\n\n1. Straight away, on any status other than 200 or 503, such as a 404.\n2. After four tries, if every one timed out or answered 503. The wait between tries doubles from half a second."

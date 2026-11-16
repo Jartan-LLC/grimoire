@@ -1,0 +1,17 @@
+final = "Done: the Usage section now lists each option of tools/report.py."
+
+[files]
+"README.md" = """# tills
+
+Sales figures from the shop's tills.
+
+## Usage
+
+Run `python tools/report.py --since YYYY-MM-DD`. Options:
+
+- `--since`: the first day of the report (required).
+- `--until`: the last day; defaults to today.
+- `--format`: `csv` (the default) or `json`.
+- `--out`: write to this file instead of printing.
+- `--include-refunds`: count refunds as negative sales.
+"""

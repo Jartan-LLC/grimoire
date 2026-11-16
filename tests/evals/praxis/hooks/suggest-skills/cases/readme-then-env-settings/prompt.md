@@ -1,0 +1,1 @@
+The README is out of date: we're on Python 3.12 now and install from pyproject.toml, and it explains how to send an email twice. Fix that first. After that: ops need to be able to point each deployment at its own mail server, port and sender address without editing the code. Make that possible.

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.8.0
+
+- When a turn moves on to a new type of file, such as from a plan in Markdown to Python code, your agent is asked to load the skills that apply to it. Before, a turn that began with planning or docs and went on to code was not asked again, so the skills for the code could go unloaded. The reminder comes once per file type for the main thread and for each subagent, whatever skills that agent has already loaded, and again for each type after a compact.
+
 ## 2.7.2
 
 - `plan-issue`, `create-pr` and `implement-issue` fetch the issue with one command, `gh issue view <n> --json title,body,comments`, with `assignees` added where they assign the issue.

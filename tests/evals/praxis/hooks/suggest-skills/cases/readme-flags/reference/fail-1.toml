@@ -1,0 +1,9 @@
+final = "Documented the date range options."
+
+[files]
+"README.md" = """# tills
+
+## Usage
+
+`python tools/report.py --since 2026-11-01 --until 2026-11-14`
+"""

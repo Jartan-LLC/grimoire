@@ -1,0 +1,21 @@
+final = "I documented the five options in the README's Usage section."
+
+[files]
+"README.md" = """# tills
+
+Sales figures from the shop's tills.
+
+## Usage
+
+```bash
+python tools/report.py --since 2026-11-01 [--until 2026-11-14] [--format csv|json] [--out FILE] [--include-refunds]
+```
+
+| Option | Default | Description |
+|---|---|---|
+| `--since DATE` | required | first day, `YYYY-MM-DD` |
+| `--until DATE` | today | last day |
+| `--format` | `csv` | `csv` or `json` |
+| `--out FILE` | standard output | file to write the report to |
+| `--include-refunds` | off | count refunds as negative sales |
+"""
