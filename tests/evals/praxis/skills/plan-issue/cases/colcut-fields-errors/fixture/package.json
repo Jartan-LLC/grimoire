@@ -1,0 +1,7 @@
+{
+  "name": "colcut",
+  "version": "1.2.0",
+  "private": true,
+  "bin": { "colcut": "bin/colcut.js" },
+  "scripts": { "test": "node --test" }
+}

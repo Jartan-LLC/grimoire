@@ -1,6 +1,7 @@
 # A new option with inputs to refuse.
-# No session's output shaped it.
-split = "screen"
+# Its refused-input check was widened to the forms plans of #202's Haiku and Sonnet runs
+# used ("exit with code 2", "the bad-date exit code", "print the usage line").
+split = "dev"
 kind = "regression"
 hints = ["invalid", "malformed", "error", "reject", "02-30"]
 
@@ -51,7 +52,7 @@ absent = '''(?im)^\#{1,4}(?!\#)[ \t]*(?![ \t])(?!(?:\d+[.)][ \t]*)?(?:\*\*)?(?:d
 [[check]]
 metric = "reader"
 artifact = "file:.claude/workspace/issue-74/plan.md"
-present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?![ \t]*```)(?!\#)[^\n]*|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*\n[ \t]*```[^\n]*)*?(?:\n(?![ \t]*```)(?!\#)[^\n]*(?:invalid|reject|refus|error|malformed|bad (?:date|value)|not a (?:valid |real )?date|no such date|impossible|2026-02-30|02-30|-13-|13/|yesterday|last-?week|abc|not-a-date|exit(?:s)? (?:code |status |with )?[12]\b|non-?zero|fails? (?:with|for|on)|usage:|--since\b[ =]?(?:`|\s)*(?:$|--))|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*?\n(?![ \t]*```)[^\n]*(?:invalid|reject|refus|error|malformed|bad (?:date|value)|not a (?:valid |real )?date|no such date|impossible|2026-02-30|02-30|-13-|13/|yesterday|last-?week|abc|not-a-date|exit(?:s)? (?:code |status |with )?[12]\b|non-?zero|fails? (?:with|for|on)|usage:|--since\b[ =]?(?:`|\s)*(?:$|--)))'''
+present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?![ \t]*```)(?!\#)[^\n]*|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*\n[ \t]*```[^\n]*)*?(?:\n(?![ \t]*```)(?!\#)[^\n]*(?:invalid|reject|refus|error|malformed|bad[- ](?:date|value|input)|not a (?:valid |real )?date|no such date|impossible|2026-02-30|02-30|-13-|13/|yesterday|last-?week|abc|not-a-date|exit(?:s|ing)?(?: with)?(?: (?:code|status))?[ :`]*[12]\b|non-?zero|fails? (?:with|for|on)\b|usage:|print(?:s|ing)? (?:the |a )?usage|\b(?:no|missing|without (?:a )?)value\b|--since\b[ =]?(?:`|\s)*(?:$|--))|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*?\n(?![ \t]*```)[^\n]*(?:invalid|reject|refus|error|malformed|bad[- ](?:date|value|input)|not a (?:valid |real )?date|no such date|impossible|2026-02-30|02-30|-13-|13/|yesterday|last-?week|abc|not-a-date|exit(?:s|ing)?(?: with)?(?: (?:code|status))?[ :`]*[12]\b|non-?zero|fails? (?:with|for|on)\b|usage:|print(?:s|ing)? (?:the |a )?usage|\b(?:no|missing|without (?:a )?)value\b|--since\b[ =]?(?:`|\s)*(?:$|--)))'''
 
 [[gh]]
 match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
