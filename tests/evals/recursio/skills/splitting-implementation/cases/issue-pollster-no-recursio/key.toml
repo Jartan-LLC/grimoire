@@ -36,8 +36,13 @@ match = '''(^|\s)pr status\b'''
 stdout = "Current branch\n  There is no pull request associated with [feature/issue-23]\n"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 23, \"title\": \"Instant-runoff, Borda and Condorcet counting\", \"body\": \"The tally only does plurality. Add three counting methods, each in its own module with tests: instant-runoff (eliminate the last-placed candidate and transfer their ballots until one has a majority; ties broken by fewest first preferences, then alphabetically), Borda count (n-1 points for a first preference down to 0), and Condorcet with the Schulze method for cycles. Add `--method plurality|irv|borda|schulze` to `bin/tally.js`, plurality staying the default.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/pollster/issues/23\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

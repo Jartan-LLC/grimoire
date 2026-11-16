@@ -5,6 +5,11 @@ remote = true
 
 [[check]]
 metric = "rule"
+artifact = "report:praxis:general-reviewer"
+present = '''\S'''
+
+[[check]]
+metric = "rule"
 artifact = "gh"
 present = '''\A(?:.+\n)*gh (?:.* )?pr create\b.*--draft'''
 
@@ -79,8 +84,13 @@ match = '''(^|\s)pr status\b'''
 stdout = "Current branch\n  There is no pull request associated with [feature/issue-17]\n"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 17, \"title\": \"Accept millisecond windows such as 500ms\", \"body\": \"Some services need sub-second windows. `window = \\\"500ms\\\"` should load as 0.5 seconds.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/confload/issues/17\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

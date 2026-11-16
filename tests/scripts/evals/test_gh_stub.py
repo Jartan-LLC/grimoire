@@ -31,6 +31,29 @@ def test_answer_matches_a_call_with_a_multi_line_argument_as_one_line() -> None:
     assert gh_stub.answer(replies(("^pr create.*--draft$", "made")), argv) == ("made", 0)
 
 
+ISSUE = '{"number": 7, "title": "T", "body": "B", "comments": [], "assignees": []}\n'
+
+
+@pytest.mark.parametrize(
+    ("argv", "printed"),
+    [
+        (
+            ["issue", "view", "7", "--json", "title,body,comments"],
+            '{"body":"B","comments":[],"title":"T"}\n',
+        ),
+        (["issue", "view", "7", "--json=assignees"], '{"assignees":[]}\n'),
+        (["issue", "view", "7", "--json", "title,labels"], '{"title":"T"}\n'),
+        (["issue", "view", "7"], ISSUE),
+        (["issue", "view", "7", "--json"], ISSUE),
+    ],
+)
+def test_a_json_reply_prints_only_the_fields_the_call_names_keys_sorted_as_gh_does(
+    argv: list[str], printed: str
+) -> None:
+    scripted = [{"match": "^issue view", "stdout": ISSUE, "exit": 0, "json": True}]
+    assert gh_stub.answer(scripted, argv) == (printed, 0)
+
+
 @pytest.mark.parametrize(
     ("arg", "found"),
     [
@@ -211,6 +234,14 @@ def test_the_installed_stub_logs_every_call_and_fails_one_it_has_no_reply_for(
     assert calls[0]["files"] == {"b.md": "Closes #42\n"}
     assert json.loads((sandbox / "gh-stub" / "gh-stub-replies.json").read_text())[1]["exit"] == 1
     assert list((sandbox / "gh-config").iterdir()) == []
+
+
+def test_the_installed_stub_cuts_a_json_reply_to_the_fields_asked(tmp_path: pathlib.Path) -> None:
+    sandbox = tmp_path / "sandbox"
+    sandbox.mkdir()
+    session.install_gh(sandbox, (Reply("^issue view", ISSUE, json=True),))
+    viewed = run_stub(sandbox, tmp_path, "issue", "view", "7", "--json", "assignees,body")
+    assert (viewed.returncode, viewed.stdout) == (0, '{"assignees":[],"body":"B"}\n')
 
 
 def test_the_installed_stub_answers_a_call_whose_arguments_name_no_file(

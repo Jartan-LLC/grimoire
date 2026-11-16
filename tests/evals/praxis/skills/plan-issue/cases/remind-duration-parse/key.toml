@@ -58,12 +58,13 @@ text = "def _parse_duration"
 where = "fixture:remindme/snooze.py"
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tLet `remindme add --in` take hours\nstate:\tOPEN\nauthor:\tinez\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t76\n--\n`remindme add \"Call the dentist\" --in 90` works, but `--in 1h30m` or `--in 2d` fails with `invalid int value`. `remindme snooze 3 1h30m` already understands those, and I keep typing them into `add` out of habit.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 76, \"title\": \"Let `remindme add --in` take hours\", \"body\": \"`remindme add \\\"Call the dentist\\\" --in 90` works, but `--in 1h30m` or `--in 2d` fails with `invalid int value`. `remindme snooze 3 1h30m` already understands those, and I keep typing them into `add` out of habit.\", \"state\": \"OPEN\", \"author\": {\"login\": \"inez\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/remindme/issues/76\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''
@@ -116,7 +117,39 @@ remote_runner = 3
 [[baseline]]
 model = "claude-opus-5-5"
 arm = "none"
+failures = 2
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
 failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 3
 runs = 3
 runner = 2
 remote_runner = 3

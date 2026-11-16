@@ -5,6 +5,11 @@ remote = true
 
 [[check]]
 metric = "rule"
+artifact = "report:praxis:general-reviewer"
+present = '''\S'''
+
+[[check]]
+metric = "rule"
 artifact = "file:.claude/workspace/issue-52/feature--issue-52/3.md"
 present = '''(?m)^#{2,3} (?:Critical|Important)'''
 
@@ -114,8 +119,13 @@ match = '''(^|\s)pr status\b'''
 stdout = "Current branch\n  There is no pull request associated with [feature/issue-52]\n"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 52, \"title\": \"Stop retrying client errors\", \"body\": \"fetchWithRetry retries every failed request, so a 404 or a 400 goes out three times. It should give up at once on a client error (4xx), except 429 Too Many Requests, which is worth retrying.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/fetchy/issues/52\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

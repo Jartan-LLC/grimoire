@@ -5,3 +5,6 @@ final = "One decision needs you: X. Keep it?"
 "AGENTS.md" = "# Agent notes\n\n## Settings\n\nEvery duration setting is a whole number of seconds: the scheduler that reads `window` takes an int.\n"
 ".claude/workspace/issue-17/feature--issue-17/cycle.md" = "Raised: X. Recommendation: keep.\n"
 "src/confload/config.py" = "fixed\n"
+
+[reports]
+"praxis:general-reviewer" = "No Critical or Important findings."

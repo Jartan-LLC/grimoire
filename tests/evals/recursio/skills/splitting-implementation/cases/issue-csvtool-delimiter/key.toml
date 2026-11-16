@@ -41,8 +41,13 @@ match = '''(^|\s)pr status\b'''
 stdout = "Current branch\n  There is no pull request associated with [feature/issue-17]\n"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 17, \"title\": \"Add a --delimiter option\", \"body\": \"`csvtool` only reads comma-separated files. Add a `--delimiter CHAR` option to both commands (default `,`; the word `tab` means a tab) and pass it through to `parseCsv` in src/read.js. Quoted fields must keep working with any delimiter, and a delimiter longer than one character is a usage error (exit 2).\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/csvtool/issues/17\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

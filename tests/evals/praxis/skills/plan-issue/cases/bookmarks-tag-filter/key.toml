@@ -65,12 +65,13 @@ text = "open an issue for anything else you spot"
 where = "fixture:AGENTS.md"
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tShow only the bookmarks with a tag\nstate:\tOPEN\nauthor:\tlena\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t53\n--\nI've got a few hundred bookmarks now and `marks list` scrolls forever. I tag everything when I add it, so let me run `marks list --tag reading` and see only those, with the same numbers they have in the full list so I can find them again.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 53, \"title\": \"Show only the bookmarks with a tag\", \"body\": \"I've got a few hundred bookmarks now and `marks list` scrolls forever. I tag everything when I add it, so let me run `marks list --tag reading` and see only those, with the same numbers they have in the full list so I can find them again.\", \"state\": \"OPEN\", \"author\": {\"login\": \"lena\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/marks/issues/53\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

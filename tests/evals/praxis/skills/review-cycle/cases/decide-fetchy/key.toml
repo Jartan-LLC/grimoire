@@ -5,6 +5,11 @@ remote = true
 
 [[check]]
 metric = "rule"
+artifact = "report:praxis:general-reviewer"
+present = '''\S'''
+
+[[check]]
+metric = "rule"
 artifact = "gh"
 present = '''\A(?:.+\n)*gh (?:.* )?pr create\b.*--draft'''
 
@@ -79,8 +84,13 @@ match = '''(^|\s)pr status\b'''
 stdout = "Current branch\n  There is no pull request associated with [feature/issue-44]\n"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 44, \"title\": \"Honour Retry-After when retrying\", \"body\": \"When a server answers 503 or 429 with a Retry-After header (in seconds), fetchWithRetry should wait that long before the next attempt instead of its fixed delay.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/fetchy/issues/44\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

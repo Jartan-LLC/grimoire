@@ -56,8 +56,13 @@ artifact = "file:.claude/workspace/issue-64/plan.md"
 absent = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:steps|files to (?:create|modify|change|touch)|(?:implementation )?(?:checklist|steps|plan)|(?:chosen |proposed )?approach|implementation|changes)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?![ \t]*(?:[-*+][ \t]+|\d+[.)][ \t]+)?(?:\*\*|_)?(?:rejected|alternatives?|not chosen|considered|why not)\b)(?![^\n]*\b(?:no|not|without|avoid\w*|rather than|instead of|skip\w*|don'?t|do not|never|yagni|premature\w*|speculative\w*|unnecessary|overkill)\b[^\n]*(?:abstract\w*|base class|(?:an?|common|shared|generic|abstract|exporter|formatter|format|output) interface|registry|registries|strateg(?:y|ies)|plug-?ins?\b|pluggable|extensib\w*|(?-i:\b(?:[A-Z]\w*)?(?:Exporter|Formatter|Serializer|Renderer|Registry|Strategy|Factory)s?\b)))[^\n]*(?:abstract\w*|base class|(?:an?|common|shared|generic|abstract|exporter|formatter|format|output) interface|registry|registries|strateg(?:y|ies)|plug-?ins?\b|pluggable|extensib\w*|(?-i:\b(?:[A-Z]\w*)?(?:Exporter|Formatter|Serializer|Renderer|Registry|Strategy|Factory)s?\b))(?!(?:[^\n.;]|\.(?=\w)|\n(?![ \t]*(?:\n|[-*+][ \t]|\d+[.)][ \t]|\#))){0,60}?(?:(?:\bnot|n't)[ \t]+(?:\w+[ \t]+){0,2}?(?:needed|warranted|required|necessary|justified|worth\w*|wanted|called for)|\b(?:unnecessary|unneeded|overkill|premature\w*|speculative\w*|yagni|out of scope|separate (?:refactor\w*|issue|change|PR)|follow-?up)\b))'''
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 64, \"title\": \"CSV output for the monthly report\", \"body\": \"Finance copies the monthly report into a spreadsheet by hand. Add a `--csv` option that prints the same rows as CSV (header row first) instead of the table, so they can redirect it to a file and open it.\\n\\nOther formats might come up one day, but CSV is all anyone has asked for.\", \"state\": \"OPEN\", \"author\": {\"login\": \"irene\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/salesreport/issues/64\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

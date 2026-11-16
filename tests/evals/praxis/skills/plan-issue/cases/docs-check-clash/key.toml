@@ -62,8 +62,13 @@ text = "ask the maintainer before renaming"
 where = "fixture:AGENTS.md"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 71, \"title\": \"Add `pkgdoc check` for broken links\", \"body\": \"Our docs keep shipping with dead links between pages. Add `pkgdoc check` that reads the pages in `docs/`, finds links to other pages (`[text](page.md)`) whose page doesn't exist, prints each one with its file, and exits 1 if there are any, so CI can fail on them.\", \"state\": \"OPEN\", \"author\": {\"login\": \"kai\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/pkgdoc/issues/71\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

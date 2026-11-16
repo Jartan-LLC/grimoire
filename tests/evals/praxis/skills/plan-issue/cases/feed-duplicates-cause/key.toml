@@ -57,12 +57,13 @@ id = "same-feed-twice"
 verify = "python3 -c \"import sys; u = [l.split('://', 1)[-1] for l in open('feeds.txt').read().split()]; sys.exit(len(u) != len(set(u)))\""
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tEvery post shows up twice\nstate:\tOPEN\nauthor:\trui\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t37\n--\nSince last week the reader shows every post from my blog twice. Dedupe posts by title before printing them.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 37, \"title\": \"Every post shows up twice\", \"body\": \"Since last week the reader shows every post from my blog twice. Dedupe posts by title before printing them.\", \"state\": \"OPEN\", \"author\": {\"login\": \"rui\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/feedlet/issues/37\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

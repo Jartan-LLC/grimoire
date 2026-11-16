@@ -77,12 +77,13 @@ text = "open an issue for anything else you spot"
 where = "fixture:AGENTS.md"
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tKeep the original gravity of each brew\nstate:\tOPEN\nauthor:\ttomas\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t61\n--\nI measure the original gravity of every batch and keep it in a notebook, which I never have with me. Let me run `brewlog add 2026-11-02 \"Oat Stout\" stout --og 1.058` and have `brewlog list` show the gravity next to the brew. The brews I've already logged have no gravity; they should still list as they do now.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 61, \"title\": \"Keep the original gravity of each brew\", \"body\": \"I measure the original gravity of every batch and keep it in a notebook, which I never have with me. Let me run `brewlog add 2026-11-02 \\\"Oat Stout\\\" stout --og 1.058` and have `brewlog list` show the gravity next to the brew. The brews I've already logged have no gravity; they should still list as they do now.\", \"state\": \"OPEN\", \"author\": {\"login\": \"tomas\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/brewlog/issues/61\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''
@@ -127,7 +128,7 @@ stdout = "github.com\n  Logged in to github.com account dev (keyring)\n"
 [[baseline]]
 model = "claude-opus-5-5"
 arm = "old"
-failures = 2
+failures = 0
 runs = 3
 runner = 2
 remote_runner = 3
@@ -135,7 +136,39 @@ remote_runner = 3
 [[baseline]]
 model = "claude-opus-5-5"
 arm = "none"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
 failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 2
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 3
 runs = 3
 runner = 2
 remote_runner = 3

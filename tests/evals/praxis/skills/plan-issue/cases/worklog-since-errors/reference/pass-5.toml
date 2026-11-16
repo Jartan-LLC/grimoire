@@ -1,0 +1,30 @@
+final = "Plan written to .claude/workspace/issue-74/plan.md."
+
+[files]
+".claude/workspace/issue-74/plan.md" = '''# Plan: Report only recent hours (issue 74)
+
+## Approach
+Add a `--since YYYY-MM-DD` option to `worklog report`. A new `since(entries, date)` function in `src/report.js` keeps entries dated on or after `date`, and `bin/worklog.js` applies it before `totals`. Dates are ISO `YYYY-MM-DD`, so plain string comparison orders them correctly and needs no date parsing. The CLI reads its arguments with `node:util` `parseArgs` (built in on Node 20), so `--since` can come before or after the optional file argument.
+
+Rejected: a `--until` or date-range option -- the issue asks only for "since".
+
+## Decisions
+- Is `--since` inclusive of the given day? -- owner: priya (the requester) -- recommended: inclusive, so `--since 2026-11-01` counts 1 November -- default if unanswered: inclusive -- if wrong: change `>=` to `>` in `since`.
+- A malformed date (`--since yesterday`, `2026-1-5`) exits 2 with a usage message rather than silently matching nothing or everything. This is the planner's choice: a typo would otherwise produce a wrong invoice total with no warning.
+
+## Steps
+1. In `src/report.js`, add and export `since(entries, date)`, returning `entries.filter((e) => e.date >= date)`. Keep it beside `totals`, which it feeds.
+2. In `bin/worklog.js`, replace the positional destructuring on line 5 with `parseArgs({ allowPositionals: true, options: { since: { type: "string" } } })`. The command is the first positional and the file is the second, defaulting to `worklog.csv`.
+   - A `--since` value that does not match `/^\d{4}-\d{2}-\d{2}$/` prints the usage line and exits 2, like the existing bad-command path on lines 6-9.
+   - An unknown option makes `parseArgs` throw; let it exit non-zero with its own message.
+   - Update the usage text to `usage: worklog report [file] [--since YYYY-MM-DD]`.
+   - When `--since` is given, pass `since(entries, value)` to `totals`. Without it, behaviour is unchanged.
+3. Add tests to `test/report.test.js`, following the existing test at line 4. Cover `since` keeping the boundary day, dropping earlier days and returning `[]` when every entry is older. Add a CLI test that runs `bin/worklog.js` on a temp CSV with `--since`, and one for a bad date exiting 2.
+   - A date later than every entry gives empty output and exit 0, as an empty file does now.
+
+## Verification
+- `npm test` -- passing shows the filter, the boundary day and the bad-date exit code.
+- `node bin/worklog.js report <csv with entries before and after 2026-11-01> --since 2026-11-01` -- look for totals that count only entries from 2026-11-01 onward, and that match `report` on the same file with the older rows deleted.
+- `node bin/worklog.js report file.csv --since nope; echo $?` -- look for the usage line and `2`.
+- `node bin/worklog.js report file.csv` -- look for output identical to before the change.
+'''

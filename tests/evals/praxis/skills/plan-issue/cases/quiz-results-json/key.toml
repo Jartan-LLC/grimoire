@@ -54,12 +54,13 @@ artifact = "file:.claude/workspace/issue-47/plan.md"
 absent = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:steps|files to (?:create|modify|change|touch)|(?:implementation )?(?:checklist|steps|plan)|(?:chosen |proposed )?approach|implementation|changes)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?![ \t]*(?:[-*+][ \t]+|\d+[.)][ \t]+)?(?:\*\*|_)?(?:rejected|alternatives?|not chosen|considered|why not)\b)(?![^\n]*\b(?:no|not|without|avoid\w*|rather than|instead of|skip\w*|don'?t|do not|never|yagni|premature\w*|speculative\w*|unnecessary|overkill)\b[^\n]*(?:abstract\w*|base class|(?:an?|common|shared|generic|abstract|formatter|format|output|renderer|report) interface|registry|registries|strateg(?:y|ies)|plug-?ins?\b|pluggable|extensib\w*|(?-i:\b(?:[A-Z]\w*)?(?:Formatter|Renderer|Serializer|Exporter|Registry|Strategy|Factory)s?\b)))[^\n]*(?:abstract\w*|base class|(?:an?|common|shared|generic|abstract|formatter|format|output|renderer|report) interface|registry|registries|strateg(?:y|ies)|plug-?ins?\b|pluggable|extensib\w*|(?-i:\b(?:[A-Z]\w*)?(?:Formatter|Renderer|Serializer|Exporter|Registry|Strategy|Factory)s?\b))(?!(?:[^\n.;]|\.(?=\w)|\n(?![ \t]*(?:\n|[-*+][ \t]|\d+[.)][ \t]|\#))){0,60}?(?:(?:\bnot|n't)[ \t]+(?:\w+[ \t]+){0,2}?(?:needed|warranted|required|necessary|justified|worth\w*|wanted|called for)|\b(?:unnecessary|unneeded|overkill|premature\w*|speculative\w*|yagni|out of scope|separate (?:refactor\w*|issue|change|PR)|follow-?up)\b))'''
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tScores as JSON for the gradebook upload\nstate:\tOPEN\nauthor:\tpriya\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t47\n--\nThe school's new gradebook takes a JSON upload, and right now I copy every score off the `quizmark grade` table by hand. Could `quizmark grade answers.csv key.txt --json` print the scores as JSON instead, one object per student with `student`, `score` and `outOf`?\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 47, \"title\": \"Scores as JSON for the gradebook upload\", \"body\": \"The school's new gradebook takes a JSON upload, and right now I copy every score off the `quizmark grade` table by hand. Could `quizmark grade answers.csv key.txt --json` print the scores as JSON instead, one object per student with `student`, `score` and `outOf`?\", \"state\": \"OPEN\", \"author\": {\"login\": \"priya\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/quizmark/issues/47\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''
@@ -113,6 +114,38 @@ remote_runner = 3
 model = "claude-opus-5-5"
 arm = "none"
 failures = 2
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 2
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 3
 runs = 3
 runner = 2
 remote_runner = 3

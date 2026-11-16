@@ -55,8 +55,13 @@ artifact = "file:.claude/workspace/issue-12/plan.md"
 absent = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:steps|files to (?:create|modify|change|touch)|(?:implementation )?(?:checklist|steps|plan)|(?:chosen |proposed )?approach|implementation|changes)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?![ \t]*(?:[-*+][ \t]+|\d+[.)][ \t]+)?(?:\*\*|_)?(?:rejected|alternatives?|not chosen|considered|why not)\b)(?![^\n]*\b(?:no|not|without|avoid\w*|rather than|instead of|skip\w*|don'?t|do not|never|yagni|premature\w*|speculative\w*|unnecessary|overkill)\b[^\n]*(?:abstract\w*|base class|(?-i:\bABC\b|\bProtocol\b)|(?:an?|common|shared|generic|abstract|notifier|alert|notification) interface|registry|registries|strateg(?:y|ies)|plug-?ins?\b|pluggable|extensib\w*|(?-i:\b(?:[A-Z]\w*)?(?:Notifier|Sender|Backend|Provider|Channel|Registry|Strategy|Factory|Transport)s?\b)))[^\n]*(?:abstract\w*|base class|(?-i:\bABC\b|\bProtocol\b)|(?:an?|common|shared|generic|abstract|notifier|alert|notification) interface|registry|registries|strateg(?:y|ies)|plug-?ins?\b|pluggable|extensib\w*|(?-i:\b(?:[A-Z]\w*)?(?:Notifier|Sender|Backend|Provider|Channel|Registry|Strategy|Factory|Transport)s?\b))(?!(?:[^\n.;]|\.(?=\w)|\n(?![ \t]*(?:\n|[-*+][ \t]|\d+[.)][ \t]|\#))){0,60}?(?:(?:\bnot|n't)[ \t]+(?:\w+[ \t]+){0,2}?(?:needed|warranted|required|necessary|justified|worth\w*|wanted|called for)|\b(?:unnecessary|unneeded|overkill|premature\w*|speculative\w*|yagni|out of scope|separate (?:refactor\w*|issue|change|PR)|follow-?up)\b))'''
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 12, \"title\": \"Email members when a book is a week overdue\", \"body\": \"We phone people about late books, which takes the volunteers an hour every Monday. When the morning run finds a loan exactly 7 days overdue, email the member a reminder with the book's title and the due date. Send it through the village hall's mail server: SMTP_HOST, SMTP_USER and SMTP_PASSWORD are already set on the library PC.\\n\\nEmail is the only way we want to reach members; most of them use nothing else.\", \"state\": \"OPEN\", \"author\": {\"login\": \"grace\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/booklend/issues/12\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

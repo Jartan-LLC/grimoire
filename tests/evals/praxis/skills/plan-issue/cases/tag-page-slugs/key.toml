@@ -58,12 +58,13 @@ text = "function slugify"
 where = "fixture:src/posts.js"
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tTag pages\nstate:\tOPEN\nauthor:\tbram\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t83\n--\nEach post lists its tags at the bottom, but they're plain text. Make each tag a link to a page at `/tags/<tag>/` that lists the posts with that tag, newest first. Tags have spaces, dots and capitals (`Node.js`, `Year in review`), so the address needs the same kind of clean name the post addresses get.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 83, \"title\": \"Tag pages\", \"body\": \"Each post lists its tags at the bottom, but they're plain text. Make each tag a link to a page at `/tags/<tag>/` that lists the posts with that tag, newest first. Tags have spaces, dots and capitals (`Node.js`, `Year in review`), so the address needs the same kind of clean name the post addresses get.\", \"state\": \"OPEN\", \"author\": {\"login\": \"bram\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/inkpress/issues/83\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''
@@ -116,7 +117,39 @@ remote_runner = 3
 [[baseline]]
 model = "claude-opus-5-5"
 arm = "none"
-failures = 2
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 3
 runs = 3
 runner = 2
 remote_runner = 3

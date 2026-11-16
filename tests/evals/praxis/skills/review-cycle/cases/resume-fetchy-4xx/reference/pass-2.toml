@@ -9,3 +9,6 @@ final = ""
 "general-purpose" = "Run the praxis:review-pr skill on feature/issue-52 against main. Review the whole branch against its base, not only the latest commit or the commits since the last round.\n\nRun the praxis:address-review skill on 3.md. Context: an earlier round found The README does not say client errors are not retried.\n\nRun the praxis:review-pr skill on feature/issue-52 against main.\n\nReview the whole branch, never only the latest commit."
 "praxis:general-reviewer" = "Run the praxis:address-review skill on 3.md. Earlier: The README does not say client errors are not retried."
 "praxis:doc-reviewer" = "Run the praxis:review-pr skill on feature/issue-52 against main. Limited to the documentation, comments and commit messages."
+
+[reports]
+"praxis:general-reviewer" = "No Critical or Important findings."

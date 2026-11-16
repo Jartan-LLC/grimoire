@@ -59,8 +59,13 @@ text = "def list_books"
 where = "fixture:bookapi/books.py"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 73, \"title\": \"/authors returns every author at once\", \"body\": \"`GET /authors` sends the whole author list in one response. On production that is about 40,000 authors, and the app's author screen times out. It should come in pages, with `page` and `per_page`, the way `/books` does, so the app can use the same paging code for both.\", \"state\": \"OPEN\", \"author\": {\"login\": \"noah\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/bookapi/issues/73\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

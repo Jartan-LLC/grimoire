@@ -1,0 +1,36 @@
+final = "Plan written to .claude/workspace/issue-91/plan.md."
+
+[files]
+".claude/workspace/issue-91/plan.md" = '''# Plan: Choose which columns to print (issue 91)
+
+## Approach
+Add `--fields LIST` to `bin/colcut.js`, with `cut -f` syntax (1-based, commas, `N-M` ranges).
+A new `parseFields` in `src/columns.js` turns the list into the 0-based indexes `pick`
+(`src/columns.js:7-9`) already takes. No `--fields` means column 1, as now.
+
+Rejected: an argv library -- `AGENTS.md:5` rules out dependencies.
+
+## Decisions
+None.
+
+## Out of scope
+- Quoted fields (`src/columns.js:1`) -- not planned.
+
+## Steps
+1. Add and export `parseFields(list)` in `src/columns.js`, after `pick`: split on `,`, expand
+   `N-M`, subtract 1.
+2. In `bin/colcut.js:5`, read `--fields` and its value from argv in either position relative to
+   the file; default to `[0]`; pass the result to `pick` at `bin/colcut.js:11`.
+3. Add a `parseFields` test to `test/columns.test.js`, following `test/columns.test.js:5-8`.
+4. Update `AGENTS.md:3` and the usage line at `bin/colcut.js:7`; bump `package.json:3` to 1.3.0.
+
+## Verification
+- `npm test` -- passing shows `parseFields("2,4-6")` gives `[1, 3, 4, 5]` and the `pick` test
+  still holds.
+- `printf 'a,b,c,d,e,f\n' > /tmp/t.csv; node bin/colcut.js /tmp/t.csv --fields 2,4-6` -- prints
+  `b,d,e,f`.
+- `node bin/colcut.js --fields 3 /tmp/t.csv` -- prints `c`: the option works before the file too.
+- `node bin/colcut.js /tmp/t.csv` -- prints `a`, unchanged.
+- `node bin/colcut.js /tmp/t.csv --fields 9` -- prints an empty line: a field past the row end is
+  empty, like `cut`.
+'''

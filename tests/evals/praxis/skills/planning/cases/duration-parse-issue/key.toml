@@ -24,12 +24,13 @@ skill = "praxis:planning"
 state = "loaded"
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tAdd parse_duration to timeutil\nstate:\tOPEN\nauthor:\tana\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t8\n--\nAdd `parse_duration(text)` to `timeutil.py`. It accepts `90s`, `15m`, `2h` and combinations such as `1h30m`, and returns the number of seconds as an int. Anything else raises `ValueError`: an empty string, an unknown unit, a decimal such as `1.5h`. Add tests in `tests/test_timeutil.py`.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 8, \"title\": \"Add parse_duration to timeutil\", \"body\": \"Add `parse_duration(text)` to `timeutil.py`. It accepts `90s`, `15m`, `2h` and combinations such as `1h30m`, and returns the number of seconds as an int. Anything else raises `ValueError`: an empty string, an unknown unit, a decimal such as `1.5h`. Add tests in `tests/test_timeutil.py`.\", \"state\": \"OPEN\", \"author\": {\"login\": \"ana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/app/issues/8\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

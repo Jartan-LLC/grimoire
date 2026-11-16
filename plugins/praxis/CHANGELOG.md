@@ -4,6 +4,16 @@
 
 - When a turn moves on to a new type of file, such as from a plan in Markdown to Python code, your agent is asked to load the skills that apply to it. Before, a turn that began with planning or docs and went on to code was not asked again, so the skills for the code could go unloaded. The reminder comes once per file type for the main thread and for each subagent, whatever skills that agent has already loaded, and again for each type after a compact.
 
+## 2.7.2
+
+- `plan-issue`, `create-pr` and `implement-issue` fetch the issue with one command, `gh issue view <n> --json title,body,comments`, with `assignees` added where they assign the issue.
+- `plan-issue` reads the issue's comments as well as its title and body, so your agent plans with the scope, decisions and corrections people add in comments after filing.
+- `create-pr` reads the issue's title and body as well as its comments. Before, your agent ran only `gh issue view --comments`, which prints just the comments when its output is not a terminal, so it wrote the PR title, description and `Closes` line without the issue unless the issue was already in its context.
+
+## 2.7.1
+
+- `review-pr` launches its reviewer agents however small the change. On Sonnet, and sometimes on Haiku, a review of a change a few lines long often skipped them: your agent wrote the review alone, without the review skills each reviewer brings.
+
 ## 2.7.0
 
 - New `planning` skill: wherever your agent plans, in conversation, in a plan file or for an issue, it sizes the plan to what a mistake would cost and settles each gap with whoever owns it. When no one can answer, your agent records an assumption and carries on, holding back only steps that cannot be undone.

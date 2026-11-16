@@ -24,12 +24,13 @@ skill = "praxis:planning"
 state = "loaded"
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tAdd slugify to utils\nstate:\tOPEN\nauthor:\tana\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t12\n--\nAdd `slugify(text)` to `utils.py`: lowercase the text, turn each run of spaces into one `-`, and drop every character that is not `a-z`, `0-9` or `-`. Add tests in `tests/test_utils.py`.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 12, \"title\": \"Add slugify to utils\", \"body\": \"Add `slugify(text)` to `utils.py`: lowercase the text, turn each run of spaces into one `-`, and drop every character that is not `a-z`, `0-9` or `-`. Add tests in `tests/test_utils.py`.\", \"state\": \"OPEN\", \"author\": {\"login\": \"ana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/app/issues/12\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

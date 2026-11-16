@@ -59,8 +59,13 @@ text = "a dataclass would catch it"
 where = "fixture:rolodex/models.py"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 36, \"title\": \"Import contacts from a CSV file\", \"body\": \"The front desk keeps a spreadsheet of contacts. Add `rolodex import contacts.csv` that reads a CSV with the columns name,email,phone (phone may be empty) and adds each contact. Skip rows with no email or an email we already have, and print how many were added and how many skipped.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/rolodex/issues/36\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''
