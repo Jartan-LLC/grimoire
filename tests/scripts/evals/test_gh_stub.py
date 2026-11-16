@@ -44,6 +44,7 @@ ISSUE = '{"number": 7, "title": "T", "body": "B", "comments": [], "assignees": [
         (["issue", "view", "7", "--json=assignees"], '{"assignees":[]}\n'),
         (["issue", "view", "7", "--json", "title,labels"], '{"title":"T"}\n'),
         (["issue", "view", "7"], ISSUE),
+        (["issue", "view", "7", "--json"], ISSUE),
     ],
 )
 def test_a_json_reply_prints_only_the_fields_the_call_names_keys_sorted_as_gh_does(
