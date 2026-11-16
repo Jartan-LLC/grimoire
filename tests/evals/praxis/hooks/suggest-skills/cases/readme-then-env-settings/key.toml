@@ -1,0 +1,14 @@
+split = "screen"
+kind = "trigger"
+hints = ["skill", "pythonica", "configur", "env", "pydantic", "settings"]
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "pythonica:python-configuration"
+state = "loaded"
+
+[[check]]
+metric = "works"
+artifact = "verify"
+command = "python3 -m pytest -q"

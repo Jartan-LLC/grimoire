@@ -1,0 +1,34 @@
+split = "confirm"
+kind = "trigger"
+hints = ["skill", "pythonica", "context manager", "with open", "resource", "leak"]
+
+[[plant]]
+id = "file-left-open-on-error"
+verify = '''python3 -c "
+import builtins, sys
+from decimal import Decimal
+opened = []
+real_open = builtins.open
+def tracking_open(*args, **kwargs):
+    handle = real_open(*args, **kwargs)
+    opened.append(handle)
+    return handle
+builtins.open = tracking_open
+from reports.export import export_csv
+try:
+    export_csv('out.csv', [{'id': 1, 'customer': 'A', 'amount': Decimal('1')}, {'id': 2, 'customer': 'B', 'amount': 'x'}])
+except ValueError:
+    pass
+sys.exit(0 if opened and all(handle.closed for handle in opened) else 1)
+"'''
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "pythonica:python-resource-management"
+state = "loaded"
+
+[[check]]
+metric = "works"
+artifact = "verify"
+command = "python3 -m pytest -q"

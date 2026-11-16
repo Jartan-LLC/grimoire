@@ -1,0 +1,47 @@
+split = "confirm"
+kind = "regression"
+hints = ["skill", "pythonica"]
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "pythonica:python-resilience"
+state = "not-loaded"
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "pythonica:python-patterns"
+state = "not-loaded"
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "pythonica:python-code-style"
+state = "not-loaded"
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "pythonica:python-anti-patterns"
+state = "not-loaded"
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "pythonica:python-project-structure"
+state = "not-loaded"
+
+[[check]]
+metric = "answer"
+artifact = "final"
+present = '''(?i)\b(4|four)\b'''
+
+[[check]]
+metric = "answer"
+artifact = "final"
+present = '''503'''
+
+[[fact]]
+text = "ATTEMPTS = 4"
+where = "fixture:stockroom/client.py"

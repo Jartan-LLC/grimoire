@@ -1,0 +1,14 @@
+split = "confirm"
+kind = "trigger"
+hints = ["skill", "pythonica", "pytest", "test"]
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "pythonica:python-testing"
+state = "loaded"
+
+[[check]]
+metric = "works"
+artifact = "verify"
+command = "python3 -m pytest -q"

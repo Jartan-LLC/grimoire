@@ -1,0 +1,56 @@
+split = "screen"
+kind = "regression"
+hints = ["skill", "pythonica"]
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "pythonica:python-patterns"
+state = "not-loaded"
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "pythonica:python-code-style"
+state = "not-loaded"
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "pythonica:python-anti-patterns"
+state = "not-loaded"
+
+[[check]]
+metric = "quiet"
+artifact = "delivery"
+skill = "pythonica:python-project-structure"
+state = "not-loaded"
+
+[[check]]
+metric = "done"
+artifact = "file:README.md"
+present = '''--since'''
+
+[[check]]
+metric = "done"
+artifact = "file:README.md"
+present = '''--until'''
+
+[[check]]
+metric = "done"
+artifact = "file:README.md"
+present = '''--format'''
+
+[[check]]
+metric = "done"
+artifact = "file:README.md"
+present = '''--out'''
+
+[[check]]
+metric = "done"
+artifact = "file:README.md"
+present = '''--include-refunds'''
+
+[[fact]]
+text = "--include-refunds"
+where = "fixture:tools/report.py"

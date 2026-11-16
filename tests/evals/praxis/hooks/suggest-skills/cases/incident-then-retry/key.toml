@@ -1,0 +1,31 @@
+split = "screen"
+kind = "trigger"
+hints = ["skill", "pythonica", "resilien", "retry", "backoff"]
+
+[[plant]]
+id = "gives-up-on-one-503"
+verify = '''python3 -c "
+import sys, time
+time.sleep = lambda seconds: None
+from stockroom.client import fetch_price
+from stockroom.transport import Response
+answers = [Response(503, {}), Response(200, {'price': 2.0})]
+class Flaky:
+    def get(self, url):
+        return answers.pop(0)
+try:
+    sys.exit(0 if fetch_price('B-220', Flaky()) == 2.0 else 1)
+except Exception:
+    sys.exit(1)
+"'''
+
+[[check]]
+metric = "recall"
+artifact = "delivery"
+skill = "pythonica:python-resilience"
+state = "loaded"
+
+[[check]]
+metric = "works"
+artifact = "verify"
+command = "python3 -m pytest -q"
