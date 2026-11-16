@@ -491,6 +491,8 @@ def test_a_json_reply_loads_and_counts_in_a_case_hash_only_when_set(tmp_path: pa
     cut = load_suite(root).cases[0]
     assert cut.gh[-1] == Reply("^issue view", '{"title": "T"}', 0, json=True)
     assert cut.hash() != plain.hash()
+    key.write_text(KEY + GH + issue.replace("json = true\n", ""))
+    assert load_suite(root).cases[0].hash() != cut.hash()
 
 
 def test_a_hook_script_target_is_its_own_path_and_any_other_a_skill_agent_or_command() -> None:
