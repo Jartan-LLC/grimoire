@@ -266,7 +266,8 @@ class Case:
         )
         digest = tree_hash(self.path, files)
         if self.remote:
-            # `json` only when set, so a case without it keeps the hash it had before it existed.
+            # A false `json` is left out, so a case that does not set it hashes as it
+            # did without the field.
             replies = json.dumps(
                 [
                     {k: v for k, v in dataclasses.asdict(r).items() if k != "json" or v}
