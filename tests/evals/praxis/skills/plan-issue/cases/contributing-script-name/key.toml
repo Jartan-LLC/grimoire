@@ -62,8 +62,13 @@ id = "contributing-names-missing-script"
 verify = '''node -e "const fs=require('fs'); const s=JSON.parse(fs.readFileSync('package.json','utf8')).scripts; const m=[...fs.readFileSync('CONTRIBUTING.md','utf8').matchAll(/npm run ([\w:-]+)/g)]; process.exit(m.length && m.every(x=>x[1] in s) ? 0 : 1)"'''
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 15, \"title\": \"CONTRIBUTING.md asks for a script that doesn't exist\", \"body\": \"Step 2 of CONTRIBUTING.md says to run `npm run lint`, which fails with `Missing script: \\\"lint\\\"`.\", \"state\": \"OPEN\", \"author\": {\"login\": \"eli\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/colorpick/issues/15\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

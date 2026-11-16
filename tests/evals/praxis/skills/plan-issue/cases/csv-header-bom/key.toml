@@ -61,8 +61,13 @@ id = "excel-bom"
 verify = '''python3 -c "import pathlib, tempfile; from ledger.bank_csv import read_statement; p = pathlib.Path(tempfile.mkdtemp()) / 's.csv'; p.write_bytes(b'\xef\xbb\xbfdate,payee,amount\n2026-10-01,Grocer,-1\n'); read_statement(p)"'''
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 9, \"title\": \"Import fails on statements exported from Excel\", \"body\": \"Statements I save from Excel fail to import with `KeyError: 'date'`, though the file looks right and the header is `date,payee,amount`. The bank's own download imports fine.\", \"state\": \"OPEN\", \"author\": {\"login\": \"jo\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/ledger/issues/9\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

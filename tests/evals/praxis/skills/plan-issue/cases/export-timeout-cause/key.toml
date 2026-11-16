@@ -61,12 +61,13 @@ text = "Settings shared by the upload and the health check."
 where = "fixture:ledgerpush/config.py"
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tNightly export upload times out\nstate:\tOPEN\nauthor:\tlena\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t44\n--\nSince Monday the nightly export fails with `timed out` when it uploads to the accountant's SFTP server. Add retries to `upload()` so a slow connection doesn't fail the whole night.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 44, \"title\": \"Nightly export upload times out\", \"body\": \"Since Monday the nightly export fails with `timed out` when it uploads to the accountant's SFTP server. Add retries to `upload()` so a slow connection doesn't fail the whole night.\", \"state\": \"OPEN\", \"author\": {\"login\": \"lena\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/ledgerpush/issues/44\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

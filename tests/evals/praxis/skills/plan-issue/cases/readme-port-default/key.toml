@@ -62,8 +62,13 @@ id = "readme-port-mismatch"
 verify = '''node -e "const fs=require('fs'); const m=/localhost:(\d+)/.exec(fs.readFileSync('README.md','utf8')); process.exit(m && Number(m[1])===require('./src/config').DEFAULT_PORT ? 0 : 1)"'''
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 8, \"title\": \"README gives the wrong port\", \"body\": \"The README says the server listens on http://localhost:8080, but `npx mockapi mocks/` prints `mockapi: listening on 3000, serving mocks/`. I lost ten minutes on that.\", \"state\": \"OPEN\", \"author\": {\"login\": \"ivy\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/mockapi/issues/8\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

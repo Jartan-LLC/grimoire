@@ -1,0 +1,29 @@
+final = "Plan written to .claude/workspace/issue-74/plan.md."
+
+[files]
+".claude/workspace/issue-74/plan.md" = '''# Plan: Report only recent hours (issue 74)
+
+## Approach
+Add an optional `--since <YYYY-MM-DD>` flag to `worklog report`. It keeps entries whose date is on or after the given day, then runs the existing `totals`. The filter lives in `src/report.js` so tests can call it without the CLI. Dates are zero-padded ISO strings, so comparing them as strings orders them correctly; no `Date` parsing is needed. Without the flag, output is unchanged.
+
+## Decisions
+- Whether `--since` includes that day -- owner: Priya (requester) -- recommended: inclusive, since the issue says "since a given day" and `--since 2026-11-01` should count hours logged on 1 Nov -- default if unanswered: inclusive -- if wrong: change `>=` to `>` in `entriesSince` and its test.
+- Unchecked: none. The current behaviour was checked: `npm test` passes (1 test), and `report` on a sample file prints per-project totals over the whole file.
+
+## Out of scope
+- Other filters such as `--until` or `--project` -- not planned; the issue asks only for a start date.
+- Version bump in `package.json` -- not planned; a release decision for the maintainer.
+- A README or docs page -- none exists in the repo; the usage string in `bin/worklog.js` is the only documentation of the command.
+
+## Steps
+1. In `src/report.js`, add and export `entriesSince(entries, since)`, returning entries with `e.date >= since`. Follow the style of `totals` (`src/report.js:12`). Failure path: none at this level; the caller validates the date.
+2. In `bin/worklog.js`, parse `--since <date>` out of `process.argv` before the existing `[command, file]` destructuring (`bin/worklog.js:5`), so the flag may appear before or after the file name. Require the value to match `/^\d{4}-\d{2}-\d{2}$/`. A missing or malformed value prints the usage line and exits 2, as the existing command check does (`bin/worklog.js:7-9`). Apply `entriesSince` before `totals` when the flag is set (`bin/worklog.js:11`). Failure path: a value such as `2026-13-45` passes the pattern and still compares correctly as a string, so it yields a filter that matches nothing rather than an error; accepted and noted here.
+3. In `test/report.test.js`, add tests for `entriesSince` following the existing `totals` test (`test/report.test.js:4`): an entry dated exactly on `since` is kept; an entry before it is dropped; a `since` after all entries returns an empty list, and `totals` of that is `{}`.
+4. Update the usage string in `bin/worklog.js:7` to `usage: worklog report [--since YYYY-MM-DD] [file]`.
+
+## Verification
+- `npm test` -- passes, including the three new `entriesSince` tests; a broken `>=` (for example `>`) makes the boundary test fail.
+- With a file containing rows dated 2026-10-30 (site, 1), 2026-11-02 (site, 2) and 2026-11-05 (api, 3): `node bin/worklog.js report --since 2026-11-01 worklog.csv` prints `site 2.0` and `api 3.0`; `node bin/worklog.js report worklog.csv` with no flag prints `site 3.0` and `api 3.0`.
+- `node bin/worklog.js report --since` (no value) and `node bin/worklog.js report --since 11/01/2026` each print the usage line and exit with code 2.
+- Run the flag before the file name as well (`report --since 2026-11-01 worklog.csv`) to confirm both orders parse.
+'''

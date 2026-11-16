@@ -102,8 +102,13 @@ match = '''(^|\s)pr status\b'''
 stdout = "Current branch\n  There is no pull request associated with [feature/issue-33]\n"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 33, \"title\": \"Turn timeout into seconds too\", \"body\": \"Settings files now carry a `timeout` duration beside `window`, such as `timeout = \\\"5m\\\"`. load_config() should turn it into seconds the way it does window, so the app does not parse durations itself.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/confload/issues/33\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

@@ -62,8 +62,13 @@ text = "Ask the maintainer before renaming"
 where = "fixture:AGENTS.md"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 22, \"title\": \"Add `notes sync` to share notes with the team server\", \"body\": \"We now have a team notes server (its API is in docs/server.md). Add `notes sync` so people can push their notes to it: upload every note that is new or changed since the last sync. Read the server URL from NOTES_SERVER and the token from NOTES_TOKEN.\", \"state\": \"OPEN\", \"author\": {\"login\": \"priya\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/notes/issues/22\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

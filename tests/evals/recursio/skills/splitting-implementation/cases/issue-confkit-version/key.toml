@@ -41,8 +41,13 @@ match = '''(^|\s)pr status\b'''
 stdout = "Current branch\n  There is no pull request associated with [feature/issue-9]\n"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 9, \"title\": \"Add a --version flag\", \"body\": \"`confkit --version` should print `confkit <version>` with the version from the installed package metadata, and exit 0.\", \"state\": \"OPEN\", \"author\": {\"login\": \"dana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/confkit/issues/9\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

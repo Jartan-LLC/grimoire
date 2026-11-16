@@ -59,8 +59,13 @@ text = "function money"
 where = "fixture:src/receipt.js"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 61, \"title\": \"Cart shows prices as bare numbers\", \"body\": \"With the espresso machine in the cart, the summary says `1 x Espresso machine: 1234.5` and `1 items. Total: 1234.5`. The receipt email for the same order says $1,234.50. Show the cart's prices the way the receipt does.\", \"state\": \"OPEN\", \"author\": {\"login\": \"leo\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/corner-shop/issues/61\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

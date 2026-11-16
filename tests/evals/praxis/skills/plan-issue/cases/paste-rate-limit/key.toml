@@ -55,8 +55,13 @@ artifact = "file:.claude/workspace/issue-54/plan.md"
 absent = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:steps|files to (?:create|modify|change|touch)|(?:implementation )?(?:checklist|steps|plan)|(?:chosen |proposed )?approach|implementation|changes)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?![ \t]*(?:[-*+][ \t]+|\d+[.)][ \t]+)?(?:\*\*|_)?(?:rejected|alternatives?|not chosen|considered|why not)\b)(?![^\n]*\b(?:no|not|without|avoid\w*|rather than|instead of|skip\w*|don'?t|do not|never|yagni|premature\w*|speculative\w*|unnecessary|overkill)\b[^\n]*(?:abstract\w*|base class|(?:an?|common|shared|generic|abstract|limiter|rate[- ]limit\w*|store|storage) interface|(?:store|storage|counter) backends?|registry|registries|strateg(?:y|ies)|plug-?ins?\b|pluggable|extensib\w*|(?-i:\b(?:[A-Z]\w*)?(?:Backend|Provider|Registry|Strategy|Factory|Policy)s?\b)))[^\n]*(?:abstract\w*|base class|(?:an?|common|shared|generic|abstract|limiter|rate[- ]limit\w*|store|storage) interface|(?:store|storage|counter) backends?|registry|registries|strateg(?:y|ies)|plug-?ins?\b|pluggable|extensib\w*|(?-i:\b(?:[A-Z]\w*)?(?:Backend|Provider|Registry|Strategy|Factory|Policy)s?\b))(?!(?:[^\n.;]|\.(?=\w)|\n(?![ \t]*(?:\n|[-*+][ \t]|\d+[.)][ \t]|\#))){0,60}?(?:(?:\bnot|n't)[ \t]+(?:\w+[ \t]+){0,2}?(?:needed|warranted|required|necessary|justified|worth\w*|wanted|called for)|\b(?:unnecessary|unneeded|overkill|premature\w*|speculative\w*|yagni|out of scope|separate (?:refactor\w*|issue|change|PR)|follow-?up)\b))'''
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 54, \"title\": \"One script filled the paste store overnight\", \"body\": \"Someone's script posted 40,000 pastes in one night and the server ran out of memory. Limit each client address to 30 new pastes a minute; past that, answer 429 with a Retry-After header. Reading pastes stays unlimited.\", \"state\": \"OPEN\", \"author\": {\"login\": \"jonas\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/pastebox/issues/54\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

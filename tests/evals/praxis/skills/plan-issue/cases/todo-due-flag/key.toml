@@ -59,8 +59,13 @@ text = "parseArgs"
 where = "fixture:src/args.js"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 57, \"title\": \"Add due dates to todos\", \"body\": \"I'd like to give a todo a due date when I add it:\\n\\n```\\ntodo add \\\"Pay rent\\\" --due 2026-11-01\\n```\\n\\nand see it in `todo list`, e.g. `  3 [ ] Pay rent (due 2026-11-01)`. Marking overdue items somehow would be nice too, but that's a nice-to-have.\", \"state\": \"OPEN\", \"author\": {\"login\": \"sam\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/todo/issues/57\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

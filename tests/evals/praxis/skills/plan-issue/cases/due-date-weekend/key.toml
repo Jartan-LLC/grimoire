@@ -65,8 +65,13 @@ id = "saturday-to-sunday"
 verify = '''python3 -c "from datetime import date; from invoicer.dates import due_date; assert due_date(date(2026, 3, 2), 12) == date(2026, 3, 16)"'''
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 31, \"title\": \"Invoices due on a Saturday show Sunday as the due date\", \"body\": \"An invoice issued on Monday 2 March 2026 with 12-day terms says \\\"Due: Sunday 15 March 2026\\\". A due date on a weekend should move to the Monday, so this one should be Monday 16 March. Sunday due dates already move to Monday correctly.\\n\\nReported by the bookkeeping team: customers pay on the Monday and then get a late notice.\", \"state\": \"OPEN\", \"author\": {\"login\": \"mira\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/invoicer/issues/31\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

@@ -1,0 +1,67 @@
+final = "Plan written to .claude/workspace/issue-91/plan.md."
+
+[files]
+".claude/workspace/issue-91/plan.md" = '''# Plan: Choose which columns to print (issue 91)
+
+## Approach
+`colcut` hard-codes column 0 at `bin/colcut.js:11`. The change adds a `--fields LIST` option with
+the `cut -f` grammar the issue names: 1-based fields, separated by commas, with `N-M` ranges.
+The list is parsed in a new pure function, `parseFields`, in `src/columns.js`, so it can be unit
+tested without spawning the CLI; `bin/colcut.js` only reads argv, calls it and reports errors.
+`pick` (`src/columns.js:7-9`) already takes 0-based indexes and returns `""` for a missing field,
+so nothing changes there: a field past the end of a short row prints empty, as `cut` does.
+
+Fields print in the order the list gives them, since that is what `pick` does
+(`test/columns.test.js:7` pins `[2, 0]` -> `["c", "a"]`). This differs from `cut`, which always
+prints in file order; the trade-off is that `--fields 3,1` reorders columns, which the monthly
+export may want.
+
+Rejected: a dependency such as `minimist` for argv parsing -- `AGENTS.md:5` says no dependencies,
+and one option does not need a parser.
+Rejected: open ranges (`4-`, `-3`) -- not asked for; they are refused with the same error as any
+other malformed item, and can be added later without breaking anyone.
+
+## Decisions
+- Output order for `--fields 3,1` -- owner: lena -- recommended: list order, as `pick` does
+  -- default if unanswered: list order -- if wrong: sort and dedupe the indexes in `parseFields`
+  and change its tests.
+
+## Out of scope
+- Quoted fields -- `src/columns.js:1` says they are not supported; not planned.
+- A `--delimiter` option like `cut -d` -- not planned.
+
+## Steps
+1. In `src/columns.js`, add `parseFields(list)` after `pick` (`src/columns.js:7-9`) and export it
+   at `src/columns.js:11`. It splits on `,`; each item is either `N` or `N-M` with `N` and `M`
+   whole numbers >= 1 and `N <= M`. It returns the 0-based indexes in list order, ranges expanded.
+   Anything else -- an empty list, an empty item (`2,,4`), a non-number, `0`, a reversed range
+   (`6-4`), an open range -- throws `Error("invalid field list: <list>")`.
+2. In `bin/colcut.js:5`, replace the single positional read with a small loop over
+   `process.argv.slice(2)`: `--fields` takes the next argument as its value, anything else is the
+   file. `--fields` with no value after it is the same error as an invalid list. The order of file
+   and option does not matter, so the issue's `colcut orders.csv --fields 2,4-6` works.
+3. In `bin/colcut.js`, call `parseFields` before reading the file; on a throw, print
+   `colcut: <message>` to stderr and exit 2, the code the usage check uses (`bin/colcut.js:6-9`).
+   With no `--fields`, use `[0]`. Pass the indexes to `pick` at `bin/colcut.js:11`.
+4. Change the usage line at `bin/colcut.js:7` to `usage: colcut <file.csv> [--fields LIST]`.
+5. In `test/columns.test.js`, add tests after `test/columns.test.js:8`, in the same `node:test`
+   style:
+   - `parseFields expands ranges in list order` -- `"2,4-6"` -> `[1, 3, 4, 5]`, `"3,1"` -> `[2, 0]`.
+   - `parseFields refuses malformed lists` -- `assert.throws` for `"0"`, `"a"`, `"6-4"`, `"2,,4"`, `""`.
+6. Update `AGENTS.md:3` to say colcut prints the chosen columns, the first by default, and how
+   `--fields` works.
+7. Bump `package.json:3` from 1.2.0 to 1.3.0: a new option, nothing removed.
+
+## Verification
+- `npm test` -- passing shows the existing `pick` test still holds and the two new tests pass:
+  `parseFields expands ranges in list order`, and `parseFields refuses malformed lists`, which
+  shows `"0"`, `"a"`, `"6-4"`, `"2,,4"` and `""` each throw `invalid field list`.
+- `printf 'id,date,cust,sku,qty,price\n91,2026-11,lena,x1,2,9.50\n' > /tmp/orders.csv`, then
+  `node bin/colcut.js /tmp/orders.csv --fields 2,4-6` -- prints `date,sku,qty,price` and
+  `2026-11,x1,2,9.50`.
+- `node bin/colcut.js /tmp/orders.csv` -- prints only `id` and `91`, as before.
+- `node bin/colcut.js /tmp/orders.csv --fields 6-4; echo $?` -- stderr has
+  `colcut: invalid field list: 6-4`, stdout is empty, and the exit code is `2`.
+- `node bin/colcut.js /tmp/orders.csv --fields 9` -- prints two empty lines, not an error: a
+  field past the end of the row is empty, as with `cut`.
+'''

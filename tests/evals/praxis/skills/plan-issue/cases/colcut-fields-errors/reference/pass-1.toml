@@ -1,0 +1,29 @@
+final = "Plan written to .claude/workspace/issue-91/plan.md."
+
+[files]
+".claude/workspace/issue-91/plan.md" = '''# Plan: Choose which columns to print (issue 91)
+
+## Approach
+Add a `parseFields` function to `src/columns.js` that turns a `cut -f` style list into the
+0-based indexes `pick` already takes, and have `bin/colcut.js` read `--fields` and pass them on.
+Without `--fields` the CLI keeps printing column 1.
+
+## Decisions
+None.
+
+## Steps
+1. Add `parseFields(list)` in `src/columns.js`, next to `pick` (`src/columns.js:7`): split on
+   commas, expand `N-M` ranges, return 0-based indexes. Throw on a field below 1, a non-number or
+   a reversed range.
+2. In `bin/colcut.js:5`, read `--fields <list>` from anywhere in argv; default to `[0]`. Catch the
+   error from `parseFields` and exit 2 with `colcut: invalid field list`, as the usage check does
+   (`bin/colcut.js:6-9`). Pass the indexes to `pick` at `bin/colcut.js:11`.
+3. Add tests for `parseFields` in `test/columns.test.js`, following `test/columns.test.js:5`.
+4. Update the description in `AGENTS.md:3` and the usage line to mention `--fields`; bump
+   `package.json` to 1.3.0.
+
+## Verification
+- `npm test` -- passing shows `parseFields("2,4-6")` returns `[1, 3, 4, 5]`.
+- `printf 'a,b,c,d,e,f\n' > /tmp/t.csv && node bin/colcut.js /tmp/t.csv --fields 2,4-6` -- prints `b,d,e,f`.
+- `node bin/colcut.js /tmp/t.csv --fields 0; echo $?` -- prints `colcut: invalid field list` to stderr and `2`.
+'''

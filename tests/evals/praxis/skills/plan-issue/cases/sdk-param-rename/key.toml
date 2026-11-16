@@ -61,12 +61,13 @@ text = "cb=handle_order"
 where = "fixture:README.md"
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tRename subscribe's cb parameter to callback\nstate:\tOPEN\nauthor:\tomar\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t63\n--\n`cb` in `Client.subscribe(topic, cb)` is unreadable. Rename the parameter to `callback`.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 63, \"title\": \"Rename subscribe's cb parameter to callback\", \"body\": \"`cb` in `Client.subscribe(topic, cb)` is unreadable. Rename the parameter to `callback`.\", \"state\": \"OPEN\", \"author\": {\"login\": \"omar\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/pubsubby/issues/63\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

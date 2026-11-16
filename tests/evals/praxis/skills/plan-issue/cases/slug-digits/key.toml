@@ -61,8 +61,13 @@ id = "digits-dropped"
 verify = '''node -e "const {slugify}=require('./src/slug'); process.exit(slugify('Top 10 tips for 2026')==='top-10-tips-for-2026' ? 0 : 1)"'''
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 14, \"title\": \"Numbers vanish from post URLs\", \"body\": \"A post titled \\\"Top 10 tips for 2026\\\" got the URL /2026/10/top-tips-for/. Worse, our weekly posts \\\"Week 1 recap\\\" and \\\"Week 2 recap\\\" both get /week-recap/ in the same month, so the second one replaces the first on the site. Numbers in a title should stay in its URL.\", \"state\": \"OPEN\", \"author\": {\"login\": \"hana\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/permalink/issues/14\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

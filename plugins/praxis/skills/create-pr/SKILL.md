@@ -18,10 +18,10 @@ Check existing local and remote branches for one related to this issue -- it may
 
 ### 2. Get Issue Context
 
-Determine the issue number from the user's request and fetch the issue with its comments:
+Determine the issue number from the user's request and fetch the issue and its comments in one call:
 
 ```bash
-gh issue view <issue-number> --comments
+gh issue view <issue-number> --json title,body,comments
 ```
 
 Also load the `praxis:workspace-patterns` skill and read the issue's plan, `.claude/workspace/issue-<issue-number>/plan.md`, or any other plan file in the workspace for this issue.

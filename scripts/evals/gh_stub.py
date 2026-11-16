@@ -5,20 +5,26 @@ The runner installs this file as `bin/gh` in a sample's sandbox, beside
 (the log it appends to). It reaches no network and uses only the standard library. A
 call no reply matches fails, so a session never reads a success the case did not script.
 
-It does not parse gh's flags, whose arity varies by command (`pr create -f` takes no
-value, `api -f` does). It logs the argv as given, then the text of every regular file an
-argument or a part of one names (`candidates`) inside its roots, and stdin when one of
-those is `-`. The roots are the sandbox and the temp directories the runner names in the
-GRIMOIRE_GH_STUB_TEMP variable (TEMP_ROOTS holds the name), an `os.pathsep` list; without
-that variable, the sandbox alone. That can include a file no gh command would read, and
-stdin whenever any candidate is exactly `-`, a key's value included (`-f q=-`), which
-waits while stdin stays open. It misses a file outside the roots, any file or stdin of a
-call with a PRIVATE argument (`auth`, `secret` or `variable`), and the text of a file
-over MAX_BYTES, which it lists under `over_cap` unread.
+Apart from the value of `--json` (`json_fields`), it does not parse gh's flags, whose
+arity varies by command (`pr create -f` takes no value, `api -f` does). It logs the argv
+as given, then the text of every regular file an argument or a part of one names
+(`candidates`) inside its roots, and stdin when one of those is `-`. The roots are the
+sandbox and the temp directories the runner names in the GRIMOIRE_GH_STUB_TEMP variable
+(TEMP_ROOTS holds the name), an `os.pathsep` list; without that variable, the sandbox
+alone. That can include a file no gh command would read, and stdin whenever any
+candidate is exactly `-`, a key's value included (`-f q=-`), which waits while stdin
+stays open. It misses a file outside the roots, any file or stdin of a call with a
+PRIVATE argument (`auth`, `secret` or `variable`), and the text of a file over
+MAX_BYTES, which it lists under `over_cap` unread.
+
+A reply with `json` set holds a JSON object, and the stub prints it cut to the fields the
+call's `--json` names, as gh does (`json_fields`).
 
 A change to what this stub answers, how it matches a call or what it logs, or to the
 remote setup in `session.py`, changes what a remote session can do: bump REMOTE_RUNNER
-there, so no remote sample drawn before it is reused.
+there, so no remote sample drawn before it is reused. A new reply option that no case set
+before needs no bump when `Case.hash` leaves it out while unset, as it does for `json`:
+only the cases that set it answer differently, and setting it changes their hash.
 """
 
 import json
@@ -27,6 +33,7 @@ import pathlib
 import re
 import sys
 from collections.abc import Callable, Mapping, Sequence
+from typing import cast
 
 # The letters of a short flag with its value attached, `-bText`, or of a group, `-dFbody.md`.
 SHORT = re.compile(r"-([A-Za-z]+)")
@@ -76,13 +83,38 @@ def call_line(argv: Sequence[str]) -> str:
     return " ".join(arg.replace("\n", "\\n") for arg in argv)
 
 
+def json_fields(text: str, argv: Sequence[str]) -> str:
+    """The JSON object `text` cut to the fields the call's `--json` names, as gh prints it.
+
+    gh prints only those fields, keys sorted, on one line. A call without a `--json` value
+    gets `text` unchanged, `--json` given last included, and a field the object lacks is
+    left out, where gh refuses both a missing value and a field it does not know. `--jq`
+    and `--template` are not applied.
+    """
+    names: str | None = None
+    for i, arg in enumerate(argv):
+        if arg == "--json" and i + 1 < len(argv):
+            names = argv[i + 1]
+        elif arg.startswith("--json="):
+            names = arg.removeprefix("--json=")
+    if names is None:
+        return text
+    found = cast(dict[str, object], json.loads(text))
+    wanted = {name.strip() for name in names.split(",")}
+    cut = {name: found[name] for name in sorted(wanted) if name in found}
+    return json.dumps(cut, separators=(",", ":"), ensure_ascii=False) + "\n"
+
+
 def answer(replies: Sequence[Mapping[str, object]], argv: list[str]) -> tuple[str, int] | None:
     """The stdout and exit code of the first reply whose `match` finds the call's `call_line`."""
     line = call_line(argv)
     for reply in replies:
         if re.search(str(reply["match"]), line):
             code = reply.get("exit", 0)
-            return str(reply.get("stdout", "")), code if isinstance(code, int) else 0
+            stdout = str(reply.get("stdout", ""))
+            if reply.get("json"):
+                stdout = json_fields(stdout, argv)
+            return stdout, code if isinstance(code, int) else 0
     return None
 
 

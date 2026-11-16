@@ -59,8 +59,13 @@ text = "function updateProfile"
 where = "fixture:src/profile.js"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 52, \"title\": \"Signup accepts any text as an email\", \"body\": \"Signing up with \\\"bob\\\" or \\\"bob@\\\" as the email works, and then the welcome mail bounces. Signup should reject an invalid email with the same message members see when they enter one on their profile page.\", \"state\": \"OPEN\", \"author\": {\"login\": \"ruth\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/clubhouse/issues/52\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

@@ -62,8 +62,13 @@ id = "usage-names-missing-option"
 verify = '''python3 -c "import re, pathlib; from csvstats.cli import build_parser; opts = {o for a in build_parser()._actions for o in a.option_strings}; used = set(re.findall(r'--[a-z][a-z-]*', pathlib.Path('docs/usage.md').read_text())); assert used <= opts, used - opts"'''
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 6, \"title\": \"Usage docs give an option that doesn't exist\", \"body\": \"docs/usage.md says to run `python3 -m csvstats sales.csv --column price --sep ';'`, which stops with `csvstats: error: unrecognized arguments: --column price`.\", \"state\": \"OPEN\", \"author\": {\"login\": \"zoe\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/csvstats/issues/6\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

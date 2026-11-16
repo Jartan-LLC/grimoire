@@ -61,8 +61,13 @@ id = "minutes-as-hundredths"
 verify = '''python3 -c "from timesheet.hours import parse_hours; assert parse_hours('7:30') == 7.5"'''
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 26, \"title\": \"7:30 counts as 7.3 hours\", \"body\": \"I worked 7:30 every day last week and typed it that way in my sheet. The weekly total says 36.5 h; it should be 37.5. Decimal entries like 7.5 add up fine.\", \"state\": \"OPEN\", \"author\": {\"login\": \"omar\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/timesheet/issues/26\", \"createdAt\": \"2026-10-20T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

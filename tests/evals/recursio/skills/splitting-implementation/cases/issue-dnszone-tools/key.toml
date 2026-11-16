@@ -41,8 +41,13 @@ match = '''(^|\s)pr status\b'''
 stdout = "Current branch\n  There is no pull request associated with [feature/issue-81]\n"
 
 [[gh]]
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
+
+[[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 81, \"title\": \"Zone tooling: parser, checks, wire format and diff\", \"body\": \"We need the zone tooling the README describes, built on the data model in `src/zonekit/model.py`:\\n\\n- the master-file parser (`zonekit.parse`)\\n- the zone checks (`zonekit.validate`)\\n- wire-format encoding and decoding with name compression (`zonekit.wire`)\\n- the comparison of two zones (`zonekit.diff`)\\n- the `zonekit` command with its `check`, `diff` and `encode` subcommands\\n\\nThe README has the rules for each part. Each part needs its own tests.\", \"state\": \"OPEN\", \"author\": {\"login\": \"ravi\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"url\": \"https://github.com/acme/zonekit/issues/81\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''

@@ -1,0 +1,41 @@
+final = "Plan written to .claude/workspace/issue-91/plan.md."
+
+[files]
+".claude/workspace/issue-91/plan.md" = '''# Plan: Choose which columns to print (issue 91)
+
+## Approach
+Parse `--fields` in `bin/colcut.js` into the 0-based index list that `pick`
+(`src/columns.js:7`) takes, using a new exported `parseFields` in `src/columns.js` so the grammar
+is testable on its own. Fields are 1-based like `cut`. A bad list stops the run before any output,
+with exit 2 like the existing usage error at `bin/colcut.js:6-9`, so a broken export never writes
+half a file.
+
+## Decisions
+None.
+
+## Out of scope
+- Quoted CSV fields (`src/columns.js:1`) -- not planned.
+
+## Steps
+1. `src/columns.js`: add and export `parseFields(list)`; items are `N` or `N-M` with
+   `1 <= N <= M`; anything else throws.
+2. `bin/colcut.js:5`: accept `--fields LIST` before or after the file; missing value or a throw
+   from `parseFields` -> `colcut: invalid --fields value` on stderr, exit 2. Default stays `[0]`;
+   pass the list to `pick` at line 11.
+3. `test/columns.test.js`: cover a range, a single field, and a refused list.
+4. `AGENTS.md:3`: describe `--fields`. `package.json:3`: 1.2.0 -> 1.3.0.
+
+## Verification
+`npm test` must pass. Then, in the checkout:
+
+```sh
+printf 'o1,a,b,c,d,e\no2,f,g,h,i,j\n' > /tmp/o.csv
+node bin/colcut.js /tmp/o.csv --fields 2,4-6   # a,c,d,e then f,h,i,j
+node bin/colcut.js /tmp/o.csv                  # o1 then o2, unchanged
+node bin/colcut.js /tmp/o.csv --fields; echo $?      # colcut: invalid --fields value, 2
+node bin/colcut.js /tmp/o.csv --fields 2,,4; echo $? # same message, 2, nothing on stdout
+```
+
+The last two show the option refuses a missing value and an empty item instead of printing
+column 1 or an empty column.
+'''

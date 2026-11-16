@@ -143,11 +143,16 @@ class Plant:
 
 @dataclass(frozen=True)
 class Reply:
-    """A scripted answer of the sandbox's `gh`, to a call whose one-line argv (`gh_stub.call_line`) `match` finds."""
+    """A scripted answer of the sandbox's `gh`, to a call whose one-line argv (`gh_stub.call_line`) `match` finds.
+
+    With `json`, `stdout` is a JSON object, printed cut to the fields the call's `--json`
+    names (`gh_stub.json_fields`).
+    """
 
     match: str
     stdout: str = ""
     exit: int = 0
+    json: bool = False
 
 
 @dataclass(frozen=True)
@@ -261,7 +266,14 @@ class Case:
         )
         digest = tree_hash(self.path, files)
         if self.remote:
-            replies = json.dumps([dataclasses.asdict(r) for r in self.gh])
+            # A false `json` is left out, so a case that does not set it hashes as it
+            # did without the field.
+            replies = json.dumps(
+                [
+                    {k: v for k, v in dataclasses.asdict(r).items() if k != "json" or v}
+                    for r in self.gh
+                ]
+            )
             digest = hashlib.sha256(f"{digest}\0{replies}".encode()).hexdigest()
         options: dict[str, object] = {}
         if self.without:
@@ -594,19 +606,39 @@ def _agent_texts(data: Table, key: str, path: pathlib.Path) -> dict[str, str]:
     return cast("dict[str, str]", value)
 
 
+def _json_object(text: str) -> bool:
+    try:
+        return isinstance(json.loads(text), dict)
+    except json.JSONDecodeError:
+        return False
+
+
 def _replies(key: Table, where: pathlib.Path) -> tuple[Reply, ...]:
     found: list[Reply] = []
     for table in _tables(key, "gh", where):
-        if set(table) - {"match", "stdout", "exit"}:
-            raise SuiteError(f"{where}: a [[gh]] takes only match, stdout and exit")
-        stdout, code = table.get("stdout", ""), table.get("exit", 0)
+        if set(table) - {"match", "stdout", "exit", "json"}:
+            raise SuiteError(f"{where}: a [[gh]] takes only match, stdout, exit and json")
+        stdout, code, as_json = (
+            table.get("stdout", ""),
+            table.get("exit", 0),
+            table.get("json", False),
+        )
         if not isinstance(stdout, str):
             raise SuiteError(f"{where}: a [[gh]]'s 'stdout' must be a string")
         if isinstance(code, bool) or not isinstance(code, int) or not 0 <= code <= MAX_EXIT:
             raise SuiteError(f"{where}: a [[gh]]'s 'exit' must be an integer from 0 to {MAX_EXIT}")
+        if not isinstance(as_json, bool):
+            raise SuiteError(f"{where}: a [[gh]]'s 'json' must be true or false")
+        if as_json and not _json_object(stdout):
+            raise SuiteError(
+                f"{where}: a [[gh]] with json = true needs a JSON object as its 'stdout'"
+            )
         found.append(
             Reply(
-                _regex(table.get("match"), where, "a [[gh]] needs a 'match' string"), stdout, code
+                _regex(table.get("match"), where, "a [[gh]] needs a 'match' string"),
+                stdout,
+                code,
+                json=as_json,
             )
         )
     return tuple(found)

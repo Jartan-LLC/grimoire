@@ -44,6 +44,10 @@ BURNED = [
   # planned" and "`src/store.js` stays on callbacks" as misses, which voids the second Opus
   # screen of plan-issue for the planning skill (#193). It moved to dev with the check fixed.
   "bookmarks-tag-filter",
+  # Its refused-input check took "exit code 2" but not "exit with code 2" or "the bad-date exit
+  # code", and failed right plans in Haiku's screen of the fix for #202, which voids that screen.
+  # It moved to dev with the check fixed.
+  "worklog-since-errors",
 ]
 # Beside plan-issue's own files, the suite covers any skill's plan-format.md, any praxis Markdown
 # file with "plan" in its path, and github-conventions, so a change that moves the plan template or

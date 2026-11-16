@@ -54,12 +54,13 @@ artifact = "file:.claude/workspace/issue-58/plan.md"
 absent = '''(?im)^\#{1,4}[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:steps|files to (?:create|modify|change|touch)|(?:implementation )?(?:checklist|steps|plan)|(?:chosen |proposed )?approach|implementation|changes)\b[^\n]*(?:\n(?!\#)[^\n]*)*?\n(?!\#)(?![ \t]*(?:[-*+][ \t]+|\d+[.)][ \t]+)?(?:\*\*|_)?(?:rejected|alternatives?|not chosen|considered|why not)\b)(?![^\n]*\b(?:no|not|without|avoid\w*|rather than|instead of|skip\w*|don'?t|do not|never|yagni|premature\w*|speculative\w*|unnecessary|overkill)\b[^\n]*(?:abstract\w*|base class|(?-i:\bABC\b|\bProtocol\b)|(?:an?|common|shared|generic|abstract|validator|validation|upload|rule|check) interface|registry|registries|strateg(?:y|ies)|plug-?ins?\b|pluggable|extensib\w*|\bvalidators\b|(?:list|chain|pipeline|set) of (?:rules|checks)|(?-i:\b(?:[A-Z]\w*)?(?:Validator|Policy|Registry|Strategy|Factory|(?<=[a-z])(?:Rule|Check))s?\b)))[^\n]*(?:abstract\w*|base class|(?-i:\bABC\b|\bProtocol\b)|(?:an?|common|shared|generic|abstract|validator|validation|upload|rule|check) interface|registry|registries|strateg(?:y|ies)|plug-?ins?\b|pluggable|extensib\w*|\bvalidators\b|(?:list|chain|pipeline|set) of (?:rules|checks)|(?-i:\b(?:[A-Z]\w*)?(?:Validator|Policy|Registry|Strategy|Factory|(?<=[a-z])(?:Rule|Check))s?\b))(?!(?:[^\n.;]|\.(?=\w)|\n(?![ \t]*(?:\n|[-*+][ \t]|\d+[.)][ \t]|\#))){0,60}?(?:(?:\bnot|n't)[ \t]+(?:\w+[ \t]+){0,2}?(?:needed|warranted|required|necessary|justified|worth\w*|wanted|called for)|\b(?:unnecessary|unneeded|overkill|premature\w*|speculative\w*|yagni|out of scope|separate (?:refactor\w*|issue|change|PR)|follow-?up)\b))'''
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tUploads can fill the NAS disk\nstate:\tOPEN\nauthor:\tkofi\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t58\n--\nSomeone's phone sent a 900 MB screen recording last night (the share sheet named it .jpg) and the NAS ran out of space, so the backups failed too. Refuse any upload over 25 MB, with a message the phone app can show, the way it already refuses file types it does not take.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 58, \"title\": \"Uploads can fill the NAS disk\", \"body\": \"Someone's phone sent a 900 MB screen recording last night (the share sheet named it .jpg) and the NAS ran out of space, so the backups failed too. Refuse any upload over 25 MB, with a message the phone app can show, the way it already refuses file types it does not take.\", \"state\": \"OPEN\", \"author\": {\"login\": \"kofi\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/snapbox/issues/58\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''
@@ -111,6 +112,38 @@ remote_runner = 3
 
 [[baseline]]
 model = "claude-opus-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
 arm = "none"
 failures = 2
 runs = 3

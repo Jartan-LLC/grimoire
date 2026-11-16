@@ -66,12 +66,13 @@ id = "shares-miss-total"
 verify = "python3 -c \"from tabsplit.split import split; assert all(sum(split(t, n)) == t for t in (1000, 2000) for n in (3, 7))\""
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tThree-way split comes to a cent less than the bill\nstate:\tOPEN\nauthor:\tinez\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t84\n--\nSplitting a 10.00 bill between three people shows 3.33 each, which adds up to 9.99, so somebody always ends up chasing the last cent. With 20.00 it shows 6.67 each, which is 20.01. The shares should add up to the bill exactly.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 84, \"title\": \"Three-way split comes to a cent less than the bill\", \"body\": \"Splitting a 10.00 bill between three people shows 3.33 each, which adds up to 9.99, so somebody always ends up chasing the last cent. With 20.00 it shows 6.67 each, which is 20.01. The shares should add up to the bill exactly.\", \"state\": \"OPEN\", \"author\": {\"login\": \"inez\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/tabsplit/issues/84\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''
@@ -124,7 +125,39 @@ remote_runner = 3
 [[baseline]]
 model = "claude-opus-5-5"
 arm = "none"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "old"
 failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-sonnet-5-5"
+arm = "none"
+failures = 3
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "old"
+failures = 0
+runs = 3
+runner = 2
+remote_runner = 3
+
+[[baseline]]
+model = "claude-haiku-5-5"
+arm = "none"
+failures = 2
 runs = 3
 runner = 2
 remote_runner = 3

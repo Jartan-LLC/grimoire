@@ -53,12 +53,13 @@ artifact = "file:.claude/workspace/issue-29/plan.md"
 present = '''(?im)(?:^\#{1,2}(?!\#)|\A(?:(?:[^\n]*\n)*?\#{1,2}(?!\#)(?![ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:implementation[ \t]+)?steps\b)[^\n]*\n)?(?:(?!\#{1,2}(?!\#))[^\n]*\n)*?\#{3,4}(?!\#))[ \t]*(?:\d+[.)][ \t]*)?(?:\*\*)?(?:verification|verify(?:ing)?|testing|tests?|test plan|validation|how to (?:test|verify))\b[^\n]*(?:\n(?![ \t]*```)(?!\#)[^\n]*|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*\n[ \t]*```[^\n]*)*?(?:\n(?![ \t]*```)(?!\#)[^\n]*(?:invalid|reject|refus|error|out of range|in use|already (?:in use|taken|bound)|exit(?:s)? (?:code |status |with )?[12]\b|non-?zero|fails? (?:with|for|on)|usage:|--port[ =](?:0|-1|65536|70000|99999|abc|x)\b)|\n[ \t]*```[^\n]*(?:\n(?![ \t]*```)[^\n]*)*?\n(?![ \t]*```)[^\n]*(?:invalid|reject|refus|error|out of range|in use|already (?:in use|taken|bound)|exit(?:s)? (?:code |status |with )?[12]\b|non-?zero|fails? (?:with|for|on)|usage:|--port[ =](?:0|-1|65536|70000|99999|abc|x)\b))'''
 
 [[gh]]
-match = '''(^|\s)issue view\b.*--comments'''
-stdout = "title:\tLet devserve run on another port\nstate:\tOPEN\nauthor:\tkim\nlabels:\t\ncomments:\t0\nassignees:\t\nprojects:\t\nmilestone:\t\nnumber:\t29\n--\n`devserve` always listens on 8000, so I can't run two projects at once. Add a `--port` option, defaulting to 8000.\n"
+match = '''(^|\s)issue view\b.*\s(--comments|-c)\b'''
+stdout = ""
 
 [[gh]]
 match = '''(^|\s)issue view\b.*--json'''
 stdout = "{\"number\": 29, \"title\": \"Let devserve run on another port\", \"body\": \"`devserve` always listens on 8000, so I can't run two projects at once. Add a `--port` option, defaulting to 8000.\", \"state\": \"OPEN\", \"author\": {\"login\": \"kim\"}, \"labels\": [], \"comments\": [], \"assignees\": [], \"milestone\": null, \"url\": \"https://github.com/acme/devserve/issues/29\", \"createdAt\": \"2026-11-02T09:14:00Z\"}\n"
+json = true
 
 [[gh]]
 match = '''(^|\s)issue view\b'''
