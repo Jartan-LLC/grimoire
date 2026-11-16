@@ -162,14 +162,18 @@ hook script, named without its extension, whose `target` is its path in the plug
   `[[gh]]` tables: the first whose `match` regex finds the call's arguments joined with spaces, each
   newline in them written as `\n` (`pr create --draft --title ...`), prints its `stdout` and exits with
   its `exit` (default 0). A call no reply matches fails with `gh stub: no reply for: <arguments>`, so
-  script every call the task needs, reads (`gh pr view`, `gh api`) included. With `json = true`, the
-  `stdout` is a JSON object and the stub prints only the fields the call's `--json` names, keys sorted
-  on one line, as gh does. It applies no `--jq` or `--template`, prints the whole object for a
-  `--json` with no value, and leaves out a field the object lacks, where gh refuses both a missing
-  value and a field it does not know, so a malformed call can pass here and fail under gh. Reply as gh does when its output is
-  piped, as in the Bash tool, or a skipped read goes unseen: `issue view --comments` prints only the
-  comments, and nothing for an issue without any. A `[[gh]]` table implies
+  script every call the task needs, reads (`gh pr view`, `gh api`) included. A `[[gh]]` table implies
   `remote = true`, and the replies count in the case hash, like the fixture.
+
+  Reply as gh does when its output is piped, as in the Bash tool, or a skipped read goes unseen:
+  `issue view --comments` prints only the comments, and nothing for an issue without any. Put a case's
+  `--comments` reply above its plain `issue view` reply, which matches a `--comments` call too.
+
+  With `json = true`, the `stdout` is a JSON object and the stub prints only the fields the call's
+  `--json` names, keys sorted on one line, as gh does. It applies no `--jq` or `--template`, prints
+  the whole object for a `--json` with no value, and leaves out a field the object lacks, where gh
+  refuses both a missing value and a field it does not know, so a malformed call can pass here and
+  fail under gh.
 
   Write each `match` to accept every call the task could make at that step, keyed on the subcommand
   wherever it falls, as gh takes flags before it (`gh -R o/r pr create`): `(^|\s)pr create\b`. Grade the
