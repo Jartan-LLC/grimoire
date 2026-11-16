@@ -14,7 +14,7 @@ Where the project's own rules say otherwise, follow them.
 
 ### 1. Load Context
 
-Determine the issue number from the user's request, which may carry context beyond the number. Fetch the issue, its comments, which may hold a plan, and its assignees in one call:
+Determine the issue number from the user's request, which may carry context beyond the number. Fetch the issue, its comments (which may hold a plan) and its assignees in one call:
 
 ```bash
 gh issue view <issue-number> --json title,body,comments,assignees
